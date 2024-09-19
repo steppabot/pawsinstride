@@ -13,8 +13,11 @@
             <img src="pawsnstridelogo1.png" alt="Paws In Stride Logo" class="logo">
         </div>
 
+        <!-- "MENU" for Mobile -->
+        <div class="menu-button" onclick="toggleMenu()">MENU</div>
+        
         <!-- Navigation Menu -->
-        <nav>
+        <nav id="nav-menu">
             <ul class="nav-links">
                 <li><a href="#home">HOME</a></li>
                 <li><a href="#services">SERVICES</a></li>
@@ -28,15 +31,12 @@
         <!-- Add content here -->
     </main>
 
-    <!-- JavaScript to handle menu toggling on mobile -->
+    <!-- JavaScript for Accordion Menu -->
     <script>
         function toggleMenu() {
-            var menu = document.querySelector('.nav-links');
+            var menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
         }
-
-        // Add event listener to the "MENU" label (on mobile)
-        document.querySelector('.menu-button').addEventListener('click', toggleMenu);
     </script>
 </body>
 </html>
