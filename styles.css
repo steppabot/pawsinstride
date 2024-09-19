@@ -79,38 +79,53 @@ nav {
     color: #f09d51;
 }
 
+/* Hidden class to hide menu by default */
+.hidden {
+    display: none;
+}
+
+/* Menu button styling for mobile */
+.menu-button {
+    display: none; /* Hidden on desktop */
+    background-color: #f09d51;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    margin: 10px auto;
+    width: fit-content;
+}
+
 /* Mobile Media Query */
 @media (max-width: 768px) {
-    /* Adjust logo for mobile */
     .logo {
         width: 120px; /* Smaller logo size for mobile */
     }
 
-    /* Stack menu items vertically */
+    /* Hide menu on mobile by default */
+    nav {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
     .nav-links {
-        flex-direction: column; /* Stack vertically */
+        flex-direction: column; /* Stack menu items vertically */
         align-items: center;
     }
 
     .nav-links li {
-        margin: 10px 0; /* Add spacing between stacked items */
+        margin: 10px 0;
     }
 
-    /* Ensure nav takes full width on mobile without allowing scrolling */
-    nav {
-        width: 100%; /* Full width for mobile */
-        padding: 15px 0;
-        box-sizing: border-box;
-        overflow-x: hidden; /* Prevent horizontal scrolling */
-    }
-
-    /* Adjust the font size for smaller screens */
     .nav-links li a {
         font-size: 16px;
     }
 
-    /* Prevent horizontal scrolling on body */
-    body {
-        overflow-x: hidden;
+    /* Show the menu button on mobile */
+    .menu-button {
+        display: block;
     }
 }
