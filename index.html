@@ -12,12 +12,9 @@
         <div class="logo-container">
             <img src="pawsnstridelogo1.png" alt="Paws In Stride Logo" class="logo">
         </div>
-        
-        <!-- Accordion Menu Button for Mobile -->
-        <button class="menu-button" onclick="toggleMenu()">MENU</button>
-        
+
         <!-- Navigation Menu -->
-        <nav id="nav-menu">
+        <nav>
             <ul class="nav-links">
                 <li><a href="#home">HOME</a></li>
                 <li><a href="#services">SERVICES</a></li>
@@ -26,17 +23,20 @@
             </ul>
         </nav>
     </header>
-    
+
     <main>
         <!-- Add content here -->
     </main>
-    
-    <!-- JavaScript for Accordion Menu -->
+
+    <!-- JavaScript to handle menu toggling on mobile -->
     <script>
         function toggleMenu() {
-            var menu = document.getElementById('nav-menu');
-            menu.classList.toggle('hidden');
+            var menu = document.querySelector('.nav-links');
+            menu.classList.toggle('open');
         }
+
+        // Add event listener to the "MENU" label (on mobile)
+        document.querySelector('.menu-button').addEventListener('click', toggleMenu);
     </script>
 </body>
 </html>
