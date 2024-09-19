@@ -6,8 +6,8 @@
     <title>Paws in Stride</title>
     <link rel="stylesheet" href="styles.css">
     <script>
+        // Function to dynamically load content
         function loadPage(page) {
-            // Load the content of the page into the content div
             var xhr = new XMLHttpRequest();
             xhr.open('GET', page, true);
             xhr.onreadystatechange = function () {
@@ -17,16 +17,20 @@
             };
             xhr.send();
         }
+
+        // Load default content (e.g., home) when the page loads
+        window.onload = function() {
+            loadPage('home.html');
+        };
     </script>
 </head>
 <body>
 
+    <!-- Logo and Navigation Menu -->
     <header>
         <div class="logo-container">
             <img src="pawsnstridelogo1.png" alt="Paws in Stride Logo" class="logo">
         </div>
-
-        <!-- Navigation Menu -->
         <nav>
             <ul class="nav-links">
                 <li><a href="#" onclick="loadPage('home.html')">HOME</a></li>
@@ -37,12 +41,10 @@
         </nav>
     </header>
 
+    <!-- Content Section Where Pages Will Be Loaded -->
     <main>
-        <!-- Placeholder where the content will be dynamically loaded -->
         <div id="content">
-            <!-- Initial content goes here, or it can be left blank until a page is loaded -->
-            <h2>Welcome to Paws in Stride</h2>
-            <p>This is the homepage content. Click on the menu items to load different sections.</p>
+            <!-- This will dynamically load content based on the menu item clicked -->
         </div>
     </main>
 
