@@ -22,7 +22,7 @@ header {
 }
 
 .logo {
-    width: 200px; /* Original size for desktop */
+    width: 200px; /* Desktop size */
     height: auto;
 }
 
@@ -79,69 +79,41 @@ nav {
     color: #f09d51;
 }
 
-/* Hide the mobile menu by default */
-.hidden {
-    display: none;
-}
-
-/* Mobile Media Query */
+/* Mobile Menu (collapsed by default) */
 @media (max-width: 768px) {
-    /* Adjust logo for mobile */
-    .logo {
-        width: 120px; /* Smaller logo size for mobile */
-    }
-
-    /* Stack menu items vertically for mobile */
     .nav-links {
+        display: none; /* Hide menu links by default */
         flex-direction: column;
         align-items: center;
     }
 
-    .nav-links li {
-        margin: 10px 0;
+    /* Show menu when toggled */
+    .nav-links.open {
+        display: flex; /* Show menu when "MENU" is clicked */
     }
 
-    .nav-links li a {
-        font-size: 16px;
-    }
-
-    /* Hide menu initially on mobile */
-    nav.hidden {
-        display: none;
-    }
-
-    /* Show the menu button on mobile */
+    /* The "MENU" label to click */
     .menu-button {
         display: block;
-        background-color: #f09d51;
-        color: white;
+        background-color: transparent;
+        color: #333;
         font-size: 18px;
         font-weight: bold;
         padding: 10px;
         border: none;
-        border-radius: 25px;
         cursor: pointer;
-        margin: 10px auto;
-        width: fit-content;
+        text-align: center;
+        width: 100%;
     }
 
-    /* Hide menu button on desktop */
-    .menu-button {
-        display: none;
+    /* Hide the desktop version of the menu */
+    .logo {
+        width: 120px; /* Smaller logo size for mobile */
     }
 
-    /* Display menu button and hide menu on mobile */
-    @media (max-width: 768px) {
-        .menu-button {
-            display: block;
-        }
-
-        nav {
-            display: none; /* Menu hidden by default on mobile */
-        }
-
-        nav.hidden {
-            display: block; /* Toggle to display when clicked */
-        }
+    /* Ensure the navigation bar is full-width */
+    nav {
+        width: 100%;
+        box-sizing: border-box;
     }
 }
