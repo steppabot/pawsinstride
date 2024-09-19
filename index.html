@@ -3,41 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paws In Stride</title>
+    <title>Paws in Stride</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        function loadPage(page) {
+            // Load the content of the page into the content div
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', page, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    document.getElementById('content').innerHTML = xhr.responseText;
+                }
+            };
+            xhr.send();
+        }
+    </script>
 </head>
 <body>
+
     <header>
-        <!-- Logo Section -->
         <div class="logo-container">
-            <img src="pawsnstridelogo1.png" alt="Paws In Stride Logo" class="logo">
+            <img src="pawsnstridelogo1.png" alt="Paws in Stride Logo" class="logo">
         </div>
 
-        <!-- Entire White Box for Menu -->
-        <nav id="menu-box" onclick="toggleMenu()">
-            <!-- Mobile Menu Text -->
-            <div class="menu-button">MENU</div>
-
-            <!-- Navigation Links -->
-            <ul class="nav-links" id="nav-menu">
-                <li><a href="#home">HOME</a></li>
-                <li><a href="#services">SERVICES</a></li>
-                <li><a href="#about">ABOUT</a></li>
-                <li><a href="contact.html">CONTACT</a></li>
+        <!-- Navigation Menu -->
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#" onclick="loadPage('home.html')">HOME</a></li>
+                <li><a href="#" onclick="loadPage('services.html')">SERVICES</a></li>
+                <li><a href="#" onclick="loadPage('about.html')">ABOUT</a></li>
+                <li><a href="#" onclick="loadPage('contact.html')">CONTACT</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <!-- Add content here -->
+        <!-- Placeholder where the content will be dynamically loaded -->
+        <div id="content">
+            <!-- Initial content goes here, or it can be left blank until a page is loaded -->
+            <h2>Welcome to Paws in Stride</h2>
+            <p>This is the homepage content. Click on the menu items to load different sections.</p>
+        </div>
     </main>
 
-    <!-- JavaScript for Accordion Menu -->
-    <script>
-        function toggleMenu() {
-            var menu = document.getElementById('nav-menu');
-            menu.classList.toggle('open');
-        }
-    </script>
 </body>
 </html>
