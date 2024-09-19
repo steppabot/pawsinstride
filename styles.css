@@ -22,38 +22,37 @@ header {
 }
 
 .logo {
-    width: 150px; /* Reduced logo size for better mobile scaling */
+    width: 200px; /* Original size for desktop */
     height: auto;
 }
 
-/* Navigation styling */
+/* Navigation styling for desktop */
 nav {
     background-color: #fff;
     padding: 10px 20px;
     border-radius: 25px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     margin: 0 auto;
-    max-width: 100%; /* Restrict the width to 100% */
+    width: fit-content;
 }
 
 .nav-links {
     list-style: none;
     display: flex;
-    justify-content: space-around; /* Distribute items evenly */
+    justify-content: center;
     padding: 0;
     margin: 0;
-    flex-wrap: wrap; /* Allow the items to wrap on small screens */
 }
 
 .nav-links li {
-    margin: 0 10px; /* Reduced margin */
+    margin: 0 20px;
     position: relative;
 }
 
 .nav-links li a {
     text-decoration: none;
     color: #333;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
     padding: 5px 0;
     display: inline-block;
@@ -82,8 +81,14 @@ nav {
 
 /* Mobile Media Query */
 @media (max-width: 768px) {
+    /* Adjust logo for mobile */
+    .logo {
+        width: 120px; /* Smaller logo size for mobile */
+    }
+
+    /* Stack menu items vertically */
     .nav-links {
-        flex-direction: column; /* Stack menu items vertically on smaller screens */
+        flex-direction: column; /* Stack vertically */
         align-items: center;
     }
 
@@ -91,17 +96,21 @@ nav {
         margin: 10px 0; /* Add spacing between stacked items */
     }
 
+    /* Ensure nav takes full width on mobile without allowing scrolling */
     nav {
-        width: 100%; /* Ensure nav takes full width on mobile */
+        width: 100%; /* Full width for mobile */
         padding: 15px 0;
-        box-sizing: border-box; /* Prevent overflow */
+        box-sizing: border-box;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
     }
 
-    .logo {
-        width: 120px; /* Smaller logo size for mobile */
-    }
-
+    /* Adjust the font size for smaller screens */
     .nav-links li a {
-        font-size: 14px; /* Adjust font size for smaller screens */
+        font-size: 16px;
+    }
+
+    /* Prevent horizontal scrolling on body */
+    body {
+        overflow-x: hidden;
     }
 }
