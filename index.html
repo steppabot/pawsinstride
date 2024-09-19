@@ -18,6 +18,12 @@
             xhr.send();
         }
 
+        // Toggle mobile menu open/close
+        function toggleMenu() {
+            var menu = document.getElementById('nav-menu');
+            menu.classList.toggle('open');
+        }
+
         // Load default content (e.g., home) when the page loads
         window.onload = function() {
             loadPage('home.html');
@@ -31,14 +37,18 @@
         <div class="logo-container">
             <img src="pawsnstridelogo1.png" alt="Paws in Stride Logo" class="logo">
         </div>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="#" onclick="loadPage('home.html')">HOME</a></li>
-                <li><a href="#" onclick="loadPage('services.html')">SERVICES</a></li>
-                <li><a href="#" onclick="loadPage('about.html')">ABOUT</a></li>
-                <li><a href="#" onclick="loadPage('contact.html')">CONTACT</a></li>
-            </ul>
-        </nav>
+            <nav id="menu-box">
+                <!-- Menu Button for Mobile -->
+                <div class="menu-button" onclick="toggleMenu()">MENU</div>
+            
+                <!-- Navigation Links -->
+                <ul class="nav-links" id="nav-menu">
+                    <li><a href="https://pawsinstride.com">HOME</a></li> <!-- Changed href to the root domain -->
+                    <li><a href="#" onclick="loadPage('services.html')">SERVICES</a></li>
+                    <li><a href="#" onclick="loadPage('about.html')">ABOUT</a></li>
+                    <li><a href="#" onclick="loadPage('contact.html')">CONTACT</a></li>
+                </ul>
+            </nav>
     </header>
 
     <!-- Content Section Where Pages Will Be Loaded -->
