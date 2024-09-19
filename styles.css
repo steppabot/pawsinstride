@@ -7,7 +7,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #3acee8; /* Background behind the logo */
+    background-color: #3acee8;
     color: #333;
 }
 
@@ -22,7 +22,7 @@ header {
 }
 
 .logo {
-    width: 200px; /* Desktop size */
+    width: 200px; /* Original size for desktop */
     height: auto;
 }
 
@@ -79,35 +79,35 @@ nav {
     color: #f09d51;
 }
 
-/* Hide the mobile menu by default */
-.hidden {
-    display: none;
-}
-
 /* Mobile Menu (collapsed by default) */
 @media (max-width: 768px) {
     .nav-links {
-        display: none; /* Hide the menu by default on mobile */
-        flex-direction: column; /* Stack menu items vertically on mobile */
+        display: none; /* Hidden by default on mobile */
+        flex-direction: column;
         align-items: center;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 25px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .nav-links.open {
-        display: flex; /* Show menu when open */
+        display: flex; /* Show when 'MENU' is clicked */
     }
 
-    /* The "MENU" label to click */
+    /* The "MENU" label for mobile */
     .menu-button {
         display: block;
-        background-color: #f09d51;
-        color: white;
+        background-color: #fff;
+        color: #333;
         font-size: 18px;
         font-weight: bold;
         padding: 10px;
-        border: none;
+        border-radius: 25px;
         cursor: pointer;
-        text-align: center;
-        width: 100%;
+        margin: 0 auto;
+        width: fit-content;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     /* Hide the desktop version of the menu */
@@ -116,8 +116,8 @@ nav {
     }
 
     nav {
-        width: 100%; /* Ensure navigation takes full width on mobile */
-        box-sizing: border-box;
+        width: 90%;
+        margin: 0 auto;
     }
 }
 
@@ -128,6 +128,6 @@ nav {
     }
 
     .nav-links {
-        display: flex; /* Display the full menu on desktop */
+        display: flex; /* Show the menu normally on desktop */
     }
 }
