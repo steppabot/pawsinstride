@@ -14,7 +14,7 @@ body {
 header {
     text-align: center;
     padding: 20px 0;
-    background-color: #3acee8; /* Set background color behind logo */
+    background-color: #3acee8; /* Background color behind logo */
 }
 
 /* Logo styling */
@@ -29,25 +29,52 @@ header {
 
 /* Navigation styling */
 nav {
-    background-color: #333;
+    background-color: #fff;
+    padding: 10px 0;
+    border-radius: 25px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+    margin: 0 auto;
 }
 
 .nav-links {
     list-style: none;
+    display: flex;
+    justify-content: center;
     padding: 0;
 }
 
 .nav-links li {
-    display: inline-block;
-    margin-right: 20px;
+    margin: 0 20px;
+    position: relative;
 }
 
 .nav-links li a {
-    color: white;
     text-decoration: none;
+    color: #333;
     font-size: 18px;
+    font-weight: bold;
+    padding: 5px 0;
+    display: inline-block;
+    position: relative;
+}
+
+/* Hover effect for navigation */
+.nav-links li a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    height: 3px;
+    background-color: #f09d51; /* Hover effect color */
+    transition: width 0.3s ease-in-out;
+}
+
+.nav-links li a:hover::after {
+    width: 100%;
 }
 
 .nav-links li a:hover {
-    text-decoration: underline;
+    color: #f09d51; /* Change text color on hover */
 }
