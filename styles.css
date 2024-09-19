@@ -22,18 +22,18 @@ header {
 }
 
 .logo {
-    width: 200px;
+    width: 150px; /* Reduced logo size for better mobile scaling */
     height: auto;
 }
 
 /* Navigation styling */
 nav {
     background-color: #fff;
-    padding: 10px 0;
+    padding: 10px 20px; /* Add padding to create space around the nav */
     border-radius: 25px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    width: fit-content;
     margin: 0 auto;
+    width: fit-content; /* Adjust width */
 }
 
 .nav-links {
@@ -41,17 +41,18 @@ nav {
     display: flex;
     justify-content: center;
     padding: 0;
+    margin: 0;
 }
 
 .nav-links li {
-    margin: 0 20px;
+    margin: 0 10px; /* Reduced margin for mobile */
     position: relative;
 }
 
 .nav-links li a {
     text-decoration: none;
     color: #333;
-    font-size: 18px;
+    font-size: 16px; /* Reduced font size for mobile */
     font-weight: bold;
     padding: 5px 0;
     display: inline-block;
@@ -81,7 +82,7 @@ nav {
 /* Mobile Media Query */
 @media (max-width: 768px) {
     .nav-links {
-        flex-direction: column; /* Stack menu items vertically on smaller screens */
+        flex-direction: column; /* Stack menu items vertically */
         align-items: center;
     }
 
@@ -90,6 +91,16 @@ nav {
     }
 
     nav {
-        width: 100%; /* Make the nav take full width on mobile */
-        padding: 10px; /* Adjust padding for better mobile appearance */
-   
+        width: 90%; /* Ensure nav takes 90% of mobile screen width */
+        padding: 15px 0; /* Add padding around the nav on mobile */
+    }
+
+    /* Adjust the font size and logo size for smaller screens */
+    .logo {
+        width: 120px; /* Further reduce logo size for smaller screens */
+    }
+
+    .nav-links li a {
+        font-size: 14px; /* Adjust font size for smaller screens */
+    }
+}
