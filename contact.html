@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Paws in Stride</title>
+    <style>
+        /* Basic form styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px;
+        }
+
+        .contact-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-form h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .send-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3acee8;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .send-button:hover {
+            background-color: #2db1c1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contact-form">
+        <h2>Contact Us</h2>
+        <form action="https://formspree.io/f/manwgqoz" method="POST">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Your name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="_replyto" placeholder="Your email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="Your phone number">
+            </div>
+            <div class="form-group">
+                <label for="comments">Comments</label>
+                <textarea id="comments" name="comments" placeholder="Your message" required></textarea>
+            </div>
+            <button type="submit" class="send-button">Send</button>
+        </form>
+    </div>
+
+</body>
+</html>
