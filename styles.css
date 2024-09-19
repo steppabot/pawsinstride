@@ -7,14 +7,13 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #3acee8; /* Background behind the logo */
     color: #333;
 }
 
 header {
     text-align: center;
     padding: 20px 0;
-    background-color: #3acee8; /* Background color behind logo */
 }
 
 /* Logo styling */
@@ -67,7 +66,7 @@ nav {
     bottom: 0;
     width: 0%;
     height: 3px;
-    background-color: #f09d51; /* Hover effect color */
+    background-color: #f09d51;
     transition: width 0.3s ease-in-out;
 }
 
@@ -76,5 +75,21 @@ nav {
 }
 
 .nav-links li a:hover {
-    color: #f09d51; /* Change text color on hover */
+    color: #f09d51;
 }
+
+/* Mobile Media Query */
+@media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column; /* Stack menu items vertically on smaller screens */
+        align-items: center;
+    }
+
+    .nav-links li {
+        margin: 10px 0; /* Add spacing between stacked items */
+    }
+
+    nav {
+        width: 100%; /* Make the nav take full width on mobile */
+        padding: 10px; /* Adjust padding for better mobile appearance */
+   
