@@ -6,7 +6,7 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: Roboto, sans-serif;
     background: linear-gradient(135deg, #47cee6, #2890df); /* Gradient background */
     color: #333;
     min-height: 100vh; /* Ensure body covers full viewport height */
