@@ -81,70 +81,89 @@ nav {
     color: #f09d51;
 }
 
-/* Mobile Menu (collapsed by default) */
-@media (max-width: 768px) {
-    .nav-links {
-        display: none; /* Hidden by default on mobile */
-        flex-direction: column;
-        align-items: center;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 25px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .nav-links.open {
-        display: flex; /* Show when 'MENU' is clicked */
-    }
-
-    /* Style the entire box that will show 'MENU' */
-    #menu-box {
-        display: block;
-        background-color: #fff;
-        color: #333;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 10px;
-        border-radius: 25px;
-        cursor: pointer;
-        margin: 0 auto;
-        width: 90%; /* Make the menu button wider */
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-
-    /* Hide the desktop version of the menu */
-    .logo {
-        width: 120px; /* Smaller logo size for mobile */
-    }
-
-    nav {
-        width: 90%;
-        margin: 0 auto;
-    }
-}
-
-/* Desktop Layout remains unchanged */
-@media (min-width: 769px) {
-    .menu-button {
-        display: none; /* Hide the "MENU" button on desktop */
-    }
-
-    .nav-links {
-        display: flex; /* Show the menu normally on desktop */
-    }
-}
-
 /* Hero Section */
 .hero-section {
     background: none; /* Let the gradient background show through */
     padding: 50px 0;
 }
 
-/* Mobile Specific Layout */
+.hero-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
+.hero-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px 0 0 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hero-text-container {
+    background-color: #fff;
+    flex: 1;
+    padding: 40px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0 15px 15px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero-text h1,
+.hero-text h3,
+.hero-text p {
+    margin: 0 auto;
+}
+
+.hero-text h1 {
+    font-size: 36px;
+    color: #e87032;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.hero-text h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.hero-text p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: #f5ab40;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+    margin: 0 auto;
+}
+
+.cta-button:hover {
+    background-color: #ef602c;
+}
+
+/* Mobile Specific Layout */
 @media (max-width: 768px) {
-    /* Make each part a separate div */
+    .hero-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
     .hero-heading {
         background-color: #fff;
         padding: 20px;
@@ -177,8 +196,8 @@ nav {
 
     .cta-button {
         display: inline-block;
-        background-color: #f5ab40; /* Primary button color */
-        color: #fff; /* Ensure text color is white */
+        background-color: #f5ab40;
+        color: #fff;
         font-size: 18px;
         font-weight: bold;
         padding: 15px 30px;
@@ -188,12 +207,23 @@ nav {
         cursor: pointer;
         margin: 20px auto;
         text-align: center;
-        z-index: 1; /* Ensure it's on top */
-        visibility: visible; /* Ensure visibility */
+        z-index: 1;
+        visibility: visible;
         width: fit-content;
     }
 
     .cta-button:hover {
-        background-color: #ef602c; /* Hover color */
+        background-color: #ef602c;
+    }
+}
+
+/* Desktop Layout remains unchanged */
+@media (min-width: 769px) {
+    .menu-button {
+        display: none;
+    }
+
+    .nav-links {
+        display: flex;
     }
 }
