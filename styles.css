@@ -148,21 +148,28 @@ nav {
     .hero-heading {
         background-color: #fff;
         padding: 20px;
-        border-radius: 15px;
+        border-radius: 15px 15px 0 0;
         text-align: center;
-        font-size: 24px;
+        font-size: 20px; /* Smaller font size for h1 */
         color: #e87032;
         font-weight: bold;
+        margin-bottom: 0; /* Remove margin to make sections touch */
+    }
+
+    .hero-heading h3 {
+        color: #333; /* Make the h3 text black */
+        margin-top: 5px;
+        font-size: 16px;
     }
 
     .hero-image {
-        margin: 20px 0;
+        margin: 0; /* Remove margin to make sections touch */
         text-align: center;
     }
 
     .hero-image img {
         max-width: 100%;
-        border-radius: 15px;
+        border-radius: 0;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     }
 
@@ -171,8 +178,8 @@ nav {
         padding: 20px;
         text-align: center;
         font-size: 16px;
-        border-radius: 15px;
-        margin-top: 10px;
+        border-radius: 0 0 15px 15px; /* Ensure bottom corners are rounded */
+        margin-top: 0; /* Remove margin to make sections touch */
     }
 
     .cta-button {
