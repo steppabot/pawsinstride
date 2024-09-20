@@ -195,21 +195,31 @@ nav {
     margin-bottom: 25px;
 }
 
-.cta-button {
+/* Button Styling (Shared across the site) */
+.cta-button,
+.send-button {
     display: inline-block;
-    background-color: #f09d51;
+    background-color: #f5ab40; /* Primary button color */
     color: #fff;
     font-size: 18px;
     font-weight: bold;
     padding: 15px 30px;
     text-decoration: none;
     border-radius: 25px;
-    transition: background-color 0.3s ease;
-    margin: 0 auto; /* Center button */
+    transition: background-color 0.3s ease; /* Smooth transition */
+    cursor: pointer;
+    text-align: center;
 }
 
-.cta-button:hover {
-    background-color: #e87032;
+.cta-button:hover,
+.send-button:hover {
+    background-color: #ef602c; /* Hover color */
+}
+
+/* Contact form specific adjustments */
+.send-button {
+    width: 100%;
+    border-radius: 5px; /* Smaller border radius for the contact form button */
 }
 
 /* Contact form styling */
@@ -251,24 +261,6 @@ textarea {
 textarea {
     height: 150px;
     resize: vertical;
-}
-
-.send-button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #f7ac2e;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-}
-
-.send-button:hover {
-    background-color: #f2611f;
 }
 
 /* Mobile specific styles */
