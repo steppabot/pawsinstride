@@ -165,7 +165,14 @@ nav {
     border-radius: 0 15px 15px 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center; /* Vertically center the text */
+    text-align: center; /* Ensure text is centered horizontally */
+}
+
+.hero-text h1,
+.hero-text h3,
+.hero-text p {
+    margin: 0 auto; /* Ensure centered alignment */
 }
 
 .hero-text h1 {
@@ -198,12 +205,12 @@ nav {
     text-decoration: none;
     border-radius: 25px;
     transition: background-color 0.3s ease;
+    margin: 0 auto; /* Center button */
 }
 
 .cta-button:hover {
     background-color: #e87032;
 }
-
 
 /* Contact form styling */
 .contact-form {
