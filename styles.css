@@ -1,3 +1,139 @@
+/* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #3acee8;
+    color: #333;
+}
+
+header {
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* Logo styling */
+.logo-container {
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 200px; /* Original size for desktop */
+    height: auto;
+}
+
+/* Navigation styling for desktop */
+nav {
+    background-color: #fff;
+    padding: 10px 20px;
+    border-radius: 25px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    width: fit-content;
+    cursor: pointer;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-links li {
+    margin: 0 20px;
+    position: relative;
+}
+
+.nav-links li a {
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px 0;
+    display: inline-block;
+    position: relative;
+}
+
+/* Hover effect for navigation */
+.nav-links li a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    height: 3px;
+    background-color: #f09d51;
+    transition: width 0.3s ease-in-out;
+}
+
+.nav-links li a:hover::after {
+    width: 100%;
+}
+
+.nav-links li a:hover {
+    color: #f09d51;
+}
+
+/* Mobile Menu (collapsed by default) */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Hidden by default on mobile */
+        flex-direction: column;
+        align-items: center;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 25px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-links.open {
+        display: flex; /* Show when 'MENU' is clicked */
+    }
+
+    /* Style the entire box that will show 'MENU' */
+    #menu-box {
+        display: block;
+        background-color: #fff;
+        color: #333;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 25px;
+        cursor: pointer;
+        margin: 0 auto;
+        width: 90%; /* Make the menu button wider */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* Hide the desktop version of the menu */
+    .logo {
+        width: 120px; /* Smaller logo size for mobile */
+    }
+
+    nav {
+        width: 90%;
+        margin: 0 auto;
+    }
+}
+
+/* Desktop Layout remains unchanged */
+@media (min-width: 769px) {
+    .menu-button {
+        display: none; /* Hide the "MENU" button on desktop */
+    }
+
+    .nav-links {
+        display: flex; /* Show the menu normally on desktop */
+    }
+}
+
 /* Hero Section */
 .hero-section {
     background-color: #3acee8; /* Blue background */
@@ -75,5 +211,9 @@
     .hero-text-container {
         margin-left: 0; /* Remove left margin on mobile */
         margin-top: 20px; /* Add spacing above text container */
+    }
+
+    .hero-image {
+        padding-bottom: 20px; /* Space below the image on mobile */
     }
 }
