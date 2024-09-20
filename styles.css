@@ -1,30 +1,32 @@
 /* Hero Section */
 .hero-section {
-    background-color: #fff; /* White background for the entire section */
+    background-color: #3acee8; /* Blue background */
     padding: 50px 0;
 }
 
 .hero-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* Flex container for desktop layout */
-.text-image-container {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    flex-direction: column; /* Default to column layout for mobile */
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* Hero Text */
-.hero-text {
+.hero-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hero-text-container {
+    background-color: #fff;
     flex: 1;
-    max-width: 600px;
-    text-align: center;
-    margin-bottom: 20px;
+    padding: 40px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    margin-left: 20px; /* Adds space between image and text */
 }
 
 .hero-text h1 {
@@ -41,26 +43,7 @@
     margin-bottom: 15px;
 }
 
-/* Hero Image */
-.hero-image {
-    margin-bottom: 20px;
-}
-
-.hero-image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 15px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Hero Description (Text and Button) */
-.hero-description {
-    max-width: 600px;
-    text-align: center;
-    margin-top: 20px;
-}
-
-.hero-description p {
+.hero-text p {
     font-size: 16px;
     color: #333;
     margin-bottom: 25px;
@@ -82,44 +65,15 @@
     background-color: #e87032;
 }
 
-/* Responsive Layout for Mobile */
+/* Mobile specific styles */
 @media (max-width: 768px) {
-    .text-image-container {
-        flex-direction: column; /* Stack text, image, and description vertically */
+    .hero-container {
+        flex-direction: column;
         text-align: center;
     }
 
-    .hero-text {
-        padding: 0;
-    }
-
-    .hero-description {
-        margin-top: 20px;
-        padding: 0 15px;
-    }
-}
-
-/* Desktop Layout */
-@media (min-width: 769px) {
-    .text-image-container {
-        flex-direction: row; /* Image and text side-by-side on desktop */
-        align-items: flex-start;
-        justify-content: space-between;
-    }
-
-    .hero-text {
-        text-align: left; /* Align text to the left on desktop */
-        max-width: 500px;
-        padding-right: 40px;
-    }
-
-    .hero-image {
-        max-width: 500px;
-    }
-
-    .hero-description {
-        text-align: left; /* Align description and button to the left */
-        max-width: 500px;
-        padding-left: 40px;
+    .hero-text-container {
+        margin-left: 0; /* Remove left margin on mobile */
+        margin-top: 20px; /* Add spacing above text container */
     }
 }
