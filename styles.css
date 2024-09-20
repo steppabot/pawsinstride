@@ -34,7 +34,7 @@ nav {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     margin: 0 auto;
     width: fit-content;
-    cursor: pointer;
+    cursor: pointer; /* Entire white box is clickable */
 }
 
 .nav-links {
@@ -134,7 +134,7 @@ nav {
     }
 }
 
-/* Hero Section */
+/* NEW Hero Section Styling */
 .hero-section {
     background-color: #3acee8; /* Blue background */
     padding: 50px 0;
