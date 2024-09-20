@@ -209,6 +209,8 @@ nav {
     transition: background-color 0.3s ease; /* Smooth transition */
     cursor: pointer;
     text-align: center;
+    border: none;
+
 }
 
 .cta-button:hover,
@@ -219,7 +221,7 @@ nav {
 /* Contact form specific adjustments */
 .send-button {
     width: 100%;
-    border-radius: 25px; /* Smaller border radius for the contact form button */
+    border-radius: 25px;
 }
 
 /* Contact form styling */
