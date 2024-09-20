@@ -278,17 +278,33 @@ textarea {
         text-align: center;
     }
 
-    .hero-image img {
+    /* Add white background to heading and subheading */
+    .hero-text-container h1,
+    .hero-text-container h3 {
+        background-color: #fff;
+        padding: 10px;
         border-radius: 15px;
+    }
+
+    .hero-image img {
+        border-radius: 0; /* Remove border radius for seamless stacking */
     }
 
     .hero-text-container {
-        border-radius: 15px;
-        margin-top: 20px;
+        border-radius: 0; /* Ensure the text container touches the image */
+        margin-top: 0;
     }
 
+    /* Move the heading above the image on mobile */
     .hero-text-container h1 {
-        order: -1; /* Move the heading above the image on mobile */
+        order: -1;
+    }
+
+    .hero-text-container p,
+    .cta-button {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 0 0 15px 15px; /* Keep rounded corners at the bottom */
     }
 
     .hero-text-container,
