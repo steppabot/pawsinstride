@@ -81,6 +81,60 @@ nav {
     color: #f09d51;
 }
 
+/* Mobile Menu (collapsed by default) */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Hidden by default on mobile */
+        flex-direction: column;
+        align-items: center;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 25px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-links.open {
+        display: flex; /* Show when 'MENU' is clicked */
+    }
+
+    /* Style the entire box that will show 'MENU' */
+    #menu-box {
+        display: block;
+        background-color: #fff;
+        color: #333;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 25px;
+        cursor: pointer;
+        margin: 0 auto;
+        width: 90%; /* Make the menu button wider */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* Hide the desktop version of the menu */
+    .logo {
+        width: 120px; /* Smaller logo size for mobile */
+    }
+
+    nav {
+        width: 90%;
+        margin: 0 auto;
+    }
+}
+
+/* Desktop Layout remains unchanged */
+@media (min-width: 769px) {
+    .menu-button {
+        display: none; /* Hide the "MENU" button on desktop */
+    }
+
+    .nav-links {
+        display: flex; /* Show the menu normally on desktop */
+    }
+}
+
 /* Hero Section */
 .hero-section {
     background: none; /* Let the gradient background show through */
@@ -89,15 +143,16 @@ nav {
 
 .hero-container {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     align-items: stretch;
+    justify-content: space-between;
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .hero-image img {
     max-width: 100%;
-    height: auto;
+    height: 100%; /* Ensure the image height matches the text container */
     border-radius: 15px 0 0 15px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -110,14 +165,14 @@ nav {
     border-radius: 0 15px 15px 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    text-align: center;
+    justify-content: center; /* Vertically center the text */
+    text-align: center; /* Ensure text is centered horizontally */
 }
 
 .hero-text h1,
 .hero-text h3,
 .hero-text p {
-    margin: 0 auto;
+    margin: 0 auto; /* Ensure centered alignment */
 }
 
 .hero-text h1 {
@@ -140,81 +195,31 @@ nav {
     margin-bottom: 25px;
 }
 
-.cta-button {
+/* Button Styling (Shared across the site) */
+.cta-button,
+.send-button {
     display: inline-block;
-    background-color: #f5ab40;
+    background-color: #f5ab40; /* Primary button color */
     color: #fff;
     font-size: 18px;
     font-weight: bold;
     padding: 15px 30px;
     text-decoration: none;
     border-radius: 25px;
-    transition: background-color 0.3s ease;
-    margin: 0 auto;
+    transition: background-color 0.3s ease; /* Smooth transition */
+    cursor: pointer;
+    text-align: center;
 }
 
-.cta-button:hover {
-    background-color: #ef602c;
+.cta-button:hover,
+.send-button:hover {
+    background-color: #ef602c; /* Hover color */
 }
 
-/* Mobile Specific Layout */
-@media (max-width: 768px) {
-    .hero-container {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .hero-heading {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 15px;
-        text-align: center;
-        font-size: 24px;
-        color: #e87032;
-        font-weight: bold;
-    }
-
-    .hero-image {
-        margin: 20px 0;
-        text-align: center;
-    }
-
-    .hero-image img {
-        max-width: 100%;
-        border-radius: 15px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .hero-description {
-        background-color: #fff;
-        padding: 20px;
-        text-align: center;
-        font-size: 16px;
-        border-radius: 15px;
-        margin-top: 10px;
-    }
-
-    .cta-button {
-        display: inline-block;
-        background-color: #f5ab40;
-        color: #fff;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 15px 30px;
-        text-decoration: none;
-        border-radius: 25px;
-        transition: background-color 0.3s ease;
-        cursor: pointer;
-        margin: 20px auto;
-        text-align: center;
-        z-index: 1;
-        visibility: visible;
-        width: fit-content;
-    }
-
-    .cta-button:hover {
-        background-color: #ef602c;
-    }
+/* Contact form specific adjustments */
+.send-button {
+    width: 100%;
+    border-radius: 5px; /* Smaller border radius for the contact form button */
 }
 
 /* Contact form styling */
@@ -258,32 +263,44 @@ textarea {
     resize: vertical;
 }
 
-.send-button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #f7ac2e;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-}
-
-.send-button:hover {
-    background-color: #f2611f;
-}
-
-/* Desktop Layout remains unchanged */
-@media (min-width: 769px) {
-    .menu-button {
-        display: none;
+/* Mobile specific styles */
+@media (max-width: 768px) {
+    .hero-container {
+        flex-direction: column;
+        text-align: center;
     }
 
-    .nav-links {
-        display: flex;
+    /* Add white background to heading and subheading */
+    .hero-text-container h1,
+    .hero-text-container h3 {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 15px;
+    }
+
+    .hero-image img {
+        border-radius: 0; /* Remove border radius for seamless stacking */
+    }
+
+    .hero-text-container {
+        border-radius: 0; /* Ensure the text container touches the image */
+        margin-top: 0;
+    }
+
+    /* Move the heading above the image on mobile */
+    .hero-text-container h1 {
+        order: -1;
+    }
+
+    .hero-text-container p,
+    .cta-button {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 0 0 15px 15px; /* Keep rounded corners at the bottom */
+    }
+
+    .hero-text-container,
+    .hero-image img {
+        width: 100%;
     }
 }
-
