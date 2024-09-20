@@ -200,15 +200,17 @@ nav {
 .send-button {
     display: inline-block;
     background-color: #f5ab40; /* Primary button color */
-    color: #fff;
+    color: #fff; /* Ensure text color is white */
     font-size: 18px;
     font-weight: bold;
     padding: 15px 30px;
     text-decoration: none;
     border-radius: 25px;
-    transition: background-color 0.3s ease; /* Smooth transition */
+    transition: background-color 0.3s ease;
     cursor: pointer;
     text-align: center;
+    z-index: 1; /* Ensure it's on top */
+    visibility: visible; /* Ensure visibility */
 }
 
 .cta-button:hover,
@@ -266,36 +268,43 @@ textarea {
 /* Mobile specific styles */
 @media (max-width: 768px) {
     .hero-container {
+        display: flex;
         flex-direction: column;
         text-align: center;
     }
 
-    /* Ensure that the heading and subheading come above the image */
+    /* Ensure that the text (h1 and h3) comes first */
     .hero-text-container {
-        order: -1; /* This moves the text container above the image */
+        display: block;
+        order: -1;
         background-color: #fff;
         padding: 20px;
         border-radius: 15px;
     }
 
+    /* Separate styles for h1 and h3 to make sure they are styled correctly */
     .hero-text-container h1,
     .hero-text-container h3 {
         background-color: #fff;
         padding: 10px;
+        margin: 0;
         border-radius: 15px;
     }
 
     .hero-image img {
-        border-radius: 0; /* Remove border radius for seamless stacking */
-        margin-top: 10px; /* Add some spacing between the text and image */
+        margin-top: 10px; /* Add space between headings and image */
+        border-radius: 0;
+        max-width: 100%;
     }
 
-    /* Ensure the paragraph and button are below the image */
+    /* Paragraph and button styles */
     .hero-text-container p,
     .cta-button {
         background-color: #fff;
-        padding: 10px;
-        border-radius: 0 0 15px 15px; /* Keep rounded corners at the bottom */
+        padding: 15px;
+        border-radius: 0 0 15px 15px; /* Rounded corners */
+        margin-top: 10px;
+        text-align: center;
     }
 
     .hero-text-container,
