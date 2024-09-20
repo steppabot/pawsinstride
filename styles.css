@@ -1,4 +1,4 @@
-/* Load Google Fonts */
+/* Load Google Fonts for bubble-style font */
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap');
 
 /* Basic reset */
@@ -84,138 +84,109 @@ nav {
     color: #f09d51;
 }
 
-/* Mobile Menu (collapsed by default) */
-@media (max-width: 768px) {
-    .nav-links {
-        display: none; /* Hidden by default on mobile */
-        flex-direction: column;
-        align-items: center;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 25px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .nav-links.open {
-        display: flex; /* Show when 'MENU' is clicked */
-    }
-
-    /* Style the entire box that will show 'MENU' */
-    #menu-box {
-        display: block;
-        background-color: #fff;
-        color: #333;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 10px;
-        border-radius: 25px;
-        cursor: pointer;
-        margin: 0 auto;
-        width: 90%; /* Make the menu button wider */
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-
-    /* Hide the desktop version of the menu */
-    .logo {
-        width: 120px; /* Smaller logo size for mobile */
-    }
-
-    nav {
-        width: 90%;
-        margin: 0 auto;
-    }
-}
-
-/* Desktop Layout remains unchanged */
-@media (min-width: 769px) {
-    .menu-button {
-        display: none; /* Hide the "MENU" button on desktop */
-    }
-
-    .nav-links {
-        display: flex; /* Show the menu normally on desktop */
-    }
-}
-
 /* Hero Section */
 .hero-section {
-    background: none; /* Let the gradient background show through */
+    background: none;
     padding: 50px 0;
 }
 
-/* Mobile Specific Layout */
+.hero-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
+/* Image section */
+.hero-image img {
+    max-width: 100%;
+    height: 100%;
+    border-radius: 15px 0 0 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Text section */
+.hero-text-container {
+    background-color: #fff;
+    flex: 1;
+    padding: 40px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0 15px 15px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Bubble-style h1 */
+.hero-text-container h1 {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 36px;
+    color: #e87032;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 25px;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hero-text-container h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.hero-text-container p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: #f5ab40;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+.cta-button:hover {
+    background-color: #ef602c;
+}
+
+/* Mobile-specific styles */
 @media (max-width: 768px) {
-    /* Make each part a separate div */
-    .hero-heading {
-        background-color: #fff;
+    .hero-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-text-container {
         padding: 20px;
-        border-radius: 15px 15px 0 0;
-        text-align: center;
-        font-size: 20px; /* Smaller font size for h1 */
-        color: #e87032;
-        font-weight: bold;
-        margin-bottom: 0; /* Remove margin to make sections touch */
-        font-family: 'Baloo 2', sans-serif; /* Apply the bubble font */
-        border-radius: 25px; /* Rounded edges */
-    }
-
-    .hero-heading h1 {
-        font-size: 24px; /* Slightly larger h1 */
-        padding: 10px;
-        background-color: #fff;
         border-radius: 15px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        display: inline-block;
-        margin-bottom: 10px;
+        margin-top: 10px;
     }
 
-    .hero-heading h3 {
-        color: #333; /* Make the h3 text black */
-        margin-top: 5px;
-        font-size: 16px;
-    }
-
-    .hero-image {
-        margin: 0; /* Remove margin to make sections touch */
-        text-align: center;
+    .hero-text-container h1 {
+        font-size: 24px; /* Smaller font for mobile */
     }
 
     .hero-image img {
-        max-width: 100%;
         border-radius: 0;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .hero-description {
-        background-color: #fff;
-        padding: 20px;
-        text-align: center;
-        font-size: 16px;
-        border-radius: 0 0 15px 15px; /* Ensure bottom corners are rounded */
-        margin-top: 0; /* Remove margin to make sections touch */
+        margin-top: 10px;
     }
 
     .cta-button {
-        display: inline-block;
-        background-color: #f5ab40; /* Primary button color */
-        color: #fff; /* Ensure text color is white */
-        font-size: 18px;
-        font-weight: bold;
-        padding: 15px 30px;
-        text-decoration: none;
-        border-radius: 25px;
-        transition: background-color 0.3s ease;
-        cursor: pointer;
         margin: 20px auto;
-        text-align: center;
-        z-index: 1; /* Ensure it's on top */
-        visibility: visible; /* Ensure visibility */
-        width: fit-content;
-    }
-
-    .cta-button:hover {
-        background-color: #ef602c; /* Hover color */
     }
 }
