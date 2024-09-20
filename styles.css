@@ -219,7 +219,7 @@ nav {
 /* Contact form specific adjustments */
 .send-button {
     width: 100%;
-    border-radius: 5px; /* Smaller border radius for the contact form button */
+    border-radius: 25px; /* Smaller border radius for the contact form button */
 }
 
 /* Contact form styling */
