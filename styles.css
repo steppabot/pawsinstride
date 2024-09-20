@@ -292,12 +292,23 @@ textarea {
         order: -1;
     }
 
-    .hero-text-container p,
-    .cta-button {
-        background-color: #fff;
-        padding: 10px;
-        border-radius: 0 0 15px 15px; /* Keep rounded corners at the bottom */
-    }
+.hero-text-container p {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 0 0 15px 15px; /* Keep rounded corners at the bottom */
+}
+
+.cta-button {
+    display: block; /* Ensure it's visible */
+    margin: 20px auto; /* Center it with margin */
+    width: 80%; /* Make it wider for mobile users */
+    background-color: #f5ab40; /* Retain your original button color */
+    color: #fff;
+    padding: 15px 30px;
+    border-radius: 25px;
+    text-align: center;
+    text-decoration: none;
+}
 
     .hero-text-container,
     .hero-image img {
