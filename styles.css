@@ -141,59 +141,166 @@ nav {
     padding: 50px 0;
 }
 
-/* Mobile Specific Layout */
+.hero-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
+.hero-image img {
+    max-width: 100%;
+    height: 100%; /* Ensure the image height matches the text container */
+    border-radius: 15px 0 0 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hero-text-container {
+    background-color: #fff;
+    flex: 1;
+    padding: 40px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0 15px 15px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertically center the text */
+    text-align: center; /* Ensure text is centered horizontally */
+}
+
+.hero-text h1,
+.hero-text h3,
+.hero-text p {
+    margin: 0 auto; /* Ensure centered alignment */
+}
+
+.hero-text h1 {
+    font-size: 36px;
+    color: #e87032;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.hero-text h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.hero-text p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+/* Button Styling (Shared across the site) */
+.cta-button,
+.send-button {
+    display: inline-block;
+    background-color: #f5ab40; /* Primary button color */
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: background-color 0.3s ease; /* Smooth transition */
+    cursor: pointer;
+    text-align: center;
+}
+
+.cta-button:hover,
+.send-button:hover {
+    background-color: #ef602c; /* Hover color */
+}
+
+/* Contact form specific adjustments */
+.send-button {
+    width: 100%;
+    border-radius: 5px; /* Smaller border radius for the contact form button */
+}
+
+/* Contact form styling */
+.contact-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 20px auto;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.contact-form h2 {
+    text-align: center;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+textarea {
+    height: 150px;
+    resize: vertical;
+}
+
+/* Mobile specific styles */
 @media (max-width: 768px) {
-    /* Make each part a separate div */
-    .hero-heading {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 15px;
+    .hero-container {
+        flex-direction: column;
         text-align: center;
-        font-size: 24px;
-        color: #e87032;
-        font-weight: bold;
     }
 
-    .hero-image {
-        margin: 20px 0;
-        text-align: center;
+    /* Add white background to heading and subheading */
+    .hero-text-container h1,
+    .hero-text-container h3 {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 15px;
     }
 
     .hero-image img {
-        max-width: 100%;
-        border-radius: 15px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 0; /* Remove border radius for seamless stacking */
     }
 
-    .hero-description {
-        background-color: #fff;
-        padding: 20px;
-        text-align: center;
-        font-size: 16px;
-        border-radius: 15px;
-        margin-top: 10px;
+    .hero-text-container {
+        border-radius: 0; /* Ensure the text container touches the image */
+        margin-top: 0;
     }
 
+    /* Move the heading above the image on mobile */
+    .hero-text-container h1 {
+        order: -1;
+    }
+
+    .hero-text-container p,
     .cta-button {
-        display: inline-block;
-        background-color: #f5ab40; /* Primary button color */
-        color: #fff; /* Ensure text color is white */
-        font-size: 18px;
-        font-weight: bold;
-        padding: 15px 30px;
-        text-decoration: none;
-        border-radius: 25px;
-        transition: background-color 0.3s ease;
-        cursor: pointer;
-        margin: 20px auto;
-        text-align: center;
-        z-index: 1; /* Ensure it's on top */
-        visibility: visible; /* Ensure visibility */
-        width: fit-content;
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 0 0 15px 15px; /* Keep rounded corners at the bottom */
     }
 
-    .cta-button:hover {
-        background-color: #ef602c; /* Hover color */
+    .hero-text-container,
+    .hero-image img {
+        width: 100%;
     }
 }
