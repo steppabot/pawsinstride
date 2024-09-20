@@ -270,7 +270,14 @@ textarea {
         text-align: center;
     }
 
-    /* Add white background to heading and subheading */
+    /* Ensure that the heading and subheading come above the image */
+    .hero-text-container {
+        order: -1; /* This moves the text container above the image */
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 15px;
+    }
+
     .hero-text-container h1,
     .hero-text-container h3 {
         background-color: #fff;
@@ -280,18 +287,10 @@ textarea {
 
     .hero-image img {
         border-radius: 0; /* Remove border radius for seamless stacking */
+        margin-top: 10px; /* Add some spacing between the text and image */
     }
 
-    .hero-text-container {
-        border-radius: 0; /* Ensure the text container touches the image */
-        margin-top: 0;
-    }
-
-    /* Move the heading above the image on mobile */
-    .hero-text-container h1 {
-        order: -1;
-    }
-
+    /* Ensure the paragraph and button are below the image */
     .hero-text-container p,
     .cta-button {
         background-color: #fff;
