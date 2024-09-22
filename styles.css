@@ -218,12 +218,12 @@ nav {
     background-color: #ef602c; /* Hover color */
 }
 
-/* Styling for Services Section */
+/* Service Section for Dog Walking and Pet Sitting */
 .services-section {
     display: flex;
     justify-content: center;
     padding: 40px 0;
-    background-color: #f0f8ff;
+    /* Removed the background color so the gradient from the body will show */
 }
 
 .service-container {
