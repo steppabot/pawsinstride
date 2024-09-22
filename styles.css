@@ -335,9 +335,9 @@ iframe {
     cursor: pointer; /* Optional: Shows a pointer on hover to indicate it's clickable */
 }
 
-.phone-number:hover {
-    text-decoration: none; /* Ensures no underline appears on hover */
-    color: inherit; /* Ensures color stays the same on hover */
+.phone-number:hover, .phone-number:focus, .phone-number:active {
+    text-decoration: none; /* No underline on hover, focus, or active */
+    color: inherit; /* Keep the color the same on hover */
 }
 
 .form-group {
