@@ -329,6 +329,17 @@ iframe {
     margin-bottom: 10px;
 }
 
+.phone-number {
+    color: inherit; /* Inherits the color of the parent element */
+    text-decoration: none; /* Removes underline */
+    cursor: pointer; /* Optional: Shows a pointer on hover to indicate it's clickable */
+}
+
+.phone-number:hover {
+    text-decoration: none; /* Ensures no underline appears on hover */
+    color: inherit; /* Ensures color stays the same on hover */
+}
+
 .form-group {
     margin-bottom: 15px;
 }
