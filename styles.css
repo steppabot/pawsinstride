@@ -377,4 +377,19 @@ textarea {
     .hero-image img {
         width: 100%;
     }
+
+    .service-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .service-image {
+        width: 100%; /* Make the image fill the mobile width */
+        height: auto; /* Adjust height to maintain aspect ratio */
+    }
+
+    .service-image img {
+        width: 100%; /* Ensure image scales to 100% width on mobile */
+        height: auto; /* Keep aspect ratio */
+    }
 }
