@@ -222,7 +222,7 @@ nav {
 .services-section {
     display: flex;
     justify-content: center;
-    padding: 40px 0;
+    padding: 20px 0;
     /* Removed the background color so the gradient from the body will show */
 }
 
