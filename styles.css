@@ -291,6 +291,11 @@ nav {
     padding: 20px;
 }
 
+.contact-form h2 {
+    text-align: center; /* Center the heading */
+    color: #333; /* Existing color */
+    margin-bottom: 20px; /* Add some space below the heading */
+}
 .contact-form {
     background-color: #fff;
     padding: 20px;
