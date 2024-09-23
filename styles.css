@@ -287,6 +287,27 @@ nav {
     border-radius: 25px;
 }
 
+/* Schedule Calendar styling */
+
+#schedule-section {
+    text-align: center;
+    padding: 20px;
+}
+
+#back-to-home {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #2890df;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#back-to-home:hover {
+    background-color: #47cee6;
+}
+
 /* Contact form styling */
 .contact-section {
     text-align: left;
