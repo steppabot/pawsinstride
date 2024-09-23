@@ -17,6 +17,18 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     document.getElementById('content').innerHTML = xhr.responseText;
+
+                    // Re-bind the click event for the Calendly button if home.html is loaded
+                    if (page === 'home.html') {
+                        var scheduleButton = document.getElementById('schedule-button');
+                        if (scheduleButton) {
+                            scheduleButton.addEventListener('click', function(event) {
+                                event.preventDefault();
+                                Calendly.showPopupWidget('https://calendly.com/pawsinstridefrisco/meet-greet');
+                                return false;
+                            });
+                        }
+                    }
                 }
             };
             xhr.send();
