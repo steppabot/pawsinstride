@@ -8,6 +8,17 @@
     <link rel="stylesheet" href="styles.css">
 
     <script>
+        // Function to dynamically load content into the #content div
+        function loadPage(page) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', page, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    document.getElementById('content').innerHTML = xhr.responseText;
+                }
+            };
+            xhr.send();
+        }
 
         // Load the home page by default when the page loads
         window.onload = function() {
@@ -20,10 +31,6 @@
             menu.classList.toggle('open');
         }
     </script>
-    <!-- Calendly link widget begin -->
-    <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
-    <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
-    <!-- Calendly link widget end -->
 </head>
 <body>
 
