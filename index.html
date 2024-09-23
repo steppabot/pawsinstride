@@ -8,24 +8,6 @@
     <link rel="stylesheet" href="styles.css">
 
     <script>
-        // Function to dynamically load content into the #content div
-        function loadPage(page) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', page, true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    document.getElementById('content').innerHTML = xhr.responseText;
-
-                    // If schedule.html is loaded, attach the back-to-home functionality
-                    if (page === 'schedule.html') {
-                        document.getElementById('back-to-home').addEventListener('click', function() {
-                            loadPage('home.html'); // Load home.html when back button is clicked
-                        });
-                    }
-                }
-            };
-            xhr.send();
-        }
 
         // Load the home page by default when the page loads
         window.onload = function() {
@@ -37,14 +19,6 @@
             var menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
         }
-
-        // Event listener for the SCHEDULE A FREE MEET & GREET button in home.html
-        document.addEventListener('click', function(event) {
-            if (event.target && event.target.id === 'schedule-button') {
-                event.preventDefault();
-                loadPage('schedule.html'); // Load schedule.html when button is clicked
-            }
-        });
     </script>
 </head>
 <body>
