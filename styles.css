@@ -464,181 +464,92 @@ textarea {
     }
 }
 
-/* About Us Section */
-.about-section {
-    display: flex;
-    justify-content: center;
-    padding: 50px 0;
-}
-
-.about-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-    flex-wrap: wrap; /* Allows wrapping on smaller screens */
-}
-
-.about-image {
-    flex: 1;
-    max-width: 50%;
-    padding: 20px;
-}
-
-.about-image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 15px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.about-text {
-    flex: 1;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 15px;
-    text-align: left;
-}
-
-.about-text h2 {
-    color: #f3aa4c;
-    font-size: 32px;
-    margin-bottom: 20px;
-}
-
-.about-text p {
-    color: #333;
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-
-/* Services Section */
-.services-section {
-    display: flex;
-    justify-content: center;
-    padding: 50px 0;
-    background-color: #fff;
-}
-
-.services-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-    flex-wrap: wrap;
-}
-
-.services-text {
-    flex: 1;
-    padding: 20px;
-    text-align: left;
-}
-
-.services-text h2 {
-    color: #f3aa4c;
-    font-size: 32px;
-    margin-bottom: 20px;
-}
-
-.services-text p {
-    color: #333;
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-
-.services-image {
-    flex: 1;
-    max-width: 50%;
-    padding: 20px;
-}
-
-.services-image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 15px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Health Benefits Section */
+/* About Us Section Styling */
+.about-section, 
+.services-section, 
 .health-section {
     display: flex;
-    justify-content: center;
-    padding: 50px 0;
-}
-
-.health-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: stretch;
+    margin: 20px auto;
     max-width: 1200px;
-    margin: 0 auto;
-    flex-wrap: wrap;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    overflow: hidden; /* This ensures the image and text stay connected */
 }
 
-.health-image {
-    flex: 1;
-    max-width: 50%;
-    padding: 20px;
-}
-
-.health-image img {
-    max-width: 100%;
+/* Shared styling for image containers in these sections */
+.about-section img, 
+.services-section img, 
+.health-section img {
+    width: 50%;
     height: auto;
-    border-radius: 15px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    display: block;
+    object-fit: cover; 
 }
 
-.health-text {
-    flex: 1;
-    padding: 20px;
+/* Text container styles for all three sections */
+.about-section .text-container, 
+.services-section .text-container, 
+.health-section .text-container {
+    width: 50%;
     background-color: #fff;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 15px;
-    text-align: left;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.health-text h2 {
-    color: #f3aa4c;
+/* Specific styling for each section heading */
+.about-section h2, 
+.services-section h2, 
+.health-section h2 {
+    color: #f3aa4c; /* Custom color for titles */
     font-size: 32px;
     margin-bottom: 20px;
 }
 
-.health-text p {
-    color: #333;
+.about-section p, 
+.services-section p, 
+.health-section p {
     font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 15px;
+    color: #333;
 }
 
-/* Mobile adjustments */
+/* Ensure the image and text are directly connected (no gap) */
+.about-section img, 
+.services-section img, 
+.health-section img {
+    border-radius: 0;
+    margin: 0; /* Remove margin */
+}
+
+/* To handle the mobile responsiveness */
 @media (max-width: 768px) {
-    .about-container,
-    .services-container,
-    .health-container {
-        flex-direction: column;
+    .about-section, 
+    .services-section, 
+    .health-section {
+        flex-direction: column; /* Stack image and text vertically on mobile */
     }
 
-    .about-image,
-    .services-image,
-    .health-image {
-        max-width: 100%;
-        margin-bottom: 20px;
+    .about-section img, 
+    .services-section img, 
+    .health-section img,
+    .about-section .text-container, 
+    .services-section .text-container, 
+    .health-section .text-container {
+        width: 100%; /* Full width on mobile */
     }
 
-    .about-text,
-    .services-text,
-    .health-text {
-        text-align: center;
+    .about-section img, 
+    .services-section img, 
+    .health-section img {
+        height: auto;
+        border-radius: 0; /* No border radius on mobile */
     }
 
-    .about-text p,
-    .services-text p,
-    .health-text p {
-        text-align: justify;
+    .about-section .text-container, 
+    .services-section .text-container, 
+    .health-section .text-container {
+        padding: 20px;
     }
 }
