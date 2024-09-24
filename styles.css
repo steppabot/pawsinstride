@@ -463,3 +463,96 @@ textarea {
         height: auto; /* Keep aspect ratio */
     }
 }
+
+/* About Us Page Styles */
+
+/* Section styling */
+.about-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto 40px auto;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Alternating layout for image and text in each section */
+.about-section:nth-child(even) {
+    flex-direction: row-reverse; /* Switches image to the right for even sections */
+}
+
+/* Image styling */
+.about-image {
+    width: 50%;
+    max-width: 500px;
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+}
+
+/* Text container styling */
+.about-text {
+    flex: 1;
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.about-text h2 {
+    font-size: 32px;
+    color: #f3aa4c;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.about-text p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+/* Specific styling for the benefits lists in section 3 */
+.benefits-list {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.benefits-list h4 {
+    font-size: 18px;
+    color: #f3aa4c;
+    margin-bottom: 10px;
+}
+
+.benefits-list ul {
+    margin-left: 20px;
+}
+
+.benefits-list ul li {
+    list-style: disc;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .about-section {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .about-image {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .about-text {
+        padding: 0;
+    }
+}
