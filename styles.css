@@ -138,7 +138,7 @@ nav {
 /* Hero Section */
 .hero-section {
     background: none; /* Let the gradient background show through */
-    padding:  50px 0 20px 0;;
+    padding:  50px 0 20px 0; 
 }
 
 .hero-container {
@@ -210,7 +210,6 @@ nav {
     cursor: pointer;
     text-align: center;
     border: none;
-
 }
 
 .cta-button:hover,
@@ -273,195 +272,11 @@ nav {
     z-index: 2;
     pointer-events: none; /* Prevent text from being clickable */
     text-align: center;
-
 }
 
 .service-image a {
     display: block;
     text-decoration: none;
-}
-
-/* Contact form specific adjustments */
-.send-button {
-    width: 100%;
-    border-radius: 25px;
-}
-
-/* Schedule Calendar styling */
-
-#schedule-section {
-    text-align: center;
-    padding: 20px;
-}
-
-#back-to-home {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #2890df;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-#back-to-home:hover {
-    background-color: #47cee6;
-}
-
-/* Contact form styling */
-.contact-section {
-    text-align: left;
-    padding: 20px;
-}
-
-.contact-form h2 {
-    text-align: center; /* Center the heading */
-    color: #333; /* Existing color */
-    margin-bottom: 20px; /* Add some space below the heading */
-}
-.contact-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 600px;
-    margin: 20px auto;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.map-section {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 600px;
-    margin: 20px auto;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-iframe {
-    width: 100%;
-    height: 350px;
-    border: none;
-    border-radius: 10px;
-}
-
-.address-section {
-    margin-top: 20px;
-    font-size: 18px;
-    color: #333;
-    text-align: center;
-}
-
-.address-section h3 {
-    color: #f3aa4c;
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-.phone-number {
-    color: inherit; /* Inherits the color of the parent element */
-    text-decoration: none; /* Removes underline */
-    cursor: pointer; /* Optional: Shows a pointer on hover to indicate it's clickable */
-}
-
-.phone-number:hover, .phone-number:focus, .phone-number:active {
-    text-decoration: none; /* No underline on hover, focus, or active */
-    color: inherit; /* Keep the color the same on hover */
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    font-size: 16px;
-    margin-bottom: 5px;
-    text-align: left;
-
-}
-
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-textarea {
-    height: 150px;
-    resize: vertical;
-}
-
-/* Mobile specific styles */
-@media (max-width: 768px) {
-    .hero-container {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    /* Add white background to heading and subheading */
-    .hero-text-container h1,
-    .hero-text-container h3 {
-        background-color: #fff;
-        padding: 10px;
-        border-radius: 15px;
-    }
-
-    .hero-image img {
-        border-radius: 0; /* Remove border radius for seamless stacking */
-    }
-
-    .hero-text-container {
-        border-radius: 0; /* Ensure the text container touches the image */
-        margin-top: 0;
-    }
-
-    /* Move the heading above the image on mobile */
-    .hero-text-container h1 {
-        order: -1;
-    }
-
-.hero-text-container p {
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 0 0 15px 15px; /* Keep rounded corners at the bottom */
-}
-
-.cta-button {
-    display: block; /* Ensure it's visible */
-    margin: 20px auto; /* Center it with margin */
-    width: 80%; /* Make it wider for mobile users */
-    background-color: #f5ab40; /* Retain your original button color */
-    color: #fff;
-    padding: 15px 30px;
-    border-radius: 25px;
-    text-align: center;
-    text-decoration: none;
-}
-
-    .hero-text-container,
-    .hero-image img {
-        width: 100%;
-    }
-
-    .service-container {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .service-image {
-        width: 100%; /* Make the image fill the mobile width */
-        height: auto; /* Adjust height to maintain aspect ratio */
-    }
-
-    .service-image img {
-        width: 100%; /* Ensure image scales to 100% width on mobile */
-        height: auto; /* Keep aspect ratio */
-    }
 }
 
 /* About Us Page Styles */
@@ -538,4 +353,118 @@ textarea {
     .about-section .about-text-container {
         padding: 20px;
     }
+}
+
+/* Contact form specific adjustments */
+.send-button {
+    width: 100%;
+    border-radius: 25px;
+}
+
+/* Schedule Calendar styling */
+#schedule-section {
+    text-align: center;
+    padding: 20px;
+}
+
+#back-to-home {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #2890df;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#back-to-home:hover {
+    background-color: #47cee6;
+}
+
+/* Contact form styling */
+.contact-section {
+    text-align: left;
+    padding: 20px;
+}
+
+.contact-form h2 {
+    text-align: center; /* Center the heading */
+    color: #333; /* Existing color */
+    margin-bottom: 20px; /* Add some space below the heading */
+}
+
+.contact-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 20px auto;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.map-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 20px auto;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+iframe {
+    width: 100%;
+    height: 350px;
+    border: none;
+    border-radius: 10px;
+}
+
+.address-section {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+}
+
+.address-section h3 {
+    color: #f3aa4c;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.phone-number {
+    color: inherit; /* Inherits the color of the parent element */
+    text-decoration: none; /* Removes underline */
+    cursor: pointer; /* Optional: Shows a pointer on hover to indicate it's clickable */
+}
+
+.phone-number:hover, .phone-number:focus, .phone-number:active {
+    text-decoration: none; /* No underline on hover, focus, or active */
+    color: inherit; /* Keep the color the same on hover */
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+textarea {
+    height: 150px;
+    resize: vertical;
 }
