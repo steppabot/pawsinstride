@@ -217,68 +217,6 @@ nav {
     background-color: #ef602c; /* Hover color */
 }
 
-/* Service Section for Dog Walking and Pet Sitting */
-.services-section {
-    display: flex;
-    justify-content: center;
-    padding: 20px 0;
-    /* Removed the background color so the gradient from the body will show */
-}
-
-.service-container {
-    display: flex;
-    gap: 20px;
-}
-
-.service-image {
-    position: relative;
-    width: 300px;
-    height: 300px;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out;
-}
-
-.service-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.service-image:hover {
-    transform: scale(1.05);
-}
-
-.overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.3); /* 30% opacity */
-    z-index: 1;
-}
-
-.service-image h2 {
-    position: absolute;
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    z-index: 2;
-    pointer-events: none; /* Prevent text from being clickable */
-    text-align: center;
-}
-
-.service-image a {
-    display: block;
-    text-decoration: none;
-}
-
 /* About Us Page Styles */
 
 /* Section Styling */
@@ -480,7 +418,6 @@ textarea {
     resize: vertical;
 }
 
-
 /* Services Page Styles */
 
 /* Section Styling */
@@ -489,14 +426,17 @@ textarea {
     align-items: stretch;
     margin: 20px auto;
     max-width: 1200px;
-    border-radius: 15px;
+    border-radius: 15px; /* Add rounded corners */
     overflow: hidden;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff; /* Make the background white to match the text area */
 }
 
 /* Image Styling */
 .services-section .services-image {
     width: 50%;
+    border-radius: 15px 0 0 15px; /* Round the left side of the image */
+    overflow: hidden;
 }
 
 .services-section .services-image img {
@@ -509,11 +449,12 @@ textarea {
 /* Text Container Styling */
 .services-section .services-text-container {
     width: 50%;
-    background-color: #fff;
     padding: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    border-radius: 0 15px 15px 0; /* Round the right side of the text container */
+    background-color: #fff;
 }
 
 /* Headings and Paragraphs */
@@ -530,16 +471,28 @@ textarea {
     margin-bottom: 15px;
 }
 
+/* Health Benefits Lists */
+.services-section .services-text-container ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+.services-section .services-text-container ul li {
+    margin-bottom: 10px;
+}
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .services-section {
         flex-direction: column;
+        border-radius: 15px; /* Ensure rounded corners on mobile */
     }
 
     .services-section .services-image,
     .services-section .services-text-container {
         width: 100%;
+        border-radius: 15px; /* Rounded corners on mobile */
     }
 
     .services-section .services-text-container {
