@@ -492,7 +492,7 @@ textarea {
     max-width: 1200px;
     border-radius: 15px; /* Rounded corners for the entire container */
     overflow: hidden; /* Ensure no gaps at the borders */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Apply shadow to the whole section */
 }
 
 /* Image Styling */
@@ -538,11 +538,7 @@ textarea {
 @media (max-width: 768px) {
     .services-section {
         flex-direction: column;
-    }
-
-    .services-section .services-image,
-    .services-section .services-text-container {
-        width: 100%;
+        box-shadow: none; /* Remove shadow on mobile */
     }
 
     .services-section .services-image {
