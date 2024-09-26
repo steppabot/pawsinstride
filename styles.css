@@ -481,13 +481,13 @@ textarea {
     resize: vertical;
 }
 
-/* Services Page Styles */
+/* Services Page Styles (Cloning from about-section) */
 
 /* Section Styling */
 .services-section {
     display: flex;
     align-items: stretch;
-    margin: 0 auto; /* Remove top and bottom margin to eliminate the gaps */
+    margin: 20px auto;
     max-width: 1200px;
     border-radius: 15px;
     overflow: hidden;
@@ -497,7 +497,6 @@ textarea {
 /* Image Styling */
 .services-section .services-image {
     width: 50%;
-    margin: 0; /* Ensure no margins are added */
 }
 
 .services-section .services-image img {
@@ -505,7 +504,6 @@ textarea {
     height: 100%;
     object-fit: cover;
     display: block;
-    border-radius: 15px 0 0 15px; /* Apply rounded corners only on the left side */
 }
 
 /* Text Container Styling */
@@ -516,8 +514,6 @@ textarea {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-radius: 0 15px 15px 0; /* Rounded corners only on the right side */
-    margin: 0; /* Remove any margin to fit tightly with the image */
 }
 
 /* Headings and Paragraphs */
@@ -547,10 +543,5 @@ textarea {
 
     .services-section .services-text-container {
         padding: 20px;
-        border-radius: 0 0 15px 15px; /* Ensure rounded corners on the bottom for mobile */
-    }
-
-    .services-section .services-image img {
-        border-radius: 15px 15px 0 0; /* Rounded top corners for mobile */
     }
 }
