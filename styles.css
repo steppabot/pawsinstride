@@ -217,83 +217,66 @@ nav {
     background-color: #ef602c; /* Hover color */
 }
 
-/* Services Page: Ensure div and image sizes match, and the text follows the About Us style */
+/* Service Section for Dog Walking and Pet Sitting */
 .services-section {
     display: flex;
-    align-items: stretch;
-    margin: 20px auto;
-    max-width: 1200px;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff; /* White background for services */
-}
-
-.services-section .service-image {
-    flex: 0 0 525px; /* Image width to match the About Us section */
-    height: auto;
-}
-
-.services-section .service-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.services-section .service-text {
-    padding: 40px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     justify-content: center;
-    text-align: left;
-    color: #333;
-    line-height: 1.6;
+    padding: 20px 0;
+    /* Removed the background color so the gradient from the body will show */
 }
 
-.services-section .service-text h2 {
-    color: #f3aa4c;
-    font-size: 32px;
-    margin-bottom: 20px;
-}
-
-.services-section .service-text p,
-.services-section .service-text ul {
-    font-size: 16px;
-}
-
-/* Home Page Services Section (Mobile Stacking) */
-.home-services-container {
+.service-container {
     display: flex;
-    justify-content: space-around;
     gap: 20px;
 }
 
-.home-services-container .service-box {
+.service-image {
+    position: relative;
     width: 300px;
-    height: auto;
+    height: 300px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.service-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.service-image:hover {
+    transform: scale(1.05);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3); /* 30% opacity */
+    z-index: 1;
+}
+
+.service-image h2 {
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    z-index: 2;
+    pointer-events: none; /* Prevent text from being clickable */
     text-align: center;
 }
 
-.home-services-container img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-radius: 15px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Mobile Responsiveness for Home Services */
-@media (max-width: 768px) {
-    .home-services-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .home-services-container .service-box {
-        width: 90%; /* Stack images with full width */
-    }
+.service-image a {
+    display: block;
+    text-decoration: none;
 }
 
 /* About Us Page Styles */
@@ -354,6 +337,22 @@ nav {
 
 .about-section .about-text-container ul li {
     margin-bottom: 10px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .about-section {
+        flex-direction: column;
+    }
+
+    .about-section .about-image,
+    .about-section .about-text-container {
+        width: 100%;
+    }
+
+    .about-section .about-text-container {
+        padding: 20px;
+    }
 }
 
 /* Contact form specific adjustments */
