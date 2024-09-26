@@ -490,16 +490,17 @@ textarea {
     align-items: stretch;
     margin: 20px auto;
     max-width: 1200px;
-    border-radius: 15px; /* Rounded corners for the entire container */
-    overflow: hidden; /* Ensure no gaps at the borders */
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Apply shadow to the whole section */
+    border-radius: 15px; /* Rounded corners for the whole section */
+    overflow: hidden;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15); /* Shadow applied to the entire section */
+    width: 100%; /* Make sure the section takes up full width */
 }
 
 /* Image Styling */
 .services-section .services-image {
-    width: 50%; /* Same width as the text container */
-    border-radius: 15px 0 0 15px; /* Round left side corners only */
-    overflow: hidden; /* Make sure image stays inside rounded corners */
+    width: 50%; /* Image takes up half of the section */
+    border-radius: 15px 0 0 15px; /* Rounded corners only on the left */
+    overflow: hidden; /* Ensure the image stays within the rounded corners */
 }
 
 .services-section .services-image img {
@@ -511,10 +512,10 @@ textarea {
 
 /* Text Container Styling */
 .services-section .services-text-container {
-    width: 50%;
+    width: 50%; /* Text container takes up the other half */
     background-color: #fff;
     padding: 40px;
-    border-radius: 0 15px 15px 0; /* Round right side corners only */
+    border-radius: 0 15px 15px 0; /* Rounded corners only on the right */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -537,16 +538,19 @@ textarea {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .services-section {
-        flex-direction: column;
-        box-shadow: none; /* Remove shadow on mobile */
+        flex-direction: column; /* Stack image and text */
+        box-shadow: none; /* Remove shadow for mobile */
+        width: 100%; /* Ensure full width on mobile */
     }
 
     .services-section .services-image {
-        border-radius: 15px 15px 0 0; /* Round top corners on mobile */
+        width: 100%; /* Full width for image on mobile */
+        border-radius: 15px 15px 0 0; /* Rounded corners on the top */
     }
 
     .services-section .services-text-container {
-        border-radius: 0 0 15px 15px; /* Round bottom corners on mobile */
+        width: 100%; /* Full width for text on mobile */
+        border-radius: 0 0 15px 15px; /* Rounded corners on the bottom */
         padding: 20px;
     }
 }
