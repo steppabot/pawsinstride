@@ -402,17 +402,6 @@ nav {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.email-link {
-    color: #f3aa4c; /* Use the yellow color used elsewhere */
-    text-decoration: none; /* Remove underline */
-    font-weight: bold; /* Make it bold to match the style */
-}
-
-.email-link:hover {
-    text-decoration: none; /* Ensure no underline on hover */
-    color: #ef602c; /* Optional: change to a hover color */
-}
-
 .map-section {
     background-color: #fff;
     padding: 20px;
@@ -479,6 +468,8 @@ textarea {
     height: 150px;
     resize: vertical;
 }
+
+
 
 /* Services Page Styles */
 
