@@ -504,7 +504,7 @@ textarea {
     height: 100%;
     object-fit: cover;
     display: block;
-    border-radius: 15px; /* Apply rounded corners to service images */
+    border-radius: 15px 0 0 15px; /* Apply rounded corners only on the left side */
 }
 
 /* Text Container Styling */
@@ -515,7 +515,7 @@ textarea {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-radius: 0 15px 15px 0; /* Right side rounded corners */
+    border-radius: 0 15px 15px 0; /* Rounded corners only on the right side */
 }
 
 /* Headings and Paragraphs */
@@ -536,7 +536,6 @@ textarea {
 @media (max-width: 768px) {
     .services-section {
         flex-direction: column;
-        border-radius: 15px; /* Entire section rounded on mobile */
     }
 
     .services-section .services-image,
@@ -544,19 +543,12 @@ textarea {
         width: 100%;
     }
 
-    .services-section .services-image img {
-        border-radius: 15px 15px 0 0; /* Top rounded corners on mobile */
-    }
-
     .services-section .services-text-container {
         padding: 20px;
-        border-radius: 0 0 15px 15px; /* Bottom rounded corners on mobile */
+        border-radius: 0 0 15px 15px; /* Ensure rounded corners on the bottom for mobile */
     }
-}
 
-@media (max-width: 768px) {
-    .service-container {
-        flex-direction: column;
-        align-items: center;
+    .services-section .services-image img {
+        border-radius: 15px 15px 0 0; /* Rounded top corners for mobile */
     }
 }
