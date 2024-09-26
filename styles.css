@@ -491,34 +491,32 @@ textarea {
     max-width: 1200px;
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15); /* Correct shadow for both image and div */
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15); /* Shadow applied to the whole section */
 }
 
 /* Image Styling */
 .services-section .services-image {
-    width: 50%;
-    height: auto; /* Ensure image height aligns with the text */
+    flex: 1;
     border-radius: 15px 0 0 15px; /* Rounded corners only on the left */
     overflow: hidden;
-    display: block; /* Ensure the image fills the container */
 }
 
 .services-section .services-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block; /* Ensure the image fully fills the container */
 }
 
 /* Text Container Styling */
 .services-section .services-text-container {
-    width: 50%;
+    flex: 1;
     background-color: #fff;
     padding: 40px;
     border-radius: 0 15px 15px 0; /* Rounded corners only on the right */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 100%; /* Ensure the container aligns with the image */
 }
 
 /* Headings and Paragraphs */
@@ -539,21 +537,19 @@ textarea {
 @media (max-width: 768px) {
     .services-section {
         flex-direction: column;
-        width: 100%; /* Full width for mobile */
-        height: auto; /* Adjust height for stacking */
-        border-radius: 15px; /* Maintain full rounded corners on mobile */
+        width: 100%;
+        border-radius: 15px; /* Rounded corners for the whole section on mobile */
     }
 
     .services-section .services-image {
         width: 100%;
-        height: auto; /* Adjust height for stacking */
+        height: auto; /* Let the image adjust to its natural height */
         border-radius: 15px 15px 0 0; /* Rounded corners on the top */
     }
 
     .services-section .services-text-container {
         width: 100%;
-        height: auto; /* Adjust height to fit content */
-        border-radius: 0 0 15px 15px; /* Rounded corners on the bottom */
         padding: 20px;
+        border-radius: 0 0 15px 15px; /* Rounded corners on the bottom */
     }
 }
