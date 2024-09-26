@@ -470,7 +470,6 @@ textarea {
 }
 
 
-
 /* Services Page Styles */
 
 /* Section Styling */
@@ -479,17 +478,14 @@ textarea {
     align-items: stretch;
     margin: 20px auto;
     max-width: 1200px;
-    border-radius: 15px; /* Add rounded corners */
+    border-radius: 15px;
     overflow: hidden;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff; /* Make the background white to match the text area */
 }
 
 /* Image Styling */
 .services-section .services-image {
     width: 50%;
-    border-radius: 15px 0 0 15px; /* Round the left side of the image */
-    overflow: hidden;
 }
 
 .services-section .services-image img {
@@ -502,12 +498,11 @@ textarea {
 /* Text Container Styling */
 .services-section .services-text-container {
     width: 50%;
+    background-color: #fff;
     padding: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-radius: 0 15px 15px 0; /* Round the right side of the text container */
-    background-color: #fff;
 }
 
 /* Headings and Paragraphs */
@@ -524,28 +519,16 @@ textarea {
     margin-bottom: 15px;
 }
 
-/* Health Benefits Lists */
-.services-section .services-text-container ul {
-    list-style-type: disc;
-    margin-left: 20px;
-    margin-bottom: 20px;
-}
-
-.services-section .services-text-container ul li {
-    margin-bottom: 10px;
-}
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .services-section {
         flex-direction: column;
-        border-radius: 15px; /* Ensure rounded corners on mobile */
     }
 
     .services-section .services-image,
     .services-section .services-text-container {
         width: 100%;
-        border-radius: 15px; /* Rounded corners on mobile */
     }
 
     .services-section .services-text-container {
