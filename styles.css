@@ -537,7 +537,7 @@ textarea {
     flex: 1;
     background-color: #fff;
     padding: 40px;
-    border-radius: 0 15px 15px 0; /* Rounded corners only on the right */
+    border-radius: 0 15px 15px 15; /* Rounded corners only on the right */
     display: flex;
     flex-direction: column;
     justify-content: center;
