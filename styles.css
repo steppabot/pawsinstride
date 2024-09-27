@@ -655,3 +655,19 @@ footer {
 #backToTop:hover {
     background-color: #2890df;
 }
+
+.social-media-icons {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.social-media-icons a {
+    margin: 0 10px;
+    color: #333; /* Change this to your preferred icon color */
+    font-size: 24px;
+    text-decoration: none;
+}
+
+.social-media-icons a:hover {
+    color: #47cee6; /* Optional hover color for icons */
+}
