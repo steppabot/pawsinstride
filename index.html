@@ -85,6 +85,26 @@
             menu.classList.toggle('open');
         }
     </script>
+    
+    <script>
+        // Show the button when the user scrolls down 200px
+        window.onscroll = function() {scrollFunction()};
+    
+        function scrollFunction() {
+            const backToTopButton = document.getElementById("backToTop");
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopButton.style.display = "block";
+            } else {
+                backToTopButton.style.display = "none";
+            }
+        }
+    
+        // Scroll to the top of the document
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+    
     <!-- Calendly Embed Script -->
     <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
     <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
@@ -133,6 +153,9 @@
                 <p>Frisco, TX | Phone: +1-214-736-7923</p>
             </div>
         </div>
-    </footer>
+        </footer>
+    
+    <!-- Back to Top Button -->
+    <button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
 </body>
 </html>
