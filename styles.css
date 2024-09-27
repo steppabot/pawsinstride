@@ -500,7 +500,7 @@ textarea {
 .services-offered-section {
     display: flex;
     align-items: stretch;
-    margin: 0 auto;
+    margin: 40px auto; /* Adds spacing between sections */
     max-width: 1200px;
     border-radius: 15px;
     overflow: hidden;
@@ -510,6 +510,10 @@ textarea {
 /* For the Drop-In Visits section with image on the right */
 .services-offered-section.reverse {
     flex-direction: row-reverse; /* This ensures the image is on the right and text on the left */
+}
+
+.services-offered-image {
+    flex: 1;
 }
 
 .services-offered-image img {
@@ -563,18 +567,5 @@ textarea {
         width: 100%;
         padding: 20px;
         border-radius: 0 0 15px 15px; /* Rounded corners on the bottom */
-    }
-}
-
-/* Image Styling */
-.services-offered-image {
-    flex: 1;
-    border-radius: 15px 0 0 15px; /* Rounded corners only on the left */
-    overflow: hidden;
-}
-
-@media (max-width: 768px) {
-    .services-offered-section.reverse {
-        flex-direction: column; /* Stack on top for mobile */
     }
 }
