@@ -305,6 +305,11 @@ nav {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* For the Drop-In Visits section with image on the right */
+.about-section.reverse {
+    flex-direction: row-reverse; /* This ensures the image is on the right and text on the left */
+}
+
 /* Image Styling */
 .about-section .about-image {
     width: 50%;
@@ -355,6 +360,10 @@ nav {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .about-section {
+        flex-direction: column;
+    }
+
+    .about-section.reverse {
         flex-direction: column;
     }
 
