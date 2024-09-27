@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paws in Stride | Frisco Dog Walking Service</title>
     <meta name="description" content="Looking for dog walking services in Frisco, Texas? Paws in Stride provides reliable and personalized dog walking and pet sitting services tailored to your pet's needs.">
+    
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -51,12 +52,20 @@
 
     <script>
         // Function to dynamically load content into the #content div
-        function loadPage(page) {
+        function loadPage(page, section = null) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', page, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     document.getElementById('content').innerHTML = xhr.responseText;
+
+                    // If a section hash is provided, scroll to that section after loading
+                    if (section) {
+                        const targetElement = document.getElementById(section);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
                 }
             };
             xhr.send();
