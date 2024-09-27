@@ -557,6 +557,13 @@ textarea {
         box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15); /* Ensure shadow remains tight */
     }
 
+    .services-offered-section.reverse {
+        flex-direction: column;
+        width: 100%;
+        border-radius: 15px; /* Rounded corners for the whole section on mobile */
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15); /* Ensure shadow remains tight */
+    }
+
     .services-offered-image {
         width: 100%;
         height: auto; /* Let the image adjust to its natural height */
