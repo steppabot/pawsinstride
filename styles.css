@@ -626,6 +626,16 @@ footer {
     color: #666;
 }
 
+.footer-info a {
+    color: inherit; /* Inherits the default text color of the parent */
+    text-decoration: none; /* Removes the underline */
+}
+
+.footer-info a:hover {
+    color: #47cee6; /* Optional: Change color on hover */
+    text-decoration: none; /* Ensure no underline on hover */
+}
+
 #backToTop {
     display: none; /* Hidden by default */
     position: fixed;
