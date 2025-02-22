@@ -409,6 +409,19 @@ nav {
     padding: 20px;
 }
 
+/* Ensure uniform placeholder text styling */
+::placeholder {
+    font-family: inherit;
+    font-size: 14px;
+    color: #888; /* Adjust color as needed */
+    opacity: 1; /* Ensure full visibility */
+}
+
+/* Specifically for the textarea */
+textarea::placeholder {
+    font-size: 14px;
+}
+
 .contact-form h2 {
     text-align: center; /* Center the heading */
     color: #333; /* Existing color */
