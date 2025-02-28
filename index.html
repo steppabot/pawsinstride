@@ -111,6 +111,12 @@
     <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 </head>
 <body>
+    <!-- Notification Bar -->
+    <div id="notification-bar">
+        <p>🎉 Claim your <strong>15% OFF</strong> Pet Sitting or VIP Pet Boarding for first-time customers when you book 3+ days! 🎉</p>
+        <p class="banner-phone">📞 Call Now: <a href="tel:2147367923">214-736-7923</a></p>
+        <span class="close-btn" onclick="closeNotificationBar()">✖</span>
+    </div>
 
     <!-- Logo and Navigation Menu -->
     <header>
@@ -176,16 +182,16 @@
     
     <!-- Back to Top Button -->
     <button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
-
+    
     <script>
-        function closeBanner() {
-            document.getElementById("headerBanner").style.display = "none";
-            localStorage.setItem("bannerClosed", "true"); // Keeps it hidden even if user navigates pages
+        function closeNotificationBar() {
+            document.getElementById("notification-bar").style.display = "none";
+            localStorage.setItem("notificationClosed", "true"); // Save preference
         }
     
-        document.addEventListener("DOMContentLoaded", function() {
-            if (localStorage.getItem("bannerClosed") === "true") {
-                document.getElementById("headerBanner").style.display = "none";
+        document.addEventListener("DOMContentLoaded", function () {
+            if (localStorage.getItem("notificationClosed") === "true") {
+                document.getElementById("notification-bar").style.display = "none";
             }
         });
     </script>
