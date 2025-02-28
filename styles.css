@@ -684,3 +684,49 @@ footer {
 .social-media-icons a:hover {
     color: #f5ab40; /* Optional hover color for icons */
 }
+
+.header-banner {
+    background-color: #f5ab40;
+    color: #333;
+    text-align: center;
+    padding: 15px 20px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    position: relative;
+}
+
+.banner-text {
+    margin: 0;
+    padding: 5px 0;
+}
+
+.banner-phone {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.banner-phone a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.banner-phone a:hover {
+    text-decoration: underline;
+}
+
+/* Close Button */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.close-btn:hover {
+    color: #000;
+}
