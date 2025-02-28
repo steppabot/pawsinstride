@@ -689,7 +689,7 @@ footer {
     background-color: #f5ab40;
     color: #fff;
     text-align: center;
-    padding: 10px 15px;
+    padding: 10px 40px 10px 15px; /* Extra right padding for close button spacing */
     font-family: Arial, sans-serif;
     font-weight: bold;
     font-size: 1rem;
@@ -704,11 +704,12 @@ footer {
     flex-wrap: wrap;
     gap: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensures close button stays positioned properly */
 }
 
 /* Push the header down so it doesn’t get overlapped */
-body {
-    padding-top: 50px; /* Adjust based on notification bar height */
+header {
+    margin-top: 50px; /* Adjust based on notification bar height */
 }
 
 #notification-bar p {
@@ -729,7 +730,7 @@ body {
 /* Close Button */
 .close-btn {
     position: absolute;
-    right: 15px;
+    right: 10px; /* Moves it further inside from the right edge */
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
@@ -738,8 +739,15 @@ body {
     color: #fff;
     background: none;
     border: none;
+    padding: 5px 10px;
+    line-height: 1;
 }
 
-.close-btn:hover {
-    color: #000;
+/* Adjust Close Button for Smaller Screens */
+@media (max-width: 600px) {
+    .close-btn {
+        right: 5px; /* Bring it slightly inward on mobile */
+        font-size: 16px; /* Slightly smaller size */
+        padding: 5px;
+    }
 }
