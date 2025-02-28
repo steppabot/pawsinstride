@@ -687,7 +687,7 @@ footer {
 
 #notification-bar {
     background-color: #f5ab40;
-    color: #333;
+    color: #fff;
     text-align: center;
     padding: 10px 15px;
     font-family: Arial, sans-serif;
@@ -706,13 +706,18 @@ footer {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Push the header down so it doesn’t get overlapped */
+body {
+    padding-top: 50px; /* Adjust based on notification bar height */
+}
+
 #notification-bar p {
     margin: 0;
     padding: 0;
 }
 
 .banner-phone a {
-    color: #333;
+    color: #fff;
     text-decoration: none;
     font-weight: bold;
 }
@@ -730,7 +735,7 @@ footer {
     cursor: pointer;
     font-size: 18px;
     font-weight: bold;
-    color: #333;
+    color: #fff;
     background: none;
     border: none;
 }
