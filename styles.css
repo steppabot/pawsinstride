@@ -685,25 +685,30 @@ footer {
     color: #f5ab40; /* Optional hover color for icons */
 }
 
-.header-banner {
+#notification-bar {
     background-color: #f5ab40;
     color: #333;
     text-align: center;
-    padding: 15px 20px;
+    padding: 10px 15px;
     font-family: Arial, sans-serif;
     font-weight: bold;
-    font-size: 1.2rem;
-    position: relative;
+    font-size: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.banner-text {
+#notification-bar p {
     margin: 0;
-    padding: 5px 0;
-}
-
-.banner-phone {
-    margin: 0;
-    font-size: 1.1rem;
+    padding: 0;
 }
 
 .banner-phone a {
@@ -719,12 +724,15 @@ footer {
 /* Close Button */
 .close-btn {
     position: absolute;
-    top: 10px;
     right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
     font-size: 18px;
     font-weight: bold;
     color: #333;
+    background: none;
+    border: none;
 }
 
 .close-btn:hover {
