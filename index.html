@@ -190,8 +190,17 @@
             <div class="elfsight-app-f7b18edf-ceba-4a81-9f18-846d5c74e0cf" data-elfsight-app-lazy></div>
         </div>
     </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          let elfsightBranding = document.querySelector('a[href*="elfsight.com/instagram-feed-instashow"]');
+          if (elfsightBranding) {
+              elfsightBranding.remove(); // Removes the Elfsight branding button
+          }
+      });
+    </script>
         
-            
+        
     <!-- Footer Section -->
     <footer>
         <div class="footer-container">
