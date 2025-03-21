@@ -751,3 +751,10 @@ header {
         padding: 5px;
     }
 }
+
+.elfsight-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem auto;
+}
