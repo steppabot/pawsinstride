@@ -193,13 +193,15 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-          let elfsightBranding = document.querySelector('a[href*="elfsight.com/instagram-feed-instashow"]');
-          if (elfsightBranding) {
-              elfsightBranding.remove(); // Removes the Elfsight branding button
-          }
+          let interval = setInterval(function () {
+              let elfsightBranding = document.querySelector('a[href*="elfsight.com/instagram-feed-instashow"]');
+              if (elfsightBranding) {
+                  elfsightBranding.remove(); // Remove the branding button
+                  clearInterval(interval); // Stop checking once removed
+              }
+          }, 500); // Check every 500ms (0.5 seconds)
       });
     </script>
-        
         
     <!-- Footer Section -->
     <footer>
