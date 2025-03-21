@@ -758,7 +758,7 @@ header {
     align-items: center; /* Aligns content vertically */
     max-width: 1200px; /* Match hero container width */
     margin: 0 auto; /* Centering */
-    padding: 5px;
+    padding: 15px;
 }
 
 .elfsight-wrapper {
