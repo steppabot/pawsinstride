@@ -758,14 +758,24 @@ header {
     align-items: center; /* Aligns content vertically */
     max-width: 1200px; /* Match hero container width */
     margin: 0 auto; /* Centering */
-    padding: 20px;
+    padding: 10px;
 }
 
 .elfsight-wrapper {
     background-color: #fff;
     padding: 40px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 15px; /* Rounded corners */
-    width: 100%; /* Full width of the hero container */
+    border-radius: 15px;
+    width: 100%; /* Ensure it takes full width */
     text-align: center;
+    display: flex;
+    justify-content: center; /* Centers the widget horizontally */
+    align-items: center; /* Centers the widget vertically */
 }
+
+.elfsight-app {
+    max-width: 100%;
+    width: auto; /* Ensure it doesn’t stretch too much */
+}
+
+
