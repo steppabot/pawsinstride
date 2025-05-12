@@ -778,25 +778,31 @@ header {
     width: auto; /* Ensure it doesn’t stretch too much */
 }
 
-.table-wrapper {
-  overflow-x: auto;
-  max-width: 100%;
-  margin-bottom: 1.5em;
-}
 
 .compact-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
+  text-align: center; /* centers all content */
 }
 
 .compact-table th,
 .compact-table td {
   border: 1px solid #ccc;
   padding: 8px 12px;
-  text-align: left;
+  text-align: center; /* ensure all cells are centered */
 }
 
 .compact-table thead {
   background-color: #f9f9f9;
 }
+
+.table-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+  margin-bottom: 1.5em;
+}
+
+
+
+
