@@ -1,0 +1,184 @@
+<section class="fresh-meals-page">
+    <div class="fresh-meals-hero">
+        <div class="fresh-meals-hero-text">
+            <span class="fresh-tag">Fresh Meals for Dogs</span>
+            <h1>Freshly Cooked Dog Meals Delivered Weekly</h1>
+            <p>
+                Introducing fresh dog meals from Paws in Stride — made with real ingredients,
+                cooked weekly, and delivered locally. No mystery fillers. No frozen shipping boxes.
+                Just simple, fresh meals prepared with your dog in mind.
+            </p>
+
+            <div class="fresh-meals-buttons">
+                <a href="#meal-intake-form" class="fresh-btn primary-btn">Start My Dog’s Plan</a>
+                <a href="#meal-menu-preview" class="fresh-btn secondary-btn">View Sample Menu</a>
+            </div>
+
+            <ul class="fresh-meals-highlights">
+                <li><i class="fas fa-check-circle"></i> Cooked fresh weekly</li>
+                <li><i class="fas fa-check-circle"></i> Delivered locally</li>
+                <li><i class="fas fa-check-circle"></i> Portion guidance by dog size</li>
+                <li><i class="fas fa-check-circle"></i> Allergy-aware meal planning</li>
+            </ul>
+        </div>
+
+        <div class="fresh-meals-hero-image">
+            <img src="dog-meal-hero.jpg" alt="Fresh dog meal prepared by Paws in Stride">
+        </div>
+    </div>
+
+    <div class="fresh-meals-section intro-card">
+        <h2>Why Paws in Stride Fresh Meals?</h2>
+        <p>
+            We already care for dogs across Frisco through walking, pet sitting, and boarding.
+            Now we’re bringing that same trusted care into the kitchen with freshly prepared meals
+            made for local dogs.
+        </p>
+    </div>
+
+    <div class="fresh-meals-section" id="meal-menu-preview">
+        <h2>Sample Menu</h2>
+        <div class="fresh-menu-grid">
+            <div class="fresh-menu-card">
+                <h3>Chicken & Rice Bowl</h3>
+                <p>Chicken breast, white rice, carrots, and green beans.</p>
+            </div>
+
+            <div class="fresh-menu-card">
+                <h3>Ground Turkey & Sweet Potato</h3>
+                <p>Ground turkey, sweet potato, peas, and green beans.</p>
+            </div>
+
+            <div class="fresh-menu-card">
+                <h3>Ground Beef & Veggie Bowl</h3>
+                <p>Lean ground beef, rice, carrots, and peas.</p>
+            </div>
+
+            <div class="fresh-menu-card">
+                <h3>Ground Chicken Harvest Bowl</h3>
+                <p>Ground chicken, rice, pumpkin, and green beans.</p>
+            </div>
+
+            <div class="fresh-menu-card premium-card">
+                <h3>Premium Add-On Proteins</h3>
+                <p>Occasional egg or salmon rotations may be offered based on availability.</p>
+            </div>
+
+            <div class="fresh-menu-card">
+                <h3>Fruit Add-Ins</h3>
+                <p>Blueberries may be included in select meals in small dog-safe portions.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="fresh-meals-section">
+        <h2>How It Works</h2>
+        <div class="fresh-steps-grid">
+            <div class="fresh-step-card">
+                <span>1</span>
+                <h3>Tell Us About Your Dog</h3>
+                <p>Submit your dog’s weight, age, and allergy info through the form below.</p>
+            </div>
+
+            <div class="fresh-step-card">
+                <span>2</span>
+                <h3>We Review the Best Fit</h3>
+                <p>We’ll recommend a meal plan based on your dog’s size and needs.</p>
+            </div>
+
+            <div class="fresh-step-card">
+                <span>3</span>
+                <h3>Fresh Meals Delivered Weekly</h3>
+                <p>Your dog’s meals are prepared fresh and delivered locally to your door.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="fresh-meals-section pricing-section">
+        <h2>Starting Pricing</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Small Dogs</h3>
+                <p class="price">Starting at $70/week</p>
+                <p>For smaller dogs with lighter daily portions.</p>
+            </div>
+
+            <div class="pricing-card">
+                <h3>Custom Plans</h3>
+                <p class="price">Quoted by Size</p>
+                <p>
+                    Medium and large dogs require different portions, so pricing varies by weight,
+                    activity level, and dietary needs.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="fresh-meals-section form-section" id="meal-intake-form">
+        <h2>Start Your Dog’s Meal Plan</h2>
+        <p class="form-intro">
+            Fill out the form below and we’ll reach out with a recommended plan and next steps.
+        </p>
+
+        <form class="fresh-meals-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="owner-name">Owner Name</label>
+                    <input type="text" id="owner-name" name="owner_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone-number">Phone Number</label>
+                    <input type="tel" id="phone-number" name="phone_number" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email-address">Email Address</label>
+                    <input type="email" id="email-address" name="email_address" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dog-name">Dog Name</label>
+                    <input type="text" id="dog-name" name="dog_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dog-weight">Dog Weight (lbs)</label>
+                    <input type="number" id="dog-weight" name="dog_weight" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dog-age">Dog Age</label>
+                    <input type="text" id="dog-age" name="dog_age">
+                </div>
+
+                <div class="form-group">
+                    <label for="activity-level">Activity Level</label>
+                    <select id="activity-level" name="activity_level">
+                        <option value="">Select one</option>
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="current-food">Current Food / Feeding Routine</label>
+                    <input type="text" id="current-food" name="current_food">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="allergies">Any Allergies or Ingredients to Avoid?</label>
+                    <textarea id="allergies" name="allergies" rows="4" placeholder="Example: chicken allergy, sensitive stomach, grain-free, etc."></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="notes">Anything Else We Should Know?</label>
+                    <textarea id="notes" name="notes" rows="4" placeholder="Tell us about your dog’s preferences, sensitivities, or special needs."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="fresh-form-btn">Request My Dog’s Meal Plan</button>
+        </form>
+    </div>
+</section>
