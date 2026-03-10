@@ -804,5 +804,324 @@ header {
 }
 
 
+/* =========================
+   FRESH MEALS PAGE
+========================= */
+
+.fresh-meals-page {
+    max-width: 1200px;
+    margin: 40px auto 60px;
+    padding: 0 20px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.fresh-meals-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 50px 40px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+    margin-bottom: 35px;
+}
+
+.fresh-meals-hero-text {
+    flex: 1;
+}
+
+.fresh-tag {
+    display: inline-block;
+    background: #e9f8f4;
+    color: #1e8e6b;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+}
+
+.fresh-meals-hero-text h1 {
+    font-size: 2.5rem;
+    line-height: 1.15;
+    color: #222;
+    margin-bottom: 16px;
+}
+
+.fresh-meals-hero-text p {
+    font-size: 1.05rem;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 24px;
+}
+
+.fresh-meals-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.fresh-btn {
+    display: inline-block;
+    text-decoration: none;
+    padding: 14px 22px;
+    border-radius: 999px;
+    font-weight: 700;
+    transition: 0.25s ease;
+}
+
+.primary-btn {
+    background: #2890df;
+    color: #fff;
+}
+
+.primary-btn:hover {
+    background: #1f7bc2;
+}
+
+.secondary-btn {
+    background: #f4f7fb;
+    color: #2890df;
+    border: 1px solid #d8e4f0;
+}
+
+.secondary-btn:hover {
+    background: #ebf3fb;
+}
+
+.fresh-meals-highlights {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.fresh-meals-highlights li {
+    color: #444;
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.fresh-meals-highlights i {
+    color: #47cee6;
+    margin-right: 10px;
+}
+
+.fresh-meals-hero-image {
+    flex: 1;
+    text-align: center;
+}
+
+.fresh-meals-hero-image img {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px;
+    object-fit: cover;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+.fresh-meals-section {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    margin-bottom: 28px;
+}
+
+.fresh-meals-section h2 {
+    font-size: 2rem;
+    color: #222;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.fresh-meals-section p {
+    color: #555;
+    line-height: 1.8;
+}
+
+.intro-card {
+    text-align: center;
+}
+
+.fresh-menu-grid,
+.fresh-steps-grid,
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin-top: 25px;
+}
+
+.fresh-menu-card,
+.fresh-step-card,
+.pricing-card {
+    background: #f9fbfd;
+    border: 1px solid #e6eef5;
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+}
+
+.fresh-menu-card h3,
+.fresh-step-card h3,
+.pricing-card h3 {
+    font-size: 1.2rem;
+    color: #222;
+    margin-bottom: 12px;
+}
+
+.premium-card {
+    background: linear-gradient(135deg, #fdfdfd, #f4fbff);
+}
+
+.fresh-step-card span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: #2890df;
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 700;
+    margin-bottom: 14px;
+    font-size: 1.1rem;
+}
+
+.price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2890df;
+    margin: 10px 0 12px;
+}
+
+.form-section {
+    padding-bottom: 45px;
+}
+
+.form-intro {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 28px;
+}
+
+.fresh-meals-form {
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d8e4f0;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-family: 'Roboto', sans-serif;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2890df;
+    box-shadow: 0 0 0 3px rgba(40, 144, 223, 0.12);
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.fresh-form-btn {
+    display: inline-block;
+    margin-top: 22px;
+    background: #2890df;
+    color: #fff;
+    border: none;
+    padding: 16px 28px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.fresh-form-btn:hover {
+    background: #1f7bc2;
+}
+
+@media (max-width: 992px) {
+    .fresh-meals-hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 35px 25px;
+    }
+
+    .fresh-menu-grid,
+    .fresh-steps-grid,
+    .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fresh-meals-highlights li {
+        text-align: left;
+    }
+}
+
+@media (max-width: 768px) {
+    .fresh-meals-page {
+        padding: 0 14px;
+        margin-top: 25px;
+    }
+
+    .fresh-meals-hero-text h1 {
+        font-size: 2rem;
+    }
+
+    .fresh-menu-grid,
+    .fresh-steps-grid,
+    .pricing-grid,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fresh-meals-section,
+    .fresh-meals-hero {
+        border-radius: 18px;
+    }
+
+    .fresh-btn,
+    .fresh-form-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .fresh-meals-buttons {
+        flex-direction: column;
+    }
+}
+
 
 
