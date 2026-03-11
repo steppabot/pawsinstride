@@ -1186,6 +1186,18 @@ header {
     color: #fff;
 }
 
+.service-areas p a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    border-bottom: 2px solid #f3aa4c;
+    padding-bottom: 1px;
+}
+
+.service-areas p a:hover {
+    color: #f3aa4c;
+}
+
 @media (max-width: 768px) {
     .service-areas {
         padding: 20px 14px 25px;
