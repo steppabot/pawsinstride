@@ -75,35 +75,44 @@
     <link rel="stylesheet" href="styles.css">
 
     <script>
-        // Function to dynamically load content into the #content div
         function loadPage(page, section = null) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', page, true);
             xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
+                if (xhr.readyState === 4 && xhr.status === 200) {
                     document.getElementById('content').innerHTML = xhr.responseText;
-
-                    // If a section hash is provided, scroll to that section after loading
+    
                     if (section) {
-                        const targetElement = document.getElementById(section);
-                        if (targetElement) {
-                            targetElement.scrollIntoView({ behavior: 'smooth' });
-                        }
+                        setTimeout(function () {
+                            const targetElement = document.getElementById(section);
+                            if (targetElement) {
+                                targetElement.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }, 100);
                     } else {
-                        // Scroll to the top of the page
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 }
             };
             xhr.send();
         }
-
-        // Load the home page by default when the page loads
-        window.onload = function() {
-            loadPage('home.html');
+    
+        window.onload = function () {
+            const params = new URLSearchParams(window.location.search);
+            const page = params.get('page');
+            const section = params.get('section');
+    
+            if (page === 'services') {
+                loadPage('services.html', section);
+            } else if (page === 'aboutus') {
+                loadPage('aboutus.html');
+            } else if (page === 'contact') {
+                loadPage('contact.html');
+            } else {
+                loadPage('home.html');
+            }
         };
-
-        // Toggle mobile menu open/close
+    
         function toggleMenu() {
             var menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
