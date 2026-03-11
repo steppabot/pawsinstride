@@ -188,6 +188,13 @@ care they deserve while giving you peace of mind during the day.
 
 </section>
 
+<section class="elfsight-container">
+    <div class="elfsight-wrapper">
+        <script src="https://static.elfsight.com/platform/platform.js" async></script>
+        <div class="elfsight-app-f7b18edf-ceba-4a81-9f18-846d5c74e0cf" data-elfsight-app-lazy></div>
+    </div>
+</section>
+
 <footer>
 
 <div class="footer-container">
@@ -209,7 +216,17 @@ care they deserve while giving you peace of mind during the day.
 
 </footer>
 
-
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let interval = setInterval(function () {
+        let elfsightBranding = document.querySelector('a[href*="elfsight.com/instagram-feed-instashow"]');
+        if (elfsightBranding) {
+            elfsightBranding.remove();
+            clearInterval(interval);
+        }
+    }, 500);
+});
+</script>
 
 </body>
 </html>
