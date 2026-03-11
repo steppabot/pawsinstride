@@ -1168,6 +1168,23 @@ header {
     border-radius: 999px;
     font-weight: bold;
     box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.service-areas li a {
+    display: block;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+.service-areas li:hover {
+    background-color: #f5ab40;
+    transition: background-color 0.3s ease;
+}
+
+.service-areas li:hover a {
+    color: #fff;
+}
 
 @media (max-width: 768px) {
     .service-areas {
