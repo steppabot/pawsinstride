@@ -241,33 +241,5 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
-
-
- <script>
-document.addEventListener("DOMContentLoaded", function () {
-    function removeCalendlyBranding() {
-        const branding = document.querySelector('div[data-id="branding"]');
-        if (branding) {
-            branding.remove();
-            return true;
-        }
-        return false;
-    }
-
-    const observer = new MutationObserver(() => {
-        if (removeCalendlyBranding()) {
-            observer.disconnect();
-        }
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-
-    removeCalendlyBranding();
-});
-</script>
-
 </body>
 </html>
