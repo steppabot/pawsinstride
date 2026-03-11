@@ -228,5 +228,17 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let calendlyInterval = setInterval(function () {
+        let calendlyBranding = document.querySelector('a[href*="calendly.com"]');
+        if (calendlyBranding && calendlyBranding.innerText.toLowerCase().includes("powered by")) {
+            calendlyBranding.style.display = "none";
+            clearInterval(calendlyInterval);
+        }
+    }, 500);
+});
+</script>
+
 </body>
 </html>
