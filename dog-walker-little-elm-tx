@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dog Walking & Pet Sitting in Little Elm, TX | Paws in Stride</title>
+<meta name="description" content="Looking for dog walking or pet sitting in Little Elm, Texas? Paws in Stride provides reliable dog walking, drop-in visits, pet sitting, and dog boarding in Little Elm including Sunset Pointe, Frisco Hills, and Valencia on the Lake.">
+
+<meta name="robots" content="index, follow">
+
+<link rel="stylesheet" href="styles.css">
+
+<link rel="canonical" href="https://www.pawsinstride.com/dog-walker-little-elm-tx.html">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+
+<link rel="icon" href="/icons/favicon.ico">
+
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "PetService",
+ "name": "Paws in Stride",
+ "url": "https://www.pawsinstride.com/dog-walker-little-elm-tx.html",
+ "telephone": "+1-214-736-7923",
+ "description": "Paws in Stride provides dog walking, pet sitting, drop-in visits, and dog boarding services in Little Elm, Texas including Sunset Pointe, Frisco Hills, and Valencia on the Lake.",
+ "areaServed": {
+   "@type": "City",
+   "name": "Little Elm",
+   "addressRegion": "TX",
+   "addressCountry": "US"
+ }
+}
+</script>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo-container">
+<a href="index.html">
+<img src="pawsnstridelogo1.png" alt="Paws in Stride Dog Walking Little Elm Texas" class="logo">
+</a>
+</div>
+
+<nav id="menu-box">
+<ul class="nav-links">
+<li><a href="dog-walker-little-elm-tx.html">HOME</a></li>
+<li><a href="index.html?page=services">SERVICES</a></li>
+<li><a href="index.html?page=aboutus">ABOUT</a></li>
+<li><a href="index.html?page=contact">CONTACT</a></li>
+</ul>
+</nav>
+
+</header>
+
+<section class="hero-section">
+<div class="hero-container">
+
+<div class="hero-image">
+<img src="pupflex.png" alt="Dog Walking and Pet Sitting in Little Elm Texas">
+</div>
+
+<div class="hero-text-container">
+<div class="hero-text">
+
+<h1>Dog Walking & Pet Sitting in Little Elm, TX</h1>
+<h3>Serving Sunset Pointe, Frisco Hills & Valencia on the Lake</h3>
+
+<p>
+Looking for a reliable dog walker in Little Elm, Texas? Paws in Stride provides
+professional dog walking, pet sitting, drop-in visits, and dog boarding
+services for busy pet owners throughout Little Elm. We proudly serve families in
+Sunset Pointe, Frisco Hills, Valencia on the Lake, and surrounding communities
+with dependable, personalized care tailored to each dog’s routine and energy level.
+</p>
+
+<a class="cta-button"
+onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+SCHEDULE A FREE MEET & GREET
+</a>
+
+</div>
+</div>
+
+</div>
+</section>
+
+<section class="services-section">
+
+<div class="service-container">
+
+<div class="service-image">
+<a href="index.html?page=services&section=dog-walking">
+<img src="walking.png" alt="Dog Walking Service in Little Elm Texas" class="rounded-image">
+<div class="overlay"></div>
+<h2>DOG WALKING</h2>
+</a>
+</div>
+
+<div class="service-image">
+<a href="index.html?page=services&section=drop-in-visits">
+<img src="dropinfront.png" alt="Drop In Visits and Potty Breaks in Little Elm Texas" class="rounded-image">
+<div class="overlay"></div>
+<h2>DROP IN VISITS / POTTY BREAKS</h2>
+</a>
+</div>
+
+<div class="service-image">
+<a href="index.html?page=services&section=pet-sitting">
+<img src="dropin.png" alt="Pet Sitting in Little Elm Texas" class="rounded-image">
+<div class="overlay"></div>
+<h2>PET SITTING</h2>
+</a>
+</div>
+
+<div class="service-image">
+<a href="index.html?page=services&section=dog-boarding">
+<img src="dogsitting.png" alt="Dog Boarding in Little Elm Texas" class="rounded-image">
+<div class="overlay"></div>
+<h2>DOG BOARDING</h2>
+</a>
+</div>
+
+</div>
+
+</section>
+
+<section class="service-areas">
+
+<div class="service-areas-container">
+
+<h2>Little Elm Dog Walking Neighborhoods We Serve</h2>
+
+<p>
+Paws in Stride proudly provides dog walking, pet sitting, and dog boarding
+services for pet owners throughout Little Elm, Texas.
+</p>
+
+<ul>
+<li>Sunset Pointe</li>
+<li>Frisco Hills</li>
+<li>Valencia on the Lake</li>
+</ul>
+
+<p>
+If you're located in Little Elm or one of these neighborhoods, contact us to
+schedule a complimentary meet and greet and see if we’re the perfect fit
+for your pup.
+</p>
+
+</div>
+
+</section>
+
+<section class="service-areas">
+
+<div class="service-areas-container">
+
+<h2>Why Little Elm Pet Owners Choose Paws in Stride</h2>
+
+<p>
+Every dog has different needs, which is why we tailor our visits based on
+your dog’s personality, age, energy level, and routine. Whether your dog
+needs a daily walk, a quick potty break while you're at work, or attentive
+care while you're away, Paws in Stride provides dependable service for
+Little Elm families.
+</p>
+
+<p>
+Our goal is simple: make sure your dog gets the exercise, attention, and
+care they deserve while giving you peace of mind during the day.
+</p>
+
+</div>
+
+</section>
+
+<section class="elfsight-container">
+<div class="elfsight-wrapper">
+<script src="https://static.elfsight.com/platform/platform.js" async></script>
+<div class="elfsight-app-f7b18edf-ceba-4a81-9f18-846d5c74e0cf" data-elfsight-app-lazy></div>
+</div>
+</section>
+
+<footer>
+
+<div class="footer-container">
+
+<ul class="footer-nav">
+<li><a href="index.html">HOME</a></li>
+<li><a href="index.html?page=services">SERVICES</a></li>
+<li><a href="index.html?page=aboutus">ABOUT</a></li>
+<li><a href="index.html?page=contact">CONTACT</a></li>
+</ul>
+
+<div class="footer-info">
+<p>&copy; 2026 Paws in Stride</p>
+<p>Serving Frisco, Celina, Prosper & Little Elm</p>
+<p>Phone: <a href="tel:+12147367923">214-736-7923</a></p>
+</div>
+
+</div>
+
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+let elfsightInterval = setInterval(function () {
+let elfsightBranding = document.querySelector('a[href*="elfsight.com/instagram-feed-instashow"]');
+if (elfsightBranding) {
+elfsightBranding.remove();
+clearInterval(elfsightInterval);
+}
+}, 500);
+
+let calendlyInterval = setInterval(function () {
+let calendlyBranding = document.querySelector('a[href*="calendly.com"]');
+if (calendlyBranding && calendlyBranding.innerText.toLowerCase().includes("powered by")) {
+calendlyBranding.style.display = "none";
+clearInterval(calendlyInterval);
+}
+}, 500);
+
+});
+</script>
+
+</body>
+</html>
