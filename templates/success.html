@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription Confirmed</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #47cee6, #2890df);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 760px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+      padding: 38px 28px;
+      text-align: center;
+    }
+
+    .icon {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: #eefbf2;
+      color: #1f9d57;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: #eef8ff;
+      color: #2890df;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 8px 14px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      line-height: 1.15;
+      color: #222;
+    }
+
+    p {
+      margin: 0 auto 14px;
+      max-width: 620px;
+      color: #666;
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    .info-box {
+      margin: 26px auto 0;
+      background: #f8fbff;
+      border: 1px solid #dde6ef;
+      border-radius: 18px;
+      padding: 22px;
+      text-align: left;
+      max-width: 620px;
+    }
+
+    .info-box h2 {
+      margin: 0 0 14px;
+      font-size: 1.2rem;
+      color: #222;
+      text-align: center;
+    }
+
+    .info-box ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #555;
+      line-height: 1.8;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 22px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn.primary {
+      background: #f5ab40;
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: #ef602c;
+    }
+
+    .btn.secondary {
+      background: #eef3f8;
+      color: #333;
+    }
+
+    .btn.secondary:hover {
+      background: #e3ebf4;
+    }
+
+    .note {
+      margin-top: 18px;
+      font-size: 0.92rem;
+      color: #777;
+    }
+
+    @media (max-width: 700px) {
+      .card {
+        padding: 28px 18px;
+        border-radius: 18px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .info-box {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">✓</div>
+    <div class="eyebrow">Subscription Confirmed</div>
+    <h1>Your dog’s fresh meal plan is active</h1>
+    <p>
+      Thanks for subscribing to Paws in Stride Fresh Dog Meals.
+      Your weekly meal delivery has been started successfully.
+    </p>
+
+    <div class="info-box">
+      <h2>What happens next?</h2>
+      <ul>
+        <li>We’ll review your dog’s submitted information and dietary preferences.</li>
+        <li>Your meals will be prepared fresh based on your selected plan.</li>
+        <li>You’ll receive confirmation and delivery updates by email.</li>
+        <li>If we have any questions about allergies or delivery details, we’ll contact you directly.</li>
+      </ul>
+    </div>
+
+    <div class="actions">
+      <a href="/" class="btn secondary">Back to Meal Quiz</a>
+      <a href="https://pawsinstride.com" class="btn primary">Visit Paws in Stride</a>
+    </div>
+
+    <div class="note">
+      Need help with your subscription? Reach out and we’ll be happy to help.
+    </div>
+  </div>
+</body>
+</html>

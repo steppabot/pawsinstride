@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start Your Dog's Fresh Meal Plan</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #47cee6, #2890df);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    .survey-card {
+      width: 100%;
+      max-width: 720px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+      padding: 32px 28px;
+      overflow: hidden;
+    }
+
+    .top-copy {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: #eef8ff;
+      color: #2890df;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 8px 14px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    .top-copy h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+      line-height: 1.15;
+      color: #222;
+    }
+
+    .top-copy p {
+      margin: 0;
+      color: #666;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .progress-wrap {
+      margin: 26px 0 18px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #e9eef3;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 33.333%;
+      background: linear-gradient(90deg, #f5ab40, #ef602c);
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    .step-shell {
+      position: relative;
+      min-height: 330px;
+    }
+
+    .step {
+      display: none;
+      opacity: 0;
+      transform: translateX(18px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .step.active {
+      display: block;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .step h2 {
+      margin: 0 0 10px;
+      font-size: 1.55rem;
+      text-align: center;
+      color: #222;
+    }
+
+    .step-subtext {
+      text-align: center;
+      color: #777;
+      margin: 0 0 24px;
+      line-height: 1.6;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .choice-btn {
+      appearance: none;
+      border: 2px solid #dde6ef;
+      background: #fff;
+      border-radius: 16px;
+      padding: 18px 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      min-height: 86px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .choice-btn:hover {
+      border-color: #f5ab40;
+      background: #fff8ef;
+      transform: translateY(-1px);
+    }
+
+    .choice-btn.selected {
+      border-color: #f5ab40;
+      background: #fff4e7;
+      box-shadow: 0 0 0 3px rgba(245, 171, 64, 0.14);
+    }
+
+    .choice-title {
+      font-weight: 700;
+      color: #222;
+      font-size: 1rem;
+    }
+
+    .choice-note {
+      font-size: 0.92rem;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .chip-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .chip {
+      position: relative;
+    }
+
+    .chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .chip label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 2px solid #dde6ef;
+      border-radius: 14px;
+      padding: 14px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #fff;
+      min-height: 58px;
+    }
+
+    .chip label:hover {
+      border-color: #f5ab40;
+      background: #fff8ef;
+    }
+
+    .chip input:checked + label {
+      border-color: #f5ab40;
+      background: #fff4e7;
+      box-shadow: 0 0 0 3px rgba(245, 171, 64, 0.14);
+    }
+
+    .chip-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #cbd6e2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: transparent;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .chip input:checked + label .chip-check {
+      background: #f5ab40;
+      border-color: #f5ab40;
+      color: #fff;
+    }
+
+    .chip-text {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 26px;
+    }
+
+    .nav-btn {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn.back {
+      background: #eef3f8;
+      color: #333;
+    }
+
+    .nav-btn.back:hover {
+      background: #e3ebf4;
+    }
+
+    .nav-btn.next,
+    .nav-btn.submit {
+      background: #f5ab40;
+      color: #fff;
+      margin-left: auto;
+    }
+
+    .nav-btn.next:hover,
+    .nav-btn.submit:hover {
+      background: #ef602c;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .helper-note {
+      text-align: center;
+      font-size: 0.92rem;
+      color: #777;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 700px) {
+      .survey-card {
+        padding: 24px 18px;
+        border-radius: 18px;
+      }
+
+      .top-copy h1 {
+        font-size: 1.7rem;
+      }
+
+      .button-grid,
+      .chip-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .step-shell {
+        min-height: 420px;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+
+      .nav-btn.next,
+      .nav-btn.submit,
+      .nav-btn.back {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="survey-card">
+    <div class="top-copy">
+      <div class="eyebrow">Fresh Meals Quiz</div>
+      <h1>Build Your Dog’s Fresh Meal Plan</h1>
+      <p>
+        Answer 3 quick questions and we’ll recommend the best meal plan
+        for your dog’s size, activity level, and dietary needs.
+      </p>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="stepCount">Step 1 of 3</span>
+        <span id="stepLabel">Weight</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <form id="surveyForm" method="POST" action="/recommend">
+      <input type="hidden" name="weight_range" id="weightInput">
+      <input type="hidden" name="activity_level" id="activityInput">
+
+      <div class="step-shell">
+        <!-- STEP 1 -->
+        <section class="step active" id="step1">
+          <h2>How much does your dog weigh?</h2>
+          <p class="step-subtext">
+            Choose the weight range that best matches your dog.
+          </p>
+
+          <div class="button-grid">
+            <button type="button" class="choice-btn" data-value="0-20 lbs" data-group="weight">
+              <span class="choice-title">0–20 lbs</span>
+              <span class="choice-note">Best fit for smaller dogs and toy breeds</span>
+            </button>
+
+            <button type="button" class="choice-btn" data-value="21-40 lbs" data-group="weight">
+              <span class="choice-title">21–40 lbs</span>
+              <span class="choice-note">Great for mid-sized dogs with moderate portions</span>
+            </button>
+
+            <button type="button" class="choice-btn" data-value="41-70 lbs" data-group="weight">
+              <span class="choice-title">41–70 lbs</span>
+              <span class="choice-note">Larger daily portions for bigger dogs</span>
+            </button>
+
+            <button type="button" class="choice-btn" data-value="71+ lbs" data-group="weight">
+              <span class="choice-title">71+ lbs</span>
+              <span class="choice-note">Extra-large portions for giant breeds</span>
+            </button>
+          </div>
+
+          <div class="bottom-nav">
+            <button type="button" class="nav-btn next" id="toStep2" disabled>Next</button>
+          </div>
+          <div class="helper-note">This helps us match your dog to the right daily portion size.</div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="step" id="step2">
+          <h2>What’s your dog’s activity level?</h2>
+          <p class="step-subtext">
+            This helps us understand your dog’s routine and energy needs.
+          </p>
+
+          <div class="button-grid">
+            <button type="button" class="choice-btn" data-value="Low" data-group="activity">
+              <span class="choice-title">Low</span>
+              <span class="choice-note">Mostly indoors, relaxed routine</span>
+            </button>
+
+            <button type="button" class="choice-btn" data-value="Moderate" data-group="activity">
+              <span class="choice-title">Moderate</span>
+              <span class="choice-note">Daily walks and normal play</span>
+            </button>
+
+            <button type="button" class="choice-btn" data-value="High" data-group="activity">
+              <span class="choice-title">High</span>
+              <span class="choice-note">Very active, energetic, or athletic</span>
+            </button>
+          </div>
+
+          <div class="bottom-nav">
+            <button type="button" class="nav-btn back" data-back="1">Back</button>
+            <button type="button" class="nav-btn next" id="toStep3" disabled>Next</button>
+          </div>
+          <div class="helper-note">We’ll use this to better tailor your dog’s fresh meal plan.</div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="step" id="step3">
+          <h2>Does your dog have any food allergies?</h2>
+          <p class="step-subtext">
+            Select any ingredients your dog should avoid. Leave blank if none apply.
+          </p>
+
+          <div class="chip-grid">
+            <div class="chip">
+              <input type="checkbox" id="allergy-chicken" name="allergies" value="Chicken">
+              <label for="allergy-chicken">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Chicken</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-beef" name="allergies" value="Beef">
+              <label for="allergy-beef">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Beef</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-turkey" name="allergies" value="Turkey">
+              <label for="allergy-turkey">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Turkey</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-fish" name="allergies" value="Fish">
+              <label for="allergy-fish">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Fish</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-rice" name="allergies" value="Rice">
+              <label for="allergy-rice">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Rice</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-quinoa" name="allergies" value="Quinoa">
+              <label for="allergy-quinoa">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Quinoa</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-sweetpotato" name="allergies" value="Sweet Potato">
+              <label for="allergy-sweetpotato">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Sweet Potato</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-greenbeans" name="allergies" value="Green Beans">
+              <label for="allergy-greenbeans">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Green Beans</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-carrots" name="allergies" value="Carrots">
+              <label for="allergy-carrots">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Carrots</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-peas" name="allergies" value="Peas">
+              <label for="allergy-peas">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Peas</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-blueberries" name="allergies" value="Blueberries">
+              <label for="allergy-blueberries">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Blueberries</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-pumpkin" name="allergies" value="Pumpkin">
+              <label for="allergy-pumpkin">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Pumpkin</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-salmonoil" name="allergies" value="Salmon Oil">
+              <label for="allergy-salmonoil">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Salmon Oil</span>
+              </label>
+            </div>
+
+            <div class="chip">
+              <input type="checkbox" id="allergy-eggshellpowder" name="allergies" value="Eggshell Powder">
+              <label for="allergy-eggshellpowder">
+                <span class="chip-check">✓</span>
+                <span class="chip-text">Eggshell Powder</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="bottom-nav">
+            <button type="button" class="nav-btn back" data-back="2">Back</button>
+            <button type="submit" class="nav-btn submit">See My Dog’s Plan</button>
+          </div>
+          <div class="helper-note">We’ll use this to avoid ingredients your dog shouldn’t have.</div>
+        </section>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const steps = [
+      { id: "step1", label: "Weight" },
+      { id: "step2", label: "Activity" },
+      { id: "step3", label: "Allergies" }
+    ];
+
+    let currentStep = 1;
+    let selectedWeight = "";
+    let selectedActivity = "";
+
+    const stepCount = document.getElementById("stepCount");
+    const stepLabel = document.getElementById("stepLabel");
+    const progressFill = document.getElementById("progressFill");
+
+    const weightInput = document.getElementById("weightInput");
+    const activityInput = document.getElementById("activityInput");
+
+    const toStep2Btn = document.getElementById("toStep2");
+    const toStep3Btn = document.getElementById("toStep3");
+
+    function updateProgress(stepNumber) {
+      currentStep = stepNumber;
+      stepCount.textContent = `Step ${stepNumber} of 3`;
+      stepLabel.textContent = steps[stepNumber - 1].label;
+      progressFill.style.width = `${(stepNumber / 3) * 100}%`;
+    }
+
+    function showStep(stepNumber) {
+      document.querySelectorAll(".step").forEach(step => {
+        step.classList.remove("active");
+      });
+      document.getElementById(`step${stepNumber}`).classList.add("active");
+      updateProgress(stepNumber);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function clearSelected(groupName) {
+      document.querySelectorAll(`.choice-btn[data-group="${groupName}"]`).forEach(btn => {
+        btn.classList.remove("selected");
+      });
+    }
+
+    document.querySelectorAll('.choice-btn[data-group="weight"]').forEach(btn => {
+      btn.addEventListener("click", function () {
+        clearSelected("weight");
+        this.classList.add("selected");
+        selectedWeight = this.dataset.value;
+        weightInput.value = selectedWeight;
+        toStep2Btn.disabled = false;
+      });
+    });
+
+    document.querySelectorAll('.choice-btn[data-group="activity"]').forEach(btn => {
+      btn.addEventListener("click", function () {
+        clearSelected("activity");
+        this.classList.add("selected");
+        selectedActivity = this.dataset.value;
+        activityInput.value = selectedActivity;
+        toStep3Btn.disabled = false;
+      });
+    });
+
+    toStep2Btn.addEventListener("click", function () {
+      if (!selectedWeight) return;
+      showStep(2);
+    });
+
+    toStep3Btn.addEventListener("click", function () {
+      if (!selectedActivity) return;
+      showStep(3);
+    });
+
+    document.querySelectorAll(".nav-btn.back").forEach(btn => {
+      btn.addEventListener("click", function () {
+        const targetStep = parseInt(this.dataset.back, 10);
+        showStep(targetStep);
+      });
+    });
+
+    document.getElementById("surveyForm").addEventListener("submit", function (e) {
+      if (!weightInput.value || !activityInput.value) {
+        e.preventDefault();
+        alert("Please complete all required steps before continuing.");
+      }
+    });
+  </script>
+</body>
+</html>

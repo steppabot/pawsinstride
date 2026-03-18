@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Dog's Recommended Plan</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #47cee6, #2890df);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 900px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+      padding: 32px 28px;
+    }
+
+    .top-copy {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: #eef8ff;
+      color: #2890df;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 8px 14px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    .top-copy h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+      line-height: 1.15;
+      color: #222;
+    }
+
+    .top-copy p {
+      margin: 0;
+      color: #666;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .plan-box {
+      background: linear-gradient(135deg, #fff8ef, #fff2e2);
+      border: 2px solid #f8d39f;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .plan-box h2 {
+      margin: 0 0 10px;
+      color: #ef602c;
+      font-size: 1.7rem;
+    }
+
+    .plan-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .meta-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .meta-label {
+      display: block;
+      font-size: 0.9rem;
+      color: #777;
+      margin-bottom: 6px;
+    }
+
+    .meta-value {
+      font-weight: 700;
+      color: #222;
+      font-size: 1.05rem;
+    }
+
+    .section-title {
+      margin: 24px 0 14px;
+      font-size: 1.3rem;
+      color: #222;
+    }
+
+    .section-sub {
+      margin: -4px 0 18px;
+      color: #777;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 14px 14px;
+      border: 2px solid #dde6ef;
+      border-radius: 14px;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: #f5ab40;
+      box-shadow: 0 0 0 4px rgba(245, 171, 64, 0.14);
+    }
+
+    .allergy-summary {
+      background: #f8fbff;
+      border: 1px solid #dde6ef;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-top: 8px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .nav-btn {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn.back {
+      background: #eef3f8;
+      color: #333;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn.back:hover {
+      background: #e3ebf4;
+    }
+
+    .nav-btn.submit {
+      background: #f5ab40;
+      color: #fff;
+      margin-left: auto;
+    }
+
+    .nav-btn.submit:hover {
+      background: #ef602c;
+    }
+
+    .note {
+      margin-top: 16px;
+      font-size: 0.92rem;
+      color: #777;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 800px) {
+      .form-card {
+        padding: 24px 18px;
+        border-radius: 18px;
+      }
+
+      .top-copy h1 {
+        font-size: 1.7rem;
+      }
+
+      .grid,
+      .plan-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .bottom-nav {
+        flex-direction: column;
+      }
+
+      .nav-btn.back,
+      .nav-btn.submit {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-card">
+    <div class="top-copy">
+      <div class="eyebrow">Recommended Plan</div>
+      <h1>Your Dog’s Fresh Meal Plan</h1>
+      <p>
+        Based on your dog’s weight and activity level, we’ve recommended the best starting plan below.
+        Complete your info to continue to checkout.
+      </p>
+    </div>
+
+    <div class="plan-box">
+      <h2>{{ recommended_plan }}</h2>
+      <p>
+        This plan is designed to fit your dog’s current size and routine.
+      </p>
+
+      <div class="plan-meta">
+        <div class="meta-card">
+          <span class="meta-label">Weight Range</span>
+          <span class="meta-value">{{ weight_range }}</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Activity Level</span>
+          <span class="meta-value">{{ activity_level }}</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Daily Portion</span>
+          <span class="meta-value">{{ daily_ounces }} oz/day</span>
+        </div>
+      </div>
+    </div>
+
+    <form method="POST" action="/start-subscription">
+      <!-- Hidden survey data -->
+      <input type="hidden" name="weight_range" value="{{ weight_range }}">
+      <input type="hidden" name="activity_level" value="{{ activity_level }}">
+      {% for allergy in allergies %}
+        <input type="hidden" name="allergies" value="{{ allergy }}">
+      {% endfor %}
+
+      <h3 class="section-title">Pet Owner Information</h3>
+      <p class="section-sub">
+        Tell us where to deliver your dog’s fresh meals each week.
+      </p>
+
+      <div class="grid">
+        <div class="field">
+          <label for="first_name">First Name</label>
+          <input type="text" name="first_name" id="first_name" required>
+        </div>
+
+        <div class="field">
+          <label for="last_name">Last Name</label>
+          <input type="text" name="last_name" id="last_name" required>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" required>
+        </div>
+
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input type="text" name="phone" id="phone" required>
+        </div>
+
+        <div class="field full">
+          <label for="delivery_address">Delivery Address</label>
+          <input type="text" name="delivery_address" id="delivery_address" required>
+        </div>
+
+        <div class="field">
+          <label for="city">City</label>
+          <input type="text" name="city" id="city" required>
+        </div>
+
+        <div class="field">
+          <label for="state">State</label>
+          <input type="text" name="state" id="state" required>
+        </div>
+
+        <div class="field">
+          <label for="zipcode">Zip Code</label>
+          <input type="text" name="zipcode" id="zipcode" required>
+        </div>
+      </div>
+
+      <h3 class="section-title">Your Dog</h3>
+      <p class="section-sub">
+        We’ll use this information to personalize your dog’s subscription and delivery record.
+      </p>
+
+      <div class="grid">
+        <div class="field">
+          <label for="dog_name">Dog Name</label>
+          <input type="text" name="dog_name" id="dog_name" required>
+        </div>
+
+        <div class="field">
+          <label for="breed">Dog Breed</label>
+          <input type="text" name="breed" id="breed">
+        </div>
+
+        <div class="field">
+          <label for="age_years">Dog Age</label>
+          <input type="number" name="age_years" id="age_years" min="0">
+        </div>
+
+        <div class="field full">
+          <label>Allergy Summary</label>
+          <div class="allergy-summary">
+            {% if allergies and allergies|length > 0 %}
+              {{ allergies | join(', ') }}
+            {% else %}
+              No allergies selected
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <a href="/survey" class="nav-btn back">Back</a>
+        <button type="submit" class="nav-btn submit">Continue to Checkout</button>
+      </div>
+
+      <div class="note">
+        After checkout, your dog’s weekly fresh meal subscription will be activated and you’ll receive confirmation by email.
+      </div>
+    </form>
+  </div>
+</body>
+</html>
