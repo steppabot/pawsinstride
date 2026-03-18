@@ -88,16 +88,17 @@ def recommend():
     if not weight_range or not activity_level:
         return abort(400, "Missing required survey fields.")
 
-    recommended_plan, daily_ounces = recommend_plan(weight_range)
+    recommended_plan, daily_ounces, weekly_price = recommend_plan(weight_range)
 
     return render_template(
-        "owner_form.html",
-        weight_range=weight_range,
-        activity_level=activity_level,
-        allergies=allergies,
-        recommended_plan=recommended_plan,
-        daily_ounces=daily_ounces,
-    )
+    "owner_form.html",
+    weight_range=weight_range,
+    activity_level=activity_level,
+    allergies=allergies,
+    recommended_plan=recommended_plan,
+    daily_ounces=daily_ounces,
+    weekly_price=weekly_price,
+)
 
 
 @app.route("/start-subscription", methods=["POST"])
@@ -132,7 +133,7 @@ def start_subscription():
     allergies = parse_allergies(request.form)
 
     # Recompute plan server-side so user can't tamper with hidden fields
-    recommended_plan, daily_ounces = recommend_plan(weight_range)
+    recommended_plan, daily_ounces, weekly_price = recommend_plan(weight_range)
 
     required_fields = [
         first_name, last_name, email, phone,
