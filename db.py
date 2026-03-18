@@ -217,12 +217,12 @@ def create_dog(customer_id, dog_name, breed, age_years, weight_range, activity_l
         return cur.fetchone()[0]
 
 
-def recommend_plan(weight_range: str) -> tuple[str, int]:
+def recommend_plan(weight_range: str) -> tuple[str, int, int]:
     mapping = {
-        "0-20 lbs": ("Small Plan", 8),
-        "21-40 lbs": ("Medium Plan", 14),
-        "41-70 lbs": ("Large Plan", 20),
-        "71+ lbs": ("XL Plan", 22),
+        "0-20 lbs": ("Small Plan", 8, 50),
+        "21-40 lbs": ("Medium Plan", 14, 70),
+        "41-70 lbs": ("Large Plan", 20, 90),
+        "71+ lbs": ("XL Plan", 22, 110),
     }
     return mapping[weight_range]
 
