@@ -121,49 +121,65 @@ def init_db():
         with conn.cursor() as cur:
             cur.execute("SET statement_timeout = 30000")
 
-            cur.execute("""
-            CREATE TABLE IF NOT EXISTS customers (
-                id SERIAL PRIMARY KEY,
-                first_name TEXT NOT NULL,
-                last_name TEXT NOT NULL,
-                email TEXT NOT NULL,
-                phone TEXT NOT NULL,
-                delivery_address TEXT NOT NULL,
-                city TEXT NOT NULL,
-                state TEXT NOT NULL,
-                zipcode TEXT NOT NULL,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-            """)
+            # Prevent multiple workers from initializing schema at the same time
+            cur.execute("SELECT pg_advisory_lock(987654321)")
 
-            cur.execute("""
-            CREATE TABLE IF NOT EXISTS dogs (
-                id SERIAL PRIMARY KEY,
-                customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-                dog_name TEXT NOT NULL,
-                breed TEXT,
-                age_years INTEGER,
-                weight_range TEXT NOT NULL,
-                activity_level TEXT NOT NULL,
-                allergies TEXT[] NOT NULL DEFAULT '{}',
-                recommended_plan TEXT NOT NULL,
-                daily_ounces INTEGER NOT NULL,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-            """)
+            try:
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS customers (
+                    id SERIAL PRIMARY KEY,
+                    first_name TEXT NOT NULL,
+                    last_name TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    phone TEXT NOT NULL,
+                    delivery_address TEXT NOT NULL,
+                    city TEXT NOT NULL,
+                    state TEXT NOT NULL,
+                    zipcode TEXT NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+                """)
 
-            cur.execute("""
-            CREATE TABLE IF NOT EXISTS subscriptions (
-                id SERIAL PRIMARY KEY,
-                customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-                dog_id INTEGER NOT NULL REFERENCES dogs(id) ON DELETE CASCADE,
-                stripe_customer_id TEXT,
-                stripe_subscription_id TEXT,
-                stripe_checkout_session_id TEXT,
-                subscription_status TEXT NOT NULL DEFAULT 'pending',
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-            """)
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS dogs (
+                    id SERIAL PRIMARY KEY,
+                    customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+                    dog_name TEXT NOT NULL,
+                    breed TEXT,
+                    age_years INTEGER,
+                    weight_range TEXT NOT NULL,
+                    activity_level TEXT NOT NULL,
+                    allergies TEXT[] NOT NULL DEFAULT '{}',
+                    recommended_plan TEXT NOT NULL,
+                    daily_ounces INTEGER NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+                """)
+
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS subscriptions (
+                    id SERIAL PRIMARY KEY,
+                    customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+                    dog_id INTEGER NOT NULL REFERENCES dogs(id) ON DELETE CASCADE,
+                    stripe_customer_id TEXT,
+                    stripe_subscription_id TEXT,
+                    stripe_checkout_session_id TEXT,
+                    subscription_status TEXT NOT NULL DEFAULT 'pending',
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+                """)
+
+                cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_customers_email
+                ON customers (LOWER(email));
+                """)
+
+                cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription
+                ON subscriptions (stripe_subscription_id);
+                """)
+            finally:
+                cur.execute("SELECT pg_advisory_unlock(987654321)")
 
 
 # -----------------------------
