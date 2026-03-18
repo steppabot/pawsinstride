@@ -77,16 +77,21 @@
 
     .plan-meta {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 14px;
-      margin-top: 18px;
+      max-width: 620px;
+      margin: 18px auto 0;
     }
-
     .meta-card {
       background: #fff;
       border-radius: 14px;
       padding: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .meta-card.price {
+      border: 2px solid #47cee6;
+      background: #f0fbff;
     }
 
     .meta-label {
@@ -262,7 +267,7 @@
           <span class="meta-label">Daily Portion</span>
           <span class="meta-value">{{ daily_ounces }} oz/day</span>
         </div>
-        <div class="meta-card">
+        <div class="meta-card price">
           <span class="meta-label">Weekly Price</span>
           <span class="meta-value">${{ weekly_price }}/week</span>
         </div>
