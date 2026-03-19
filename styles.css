@@ -1242,7 +1242,7 @@ header {
 .fresh-food-header h2 {
   margin: 0 0 12px;
   font-size: 32px;
-  color: #222;
+  color: #f3aa4c;
 }
 
 .fresh-food-header p {
@@ -1260,8 +1260,8 @@ header {
 
 .fresh-food-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
   align-items: center;
 }
 
@@ -1270,14 +1270,24 @@ header {
   display: block;
   border-radius: 15px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  max-height: 330px;
+  object-fit: cover;
+}
+
+.fresh-food-copy {
+  max-width: 360px;
 }
 
 .fresh-food-copy ul {
   margin: 0 0 18px;
   padding-left: 20px;
   color: #444;
-  line-height: 1.9;
+  line-height: 1.8;
   font-weight: 600;
+}
+
+.fresh-food-copy li {
+  margin-bottom: 8px;
 }
 
 .fresh-food-btn {
