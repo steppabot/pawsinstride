@@ -69,6 +69,30 @@
       text-align: center;
     }
 
+    .brand {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .brand img {
+      max-width: 220px;
+      width: 100%;
+      height: auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 14px;
+      font-size: 0.92rem;
+      color: #2890df;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    
+    .back-link:hover {
+      color: #ef602c;
+    }
+    
     .plan-box h2 {
       margin: 0 0 10px;
       color: #ef602c;
@@ -240,8 +264,14 @@
 <body>
   <div class="form-card">
     <div class="top-copy">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='pawsnstridelogo1.png') }}" alt="Paws in Stride logo">
+      </div>
+    
+      <a href="https://pawsinstride.com" class="back-link">← Back to Paws in Stride</a>
+    
       <div class="eyebrow">Recommended Plan</div>
-      <h1>Your Dog’s Fresh Meal Plan</h1>
+      <h1>Your Dog’s Paws in Stride Meal Plan</h1>
       <p>
         Based on your dog’s weight and activity level, we’ve recommended the best starting plan below.
         Complete your info to continue to checkout.
@@ -364,7 +394,7 @@
 
       <div class="bottom-nav">
         <a href="/survey" class="nav-btn back">Back</a>
-        <button type="submit" class="nav-btn submit">Continue to Checkout</button>
+        <button type="submit" class="nav-btn submit">Continue to Secure Checkout</button>
       </div>
 
       <div class="note">
