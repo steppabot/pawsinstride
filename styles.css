@@ -1225,41 +1225,42 @@ header {
     }
 }
 .fresh-food-feature {
-  max-width: 1100px;
-  margin: 20px auto 16px;
+  max-width: 1200px;
+  margin: 20px auto;
   background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.12);
-  padding: 32px 28px;
+  padding: 35px 30px;
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .fresh-food-header {
   text-align: center;
-  max-width: 760px;
+  max-width: 820px;
   margin: 0 auto 24px;
 }
 
 .fresh-food-header h2 {
   margin: 0 0 12px;
-  font-size: 2rem;
+  font-size: 32px;
   color: #222;
 }
 
 .fresh-food-header p {
   margin: 0;
-  color: #67707d;
-  line-height: 1.8;
+  font-size: 16px;
+  color: #333;
+  line-height: 1.6;
 }
 
 .fresh-food-highlight {
   margin-top: 10px !important;
-  font-weight: 700;
+  font-weight: bold;
   color: #ef602c !important;
 }
 
 .fresh-food-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   align-items: center;
 }
@@ -1267,8 +1268,8 @@ header {
 .fresh-food-image-wrap img {
   width: 100%;
   display: block;
-  border-radius: 18px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .fresh-food-copy ul {
@@ -1280,38 +1281,43 @@ header {
 }
 
 .fresh-food-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5ab40;
+  display: inline-block;
+  background-color: #f5ab40;
   color: #fff;
-  border-radius: 999px;
-  padding: 14px 22px;
-  font-weight: 800;
-  font-size: 1rem;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 15px 30px;
   text-decoration: none;
-  transition: 0.2s ease;
+  border-radius: 25px;
+  transition: background-color 0.3s ease;
 }
 
 .fresh-food-btn:hover {
-  background: #ef602c;
+  background-color: #ef602c;
 }
 
 @media (max-width: 768px) {
   .fresh-food-feature {
-    padding: 24px 18px;
-    border-radius: 18px;
+    padding: 25px 18px;
+    border-radius: 15px;
+    margin: 20px 14px;
   }
 
   .fresh-food-header h2 {
-    font-size: 1.6rem;
+    font-size: 26px;
+  }
+
+  .fresh-food-header p {
+    font-size: 15px;
   }
 
   .fresh-food-grid {
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .fresh-food-btn {
     width: 100%;
+    text-align: center;
   }
 }
