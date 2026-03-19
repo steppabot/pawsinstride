@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/favicon.ico">
+  <meta property="og:title" content="Fresh Dog Meals Delivered Weekly | Paws in Stride">
+  <meta property="og:description" content="Fresh, human-grade dog meals delivered locally in glass containers. One meal donated for every subscribed dog.">
+  <meta property="og:image" content="https://pawsinstride.com/freshdogmealshero.png">
+  <meta property="og:type" content="website">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fresh Dog Food Delivery in Frisco, Celina & Prosper, TX | Paws in Stride</title>
+  <meta name="description" content="Fresh, human-grade dog meals delivered weekly in glass containers. Portion-based meal plans, real ingredients, local delivery across Collin County, and one donated meal for every subscribed dog." />
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #47cee6, #2890df);
+      color: #333;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+
+    .section-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 14px 38px rgba(0, 0, 0, 0.12);
+      padding: 42px 34px;
+      margin-bottom: 26px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: #eef8ff;
+      color: #2890df;
+      font-size: 0.9rem;
+      font-weight: 800;
+      padding: 8px 14px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      margin: 0 0 16px;
+      font-size: 3rem;
+      line-height: 1.05;
+      color: #222;
+    }
+
+    .hero p {
+      margin: 0 0 22px;
+      color: #5c6470;
+      line-height: 1.8;
+      font-size: 1.05rem;
+      max-width: 620px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 15px 24px;
+      font-weight: 800;
+      font-size: 1rem;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #f5ab40;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #ef602c;
+    }
+
+    .btn-secondary {
+      background: #eef3f8;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e2eaf3;
+    }
+
+    .hero-image-wrap {
+      position: relative;
+    }
+
+    .hero-image-wrap img {
+      width: 100%;
+      border-radius: 24px;
+      display: block;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.14);
+      object-fit: cover;
+    }
+
+    .section-head {
+      text-align: center;
+      max-width: 780px;
+      margin: 0 auto 26px;
+    }
+
+    .section-head h2 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      color: #222;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: #67707d;
+      line-height: 1.8;
+    }
+
+    .trust-grid,
+    .plan-grid,
+    .feature-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .service-area-section {
+      background: linear-gradient(135deg, #f8fbff, #ffffff);
+    }
+
+    .closing-cta-highlight {
+      background: linear-gradient(135deg, #fffaf2, #ffffff);
+      border: 2px solid #f5d2a5;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .closing-cta .btn {
+      padding: 17px 30px;
+      font-size: 1.05rem;
+    }
+
+    .trust-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .plan-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .feature-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mini-card,
+    .plan-card,
+    .feature-card {
+      background: #f8fbff;
+      border: 1px solid #e2eaf3;
+      border-radius: 20px;
+      padding: 22px 18px;
+      text-align: center;
+    }
+
+    .mini-card h3,
+    .plan-card h3,
+    .feature-card h3 {
+      margin: 0 0 10px;
+      color: #222;
+      font-size: 1.15rem;
+    }
+
+    .mini-card p,
+    .plan-card p,
+    .feature-card p {
+      margin: 0;
+      color: #67707d;
+      line-height: 1.7;
+      font-size: 0.97rem;
+    }
+
+    .image-caption {
+      margin-top: 12px;
+      padding: 14px 16px;
+      background: #f8fbff;
+      border: 1px solid #e2eaf3;
+      border-radius: 16px;
+      text-align: left;
+    }
+
+    .image-caption strong {
+      display: block;
+      font-size: 1rem;
+      color: #222;
+      margin-bottom: 4px;
+    }
+
+    .image-caption span {
+      font-size: 0.92rem;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .ingredients-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 24px;
+      align-items: center;
+      margin-top: 26px;
+    }
+
+    .ingredients-image img {
+      width: 100%;
+      display: block;
+      border-radius: 24px;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+      object-fit: cover;
+    }
+
+    .ingredient-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .ingredient-card {
+      background: #f8fbff;
+      border: 1px solid #e2eaf3;
+      border-radius: 20px;
+      padding: 22px 18px;
+      text-align: center;
+    }
+
+    .ingredient-card h3 {
+      margin: 0 0 10px;
+      color: #222;
+      font-size: 1.1rem;
+    }
+
+    .ingredient-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      color: #555;
+      line-height: 1.9;
+      font-weight: 500;
+    }
+
+    .plan-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plan-card.featured {
+      border: 2px solid #f5ab40;
+      background: linear-gradient(180deg, #fffaf2, #ffffff);
+    }
+
+    .plan-badge {
+      display: inline-block;
+      background: #f5ab40;
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 7px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .plan-weight {
+      color: #5b6470;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .plan-portion {
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 700;
+    }
+
+    .plan-price {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: #2890df;
+      margin-top: 14px;
+    }
+
+    .plan-price span {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #66707c;
+    }
+
+    .donation-section {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 28px;
+      align-items: center;
+      background: linear-gradient(135deg, #fff8ef, #fffdf8);
+      border: 2px solid #f5d2a5;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.10);
+    }
+
+    .donation-copy h2 {
+      margin: 0 0 14px;
+      font-size: 2.2rem;
+      color: #222;
+      line-height: 1.15;
+    }
+
+    .donation-copy p {
+      color: #67707d;
+      line-height: 1.85;
+      margin: 0 0 14px;
+      font-size: 1.02rem;
+    }
+
+    .donation-highlight {
+      display: inline-block;
+      background: #fff;
+      color: #ef602c;
+      border: 1px solid #f5d2a5;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .donation-stat {
+      background: #fff;
+      border: 2px solid #f5d2a5;
+      border-radius: 20px;
+      padding: 22px 26px;
+      font-weight: 800;
+      color: #333;
+      line-height: 1.6;
+      margin-top: 18px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+      max-width: 560px;
+      font-size: 1.05rem;
+    }
+
+    .donation-image-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donation-image img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 24px;
+      display: block;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .mini-card,
+    .plan-card,
+    .feature-card,
+    .ingredient-card {
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .mini-card:hover,
+    .plan-card:hover,
+    .feature-card:hover,
+    .ingredient-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      border-color: #cfddeb;
+    }
+
+    .closing-cta {
+      text-align: center;
+      padding-top: 10px;
+    }
+
+    .closing-cta h2 {
+      margin: 0 0 12px;
+      font-size: 2.15rem;
+      color: #222;
+    }
+
+    .closing-cta p {
+      max-width: 720px;
+      margin: 0 auto 22px;
+      color: #67707d;
+      line-height: 1.8;
+    }
+
+    .small-note {
+      margin-top: 16px;
+      color: #7b848f;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 1024px) {
+      .hero,
+      .donation-section,
+      .ingredients-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .trust-grid,
+      .plan-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .page-wrap {
+        padding: 18px 14px 42px;
+      }
+
+      .section-card {
+        padding: 28px 18px;
+        border-radius: 18px;
+      }
+
+      .hero h1,
+      .section-head h2,
+      .donation-copy h2,
+      .closing-cta h2 {
+        font-size: 1.8rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .trust-grid,
+      .plan-grid,
+      .feature-grid,
+      .ingredient-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .donation-section {
+        gap: 20px;
+      }
+
+      .donation-image-wrap {
+        align-items: center;
+      }
+
+      .donation-copy h2 {
+        font-size: 1.9rem;
+      }
+
+      .donation-stat {
+        padding: 16px;
+        font-size: 0.95rem;
+      }
+
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+
+    <!-- HERO -->
+    <section class="section-card hero">
+      <div>
+        <div class="eyebrow">Fresh Meals for Dogs</div>
+        <h1>Fresh, Human-Grade Dog Meals Delivered Weekly</h1>
+        <p>
+          Real ingredients, prepared fresh each week and delivered locally in glass containers. Each plan includes 7 daily meal packs with separate morning and evening servings, portioned around your dog’s size and needs.
+        </p>
+
+        <div class="hero-actions">
+          <a href="https://survey.pawsinstride.com" class="btn btn-primary">Start Your Dog’s Meal Plan</a>
+          <a href="#plans" class="btn btn-secondary">See Plans & Pricing</a>
+        </div>
+      </div>
+
+      <div class="hero-image-wrap">
+        <img src="freshdogmealshero.png" alt="Fresh human-grade dog meals prepared in glass containers">
+
+        <div class="image-caption">
+          <strong>7 daily meal packs delivered weekly • 14 total servings</strong>
+          <span>Each daily pack is portioned for one full day of feeding, with separate morning and evening servings.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMBINED TRUST / DIFFERENCE -->
+    <section class="section-card">
+      <div class="section-head">
+        <h2>Why Pet Parents Choose Paws in Stride Fresh Meals</h2>
+        <p>
+          Paws in Stride Fresh Meals are made with real protein, nourishing carbs, and wholesome vegetables. We prepare them fresh each week, portion them by plan size, and deliver them locally for a cleaner, more personal feeding experience.
+        </p>
+      </div>
+
+      <div class="trust-grid">
+        <div class="mini-card">
+          <h3>🥩 Human-Grade Ingredients</h3>
+          <p>Made with real ingredients you can recognize and feel good about feeding.</p>
+        </div>
+
+        <div class="mini-card">
+          <h3>🚚 Fresh Weekly Delivery</h3>
+          <p>Meals are prepared fresh each week and delivered locally to your door.</p>
+        </div>
+
+        <div class="mini-card">
+          <h3>🫙 Glass Containers</h3>
+          <p>Stored in glass for a cleaner, more sustainable meal experience with less plastic contact.</p>
+        </div>
+
+        <div class="mini-card">
+          <h3>❄️ Never Frozen</h3>
+          <p>No frozen bricks, no thawing hassle, and no heavily processed feel.</p>
+        </div>
+      </div>
+
+      <div class="feature-grid" style="margin-top: 18px;">
+        <div class="feature-card">
+          <h3>🍽️ Real Food, Not Fillers</h3>
+          <p>
+            No mystery ingredients, no heavily processed textures, and no fake “healthy” branding. Just simple, recognizable ingredients built into balanced meal packs.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <h3>📍 Local and Personal</h3>
+          <p>
+            We’re not shipping frozen boxes across the country. We’re local, hands-on, and focused on quality from prep day to delivery day.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- INGREDIENTS -->
+    <section class="section-card">
+      <div class="section-head">
+        <h2>Simple Ingredients. Real Nutrition.</h2>
+        <p>
+          Our meals are built from ingredients chosen for freshness, simplicity, and everyday nourishment.
+        </p>
+      </div>
+
+      <div class="ingredients-layout">
+        <div class="ingredients-image">
+          <img src="ingredients-dog-food.png" alt="Fresh ingredients used in our dog meal plans">
+        </div>
+
+        <div class="ingredient-grid">
+          <div class="ingredient-card">
+            <h3>Proteins</h3>
+            <ul class="ingredient-list">
+              <li>Chicken</li>
+              <li>Beef</li>
+              <li>Turkey</li>
+              <li>Fish</li>
+            </ul>
+          </div>
+
+          <div class="ingredient-card">
+            <h3>Carbs</h3>
+            <ul class="ingredient-list">
+              <li>Rice</li>
+              <li>Quinoa</li>
+              <li>Sweet Potato</li>
+            </ul>
+          </div>
+
+          <div class="ingredient-card">
+            <h3>Vegetables</h3>
+            <ul class="ingredient-list">
+              <li>Green Beans</li>
+              <li>Carrots</li>
+              <li>Peas</li>
+              <li>Pumpkin</li>
+            </ul>
+          </div>
+
+          <div class="ingredient-card">
+            <h3>Extras</h3>
+            <ul class="ingredient-list">
+              <li>Blueberries</li>
+              <li>Salmon Oil</li>
+              <li>Eggshell Powder</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLANS -->
+    <section class="section-card" id="plans">
+      <div class="section-head">
+        <h2>Plans Built Around Your Dog’s Size</h2>
+        <p>
+          Every dog starts with a plan matched to their size. Our quiz helps recommend the best fit, and we account for dietary restrictions along the way.
+        </p>
+      </div>
+
+      <div class="plan-grid">
+        <div class="plan-card">
+          <h3>Small Plan</h3>
+          <div class="plan-weight">0–20 lbs</div>
+          <div class="plan-portion">8 oz per day</div>
+          <p>7 daily packs • 14 total servings</p>
+          <div class="plan-price">$50<span>/week</span></div>
+        </div>
+
+        <div class="plan-card featured">
+          <div class="plan-badge">Most Popular</div>
+          <h3>Medium Plan</h3>
+          <div class="plan-weight">21–40 lbs</div>
+          <div class="plan-portion">14 oz per day</div>
+          <p>7 daily packs • 14 total servings</p>
+          <div class="plan-price">$75<span>/week</span></div>
+        </div>
+
+        <div class="plan-card">
+          <h3>Large Plan</h3>
+          <div class="plan-weight">41–70 lbs</div>
+          <div class="plan-portion">20 oz per day</div>
+          <p>7 daily packs • 14 total servings</p>
+          <div class="plan-price">$100<span>/week</span></div>
+        </div>
+
+        <div class="plan-card">
+          <h3>XL Plan</h3>
+          <div class="plan-weight">71+ lbs</div>
+          <div class="plan-portion">22 oz per day</div>
+          <p>7 daily packs • 14 total servings</p>
+          <div class="plan-price">$125<span>/week</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DONATION -->
+    <section class="section-card donation-section">
+      <div class="donation-copy">
+        <div class="donation-highlight">❤️ Every subscription gives back</div>
+        <h2>Feed Your Dog and Help a Shelter Dog Eat Too</h2>
+        <p>
+          When you subscribe to Paws in Stride Fresh Meals, you’re doing more than improving your own dog’s routine. You’re also helping feed a dog still waiting for a loving home.
+        </p>
+        <p>
+          We’re proud to support the Collin County Animal Shelter by donating one meal for every subscribed dog. It’s our way of turning every order into something bigger than just delivery day.
+        </p>
+
+        <div class="donation-stat">
+          Every subscribed dog provides one fresh meal to a dog at the Collin County Animal Shelter
+        </div>
+      </div>
+
+      <div class="donation-image-wrap">
+        <div class="donation-image">
+          <img src="collin-shelter.png" alt="Collin County Animal Shelter where Paws in Stride donates meals">
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICE AREA -->
+    <section class="section-card service-area-section">
+      <div class="section-head">
+        <h2>Local Delivery Across Collin County</h2>
+        <p>
+          We deliver fresh dog meals throughout Collin County, including Frisco, Celina, Prosper, McKinney, Allen, Plano, Wylie, Anna, Melissa, and nearby communities.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>🚚 Local Weekly Delivery</h3>
+          <p>
+            We deliver directly to your door each week, so your dog’s meals arrive fresh, ready to serve, and never stuck in long shipping delays.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <h3>📍 Expanding Service Area</h3>
+          <p>
+            If you’re nearby and don’t see your city listed, reach out — we’re actively expanding delivery routes throughout Collin County.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="section-card closing-cta closing-cta-highlight">
+      <div class="donation-highlight">🐶 Personalized meal recommendations</div>
+      <h2>Find the Best Starting Plan for Your Dog</h2>
+      <p>
+        Answer a few quick questions and we’ll recommend the right meal plan based on your dog’s size, routine, and dietary needs.
+      </p>
+
+      <a href="https://survey.pawsinstride.com" class="btn btn-primary">Start the Meal Quiz</a>
+
+      <div class="small-note">
+        Takes less than 2 minutes • No commitment required
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
