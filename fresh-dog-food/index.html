@@ -4,14 +4,27 @@
   <link rel="icon" href="/favicon.ico">
   <meta property="og:title" content="Fresh Dog Meals Delivered Weekly | Paws in Stride">
   <meta property="og:description" content="Fresh, human-grade dog meals delivered locally in glass containers. One meal donated for every subscribed dog.">
-  <meta property="og:image" content="https://pawsinstride.com/freshdogmealshero.png">
+  <meta property="og:image" content="https://pawsinstride.com/freshdogmealshero.PNG">
   <meta property="og:type" content="website">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fresh Dog Food Delivery in Frisco, Celina & Prosper, TX | Paws in Stride</title>
   <meta name="description" content="Fresh, human-grade dog meals delivered weekly in glass containers. Portion-based meal plans, real ingredients, local delivery across Collin County, and one donated meal for every subscribed dog." />
 
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+  <link rel="icon" href="/icons/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <link rel="manifest" href="/icons/site.webmanifest">
+  
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+  
   <style>
     * {
       box-sizing: border-box;
@@ -487,247 +500,340 @@
   </style>
 </head>
 <body>
+  <!-- Notification Bar -->
+  <div id="notification-bar">
+    <p>🎖️ Veterans & First Responders receive <strong>10% OFF</strong> all Services!</p>
+    <p class="banner-phone">📞 Call Now: <a href="tel:2147367923">214-736-7923</a></p>
+    <span class="close-btn" onclick="closeNotificationBar()">✖</span>
+  </div>
+  
+  <header>
+    <div class="logo-container">
+      <a href="/">
+        <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="logo">
+      </a>
+    </div>
+  
+    <div class="social-media-icons">
+      <a href="https://www.facebook.com/pawsinstride" target="_blank" class="social-icon">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/paws.in.stride" target="_blank" class="social-icon">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="https://www.tiktok.com/@pawsnstride" target="_blank" class="social-icon">
+        <i class="fab fa-tiktok"></i>
+      </a>
+    </div>
+  
+    <nav id="menu-box">
+      <div class="menu-button" onclick="toggleMenu()">MENU</div>
+  
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/">HOME</a></li>
+        <li><a href="/?page=services">SERVICES</a></li>
+        <li><a href="/?page=aboutus">ABOUT</a></li>
+        <li><a href="/?page=contact">CONTACT</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+      </ul>
+    </nav>
+  </header>
   <div class="page-wrap">
 
-    <!-- HERO -->
-    <section class="section-card hero">
-      <div>
-        <div class="eyebrow">Fresh Meals for Dogs</div>
-        <h1>Fresh, Human-Grade Dog Meals Delivered Weekly</h1>
-        <p>
-          Real ingredients, prepared fresh each week and delivered locally in glass containers. Each plan includes 7 daily meal packs with separate morning and evening servings, portioned around your dog’s size and needs.
-        </p>
-
-        <div class="hero-actions">
-          <a href="https://survey.pawsinstride.com" class="btn btn-primary">Start Your Dog’s Meal Plan</a>
-          <a href="#plans" class="btn btn-secondary">See Plans & Pricing</a>
-        </div>
-      </div>
-
-      <div class="hero-image-wrap">
-        <img src="/freshdogmealshero.PNG" alt="Fresh human-grade dog meals prepared in glass containers">
-
-        <div class="image-caption">
-          <strong>7 daily meal packs delivered weekly • 14 total servings</strong>
-          <span>Each daily pack is portioned for one full day of feeding, with separate morning and evening servings.</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- COMBINED TRUST / DIFFERENCE -->
-    <section class="section-card">
-      <div class="section-head">
-        <h2>Why Pet Parents Choose Paws in Stride Fresh Meals</h2>
-        <p>
-          Paws in Stride Fresh Meals are made with real protein, nourishing carbs, and wholesome vegetables. We prepare them fresh each week, portion them by plan size, and deliver them locally for a cleaner, more personal feeding experience.
-        </p>
-      </div>
-
-      <div class="trust-grid">
-        <div class="mini-card">
-          <h3>🥩 Human-Grade Ingredients</h3>
-          <p>Made with real ingredients you can recognize and feel good about feeding.</p>
-        </div>
-
-        <div class="mini-card">
-          <h3>🚚 Fresh Weekly Delivery</h3>
-          <p>Meals are prepared fresh each week and delivered locally to your door.</p>
-        </div>
-
-        <div class="mini-card">
-          <h3>🫙 Glass Containers</h3>
-          <p>Stored in glass for a cleaner, more sustainable meal experience with less plastic contact.</p>
-        </div>
-
-        <div class="mini-card">
-          <h3>❄️ Never Frozen</h3>
-          <p>No frozen bricks, no thawing hassle, and no heavily processed feel.</p>
-        </div>
-      </div>
-
-      <div class="feature-grid" style="margin-top: 18px;">
-        <div class="feature-card">
-          <h3>🍽️ Real Food, Not Fillers</h3>
+    <main>
+      <!-- HERO -->
+      <section class="section-card hero">
+        <div>
+          <div class="eyebrow">Fresh Meals for Dogs</div>
+          <h1>Fresh, Human-Grade Dog Meals Delivered Weekly</h1>
           <p>
-            No mystery ingredients, no heavily processed textures, and no fake “healthy” branding. Just simple, recognizable ingredients built into balanced meal packs.
+            Real ingredients, prepared fresh each week and delivered locally in glass containers. Each plan includes 7 daily meal packs with separate morning and evening servings, portioned around your dog’s size and needs.
           </p>
-        </div>
-
-        <div class="feature-card">
-          <h3>📍 Local and Personal</h3>
-          <p>
-            We’re not shipping frozen boxes across the country. We’re local, hands-on, and focused on quality from prep day to delivery day.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- INGREDIENTS -->
-    <section class="section-card">
-      <div class="section-head">
-        <h2>Simple Ingredients. Real Nutrition.</h2>
-        <p>
-          Our meals are built from ingredients chosen for freshness, simplicity, and everyday nourishment.
-        </p>
-      </div>
-
-      <div class="ingredients-layout">
-        <div class="ingredients-image">
-          <img src="/ingredients-dog-food.PNG" alt="Fresh ingredients used in our dog meal plans">
-        </div>
-
-        <div class="ingredient-grid">
-          <div class="ingredient-card">
-            <h3>Proteins</h3>
-            <ul class="ingredient-list">
-              <li>Chicken</li>
-              <li>Beef</li>
-              <li>Turkey</li>
-              <li>Fish</li>
-            </ul>
-          </div>
-
-          <div class="ingredient-card">
-            <h3>Carbs</h3>
-            <ul class="ingredient-list">
-              <li>Rice</li>
-              <li>Quinoa</li>
-              <li>Sweet Potato</li>
-            </ul>
-          </div>
-
-          <div class="ingredient-card">
-            <h3>Vegetables</h3>
-            <ul class="ingredient-list">
-              <li>Green Beans</li>
-              <li>Carrots</li>
-              <li>Peas</li>
-              <li>Pumpkin</li>
-            </ul>
-          </div>
-
-          <div class="ingredient-card">
-            <h3>Extras</h3>
-            <ul class="ingredient-list">
-              <li>Blueberries</li>
-              <li>Salmon Oil</li>
-              <li>Eggshell Powder</li>
-            </ul>
+  
+          <div class="hero-actions">
+            <a href="https://survey.pawsinstride.com" class="btn btn-primary">Start Your Dog’s Meal Plan</a>
+            <a href="#plans" class="btn btn-secondary">See Plans & Pricing</a>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- PLANS -->
-    <section class="section-card" id="plans">
-      <div class="section-head">
-        <h2>Plans Built Around Your Dog’s Size</h2>
-        <p>
-          Every dog starts with a plan matched to their size. Our quiz helps recommend the best fit, and we account for dietary restrictions along the way.
-        </p>
-      </div>
-
-      <div class="plan-grid">
-        <div class="plan-card">
-          <h3>Small Plan</h3>
-          <div class="plan-weight">0–20 lbs</div>
-          <div class="plan-portion">8 oz per day</div>
-          <p>7 daily packs • 14 total servings</p>
-          <div class="plan-price">$50<span>/week</span></div>
+  
+        <div class="hero-image-wrap">
+          <img src="/freshdogmealshero.PNG" alt="Fresh human-grade dog meals prepared in glass containers">
+  
+          <div class="image-caption">
+            <strong>7 daily meal packs delivered weekly • 14 total servings</strong>
+            <span>Each daily pack is portioned for one full day of feeding, with separate morning and evening servings.</span>
+          </div>
         </div>
-
-        <div class="plan-card featured">
-          <div class="plan-badge">Most Popular</div>
-          <h3>Medium Plan</h3>
-          <div class="plan-weight">21–40 lbs</div>
-          <div class="plan-portion">14 oz per day</div>
-          <p>7 daily packs • 14 total servings</p>
-          <div class="plan-price">$75<span>/week</span></div>
-        </div>
-
-        <div class="plan-card">
-          <h3>Large Plan</h3>
-          <div class="plan-weight">41–70 lbs</div>
-          <div class="plan-portion">20 oz per day</div>
-          <p>7 daily packs • 14 total servings</p>
-          <div class="plan-price">$100<span>/week</span></div>
-        </div>
-
-        <div class="plan-card">
-          <h3>XL Plan</h3>
-          <div class="plan-weight">71+ lbs</div>
-          <div class="plan-portion">22 oz per day</div>
-          <p>7 daily packs • 14 total servings</p>
-          <div class="plan-price">$125<span>/week</span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- DONATION -->
-    <section class="section-card donation-section">
-      <div class="donation-copy">
-        <div class="donation-highlight">❤️ Every subscription gives back</div>
-        <h2>Feed Your Dog and Help a Shelter Dog Eat Too</h2>
-        <p>
-          When you subscribe to Paws in Stride Fresh Meals, you’re doing more than improving your own dog’s routine. You’re also helping feed a dog still waiting for a loving home.
-        </p>
-        <p>
-          We’re proud to support the Collin County Animal Shelter by donating one meal for every subscribed dog. It’s our way of turning every order into something bigger than just delivery day.
-        </p>
-
-        <div class="donation-stat">
-          Every subscribed dog provides one fresh meal to a dog at the Collin County Animal Shelter
-        </div>
-      </div>
-
-      <div class="donation-image-wrap">
-        <div class="donation-image">
-          <img src="/collin-shelter.png" alt="Collin County Animal Shelter where Paws in Stride donates meals">
-        </div>
-      </div>
-    </section>
-
-    <!-- SERVICE AREA -->
-    <section class="section-card service-area-section">
-      <div class="section-head">
-        <h2>Local Delivery Across Collin County</h2>
-        <p>
-          We deliver fresh dog meals throughout Collin County, including Frisco, Celina, Prosper, McKinney, Allen, Plano, Wylie, Anna, Melissa, and nearby communities.
-        </p>
-      </div>
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <h3>🚚 Local Weekly Delivery</h3>
+      </section>
+  
+      <!-- COMBINED TRUST / DIFFERENCE -->
+      <section class="section-card">
+        <div class="section-head">
+          <h2>Why Pet Parents Choose Paws in Stride Fresh Meals</h2>
           <p>
-            We deliver directly to your door each week, so your dog’s meals arrive fresh, ready to serve, and never stuck in long shipping delays.
+            Paws in Stride Fresh Meals are made with real protein, nourishing carbs, and wholesome vegetables. We prepare them fresh each week, portion them by plan size, and deliver them locally for a cleaner, more personal feeding experience.
           </p>
         </div>
-
-        <div class="feature-card">
-          <h3>📍 Expanding Service Area</h3>
+  
+        <div class="trust-grid">
+          <div class="mini-card">
+            <h3>🥩 Human-Grade Ingredients</h3>
+            <p>Made with real ingredients you can recognize and feel good about feeding.</p>
+          </div>
+  
+          <div class="mini-card">
+            <h3>🚚 Fresh Weekly Delivery</h3>
+            <p>Meals are prepared fresh each week and delivered locally to your door.</p>
+          </div>
+  
+          <div class="mini-card">
+            <h3>🫙 Glass Containers</h3>
+            <p>Stored in glass for a cleaner, more sustainable meal experience with less plastic contact.</p>
+          </div>
+  
+          <div class="mini-card">
+            <h3>❄️ Never Frozen</h3>
+            <p>No frozen bricks, no thawing hassle, and no heavily processed feel.</p>
+          </div>
+        </div>
+  
+        <div class="feature-grid" style="margin-top: 18px;">
+          <div class="feature-card">
+            <h3>🍽️ Real Food, Not Fillers</h3>
+            <p>
+              No mystery ingredients, no heavily processed textures, and no fake “healthy” branding. Just simple, recognizable ingredients built into balanced meal packs.
+            </p>
+          </div>
+  
+          <div class="feature-card">
+            <h3>📍 Local and Personal</h3>
+            <p>
+              We’re not shipping frozen boxes across the country. We’re local, hands-on, and focused on quality from prep day to delivery day.
+            </p>
+          </div>
+        </div>
+      </section>
+  
+      <!-- INGREDIENTS -->
+      <section class="section-card">
+        <div class="section-head">
+          <h2>Simple Ingredients. Real Nutrition.</h2>
           <p>
-            If you’re nearby and don’t see your city listed, reach out — we’re actively expanding delivery routes throughout Collin County.
+            Our meals are built from ingredients chosen for freshness, simplicity, and everyday nourishment.
           </p>
         </div>
-      </div>
-    </section>
-
-    <!-- FINAL CTA -->
-    <section class="section-card closing-cta closing-cta-highlight">
-      <div class="donation-highlight">🐶 Personalized meal recommendations</div>
-      <h2>Find the Best Starting Plan for Your Dog</h2>
-      <p>
-        Answer a few quick questions and we’ll recommend the right meal plan based on your dog’s size, routine, and dietary needs.
-      </p>
-
-      <a href="https://survey.pawsinstride.com" class="btn btn-primary">Start the Meal Quiz</a>
-
-      <div class="small-note">
-        Takes less than 2 minutes • No commitment required
-      </div>
-    </section>
-
+  
+        <div class="ingredients-layout">
+          <div class="ingredients-image">
+            <img src="/ingredients-dog-food.PNG" alt="Fresh ingredients used in our dog meal plans">
+          </div>
+  
+          <div class="ingredient-grid">
+            <div class="ingredient-card">
+              <h3>Proteins</h3>
+              <ul class="ingredient-list">
+                <li>Chicken</li>
+                <li>Beef</li>
+                <li>Turkey</li>
+                <li>Fish</li>
+              </ul>
+            </div>
+  
+            <div class="ingredient-card">
+              <h3>Carbs</h3>
+              <ul class="ingredient-list">
+                <li>Rice</li>
+                <li>Quinoa</li>
+                <li>Sweet Potato</li>
+              </ul>
+            </div>
+  
+            <div class="ingredient-card">
+              <h3>Vegetables</h3>
+              <ul class="ingredient-list">
+                <li>Green Beans</li>
+                <li>Carrots</li>
+                <li>Peas</li>
+                <li>Pumpkin</li>
+              </ul>
+            </div>
+  
+            <div class="ingredient-card">
+              <h3>Extras</h3>
+              <ul class="ingredient-list">
+                <li>Blueberries</li>
+                <li>Salmon Oil</li>
+                <li>Eggshell Powder</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- PLANS -->
+      <section class="section-card" id="plans">
+        <div class="section-head">
+          <h2>Plans Built Around Your Dog’s Size</h2>
+          <p>
+            Every dog starts with a plan matched to their size. Our quiz helps recommend the best fit, and we account for dietary restrictions along the way.
+          </p>
+        </div>
+  
+        <div class="plan-grid">
+          <div class="plan-card">
+            <h3>Small Plan</h3>
+            <div class="plan-weight">0–20 lbs</div>
+            <div class="plan-portion">8 oz per day</div>
+            <p>7 daily packs • 14 total servings</p>
+            <div class="plan-price">$50<span>/week</span></div>
+          </div>
+  
+          <div class="plan-card featured">
+            <div class="plan-badge">Most Popular</div>
+            <h3>Medium Plan</h3>
+            <div class="plan-weight">21–40 lbs</div>
+            <div class="plan-portion">14 oz per day</div>
+            <p>7 daily packs • 14 total servings</p>
+            <div class="plan-price">$75<span>/week</span></div>
+          </div>
+  
+          <div class="plan-card">
+            <h3>Large Plan</h3>
+            <div class="plan-weight">41–70 lbs</div>
+            <div class="plan-portion">20 oz per day</div>
+            <p>7 daily packs • 14 total servings</p>
+            <div class="plan-price">$100<span>/week</span></div>
+          </div>
+  
+          <div class="plan-card">
+            <h3>XL Plan</h3>
+            <div class="plan-weight">71+ lbs</div>
+            <div class="plan-portion">22 oz per day</div>
+            <p>7 daily packs • 14 total servings</p>
+            <div class="plan-price">$125<span>/week</span></div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- DONATION -->
+      <section class="section-card donation-section">
+        <div class="donation-copy">
+          <div class="donation-highlight">❤️ Every subscription gives back</div>
+          <h2>Feed Your Dog and Help a Shelter Dog Eat Too</h2>
+          <p>
+            When you subscribe to Paws in Stride Fresh Meals, you’re doing more than improving your own dog’s routine. You’re also helping feed a dog still waiting for a loving home.
+          </p>
+          <p>
+            We’re proud to support the Collin County Animal Shelter by donating one meal for every subscribed dog. It’s our way of turning every order into something bigger than just delivery day.
+          </p>
+  
+          <div class="donation-stat">
+            Every subscribed dog provides one fresh meal to a dog at the Collin County Animal Shelter
+          </div>
+        </div>
+  
+        <div class="donation-image-wrap">
+          <div class="donation-image">
+            <img src="/collin-shelter.png" alt="Collin County Animal Shelter where Paws in Stride donates meals">
+          </div>
+        </div>
+      </section>
+  
+      <!-- SERVICE AREA -->
+      <section class="section-card service-area-section">
+        <div class="section-head">
+          <h2>Local Delivery Across Collin County</h2>
+          <p>
+            We deliver fresh dog meals throughout Collin County, including Frisco, Celina, Prosper, McKinney, Allen, Plano, Wylie, Anna, Melissa, and nearby communities.
+          </p>
+        </div>
+  
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h3>🚚 Local Weekly Delivery</h3>
+            <p>
+              We deliver directly to your door each week, so your dog’s meals arrive fresh, ready to serve, and never stuck in long shipping delays.
+            </p>
+          </div>
+  
+          <div class="feature-card">
+            <h3>📍 Expanding Service Area</h3>
+            <p>
+              If you’re nearby and don’t see your city listed, reach out — we’re actively expanding delivery routes throughout Collin County.
+            </p>
+          </div>
+        </div>
+      </section>
+  
+      <!-- FINAL CTA -->
+      <section class="section-card closing-cta closing-cta-highlight">
+        <div class="donation-highlight">🐶 Personalized meal recommendations</div>
+        <h2>Find the Best Starting Plan for Your Dog</h2>
+        <p>
+          Answer a few quick questions and we’ll recommend the right meal plan based on your dog’s size, routine, and dietary needs.
+        </p>
+  
+        <a href="https://survey.pawsinstride.com" class="btn btn-primary">Start the Meal Quiz</a>
+  
+        <div class="small-note">
+          Takes less than 2 minutes • No commitment required
+        </div>
+      </section>
+    </main>
   </div>
+<script>
+  function toggleMenu() {
+    var menu = document.getElementById('nav-menu');
+    menu.classList.toggle('open');
+  }
+
+  window.onscroll = function () {
+    scrollFunction();
+  };
+
+  function scrollFunction() {
+    const backToTopButton = document.getElementById("backToTop");
+    if (!backToTopButton) return;
+
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+      backToTopButton.style.display = "block";
+    } else {
+      backToTopButton.style.display = "none";
+    }
+  }
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function closeNotificationBar() {
+    document.getElementById("notification-bar").style.display = "none";
+    localStorage.setItem("notificationClosed", "true");
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.getItem("notificationClosed") === "true") {
+      const bar = document.getElementById("notification-bar");
+      if (bar) bar.style.display = "none";
+    }
+  });
+</script>
+<footer>
+  <div class="footer-container">
+    <ul class="footer-nav">
+      <li><a href="/">HOME</a></li>
+      <li><a href="/?page=services">SERVICES</a></li>
+      <li><a href="/?page=aboutus">ABOUT</a></li>
+      <li><a href="/?page=contact">CONTACT</a></li>
+      <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+    </ul>
+    <div class="footer-info">
+      <p>&copy; 2024 Paws in Stride®</p>
+      <p>Proudly serving Frisco, Prosper, Celina, and Little Elm Texas</p>
+      <p>Phone Number: <a href="tel:+12147367923">+1-214-736-7923</a></p>
+    </div>
+  </div>
+</footer>
+<button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
 </body>
 </html>
