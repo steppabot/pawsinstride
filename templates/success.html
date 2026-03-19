@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" href="{{ url_for('static', filename='pawsnstridelogo1.png') }}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subscription Confirmed</title>
@@ -11,7 +13,7 @@
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Roboto', sans-serif;
       background: linear-gradient(135deg, #47cee6, #2890df);
       min-height: 100vh;
       display: flex;
@@ -63,6 +65,17 @@
       color: #222;
     }
 
+    .brand {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .brand img {
+      max-width: 220px;
+      width: 100%;
+      height: auto;
+    }
+    
     p {
       margin: 0 auto 14px;
       max-width: 620px;
@@ -168,6 +181,9 @@
 </head>
 <body>
   <div class="card">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='pawsnstridelogo1.png') }}" alt="Paws in Stride logo">
+    </div>
     <div class="icon">✓</div>
     <div class="eyebrow">Subscription Confirmed</div>
     <h1>Your dog’s fresh meal plan is active</h1>
