@@ -21,6 +21,13 @@
       color: #333;
     }
 
+    .micro-trust {
+      text-align: center;
+      font-size: 0.86rem;
+      color: #888;
+      margin-top: 14px;
+    }
+
     .survey-card {
       width: 100%;
       max-width: 720px;
@@ -298,6 +305,29 @@
         font-size: 1.7rem;
       }
 
+      .brand {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      
+      .brand img {
+        max-width: 220px;
+        width: 100%;
+        height: auto;
+      }
+      
+      .back-link {
+        display: inline-block;
+        margin-bottom: 14px;
+        font-size: 0.92rem;
+        color: #2890df;
+        font-weight: 700;
+      }
+      
+      .back-link:hover {
+        color: #ef602c;
+      }
+      
       .button-grid,
       .chip-grid {
         grid-template-columns: 1fr;
@@ -322,8 +352,14 @@
 <body>
   <div class="survey-card">
     <div class="top-copy">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='pawsnstridelogo1.png') }}" alt="Paws in Stride logo">
+      </div>
+    
+      <a href="https://pawsinstride.com" class="back-link">← Back to Paws in Stride</a>
+    
       <div class="eyebrow">Fresh Meals Quiz</div>
-      <h1>Build Your Dog’s Fresh Meal Plan</h1>
+      <h1>Build Your Dog’s Paws in Stride Meal Plan</h1>
       <p>
         Answer 3 quick questions and we’ll recommend the best meal plan
         for your dog’s size, activity level, and dietary needs.
@@ -540,6 +576,7 @@
         </section>
       </div>
     </form>
+    <p class="micro-trust">Trusted by local dog owners across Collin County</p>
   </div>
 
   <script>
