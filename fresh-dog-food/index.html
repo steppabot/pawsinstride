@@ -433,6 +433,72 @@
       font-size: 0.92rem;
     }
 
+    .meal-rotation {
+      max-width: 1200px;
+      margin: 30px auto;
+      text-align: center;
+    }
+    
+    .meal-rotation h2 {
+      color: #f3aa4c;
+      margin-bottom: 10px;
+    }
+    
+    .meal-rotation p {
+      max-width: 700px;
+      margin: 0 auto 25px;
+      color: #333;
+    }
+    
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    
+    .meal-card {
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.08);
+      text-align: left;
+    }
+    
+    .meal-card h3 {
+      margin-bottom: 8px;
+    }
+    
+    .meal-card span {
+      display: block;
+      margin-top: 8px;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    /* PREMIUM CARD */
+    .meal-card.premium {
+      border: 2px solid #f5ab40;
+      background: linear-gradient(135deg, #fff8ef, #ffffff);
+    }
+    
+    .premium-tag {
+      color: #f5ab40;
+      font-weight: bold;
+    }
+    
+    .meal-card small {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    @media (max-width: 768px) {
+      .meal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 1024px) {
       .hero,
       .donation-section,
@@ -666,6 +732,55 @@
               </ul>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!---- MEAL SECTION ---->
+      <section class="meal-rotation">
+        <h2>🍽️ Sample Weekly Meal Rotation</h2>
+        <p>
+          Your dog’s meals include a rotating mix of fresh, balanced recipes made with real ingredients.
+          Some favorite meals may repeat throughout the week, with premium options included in select rotations.
+        </p>
+      
+        <div class="meal-grid">
+      
+          <!-- Chicken -->
+          <div class="meal-card">
+            <h3>🍗 Chicken Bowl</h3>
+            <p>Chicken breast, rice, carrots, green beans</p>
+            <span>Simple & highly digestible</span>
+          </div>
+      
+          <!-- Turkey -->
+          <div class="meal-card">
+            <h3>🦃 Turkey Bowl</h3>
+            <p>Ground turkey, sweet potato, peas, green beans</p>
+            <span>Great for energy & digestion</span>
+          </div>
+      
+          <!-- Beef -->
+          <div class="meal-card">
+            <h3>🥩 Beef Bowl</h3>
+            <p>Ground beef, rice, carrots, peas</p>
+            <span>Hearty & protein-rich</span>
+          </div>
+      
+          <!-- Ground Chicken -->
+          <div class="meal-card">
+            <h3>🍗 Ground Chicken Bowl</h3>
+            <p>Ground chicken, quinoa, green beans, carrots</p>
+            <span>Clean & balanced</span>
+          </div>
+      
+          <!-- Salmon Premium -->
+          <div class="meal-card premium">
+            <h3>🐟 Salmon Bowl</h3>
+            <p>Salmon, pumpkin, peas, blueberries</p>
+            <span class="premium-tag">⭐ Premium Meal</span>
+            <small>Included in select weekly rotations</small>
+          </div>
+      
         </div>
       </section>
   
