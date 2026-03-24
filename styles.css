@@ -1969,13 +1969,13 @@ header {
 }
 
 .service-note {
-    background: #fff7ea;
+    background: #fffaf3;
     border: 1px solid #f3d19d;
-    color: #5a4a2d;
-    padding: 12px 14px;
-    border-radius: 12px;
-    font-size: 15px;
-    line-height: 1.5;
+    color: #7a5a2b;
+    padding: 10px 16px;
+    border-radius: 999px; /* makes it pill-ish */
+    font-size: 14px;
+    display: inline-block;
     margin: 18px 0 20px;
 }
 
