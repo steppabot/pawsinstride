@@ -2027,3 +2027,34 @@ header {
     font-size: 14px;
     white-space: nowrap;
 }
+
+.services-jump-menu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 16px 0 28px;
+}
+
+.services-jump-menu a {
+    display: inline-block;
+    background: #fff7ea;
+    color: #7a5a2b;
+    border: 1px solid #f3d19d;
+    padding: 10px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.services-jump-menu a:hover {
+    background: #f3aa4c;
+    color: #fff;
+    border-color: #f3aa4c;
+}
+
+html {
+    scroll-behavior: smooth;
+}
