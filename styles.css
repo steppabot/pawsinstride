@@ -1995,3 +1995,35 @@ header {
     text-align: left;
 }
 
+.services-intro-wrapper {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    text-align: center;
+}
+
+.services-intro {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.services-trust-strip {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.services-trust-strip span {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    white-space: nowrap;
+}
