@@ -2171,3 +2171,61 @@ html {
         line-height: 1.7;
     }
 }
+
+/* ABOUT CTA SECTION */
+.about-cta {
+    max-width: 1150px;
+    margin: 40px auto 60px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 50px 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.about-cta h2 {
+    font-size: 32px;
+    color: #e6a23c;
+    margin-bottom: 12px;
+}
+
+.about-cta p {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+/* reuse your existing button style if you have one */
+.about-cta .cta-button {
+    display: inline-block;
+    background: #f3a847;
+    color: #fff;
+    padding: 14px 26px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.about-cta .cta-button:hover {
+    background: #e0952f;
+    transform: translateY(-2px);
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .about-cta {
+        width: calc(100% - 28px);
+        padding: 35px 20px;
+        margin: 30px auto 50px;
+    }
+
+    .about-cta h2 {
+        font-size: 26px;
+    }
+
+    .about-cta p {
+        font-size: 15px;
+    }
+}
