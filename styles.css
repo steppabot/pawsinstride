@@ -1357,6 +1357,7 @@ header {
 /* all homepage sections use the same outer width */
 .homepage-hero,
 .trust-images-section,
+.homepage-reviews,
 .homepage-pricing,
 .homepage-services,
 .service-areas,
@@ -1820,6 +1821,7 @@ header {
 @media (max-width: 768px) {
     .homepage-hero,
     .trust-images-section,
+    .homepage-reviews,
     .homepage-pricing,
     .homepage-services,
     .service-areas,
