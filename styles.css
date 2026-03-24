@@ -1572,15 +1572,15 @@ header {
 }
 
 .trust-grid img:nth-child(1) {
-    object-position: center center;
-}
-
-.trust-grid img:nth-child(2) {
     object-position: center 35%;
 }
 
+.trust-grid img:nth-child(2) {
+    object-position: center 55%;
+}
+
 .trust-grid img:nth-child(3) {
-    object-position: center 30%;
+    object-position: center 20%;
 }
 
 /* =========================
