@@ -14,12 +14,14 @@ body {
 
 header {
     text-align: center;
-    padding: 10px 0;
+    padding: 8px 0 0;
+    margin-top: 12px;
+    margin-bottom: 28px;
 }
 
 /* Logo styling */
 .logo-container {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .logo {
@@ -137,8 +139,8 @@ nav {
 
 /* Hero Section */
 .hero-section {
-    background: none; /* Let the gradient background show through */
-    padding:  50px 0 20px 0; 
+    background: none;
+    padding: 0;
 }
 
 .hero-container {
@@ -675,7 +677,7 @@ footer {
 
 .social-media-icons {
     text-align: center;
-    margin: 10px 0;
+    margin: 6px 0 10px;
 }
 
 .social-media-icons a {
@@ -713,7 +715,7 @@ footer {
 
 /* Push the header down so it doesn’t get overlapped */
 header {
-    margin-top: 50px; /* Adjust based on notification bar height */
+    margin-top: 12px; /* Adjust based on notification bar height */
 }
 
 #notification-bar p {
@@ -1927,6 +1929,10 @@ header {
     line-height: 1.6;
 }
 
+.homepage-hero {
+    margin-top: 0;
+}
+
 /* hide Elfsight branding */
 .homepage-reviews a[href*="elfsight.com/google-reviews-widget"] {
     display: none !important;
@@ -1946,4 +1952,6 @@ header {
         font-size: 1.65rem;
     }
 }
+
+
 
