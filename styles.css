@@ -2058,3 +2058,52 @@ header {
 html {
     scroll-behavior: smooth;
 }
+
+/* ABOUT PAGE MAIN CARD */
+.about-main-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 40px auto;
+    max-width: 1100px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    align-items: center;
+}
+
+/* IMAGE SIDE */
+.about-image img {
+    width: 100%;
+    height: auto;
+    max-height: 630px;
+    object-fit: contain;
+    display: block;
+}
+
+/* TEXT SIDE */
+.about-text {
+    padding: 40px;
+}
+
+.about-text h2 {
+    color: #e6a23c;
+    font-size: 28px;
+    margin-bottom: 16px;
+}
+
+.about-text p {
+    margin-bottom: 16px;
+    line-height: 1.6;
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    .about-main-card {
+        grid-template-columns: 1fr;
+    }
+
+    .about-text {
+        padding: 25px;
+    }
+}
