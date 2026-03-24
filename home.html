@@ -1,30 +1,155 @@
-<section class="hero-section">
-    <div class="hero-container">
-        <!-- Image on the left for desktop, above text for mobile -->
-        <div class="hero-image">
-            <img src="pupflex.png" alt="Dog Walker Frisco Texas" />
+<section class="hero-section homepage-hero">
+  <div class="hero-container">
+    <div class="hero-image">
+      <img src="/images/golden.jpg" alt="Happy golden retriever for dog walking in Frisco Texas">
+    </div>
+
+    <div class="hero-text-container">
+      <div class="hero-text">
+        <span class="hero-badge">🐾 Trusted Local Pet Care in Frisco</span>
+        <h1>Dog Walking, Pet Sitting & Boarding in Frisco, TX</h1>
+        <h3>Also serving Prosper, Celina & Little Elm</h3>
+
+        <p class="hero-subtext">
+          Reliable, personalized care for your dog with a free meet & greet before getting started.
+        </p>
+
+        <div class="hero-trust-points">
+          <span>⭐ Trusted local service</span>
+          <span>📍 Frisco-based</span>
+          <span>🐶 Personalized care</span>
         </div>
 
-        <!-- Right side text in a white background -->
-        <div class="hero-text-container">
-            <div class="hero-text">
-                <h1>Professional Dog Walking & Pet Sitting in Frisco, TX</h1>
-                <h3>Also Serving Prosper, Celina & Little Elm</h3>
-                <p>
-                At Paws in Stride, we provide reliable dog walking, pet sitting, and dog boarding
-                services tailored to your pup’s needs. We offer a complimentary meet and greet
-                to get to know you and your dog before getting started.
-                </p>
-                <!-- Button to be hooked up to Calendly -->
-                <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">SCHEDULE A FREE MEET & GREET</a>
-            </div>
+        <div class="hero-pricing-preview">
+          <div class="price-pill">Walks from <strong>$15</strong></div>
+          <div class="price-pill">Pet Sitting from <strong>$80</strong></div>
+          <div class="price-pill">Boarding from <strong>$85/day</strong></div>
         </div>
+
+        <div class="hero-buttons">
+          <a class="cta-button primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+            SCHEDULE A FREE MEET & GREET
+          </a>
+
+          <a class="cta-button secondary" href="tel:2147367923">
+            CALL NOW
+          </a>
+        </div>
+      </div>
     </div>
+  </div>
 </section>
 
-<section class="fresh-food-feature">
+<section class="trust-images-section">
+  <div class="section-heading">
+    <h2>Happy Dogs. Real Care. Local Service.</h2>
+    <p>Personalized pet care for dogs of all sizes, breeds, and personalities.</p>
+  </div>
+
+  <div class="trust-grid">
+    <img src="/images/golden3.jpg" alt="Golden retriever sitting outside in Frisco Texas">
+    <img src="/images/pom.jpg" alt="Small dog receiving indoor pet care in Frisco Texas">
+    <img src="/images/lab.jpg" alt="Friendly dog being cared for by Paws in Stride">
+  </div>
+</section>
+
+<section class="homepage-pricing">
+  <div class="homepage-pricing-container">
+    <h2>Simple, Transparent Starting Prices</h2>
+    <p>Quick pricing so you know what to expect before reaching out.</p>
+
+    <div class="pricing-cards">
+      <div class="pricing-card homepage-pricing-card">
+        <h3>Dog Walking</h3>
+        <p class="price">Starting at $15</p>
+        <p>Perfect for quick potty breaks, routine walks, and midday exercise.</p>
+      </div>
+
+      <div class="pricing-card homepage-pricing-card">
+        <h3>Pet Sitting</h3>
+        <p class="price">Starting at $80</p>
+        <p>In-home care for dogs who do best with personalized attention and companionship.</p>
+      </div>
+
+      <div class="pricing-card homepage-pricing-card">
+        <h3>Dog Boarding</h3>
+        <p class="price">Starting at $85/day</p>
+        <p>Comfortable home-style boarding with personalized care, potty breaks, and updates.</p>
+      </div>
+    </div>
+
+    <div class="pricing-cta">
+      <a href="#" onclick="loadPage('services.html'); return false;" class="cta-button secondary">
+        VIEW FULL PRICING & SERVICES
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="services-section homepage-services">
+  <div class="section-heading">
+    <h2>Pet Care Services</h2>
+    <p>Choose the service that best fits your dog’s routine and needs.</p>
+  </div>
+
+  <div class="service-container">
+    <div class="service-image">
+      <a href="#" onclick="loadPage('services.html', 'dog-walking'); return false;">
+        <img src="/images/golden.jpg" alt="Dog walking in Frisco Texas" class="rounded-image">
+        <div class="overlay"></div>
+        <h2>DOG WALKING</h2>
+      </a>
+    </div>
+
+    <div class="service-image">
+      <a href="#" onclick="loadPage('services.html', 'drop-in-visits'); return false;">
+        <img src="/images/dropin.jpg" alt="Drop in visits and potty breaks in Frisco Texas" class="rounded-image">
+        <div class="overlay"></div>
+        <h2>DROP-IN VISITS / POTTY BREAKS</h2>
+      </a>
+    </div>
+
+    <div class="service-image">
+      <a href="#" onclick="loadPage('services.html', 'pet-sitting'); return false;">
+        <img src="/images/poodle.jpg" alt="Pet sitting in Frisco Texas" class="rounded-image">
+        <div class="overlay"></div>
+        <h2>PET SITTING</h2>
+      </a>
+    </div>
+
+    <div class="service-image">
+      <a href="#" onclick="loadPage('services.html', 'dog-boarding'); return false;">
+        <img src="/images/poodle2.jpg" alt="Dog boarding in Frisco Texas" class="rounded-image">
+        <div class="overlay"></div>
+        <h2>DOG BOARDING</h2>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="service-areas">
+  <div class="service-areas-container">
+    <h2>Service Areas</h2>
+    <p>
+      Paws in Stride proudly provides dog walking, pet sitting, and dog boarding services across North Texas including:
+    </p>
+
+    <ul>
+      <li><a href="dog-walker-frisco-tx.html">Frisco, Texas</a></li>
+      <li><a href="dog-walker-prosper-tx.html">Prosper, Texas</a></li>
+      <li><a href="dog-walker-celina-tx.html">Celina, Texas</a></li>
+      <li><a href="dog-walker-little-elm-tx.html">Little Elm, Texas</a></li>
+    </ul>
+
+    <p>
+      If you're located near these areas, feel free to contact us to see if we can accommodate your location.
+    </p>
+  </div>
+</section>
+
+<section class="fresh-food-feature lower-priority">
   <div class="fresh-food-header">
-    <h2>🍽️ New: Fresh, Human-Grade Dog Meals Delivered Weekly</h2>
+    <h2>🍽️ Fresh, Human-Grade Dog Meals Delivered Weekly</h2>
     <p>
       Upgrade your dog’s nutrition with fresh, portioned meals made from real ingredients and delivered locally in BPA-free containers.
     </p>
@@ -42,69 +167,32 @@
       <ul>
         <li>🥩 Real, human-grade ingredients</li>
         <li>🚚 Weekly local delivery</li>
-        <li>♻️ Sustainable BPA-free containers</li>
+        <li>♻️ BPA-free containers</li>
         <li>❄️ Never frozen, no fillers</li>
       </ul>
 
       <a href="/fresh-dog-food" class="fresh-food-btn">
-        START YOUR DOG'S MEAL PLAN
+        LEARN ABOUT FRESH DOG MEALS
       </a>
     </div>
   </div>
 </section>
 
-<!-- Service Section with images and overlay text -->
-<section class="services-section">
-    <div class="service-container">
-        <!-- Dog Walking Section -->
-        <div class="service-image">
-            <a href="#" onclick="loadPage('services.html', 'dog-walking'); return false;">
-                <img src="walking.png" alt="Dog Walking Frisco Texas" class="rounded-image">
-                <div class="overlay"></div>
-                <h2>DOG WALKING</h2>
-            </a>
-        </div>
-        <!-- Drop In Visit Section -->
-        <div class="service-image">
-            <a href="#" onclick="loadPage('services.html', 'drop-in-visits'); return false;">
-                <img src="dropinfront.png" alt="Dog Potty Breaks Frisco Texas" class="rounded-image">
-                <div class="overlay"></div>
-                <h2>DROP IN VISITS / POTTY BREAKS</h2>
-            </a>
-        </div>
-        <!-- Pet Sitting Section -->
-        <div class="service-image">
-            <a href="#" onclick="loadPage('services.html', 'pet-sitting'); return false;">
-                <img src="dropin.png" alt="Frisco Texas Pet Sitting" class="rounded-image">
-                <div class="overlay"></div>
-                <h2>PET SITTING</h2>
-            </a>
-        </div>
-        <!-- Dog Boarding Section -->
-        <div class="service-image">
-            <a href="#" onclick="loadPage('services.html', 'dog-boarding'); return false;">
-                <img src="dogsitting.png" alt="Frisco Texas Dog Boarding" class="rounded-image">
-                <div class="overlay"></div>
-                <h2>DOG BOARDING</h2>
-            </a>
-        </div>
-    </div>
-</section>
+<section class="final-cta">
+  <div class="final-cta-container">
+    <h2>Ready to Get Started?</h2>
+    <p>
+      Book your free meet & greet today and see if Paws in Stride is the right fit for your dog.
+    </p>
 
-<section class="service-areas">
-    <div class="service-areas-container">
-        <h2>Dog Walking Service Areas</h2>
-        <p>
-        Paws in Stride proudly provides dog walking, pet sitting, and dog boarding services across North Texas including:
-        </p>
-        <ul>
-            <li><a href="dog-walker-frisco-tx.html">Frisco, Texas</a></li>
-            <li><a href="dog-walker-prosper-tx.html">Prosper, Texas</a></li>
-            <li><a href="dog-walker-celina-tx.html">Celina, Texas</a></li>
-            <li><a href="dog-walker-little-elm-tx.html">Little Elm, Texas</a></li>
-        </ul>
-        <p>
-        If you're located near these areas, feel free to contact us to see if we can accommodate your location.
-        </p>
+    <div class="hero-buttons">
+      <a class="cta-button primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+        BOOK FREE MEET & GREET
+      </a>
+
+      <a class="cta-button secondary" href="tel:2147367923">
+        CALL 214-736-7923
+      </a>
     </div>
+  </div>
 </section>
