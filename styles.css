@@ -1573,15 +1573,15 @@ header {
 }
 
 .trust-grid img:nth-child(1) {
-    object-position: center 35%;
+    object-position: center 25%; /* move UP */
 }
 
 .trust-grid img:nth-child(2) {
-    object-position: center 55%;
+    object-position: center 70%; /* move DOWN */
 }
 
 .trust-grid img:nth-child(3) {
-    object-position: center 20%;
+    object-position: center 10%; /* move UP more */
 }
 
 /* =========================
