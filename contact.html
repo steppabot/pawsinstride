@@ -1,40 +1,80 @@
-<div class="contact-section">
-    <div class="contact-form">
-        <h2>Contact Us</h2>
-        <form action="https://formspree.io/f/manwgqoz" method="POST">
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" id="name" name="name" placeholder="Your name" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="_replyto" placeholder="Your email" required>
-            </div>
-            <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" placeholder="Your phone number">
-            </div>
-            <div class="form-group">
-                <label for="comments">Comments</label>
-                <textarea id="comments" name="comments" placeholder="Your message" required></textarea>
-            </div>
-            <button type="submit" class="send-button">Send</button>
-        </form>
+<!-- Contact Intro -->
+<section class="contact-hero">
+  <div class="contact-hero-card">
+    <h1>Contact Paws in Stride</h1>
+    <p>
+      Questions about dog walking, drop-in visits, pet sitting, or boarding? Reach out today and we’ll help you find the best fit for your dog.
+    </p>
+
+    <div class="contact-hero-buttons">
+      <a class="cta-button primary" href="tel:2147367923">CALL 214-736-7923</a>
+      <a class="cta-button secondary" href="mailto:contact@pawsinstride.com?subject=Dog%20Walking%20Inquiry&body=Hi%20there,%20I%27d%20like%20to%20know%20more%20about%20your%20services.">EMAIL US</a>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Main Section -->
+<section class="contact-page-section">
+  <div class="contact-page-grid">
+
+    <!-- Form Card -->
+    <div class="contact-form-card">
+      <h2>Send a Message</h2>
+      <p class="contact-card-subtext">
+        Fill out the form below and we’ll get back to you as soon as possible.
+      </p>
+
+      <form action="https://formspree.io/f/manwgqoz" method="POST" class="premium-contact-form">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Your name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="_replyto" placeholder="Your email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="Your phone number">
+        </div>
+
+        <div class="form-group">
+          <label for="comments">How can we help?</label>
+          <textarea id="comments" name="comments" placeholder="Tell us a little about your dog and what service you’re looking for" required></textarea>
+        </div>
+
+        <button type="submit" class="send-button">Send Message</button>
+      </form>
     </div>
 
-    <!-- Google Map Section -->
-    <div class="map-section">
+    <!-- Info / Map Card -->
+    <div class="contact-info-card">
+      <h2>Get in Touch</h2>
+      <p class="contact-card-subtext">
+        Serving Frisco, Prosper, Celina, and Little Elm.
+      </p>
+
+      <div class="contact-info-pills">
+        <a href="tel:2147367923" class="contact-pill">📞 (214) 736-7923</a>
+        <a href="mailto:contact@pawsinstride.com?subject=Dog%20Walking%20Inquiry&body=Hi%20there,%20I%27d%20like%20to%20know%20more%20about%20your%20services." class="contact-pill">✉️ contact@pawsinstride.com</a>
+      </div>
+
+      <div class="contact-map-wrap">
         <iframe 
-            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAeG7JYPOFN71MLzotx-v-s5M4ZR2fDoWQ&q=Paws+In+Stride,Frisco+TX" 
-            allowfullscreen="" 
-            loading="lazy"></iframe>
-    
-            <!-- Address Section -->
-        <div class="address-section">
-            <h3>PAWS IN STRIDE</h3>
-            <p>4545 Mission Ave, Frisco, TX 75034</p>
-            <p><a href="tel:+12147367923" class="phone-number">(214) 736-7923</a></p>
-            <p><a href="mailto:contact@pawsinstride.com?subject=Dog%20Walking%20Inquiry&body=Hi%20there,%20I%27d%20like%20to%20know%20more%20about%20your%20services." class="email-link">Email Us</a></p>
-        </div>
+          src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAeG7JYPOFN71MLzotx-v-s5M4ZR2fDoWQ&q=Paws+In+Stride,Frisco+TX"
+          allowfullscreen=""
+          loading="lazy">
+        </iframe>
+      </div>
+
+      <div class="contact-address-box">
+        <h3>Paws in Stride</h3>
+        <p>4545 Mission Ave, Frisco, TX 75034</p>
+        <p>Serving dogs across Frisco and surrounding areas.</p>
+      </div>
     </div>
-</div>
+
+  </div>
+</section>
