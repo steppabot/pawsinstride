@@ -357,6 +357,10 @@ nav {
     margin-bottom: 10px;
 }
 
+.dropin-image {
+  object-position: 30% center;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .about-section {
