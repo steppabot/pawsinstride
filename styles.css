@@ -1564,12 +1564,23 @@ header {
 
 .trust-grid img {
     width: 100%;
-    height: 280px;
+    height: 250px;
     object-fit: cover;
-    object-position: center;
     border-radius: 22px;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
     display: block;
+}
+
+.trust-grid img:nth-child(1) {
+    object-position: center center;
+}
+
+.trust-grid img:nth-child(2) {
+    object-position: center 35%;
+}
+
+.trust-grid img:nth-child(3) {
+    object-position: center 30%;
 }
 
 /* =========================
