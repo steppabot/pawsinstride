@@ -1953,5 +1953,45 @@ header {
     }
 }
 
+.services-offered-text-container h3,
+.services-offered-text-container h4 {
+    color: #333;
+    margin-top: 18px;
+    margin-bottom: 10px;
+}
 
+.services-offered-text-container p {
+    margin-bottom: 16px;
+}
+
+.services-offered-text-container .table-wrapper {
+    margin-bottom: 16px;
+}
+
+.service-note {
+    background: #fff7ea;
+    border: 1px solid #f3d19d;
+    color: #5a4a2d;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 18px 0 20px;
+}
+
+.services-offered-text-container .cta-button {
+    margin-top: 6px;
+}
+
+.compact-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.compact-table th,
+.compact-table td {
+    padding: 10px 12px;
+    text-align: left;
+}
 
