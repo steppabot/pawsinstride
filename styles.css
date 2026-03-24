@@ -2077,12 +2077,12 @@ html {
     grid-template-columns: 1fr 1.1fr;
 }
 
-.about-main-card.reverse .about-image {
-    order: 2;
+.about-main-card.reverse {
+    direction: rtl;
 }
 
 .about-main-card.reverse .about-text {
-    order: 1;
+    direction: ltr;
 }
 
 /* IMAGE SIDE */
