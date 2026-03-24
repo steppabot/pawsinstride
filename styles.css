@@ -1574,6 +1574,7 @@ header {
 /* =========================
    PRICING WHITE CARD
 ========================= */
+
 .homepage-pricing .homepage-pricing-container {
     width: 100%;
     background: #fff;
@@ -1585,9 +1586,10 @@ header {
 
 .pricing-cards {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 20px;
     margin-top: 26px;
+    align-items: stretch;
 }
 
 .homepage-pricing-card {
@@ -1598,6 +1600,7 @@ header {
     text-align: center;
     box-shadow: none;
     width: 100%;
+    min-width: 0;
 }
 
 .homepage-pricing-card h3 {
@@ -1615,6 +1618,12 @@ header {
 .pricing-cta {
     text-align: center;
     margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+    .pricing-cards {
+        grid-template-columns: 1fr !important;
+    }
 }
 
 /* =========================
