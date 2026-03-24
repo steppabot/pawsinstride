@@ -269,5 +269,29 @@
             }
         });
     </script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function removeElfsightBranding() {
+            var elfsightLink = document.querySelector('a[href*="elfsight.com/google-reviews-widget"]');
+            if (elfsightLink) {
+                elfsightLink.style.display = 'none';
+            }
+        }
+    
+        removeElfsightBranding();
+    
+        var observer = new MutationObserver(function() {
+            removeElfsightBranding();
+        });
+    
+        observer.observe(document.body, { childList: true, subtree: true });
+    
+        setInterval(removeElfsightBranding, 1000);
+    });
+    </script>
+
+    <script src="https://elfsightcdn.com/platform.js" async></script>
+    
 </body>
 </html>
