@@ -2457,6 +2457,18 @@ html {
     object-position: center 30%;
 }
 
+.prosper-page .city-trust-section .trust-grid img:nth-child(1) {
+    object-position: center 38%;
+}
+
+.prosper-page .city-trust-section .trust-grid img:nth-child(2) {
+    object-position: center 35%;
+}
+
+.prosper-page .city-trust-section .trust-grid img:nth-child(3) {
+    object-position: center 42%;
+}
+
 @media (max-width: 980px) {
     .city-hero .hero-text h1 {
         font-size: 2.2rem;
