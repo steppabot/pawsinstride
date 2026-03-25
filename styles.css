@@ -2446,15 +2446,15 @@ html {
 }
 
 .frisco-page .city-trust-section .trust-grid img:nth-child(1) {
-    object-position: center 5%;
+    object-position: center 65%;
 }
 
 .frisco-page .city-trust-section .trust-grid img:nth-child(2) {
-    object-position: center 5%;
+    object-position: center 65%;
 }
 
 .frisco-page .city-trust-section .trust-grid img:nth-child(3) {
-    object-position: center 65%;
+    object-position: center 30%;
 }
 
 @media (max-width: 980px) {
