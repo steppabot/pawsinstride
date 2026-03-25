@@ -2434,15 +2434,15 @@ html {
 }
 
 .celina-page .city-trust-section .trust-grid img:nth-child(1) {
-    object-position: center 0%;
+    object-position: center 60%;
 }
 
 .celina-page .city-trust-section .trust-grid img:nth-child(2) {
-    object-position: center 50%;
+    object-position: center 43%;
 }
 
 .celina-page .city-trust-section .trust-grid img:nth-child(3) {
-    object-position: center 40%;
+    object-position: center 50%;
 }
 
 @media (max-width: 980px) {
