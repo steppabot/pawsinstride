@@ -2430,7 +2430,15 @@ html {
 }
 
 .city-trust-section .trust-grid img:nth-child(1) {
-    object-position: center 30%;
+    object-position: center 25%;
+}
+
+.city-trust-section .trust-grid img:nth-child(2) {
+    object-position: center 50%;
+}
+
+.city-trust-section .trust-grid img:nth-child(3) {
+    object-position: center 40%;
 }
 
 @media (max-width: 980px) {
