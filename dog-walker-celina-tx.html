@@ -1,259 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dog Walking & Pet Sitting in Celina, TX | Paws in Stride</title>
-<meta name="description" content="Looking for dog walking or pet sitting in Celina, Texas? Paws in Stride provides reliable dog walking, drop-in visits, pet sitting, and dog boarding in Celina including Light Farms, Mustang Creek, and Lilyana.">
+  <title>Dog Walking & Pet Sitting in Celina, TX | Paws in Stride</title>
+  <meta name="description" content="Looking for dog walking or pet sitting in Celina, Texas? Paws in Stride provides reliable dog walking, drop-in visits, pet sitting, and dog boarding in Celina including Light Farms, Mustang Creek, and Lilyana.">
+  <meta name="robots" content="index, follow">
 
-<meta name="robots" content="index, follow">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+  <link rel="icon" href="/icons/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <link rel="manifest" href="/icons/site.webmanifest">
 
-<link rel="stylesheet" href="styles.css">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
 
-<!-- Favicon -->
-<link rel="icon" href="/icons/favicon.ico">
-
-<!-- Calendly -->
-<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
-<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
-
-<!-- Local Business Schema -->
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "PetService",
- "name": "Paws in Stride",
- "url": "https://www.pawsinstride.com/dog-walker-celina-tx.html",
- "telephone": "+1-214-736-7923",
- "description": "Paws in Stride provides dog walking, pet sitting, drop-in visits, and dog boarding services in Celina, Texas including Light Farms, Mustang Creek, and Lilyana.",
- "areaServed": {
-   "@type": "City",
-   "name": "Celina",
-   "addressRegion": "TX",
-   "addressCountry": "US"
- }
-}
-</script>
-
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "PetService",
+    "name": "Paws in Stride",
+    "url": "https://www.pawsinstride.com/dog-walker-celina-tx.html",
+    "telephone": "+1-214-736-7923",
+    "description": "Paws in Stride provides dog walking, pet sitting, drop-in visits, and dog boarding services in Celina, Texas including Light Farms, Mustang Creek, and Lilyana.",
+    "areaServed": {
+      "@type": "City",
+      "name": "Celina",
+      "addressRegion": "TX",
+      "addressCountry": "US"
+    }
+  }
+  </script>
 </head>
 
 <body>
+  <div id="notification-bar">
+    <p>🎖️ Veterans & First Responders receive <strong>10% OFF</strong> all Services!</p>
+    <p class="banner-phone">📞 Call Now: <a href="tel:2147367923">214-736-7923</a></p>
+    <span class="close-btn" onclick="closeNotificationBar()">✖</span>
+  </div>
 
-<header>
+  <header>
+    <div class="logo-container">
+      <a href="/index.html">
+        <img src="/pawsnstridelogo1.png" alt="Dog Walking Services Celina Texas" class="logo">
+      </a>
+    </div>
 
-<div class="logo-container">
-<a href="index.html">
-<img src="pawsnstridelogo1.png" alt="Paws in Stride Dog Walking Celina Texas" class="logo">
-</a>
-</div>
+    <div class="social-media-icons">
+      <a href="https://www.facebook.com/pawsinstride" target="_blank" class="social-icon">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/paws.in.stride" target="_blank" class="social-icon">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="https://www.tiktok.com/@pawsnstride" target="_blank" class="social-icon">
+        <i class="fab fa-tiktok"></i>
+      </a>
+    </div>
 
-<nav id="menu-box">
-<ul class="nav-links">
-    <li><a href="dog-walker-celina-tx.html">HOME</a></li>
-    <li><a href="index.html?page=services">SERVICES</a></li>
-    <li><a href="index.html?page=aboutus">ABOUT</a></li>
-    <li><a href="index.html?page=contact">CONTACT</a></li>
-</ul>
-</nav>
+    <nav id="menu-box">
+      <div class="menu-button" onclick="toggleMenu()">MENU</div>
 
-</header>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/index.html">HOME</a></li>
+        <li><a href="/index.html?page=services">SERVICES</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+        <li><a href="/index.html?page=aboutus">ABOUT</a></li>
+        <li><a href="/index.html?page=contact">CONTACT</a></li>
+      </ul>
+    </nav>
+  </header>
 
-<section class="hero-section">
-<div class="hero-container">
+  <main>
+    <section class="hero-section homepage-hero city-hero">
+      <div class="hero-container">
+        <div class="hero-image">
+          <img src="/images/celina-hero.jpg" alt="Dog walking in Celina Texas">
+        </div>
 
-<div class="hero-image">
-<img src="pupflex.png" alt="Dog Walking and Pet Sitting in Celina Texas">
-</div>
+        <div class="hero-text-container">
+          <div class="hero-text">
+            <span class="hero-badge">🐾 Trusted Dog Walking in Celina</span>
+            <h1>Dog Walking & Pet Sitting in Celina, TX</h1>
+            <h3>Serving Light Farms, Mustang Creek, Lilyana & nearby areas</h3>
 
-<div class="hero-text-container">
-<div class="hero-text">
+            <p class="hero-subtext">
+              Reliable dog walking, drop-in visits, pet sitting, and dog boarding for busy Celina pet owners who want dependable, personalized care.
+            </p>
 
-<h1>Dog Walking & Pet Sitting in Celina, TX</h1>
-<h3>Serving Light Farms, Mustang Creek, Lilyana & Nearby Areas</h3>
+            <div class="hero-trust-points">
+              <span>📍 Celina Service Area</span>
+              <span>🐶 Personalized Care</span>
+              <span>⭐ Trusted Local Service</span>
+            </div>
 
-<p>
-Looking for a reliable dog walker in Celina, Texas? Paws in Stride provides
-professional dog walking, pet sitting, drop-in visits, and dog boarding
-services for busy pet owners throughout Celina. We proudly serve families in
-Light Farms, Mustang Creek, Lilyana, and nearby neighborhoods with dependable,
-personalized care tailored to each dog’s routine and energy level.
-</p>
+            <div class="hero-pricing-preview">
+              <div class="price-pill">Walks from <strong>$15</strong></div>
+              <div class="price-pill">Drop-Ins from <strong>$15</strong></div>
+              <div class="price-pill">Boarding from <strong>$85/day</strong></div>
+            </div>
 
-<a class="cta-button"
-onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
-SCHEDULE A FREE MEET & GREET
-</a>
+            <p style="font-weight: 700; color: #ef602c; margin-top: 12px;">
+              Book your free Meet & Greet today
+            </p>
 
-</div>
-</div>
+            <div class="hero-buttons">
+              <a class="cta-button primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+                SCHEDULE A FREE MEET & GREET
+              </a>
+              <a class="cta-button secondary" href="tel:2147367923">
+                CALL NOW
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-</div>
-</section>
+    <section class="trust-images-section">
+      <div class="section-heading">
+        <h2>Happy Dogs. Real Care. Celina Service.</h2>
+        <p>Personalized care for dogs of all sizes, breeds, and energy levels.</p>
+      </div>
 
-<section class="services-section">
+      <div class="trust-grid">
+        <img src="/images/celina-trust-1.jpg" alt="Dog care in Celina Texas">
+        <img src="/images/celina-trust-2.jpg" alt="Happy dog being cared for in Celina Texas">
+        <img src="/images/celina-trust-3.jpg" alt="Professional pet care in Celina Texas">
+      </div>
+    </section>
 
-<div class="service-container">
+    <section class="services-section homepage-services">
+      <div class="homepage-services-card">
+        <div class="section-heading">
+          <h2>Pet Care Services in Celina</h2>
+          <p>Choose the service that best fits your dog’s routine and needs.</p>
+        </div>
 
-<div class="service-image">
-<a href="index.html?page=services&section=dog-walking">
-<img src="walking.png" alt="Dog Walking Service in Celina Texas" class="rounded-image">
-<div class="overlay"></div>
-<h2>DOG WALKING</h2>
-</a>
-</div>
+        <div class="service-container">
+          <div class="service-image">
+            <a href="/index.html?page=services&section=dog-walking">
+              <img src="/images/dogwalking.jpg" alt="Dog walking in Celina Texas" class="rounded-image">
+              <div class="overlay"></div>
+              <h2>DOG WALKING</h2>
+            </a>
+          </div>
 
-<div class="service-image">
-<a href="index.html?page=services&section=drop-in-visits">
-<img src="dropinfront.png" alt="Drop In Visits and Potty Breaks in Celina Texas" class="rounded-image">
-<div class="overlay"></div>
-<h2>DROP IN VISITS / POTTY BREAKS</h2>
-</a>
-</div>
+          <div class="service-image">
+            <a href="/index.html?page=services&section=drop-in-visits">
+              <img src="/images/dropin.jpg" alt="Drop in visits in Celina Texas" class="rounded-image">
+              <div class="overlay"></div>
+              <h2>DROP-IN VISITS / POTTY BREAKS</h2>
+            </a>
+          </div>
 
-<div class="service-image">
-<a href="index.html?page=services&section=pet-sitting">
-<img src="dropin.png" alt="Pet Sitting in Celina Texas" class="rounded-image">
-<div class="overlay"></div>
-<h2>PET SITTING</h2>
-</a>
-</div>
+          <div class="service-image">
+            <a href="/index.html?page=services&section=pet-sitting">
+              <img src="/images/poodle.jpg" alt="Pet sitting in Celina Texas" class="rounded-image">
+              <div class="overlay"></div>
+              <h2>PET SITTING</h2>
+            </a>
+          </div>
 
-<div class="service-image">
-<a href="index.html?page=services&section=dog-boarding">
-<img src="dogsitting.png" alt="Dog Boarding in Celina Texas" class="rounded-image">
-<div class="overlay"></div>
-<h2>DOG BOARDING</h2>
-</a>
-</div>
+          <div class="service-image">
+            <a href="/index.html?page=services&section=dog-boarding">
+              <img src="/images/poodle2.jpg" alt="Dog boarding in Celina Texas" class="rounded-image">
+              <div class="overlay"></div>
+              <h2>DOG BOARDING</h2>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-</div>
+    <section class="service-areas">
+      <div class="service-areas-container">
+        <h2>Celina Neighborhoods We Serve</h2>
+        <p>
+          Paws in Stride proudly provides dog walking, pet sitting, drop-in visits, and dog boarding for pet owners throughout Celina, Texas.
+        </p>
 
-</section>
+        <ul>
+          <li><a href="#">Light Farms</a></li>
+          <li><a href="#">Mustang Creek</a></li>
+          <li><a href="#">Lilyana</a></li>
+          <li><a href="#">Nearby Celina Communities</a></li>
+        </ul>
 
-<section class="service-areas">
+        <p>
+          If you're in Celina and looking for dependable help during the day, we’d love to meet you and your pup.
+        </p>
+      </div>
+    </section>
 
-<div class="service-areas-container">
+    <section class="service-areas">
+      <div class="service-areas-container">
+        <h2>Why Celina Dog Owners Choose Paws in Stride</h2>
+        <p>
+          Every dog has different needs, which is why we tailor visits based on personality, age, energy level, and routine. Whether your dog needs a structured walk, a midday potty break, or attentive care while you're away, we provide dependable service with real updates and real peace of mind.
+        </p>
+        <p>
+          Our goal is simple: make sure your dog gets the care, attention, and exercise they deserve while making your day easier.
+        </p>
+      </div>
+    </section>
 
-<h2>🐾 Celina Dog Walking Neighborhoods We Serve</h2>
+    <section class="final-cta">
+      <div class="final-cta-container">
+        <h2>Ready to Get Started?</h2>
+        <p>
+          Schedule your free meet & greet and see if Paws in Stride is the right fit for your dog in Celina.
+        </p>
 
-<p>
-Paws in Stride proudly provides dog walking, pet sitting, and dog boarding
-services for pet owners throughout Celina, Texas.
-</p>
+        <div class="hero-buttons">
+          <a class="cta-button primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+            BOOK FREE MEET & GREET
+          </a>
+          <a class="cta-button secondary" href="tel:2147367923">
+            CALL 214-736-7923
+          </a>
+        </div>
+      </div>
+    </section>
 
-<ul>
-<li>Light Farms</li>
-<li>Mustang Creek</li>
-<li>Lilyana</li>
-<li>Surrounding Celina Communities</li>
-</ul>
-
-<p>
-If you're located in Celina or one of these neighborhoods, contact us to
-schedule a complimentary meet and greet and see if we’re the perfect fit
-for your pup.
-</p>
-
-</div>
-
-</section>
-
-<section class="service-areas">
-
-<div class="service-areas-container">
-
-<h2>❤️ Why Celina Pet Owners Choose Paws in Stride</h2>
-
-<p>
-Every dog has different needs, which is why we tailor our visits based on
-your dog’s personality, age, energy level, and routine. Whether your dog
-needs a daily walk, a quick potty break while you're at work, or attentive
-care while you're away, Paws in Stride provides dependable service for
-Celina families.
-</p>
-
-<p>
-Our goal is simple: make sure your dog gets the exercise, attention, and
-care they deserve while giving you peace of mind during the day.
-</p>
-
-</div>
-
-</section>
-
-<section class="service-areas">
-
-<div class="service-areas-container">
-
-<h2>📍 Nearby Dog Walking Service Areas</h2>
-
-<p>
-Paws in Stride also provides dog walking and pet sitting services in nearby
-areas including <a href="dog-walker-frisco-tx.html">Frisco</a>,
-<a href="dog-walker-prosper-tx.html">Prosper</a>, and
-<a href="dog-walker-little-elm-tx.html">Little Elm</a>.
-</p>
-
-</div>
-
-</section>
-
-<section class="elfsight-container">
-    <div class="elfsight-wrapper">
+    <section class="elfsight-container">
+      <div class="elfsight-wrapper">
         <script src="https://static.elfsight.com/platform/platform.js" async></script>
         <div class="elfsight-app-f7b18edf-ceba-4a81-9f18-846d5c74e0cf" data-elfsight-app-lazy></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <ul class="footer-nav">
+        <li><a href="/index.html">HOME</a></li>
+        <li><a href="/index.html?page=services">SERVICES</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+        <li><a href="/index.html?page=aboutus">ABOUT</a></li>
+        <li><a href="/index.html?page=contact">CONTACT</a></li>
+      </ul>
+      <div class="footer-info">
+        <p>&copy; 2026 Paws in Stride®</p>
+        <p>Proudly serving Frisco, Prosper, Celina, and Little Elm Texas</p>
+        <p>Phone Number: <a href="tel:+12147367923">+1-214-736-7923</a></p>
+      </div>
     </div>
-</section>
+  </footer>
 
-<footer>
+  <button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
 
-<div class="footer-container">
+  <script>
+    function toggleMenu() {
+      var menu = document.getElementById('nav-menu');
+      menu.classList.toggle('open');
+    }
 
-<ul class="footer-nav">
-<li><a href="dog-walker-celina-tx">HOME</a></li>
-<li><a href="index.html?page=services">SERVICES</a></li>
-<li><a href="index.html?page=aboutus">ABOUT</a></li>
-<li><a href="index.html?page=contact">CONTACT</a></li>
-</ul>
+    window.onscroll = function() {scrollFunction()};
 
-<div class="footer-info">
-<p>&copy; 2026 Paws in Stride</p>
-<p>Serving Frisco, Celina, Prosper & Little Elm</p>
-<p>Phone: <a href="tel:+12147367923">214-736-7923</a></p>
-</div>
+    function scrollFunction() {
+      const backToTopButton = document.getElementById("backToTop");
+      if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        backToTopButton.style.display = "block";
+      } else {
+        backToTopButton.style.display = "none";
+      }
+    }
 
-</div>
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-</footer>
+    function closeNotificationBar() {
+      document.getElementById("notification-bar").style.display = "none";
+      localStorage.setItem("notificationClosed", "true");
+    }
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
+      if (localStorage.getItem("notificationClosed") === "true") {
+        document.getElementById("notification-bar").style.display = "none";
+      }
 
-    /* Remove Elfsight branding */
-    let elfsightInterval = setInterval(function () {
+      let elfsightInterval = setInterval(function () {
         let elfsightBranding = document.querySelector('a[href*="elfsight.com/instagram-feed-instashow"]');
         if (elfsightBranding) {
-            elfsightBranding.remove();
-            clearInterval(elfsightInterval);
+          elfsightBranding.remove();
+          clearInterval(elfsightInterval);
         }
-    }, 500);
+      }, 500);
 
-    /* Remove Calendly branding */
-    let calendlyInterval = setInterval(function () {
-        let calendlyBranding = document.querySelector('a[href*="calendly.com"]');
-        if (calendlyBranding && calendlyBranding.innerText.toLowerCase().includes("powered by")) {
-            calendlyBranding.style.display = "none";
-            clearInterval(calendlyInterval);
+      let reviewsInterval = setInterval(function () {
+        let googleBranding = document.querySelector('a[href*="elfsight.com/google-reviews-widget"]');
+        if (googleBranding) {
+          googleBranding.style.display = "none";
+          clearInterval(reviewsInterval);
         }
-    }, 500);
-
-});
-</script>
-
+      }, 500);
+    });
+  </script>
 </body>
 </html>
