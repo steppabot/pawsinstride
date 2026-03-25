@@ -2469,6 +2469,19 @@ html {
     object-position: center 22%;
 }
 
+/* Little Elm specific tweaks */
+.little-elm-page .trust-grid img:nth-child(1) {
+    object-position: center 40%;
+}
+
+.little-elm-page .trust-grid img:nth-child(2) {
+    object-position: center 35%;
+}
+
+.little-elm-page .trust-grid img:nth-child(3) {
+    object-position: center 45%;
+}
+
 @media (max-width: 980px) {
     .city-hero .hero-text h1 {
         font-size: 2.2rem;
