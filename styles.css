@@ -2434,7 +2434,7 @@ html {
 }
 
 .celina-page .city-trust-section .trust-grid img:nth-child(1) {
-    object-position: center 60%;
+    object-position: center 80%;
 }
 
 .celina-page .city-trust-section .trust-grid img:nth-child(2) {
@@ -2442,7 +2442,7 @@ html {
 }
 
 .celina-page .city-trust-section .trust-grid img:nth-child(3) {
-    object-position: center 50%;
+    object-position: center 52%;
 }
 
 @media (max-width: 980px) {
