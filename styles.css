@@ -2429,15 +2429,19 @@ html {
     font-size: 1.25rem;
 }
 
-.city-trust-section .trust-grid img:nth-child(1) {
-    object-position: center 60%;
+.city-trust-section .trust-grid img {
+    object-fit: cover;
 }
 
-.city-trust-section .trust-grid img:nth-child(2) {
+.celina-page .city-trust-section .trust-grid img:nth-child(1) {
+    object-position: center 0%;
+}
+
+.celina-page .city-trust-section .trust-grid img:nth-child(2) {
     object-position: center 50%;
 }
 
-.city-trust-section .trust-grid img:nth-child(3) {
+.celina-page .city-trust-section .trust-grid img:nth-child(3) {
     object-position: center 40%;
 }
 
