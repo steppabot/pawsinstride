@@ -298,6 +298,32 @@
     });
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function removeFeaturableBranding() {
+                // Hide Featurable links/badges only
+                document.querySelectorAll('a[href*="featurable.com"]').forEach(function(el) {
+                    el.style.display = "none";
+                });
+            }
+        
+            // Run once
+            removeFeaturableBranding();
+        
+            // Watch for async widget render
+            const observer = new MutationObserver(function () {
+                removeFeaturableBranding();
+            });
+        
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        
+            // Backup check
+            setInterval(removeFeaturableBranding, 1000);
+        });
+    </script>
 
     <script src="https://elfsightcdn.com/platform.js" async></script>
     <script src="https://featurable.com/assets/bundle.js" defer charset="UTF-8"></script>
