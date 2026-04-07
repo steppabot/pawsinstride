@@ -81,7 +81,21 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     document.getElementById('content').innerHTML = xhr.responseText;
-    
+        
+                    if (page === 'home.html') {
+                        const oldFeaturable = document.getElementById('featurable-script');
+                        if (oldFeaturable) {
+                            oldFeaturable.remove();
+                        }
+        
+                        const script = document.createElement('script');
+                        script.id = 'featurable-script';
+                        script.src = 'https://featurable.com/assets/bundle.js';
+                        script.charset = 'UTF-8';
+                        script.async = true;
+                        document.body.appendChild(script);
+                    }
+        
                     if (section) {
                         setTimeout(function () {
                             const targetElement = document.getElementById(section);
