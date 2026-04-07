@@ -291,6 +291,30 @@
     });
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    
+        function removeFeaturableBranding() {
+            // Remove any Featurable links/buttons
+            document.querySelectorAll('a[href*="featurable.com"]').forEach(el => el.remove());
+    
+            // Backup: remove common class if they use one
+            document.querySelectorAll('[class*="featurable"]').forEach(el => {
+                if (el.innerText.toLowerCase().includes("featurable")) {
+                    el.remove();
+                }
+            });
+        }
+    
+        removeFeaturableBranding();
+    
+        const observer = new MutationObserver(removeFeaturableBranding);
+        observer.observe(document.body, { childList: true, subtree: true });
+    
+        setInterval(removeFeaturableBranding, 1000);
+        });
+    </script>
+
     <script src="https://elfsightcdn.com/platform.js" async></script>
     
 </body>
