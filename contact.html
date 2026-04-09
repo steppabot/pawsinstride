@@ -1,80 +1,253 @@
-<!-- Contact Intro -->
-<section class="contact-hero">
-  <div class="contact-hero-card">
-    <h1>Contact Paws in Stride</h1>
-    <p>
-      Questions about dog walking, drop-in visits, pet sitting, or boarding? Reach out today and we’ll help you find the best fit for your dog.
-    </p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Paws in Stride | Dog Walker in Frisco TX</title>
+  <meta name="description" content="Contact Paws in Stride for dog walking, drop-in visits, pet sitting, and dog boarding in Frisco, TX. Call, email, or send a message today.">
 
-    <div class="contact-hero-buttons">
-      <a class="cta-button primary" href="tel:2147367923">CALL 214-736-7923</a>
-      <a class="cta-button secondary" href="mailto:contact@pawsinstride.com?subject=Dog%20Walking%20Inquiry&body=Hi%20there,%20I%27d%20like%20to%20know%20more%20about%20your%20services.">EMAIL US</a>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Paws in Stride",
+    "image": "https://www.pawsinstride.com/pawsnstridelogo1.png",
+    "url": "https://www.pawsinstride.com/contact.html",
+    "telephone": "+1-214-736-7923",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "4545 Mission Ave",
+      "addressLocality": "Frisco",
+      "addressRegion": "TX",
+      "postalCode": "75034",
+      "addressCountry": "US"
+    },
+    "description": "Contact Paws in Stride for dog walking, pet sitting, drop-in visits, and dog boarding in Frisco, Texas.",
+    "areaServed": [
+      { "@type": "City", "name": "Frisco" },
+      { "@type": "City", "name": "Prosper" },
+      { "@type": "City", "name": "Celina" },
+      { "@type": "City", "name": "Little Elm" }
+    ],
+    "openingHours": "Mo-Fr 09:00-18:00"
+  }
+  </script>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S8KBFC0X04"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-S8KBFC0X04');
+  </script>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+  <link rel="icon" href="/icons/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <link rel="manifest" href="/icons/site.webmanifest">
+
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+
+  <script>
+    function toggleMenu() {
+      var menu = document.getElementById('nav-menu');
+      menu.classList.toggle('open');
+    }
+
+    window.onscroll = function () { scrollFunction(); };
+
+    function scrollFunction() {
+      const backToTopButton = document.getElementById("backToTop");
+      if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        backToTopButton.style.display = "block";
+      } else {
+        backToTopButton.style.display = "none";
+      }
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeNotificationBar() {
+      document.getElementById("notification-bar").style.display = "none";
+      localStorage.setItem("notificationClosed", "true");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      if (localStorage.getItem("notificationClosed") === "true") {
+        document.getElementById("notification-bar").style.display = "none";
+      }
+    });
+  </script>
+</head>
+<body>
+  <div id="notification-bar">
+    <p>🎖️ Veterans & First Responders receive <strong>10% OFF</strong> all Services!</p>
+    <p class="banner-phone">📞 Call Now: <a href="tel:2147367923">214-736-7923</a></p>
+    <span class="close-btn" onclick="closeNotificationBar()">✖</span>
+  </div>
+
+  <header>
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '270500070223789');
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=270500070223789&ev=PageView&noscript=1"/>
+    </noscript>
+
+    <div class="logo-container">
+      <a href="/index.html">
+        <img src="pawsnstridelogo1.png" alt="Dog Walking Services Frisco Prosper Celina Little Elm Texas" class="logo">
+      </a>
+    </div>
+
+    <div class="social-media-icons">
+      <a href="https://www.facebook.com/pawsinstride" target="_blank" class="social-icon">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/paws.in.stride" target="_blank" class="social-icon">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="https://www.tiktok.com/@pawsnstride" target="_blank" class="social-icon">
+        <i class="fab fa-tiktok"></i>
+      </a>
+    </div>
+
+    <nav id="menu-box">
+      <div class="menu-button" onclick="toggleMenu()">MENU</div>
+
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/index.html">HOME</a></li>
+        <li><a href="/services.html">SERVICES</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+        <li><a href="/aboutus.html">ABOUT</a></li>
+        <li><a href="/contact.html">CONTACT</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="contact-hero">
+      <div class="contact-hero-card">
+        <h1>Contact Paws in Stride</h1>
+        <p>
+          Questions about dog walking, drop-in visits, pet sitting, or boarding? Reach out today and we’ll help you find the best fit for your dog.
+        </p>
+
+        <div class="contact-hero-buttons">
+          <a class="cta-button primary" href="tel:2147367923">CALL 214-736-7923</a>
+          <a class="cta-button secondary" href="mailto:contact@pawsinstride.com?subject=Dog%20Walking%20Inquiry&body=Hi%20there,%20I%27d%20like%20to%20know%20more%20about%20your%20services.">EMAIL US</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-page-section">
+      <div class="contact-page-grid">
+
+        <div class="contact-form-card">
+          <h2>Send a Message</h2>
+          <p class="contact-card-subtext">
+            Fill out the form below and we’ll get back to you as soon as possible.
+          </p>
+
+          <form action="https://formspree.io/f/manwgqoz" method="POST" class="premium-contact-form">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" placeholder="Your name" required>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="_replyto" placeholder="Your email" required>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" placeholder="Your phone number">
+            </div>
+
+            <div class="form-group">
+              <label for="comments">How can we help?</label>
+              <textarea id="comments" name="comments" placeholder="Tell us a little about your dog and what service you’re looking for" required></textarea>
+            </div>
+
+            <button type="submit" class="send-button">Send Message</button>
+          </form>
+        </div>
+
+        <div class="contact-info-card">
+          <h2>Get in Touch</h2>
+          <p class="contact-card-subtext">
+            Serving Frisco, Prosper, Celina, and Little Elm.
+          </p>
+
+          <div class="contact-info-pills">
+            <a href="tel:2147367923" class="contact-pill">📞 (214) 736-7923</a>
+            <a href="mailto:contact@pawsinstride.com?subject=Dog%20Walking%20Inquiry&body=Hi%20there,%20I%27d%20like%20to%20know%20more%20about%20your%20services." class="contact-pill">✉️ contact@pawsinstride.com</a>
+          </div>
+
+          <div class="contact-map-wrap">
+            <iframe 
+              src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAeG7JYPOFN71MLzotx-v-s5M4ZR2fDoWQ&q=Paws+In+Stride,Frisco+TX"
+              allowfullscreen=""
+              loading="lazy">
+            </iframe>
+          </div>
+
+          <div class="contact-address-box">
+            <h3>Paws in Stride</h3>
+            <p>4545 Mission Ave, Frisco, TX 75034</p>
+            <p>Serving dogs across Frisco and surrounding areas.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <div class="elfsight-container">
+    <div class="elfsight-wrapper">
+      <div class="elfsight-app-f7b18edf-ceba-4a81-9f18-846d5c74e0cf" data-elfsight-app-lazy></div>
     </div>
   </div>
-</section>
 
-<!-- Contact Main Section -->
-<section class="contact-page-section">
-  <div class="contact-page-grid">
-
-    <!-- Form Card -->
-    <div class="contact-form-card">
-      <h2>Send a Message</h2>
-      <p class="contact-card-subtext">
-        Fill out the form below and we’ll get back to you as soon as possible.
-      </p>
-
-      <form action="https://formspree.io/f/manwgqoz" method="POST" class="premium-contact-form">
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input type="text" id="name" name="name" placeholder="Your name" required>
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="_replyto" placeholder="Your email" required>
-        </div>
-
-        <div class="form-group">
-          <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" name="phone" placeholder="Your phone number">
-        </div>
-
-        <div class="form-group">
-          <label for="comments">How can we help?</label>
-          <textarea id="comments" name="comments" placeholder="Tell us a little about your dog and what service you’re looking for" required></textarea>
-        </div>
-
-        <button type="submit" class="send-button">Send Message</button>
-      </form>
-    </div>
-
-    <!-- Info / Map Card -->
-    <div class="contact-info-card">
-      <h2>Get in Touch</h2>
-      <p class="contact-card-subtext">
-        Serving Frisco, Prosper, Celina, and Little Elm.
-      </p>
-
-      <div class="contact-info-pills">
-        <a href="tel:2147367923" class="contact-pill">📞 (214) 736-7923</a>
-        <a href="mailto:contact@pawsinstride.com?subject=Dog%20Walking%20Inquiry&body=Hi%20there,%20I%27d%20like%20to%20know%20more%20about%20your%20services." class="contact-pill">✉️ contact@pawsinstride.com</a>
-      </div>
-
-      <div class="contact-map-wrap">
-        <iframe 
-          src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAeG7JYPOFN71MLzotx-v-s5M4ZR2fDoWQ&q=Paws+In+Stride,Frisco+TX"
-          allowfullscreen=""
-          loading="lazy">
-        </iframe>
-      </div>
-
-      <div class="contact-address-box">
-        <h3>Paws in Stride</h3>
-        <p>4545 Mission Ave, Frisco, TX 75034</p>
-        <p>Serving dogs across Frisco and surrounding areas.</p>
+  <footer>
+    <div class="footer-container">
+      <ul class="footer-nav">
+        <li><a href="/index.html">HOME</a></li>
+        <li><a href="/services.html">SERVICES</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+        <li><a href="/aboutus.html">ABOUT</a></li>
+        <li><a href="/contact.html">CONTACT</a></li>
+      </ul>
+      <div class="footer-info">
+        <p>&copy; 2024 Paws in Stride®</p>
+        <p>Proudly serving Frisco, Prosper, Celina, and Little Elm Texas</p>
+        <p>Phone Number: <a href="tel:+12147367923">+1-214-736-7923</a></p>
       </div>
     </div>
+  </footer>
 
-  </div>
-</section>
+  <button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
+
+  <script src="https://static.elfsight.com/platform/platform.js" async></script>
+</body>
+</html>
