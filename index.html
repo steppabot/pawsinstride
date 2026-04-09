@@ -54,11 +54,9 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-    
       gtag('config', 'G-S8KBFC0X04');
     </script>
     
-    <!-- Favicon and App Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
@@ -66,7 +64,6 @@
     <link rel="shortcut icon" href="/icons/favicon.ico">
     <link rel="manifest" href="/icons/site.webmanifest">
 
-    <!-- Meta Tags for Theming and Windows -->
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
    
@@ -75,46 +72,6 @@
     <link rel="stylesheet" href="styles.css">
 
     <script>
-        function loadPage(page, section = null) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', page, true);
-        
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    document.getElementById('content').innerHTML = xhr.responseText;
-        
-                    if (section) {
-                        setTimeout(function () {
-                            const targetElement = document.getElementById(section);
-                            if (targetElement) {
-                                targetElement.scrollIntoView({ behavior: 'smooth' });
-                            }
-                        }, 100);
-                    } else {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                }
-            };
-        
-            xhr.send();
-        }
-    
-        window.onload = function () {
-            const params = new URLSearchParams(window.location.search);
-            const page = params.get('page');
-            const section = params.get('section');
-    
-            if (page === 'services') {
-                loadPage('services.html', section);
-            } else if (page === 'aboutus') {
-                loadPage('aboutus.html');
-            } else if (page === 'contact') {
-                loadPage('contact.html');
-            } else {
-                loadPage('home.html');
-            }
-        };
-    
         function toggleMenu() {
             var menu = document.getElementById('nav-menu');
             menu.classList.toggle('open');
@@ -122,7 +79,6 @@
     </script>
     
     <script>
-        // Show the button when the user scrolls down 200px
         window.onscroll = function() {scrollFunction()};
     
         function scrollFunction() {
@@ -134,27 +90,22 @@
             }
         }
     
-        // Scroll to the top of the document
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
     
-    <!-- Calendly Embed Script -->
     <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
     <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 </head>
 <body>
-    <!-- Notification Bar -->
     <div id="notification-bar">
         <p>🎖️ Veterans & First Responders receive <strong>10% OFF</strong> all Services!</p>
         <p class="banner-phone">📞 Call Now: <a href="tel:2147367923">214-736-7923</a></p>
         <span class="close-btn" onclick="closeNotificationBar()">✖</span>
     </div>
 
-    <!-- Logo and Navigation Menu -->
     <header>
-        <!-- Meta Pixel Code -->
         <script>
         !function(f,b,e,v,n,t,s)
         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -170,16 +121,13 @@
         <noscript><img height="1" width="1" style="display:none"
         src="https://www.facebook.com/tr?id=270500070223789&ev=PageView&noscript=1"
         /></noscript>
-        <!-- End Meta Pixel Code -->
         
         <div class="logo-container">
-            <a href="#" onclick="loadPage('home.html'); return false;">
+            <a href="/index.html">
                 <img src="pawsnstridelogo1.png" alt="Dog Walking Services Frisco Prosper Celina Little Elm Texas" class="logo">
             </a>
         </div>
 
-
-        <!-- Social Media Icons -->
         <div class="social-media-icons">
             <a href="https://www.facebook.com/pawsinstride" target="_blank" class="social-icon">
                 <i class="fab fa-facebook-f"></i>
@@ -192,45 +140,248 @@
             </a>
         </div>
 
-        
         <nav id="menu-box">
-            <!-- Menu Button for Mobile -->
             <div class="menu-button" onclick="toggleMenu()">MENU</div>
 
-            <!-- Navigation Links -->
             <ul class="nav-links" id="nav-menu">
-                <li><a href="#" onclick="loadPage('home.html'); return false;">HOME</a></li>
-                <li><a href="#" onclick="loadPage('services.html'); return false;">SERVICES</a></li>
+                <li><a href="/index.html">HOME</a></li>
+                <li><a href="/services.html">SERVICES</a></li>
                 <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
-                <li><a href="#" onclick="loadPage('aboutus.html'); return false;">ABOUT</a></li>
-                <li><a href="#" onclick="loadPage('contact.html'); return false;">CONTACT</a></li>
+                <li><a href="/aboutus.html">ABOUT</a></li>
+                <li><a href="/contact.html">CONTACT</a></li>
             </ul>
         </nav>
     </header>
     
-    <!-- Placeholder Content Section -->
     <main>
-        <div id="content">
-            <!-- Content will be dynamically loaded here based on menu selection -->
-        </div>
+        <section class="hero-section homepage-hero">
+          <div class="hero-container">
+            <div class="hero-image">
+              <img src="/images/golden.jpg" alt="Happy golden retriever for dog walking in Frisco Texas">
+            </div>
+
+            <div class="hero-text-container">
+              <div class="hero-text">
+                <span class="hero-badge">🐾 Frisco’s Most Reliable Dog Walking Service</span>
+                <h1>Dog Walking, Pet Sitting & Boarding in Frisco, TX</h1>
+                <h3>Also serving Prosper, Celina & Little Elm</h3>
+
+                <p class="hero-subtext">
+                Book a free meet & greet and see why local dog owners trust us for consistent, stress-free care.
+                </p>
+
+                <div class="hero-trust-points">
+                  <span>⭐ Trusted Local Service</span>
+                  <span>📍 Frisco-Based</span>
+                  <span>🐶 Personalized Care</span>
+                </div>
+
+                <div class="hero-pricing-preview">
+                  <div class="price-pill">Walks from <strong>$15</strong></div>
+                  <div class="price-pill">Drop-Ins from <strong>$15</strong></div>
+                  <div class="price-pill">Boarding from <strong>$85/day</strong></div>
+                </div>
+
+                <p style="font-weight: 700; color: #ef602c; margin-top: 12px;">
+                  Spots Fill Quickly — Book your free Meet & Greet today
+                </p>
+
+                <div class="hero-buttons">
+                  <a class="cta-button primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+                    SCHEDULE A FREE MEET & GREET
+                  </a>
+
+                  <a class="cta-button secondary" href="tel:2147367923">
+                    CALL NOW
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="trust-images-section">
+          <div class="section-heading">
+            <h2>Happy Dogs. Real Care. Local Service.</h2>
+            <p>Personalized pet care for dogs of all sizes, breeds, and personalities.</p>
+          </div>
+
+          <div class="trust-grid">
+            <img src="/images/golden3.jpg" alt="Golden retriever sitting outside in Frisco Texas">
+            <img src="/images/trusted2.jpg" alt="Australian shepherd receving pet care in Frisco Texas">
+            <img src="/images/trusted3.jpg" alt="Friendly Yorkshire Terrier being cared for by Paws in Stride">
+          </div>
+        </section>
+
+        <section class="homepage-reviews">
+          <div class="homepage-reviews-container">
+            <div class="section-heading">
+              <h2>Trusted by Local Dog Owners</h2>
+              <p>Real reviews from happy clients across Frisco and surrounding areas.</p>
+            </div>
+            <div class="elfsight-app-9e4d48f8-3f90-41f6-afde-8b1faced5c48" data-elfsight-app-lazy></div>
+          </div>
+        </section>
+
+        <section class="homepage-pricing">
+          <div class="homepage-pricing-container">
+            <h2>Simple, Transparent Starting Prices</h2>
+            <p>Quick pricing so you know what to expect before reaching out.</p>
+
+            <div class="pricing-cards">
+              <div class="pricing-card homepage-pricing-card">
+                <h3>Dog Walking</h3>
+                <p class="price">Starting at $15</p>
+                <p>Structured walks designed to burn energy, improve behavior, and support your dog’s overall health.</p>
+              </div>
+
+              <div class="pricing-card homepage-pricing-card">
+                <h3>Drop-In Visits</h3>
+                <p class="price">Starting at $15</p>
+                <p>Perfect for potty breaks, feeding, and quick check-ins during the day.</p>
+              </div>
+
+              <div class="pricing-card homepage-pricing-card">
+                <h3>Dog Boarding</h3>
+                <p class="price">Starting at $85/day</p>
+                <p>Comfortable home-style boarding with personalized care, potty breaks, and updates.</p>
+              </div>
+            </div>
+
+            <div class="pricing-cta">
+              <a href="/services.html" class="cta-button secondary">
+                VIEW FULL PRICING & SERVICES
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section class="services-section homepage-services">
+          <div class="homepage-services-card">
+            <div class="section-heading">
+              <h2>Pet Care Services</h2>
+              <p>Choose the service that best fits your dog’s routine and needs.</p>
+            </div>
+
+            <div class="service-container">
+              <div class="service-image">
+                <a href="/services.html#dog-walking">
+                  <img src="/images/dogwalking.jpg" alt="Dog walking in Frisco Texas" class="rounded-image">
+                  <div class="overlay"></div>
+                  <h2>DOG WALKING</h2>
+                </a>
+              </div>
+
+              <div class="service-image">
+                <a href="/services.html#drop-in-visits">
+                  <img src="/images/dropin.jpg" alt="Drop in visits and potty breaks in Frisco Texas" class="rounded-image">
+                  <div class="overlay"></div>
+                  <h2>DROP-IN VISITS / POTTY BREAKS</h2>
+                </a>
+              </div>
+
+              <div class="service-image">
+                <a href="/services.html#pet-sitting">
+                  <img src="/images/poodle.jpg" alt="Pet sitting in Frisco Texas" class="rounded-image">
+                  <div class="overlay"></div>
+                  <h2>PET SITTING</h2>
+                </a>
+              </div>
+
+              <div class="service-image">
+                <a href="/services.html#dog-boarding">
+                  <img src="/images/poodle2.jpg" alt="Dog boarding in Frisco Texas" class="rounded-image">
+                  <div class="overlay"></div>
+                  <h2>DOG BOARDING</h2>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="service-areas">
+          <div class="service-areas-container">
+            <h2>Service Areas</h2>
+            <p>
+              Paws in Stride proudly provides dog walking, pet sitting, and dog boarding services across North Texas including:
+            </p>
+
+            <ul>
+              <li><a href="dog-walker-frisco-tx.html">Frisco, Texas</a></li>
+              <li><a href="dog-walker-prosper-tx.html">Prosper, Texas</a></li>
+              <li><a href="dog-walker-celina-tx.html">Celina, Texas</a></li>
+              <li><a href="dog-walker-little-elm-tx.html">Little Elm, Texas</a></li>
+            </ul>
+
+            <p>
+              If you're located near these areas, feel free to contact us to see if we can accommodate your location.
+            </p>
+          </div>
+        </section>
+
+        <section class="fresh-food-feature lower-priority">
+          <div class="fresh-food-header">
+            <h2>🍽️ Ditch the Kibble — Fresh Dog Meals Made Locally & Delivered Weekly</h2>
+            <p>
+              Real ingredients, human-grade quality, portioned and prepared fresh — delivered weekly right to your door. Now serving Frisco, Prosper, Celina & Little Elm.
+            </p>
+            <p class="fresh-food-highlight">
+              ❤️ Every meal plan donates a meal to a dog at the local animal shelter
+            </p>
+          </div>
+          <div class="fresh-food-grid">
+            <div class="fresh-food-image-wrap">
+              <img src="/freshdogmealshero.PNG" alt="Fresh human-grade dog meals prepared in BPA-free containers">
+            </div>
+            <div class="fresh-food-copy">
+              <ul>
+                <li>🥩 Real, human-grade ingredients</li>
+                <li>🚚 Weekly local delivery — We come to you</li>
+                <li>♻️ BPA-free containers</li>
+                <li>❄️ Never frozen, no fillers</li>
+                <li>💰 Plans starting at $50/week</li>
+              </ul>
+              <a href="/fresh-dog-food" class="fresh-food-btn">
+                START MY DOG'S MEAL PLAN
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section class="final-cta">
+          <div class="final-cta-container">
+            <h2>Spots Fill Quickly</h2>
+            <p>
+              Schedule your free meet & greet today and lock in dependable, personalized care for your dog.
+            </p>
+
+            <div class="hero-buttons">
+              <a class="cta-button primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+                BOOK FREE MEET & GREET
+              </a>
+
+              <a class="cta-button secondary" href="tel:2147367923">
+                CALL 214-736-7923
+              </a>
+            </div>
+          </div>
+        </section>
     </main>
 
     <div class="elfsight-container">
         <div class="elfsight-wrapper">
-            <!-- Elfsight Instagram Feed -->
             <div class="elfsight-app-f7b18edf-ceba-4a81-9f18-846d5c74e0cf" data-elfsight-app-lazy></div>
         </div>
     </div>
         
-    <!-- Footer Section -->
     <footer>
         <div class="footer-container">
             <ul class="footer-nav">
-                <li><a href="#" onclick="loadPage('home.html'); return false;">HOME</a></li>
-                <li><a href="#" onclick="loadPage('services.html'); return false;">SERVICES</a></li>
+                <li><a href="/index.html">HOME</a></li>
+                <li><a href="/services.html">SERVICES</a></li>
                 <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
-                <li><a href="#" onclick="loadPage('aboutus.html'); return false;">ABOUT</a></li>
-                <li><a href="#" onclick="loadPage('contact.html'); return false;">CONTACT</a></li>
+                <li><a href="/aboutus.html">ABOUT</a></li>
+                <li><a href="/contact.html">CONTACT</a></li>
             </ul>
             <div class="footer-info">
                 <p>&copy; 2024 Paws in Stride®</p>
@@ -238,15 +389,14 @@
                 <p>Phone Number: <a href="tel:+12147367923">+1-214-736-7923</a></p>
             </div>
         </div>
-        </footer>
+    </footer>
     
-    <!-- Back to Top Button -->
     <button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
     
     <script>
         function closeNotificationBar() {
             document.getElementById("notification-bar").style.display = "none";
-            localStorage.setItem("notificationClosed", "true"); // Save preference
+            localStorage.setItem("notificationClosed", "true");
         }
     
         document.addEventListener("DOMContentLoaded", function () {
@@ -257,6 +407,5 @@
     </script>
 
     <script src="https://static.elfsight.com/platform/platform.js" async></script>
-    
 </body>
 </html>
