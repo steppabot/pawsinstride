@@ -1,303 +1,484 @@
-<div class="services-intro-wrapper">
-  <p class="services-intro">
-    <strong>Trusted dog walking, drop-in visits, pet sitting, and in-home boarding in Frisco, TX</strong> — with real-time updates, personalized care, and a free meet & greet.
-  </p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dog Walking, Pet Sitting & Dog Boarding in Frisco TX | Paws in Stride</title>
+  <meta name="description" content="Explore dog walking, drop-in visits, pet sitting, and dog boarding services in Frisco, TX. Paws in Stride offers personalized care, updates, and a free meet & greet.">
 
-  <div class="services-jump-menu">
-    <a href="#dog-walking">Dog Walking</a>
-    <a href="#drop-in-visits">Drop-Ins</a>
-    <a href="#pet-sitting">Pet Sitting</a>
-    <a href="#dog-boarding">Boarding</a>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Paws in Stride",
+    "image": "https://www.pawsinstride.com/pawsnstridelogo1.png",
+    "url": "https://www.pawsinstride.com/services.html",
+    "telephone": "+1-214-736-7923",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "4545 Mission Ave",
+      "addressLocality": "Frisco",
+      "addressRegion": "TX",
+      "postalCode": "75034",
+      "addressCountry": "US"
+    },
+    "description": "Paws in Stride provides dog walking, drop-in visits, pet sitting, and dog boarding services in Frisco, Texas.",
+    "areaServed": [
+      { "@type": "City", "name": "Frisco" },
+      { "@type": "City", "name": "Prosper" },
+      { "@type": "City", "name": "Celina" },
+      { "@type": "City", "name": "Little Elm" }
+    ],
+    "openingHours": "Mo-Fr 09:00-18:00"
+  }
+  </script>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S8KBFC0X04"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-S8KBFC0X04');
+  </script>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+  <link rel="icon" href="/icons/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <link rel="manifest" href="/icons/site.webmanifest">
+
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+
+  <script>
+    function toggleMenu() {
+      var menu = document.getElementById('nav-menu');
+      menu.classList.toggle('open');
+    }
+
+    window.onscroll = function () { scrollFunction(); };
+
+    function scrollFunction() {
+      const backToTopButton = document.getElementById("backToTop");
+      if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        backToTopButton.style.display = "block";
+      } else {
+        backToTopButton.style.display = "none";
+      }
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeNotificationBar() {
+      document.getElementById("notification-bar").style.display = "none";
+      localStorage.setItem("notificationClosed", "true");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      if (localStorage.getItem("notificationClosed") === "true") {
+        document.getElementById("notification-bar").style.display = "none";
+      }
+    });
+  </script>
+</head>
+<body>
+  <div id="notification-bar">
+    <p>🎖️ Veterans & First Responders receive <strong>10% OFF</strong> all Services!</p>
+    <p class="banner-phone">📞 Call Now: <a href="tel:2147367923">214-736-7923</a></p>
+    <span class="close-btn" onclick="closeNotificationBar()">✖</span>
   </div>
-</div>
 
-<!-- Dog Walking Services Section -->
-<section id="dog-walking" class="services-offered-section">
-  <div class="services-offered-image">
-    <img src="/images/dogwalking3.jpg" alt="Dog Walking Services Frisco Texas">
-  </div>
+  <header>
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '270500070223789');
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=270500070223789&ev=PageView&noscript=1"/>
+    </noscript>
 
-  <div class="services-offered-text-container">
-    <h2>Dog Walking Services</h2>
-
-    <p>
-      Our dog walking service is designed to help your dog stay active, burn energy, and enjoy a healthier daily routine while you’re away. Each walk is tailored to your dog’s pace, personality, and comfort level.
-    </p>
-
-    <p>
-      Every walk includes one-on-one attention, GPS-tracked updates, and photo/video check-ins so you always know how your dog is doing. Whether your dog needs a quick energy release or a longer walk, we focus on safe, dependable, personalized care.
-    </p>
-
-    <p>
-      Ideal for busy pet owners who want consistent exercise, structure, and midday support. <strong>Dog walking services require a 2+ day weekly booking minimum.</strong>
-    </p>
-
-    <h3>Dog Walking Rates</h3>
-
-    <div class="table-wrapper">
-      <table class="compact-table">
-        <thead>
-          <tr>
-            <th>Duration</th>
-            <th>Single Walk</th>
-            <th>Weekly<br>(5 Walks)</th>
-            <th>Savings</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>15 Minutes</td>
-            <td>$15</td>
-            <td>$65</td>
-            <td>Save $10</td>
-          </tr>
-          <tr>
-            <td>30 Minutes</td>
-            <td>$25</td>
-            <td>$110</td>
-            <td>Save $15</td>
-          </tr>
-          <tr>
-            <td>60 Minutes</td>
-            <td>$40</td>
-            <td>$180</td>
-            <td>Save $20</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="logo-container">
+      <a href="/index.html">
+        <img src="pawsnstridelogo1.png" alt="Dog Walking Services Frisco Prosper Celina Little Elm Texas" class="logo">
+      </a>
     </div>
 
-    <h4>Additional Dog Fees (Per Walk)</h4>
-
-    <div class="table-wrapper">
-      <table class="compact-table">
-        <thead>
-          <tr>
-            <th>Walk Duration</th>
-            <th>Additional Dog Fee</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>15 Minutes</td><td>$10</td></tr>
-          <tr><td>30 Minutes</td><td>$15</td></tr>
-          <tr><td>60 Minutes</td><td>$20</td></tr>
-        </tbody>
-      </table>
+    <div class="social-media-icons">
+      <a href="https://www.facebook.com/pawsinstride" target="_blank" class="social-icon">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/paws.in.stride" target="_blank" class="social-icon">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="https://www.tiktok.com/@pawsnstride" target="_blank" class="social-icon">
+        <i class="fab fa-tiktok"></i>
+      </a>
     </div>
 
-    <p class="service-note">
-      <strong>Holiday pricing:</strong> +$10 per walk on major holidays.
-    </p>
+    <nav id="menu-box">
+      <div class="menu-button" onclick="toggleMenu()">MENU</div>
 
-    <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
-      SCHEDULE A FREE MEET & GREET
-    </a>
-  </div>
-</section>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/index.html">HOME</a></li>
+        <li><a href="/services.html">SERVICES</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+        <li><a href="/aboutus.html">ABOUT</a></li>
+        <li><a href="/contact.html">CONTACT</a></li>
+      </ul>
+    </nav>
+  </header>
 
+  <main>
+    <section class="services-page-hero">
+      <div class="services-page-hero-inner">
+        <span class="hero-badge">🐾 Personalized Pet Care in Frisco, TX</span>
+        <h1>Dog Walking, Drop-In Visits, Pet Sitting & Dog Boarding</h1>
+        <p>
+          Explore our services, pricing, and care options for dogs in Frisco, Prosper, Celina, and Little Elm.
+        </p>
+      </div>
+    </section>
 
-<!-- Drop-In Visits Section (with Reverse Layout) -->
-<section id="drop-in-visits" class="services-offered-section reverse">
-  <div class="services-offered-image">
-    <img src="/images/dropinvisits.jpg" class="dropin-image" alt="Dog Drop-In Visits and Potty Breaks Frisco Texas">
-  </div>
+    <div class="services-intro-wrapper">
+      <p class="services-intro">
+        <strong>Trusted dog walking, drop-in visits, pet sitting, and in-home boarding in Frisco, TX</strong> — with real-time updates, personalized care, and a free meet & greet.
+      </p>
 
-  <div class="services-offered-text-container">
-    <h2>Drop-In Visits / Potty Breaks</h2>
-
-    <p>
-      Our drop-in visits are perfect for dogs who need a potty break, feeding, fresh water, and a little extra attention while you’re away. Visits are available in 15, 30, or 60-minute options depending on your dog’s routine and needs.
-    </p>
-
-    <p>
-      During each visit, we can provide a potty break, companionship, playtime, feeding, and a quick reset before you get home. You’ll also receive updates with photos and videos so you can feel confident your dog is being well cared for.
-    </p>
-
-    <p>
-      Great for workdays, busy schedules, and dogs who need midday attention. <strong>Drop-in visit services require a 2+ day weekly booking minimum.</strong>
-    </p>
-
-    <h3>Drop-In Visit / Potty Break Rates</h3>
-
-    <div class="table-wrapper">
-      <table class="compact-table">
-        <thead>
-          <tr>
-            <th>Duration</th>
-            <th>Single Visit</th>
-            <th>Weekly<br>(5 Visits)</th>
-            <th>Savings</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>15 Minutes</td><td>$15</td><td>$65</td><td>Save $10</td></tr>
-          <tr><td>30 Minutes</td><td>$25</td><td>$110</td><td>Save $15</td></tr>
-          <tr><td>60 Minutes</td><td>$40</td><td>$180</td><td>Save $20</td></tr>
-        </tbody>
-      </table>
+      <div class="services-jump-menu">
+        <a href="#dog-walking">Dog Walking</a>
+        <a href="#drop-in-visits">Drop-Ins</a>
+        <a href="#pet-sitting">Pet Sitting</a>
+        <a href="#dog-boarding">Boarding</a>
+      </div>
     </div>
 
-    <h4>Additional Dog Fees (Per Visit)</h4>
+    <section id="dog-walking" class="services-offered-section">
+      <div class="services-offered-image">
+        <img src="/images/dogwalking3.jpg" alt="Dog Walking Services Frisco Texas">
+      </div>
 
-    <div class="table-wrapper">
-      <table class="compact-table">
-        <thead>
-          <tr>
-            <th>Visit Duration</th>
-            <th>Additional Dog Fee</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>15 Minutes</td><td>$10</td></tr>
-          <tr><td>30 Minutes</td><td>$15</td></tr>
-          <tr><td>60 Minutes</td><td>$20</td></tr>
-        </tbody>
-      </table>
+      <div class="services-offered-text-container">
+        <h2>Dog Walking Services</h2>
+
+        <p>
+          Our dog walking service is designed to help your dog stay active, burn energy, and enjoy a healthier daily routine while you’re away. Each walk is tailored to your dog’s pace, personality, and comfort level.
+        </p>
+
+        <p>
+          Every walk includes one-on-one attention, GPS-tracked updates, and photo/video check-ins so you always know how your dog is doing. Whether your dog needs a quick energy release or a longer walk, we focus on safe, dependable, personalized care.
+        </p>
+
+        <p>
+          Ideal for busy pet owners who want consistent exercise, structure, and midday support. <strong>Dog walking services require a 2+ day weekly booking minimum.</strong>
+        </p>
+
+        <h3>Dog Walking Rates</h3>
+
+        <div class="table-wrapper">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Duration</th>
+                <th>Single Walk</th>
+                <th>Weekly<br>(5 Walks)</th>
+                <th>Savings</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>15 Minutes</td>
+                <td>$15</td>
+                <td>$65</td>
+                <td>Save $10</td>
+              </tr>
+              <tr>
+                <td>30 Minutes</td>
+                <td>$25</td>
+                <td>$110</td>
+                <td>Save $15</td>
+              </tr>
+              <tr>
+                <td>60 Minutes</td>
+                <td>$40</td>
+                <td>$180</td>
+                <td>Save $20</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Additional Dog Fees (Per Walk)</h4>
+
+        <div class="table-wrapper">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Walk Duration</th>
+                <th>Additional Dog Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>15 Minutes</td><td>$10</td></tr>
+              <tr><td>30 Minutes</td><td>$15</td></tr>
+              <tr><td>60 Minutes</td><td>$20</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="service-note">
+          <strong>Holiday pricing:</strong> +$10 per walk on major holidays.
+        </p>
+
+        <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+          SCHEDULE A FREE MEET & GREET
+        </a>
+      </div>
+    </section>
+
+    <section id="drop-in-visits" class="services-offered-section reverse">
+      <div class="services-offered-image">
+        <img src="/images/dropinvisits.jpg" class="dropin-image" alt="Dog Drop-In Visits and Potty Breaks Frisco Texas">
+      </div>
+
+      <div class="services-offered-text-container">
+        <h2>Drop-In Visits / Potty Breaks</h2>
+
+        <p>
+          Our drop-in visits are perfect for dogs who need a potty break, feeding, fresh water, and a little extra attention while you’re away. Visits are available in 15, 30, or 60-minute options depending on your dog’s routine and needs.
+        </p>
+
+        <p>
+          During each visit, we can provide a potty break, companionship, playtime, feeding, and a quick reset before you get home. You’ll also receive updates with photos and videos so you can feel confident your dog is being well cared for.
+        </p>
+
+        <p>
+          Great for workdays, busy schedules, and dogs who need midday attention. <strong>Drop-in visit services require a 2+ day weekly booking minimum.</strong>
+        </p>
+
+        <h3>Drop-In Visit / Potty Break Rates</h3>
+
+        <div class="table-wrapper">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Duration</th>
+                <th>Single Visit</th>
+                <th>Weekly<br>(5 Visits)</th>
+                <th>Savings</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>15 Minutes</td><td>$15</td><td>$65</td><td>Save $10</td></tr>
+              <tr><td>30 Minutes</td><td>$25</td><td>$110</td><td>Save $15</td></tr>
+              <tr><td>60 Minutes</td><td>$40</td><td>$180</td><td>Save $20</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Additional Dog Fees (Per Visit)</h4>
+
+        <div class="table-wrapper">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Visit Duration</th>
+                <th>Additional Dog Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>15 Minutes</td><td>$10</td></tr>
+              <tr><td>30 Minutes</td><td>$15</td></tr>
+              <tr><td>60 Minutes</td><td>$20</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Other Charges</h4>
+
+        <div class="table-wrapper">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>After-Hours (Before 7am / After 7pm)</td><td>+$10</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="service-note">
+          <strong>Holiday pricing:</strong> +$10 per visit on major holidays.
+        </p>
+
+        <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+          SCHEDULE A FREE MEET & GREET
+        </a>
+      </div>
+    </section>
+
+    <section id="pet-sitting" class="services-offered-section">
+      <div class="services-offered-image">
+        <img src="/images/petsitting.png" alt="Pet Sitting Frisco Texas">
+      </div>
+
+      <div class="services-offered-text-container">
+        <h2>Pet Sitting</h2>
+
+        <p>
+          Our pet sitting service is ideal when your dog needs extended care, companionship, and supervision in the comfort of home. This is a great fit for evenings out, longer workdays, or dogs who do best with more one-on-one attention.
+        </p>
+
+        <p>
+          Visits can include potty breaks, feeding, playtime, companionship, and updates throughout the stay. Each sit is personalized to your dog’s energy level, routine, and comfort needs so they feel safe and cared for while you’re away.
+        </p>
+
+        <h3>Pet Sitting Rates</h3>
+
+        <div class="table-wrapper">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Package</th>
+                <th>Duration</th>
+                <th>Includes</th>
+                <th>Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Basic Sit</td>
+                <td>4<br>Hours</td>
+                <td>Potty Breaks<br>Feeding<br>Light Play<br>1 Update</td>
+                <td>$80</td>
+              </tr>
+              <tr>
+                <td>Standard Sit</td>
+                <td>8<br>Hours</td>
+                <td>Potty Breaks<br>Feeding<br>Playtime<br>1 Walk<br>2 Updates</td>
+                <td>$140</td>
+              </tr>
+              <tr>
+                <td>VIP Sit</td>
+                <td>12<br>Hours</td>
+                <td>Potty Breaks<br>Feeding<br>Multiple Walks<br>Extended Playtime<br>3 Updates</td>
+                <td>$180</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="service-note">
+          <strong>Holiday pricing:</strong> +$20 per pet sitting session on major holidays.
+        </p>
+
+        <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+          SCHEDULE A FREE MEET & GREET
+        </a>
+      </div>
+    </section>
+
+    <section id="dog-boarding" class="services-offered-section reverse">
+      <div class="services-offered-image">
+        <img src="/images/dogboarding.jpg" alt="Dog Boarding Frisco Texas">
+      </div>
+
+      <div class="services-offered-text-container">
+        <h2>VIP Dog Boarding</h2>
+
+        <p>
+          Our dog boarding service gives your dog a safe, comfortable home-style stay with personalized care and attention. Unlike large traditional boarding facilities, your dog receives more one-on-one attention, more comfort, and a less stressful stay.
+        </p>
+        <p>
+          Perfect for dogs who do better in a home environment rather than a crowded kennel setting.
+        </p>
+        <p>
+          Boarding includes potty breaks, feeding, daily walks, playtime, and regular updates so you can travel with peace of mind. We focus on making your dog feel secure, cared for, and as comfortable as possible while you’re away.
+        </p>
+
+        <h3>Boarding Rates</h3>
+
+        <div class="table-wrapper">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Rate</th>
+                <th>What's Included</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Overnight Boarding</td>
+                <td>$85/day</td>
+                <td>Potty Breaks, Feeding, Daily Walks, Playtime, Multiple Updates</td>
+              </tr>
+              <tr>
+                <td>Large Dog Fee</td>
+                <td>+$25/day</td>
+                <td>Applies to dogs over 50 lbs</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="service-note">
+          <strong>Holiday pricing:</strong> +$25 per day on major holidays.
+        </p>
+
+        <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+          SCHEDULE A FREE MEET & GREET
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <div class="elfsight-container">
+    <div class="elfsight-wrapper">
+      <div class="elfsight-app-f7b18edf-ceba-4a81-9f18-846d5c74e0cf" data-elfsight-app-lazy></div>
     </div>
+  </div>
 
-    <h4>Other Charges</h4>
-
-    <div class="table-wrapper">
-      <table class="compact-table">
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Fee</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>After-Hours (Before 7am / After 7pm)</td><td>+$10</td></tr>
-        </tbody>
-      </table>
+  <footer>
+    <div class="footer-container">
+      <ul class="footer-nav">
+        <li><a href="/index.html">HOME</a></li>
+        <li><a href="/services.html">SERVICES</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+        <li><a href="/aboutus.html">ABOUT</a></li>
+        <li><a href="/contact.html">CONTACT</a></li>
+      </ul>
+      <div class="footer-info">
+        <p>&copy; 2024 Paws in Stride®</p>
+        <p>Proudly serving Frisco, Prosper, Celina, and Little Elm Texas</p>
+        <p>Phone Number: <a href="tel:+12147367923">+1-214-736-7923</a></p>
+      </div>
     </div>
+  </footer>
 
-    <p class="service-note">
-      <strong>Holiday pricing:</strong> +$10 per visit on major holidays.
-    </p>
+  <button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
 
-    <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
-      SCHEDULE A FREE MEET & GREET
-    </a>
-  </div>
-</section>
-
-
-
-<!-- Pet Sitting Section -->
-<section id="pet-sitting" class="services-offered-section">
-  <div class="services-offered-image">
-    <img src="/images/petsitting.png" alt="Pet Sitting Frisco Texas">
-  </div>
-
-  <div class="services-offered-text-container">
-    <h2>Pet Sitting</h2>
-
-    <p>
-      Our pet sitting service is ideal when your dog needs extended care, companionship, and supervision in the comfort of home. This is a great fit for evenings out, longer workdays, or dogs who do best with more one-on-one attention.
-    </p>
-
-    <p>
-      Visits can include potty breaks, feeding, playtime, companionship, and updates throughout the stay. Each sit is personalized to your dog’s energy level, routine, and comfort needs so they feel safe and cared for while you’re away.
-    </p>
-
-    <h3>Pet Sitting Rates</h3>
-
-    <div class="table-wrapper">
-      <table class="compact-table">
-        <thead>
-          <tr>
-            <th>Package</th>
-            <th>Duration</th>
-            <th>Includes</th>
-            <th>Rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Basic Sit</td>
-            <td>4<br>Hours</td>
-            <td>Potty Breaks<br>Feeding<br>Light Play<br>1 Update</td>
-            <td>$80</td>
-          </tr>
-          <tr>
-            <td>Standard Sit</td>
-            <td>8<br>Hours</td>
-            <td>Potty Breaks<br>Feeding<br>Playtime<br>1 Walk<br>2 Updates</td>
-            <td>$140</td>
-          </tr>
-          <tr>
-            <td>VIP Sit</td>
-            <td>12<br>Hours</td>
-            <td>Potty Breaks<br>Feeding<br>Multiple Walks<br>Extended Playtime<br>3 Updates</td>
-            <td>$180</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="service-note">
-      <strong>Holiday pricing:</strong> +$20 per pet sitting session on major holidays.
-    </p>
-
-    <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
-      SCHEDULE A FREE MEET & GREET
-    </a>
-  </div>
-</section>
-
-
-
-<!-- Dog Boarding Section -->
-<section id="dog-boarding" class="services-offered-section reverse">
-  <div class="services-offered-image">
-    <img src="/images/dogboarding.jpg" alt="Dog Boarding Frisco Texas">
-  </div>
-
-  <div class="services-offered-text-container">
-    <h2>VIP Dog Boarding</h2>
-
-    <p>
-      Our dog boarding service gives your dog a safe, comfortable home-style stay with personalized care and attention. Unlike large traditional boarding facilities, your dog receives more one-on-one attention, more comfort, and a less stressful stay.
-    </p>
-    <p>
-      Perfect for dogs who do better in a home environment rather than a crowded kennel setting.
-    </p>    
-    <p>
-      Boarding includes potty breaks, feeding, daily walks, playtime, and regular updates so you can travel with peace of mind. We focus on making your dog feel secure, cared for, and as comfortable as possible while you’re away.
-    </p>
-
-    <h3>Boarding Rates</h3>
-
-    <div class="table-wrapper">
-      <table class="compact-table">
-        <thead>
-          <tr>
-            <th>Service</th>
-            <th>Rate</th>
-            <th>What's Included</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Overnight Boarding</td>
-            <td>$85/day</td>
-            <td>Potty Breaks, Feeding, Daily Walks, Playtime, Multiple Updates</td>
-          </tr>
-          <tr>
-            <td>Large Dog Fee</td>
-            <td>+$25/day</td>
-            <td>Applies to dogs over 50 lbs</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="service-note">
-      <strong>Holiday pricing:</strong> +$25 per day on major holidays.
-    </p>
-
-    <a class="cta-button" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
-      SCHEDULE A FREE MEET & GREET
-    </a>
-  </div>
-</section>
+  <script src="https://static.elfsight.com/platform/platform.js" async></script>
+</body>
+</html>
