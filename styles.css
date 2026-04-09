@@ -171,6 +171,19 @@ nav {
     text-align: center; /* Ensure text is centered horizontally */
 }
 
+.services-top-wrap {
+  padding: 18px 20px 34px;
+}
+
+.services-top-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.services-intro-wrapper {
+  width: 100%;
+}
+
 .hero-text h1,
 .hero-text h3,
 .hero-text p {
