@@ -171,54 +171,6 @@ nav {
     text-align: center; /* Ensure text is centered horizontally */
 }
 
-.services-top-wrap {
-  padding: 18px 20px 36px;
-}
-
-.services-top-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.services-intro-card {
-  background: #f4f4f4;
-  border-radius: 20px;
-  padding: 22px 28px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  width: 100%;
-}
-
-.services-intro {
-  margin: 0;
-  font-size: 1.1rem;
-  line-height: 1.7;
-}
-
-.services-jump-menu {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-@media (max-width: 768px) {
-  .services-top-wrap {
-    padding: 14px 16px 28px;
-  }
-
-  .services-intro-card {
-    padding: 18px 18px;
-    border-radius: 16px;
-  }
-
-  .services-intro {
-    font-size: 1rem;
-    line-height: 1.6;
-  }
-}
-
 .hero-text h1,
 .hero-text h3,
 .hero-text p {
