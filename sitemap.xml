@@ -1,24 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-<url>
-<loc>https://www.pawsinstride.com/</loc>
-</url>
+  <!-- Main Pages -->
+  <url>
+    <loc>https://www.pawsinstride.com/</loc>
+  </url>
 
-<url>
-<loc>https://www.pawsinstride.com/dog-walker-frisco-tx.html</loc>
-</url>
+  <url>
+    <loc>https://www.pawsinstride.com/services.html</loc>
+  </url>
 
-<url>
-<loc>https://www.pawsinstride.com/dog-walker-celina-tx.html</loc>
-</url>
+  <url>
+    <loc>https://www.pawsinstride.com/aboutus.html</loc>
+  </url>
 
-<url>
-<loc>https://www.pawsinstride.com/dog-walker-prosper-tx.html</loc>
-</url>
+  <url>
+    <loc>https://www.pawsinstride.com/contact.html</loc>
+  </url>
 
-<url>
-<loc>https://www.pawsinstride.com/dog-walker-little-elm-tx.html</loc>
-</url>
+  <url>
+    <loc>https://www.pawsinstride.com/fresh-dog-food</loc>
+  </url>
+
+  <!-- SEO City Pages -->
+  <url>
+    <loc>https://www.pawsinstride.com/dog-walker-frisco-tx.html</loc>
+  </url>
+
+  <url>
+    <loc>https://www.pawsinstride.com/dog-walker-celina-tx.html</loc>
+  </url>
+
+  <url>
+    <loc>https://www.pawsinstride.com/dog-walker-prosper-tx.html</loc>
+  </url>
+
+  <url>
+    <loc>https://www.pawsinstride.com/dog-walker-little-elm-tx.html</loc>
+  </url>
 
 </urlset>
