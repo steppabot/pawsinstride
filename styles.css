@@ -774,6 +774,80 @@ header {
     width: auto; /* Ensure it doesn’t stretch too much */
 }
 
+.services-intro-wrapper {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
+}
+
+.services-intro {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 24px 28px 22px;
+    border-radius: 15px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.services-intro p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #333;
+    margin: 0;
+}
+
+.services-jump-menu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.services-jump-menu a {
+    display: inline-block;
+    text-decoration: none;
+    background: #fff7ea;
+    color: #8a6224;
+    border: 1px solid #f3d19d;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.services-jump-menu a:hover {
+    background: #f3aa4c;
+    color: #fff;
+    border-color: #f3aa4c;
+}
+
+@media (max-width: 768px) {
+    .services-intro-wrapper {
+        padding: 0 14px;
+        margin-bottom: 28px;
+    }
+
+    .services-intro {
+        padding: 18px 16px;
+    }
+
+    .services-intro p {
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .services-jump-menu {
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .services-jump-menu a {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+
 
 .compact-table {
   width: 100%;
