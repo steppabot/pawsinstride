@@ -2069,8 +2069,9 @@ header {
 }
 
 .services-intro-wrapper {
-    max-width: 900px;
+    max-width: 1150px;
     margin: 0 auto 40px;
+    padding: 0 20px;
     text-align: center;
 }
 
