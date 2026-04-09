@@ -1,62 +1,250 @@
-<section class="about-main-card">
-  <div class="about-image">
-    <img src="/images/ownerandchi.png" alt="Greg with his dog Chi - Paws in Stride">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Paws in Stride | Dog Walker in Frisco TX</title>
+  <meta name="description" content="Learn about Paws in Stride, a trusted local dog walking, pet sitting, and boarding business in Frisco, TX. Meet Greg and see what makes our care different.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Paws in Stride",
+    "image": "https://www.pawsinstride.com/pawsnstridelogo1.png",
+    "url": "https://www.pawsinstride.com/aboutus.html",
+    "telephone": "+1-214-736-7923",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "4545 Mission Ave",
+      "addressLocality": "Frisco",
+      "addressRegion": "TX",
+      "postalCode": "75034",
+      "addressCountry": "US"
+    },
+    "description": "Paws in Stride provides dog walking, pet sitting, and dog boarding services in Frisco, Texas.",
+    "areaServed": [
+      { "@type": "City", "name": "Frisco" },
+      { "@type": "City", "name": "Prosper" },
+      { "@type": "City", "name": "Celina" },
+      { "@type": "City", "name": "Little Elm" }
+    ],
+    "openingHours": "Mo-Fr 09:00-18:00"
+  }
+  </script>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S8KBFC0X04"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-S8KBFC0X04');
+  </script>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+  <link rel="icon" href="/icons/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <link rel="manifest" href="/icons/site.webmanifest">
+
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+
+  <script>
+    function toggleMenu() {
+      var menu = document.getElementById('nav-menu');
+      menu.classList.toggle('open');
+    }
+
+    window.onscroll = function () { scrollFunction(); };
+
+    function scrollFunction() {
+      const backToTopButton = document.getElementById("backToTop");
+      if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        backToTopButton.style.display = "block";
+      } else {
+        backToTopButton.style.display = "none";
+      }
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeNotificationBar() {
+      document.getElementById("notification-bar").style.display = "none";
+      localStorage.setItem("notificationClosed", "true");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      if (localStorage.getItem("notificationClosed") === "true") {
+        document.getElementById("notification-bar").style.display = "none";
+      }
+    });
+  </script>
+</head>
+<body>
+  <div id="notification-bar">
+    <p>🎖️ Veterans & First Responders receive <strong>10% OFF</strong> all Services!</p>
+    <p class="banner-phone">📞 Call Now: <a href="tel:2147367923">214-736-7923</a></p>
+    <span class="close-btn" onclick="closeNotificationBar()">✖</span>
   </div>
 
-  <div class="about-text">
-    <h2>About Paws in Stride</h2>
+  <header>
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '270500070223789');
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=270500070223789&ev=PageView&noscript=1"/>
+    </noscript>
 
-    <p>
-      Hi, I’m Greg — the owner of Paws in Stride. I’ve been a dog owner for over 15 years and know how important it is to have someone you can trust caring for your dog. My own dog, Chi, is a big part of why I started this business.
-    </p>
-
-    <p>
-      After living in Frisco for over a decade, I saw how many busy dog owners needed reliable, consistent help during the day. Paws in Stride was built to provide dependable, personalized care — not just quick walks, but real attention and structure for your dog.
-    </p>
-
-    <p>
-      Every service is designed to give you peace of mind with real-time updates, photos, and a level of care that feels like family. My goal is simple — keep your dog happy, active, and well cared for while you’re away.
-    </p>
-  </div>
-</section>
-
-<!-- Our Commitment Section -->
-<div class="about-main-card about-commitment-card reverse">
-    <div class="about-image commitment-image">
-        <img src="/images/commit.png" alt="Professional dog walking commitment and care in Frisco Texas">
+    <div class="logo-container">
+      <a href="/index.html">
+        <img src="pawsnstridelogo1.png" alt="Dog Walking Services Frisco Prosper Celina Little Elm Texas" class="logo">
+      </a>
     </div>
 
-    <div class="about-text">
+    <div class="social-media-icons">
+      <a href="https://www.facebook.com/pawsinstride" target="_blank" class="social-icon">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/paws.in.stride" target="_blank" class="social-icon">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="https://www.tiktok.com/@pawsnstride" target="_blank" class="social-icon">
+        <i class="fab fa-tiktok"></i>
+      </a>
+    </div>
+
+    <nav id="menu-box">
+      <div class="menu-button" onclick="toggleMenu()">MENU</div>
+
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/index.html">HOME</a></li>
+        <li><a href="/services.html">SERVICES</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+        <li><a href="/aboutus.html">ABOUT</a></li>
+        <li><a href="/contact.html">CONTACT</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="about-page-hero">
+      <div class="about-page-hero-inner">
+        <span class="hero-badge">🐾 Local, Reliable, Personalized Care</span>
+        <h1>About Paws in Stride</h1>
+        <p>
+          Meet the local dog walker behind Paws in Stride and learn what makes our care personal, dependable, and trusted by dog owners in Frisco.
+        </p>
+      </div>
+    </section>
+
+    <section class="about-main-card">
+      <div class="about-image">
+        <img src="/images/ownerandchi.png" alt="Greg with his dog Chi - Paws in Stride">
+      </div>
+
+      <div class="about-text">
+        <h2>About Paws in Stride</h2>
+
+        <p>
+          Hi, I’m Greg — the owner of Paws in Stride. I’ve been a dog owner for over 15 years and know how important it is to have someone you can trust caring for your dog. My own dog, Chi, is a big part of why I started this business.
+        </p>
+
+        <p>
+          After living in Frisco for over a decade, I saw how many busy dog owners needed reliable, consistent help during the day. Paws in Stride was built to provide dependable, personalized care — not just quick walks, but real attention and structure for your dog.
+        </p>
+
+        <p>
+          Every service is designed to give you peace of mind with real-time updates, photos, and a level of care that feels like family. My goal is simple — keep your dog happy, active, and well cared for while you’re away.
+        </p>
+      </div>
+    </section>
+
+    <section class="about-main-card about-commitment-card reverse">
+      <div class="about-image commitment-image">
+        <img src="/images/commit.png" alt="Professional dog walking commitment and care in Frisco Texas">
+      </div>
+
+      <div class="about-text">
         <h2>Our Commitment</h2>
 
         <p>
-            <strong>Safety First:</strong> Your dog’s safety always comes first. Every walk is handled with care, awareness, and the right equipment so your pet stays secure and comfortable from start to finish.
+          <strong>Safety First:</strong> Your dog’s safety always comes first. Every walk is handled with care, awareness, and the right equipment so your pet stays secure and comfortable from start to finish.
         </p>
 
         <p>
-            <strong>Personalized Care:</strong> No two dogs are the same. We tailor each walk or visit to your dog’s energy level, routine, and personality so they get the kind of care that fits them best.
+          <strong>Personalized Care:</strong> No two dogs are the same. We tailor each walk or visit to your dog’s energy level, routine, and personality so they get the kind of care that fits them best.
         </p>
 
         <p>
-            <strong>Reliable Communication:</strong> We keep you in the loop with photo and video updates so you know how your dog is doing while you’re away. You should never have to wonder how things went.
+          <strong>Reliable Communication:</strong> We keep you in the loop with photo and video updates so you know how your dog is doing while you’re away. You should never have to wonder how things went.
         </p>
 
         <p>
-            <strong>Dependable Service:</strong> When you book with Paws in Stride, you can count on consistency, professionalism, and genuine care. We show up on time, follow through, and treat your dog like family.
+          <strong>Dependable Service:</strong> When you book with Paws in Stride, you can count on consistency, professionalism, and genuine care. We show up on time, follow through, and treat your dog like family.
         </p>
+      </div>
+    </section>
+
+    <section class="about-cta">
+      <h2>Ready to Get Started?</h2>
+
+      <p>
+        Book your free meet & greet and see why dog owners across Frisco trust Paws in Stride for reliable, personalized care.
+      </p>
+
+      <a class="cta-button"
+         onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
+        SCHEDULE A FREE MEET & GREET
+      </a>
+    </section>
+  </main>
+
+  <div class="elfsight-container">
+    <div class="elfsight-wrapper">
+      <div class="elfsight-app-f7b18edf-ceba-4a81-9f18-846d5c74e0cf" data-elfsight-app-lazy></div>
     </div>
-</div>
+  </div>
 
-<!-- About Page CTA -->
-<div class="about-cta">
-  <h2>Ready to Get Started?</h2>
+  <footer>
+    <div class="footer-container">
+      <ul class="footer-nav">
+        <li><a href="/index.html">HOME</a></li>
+        <li><a href="/services.html">SERVICES</a></li>
+        <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
+        <li><a href="/aboutus.html">ABOUT</a></li>
+        <li><a href="/contact.html">CONTACT</a></li>
+      </ul>
+      <div class="footer-info">
+        <p>&copy; 2024 Paws in Stride®</p>
+        <p>Proudly serving Frisco, Prosper, Celina, and Little Elm Texas</p>
+        <p>Phone Number: <a href="tel:+12147367923">+1-214-736-7923</a></p>
+      </div>
+    </div>
+  </footer>
 
-  <p>
-    Book your free meet & greet and see why dog owners across Frisco trust Paws in Stride for reliable, personalized care.
-  </p>
+  <button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
 
-  <a class="cta-button"
-     onclick="Calendly.initPopupWidget({url: 'https://calendly.com/pawsinstridefrisco/meet-greet?hide_gdpr_banner=1&primary_color=f3aa4c'}); return false;">
-    SCHEDULE A FREE MEET & GREET
-  </a>
-</div>
+  <script src="https://static.elfsight.com/platform/platform.js" async></script>
+</body>
+</html>
