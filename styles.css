@@ -941,6 +941,25 @@ header {
     text-align: center;
 }
 
+.services-page-hero{
+  padding: 48px 20px 24px;
+}
+
+.services-page-hero-inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.services-page-hero h1{
+  margin: 12px 0 10px;
+}
+
+.services-page-hero p{
+  max-width: 760px;
+  margin: 0 auto;
+}
+
 .fresh-menu-grid,
 .fresh-steps-grid,
 .pricing-grid {
