@@ -1318,6 +1318,25 @@ header {
   margin-bottom: 10px;
 }
 
+.about-page-hero{
+  padding: 48px 20px 24px;
+}
+
+.about-page-hero-inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.about-page-hero h1{
+  margin: 12px 0 10px;
+}
+
+.about-page-hero p{
+  max-width: 760px;
+  margin: 0 auto;
+}
+
 .fresh-food-btn {
   display: inline-block;
   background-color: #f5ab40;
