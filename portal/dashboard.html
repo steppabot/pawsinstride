@@ -19,7 +19,6 @@
   >
 </head>
 
-
 <body>
 
   <main class="dashboard-container">
@@ -158,7 +157,7 @@
           </div>
 
 
-          <!-- TIME WINDOW / PET SITTING BLOCK -->
+          <!-- TIME WINDOW -->
 
           <div
             id="time-window-wrapper"
@@ -184,7 +183,7 @@
 
 
           <!-- ========================================
-               STANDARD MULTI-DATE CALENDAR
+               MULTI-DATE CALENDAR
                ======================================== -->
 
           <div
@@ -360,9 +359,7 @@
           </div>
 
 
-          <!-- ========================================
-               TOTAL
-               ======================================== -->
+          <!-- TOTAL -->
 
           <div class="booking-total">
 
@@ -405,7 +402,7 @@
 
 
       <!-- ========================================
-           PETS
+           PET
            ======================================== -->
 
       <section>
@@ -420,16 +417,101 @@
 
 
       <!-- ========================================
-           UPCOMING SERVICES
+           UPCOMING SERVICES CALENDAR
            ======================================== -->
 
-      <section>
+      <section class="upcoming-services-section">
 
-        <h3>
-          Upcoming Services
-        </h3>
+        <div class="upcoming-services-header">
 
-        <div id="upcoming-visits"></div>
+          <div>
+            <h3>Upcoming Services</h3>
+
+            <p class="upcoming-calendar-help">
+              Select a date to view scheduled services.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="upcoming-calendar">
+
+          <div class="upcoming-calendar-header">
+
+            <button
+              type="button"
+              id="upcoming-calendar-prev"
+              class="calendar-nav-button"
+              aria-label="Previous month"
+            >
+              ‹
+            </button>
+
+
+            <strong id="upcoming-calendar-month-label">
+            </strong>
+
+
+            <button
+              type="button"
+              id="upcoming-calendar-next"
+              class="calendar-nav-button"
+              aria-label="Next month"
+            >
+              ›
+            </button>
+
+          </div>
+
+
+          <div class="upcoming-calendar-weekdays">
+
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+            <span>Sun</span>
+
+          </div>
+
+
+          <div
+            id="upcoming-calendar-grid"
+            class="upcoming-calendar-grid"
+          >
+          </div>
+
+        </div>
+
+
+        <!-- SELECTED DAY -->
+
+        <div
+          id="selected-upcoming-day"
+          class="selected-upcoming-day"
+        >
+
+          <div class="selected-upcoming-header">
+
+            <strong id="selected-upcoming-date">
+              Select a date
+            </strong>
+
+          </div>
+
+
+          <div id="selected-upcoming-services">
+
+            <p class="empty-upcoming-message">
+              Select a booked date on the calendar.
+            </p>
+
+          </div>
+
+        </div>
 
       </section>
 
