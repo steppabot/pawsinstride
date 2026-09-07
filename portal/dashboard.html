@@ -27,20 +27,15 @@
     <div class="dashboard-header">
 
       <div>
-
-        <h1>
-          Paws in Stride
-        </h1>
-
+        <h1>Paws in Stride</h1>
         <h2 id="welcome-name"></h2>
-
       </div>
 
       <button
         id="request-walk-button"
         class="primary-button"
       >
-        + Request a Walk
+        + Request Service
       </button>
 
     </div>
@@ -56,6 +51,10 @@
       style="display:none;"
     >
 
+      <!-- ========================================
+           BOOKING FORM
+           ======================================== -->
+
       <section
         id="booking-section"
         class="booking-section"
@@ -65,7 +64,7 @@
         <div class="section-header">
 
           <h3>
-            Request Walks
+            Request Service
           </h3>
 
           <button
@@ -82,6 +81,8 @@
 
         <form id="booking-form">
 
+          <!-- PET -->
+
           <label for="booking-pet">
             Pet
           </label>
@@ -90,18 +91,22 @@
             id="booking-pet"
             required
           >
+
             <option value="">
               Select your pet
             </option>
+
           </select>
 
 
-          <label for="booking-service">
-            Service
+          <!-- SERVICE TYPE -->
+
+          <label for="service-type">
+            Service Type
           </label>
 
           <select
-            id="booking-service"
+            id="service-type"
             required
           >
 
@@ -109,173 +114,261 @@
               Select a service
             </option>
 
-            <option
-              value="15 Minute Walk"
-              data-price="30"
-            >
-              15 Minute Walk — $30
+            <option value="Dog Walking">
+              Dog Walking
             </option>
 
-            <option
-              value="30 Minute Walk"
-              data-price="50"
-            >
-              30 Minute Walk — $50
+            <option value="Drop-In Visit">
+              Drop-In Visit / Potty Break
             </option>
 
-            <option
-              value="60 Minute Walk"
-              data-price="75"
-            >
-              60 Minute Walk — $75
+            <option value="Pet Sitting">
+              Pet Sitting
+            </option>
+
+            <option value="Dog Boarding">
+              Dog Boarding
             </option>
 
           </select>
 
 
-          <label for="booking-time">
-            Preferred Time Window
-          </label>
+          <!-- SERVICE OPTION -->
 
-          <select
-            id="booking-time"
-            required
+          <div
+            id="service-option-wrapper"
+            style="display:none;"
           >
 
-            <option value="">
-              Select a time window
-            </option>
-
-            <option value="7:00 AM - 10:00 AM">
-              7:00 AM – 10:00 AM
-            </option>
-
-            <option value="10:00 AM - 12:00 PM">
-              10:00 AM – 12:00 PM
-            </option>
-
-            <option value="12:00 PM - 2:00 PM">
-              12:00 PM – 2:00 PM
-            </option>
-
-            <option value="2:00 PM - 4:00 PM">
-              2:00 PM – 4:00 PM
-            </option>
-
-            <option value="4:00 PM - 6:00 PM">
-              4:00 PM – 6:00 PM
-            </option>
-
-            <option value="6:00 PM - 8:00 PM">
-              6:00 PM – 8:00 PM
-            </option>
-
-            <option value="8:00 PM - 10:00 PM">
-              8:00 PM – 10:00 PM
-            </option>
-
-          </select>
-
-
-          <!-- DATES -->
-
-          <label>
-            Dates
-          </label>
-
-          <p class="booking-help">
-            Select at least 3 walk dates per week.
-            Tap a date to select it. Tap it again to remove it.
-          </p>
-
-
-          <!-- INLINE CALENDAR -->
-
-          <div class="booking-calendar">
-
-            <div class="calendar-header">
-
-              <button
-                type="button"
-                id="calendar-prev"
-                class="calendar-nav-button"
-                aria-label="Previous month"
-              >
-                ‹
-              </button>
-
-              <strong id="calendar-month-label">
-              </strong>
-
-              <button
-                type="button"
-                id="calendar-next"
-                class="calendar-nav-button"
-                aria-label="Next month"
-              >
-                ›
-              </button>
-
-            </div>
-
-
-            <div class="calendar-weekdays">
-
-              <span>Mon</span>
-              <span>Tue</span>
-              <span>Wed</span>
-              <span>Thu</span>
-              <span>Fri</span>
-              <span>Sat</span>
-              <span>Sun</span>
-
-            </div>
-
-
-            <div
-              id="booking-calendar-grid"
-              class="calendar-grid"
+            <label
+              id="service-option-label"
+              for="service-option"
             >
+              Duration
+            </label>
+
+            <select id="service-option">
+
+              <option value="">
+                Select an option
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- TIME WINDOW / PET SITTING BLOCK -->
+
+          <div
+            id="time-window-wrapper"
+            style="display:none;"
+          >
+
+            <label
+              id="time-window-label"
+              for="booking-time"
+            >
+              Preferred Time Window
+            </label>
+
+            <select id="booking-time">
+
+              <option value="">
+                Select a time
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ========================================
+               STANDARD MULTI-DATE CALENDAR
+               ======================================== -->
+
+          <div
+            id="multi-date-booking"
+            style="display:none;"
+          >
+
+            <label>
+              Dates
+            </label>
+
+            <p
+              id="booking-date-help"
+              class="booking-help"
+            >
+              Select your service dates.
+            </p>
+
+
+            <div class="booking-calendar">
+
+              <div class="calendar-header">
+
+                <button
+                  type="button"
+                  id="calendar-prev"
+                  class="calendar-nav-button"
+                  aria-label="Previous month"
+                >
+                  ‹
+                </button>
+
+                <strong id="calendar-month-label"></strong>
+
+                <button
+                  type="button"
+                  id="calendar-next"
+                  class="calendar-nav-button"
+                  aria-label="Next month"
+                >
+                  ›
+                </button>
+
+              </div>
+
+
+              <div class="calendar-weekdays">
+
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+
+              </div>
+
+
+              <div
+                id="booking-calendar-grid"
+                class="calendar-grid"
+              >
+              </div>
+
+            </div>
+
+
+            <div id="selected-dates-container">
+
+              <div class="selected-dates-header">
+
+                <strong>
+                  Selected Dates
+                </strong>
+
+                <span id="selected-date-count">
+                  0 visits
+                </span>
+
+              </div>
+
+
+              <div id="selected-dates-list">
+
+                <p class="empty-dates-message">
+                  No dates selected yet.
+                </p>
+
+              </div>
+
             </div>
 
           </div>
 
 
-          <!-- SELECTED DATES -->
+          <!-- ========================================
+               BOARDING
+               ======================================== -->
 
-          <div id="selected-dates-container">
+          <div
+            id="boarding-booking"
+            style="display:none;"
+          >
 
-            <div class="selected-dates-header">
+            <div class="boarding-policy">
 
               <strong>
-                Selected Dates
+                VIP Overnight Boarding — $100/night
               </strong>
 
-              <span id="selected-date-count">
-                0 walks
-              </span>
-
-            </div>
-
-
-            <div id="selected-dates-list">
-
-              <p class="empty-dates-message">
-                No dates selected yet.
+              <p>
+                Drop-off is available beginning at 8:00 AM.
+                Pickup is required by 12:00 PM on the scheduled
+                departure day.
               </p>
 
             </div>
 
+
+            <label for="boarding-dropoff">
+              Drop-Off Date
+            </label>
+
+            <input
+              type="date"
+              id="boarding-dropoff"
+            >
+
+
+            <label for="boarding-pickup">
+              Pick-Up Date
+            </label>
+
+            <input
+              type="date"
+              id="boarding-pickup"
+            >
+
+
+            <label for="boarding-pickup-window">
+              Pick-Up Time
+            </label>
+
+            <select id="boarding-pickup-window">
+
+              <option value="">
+                Select pickup time
+              </option>
+
+              <option
+                value="By 12:00 PM"
+                data-fee="0"
+              >
+                By 12:00 PM
+              </option>
+
+              <option
+                value="12:00 PM - 3:00 PM"
+                data-fee="50"
+              >
+                12:00 PM – 3:00 PM (+$50)
+              </option>
+
+            </select>
+
+
+            <p class="booking-help">
+              Care needed after 3:00 PM requires booking
+              through the following day.
+            </p>
+
           </div>
 
 
-          <!-- TOTAL -->
+          <!-- ========================================
+               TOTAL
+               ======================================== -->
 
           <div class="booking-total">
 
             <div>
               <span id="booking-count">
-                0 walks
+                0 services
               </span>
             </div>
 
@@ -285,6 +378,13 @@
               </strong>
             </div>
 
+          </div>
+
+
+          <div
+            id="booking-price-details"
+            class="booking-price-details"
+          >
           </div>
 
 
@@ -304,6 +404,10 @@
       </section>
 
 
+      <!-- ========================================
+           PETS
+           ======================================== -->
+
       <section>
 
         <h3>
@@ -315,10 +419,14 @@
       </section>
 
 
+      <!-- ========================================
+           UPCOMING SERVICES
+           ======================================== -->
+
       <section>
 
         <h3>
-          Upcoming Walks
+          Upcoming Services
         </h3>
 
         <div id="upcoming-visits"></div>
