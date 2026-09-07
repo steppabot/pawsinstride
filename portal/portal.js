@@ -46,6 +46,8 @@ let currentPets = [];
 
 let currentVisits = [];
 
+let currentVisitPets = [];
+
 let selectedDates = [];
 
 let selectedUpcomingDate = null;
@@ -137,6 +139,8 @@ const SERVICE_CONFIG = {
 
         optionLabel: "Duration",
 
+        additionalPetFee: 10,
+
         options: [
 
             {
@@ -168,6 +172,8 @@ const SERVICE_CONFIG = {
 
         optionLabel: "Duration",
 
+        additionalPetFee: 10,
+
         options: [
 
             {
@@ -198,6 +204,8 @@ const SERVICE_CONFIG = {
         minimumPerWeek: 0,
 
         optionLabel: "Package",
+
+        additionalPetFee: 0,
 
         options: [
 
@@ -245,7 +253,7 @@ const SERVICE_CONFIG = {
 
         boarding: true,
 
-        pricePerNight: 100
+        pricePerPetPerNight: 100
 
     }
 
@@ -516,6 +524,55 @@ async function loadDashboard() {
         visits || [];
 
 
+    // PETS ATTACHED TO UPCOMING VISITS
+
+    currentVisitPets =
+        [];
+
+
+    const visitIds =
+        currentVisits
+            .map(
+                visit => visit.id
+            );
+
+
+    if (
+        visitIds.length > 0
+    ) {
+
+        const {
+            data: visitPets,
+            error: visitPetsError
+        } =
+            await supabaseClient
+                .from("visit_pets")
+                .select(
+                    "visit_id, pet_id, is_primary, additional_pet_fee"
+                )
+                .in(
+                    "visit_id",
+                    visitIds
+                );
+
+
+        if (visitPetsError) {
+
+            console.error(
+                "Visit pets error:",
+                visitPetsError
+            );
+
+        } else {
+
+            currentVisitPets =
+                visitPets || [];
+
+        }
+
+    }
+
+
     // WELCOME
 
     const welcomeName =
@@ -536,8 +593,8 @@ async function loadDashboard() {
 
     populateBookingPets();
 
+    renderAdditionalPets();
 
-    // DEFAULT UPCOMING DATE
 
     if (
         currentVisits.length > 0 &&
@@ -1414,8 +1471,6 @@ if (petForm) {
             let savedPet;
 
 
-            // EDIT EXISTING PET
-
             if (editingPet) {
 
                 const {
@@ -1466,11 +1521,7 @@ if (petForm) {
                 savedPet =
                     data;
 
-            }
-
-            // ADD NEW PET
-
-            else {
+            } else {
 
                 const {
                     data,
@@ -1520,8 +1571,6 @@ if (petForm) {
             }
 
 
-            // PHOTO UPLOAD
-
             if (
                 pendingPetPhotoFile
             ) {
@@ -1562,8 +1611,6 @@ if (petForm) {
 
                     if (photoPathError) {
 
-                        // Remove orphaned new upload
-
                         await supabaseClient
                             .storage
                             .from(
@@ -1578,8 +1625,6 @@ if (petForm) {
 
                     }
 
-
-                    // Remove old photo after new one is safely saved
 
                     if (
                         oldPhotoPath &&
@@ -1791,6 +1836,8 @@ async function refreshPets() {
 
     populateBookingPets();
 
+    renderAdditionalPets();
+
 }
 
 
@@ -1798,25 +1845,25 @@ async function refreshPets() {
 // BOOKING PET DROPDOWN
 // ========================================
 
+const bookingPetSelect =
+    document.getElementById(
+        "booking-pet"
+    );
+
+
 function populateBookingPets() {
 
 
-    const petSelect =
-        document.getElementById(
-            "booking-pet"
-        );
-
-
-    if (!petSelect) {
+    if (!bookingPetSelect) {
         return;
     }
 
 
     const existingValue =
-        petSelect.value;
+        bookingPetSelect.value;
 
 
-    petSelect.innerHTML =
+    bookingPetSelect.innerHTML =
         `
             <option value="">
                 Select your pet
@@ -1841,7 +1888,7 @@ function populateBookingPets() {
                 pet.name;
 
 
-            petSelect.appendChild(
+            bookingPetSelect.appendChild(
                 option
             );
 
@@ -1857,10 +1904,366 @@ function populateBookingPets() {
         )
     ) {
 
-        petSelect.value =
+        bookingPetSelect.value =
             existingValue;
 
     }
+
+}
+
+
+if (bookingPetSelect) {
+
+    bookingPetSelect.addEventListener(
+        "change",
+        () => {
+
+            renderAdditionalPets();
+
+            updateBookingTotal();
+
+        }
+    );
+
+}
+
+
+// ========================================
+// ADDITIONAL PETS
+// ========================================
+
+function renderAdditionalPets() {
+
+
+    const wrapper =
+        document.getElementById(
+            "additional-pets-wrapper"
+        );
+
+
+    const list =
+        document.getElementById(
+            "additional-pets-list"
+        );
+
+
+    const help =
+        document.getElementById(
+            "additional-pets-help"
+        );
+
+
+    if (
+        !wrapper ||
+        !list ||
+        !help
+    ) {
+        return;
+    }
+
+
+    const primaryPetId =
+        Number(
+            bookingPetSelect?.value
+        );
+
+
+    if (
+        !primaryPetId ||
+        currentPets.length < 2
+    ) {
+
+        wrapper.style.display =
+            "none";
+
+
+        list.innerHTML =
+            "";
+
+
+        help.textContent =
+            "";
+
+        return;
+
+    }
+
+
+    const previouslySelected =
+        new Set(
+            Array.from(
+                document.querySelectorAll(
+                    ".additional-pet-checkbox:checked"
+                )
+            )
+                .map(
+                    checkbox =>
+                        Number(
+                            checkbox.value
+                        )
+                )
+        );
+
+
+    const additionalPets =
+        currentPets.filter(
+            pet =>
+                Number(pet.id) !==
+                primaryPetId
+        );
+
+
+    if (
+        additionalPets.length === 0
+    ) {
+
+        wrapper.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    wrapper.style.display =
+        "block";
+
+
+    list.innerHTML =
+        additionalPets
+            .map(
+                pet => {
+
+                    const checked =
+                        previouslySelected.has(
+                            Number(pet.id)
+                        )
+                            ? "checked"
+                            : "";
+
+
+                    return `
+                        <label class="additional-pet-option">
+
+                            <span class="additional-pet-main">
+
+                                <input
+                                    type="checkbox"
+                                    class="additional-pet-checkbox"
+                                    value="${pet.id}"
+                                    ${checked}
+                                >
+
+                                <span>
+                                    ${escapeHtml(pet.name)}
+                                </span>
+
+                            </span>
+
+                            <span class="additional-pet-fee">
+                                ${getAdditionalPetLabel()}
+                            </span>
+
+                        </label>
+                    `;
+
+                }
+            )
+            .join("");
+
+
+    list
+        .querySelectorAll(
+            ".additional-pet-checkbox"
+        )
+        .forEach(
+            checkbox => {
+
+                checkbox.addEventListener(
+                    "change",
+                    updateBookingTotal
+                );
+
+            }
+        );
+
+
+    updateAdditionalPetsHelp();
+
+}
+
+
+// ========================================
+// MULTI PET HELPERS
+// ========================================
+
+function getAdditionalPetLabel() {
+
+
+    const serviceType =
+        serviceTypeSelect?.value;
+
+
+    if (
+        serviceType ===
+            "Dog Walking" ||
+        serviceType ===
+            "Drop-In Visit"
+    ) {
+
+        return "+$10 / visit";
+
+    }
+
+
+    if (
+        serviceType ===
+        "Pet Sitting"
+    ) {
+
+        return "Included";
+
+    }
+
+
+    if (
+        serviceType ===
+        "Dog Boarding"
+    ) {
+
+        return "$100 / night";
+
+    }
+
+
+    return "Optional";
+
+}
+
+
+function updateAdditionalPetsHelp() {
+
+
+    const help =
+        document.getElementById(
+            "additional-pets-help"
+        );
+
+
+    if (!help) {
+        return;
+    }
+
+
+    const serviceType =
+        serviceTypeSelect?.value;
+
+
+    if (
+        serviceType ===
+            "Dog Walking"
+    ) {
+
+        help.textContent =
+            "Each additional dog is $10 per walk.";
+
+        return;
+
+    }
+
+
+    if (
+        serviceType ===
+            "Drop-In Visit"
+    ) {
+
+        help.textContent =
+            "Each additional pet is $10 per drop-in visit.";
+
+        return;
+
+    }
+
+
+    if (
+        serviceType ===
+            "Pet Sitting"
+    ) {
+
+        help.textContent =
+            "There is no additional pet charge for Pet Sitting.";
+
+        return;
+
+    }
+
+
+    if (
+        serviceType ===
+            "Dog Boarding"
+    ) {
+
+        help.textContent =
+            "Boarding is $100 per pet, per night.";
+
+        return;
+
+    }
+
+
+    help.textContent =
+        "Select any other pets included in this service.";
+
+}
+
+
+function getSelectedAdditionalPetIds() {
+
+
+    return Array.from(
+        document.querySelectorAll(
+            ".additional-pet-checkbox:checked"
+        )
+    )
+        .map(
+            checkbox =>
+                Number(
+                    checkbox.value
+                )
+        );
+
+}
+
+
+function getSelectedPetIds() {
+
+
+    const primaryPetId =
+        Number(
+            bookingPetSelect?.value
+        );
+
+
+    if (!primaryPetId) {
+
+        return [];
+
+    }
+
+
+    return [
+        primaryPetId,
+        ...getSelectedAdditionalPetIds()
+    ];
+
+}
+
+
+function getSelectedPetCount() {
+
+
+    return getSelectedPetIds()
+        .length;
 
 }
 
@@ -1895,6 +2298,8 @@ if (
 
 
             renderBookingCalendar();
+
+            renderAdditionalPets();
 
 
             bookingSection.scrollIntoView({
@@ -2037,6 +2442,9 @@ function handleServiceTypeChange() {
         "none";
 
 
+    renderAdditionalPets();
+
+
     if (!serviceType) {
 
         updateBookingTotal();
@@ -2056,6 +2464,8 @@ function handleServiceTypeChange() {
 
 
         resetBoardingDates();
+
+        renderAdditionalPets();
 
         updateBookingTotal();
 
@@ -2111,6 +2521,8 @@ function handleServiceTypeChange() {
 
     }
 
+
+    renderAdditionalPets();
 
     renderBookingCalendar();
 
@@ -2998,10 +3410,22 @@ function updateBookingTotal() {
 
     if (
         !priceDisplay ||
-        !countDisplay
+        !countDisplay ||
+        !detailDisplay
     ) {
         return;
     }
+
+
+    const petCount =
+        getSelectedPetCount();
+
+
+    const additionalPetCount =
+        Math.max(
+            petCount - 1,
+            0
+        );
 
 
     if (!serviceType) {
@@ -3022,6 +3446,8 @@ function updateBookingTotal() {
     }
 
 
+    // BOARDING
+
     if (
         serviceType ===
         "Dog Boarding"
@@ -3035,8 +3461,20 @@ function updateBookingTotal() {
             getBoardingPickupFee();
 
 
+        const boardingPetCount =
+            Math.max(
+                petCount,
+                1
+            );
+
+
+        const nightlyTotal =
+            100 *
+            boardingPetCount;
+
+
         const total =
-            (nights * 100) +
+            (nights * nightlyTotal) +
             pickupFee;
 
 
@@ -3053,15 +3491,20 @@ function updateBookingTotal() {
 
 
         if (
-            nights > 0
+            nights > 0 &&
+            petCount > 0
         ) {
 
             let details =
-                `${nights} ${
+                `${boardingPetCount} ${
+                    boardingPetCount === 1
+                        ? "pet"
+                        : "pets"
+                } × $100 × ${nights} ${
                     nights === 1
                         ? "night"
                         : "nights"
-                } × $100`;
+                }`;
 
 
             if (
@@ -3090,6 +3533,8 @@ function updateBookingTotal() {
     }
 
 
+    // WALK / DROP-IN / PET SITTING
+
     const selectedOption =
         serviceOptionSelect.options[
             serviceOptionSelect.selectedIndex
@@ -3104,7 +3549,7 @@ function updateBookingTotal() {
         ) || 0;
 
 
-    let surcharge =
+    let eveningSurcharge =
         0;
 
 
@@ -3121,7 +3566,7 @@ function updateBookingTotal() {
             ];
 
 
-        surcharge =
+        eveningSurcharge =
             Number(
                 timeOption
                     ? timeOption.dataset.surcharge
@@ -3131,9 +3576,38 @@ function updateBookingTotal() {
     }
 
 
+    let additionalPetTotal =
+        0;
+
+
+    if (
+        serviceType ===
+            "Dog Walking" ||
+        serviceType ===
+            "Drop-In Visit"
+    ) {
+
+        additionalPetTotal =
+            additionalPetCount * 10;
+
+    }
+
+
+    if (
+        serviceType ===
+        "Pet Sitting"
+    ) {
+
+        additionalPetTotal =
+            0;
+
+    }
+
+
     const pricePerService =
         basePrice +
-        surcharge;
+        eveningSurcharge +
+        additionalPetTotal;
 
 
     const total =
@@ -3158,22 +3632,60 @@ function updateBookingTotal() {
         basePrice > 0
     ) {
 
-        let details =
-            `${selectedDates.length} × $${basePrice}`;
+        const detailParts =
+            [];
+
+
+        detailParts.push(
+            `${selectedDates.length} × $${basePrice}`
+        );
 
 
         if (
-            surcharge > 0
+            additionalPetTotal > 0
         ) {
 
-            details +=
-                ` + $${surcharge} evening fee per visit`;
+            detailParts.push(
+                `${additionalPetCount} additional ${
+                    additionalPetCount === 1
+                        ? "pet"
+                        : "pets"
+                } × $10 per visit`
+            );
+
+        }
+
+
+        if (
+            serviceType ===
+                "Pet Sitting" &&
+            additionalPetCount > 0
+        ) {
+
+            detailParts.push(
+                `${additionalPetCount} additional ${
+                    additionalPetCount === 1
+                        ? "pet included"
+                        : "pets included"
+                } at no charge`
+            );
+
+        }
+
+
+        if (
+            eveningSurcharge > 0
+        ) {
+
+            detailParts.push(
+                `$${eveningSurcharge} evening fee per visit`
+            );
 
         }
 
 
         detailDisplay.textContent =
-            details;
+            detailParts.join(" + ");
 
     } else {
 
@@ -3384,6 +3896,135 @@ function validateThreePerWeek() {
 
 
 // ========================================
+// CREATE VISIT PET ROWS
+// ========================================
+
+async function attachPetsToVisits(
+    insertedVisits,
+    primaryPetId,
+    additionalPetIds,
+    serviceType
+) {
+
+
+    const rows =
+        [];
+
+
+    insertedVisits.forEach(
+        visit => {
+
+            rows.push({
+
+                visit_id:
+                    visit.id,
+
+                pet_id:
+                    Number(primaryPetId),
+
+                is_primary:
+                    true,
+
+                additional_pet_fee:
+                    0
+
+            });
+
+
+            additionalPetIds.forEach(
+                petId => {
+
+                    let additionalFee =
+                        0;
+
+
+                    if (
+                        serviceType ===
+                            "Dog Walking" ||
+                        serviceType ===
+                            "Drop-In Visit"
+                    ) {
+
+                        additionalFee =
+                            10;
+
+                    }
+
+
+                    if (
+                        serviceType ===
+                        "Pet Sitting"
+                    ) {
+
+                        additionalFee =
+                            0;
+
+                    }
+
+
+                    if (
+                        serviceType ===
+                        "Dog Boarding"
+                    ) {
+
+                        additionalFee =
+                            100;
+
+                    }
+
+
+                    rows.push({
+
+                        visit_id:
+                            visit.id,
+
+                        pet_id:
+                            Number(petId),
+
+                        is_primary:
+                            false,
+
+                        additional_pet_fee:
+                            additionalFee
+
+                    });
+
+                }
+            );
+
+        }
+    );
+
+
+    if (
+        rows.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("visit_pets")
+            .insert(
+                rows
+            );
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+}
+
+
+// ========================================
 // BOOKING SUBMIT
 // ========================================
 
@@ -3418,12 +4059,14 @@ if (bookingForm) {
                 "";
 
 
-            const petId =
-                document
-                    .getElementById(
-                        "booking-pet"
-                    )
-                    .value;
+            const primaryPetId =
+                Number(
+                    bookingPetSelect.value
+                );
+
+
+            const additionalPetIds =
+                getSelectedAdditionalPetIds();
 
 
             const serviceType =
@@ -3431,12 +4074,12 @@ if (bookingForm) {
 
 
             if (
-                !petId ||
+                !primaryPetId ||
                 !serviceType
             ) {
 
                 message.textContent =
-                    "Please select your pet and service type.";
+                    "Please select your primary pet and service type.";
 
                 return;
 
@@ -3449,7 +4092,8 @@ if (bookingForm) {
             ) {
 
                 await submitBoardingBooking(
-                    petId,
+                    primaryPetId,
+                    additionalPetIds,
                     message,
                     submitButton
                 );
@@ -3536,7 +4180,7 @@ if (bookingForm) {
                 ) || 0;
 
 
-            let surcharge =
+            let eveningSurcharge =
                 0;
 
 
@@ -3553,7 +4197,7 @@ if (bookingForm) {
                     ];
 
 
-                surcharge =
+                eveningSurcharge =
                     Number(
                         timeOption.dataset.surcharge
                     ) || 0;
@@ -3561,9 +4205,39 @@ if (bookingForm) {
             }
 
 
-            const price =
+            let additionalPetCharge =
+                0;
+
+
+            if (
+                serviceType ===
+                    "Dog Walking" ||
+                serviceType ===
+                    "Drop-In Visit"
+            ) {
+
+                additionalPetCharge =
+                    additionalPetIds.length *
+                    10;
+
+            }
+
+
+            if (
+                serviceType ===
+                "Pet Sitting"
+            ) {
+
+                additionalPetCharge =
+                    0;
+
+            }
+
+
+            const pricePerVisit =
                 basePrice +
-                surcharge;
+                eveningSurcharge +
+                additionalPetCharge;
 
 
             const bookingGroupId =
@@ -3582,7 +4256,7 @@ if (bookingForm) {
                             currentUser.id,
 
                         pet_id:
-                            Number(petId),
+                            primaryPetId,
 
                         service_type:
                             serviceType,
@@ -3602,7 +4276,8 @@ if (bookingForm) {
                         status:
                             "requested",
 
-                        price,
+                        price:
+                            pricePerVisit,
 
                         payment_status:
                             "pending",
@@ -3622,17 +4297,76 @@ if (bookingForm) {
                 "Submitting...";
 
 
-            const {
+            try {
+
+                const {
+                    data: insertedVisits,
+                    error: visitInsertError
+                } =
+                    await supabaseClient
+                        .from("visits")
+                        .insert(
+                            visitsToInsert
+                        )
+                        .select(
+                            "id, visit_date"
+                        );
+
+
+                if (visitInsertError) {
+
+                    throw visitInsertError;
+
+                }
+
+
+                await attachPetsToVisits(
+                    insertedVisits || [],
+                    primaryPetId,
+                    additionalPetIds,
+                    serviceType
+                );
+
+
+                const serviceCount =
+                    selectedDates.length;
+
+
+                message.textContent =
+                    `${serviceCount} ${
+                        serviceCount === 1
+                            ? "service"
+                            : "services"
+                    } added successfully!`;
+
+
+                resetBookingForm();
+
+
+                submitButton.disabled =
+                    false;
+
+
+                submitButton.textContent =
+                    "Continue";
+
+
+                setTimeout(
+                    async () => {
+
+                        bookingSection.style.display =
+                            "none";
+
+
+                        await loadDashboard();
+
+                    },
+                    900
+                );
+
+            } catch (
                 error
-            } =
-                await supabaseClient
-                    .from("visits")
-                    .insert(
-                        visitsToInsert
-                    );
-
-
-            if (error) {
+            ) {
 
                 console.error(
                     "Booking error:",
@@ -3651,46 +4385,7 @@ if (bookingForm) {
                 submitButton.textContent =
                     "Continue";
 
-                return;
-
             }
-
-
-            const serviceCount =
-                selectedDates.length;
-
-
-            message.textContent =
-                `${serviceCount} ${
-                    serviceCount === 1
-                        ? "service"
-                        : "services"
-                } added successfully!`;
-
-
-            resetBookingForm();
-
-
-            submitButton.disabled =
-                false;
-
-
-            submitButton.textContent =
-                "Continue";
-
-
-            setTimeout(
-                async () => {
-
-                    bookingSection.style.display =
-                        "none";
-
-
-                    await loadDashboard();
-
-                },
-                900
-            );
 
         }
     );
@@ -3703,7 +4398,8 @@ if (bookingForm) {
 // ========================================
 
 async function submitBoardingBooking(
-    petId,
+    primaryPetId,
+    additionalPetIds,
     message,
     submitButton
 ) {
@@ -3766,12 +4462,22 @@ async function submitBoardingBooking(
         crypto.randomUUID();
 
 
+    const petCount =
+        1 +
+        additionalPetIds.length;
+
+
+    const nightlyPrice =
+        petCount *
+        100;
+
+
     const rows =
         boardingDates.map(
             (date, index) => {
 
                 let rowPrice =
-                    100;
+                    nightlyPrice;
 
 
                 if (
@@ -3792,7 +4498,7 @@ async function submitBoardingBooking(
                         currentUser.id,
 
                     pet_id:
-                        Number(petId),
+                        Number(primaryPetId),
 
                     service_type:
                         "Dog Boarding",
@@ -3835,17 +4541,72 @@ async function submitBoardingBooking(
         "Submitting...";
 
 
-    const {
+    try {
+
+        const {
+            data: insertedVisits,
+            error: visitInsertError
+        } =
+            await supabaseClient
+                .from("visits")
+                .insert(
+                    rows
+                )
+                .select(
+                    "id, visit_date"
+                );
+
+
+        if (visitInsertError) {
+
+            throw visitInsertError;
+
+        }
+
+
+        await attachPetsToVisits(
+            insertedVisits || [],
+            primaryPetId,
+            additionalPetIds,
+            "Dog Boarding"
+        );
+
+
+        message.textContent =
+            `${nights} ${
+                nights === 1
+                    ? "night"
+                    : "nights"
+            } of boarding added successfully!`;
+
+
+        resetBookingForm();
+
+
+        submitButton.disabled =
+            false;
+
+
+        submitButton.textContent =
+            "Continue";
+
+
+        setTimeout(
+            async () => {
+
+                bookingSection.style.display =
+                    "none";
+
+
+                await loadDashboard();
+
+            },
+            900
+        );
+
+    } catch (
         error
-    } =
-        await supabaseClient
-            .from("visits")
-            .insert(
-                rows
-            );
-
-
-    if (error) {
+    ) {
 
         console.error(
             "Boarding booking error:",
@@ -3864,42 +4625,7 @@ async function submitBoardingBooking(
         submitButton.textContent =
             "Continue";
 
-        return;
-
     }
-
-
-    message.textContent =
-        `${nights} ${
-            nights === 1
-                ? "night"
-                : "nights"
-        } of boarding added successfully!`;
-
-
-    resetBookingForm();
-
-
-    submitButton.disabled =
-        false;
-
-
-    submitButton.textContent =
-        "Continue";
-
-
-    setTimeout(
-        async () => {
-
-            bookingSection.style.display =
-                "none";
-
-
-            await loadDashboard();
-
-        },
-        900
-    );
 
 }
 
@@ -3952,9 +4678,17 @@ function resetBookingForm() {
         "none";
 
 
+    document.getElementById(
+        "additional-pets-wrapper"
+    ).style.display =
+        "none";
+
+
     renderSelectedDates();
 
     renderBookingCalendar();
+
+    renderAdditionalPets();
 
     updateBookingTotal();
 
@@ -4295,6 +5029,89 @@ function renderUpcomingCalendar() {
 
 
 // ========================================
+// VISIT PET NAMES
+// ========================================
+
+function getPetsForVisit(
+    visit
+) {
+
+
+    let relationships =
+        currentVisitPets
+            .filter(
+                item =>
+                    Number(item.visit_id) ===
+                    Number(visit.id)
+            );
+
+
+    relationships.sort(
+        (a, b) => {
+
+            if (
+                a.is_primary ===
+                b.is_primary
+            ) {
+
+                return 0;
+
+            }
+
+
+            return a.is_primary
+                ? -1
+                : 1;
+
+        }
+    );
+
+
+    let pets =
+        relationships
+            .map(
+                relationship =>
+                    currentPets.find(
+                        pet =>
+                            Number(pet.id) ===
+                            Number(
+                                relationship.pet_id
+                            )
+                    )
+            )
+            .filter(Boolean);
+
+
+    // Backwards compatibility
+    if (
+        pets.length === 0 &&
+        visit.pet_id
+    ) {
+
+        const legacyPet =
+            currentPets.find(
+                pet =>
+                    Number(pet.id) ===
+                    Number(visit.pet_id)
+            );
+
+
+        if (legacyPet) {
+
+            pets =
+                [legacyPet];
+
+        }
+
+    }
+
+
+    return pets;
+
+}
+
+
+// ========================================
 // UPCOMING SERVICE DETAILS
 // ========================================
 
@@ -4393,6 +5210,36 @@ function renderSelectedUpcomingServices() {
                             : "";
 
 
+                    const pets =
+                        getPetsForVisit(
+                            visit
+                        );
+
+
+                    const petLabel =
+                        pets.length === 1
+                            ? "PET"
+                            : "PETS";
+
+
+                    const petChips =
+                        pets.length > 0
+                            ? pets
+                                .map(
+                                    pet => `
+                                        <span class="service-pet-chip">
+                                            ${escapeHtml(pet.name)}
+                                        </span>
+                                    `
+                                )
+                                .join("")
+                            : `
+                                <span class="service-pet-chip service-pet-chip-missing">
+                                    Pet not assigned
+                                </span>
+                            `;
+
+
                     return `
                         <div class="upcoming-service-card">
 
@@ -4411,6 +5258,20 @@ function renderSelectedUpcomingServices() {
                                 </span>
 
                             </div>
+
+
+                            <div class="upcoming-service-pets">
+
+                                <span class="upcoming-service-pets-label">
+                                    ${petLabel}
+                                </span>
+
+                                <div class="service-pet-chips">
+                                    ${petChips}
+                                </div>
+
+                            </div>
+
 
                             ${
                                 time
