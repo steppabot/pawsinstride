@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Client Dashboard | Paws in Stride</title>
+
   <link rel="stylesheet" href="portal.css">
 </head>
 
@@ -11,32 +13,188 @@
 
   <main class="dashboard-container">
 
-    <h1>Paws in Stride</h1>
+    <div class="dashboard-header">
 
-    <div id="loading">Loading your account...</div>
+      <div>
+        <h1>Paws in Stride</h1>
+        <h2 id="welcome-name"></h2>
+      </div>
+
+      <button id="request-walk-button" class="primary-button">
+        + Request a Walk
+      </button>
+
+    </div>
+
+
+    <div id="loading">
+      Loading your account...
+    </div>
+
 
     <div id="dashboard-content" style="display:none;">
 
-      <h2 id="welcome-name"></h2>
+
+      <!-- BOOKING FORM -->
+
+      <section
+        id="booking-section"
+        class="booking-section"
+        style="display:none;"
+      >
+
+        <div class="section-header">
+
+          <h3>Request a Walk</h3>
+
+          <button
+            type="button"
+            id="close-booking-button"
+            class="close-button"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <form id="booking-form">
+
+
+          <label for="booking-pet">
+            Pet
+          </label>
+
+          <select id="booking-pet" required>
+            <option value="">
+              Select your pet
+            </option>
+          </select>
+
+
+          <label for="booking-service">
+            Service
+          </label>
+
+          <select id="booking-service" required>
+
+            <option value="">
+              Select a service
+            </option>
+
+            <option
+              value="15 Minute Walk"
+              data-price="30"
+            >
+              15 Minute Walk — $30
+            </option>
+
+            <option
+              value="30 Minute Walk"
+              data-price="50"
+            >
+              30 Minute Walk — $50
+            </option>
+
+            <option
+              value="60 Minute Walk"
+              data-price="75"
+            >
+              60 Minute Walk — $75
+            </option>
+
+          </select>
+
+
+          <label for="booking-date">
+            Date
+          </label>
+
+          <input
+            type="date"
+            id="booking-date"
+            required
+          >
+
+
+          <label for="booking-time">
+            Preferred Time
+          </label>
+
+          <input
+            type="time"
+            id="booking-time"
+            required
+          >
+
+
+          <div class="booking-total">
+
+            <span>Total</span>
+
+            <strong id="booking-price">
+              $0.00
+            </strong>
+
+          </div>
+
+
+          <button
+            type="submit"
+            id="booking-submit-button"
+            class="primary-button"
+          >
+            Request Walk
+          </button>
+
+
+          <p id="booking-message"></p>
+
+
+        </form>
+
+      </section>
+
+
+
+      <!-- PET -->
 
       <section>
+
         <h3>Your Pet</h3>
+
         <div id="pet-info"></div>
+
       </section>
+
+
+
+      <!-- UPCOMING WALKS -->
 
       <section>
+
         <h3>Upcoming Walks</h3>
+
         <div id="upcoming-visits"></div>
+
       </section>
 
-      <button id="logout-button">Log Out</button>
+
+
+      <button id="logout-button">
+        Log Out
+      </button>
+
 
     </div>
 
   </main>
 
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="./portal.js"></script>
+
 
 </body>
 </html>
