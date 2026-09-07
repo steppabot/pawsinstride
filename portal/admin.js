@@ -71,7 +71,9 @@ let allVisits =
 let allVisitPets =
     [];
 
-let allHouseholds = [];
+
+let allHouseholds =
+    [];
 
 
 let selectedAdminDate =
@@ -235,7 +237,12 @@ async function loadAdminDashboard() {
     // ========================================
 
     if (
-        profile.role !==
+        String(
+            profile.role ||
+            ""
+        )
+            .trim()
+            .toLowerCase() !==
         "admin"
     ) {
 
@@ -300,30 +307,30 @@ async function loadAdminDashboard() {
     // ========================================
 
     const [
-    
+
         profilesResult,
         petsResult,
         visitsResult,
         householdsResult
-    
+
     ] =
         await Promise.all([
-    
-    
+
+
             supabaseClient
                 .from("profiles")
                 .select(
                     "id, full_name, email, phone, role"
                 ),
-    
-    
+
+
             supabaseClient
                 .from("pets")
                 .select(
                     "id, client_id, name, breed, gender"
                 ),
-    
-    
+
+
             supabaseClient
                 .from("visits")
                 .select("*")
@@ -333,15 +340,15 @@ async function loadAdminDashboard() {
                         ascending: true
                     }
                 ),
-    
-    
+
+
             supabaseClient
                 .from("households")
                 .select(
                     "client_id, street_address, address_line_2, city, state, zip_code"
                 )
-    
-    
+
+
         ]);
 
 
@@ -409,19 +416,22 @@ async function loadAdminDashboard() {
         visitsResult.data ||
         [];
 
-    
+
+
     if (
         householdsResult.error
     ) {
-    
+
+
         console.error(
             "Admin households error:",
             householdsResult.error
         );
-    
+
     }
-    
-    
+
+
+
     allHouseholds =
         householdsResult.data ||
         [];
@@ -2470,6 +2480,430 @@ function renderAdminDayServices() {
 
 
 // ========================================
+// VISIT CHECK-IN ACTIONS
+// ========================================
+
+const adminDayServicesContainer =
+    document.getElementById(
+        "admin-day-services"
+    );
+
+
+adminDayServicesContainer
+    ?.addEventListener(
+        "click",
+        async event => {
+
+
+            const actionButton =
+                event.target.closest(
+                    "[data-visit-action]"
+                );
+
+
+            if (!actionButton) {
+
+                return;
+
+            }
+
+
+            const visitId =
+                Number(
+                    actionButton.dataset.visitId
+                );
+
+
+            const action =
+                actionButton.dataset.visitAction;
+
+
+            if (
+                !visitId ||
+                !action
+            ) {
+
+                return;
+
+            }
+
+
+            actionButton.disabled =
+                true;
+
+
+            const originalText =
+                actionButton.textContent;
+
+
+            try {
+
+
+                if (
+                    action ===
+                    "check-in"
+                ) {
+
+
+                    actionButton.textContent =
+                        "Checking In...";
+
+
+                    await checkInVisit(
+                        visitId
+                    );
+
+
+                } else if (
+                    action ===
+                    "finish"
+                ) {
+
+
+                    actionButton.textContent =
+                        "Finishing...";
+
+
+                    await finishVisit(
+                        visitId
+                    );
+
+
+                } else if (
+                    action ===
+                    "reopen"
+                ) {
+
+
+                    actionButton.textContent =
+                        "Reopening...";
+
+
+                    await reopenVisit(
+                        visitId
+                    );
+
+                }
+
+
+            } catch (
+                error
+            ) {
+
+
+                console.error(
+                    "Visit status update error:",
+                    error
+                );
+
+
+                alert(
+                    "We couldn't update this visit. Please try again."
+                );
+
+
+                actionButton.disabled =
+                    false;
+
+
+                actionButton.textContent =
+                    originalText;
+
+            }
+
+        }
+    );
+
+
+
+// ========================================
+// CHECK IN VISIT
+// ========================================
+
+async function checkInVisit(
+    visitId
+) {
+
+
+    const checkedInAt =
+        new Date()
+            .toISOString();
+
+
+    const {
+
+        data,
+        error
+
+    } =
+        await supabaseClient
+            .from("visits")
+            .update({
+
+                status:
+                    "checked_in",
+
+                checked_in_at:
+                    checkedInAt,
+
+                completed_at:
+                    null
+
+            })
+            .eq(
+                "id",
+                visitId
+            )
+            .select("*")
+            .single();
+
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+
+    replaceAdminVisit(
+        data
+    );
+
+
+    renderAdminCalendar();
+
+
+    renderAdminDayServices();
+
+}
+
+
+
+// ========================================
+// FINISH VISIT
+// ========================================
+
+async function finishVisit(
+    visitId
+) {
+
+
+    const visit =
+        allVisits.find(
+
+            item =>
+
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    visitId
+                )
+
+        );
+
+
+
+    if (!visit) {
+
+
+        throw new Error(
+            "Visit not found."
+        );
+
+    }
+
+
+
+    const completedAt =
+        new Date()
+            .toISOString();
+
+
+    const checkedInAt =
+        visit.checked_in_at ||
+        completedAt;
+
+
+
+    const {
+
+        data,
+        error
+
+    } =
+        await supabaseClient
+            .from("visits")
+            .update({
+
+                status:
+                    "completed",
+
+                checked_in_at:
+                    checkedInAt,
+
+                completed_at:
+                    completedAt
+
+            })
+            .eq(
+                "id",
+                visitId
+            )
+            .select("*")
+            .single();
+
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+
+    replaceAdminVisit(
+        data
+    );
+
+
+    renderAdminCalendar();
+
+
+    renderAdminDayServices();
+
+}
+
+
+
+// ========================================
+// REOPEN VISIT
+// ========================================
+
+async function reopenVisit(
+    visitId
+) {
+
+
+    const visit =
+        allVisits.find(
+
+            item =>
+
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    visitId
+                )
+
+        );
+
+
+
+    if (!visit) {
+
+
+        throw new Error(
+            "Visit not found."
+        );
+
+    }
+
+
+
+    const nextStatus =
+        visit.checked_in_at
+
+            ? "checked_in"
+
+            : "scheduled";
+
+
+
+    const {
+
+        data,
+        error
+
+    } =
+        await supabaseClient
+            .from("visits")
+            .update({
+
+                status:
+                    nextStatus,
+
+                completed_at:
+                    null
+
+            })
+            .eq(
+                "id",
+                visitId
+            )
+            .select("*")
+            .single();
+
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+
+    replaceAdminVisit(
+        data
+    );
+
+
+    renderAdminCalendar();
+
+
+    renderAdminDayServices();
+
+}
+
+
+
+// ========================================
+// REPLACE VISIT IN LOCAL STATE
+// ========================================
+
+function replaceAdminVisit(
+    updatedVisit
+) {
+
+
+    allVisits =
+        allVisits.map(
+
+            visit =>
+
+                Number(
+                    visit.id
+                ) ===
+                Number(
+                    updatedVisit.id
+                )
+
+                    ? updatedVisit
+
+                    : visit
+
+        );
+
+}
+
+
+
+// ========================================
 // BUILD SERVICE CARD
 // ========================================
 
@@ -2495,80 +2929,104 @@ function buildAdminServiceCard(
         client?.email ||
         "Unknown Client";
 
+
+
     const household =
         allHouseholds.find(
+
             item =>
+
                 item.client_id ===
                 visit.client_id
+
         );
-    
-    
+
+
+
     const addressParts =
         [];
-    
-    
+
+
+
     if (
         household?.street_address
     ) {
-    
+
+
         addressParts.push(
             household.street_address
         );
-    
+
     }
-    
-    
+
+
+
     if (
         household?.address_line_2
     ) {
-    
+
+
         addressParts.push(
             household.address_line_2
         );
-    
+
     }
-    
-    
+
+
+
     const cityState =
         [
+
             household?.city,
             household?.state
+
         ]
             .filter(Boolean)
             .join(", ");
-    
-    
+
+
+
     const cityStateZip =
         `${cityState}${
+
             household?.zip_code
+
                 ? ` ${household.zip_code}`
+
                 : ""
+
         }`
             .trim();
-    
-    
+
+
+
     if (
         cityStateZip
     ) {
-    
+
+
         addressParts.push(
             cityStateZip
         );
-    
+
     }
-    
-    
+
+
+
     const clientAddress =
         addressParts.join(
             ", "
         );
-    
-    
+
+
+
     const googleMapsUrl =
         clientAddress
+
             ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                 clientAddress
             )}`
+
             : "";
 
 
@@ -2585,8 +3043,10 @@ function buildAdminServiceCard(
         0
 
             ? pets.map(
+
                 pet =>
                     pet.name
+
             )
 
             : [
@@ -2603,9 +3063,36 @@ function buildAdminServiceCard(
 
 
 
+    const progress =
+        getVisitProgressInfo(
+            visit
+        );
+
+
+
+    const cardStateClass =
+        progress.state ===
+        "completed"
+
+            ? "admin-service-card-completed"
+
+            : progress.state ===
+                "checked_in"
+
+                ? "admin-service-card-in-progress"
+
+                : "";
+
+
+
     return `
 
-        <article class="admin-service-card">
+        <article class="admin-service-card ${cardStateClass}">
+
+
+            ${buildVisitProgressIcon(
+                progress
+            )}
 
 
             <div class="admin-service-top">
@@ -2640,7 +3127,6 @@ function buildAdminServiceCard(
 
 
                 </div>
-
 
 
                 <div class="admin-service-statuses">
@@ -2678,7 +3164,6 @@ function buildAdminServiceCard(
             </div>
 
 
-
             <div class="admin-service-main-grid">
 
 
@@ -2701,26 +3186,26 @@ function buildAdminServiceCard(
 
                     ${
                         client?.phone
-                    
+
                             ? `
-                    
+
                                 <small>
                                     ${escapeHtml(
                                         client.phone
                                     )}
                                 </small>
-                    
+
                             `
-                    
+
                             : ""
                     }
-                    
-                    
+
+
                     ${
                         clientAddress
-                    
+
                             ? `
-                    
+
                                 <a
                                     href="${escapeHtml(
                                         googleMapsUrl
@@ -2733,19 +3218,20 @@ function buildAdminServiceCard(
                                         clientAddress
                                     )}
                                 </a>
-                    
+
                             `
-                    
+
                             : `
+
                                 <small>
                                     Address not added
                                 </small>
+
                             `
                     }
 
 
                 </div>
-
 
 
                 <div class="admin-service-detail">
@@ -2754,7 +3240,8 @@ function buildAdminServiceCard(
                     <span>
 
                         ${
-                            petNames.length === 1
+                            petNames.length ===
+                            1
 
                                 ? "Pet"
 
@@ -2774,7 +3261,9 @@ function buildAdminServiceCard(
                                 name => `
 
                                     <span class="service-pet-chip">
-                                        ${escapeHtml(name)}
+                                        ${escapeHtml(
+                                            name
+                                        )}
                                     </span>
 
                                 `
@@ -2788,7 +3277,6 @@ function buildAdminServiceCard(
 
 
                 </div>
-
 
 
                 <div class="admin-service-detail">
@@ -2810,9 +3298,512 @@ function buildAdminServiceCard(
             </div>
 
 
+            ${buildAdminVisitProgressSection(
+                visit,
+                progress
+            )}
+
+
         </article>
 
     `;
+
+}
+
+
+
+// ========================================
+// VISIT PROGRESS INFO
+// ========================================
+
+function getVisitProgressInfo(
+    visit
+) {
+
+
+    const status =
+        String(
+            visit.status ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+
+    const hasCheckedIn =
+        Boolean(
+            visit.checked_in_at
+        );
+
+
+
+    const hasCompleted =
+        Boolean(
+            visit.completed_at
+        ) ||
+        status ===
+        "completed";
+
+
+
+    if (
+        hasCompleted
+    ) {
+
+
+        return {
+
+            state:
+                "completed",
+
+            checkedInAt:
+                visit.checked_in_at,
+
+            completedAt:
+                visit.completed_at,
+
+            minutes:
+                getVisitDurationMinutes(
+                    visit
+                )
+
+        };
+
+    }
+
+
+
+    if (
+        hasCheckedIn ||
+        status ===
+        "checked_in"
+    ) {
+
+
+        return {
+
+            state:
+                "checked_in",
+
+            checkedInAt:
+                visit.checked_in_at,
+
+            completedAt:
+                null,
+
+            minutes:
+                null
+
+        };
+
+    }
+
+
+
+    return {
+
+        state:
+            "scheduled",
+
+        checkedInAt:
+            null,
+
+        completedAt:
+            null,
+
+        minutes:
+            null
+
+    };
+
+}
+
+
+
+// ========================================
+// VISIT PROGRESS ICON
+// ========================================
+
+function buildVisitProgressIcon(
+    progress
+) {
+
+
+    if (
+        progress.state ===
+        "completed"
+    ) {
+
+
+        return `
+
+            <div
+                class="admin-visit-progress-icon admin-visit-progress-complete"
+                title="Visit complete"
+                aria-label="Visit complete"
+            >
+                ✓
+            </div>
+
+        `;
+
+    }
+
+
+
+    if (
+        progress.state ===
+        "checked_in"
+    ) {
+
+
+        return `
+
+            <div
+                class="admin-visit-progress-icon admin-visit-progress-active"
+                title="Visit in progress"
+                aria-label="Visit in progress"
+            >
+                ◷
+            </div>
+
+        `;
+
+    }
+
+
+
+    return "";
+
+}
+
+
+
+// ========================================
+// ADMIN VISIT PROGRESS SECTION
+// ========================================
+
+function buildAdminVisitProgressSection(
+    visit,
+    progress
+) {
+
+
+    if (
+        progress.state ===
+        "completed"
+    ) {
+
+
+        const checkedIn =
+            formatVisitTimestamp(
+                progress.checkedInAt
+            );
+
+
+        const completed =
+            formatVisitTimestamp(
+                progress.completedAt
+            );
+
+
+
+        const durationText =
+            progress.minutes !==
+            null
+
+                ? `${progress.minutes} total ${
+                    progress.minutes ===
+                    1
+
+                        ? "minute"
+
+                        : "minutes"
+                }`
+
+                : "Duration unavailable";
+
+
+
+        return `
+
+            <div class="admin-visit-progress admin-visit-progress-finished">
+
+
+                <div class="admin-visit-progress-copy">
+
+
+                    <strong>
+                        ✓ Visit Complete
+                    </strong>
+
+
+                    <span>
+
+                        ${escapeHtml(
+
+                            checkedIn &&
+                            completed
+
+                                ? `${checkedIn} – ${completed} • ${durationText}`
+
+                                : durationText
+
+                        )}
+
+                    </span>
+
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="secondary-button admin-reopen-visit-button"
+                    data-visit-action="reopen"
+                    data-visit-id="${visit.id}"
+                >
+                    Reopen Visit
+                </button>
+
+
+            </div>
+
+        `;
+
+    }
+
+
+
+    if (
+        progress.state ===
+        "checked_in"
+    ) {
+
+
+        const checkedIn =
+            formatVisitTimestamp(
+                progress.checkedInAt
+            );
+
+
+
+        return `
+
+            <div class="admin-visit-progress admin-visit-progress-live">
+
+
+                <div class="admin-visit-progress-copy">
+
+
+                    <strong>
+                        Visit In Progress
+                    </strong>
+
+
+                    <span>
+
+                        Checked in${
+
+                            checkedIn
+
+                                ? ` at ${escapeHtml(
+                                    checkedIn
+                                )}`
+
+                                : ""
+
+                        }
+
+                    </span>
+
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="primary-button admin-visit-action-button admin-finish-visit-button"
+                    data-visit-action="finish"
+                    data-visit-id="${visit.id}"
+                >
+                    Finish Visit
+                </button>
+
+
+            </div>
+
+        `;
+
+    }
+
+
+
+    return `
+
+        <div class="admin-visit-progress admin-visit-progress-ready">
+
+
+            <div class="admin-visit-progress-copy">
+
+
+                <strong>
+                    Visit Not Started
+                </strong>
+
+
+                <span>
+                    Check in when you begin servicing this pet.
+                </span>
+
+
+            </div>
+
+
+            <button
+                type="button"
+                class="primary-button admin-visit-action-button admin-check-in-button"
+                data-visit-action="check-in"
+                data-visit-id="${visit.id}"
+            >
+                Check In
+            </button>
+
+
+        </div>
+
+    `;
+
+}
+
+
+
+// ========================================
+// VISIT DURATION
+// ========================================
+
+function getVisitDurationMinutes(
+    visit
+) {
+
+
+    if (
+        !visit.checked_in_at ||
+        !visit.completed_at
+    ) {
+
+
+        return null;
+
+    }
+
+
+
+    const start =
+        new Date(
+            visit.checked_in_at
+        );
+
+
+    const end =
+        new Date(
+            visit.completed_at
+        );
+
+
+
+    const difference =
+        end.getTime() -
+        start.getTime();
+
+
+
+    if (
+        !Number.isFinite(
+            difference
+        ) ||
+        difference <
+        0
+    ) {
+
+
+        return null;
+
+    }
+
+
+
+    return Math.max(
+
+        0,
+
+        Math.round(
+
+            difference /
+            60000
+
+        )
+
+    );
+
+}
+
+
+
+// ========================================
+// FORMAT VISIT TIME
+// ========================================
+
+function formatVisitTimestamp(
+    timestamp
+) {
+
+
+    if (!timestamp) {
+
+
+        return "";
+
+    }
+
+
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+
+        return "";
+
+    }
+
+
+
+    return date.toLocaleTimeString(
+
+        "en-US",
+
+        {
+
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit"
+
+        }
+
+    );
 
 }
 
@@ -2969,8 +3960,12 @@ function compareAdminVisits(
 
 
     return (
-        Number(a.id) -
-        Number(b.id)
+        Number(
+            a.id
+        ) -
+        Number(
+            b.id
+        )
     );
 
 }
