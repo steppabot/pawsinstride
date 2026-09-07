@@ -230,6 +230,7 @@ button {
     margin-bottom: 18px;
     font-size: 13px;
     color: #666;
+    line-height: 1.5;
 }
 
 #booking-submit-button {
@@ -241,6 +242,66 @@ button {
     margin-top: 15px;
     margin-bottom: 0;
     font-weight: 600;
+}
+
+
+/* ========================================
+   ADDITIONAL PETS
+   ======================================== */
+
+.additional-pets-wrapper {
+    margin-bottom: 18px;
+}
+
+.additional-pets-list {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.additional-pet-option {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 0 !important;
+    padding: 13px 14px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.additional-pet-option:last-child {
+    border-bottom: none;
+}
+
+.additional-pet-option:hover {
+    background: #fafafa;
+}
+
+.additional-pet-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.additional-pet-main input {
+    width: 18px !important;
+    height: 18px;
+    margin: 0 !important;
+    flex-shrink: 0;
+}
+
+.additional-pet-fee {
+    flex-shrink: 0;
+    color: #666;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.additional-pets-help {
+    margin: 8px 2px 0;
 }
 
 
@@ -814,6 +875,47 @@ button {
     font-weight: 700;
 }
 
+
+/* ========================================
+   UPCOMING SERVICE PETS
+   ======================================== */
+
+.upcoming-service-pets {
+    padding: 10px 0 13px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid #eee;
+}
+
+.upcoming-service-pets-label {
+    display: block;
+    margin-bottom: 7px;
+    color: #777;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.service-pet-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.service-pet-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #f1f1f1;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.service-pet-chip-missing {
+    color: #777;
+    font-weight: 500;
+}
+
 .upcoming-service-row {
     display: flex;
     justify-content: space-between;
@@ -862,6 +964,17 @@ button {
 
     .login-container {
         margin: 50px auto;
+    }
+
+
+    /* ADDITIONAL PETS */
+
+    .additional-pet-option {
+        padding: 12px;
+    }
+
+    .additional-pet-fee {
+        font-size: 12px;
     }
 
 
