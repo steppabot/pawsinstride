@@ -23,7 +23,7 @@ body {
     width: 90%;
     max-width: 420px;
     margin: 100px auto;
-    background: white;
+    background: #fff;
     padding: 30px;
     border-radius: 12px;
 }
@@ -95,7 +95,7 @@ body {
    ======================================== */
 
 section {
-    background: white;
+    background: #fff;
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 12px;
@@ -136,7 +136,7 @@ button {
 .primary-button {
     width: auto;
     background: #111;
-    color: white;
+    color: #fff;
     border: none;
     border-radius: 10px;
     padding: 14px 20px;
@@ -152,6 +152,15 @@ button {
 .primary-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.secondary-button {
+    width: auto;
+    padding: 12px 18px;
+    background: #fff;
+    border: 1px solid #111;
+    border-radius: 8px;
+    font-weight: 600;
 }
 
 #logout-button {
@@ -207,9 +216,16 @@ button {
     margin-bottom: 18px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    background: white;
+    background: #fff;
     font-family: inherit;
     font-size: 16px;
+}
+
+.booking-help {
+    margin-top: -5px;
+    margin-bottom: 12px;
+    color: #666;
+    font-size: 14px;
 }
 
 .booking-total {
@@ -222,6 +238,14 @@ button {
     border-top: 1px solid #ddd;
 }
 
+.booking-price-details {
+    text-align: right;
+    margin-top: -5px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: #666;
+}
+
 #booking-submit-button {
     width: 100%;
 }
@@ -231,6 +255,345 @@ button {
     margin-top: 15px;
     margin-bottom: 0;
     font-weight: 600;
+}
+
+
+/* ========================================
+   DYNAMIC SERVICE BOOKING
+   ======================================== */
+
+#service-option-wrapper,
+#time-window-wrapper,
+#multi-date-booking,
+#boarding-booking {
+    margin-top: 0;
+}
+
+.boarding-policy {
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 18px;
+}
+
+.boarding-policy p {
+    margin: 8px 0 0;
+    line-height: 1.5;
+    color: #555;
+    font-size: 14px;
+}
+
+#boarding-booking input,
+#boarding-booking select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+
+/* ========================================
+   SELECTED BOOKING DATES
+   ======================================== */
+
+#selected-dates-container {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.selected-dates-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.selected-date-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+}
+
+.remove-date-button {
+    width: auto;
+    padding: 7px 10px;
+    background: transparent;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.empty-dates-message {
+    color: #777;
+    margin: 0;
+}
+
+
+/* ========================================
+   SHARED CALENDAR STYLES
+   ======================================== */
+
+.booking-calendar,
+.upcoming-calendar {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 16px;
+    background: #fff;
+}
+
+.booking-calendar {
+    margin-bottom: 18px;
+}
+
+.calendar-header,
+.upcoming-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.calendar-header strong,
+.upcoming-calendar-header strong {
+    font-size: 18px;
+}
+
+.calendar-nav-button {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.calendar-weekdays,
+.calendar-grid,
+.upcoming-calendar-weekdays,
+.upcoming-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.calendar-weekdays,
+.upcoming-calendar-weekdays {
+    margin-bottom: 6px;
+}
+
+.calendar-weekdays span,
+.upcoming-calendar-weekdays span {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #777;
+    padding: 4px 0;
+}
+
+
+/* ========================================
+   BOOKING CALENDAR
+   ======================================== */
+
+.calendar-empty-day {
+    aspect-ratio: 1 / 1;
+}
+
+.calendar-day {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.calendar-day:hover:not(:disabled) {
+    border-color: #111;
+}
+
+.calendar-day-selected {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+.calendar-day-today:not(.calendar-day-selected) {
+    border: 2px solid #111;
+}
+
+.calendar-day-past {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+
+/* ========================================
+   UPCOMING SERVICES
+   ======================================== */
+
+.upcoming-services-section {
+    padding: 20px;
+}
+
+.upcoming-services-header h3 {
+    margin-bottom: 4px;
+}
+
+.upcoming-calendar-help {
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: #666;
+    font-size: 14px;
+}
+
+.upcoming-calendar-empty {
+    aspect-ratio: 1 / 1;
+}
+
+.upcoming-calendar-day {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    background: #fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upcoming-calendar-day:hover {
+    border-color: #111;
+}
+
+.upcoming-day-number {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.upcoming-calendar-booked {
+    font-weight: 700;
+    border-color: #999;
+}
+
+.upcoming-calendar-today {
+    border: 2px solid #111;
+}
+
+.upcoming-calendar-selected {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+.upcoming-service-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #111;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.upcoming-calendar-selected .upcoming-service-count {
+    background: #fff;
+    color: #111;
+}
+
+
+/* ========================================
+   SELECTED UPCOMING DAY
+   ======================================== */
+
+.selected-upcoming-day {
+    margin-top: 18px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.selected-upcoming-header {
+    margin-bottom: 12px;
+}
+
+.selected-upcoming-header strong {
+    font-size: 17px;
+}
+
+.empty-upcoming-message {
+    color: #777;
+    margin: 0;
+}
+
+.upcoming-service-card {
+    border-top: 1px solid #eee;
+    padding: 14px 0;
+}
+
+.upcoming-service-card:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.upcoming-service-card:last-child {
+    padding-bottom: 0;
+}
+
+.upcoming-service-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.upcoming-service-card-header strong {
+    font-size: 15px;
+}
+
+.service-status {
+    background: #f1f1f1;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.upcoming-service-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+.upcoming-service-row span {
+    color: #666;
 }
 
 
@@ -270,265 +633,54 @@ button {
     .login-container {
         margin: 50px auto;
     }
-}
-
-.booking-help {
-    margin-top: -5px;
-    margin-bottom: 12px;
-    color: #666;
-    font-size: 14px;
-}
-
-
-.date-picker-row {
-    display: flex;
-    gap: 10px;
-    align-items: stretch;
-    margin-bottom: 18px;
-}
-
-
-.date-picker-row input {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-
-.secondary-button {
-    width: auto;
-    padding: 12px 18px;
-    background: white;
-    border: 1px solid #111;
-    border-radius: 8px;
-    font-weight: 600;
-}
-
-
-#selected-dates-container {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 20px;
-}
-
-
-.selected-dates-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-
-.selected-date-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-top: 1px solid #eee;
-}
-
-
-.remove-date-button {
-    width: auto;
-    padding: 7px 10px;
-    background: transparent;
-    border: 1px solid #bbb;
-    border-radius: 6px;
-    font-size: 12px;
-}
-
-
-.empty-dates-message {
-    color: #777;
-    margin: 0;
-}
-
-
-@media (max-width: 600px) {
-
-    .date-picker-row {
-        flex-direction: column;
-    }
-
 
     .secondary-button {
         width: 100%;
     }
 
-}
-
-/* ========================================
-   INLINE MULTI-DATE CALENDAR
-   ======================================== */
-
-.booking-calendar {
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 18px;
-    background: #fff;
-}
-
-
-.calendar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
-
-
-.calendar-header strong {
-    font-size: 18px;
-}
-
-
-.calendar-nav-button {
-    width: 42px;
-    height: 42px;
-    padding: 0;
-    border: 1px solid #ddd;
-    background: #fff;
-    border-radius: 8px;
-    font-size: 28px;
-    line-height: 1;
-}
-
-
-.calendar-weekdays,
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-}
-
-
-.calendar-weekdays {
-    margin-bottom: 6px;
-}
-
-
-.calendar-weekdays span {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: #777;
-    padding: 4px 0;
-}
-
-
-.calendar-empty-day {
-    aspect-ratio: 1 / 1;
-}
-
-
-.calendar-day {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    padding: 0;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-
-.calendar-day:hover:not(:disabled) {
-    border-color: #111;
-}
-
-
-.calendar-day-selected {
-    background: #111;
-    color: #fff;
-    border-color: #111;
-}
-
-
-.calendar-day-today:not(.calendar-day-selected) {
-    border: 2px solid #111;
-}
-
-
-.calendar-day-past {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-
-@media (max-width: 600px) {
-
-    .booking-calendar {
+    .booking-calendar,
+    .upcoming-calendar {
         padding: 12px;
     }
 
-
     .calendar-weekdays,
-    .calendar-grid {
+    .calendar-grid,
+    .upcoming-calendar-weekdays,
+    .upcoming-calendar-grid {
         gap: 4px;
     }
-
 
     .calendar-day {
         border-radius: 6px;
         font-size: 13px;
     }
 
-
-    .calendar-header strong {
+    .calendar-header strong,
+    .upcoming-calendar-header strong {
         font-size: 16px;
     }
 
-}
-/* ========================================
-   DYNAMIC SERVICE BOOKING
-   ======================================== */
+    .upcoming-calendar-day {
+        border-radius: 7px;
+    }
 
-#service-option-wrapper,
-#time-window-wrapper,
-#multi-date-booking,
-#boarding-booking {
-    margin-top: 0;
-}
+    .upcoming-day-number {
+        font-size: 13px;
+    }
 
+    .upcoming-service-count {
+        top: 2px;
+        right: 2px;
+        min-width: 16px;
+        height: 16px;
+        font-size: 9px;
+    }
 
-.boarding-policy {
-    background: #f7f7f7;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 18px;
-}
+    .selected-upcoming-day {
+        padding: 14px;
+    }
 
-
-.boarding-policy p {
-    margin: 8px 0 0;
-    line-height: 1.5;
-    color: #555;
-    font-size: 14px;
-}
-
-
-.booking-price-details {
-    text-align: right;
-    margin-top: -5px;
-    margin-bottom: 18px;
-    font-size: 13px;
-    color: #666;
-}
-
-
-#boarding-booking input,
-#boarding-booking select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 18px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background: white;
-    font-family: inherit;
-    font-size: 16px;
+    .upcoming-service-card-header {
+        align-items: flex-start;
+    }
 }
