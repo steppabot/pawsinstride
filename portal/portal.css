@@ -1,3 +1,75 @@
+/* ========================================
+   PAWS IN STRIDE CLIENT PORTAL
+   ======================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f5f5;
+    color: #111;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* ========================================
+   LOGIN
+   ======================================== */
+
+.login-container {
+    width: 90%;
+    max-width: 420px;
+    margin: 100px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+.login-container h1 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.login-container h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 20px;
+}
+
+.login-container label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+#login-message {
+    text-align: center;
+    margin-bottom: 0;
+}
+
+
+/* ========================================
+   DASHBOARD
+   ======================================== */
+
+.dashboard-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 50px auto;
+}
+
 .dashboard-header {
     display: flex;
     align-items: center;
@@ -7,20 +79,69 @@
 }
 
 .dashboard-header h1 {
+    margin-top: 0;
     margin-bottom: 6px;
 }
 
 .dashboard-header h2 {
     margin-top: 0;
+    margin-bottom: 0;
+    font-size: 24px;
+}
+
+
+/* ========================================
+   SECTIONS / CARDS
+   ======================================== */
+
+section {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+}
+
+section h3 {
+    margin-top: 0;
+}
+
+.pet-card {
+    line-height: 1.5;
+}
+
+.visit-card {
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    line-height: 1.4;
+}
+
+.visit-card:last-child {
+    margin-bottom: 0;
+}
+
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+button {
+    width: 100%;
+    padding: 14px;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .primary-button {
+    width: auto;
     background: #111;
     color: white;
     border: none;
     border-radius: 10px;
     padding: 14px 20px;
     font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
 }
 
@@ -32,6 +153,18 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+#logout-button {
+    background: #fff;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    margin-top: 0;
+}
+
+
+/* ========================================
+   BOOKING FORM
+   ======================================== */
 
 .booking-section {
     border: 2px solid #111;
@@ -52,6 +185,7 @@
     background: transparent;
     border: none;
     font-size: 28px;
+    line-height: 1;
     padding: 0 8px;
     cursor: pointer;
 }
@@ -69,12 +203,12 @@
 .booking-section input,
 .booking-section select {
     width: 100%;
-    box-sizing: border-box;
     padding: 12px;
     margin-bottom: 18px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background: white;
+    font-family: inherit;
     font-size: 16px;
 }
 
@@ -88,13 +222,37 @@
     border-top: 1px solid #ddd;
 }
 
+#booking-submit-button {
+    width: 100%;
+}
+
 #booking-message {
     text-align: center;
     margin-top: 15px;
+    margin-bottom: 0;
     font-weight: 600;
 }
 
+
+/* ========================================
+   LOADING
+   ======================================== */
+
+#loading {
+    padding: 10px 0;
+}
+
+
+/* ========================================
+   MOBILE
+   ======================================== */
+
 @media (max-width: 600px) {
+
+    .dashboard-container {
+        width: 92%;
+        margin: 25px auto;
+    }
 
     .dashboard-header {
         align-items: stretch;
@@ -105,4 +263,11 @@
         width: 100%;
     }
 
+    section {
+        padding: 18px;
+    }
+
+    .login-container {
+        margin: 50px auto;
+    }
 }
