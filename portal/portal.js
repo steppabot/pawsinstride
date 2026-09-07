@@ -725,7 +725,7 @@ if (bookingForm) {
                     .value;
 
 
-            const startTime =
+            const timeWindow =
                 document
                     .getElementById(
                         "booking-time"
