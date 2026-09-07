@@ -25,6 +25,12 @@ const supabaseClient =
 const PROFILE_PHOTO_BUCKET =
     "profile-photos";
 
+const VISIT_MEDIA_BUCKET =
+    "visit-media";
+
+
+const MAX_VISIT_MEDIA_SIZE =
+    10 * 1024 * 1024;
 
 const MAX_PHOTO_SIZE =
     5 * 1024 * 1024;
@@ -75,6 +81,24 @@ let allVisitPets =
 let allHouseholds =
     [];
 
+let allVisitReports =
+    [];
+
+
+let activeVisitReportVisitId =
+    null;
+
+
+let pendingVisitReportPhotos =
+    [];
+
+
+let pendingVisitRouteFile =
+    null;
+
+
+let activeVisitReportMedia =
+    [];
 
 let selectedAdminDate =
     null;
@@ -307,30 +331,31 @@ async function loadAdminDashboard() {
     // ========================================
 
     const [
-
+    
         profilesResult,
         petsResult,
         visitsResult,
-        householdsResult
-
+        householdsResult,
+        visitReportsResult
+    
     ] =
         await Promise.all([
-
-
+        
+        
             supabaseClient
                 .from("profiles")
                 .select(
                     "id, full_name, email, phone, role"
                 ),
-
-
+        
+        
             supabaseClient
                 .from("pets")
                 .select(
                     "id, client_id, name, breed, gender"
                 ),
-
-
+        
+        
             supabaseClient
                 .from("visits")
                 .select("*")
@@ -340,17 +365,23 @@ async function loadAdminDashboard() {
                         ascending: true
                     }
                 ),
-
-
+        
+        
             supabaseClient
                 .from("households")
                 .select(
                     "client_id, street_address, address_line_2, city, state, zip_code"
+                ),
+        
+        
+            supabaseClient
+                .from("visit_reports")
+                .select(
+                    "id, visit_id, created_by, notes, fed, fresh_water, pee, poop, created_at, updated_at"
                 )
-
-
+        
+        
         ]);
-
 
 
     if (
@@ -430,12 +461,21 @@ async function loadAdminDashboard() {
 
     }
 
-
-
-    allHouseholds =
-        householdsResult.data ||
+    if (
+        visitReportsResult.error
+    ) {
+    
+        console.error(
+            "Admin visit reports error:",
+            visitReportsResult.error
+        );
+    
+    }
+    
+    
+    allVisitReports =
+        visitReportsResult.data ||
         [];
-
 
 
     // ========================================
@@ -2477,8 +2517,6 @@ function renderAdminDayServices() {
 
 }
 
-
-
 // ========================================
 // VISIT CHECK-IN ACTIONS
 // ========================================
@@ -2615,6 +2653,154 @@ adminDayServicesContainer
     );
 
 
+// ========================================
+// VISIT REPORT ACTIONS
+// ========================================
+
+adminDayServicesContainer
+    ?.addEventListener(
+        "click",
+        async event => {
+
+
+            const openButton =
+                event.target.closest(
+                    "[data-visit-report-open]"
+                );
+
+
+            if (
+                openButton
+            ) {
+
+
+                const visitId =
+                    Number(
+                        openButton.dataset.visitReportOpen
+                    );
+
+
+                if (
+                    !visitId
+                ) {
+
+                    return;
+
+                }
+
+
+                await openAdminVisitReport(
+                    visitId
+                );
+
+
+                return;
+
+            }
+
+
+            const closeButton =
+                event.target.closest(
+                    "[data-visit-report-close]"
+                );
+
+
+            if (
+                closeButton
+            ) {
+
+
+                closeAdminVisitReport();
+
+
+                return;
+
+            }
+
+        }
+    );
+
+
+
+adminDayServicesContainer
+    ?.addEventListener(
+        "change",
+        event => {
+
+
+            const photosInput =
+                event.target.closest(
+                    "[data-visit-report-photos]"
+                );
+
+
+            if (
+                photosInput
+            ) {
+
+
+                handleVisitReportPhotos(
+                    photosInput
+                );
+
+
+                return;
+
+            }
+
+
+            const routeInput =
+                event.target.closest(
+                    "[data-visit-report-route]"
+                );
+
+
+            if (
+                routeInput
+            ) {
+
+
+                handleVisitRoutePhoto(
+                    routeInput
+                );
+
+            }
+
+        }
+    );
+
+
+
+adminDayServicesContainer
+    ?.addEventListener(
+        "submit",
+        async event => {
+
+
+            const form =
+                event.target.closest(
+                    "[data-visit-report-form]"
+                );
+
+
+            if (
+                !form
+            ) {
+
+                return;
+
+            }
+
+
+            event.preventDefault();
+
+
+            await saveAdminVisitReport(
+                form
+            );
+
+        }
+    );
 
 // ========================================
 // CHECK IN VISIT
@@ -3478,8 +3664,6 @@ function buildVisitProgressIcon(
 
 }
 
-
-
 // ========================================
 // ADMIN VISIT PROGRESS SECTION
 // ========================================
@@ -3526,6 +3710,19 @@ function buildAdminVisitProgressSection(
 
 
 
+        const existingReport =
+            allVisitReports.find(
+                report =>
+                    Number(
+                        report.visit_id
+                    ) ===
+                    Number(
+                        visit.id
+                    )
+            );
+
+
+
         return `
 
             <div class="admin-visit-progress admin-visit-progress-finished">
@@ -3558,17 +3755,44 @@ function buildAdminVisitProgressSection(
                 </div>
 
 
-                <button
-                    type="button"
-                    class="secondary-button admin-reopen-visit-button"
-                    data-visit-action="reopen"
-                    data-visit-id="${visit.id}"
-                >
-                    Reopen Visit
-                </button>
+                <div class="admin-completed-visit-actions">
+
+
+                    <button
+                        type="button"
+                        class="primary-button admin-visit-report-button"
+                        data-visit-report-open="${visit.id}"
+                    >
+                        ${
+                            existingReport
+
+                                ? "Edit Visit Report"
+
+                                : "Add Visit Report"
+                        }
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="secondary-button admin-reopen-visit-button"
+                        data-visit-action="reopen"
+                        data-visit-id="${visit.id}"
+                    >
+                        Reopen Visit
+                    </button>
+
+
+                </div>
 
 
             </div>
+
+
+            <div
+                id="admin-visit-report-${visit.id}"
+                class="admin-visit-report-mount"
+            ></div>
 
         `;
 
@@ -3677,7 +3901,1539 @@ function buildAdminVisitProgressSection(
 
 }
 
+// ========================================
+// OPEN VISIT REPORT
+// ========================================
 
+async function openAdminVisitReport(
+    visitId
+) {
+
+
+    const visit =
+        allVisits.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    visitId
+                )
+        );
+
+
+    if (
+        !visit
+    ) {
+
+        return;
+
+    }
+
+
+    const mount =
+        document.getElementById(
+            `admin-visit-report-${visitId}`
+        );
+
+
+    if (
+        !mount
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        activeVisitReportVisitId ===
+        visitId &&
+        mount.innerHTML.trim()
+    ) {
+
+
+        closeAdminVisitReport();
+
+
+        return;
+
+    }
+
+
+    closeAdminVisitReport();
+
+
+    activeVisitReportVisitId =
+        visitId;
+
+
+    pendingVisitReportPhotos =
+        [];
+
+
+    pendingVisitRouteFile =
+        null;
+
+
+    activeVisitReportMedia =
+        [];
+
+
+    mount.innerHTML =
+        `
+            <div class="admin-visit-report-loading">
+                Loading visit report...
+            </div>
+        `;
+
+
+    const existingReport =
+        allVisitReports.find(
+            report =>
+                Number(
+                    report.visit_id
+                ) ===
+                Number(
+                    visitId
+                )
+        ) ||
+        null;
+
+
+    const {
+        data: media,
+        error: mediaError
+    } =
+        await supabaseClient
+            .from("visit_photos")
+            .select(
+                "id, visit_id, storage_path, photo_type, caption, sort_order, created_at"
+            )
+            .eq(
+                "visit_id",
+                visitId
+            )
+            .order(
+                "sort_order",
+                {
+                    ascending: true
+                }
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (
+        mediaError
+    ) {
+
+
+        console.error(
+            "Visit report media error:",
+            mediaError
+        );
+
+
+        mount.innerHTML =
+            `
+                <div class="admin-visit-report-error">
+                    We couldn't load this visit report.
+                </div>
+            `;
+
+
+        return;
+
+    }
+
+
+    activeVisitReportMedia =
+        media ||
+        [];
+
+
+    const mediaWithUrls =
+        await Promise.all(
+
+            activeVisitReportMedia.map(
+                async item => {
+
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient
+                            .storage
+                            .from(
+                                VISIT_MEDIA_BUCKET
+                            )
+                            .createSignedUrl(
+                                item.storage_path,
+                                3600
+                            );
+
+
+                    return {
+
+                        ...item,
+
+                        signed_url:
+                            error
+                                ? null
+                                : data?.signedUrl ||
+                                  null
+
+                    };
+
+                }
+            )
+
+        );
+
+
+    activeVisitReportMedia =
+        mediaWithUrls;
+
+
+    renderAdminVisitReportForm(
+        visit,
+        existingReport
+    );
+
+}
+
+
+// ========================================
+// CLOSE VISIT REPORT
+// ========================================
+
+function closeAdminVisitReport() {
+
+
+    if (
+        activeVisitReportVisitId
+    ) {
+
+
+        const mount =
+            document.getElementById(
+                `admin-visit-report-${activeVisitReportVisitId}`
+            );
+
+
+        if (
+            mount
+        ) {
+
+
+            mount.innerHTML =
+                "";
+
+        }
+
+    }
+
+
+    activeVisitReportVisitId =
+        null;
+
+
+    pendingVisitReportPhotos =
+        [];
+
+
+    pendingVisitRouteFile =
+        null;
+
+
+    activeVisitReportMedia =
+        [];
+
+}
+
+
+// ========================================
+// RENDER VISIT REPORT FORM
+// ========================================
+
+function renderAdminVisitReportForm(
+    visit,
+    report
+) {
+
+
+    const mount =
+        document.getElementById(
+            `admin-visit-report-${visit.id}`
+        );
+
+
+    if (
+        !mount
+    ) {
+
+        return;
+
+    }
+
+
+    const pets =
+        getAdminPetsForVisit(
+            visit
+        );
+
+
+    const petNames =
+        pets.length
+            ? pets
+                .map(
+                    pet =>
+                        pet.name
+                )
+                .join(", ")
+            : "Pet";
+
+
+    const existingVisitPhotos =
+        activeVisitReportMedia.filter(
+            item =>
+                item.photo_type ===
+                "visit"
+        );
+
+
+    const existingRoute =
+        activeVisitReportMedia.find(
+            item =>
+                item.photo_type ===
+                "route"
+        );
+
+
+    mount.innerHTML =
+        `
+
+            <form
+                class="admin-visit-report-form"
+                data-visit-report-form
+                data-visit-id="${visit.id}"
+            >
+
+
+                <div class="admin-visit-report-header">
+
+
+                    <div>
+
+                        <span class="admin-visit-report-eyebrow">
+                            VISIT REPORT
+                        </span>
+
+                        <h5>
+                            ${escapeHtml(
+                                petNames
+                            )}
+                        </h5>
+
+                        <p>
+                            Add care updates, photos, notes, and an optional route screenshot.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="admin-visit-report-close"
+                        data-visit-report-close
+                        aria-label="Close visit report"
+                    >
+                        ×
+                    </button>
+
+
+                </div>
+
+
+                <div class="admin-visit-report-section">
+
+
+                    <span class="admin-visit-report-label">
+                        Care Completed
+                    </span>
+
+
+                    <div class="admin-visit-care-grid">
+
+
+                        <label class="admin-visit-care-option">
+
+                            <input
+                                type="checkbox"
+                                name="fed"
+                                ${
+                                    report?.fed
+                                        ? "checked"
+                                        : ""
+                                }
+                            >
+
+                            <span>
+                                Fed
+                            </span>
+
+                        </label>
+
+
+                        <label class="admin-visit-care-option">
+
+                            <input
+                                type="checkbox"
+                                name="fresh_water"
+                                ${
+                                    report?.fresh_water
+                                        ? "checked"
+                                        : ""
+                                }
+                            >
+
+                            <span>
+                                Fresh Water
+                            </span>
+
+                        </label>
+
+
+                        <label class="admin-visit-care-option">
+
+                            <input
+                                type="checkbox"
+                                name="pee"
+                                ${
+                                    report?.pee
+                                        ? "checked"
+                                        : ""
+                                }
+                            >
+
+                            <span>
+                                Pee
+                            </span>
+
+                        </label>
+
+
+                        <label class="admin-visit-care-option">
+
+                            <input
+                                type="checkbox"
+                                name="poop"
+                                ${
+                                    report?.poop
+                                        ? "checked"
+                                        : ""
+                                }
+                            >
+
+                            <span>
+                                Poop
+                            </span>
+
+                        </label>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="admin-visit-report-section">
+
+
+                    <label
+                        class="admin-visit-report-label"
+                        for="visit-report-notes-${visit.id}"
+                    >
+                        Visit Notes
+                    </label>
+
+
+                    <textarea
+                        id="visit-report-notes-${visit.id}"
+                        name="notes"
+                        class="admin-visit-report-notes"
+                        placeholder="How did the visit go? Add anything the client should know..."
+                    >${escapeHtml(
+                        report?.notes ||
+                        ""
+                    )}</textarea>
+
+
+                </div>
+
+
+                <div class="admin-visit-report-section">
+
+
+                    <span class="admin-visit-report-label">
+                        Photos
+                    </span>
+
+
+                    <p class="admin-visit-report-help">
+                        Add photos from today's visit.
+                    </p>
+
+
+                    ${
+                        existingVisitPhotos.length
+
+                            ? `
+
+                                <div class="admin-visit-existing-media">
+
+                                    ${existingVisitPhotos
+                                        .map(
+                                            item => `
+
+                                                <div class="admin-visit-media-preview">
+
+                                                    ${
+                                                        item.signed_url
+
+                                                            ? `
+                                                                <img
+                                                                    src="${escapeHtml(
+                                                                        item.signed_url
+                                                                    )}"
+                                                                    alt="Visit photo"
+                                                                >
+                                                            `
+
+                                                            : `
+                                                                <div class="admin-visit-media-missing">
+                                                                    Photo
+                                                                </div>
+                                                            `
+                                                    }
+
+                                                </div>
+
+                                            `
+                                        )
+                                        .join("")}
+
+                                </div>
+
+                            `
+
+                            : ""
+                    }
+
+
+                    <label class="admin-visit-media-upload-button">
+
+                        + Add Photos
+
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            multiple
+                            hidden
+                            data-visit-report-photos
+                        >
+
+                    </label>
+
+
+                    <div
+                        class="admin-visit-pending-media"
+                        data-pending-visit-photos
+                    ></div>
+
+
+                </div>
+
+
+                <div class="admin-visit-report-section">
+
+
+                    <span class="admin-visit-report-label">
+                        Walk Route
+                    </span>
+
+
+                    <p class="admin-visit-report-help">
+                        Optional — upload a route screenshot from your fitness or walking app.
+                    </p>
+
+
+                    ${
+                        existingRoute
+
+                            ? `
+
+                                <div class="admin-visit-route-preview">
+
+                                    ${
+                                        existingRoute.signed_url
+
+                                            ? `
+                                                <img
+                                                    src="${escapeHtml(
+                                                        existingRoute.signed_url
+                                                    )}"
+                                                    alt="Walk route screenshot"
+                                                >
+                                            `
+
+                                            : `
+                                                <div class="admin-visit-media-missing">
+                                                    Route Screenshot
+                                                </div>
+                                            `
+                                    }
+
+                                </div>
+
+                            `
+
+                            : ""
+                    }
+
+
+                    <label class="admin-visit-media-upload-button admin-route-upload-button">
+
+                        ${
+                            existingRoute
+                                ? "Replace Route Screenshot"
+                                : "+ Add Route Screenshot"
+                        }
+
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            hidden
+                            data-visit-report-route
+                        >
+
+                    </label>
+
+
+                    <div
+                        class="admin-visit-pending-route"
+                        data-pending-route
+                    ></div>
+
+
+                </div>
+
+
+                <div class="admin-visit-report-footer">
+
+
+                    <div
+                        class="admin-visit-report-message"
+                        data-visit-report-message
+                    ></div>
+
+
+                    <button
+                        type="submit"
+                        class="primary-button admin-save-visit-report-button"
+                    >
+                        ${
+                            report
+                                ? "Save Changes"
+                                : "Save Visit Report"
+                        }
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+        `;
+
+
+    renderPendingVisitPhotos();
+
+
+    renderPendingRoutePhoto();
+
+}
+
+
+// ========================================
+// HANDLE VISIT PHOTOS
+// ========================================
+
+function handleVisitReportPhotos(
+    input
+) {
+
+
+    const files =
+        Array.from(
+            input.files ||
+            []
+        );
+
+
+    if (
+        files.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+    const validFiles =
+        [];
+
+
+    for (
+        const file of files
+    ) {
+
+
+        if (
+            !ALLOWED_PHOTO_TYPES.includes(
+                file.type
+            )
+        ) {
+
+
+            alert(
+                "Visit photos must be JPG, PNG, or WebP images."
+            );
+
+
+            continue;
+
+        }
+
+
+        if (
+            file.size >
+            MAX_VISIT_MEDIA_SIZE
+        ) {
+
+
+            alert(
+                "Each visit photo must be 10 MB or smaller."
+            );
+
+
+            continue;
+
+        }
+
+
+        validFiles.push(
+            file
+        );
+
+    }
+
+
+    pendingVisitReportPhotos.push(
+        ...validFiles
+    );
+
+
+    input.value =
+        "";
+
+
+    renderPendingVisitPhotos();
+
+}
+
+
+// ========================================
+// HANDLE ROUTE SCREENSHOT
+// ========================================
+
+function handleVisitRoutePhoto(
+    input
+) {
+
+
+    const file =
+        input.files?.[0];
+
+
+    if (
+        !file
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !ALLOWED_PHOTO_TYPES.includes(
+            file.type
+        )
+    ) {
+
+
+        alert(
+            "The route screenshot must be a JPG, PNG, or WebP image."
+        );
+
+
+        input.value =
+            "";
+
+
+        return;
+
+    }
+
+
+    if (
+        file.size >
+        MAX_VISIT_MEDIA_SIZE
+    ) {
+
+
+        alert(
+            "The route screenshot must be 10 MB or smaller."
+        );
+
+
+        input.value =
+            "";
+
+
+        return;
+
+    }
+
+
+    pendingVisitRouteFile =
+        file;
+
+
+    input.value =
+        "";
+
+
+    renderPendingRoutePhoto();
+
+}
+
+
+// ========================================
+// PENDING VISIT PHOTO PREVIEWS
+// ========================================
+
+function renderPendingVisitPhotos() {
+
+
+    const container =
+        document.querySelector(
+            "[data-pending-visit-photos]"
+        );
+
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        pendingVisitReportPhotos.length ===
+        0
+    ) {
+
+
+        container.innerHTML =
+            "";
+
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        pendingVisitReportPhotos
+            .map(
+                (
+                    file,
+                    index
+                ) => `
+
+                    <div class="admin-pending-media-item">
+
+                        <span>
+                            ${escapeHtml(
+                                file.name
+                            )}
+                        </span>
+
+                        <button
+                            type="button"
+                            class="admin-pending-media-remove"
+                            data-remove-pending-photo="${index}"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                `
+            )
+            .join("");
+
+
+    container
+        .querySelectorAll(
+            "[data-remove-pending-photo]"
+        )
+        .forEach(
+            button => {
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+
+                        const index =
+                            Number(
+                                button.dataset.removePendingPhoto
+                            );
+
+
+                        pendingVisitReportPhotos.splice(
+                            index,
+                            1
+                        );
+
+
+                        renderPendingVisitPhotos();
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+// ========================================
+// PENDING ROUTE PREVIEW
+// ========================================
+
+function renderPendingRoutePhoto() {
+
+
+    const container =
+        document.querySelector(
+            "[data-pending-route]"
+        );
+
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !pendingVisitRouteFile
+    ) {
+
+
+        container.innerHTML =
+            "";
+
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        `
+
+            <div class="admin-pending-media-item">
+
+                <span>
+                    ${escapeHtml(
+                        pendingVisitRouteFile.name
+                    )}
+                </span>
+
+                <button
+                    type="button"
+                    class="admin-pending-media-remove"
+                    data-remove-pending-route
+                >
+                    ×
+                </button>
+
+            </div>
+
+        `;
+
+
+    container
+        .querySelector(
+            "[data-remove-pending-route]"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+
+                pendingVisitRouteFile =
+                    null;
+
+
+                renderPendingRoutePhoto();
+
+            }
+        );
+
+}
+
+
+// ========================================
+// SAVE VISIT REPORT
+// ========================================
+
+async function saveAdminVisitReport(
+    form
+) {
+
+
+    const visitId =
+        Number(
+            form.dataset.visitId
+        );
+
+
+    if (
+        !visitId
+    ) {
+
+        return;
+
+    }
+
+
+    const saveButton =
+        form.querySelector(
+            ".admin-save-visit-report-button"
+        );
+
+
+    const message =
+        form.querySelector(
+            "[data-visit-report-message]"
+        );
+
+
+    saveButton.disabled =
+        true;
+
+
+    saveButton.textContent =
+        "Saving...";
+
+
+    message.textContent =
+        "";
+
+
+    try {
+
+
+        const payload = {
+
+            visit_id:
+                visitId,
+
+            created_by:
+                currentUser.id,
+
+            notes:
+                String(
+                    form.elements.notes?.value ||
+                    ""
+                )
+                    .trim() ||
+                null,
+
+            fed:
+                Boolean(
+                    form.elements.fed?.checked
+                ),
+
+            fresh_water:
+                Boolean(
+                    form.elements.fresh_water?.checked
+                ),
+
+            pee:
+                Boolean(
+                    form.elements.pee?.checked
+                ),
+
+            poop:
+                Boolean(
+                    form.elements.poop?.checked
+                ),
+
+            updated_at:
+                new Date()
+                    .toISOString()
+
+        };
+
+
+        const {
+            data: savedReport,
+            error: reportError
+        } =
+            await supabaseClient
+                .from("visit_reports")
+                .upsert(
+                    payload,
+                    {
+                        onConflict:
+                            "visit_id"
+                    }
+                )
+                .select("*")
+                .single();
+
+
+        if (
+            reportError
+        ) {
+
+            throw reportError;
+
+        }
+
+
+        for (
+            let index = 0;
+            index <
+            pendingVisitReportPhotos.length;
+            index++
+        ) {
+
+
+            const file =
+                pendingVisitReportPhotos[
+                    index
+                ];
+
+
+            await uploadVisitReportMedia(
+                visitId,
+                file,
+                "visit",
+                index
+            );
+
+        }
+
+
+        if (
+            pendingVisitRouteFile
+        ) {
+
+
+            await saveVisitRouteScreenshot(
+                visitId,
+                pendingVisitRouteFile
+            );
+
+        }
+
+
+        const existingIndex =
+            allVisitReports.findIndex(
+                report =>
+                    Number(
+                        report.visit_id
+                    ) ===
+                    Number(
+                        visitId
+                    )
+            );
+
+
+        if (
+            existingIndex >=
+            0
+        ) {
+
+
+            allVisitReports[
+                existingIndex
+            ] =
+                savedReport;
+
+
+        } else {
+
+
+            allVisitReports.push(
+                savedReport
+            );
+
+        }
+
+
+        pendingVisitReportPhotos =
+            [];
+
+
+        pendingVisitRouteFile =
+            null;
+
+
+        message.textContent =
+            "Visit report saved ✓";
+
+
+        saveButton.textContent =
+            "Saved ✓";
+
+
+        setTimeout(
+            () => {
+
+
+                closeAdminVisitReport();
+
+
+                renderAdminDayServices();
+
+            },
+            700
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Visit report save error:",
+            error
+        );
+
+
+        message.textContent =
+            "We couldn't save this visit report.";
+
+
+        saveButton.disabled =
+            false;
+
+
+        saveButton.textContent =
+            "Save Visit Report";
+
+    }
+
+}
+
+
+// ========================================
+// UPLOAD NORMAL VISIT PHOTO
+// ========================================
+
+async function uploadVisitReportMedia(
+    visitId,
+    file,
+    photoType,
+    sortOrder
+) {
+
+
+    const extension =
+        getFileExtensionForMime(
+            file.type
+        );
+
+
+    const storagePath =
+        `${visitId}/${photoType}-${crypto.randomUUID()}.${extension}`;
+
+
+    const {
+        error: uploadError
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                VISIT_MEDIA_BUCKET
+            )
+            .upload(
+                storagePath,
+                file,
+                {
+                    contentType:
+                        file.type,
+
+                    cacheControl:
+                        "3600",
+
+                    upsert:
+                        false
+                }
+            );
+
+
+    if (
+        uploadError
+    ) {
+
+        throw uploadError;
+
+    }
+
+
+    const {
+        error: databaseError
+    } =
+        await supabaseClient
+            .from("visit_photos")
+            .insert({
+
+                visit_id:
+                    visitId,
+
+                storage_path:
+                    storagePath,
+
+                photo_type:
+                    photoType,
+
+                sort_order:
+                    sortOrder
+
+            });
+
+
+    if (
+        databaseError
+    ) {
+
+
+        await supabaseClient
+            .storage
+            .from(
+                VISIT_MEDIA_BUCKET
+            )
+            .remove([
+                storagePath
+            ]);
+
+
+        throw databaseError;
+
+    }
+
+}
+
+
+// ========================================
+// SAVE / REPLACE ROUTE SCREENSHOT
+// ========================================
+
+async function saveVisitRouteScreenshot(
+    visitId,
+    file
+) {
+
+
+    const extension =
+        getFileExtensionForMime(
+            file.type
+        );
+
+
+    const newStoragePath =
+        `${visitId}/route-${crypto.randomUUID()}.${extension}`;
+
+
+    const {
+        error: uploadError
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                VISIT_MEDIA_BUCKET
+            )
+            .upload(
+                newStoragePath,
+                file,
+                {
+                    contentType:
+                        file.type,
+
+                    cacheControl:
+                        "3600",
+
+                    upsert:
+                        false
+                }
+            );
+
+
+    if (
+        uploadError
+    ) {
+
+        throw uploadError;
+
+    }
+
+
+    const existingRoute =
+        activeVisitReportMedia.find(
+            item =>
+                item.photo_type ===
+                "route"
+        );
+
+
+    if (
+        existingRoute
+    ) {
+
+
+        const oldStoragePath =
+            existingRoute.storage_path;
+
+
+        const {
+            error: updateError
+        } =
+            await supabaseClient
+                .from("visit_photos")
+                .update({
+
+                    storage_path:
+                        newStoragePath
+
+                })
+                .eq(
+                    "id",
+                    existingRoute.id
+                );
+
+
+        if (
+            updateError
+        ) {
+
+
+            await supabaseClient
+                .storage
+                .from(
+                    VISIT_MEDIA_BUCKET
+                )
+                .remove([
+                    newStoragePath
+                ]);
+
+
+            throw updateError;
+
+        }
+
+
+        await supabaseClient
+            .storage
+            .from(
+                VISIT_MEDIA_BUCKET
+            )
+            .remove([
+                oldStoragePath
+            ]);
+
+
+    } else {
+
+
+        const {
+            error: insertError
+        } =
+            await supabaseClient
+                .from("visit_photos")
+                .insert({
+
+                    visit_id:
+                        visitId,
+
+                    storage_path:
+                        newStoragePath,
+
+                    photo_type:
+                        "route",
+
+                    sort_order:
+                        0
+
+                });
+
+
+        if (
+            insertError
+        ) {
+
+
+            await supabaseClient
+                .storage
+                .from(
+                    VISIT_MEDIA_BUCKET
+                )
+                .remove([
+                    newStoragePath
+                ]);
+
+
+            throw insertError;
+
+        }
+
+    }
+
+}
 
 // ========================================
 // VISIT DURATION
