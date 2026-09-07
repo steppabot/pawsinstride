@@ -271,3 +271,89 @@ button {
         margin: 50px auto;
     }
 }
+
+.booking-help {
+    margin-top: -5px;
+    margin-bottom: 12px;
+    color: #666;
+    font-size: 14px;
+}
+
+
+.date-picker-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 18px;
+}
+
+
+.date-picker-row input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+
+.secondary-button {
+    width: auto;
+    padding: 12px 18px;
+    background: white;
+    border: 1px solid #111;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+
+#selected-dates-container {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+
+.selected-dates-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+
+.selected-date-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+}
+
+
+.remove-date-button {
+    width: auto;
+    padding: 7px 10px;
+    background: transparent;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+
+.empty-dates-message {
+    color: #777;
+    margin: 0;
+}
+
+
+@media (max-width: 600px) {
+
+    .date-picker-row {
+        flex-direction: column;
+    }
+
+
+    .secondary-button {
+        width: 100%;
+    }
+
+}
