@@ -156,7 +156,7 @@ async function loadDashboard() {
 
   }
 
-=
+
   // Display visits
   const visitsContainer =
     document.getElementById("upcoming-visits");
