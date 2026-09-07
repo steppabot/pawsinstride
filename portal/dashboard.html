@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Dashboard | Paws in Stride</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
 
+<body>
+
+  <main class="dashboard-container">
+
+    <h1>Paws in Stride</h1>
+
+    <div id="loading">Loading your account...</div>
+
+    <div id="dashboard-content" style="display:none;">
+
+      <h2 id="welcome-name"></h2>
+
+      <section>
+        <h3>Your Pet</h3>
+        <div id="pet-info"></div>
+      </section>
+
+      <section>
+        <h3>Upcoming Walks</h3>
+        <div id="upcoming-visits"></div>
+      </section>
+
+      <button id="logout-button">Log Out</button>
+
+    </div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./portal.js"></script>
+
+</body>
+</html>
