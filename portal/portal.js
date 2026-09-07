@@ -29,6 +29,9 @@ const PET_PHOTO_BUCKET =
 const PROFILE_PHOTO_BUCKET =
     "profile-photos";
 
+const VISIT_MEDIA_BUCKET =
+    "visit-media";
+
 const MAX_PHOTO_SIZE =
     5 * 1024 * 1024;
 
@@ -56,6 +59,9 @@ let currentPets = [];
 let currentVisits = [];
 
 let currentVisitPets = [];
+
+let activeClientVisitReportId =
+    null;
 
 let selectedDates = [];
 
@@ -6842,7 +6848,6 @@ function buildClientVisitProgressIcon(
 
 }
 
-
 // ========================================
 // CLIENT VISIT PROGRESS MESSAGE
 // ========================================
@@ -6852,10 +6857,12 @@ function buildClientVisitProgressSection(
     progress
 ) {
 
+
     if (
         progress.state ===
         "completed"
     ) {
+
 
         const checkedIn =
             formatClientVisitTimestamp(
@@ -6872,18 +6879,26 @@ function buildClientVisitProgressSection(
         const durationText =
             progress.minutes !==
             null
+
                 ? `${progress.minutes} ${
-                    progress.minutes === 1
+                    progress.minutes ===
+                    1
+
                         ? "minute"
+
                         : "minutes"
                 }`
+
                 : "";
 
 
         return `
+
             <div class="client-visit-progress client-visit-progress-finished">
 
+
                 <div class="client-visit-progress-heading">
+
                     <span class="client-visit-inline-check">
                         ✓
                     </span>
@@ -6891,13 +6906,18 @@ function buildClientVisitProgressSection(
                     <strong>
                         Visit Complete
                     </strong>
+
                 </div>
+
 
                 ${
                     checkedIn &&
                     completed
+
                         ? `
+
                             <p>
+
                                 ${escapeHtml(
                                     checkedIn
                                 )}
@@ -6905,28 +6925,61 @@ function buildClientVisitProgressSection(
                                 ${escapeHtml(
                                     completed
                                 )}
+
                                 ${
                                     durationText
+
                                         ? ` • ${escapeHtml(
                                             durationText
                                         )}`
+
                                         : ""
                                 }
+
                             </p>
+
                         `
+
                         : durationText
+
                             ? `
+
                                 <p>
+
                                     Total Visit Time:
                                     ${escapeHtml(
                                         durationText
                                     )}
+
                                 </p>
+
                             `
+
                             : ""
                 }
 
+
+                <div class="client-visit-report-actions">
+
+                    <button
+                        type="button"
+                        class="client-view-visit-report-button"
+                        data-client-visit-report-open="${visit.id}"
+                    >
+                        View Visit Report
+                    </button>
+
+                </div>
+
+
             </div>
+
+
+            <div
+                id="client-visit-report-${visit.id}"
+                class="client-visit-report-mount"
+            ></div>
+
         `;
 
     }
@@ -6937,6 +6990,7 @@ function buildClientVisitProgressSection(
         "checked_in"
     ) {
 
+
         const checkedIn =
             formatClientVisitTimestamp(
                 progress.checkedInAt
@@ -6944,7 +6998,9 @@ function buildClientVisitProgressSection(
 
 
         return `
+
             <div class="client-visit-progress client-visit-progress-live">
+
 
                 <div class="client-visit-progress-heading">
 
@@ -6956,17 +7012,26 @@ function buildClientVisitProgressSection(
 
                 </div>
 
+
                 <p>
+
                     Your pet care provider checked in${
+
                         checkedIn
+
                             ? ` at ${escapeHtml(
                                 checkedIn
                             )}`
+
                             : ""
+
                     }.
+
                 </p>
 
+
             </div>
+
         `;
 
     }
@@ -6976,6 +7041,670 @@ function buildClientVisitProgressSection(
 
 }
 
+// ========================================
+// CLIENT VISIT REPORT ACTIONS
+// ========================================
+
+document
+    .getElementById(
+        "selected-upcoming-services"
+    )
+    ?.addEventListener(
+        "click",
+        async event => {
+
+
+            const button =
+                event.target.closest(
+                    "[data-client-visit-report-open]"
+                );
+
+
+            if (
+                !button
+            ) {
+
+                return;
+
+            }
+
+
+            const visitId =
+                Number(
+                    button.dataset
+                        .clientVisitReportOpen
+                );
+
+
+            if (
+                !visitId
+            ) {
+
+                return;
+
+            }
+
+
+            await toggleClientVisitReport(
+                visitId,
+                button
+            );
+
+        }
+    );
+
+
+// ========================================
+// TOGGLE CLIENT VISIT REPORT
+// ========================================
+
+async function toggleClientVisitReport(
+    visitId,
+    button
+) {
+
+
+    const mount =
+        document.getElementById(
+            `client-visit-report-${visitId}`
+        );
+
+
+    if (
+        !mount
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        activeClientVisitReportId ===
+        visitId &&
+        mount.innerHTML.trim()
+    ) {
+
+
+        mount.innerHTML =
+            "";
+
+
+        activeClientVisitReportId =
+            null;
+
+
+        button.textContent =
+            "View Visit Report";
+
+
+        return;
+
+    }
+
+
+    closeOpenClientVisitReport();
+
+
+    activeClientVisitReportId =
+        visitId;
+
+
+    button.textContent =
+        "Hide Visit Report";
+
+
+    mount.innerHTML =
+        `
+
+            <div class="client-visit-report-loading">
+
+                Loading visit report...
+
+            </div>
+
+        `;
+
+
+    try {
+
+
+        const [
+            reportResult,
+            mediaResult
+        ] =
+            await Promise.all([
+
+
+                supabaseClient
+                    .from(
+                        "visit_reports"
+                    )
+                    .select(
+                        "id, visit_id, notes, fed, fresh_water, pee, poop, created_at, updated_at"
+                    )
+                    .eq(
+                        "visit_id",
+                        visitId
+                    )
+                    .maybeSingle(),
+
+
+                supabaseClient
+                    .from(
+                        "visit_photos"
+                    )
+                    .select(
+                        "id, visit_id, storage_path, photo_type, caption, sort_order, created_at"
+                    )
+                    .eq(
+                        "visit_id",
+                        visitId
+                    )
+                    .order(
+                        "sort_order",
+                        {
+                            ascending:
+                                true
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending:
+                                true
+                        }
+                    )
+
+
+            ]);
+
+
+        if (
+            reportResult.error
+        ) {
+
+            throw reportResult.error;
+
+        }
+
+
+        if (
+            mediaResult.error
+        ) {
+
+            throw mediaResult.error;
+
+        }
+
+
+        const report =
+            reportResult.data ||
+            null;
+
+
+        if (
+            !report
+        ) {
+
+
+            mount.innerHTML =
+                `
+
+                    <div class="client-visit-report-empty">
+
+                        <strong>
+                            Visit Report
+                        </strong>
+
+                        <p>
+                            A visit report has not been added yet.
+                        </p>
+
+                    </div>
+
+                `;
+
+
+            return;
+
+        }
+
+
+        const media =
+            mediaResult.data ||
+            [];
+
+
+        const mediaWithUrls =
+            await Promise.all(
+
+                media.map(
+                    async item => {
+
+
+                        const {
+                            data,
+                            error
+                        } =
+                            await supabaseClient
+                                .storage
+                                .from(
+                                    VISIT_MEDIA_BUCKET
+                                )
+                                .createSignedUrl(
+                                    item.storage_path,
+                                    3600
+                                );
+
+
+                        return {
+
+                            ...item,
+
+                            signed_url:
+                                error
+
+                                    ? null
+
+                                    : data
+                                        ?.signedUrl ||
+                                      null
+
+                        };
+
+                    }
+                )
+
+            );
+
+
+        renderClientVisitReport(
+            mount,
+            report,
+            mediaWithUrls
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Client visit report error:",
+            error
+        );
+
+
+        mount.innerHTML =
+            `
+
+                <div class="client-visit-report-error">
+
+                    We couldn't load this visit report.
+
+                </div>
+
+            `;
+
+    }
+
+}
+
+
+// ========================================
+// CLOSE OPEN CLIENT VISIT REPORT
+// ========================================
+
+function closeOpenClientVisitReport() {
+
+
+    if (
+        !activeClientVisitReportId
+    ) {
+
+        return;
+
+    }
+
+
+    const oldMount =
+        document.getElementById(
+            `client-visit-report-${activeClientVisitReportId}`
+        );
+
+
+    if (
+        oldMount
+    ) {
+
+        oldMount.innerHTML =
+            "";
+
+    }
+
+
+    const oldButton =
+        document.querySelector(
+            `[data-client-visit-report-open="${activeClientVisitReportId}"]`
+        );
+
+
+    if (
+        oldButton
+    ) {
+
+        oldButton.textContent =
+            "View Visit Report";
+
+    }
+
+
+    activeClientVisitReportId =
+        null;
+
+}
+
+
+// ========================================
+// RENDER CLIENT VISIT REPORT
+// ========================================
+
+function renderClientVisitReport(
+    mount,
+    report,
+    media
+) {
+
+
+    const visitPhotos =
+        media.filter(
+            item =>
+                item.photo_type ===
+                "visit"
+        );
+
+
+    const routePhoto =
+        media.find(
+            item =>
+                item.photo_type ===
+                "route"
+        ) ||
+        null;
+
+
+    const careItems =
+        [];
+
+
+    if (
+        report.fed
+    ) {
+
+        careItems.push(
+            "Fed"
+        );
+
+    }
+
+
+    if (
+        report.fresh_water
+    ) {
+
+        careItems.push(
+            "Fresh Water"
+        );
+
+    }
+
+
+    if (
+        report.pee
+    ) {
+
+        careItems.push(
+            "Pee"
+        );
+
+    }
+
+
+    if (
+        report.poop
+    ) {
+
+        careItems.push(
+            "Poop"
+        );
+
+    }
+
+
+    const careHtml =
+        careItems.length
+
+            ? careItems
+                .map(
+                    item => `
+
+                        <span class="client-visit-report-care-item">
+
+                            <span class="client-visit-report-care-check">
+                                ✓
+                            </span>
+
+                            ${escapeHtml(
+                                item
+                            )}
+
+                        </span>
+
+                    `
+                )
+                .join("")
+
+            : `
+
+                <span class="client-visit-report-muted">
+                    No care updates were marked.
+                </span>
+
+            `;
+
+
+    const photosHtml =
+        visitPhotos.length
+
+            ? visitPhotos
+                .map(
+                    photo => {
+
+
+                        if (
+                            !photo.signed_url
+                        ) {
+
+                            return "";
+
+                        }
+
+
+                        return `
+
+                            <button
+                                type="button"
+                                class="client-visit-report-photo-button"
+                                data-client-report-image="${escapeHtml(
+                                    photo.signed_url
+                                )}"
+                            >
+
+                                <img
+                                    src="${escapeHtml(
+                                        photo.signed_url
+                                    )}"
+                                    alt="Visit photo"
+                                    class="client-visit-report-photo"
+                                >
+
+                            </button>
+
+                        `;
+
+                    }
+                )
+                .join("")
+
+            : `
+
+                <p class="client-visit-report-muted">
+                    No visit photos were added.
+                </p>
+
+            `;
+
+
+    const notesHtml =
+        report.notes
+
+            ? `
+
+                <p class="client-visit-report-notes">
+                    ${formatMultilineText(
+                        report.notes
+                    )}
+                </p>
+
+            `
+
+            : `
+
+                <p class="client-visit-report-muted">
+                    No additional notes were added.
+                </p>
+
+            `;
+
+
+    const routeHtml =
+        routePhoto &&
+        routePhoto.signed_url
+
+            ? `
+
+                <img
+                    src="${escapeHtml(
+                        routePhoto.signed_url
+                    )}"
+                    alt="Walk route"
+                    class="client-visit-report-route-image"
+                >
+
+            `
+
+            : `
+
+                <p class="client-visit-report-muted">
+                    No route screenshot was added.
+                </p>
+
+            `;
+
+
+    mount.innerHTML =
+        `
+
+            <div class="client-visit-report">
+
+
+                <div class="client-visit-report-header">
+
+                    <div>
+
+                        <span class="client-visit-report-eyebrow">
+                            VISIT REPORT
+                        </span>
+
+                        <h5>
+                            Your Pet's Visit
+                        </h5>
+
+                        <p>
+                            Here's everything from this completed visit.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="client-visit-report-section">
+
+                    <span class="client-visit-report-label">
+                        Care Updates
+                    </span>
+
+
+                    <div class="client-visit-report-care-grid">
+
+                        ${careHtml}
+
+                    </div>
+
+                </div>
+
+
+                <div class="client-visit-report-section">
+
+                    <span class="client-visit-report-label">
+                        Notes
+                    </span>
+
+                    ${notesHtml}
+
+                </div>
+
+
+                <div class="client-visit-report-section">
+
+                    <span class="client-visit-report-label">
+                        Photos
+                    </span>
+
+
+                    <div class="client-visit-report-photo-grid">
+
+                        ${photosHtml}
+
+                    </div>
+
+                </div>
+
+
+                <div class="client-visit-report-section">
+
+                    <span class="client-visit-report-label">
+                        Walk Route
+                    </span>
+
+
+                    <div class="client-visit-report-route">
+
+                        ${routeHtml}
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        `;
+
+}
 
 // ========================================
 // CLIENT VISIT DURATION
@@ -7034,7 +7763,6 @@ function getClientVisitDurationMinutes(
     );
 
 }
-
 
 // ========================================
 // CLIENT VISIT TIME
