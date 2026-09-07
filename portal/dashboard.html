@@ -58,9 +58,9 @@
     >
 
 
-      <!-- =========================
+      <!-- ========================================
            BOOKING FORM
-           ========================= -->
+           ======================================== -->
 
       <section
         id="booking-section"
@@ -79,6 +79,7 @@
             type="button"
             id="close-booking-button"
             class="close-button"
+            aria-label="Close booking form"
           >
             ×
           </button>
@@ -301,9 +302,9 @@
 
 
 
-      <!-- =========================
+      <!-- ========================================
            PETS
-           ========================= -->
+           ======================================== -->
 
       <section>
 
@@ -317,9 +318,9 @@
 
 
 
-      <!-- =========================
+      <!-- ========================================
            UPCOMING WALKS
-           ========================= -->
+           ======================================== -->
 
       <section>
 
@@ -333,6 +334,10 @@
 
 
 
+      <!-- ========================================
+           LOGOUT
+           ======================================== -->
+
       <button id="logout-button">
         Log Out
       </button>
@@ -349,233 +354,4 @@
 
 </body>
 
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Client Dashboard | Paws in Stride</title>
-
-  <link rel="stylesheet" href="portal.css">
-</head>
-
-<body>
-
-  <main class="dashboard-container">
-
-    <div class="dashboard-header">
-
-      <div>
-        <h1>Paws in Stride</h1>
-        <h2 id="welcome-name"></h2>
-      </div>
-
-      <button id="request-walk-button" class="primary-button">
-        + Request a Walk
-      </button>
-
-    </div>
-
-
-    <div id="loading">
-      Loading your account...
-    </div>
-
-
-    <div id="dashboard-content" style="display:none;">
-
-
-      <!-- BOOKING FORM -->
-
-      <section
-        id="booking-section"
-        class="booking-section"
-        style="display:none;"
-      >
-
-        <div class="section-header">
-
-          <h3>Request a Walk</h3>
-
-          <button
-            type="button"
-            id="close-booking-button"
-            class="close-button"
-          >
-            ×
-          </button>
-
-        </div>
-
-
-        <form id="booking-form">
-
-
-          <label for="booking-pet">
-            Pet
-          </label>
-
-          <select id="booking-pet" required>
-            <option value="">
-              Select your pet
-            </option>
-          </select>
-
-
-          <label for="booking-service">
-            Service
-          </label>
-
-          <select id="booking-service" required>
-
-            <option value="">
-              Select a service
-            </option>
-
-            <option
-              value="15 Minute Walk"
-              data-price="30"
-            >
-              15 Minute Walk — $30
-            </option>
-
-            <option
-              value="30 Minute Walk"
-              data-price="50"
-            >
-              30 Minute Walk — $50
-            </option>
-
-            <option
-              value="60 Minute Walk"
-              data-price="75"
-            >
-              60 Minute Walk — $75
-            </option>
-
-          </select>
-
-
-          <label for="booking-date">
-            Date
-          </label>
-
-          <input
-            type="date"
-            id="booking-date"
-            required
-          >
-
-
-          <label for="booking-time">
-            Preferred Time Window
-          </label>
-          
-          <select id="booking-time" required>
-          
-            <option value="">
-              Select a time window
-            </option>
-          
-            <option value="07:00:00">
-              7:00 AM – 10:00 AM
-            </option>
-          
-            <option value="10:00:00">
-              10:00 AM – 12:00 PM
-            </option>
-          
-            <option value="12:00:00">
-              12:00 PM – 2:00 PM
-            </option>
-          
-            <option value="14:00:00">
-              2:00 PM – 4:00 PM
-            </option>
-          
-            <option value="16:00:00">
-              4:00 PM – 6:00 PM
-            </option>
-          
-            <option value="18:00:00">
-              6:00 PM – 8:00 PM
-            </option>
-          
-            <option value="20:00:00">
-              8:00 PM – 10:00 PM
-            </option>
-          
-          </select>
-
-
-          <div class="booking-total">
-
-            <span>Total</span>
-
-            <strong id="booking-price">
-              $0.00
-            </strong>
-
-          </div>
-
-
-          <button
-            type="submit"
-            id="booking-submit-button"
-            class="primary-button"
-          >
-            Request Walk
-          </button>
-
-
-          <p id="booking-message"></p>
-
-
-        </form>
-
-      </section>
-
-
-
-      <!-- PET -->
-
-      <section>
-
-        <h3>Your Pet</h3>
-
-        <div id="pet-info"></div>
-
-      </section>
-
-
-
-      <!-- UPCOMING WALKS -->
-
-      <section>
-
-        <h3>Upcoming Walks</h3>
-
-        <div id="upcoming-visits"></div>
-
-      </section>
-
-
-
-      <button id="logout-button">
-        Log Out
-      </button>
-
-
-    </div>
-
-  </main>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script src="./portal.js"></script>
-
-
-</body>
 </html>
