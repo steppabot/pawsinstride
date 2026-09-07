@@ -350,6 +350,67 @@ if (loginForm) {
             }
 
 
+            // ========================================
+            // GET ACCOUNT ROLE
+            // ========================================
+
+            const {
+                data: loginProfile,
+                error: loginProfileError
+            } =
+                await supabaseClient
+                    .from("profiles")
+                    .select("role")
+                    .eq(
+                        "id",
+                        data.session.user.id
+                    )
+                    .single();
+
+
+            if (loginProfileError) {
+
+                console.error(
+                    "Login profile role error:",
+                    loginProfileError
+                );
+
+
+                message.textContent =
+                    "We signed you in, but couldn't load your account role.";
+
+
+                await supabaseClient
+                    .auth
+                    .signOut();
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // ADMIN
+            // ========================================
+
+            if (
+                loginProfile?.role ===
+                "admin"
+            ) {
+
+                window.location.href =
+                    "./admin.html";
+
+                return;
+
+            }
+
+
+            // ========================================
+            // CLIENT
+            // ========================================
+
             window.location.href =
                 "./dashboard.html";
 
@@ -454,9 +515,26 @@ async function loadDashboard() {
 
     }
 
-
+    
     currentProfile =
         profile;
+    
+    
+    // ========================================
+    // ADMIN REDIRECT
+    // ========================================
+    
+    if (
+        currentProfile.role ===
+        "admin"
+    ) {
+    
+        window.location.href =
+            "./admin.html";
+    
+        return;
+    
+    }
 
 
     // HOUSEHOLD
