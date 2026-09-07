@@ -2101,6 +2101,272 @@ section h3 {
 }
 
 /* ========================================
+   ADMIN VISIT REPORT
+======================================== */
+
+.admin-completed-visit-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.admin-visit-report-button {
+    width: auto;
+    padding: 10px 14px;
+    background: #18843d;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.admin-visit-report-button:hover {
+    opacity: 0.9;
+}
+
+.admin-visit-report-mount:empty {
+    display: none;
+}
+
+.admin-visit-report-mount {
+    margin-top: 14px;
+}
+
+.admin-visit-report-form {
+    padding: 18px;
+    background: #fafafa;
+    border: 1px solid #d8d8d8;
+    border-radius: 12px;
+}
+
+.admin-visit-report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+.admin-visit-report-eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    color: #777;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.admin-visit-report-header h5 {
+    margin: 0 0 4px;
+    font-size: 18px;
+}
+
+.admin-visit-report-header p {
+    margin: 0;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.admin-visit-report-close {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+}
+
+.admin-visit-report-section {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #e4e4e4;
+}
+
+.admin-visit-report-section:first-of-type {
+    border-top: none;
+}
+
+.admin-visit-report-label {
+    display: block;
+    margin-bottom: 9px;
+    color: #555;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.admin-visit-report-help {
+    margin: -3px 0 10px;
+    color: #777;
+    font-size: 12px;
+}
+
+.admin-visit-care-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.admin-visit-care-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 12px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-visit-care-option input {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+}
+
+.admin-visit-report-notes {
+    width: 100%;
+    min-height: 110px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.admin-visit-media-upload-button {
+    display: inline-block;
+    width: auto;
+    padding: 10px 14px;
+    background: #111;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-route-upload-button {
+    background: #fff;
+    color: #111;
+    border: 1px solid #111;
+}
+
+.admin-visit-existing-media {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.admin-visit-media-preview {
+    width: 92px;
+    height: 92px;
+    overflow: hidden;
+    background: #eee;
+    border: 1px solid #ddd;
+    border-radius: 9px;
+}
+
+.admin-visit-media-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-visit-route-preview {
+    max-width: 300px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    background: #eee;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.admin-visit-route-preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.admin-visit-media-missing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #777;
+    font-size: 11px;
+}
+
+.admin-visit-pending-media,
+.admin-visit-pending-route {
+    margin-top: 10px;
+}
+
+.admin-pending-media-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    font-size: 12px;
+}
+
+.admin-pending-media-remove {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-size: 19px;
+}
+
+.admin-visit-report-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #ddd;
+}
+
+.admin-visit-report-message {
+    color: #18843d;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-save-visit-report-button {
+    flex-shrink: 0;
+}
+
+.admin-visit-report-loading,
+.admin-visit-report-error {
+    padding: 16px;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    color: #666;
+    font-size: 13px;
+}
+
+/* ========================================
    MOBILE
 ======================================== */
 
@@ -2298,7 +2564,6 @@ section h3 {
         font-size: 9px;
     }
 
-
     /* UPCOMING SERVICE DETAILS */
 
     .upcoming-service-card-header {
@@ -2306,7 +2571,6 @@ section h3 {
         flex-direction: column;
         gap: 8px;
     }
-
 
     /* ADMIN */
 
@@ -2350,7 +2614,7 @@ section h3 {
         margin-top: 6px;
     }
 
-       /* VISIT CHECK-IN */
+     /* VISIT CHECK-IN */
 
     .admin-service-card-in-progress .admin-service-statuses,
     .admin-service-card-completed .admin-service-statuses {
@@ -2393,7 +2657,7 @@ section h3 {
         padding: 14px;
     }
 
-       /* CLIENT VISIT PROGRESS */
+     /* CLIENT VISIT PROGRESS */
 
     .client-visit-progress-icon {
         top: 10px;
@@ -2413,8 +2677,36 @@ section h3 {
         padding-right: 34px;
     }
 
-}
+    /* VISIT REPORT */
 
+    .admin-completed-visit-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-visit-report-button,
+    .admin-reopen-visit-button {
+        width: 100%;
+    }
+
+    .admin-visit-care-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .admin-visit-report-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-save-visit-report-button {
+        width: 100%;
+    }
+
+    .admin-visit-route-preview {
+        max-width: 100%;
+    }
+}
 
 /* ========================================
    EXTRA SMALL MOBILE
