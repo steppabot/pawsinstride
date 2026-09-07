@@ -351,7 +351,7 @@ if (loginForm) {
 
 
             // ========================================
-            // GET ACCOUNT ROLE
+            // LOAD SIGNED-IN USER'S PROFILE
             // ========================================
 
             const {
@@ -360,7 +360,7 @@ if (loginForm) {
             } =
                 await supabaseClient
                     .from("profiles")
-                    .select("role")
+                    .select("id, email, role")
                     .eq(
                         "id",
                         data.session.user.id
@@ -371,7 +371,7 @@ if (loginForm) {
             if (loginProfileError) {
 
                 console.error(
-                    "Login profile role error:",
+                    "Login role lookup error:",
                     loginProfileError
                 );
 
@@ -379,28 +379,43 @@ if (loginForm) {
                 message.textContent =
                     "We signed you in, but couldn't load your account role.";
 
-
-                await supabaseClient
-                    .auth
-                    .signOut();
-
-
                 return;
 
             }
 
 
+            const role =
+                String(
+                    loginProfile?.role || ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            console.log(
+                "Signed in user:",
+                data.session.user.email
+            );
+
+
+            console.log(
+                "Profile role:",
+                role
+            );
+
+
             // ========================================
-            // ADMIN
+            // ADMIN ROUTING
             // ========================================
 
             if (
-                loginProfile?.role ===
+                role ===
                 "admin"
             ) {
 
-                window.location.href =
-                    "./admin.html";
+                window.location.replace(
+                    "./admin.html"
+                );
 
                 return;
 
@@ -408,11 +423,12 @@ if (loginForm) {
 
 
             // ========================================
-            // CLIENT
+            // CLIENT ROUTING
             // ========================================
 
-            window.location.href =
-                "./dashboard.html";
+            window.location.replace(
+                "./dashboard.html"
+            );
 
         }
     );
@@ -515,25 +531,34 @@ async function loadDashboard() {
 
     }
 
-    
+
     currentProfile =
         profile;
-    
-    
+
+
     // ========================================
     // ADMIN REDIRECT
     // ========================================
-    
+
+    const currentRole =
+        String(
+            currentProfile?.role || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
     if (
-        currentProfile.role ===
+        currentRole ===
         "admin"
     ) {
-    
-        window.location.href =
-            "./admin.html";
-    
+
+        window.location.replace(
+            "./admin.html"
+        );
+
         return;
-    
+
     }
 
 
@@ -1710,8 +1735,6 @@ if (householdForm) {
 
             try {
 
-                // PROFILE
-
                 const {
                     error: profileUpdateError
                 } =
@@ -1740,8 +1763,6 @@ if (householdForm) {
 
                 }
 
-
-                // HOUSEHOLD
 
                 const householdPayload = {
 
@@ -1821,8 +1842,6 @@ if (householdForm) {
                 }
 
 
-                // PROPERTY ACCESS
-
                 const accessPayload = {
 
                     client_id:
@@ -1885,8 +1904,6 @@ if (householdForm) {
 
                 }
 
-
-                // PROFILE PHOTO
 
                 if (
                     pendingClientPhotoFile
@@ -6658,7 +6675,15 @@ function clearClientPhotoPreviewUrl() {
 // LOAD
 // ========================================
 
-loadDashboard();
+if (
+    document.getElementById(
+        "dashboard-content"
+    )
+) {
+
+    loadDashboard();
+
+}
 
 
 // ========================================
