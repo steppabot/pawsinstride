@@ -4860,7 +4860,9 @@ function getWeekKey(
 }
 
 
-function validateThreePerWeek() {
+async function validateThreePerWeek(
+    serviceType
+) {
 
     if (
         selectedDates.length === 0
@@ -4869,30 +4871,46 @@ function validateThreePerWeek() {
         return {
             valid: false,
             message:
-                "Please select at least 3 service dates."
+                "Please select at least one service date."
         };
 
     }
 
 
-    const weeks =
+    // ========================================
+    // BUILD THE WEEKS BEING BOOKED
+    // ========================================
+
+    const selectedWeeks =
         {};
 
 
     selectedDates.forEach(
         date => {
 
-            const key =
+            const weekStart =
                 getWeekKey(
                     date
                 );
 
 
-            weeks[key] =
-                weeks[key] || [];
+            if (
+                !selectedWeeks[
+                    weekStart
+                ]
+            ) {
+
+                selectedWeeks[
+                    weekStart
+                ] =
+                    new Set();
+
+            }
 
 
-            weeks[key].push(
+            selectedWeeks[
+                weekStart
+            ].add(
                 date
             );
 
@@ -4900,20 +4918,238 @@ function validateThreePerWeek() {
     );
 
 
+    const weekStarts =
+        Object.keys(
+            selectedWeeks
+        );
+
+
     if (
-        Object.values(
-            weeks
-        ).some(
-            dates =>
-                dates.length < 3
-        )
+        weekStarts.length === 0
     ) {
 
         return {
             valid: false,
             message:
-                "Dog Walking and Drop-In Visits require at least 3 selected dates for each week you are booking."
+                "Please select at least one service date."
         };
+
+    }
+
+
+    // ========================================
+    // FIND DATE RANGE WE NEED TO CHECK
+    // ========================================
+
+    const earliestWeekStart =
+        weekStarts
+            .slice()
+            .sort()[0];
+
+
+    const latestWeekStart =
+        weekStarts
+            .slice()
+            .sort()[
+                weekStarts.length - 1
+            ];
+
+
+    const latestWeekEnd =
+        addDaysToDateString(
+            latestWeekStart,
+            6
+        );
+
+
+    // ========================================
+    // LOAD ALREADY BOOKED SERVICES
+    // OF THE SAME TYPE
+    // ========================================
+
+    const {
+        data: existingVisits,
+        error
+    } =
+        await supabaseClient
+            .from("visits")
+            .select(
+                "id, visit_date, service_type, status"
+            )
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .eq(
+                "service_type",
+                serviceType
+            )
+            .gte(
+                "visit_date",
+                earliestWeekStart
+            )
+            .lte(
+                "visit_date",
+                latestWeekEnd
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Weekly booking validation error:",
+            error
+        );
+
+
+        return {
+            valid: false,
+            message:
+                "We couldn't verify your existing bookings. Please try again."
+        };
+
+    }
+
+
+    // ========================================
+    // COUNT EXISTING + NEW DATES BY WEEK
+    // ========================================
+
+    for (
+        const weekStart of
+            weekStarts
+    ) {
+
+        const weekEnd =
+            addDaysToDateString(
+                weekStart,
+                6
+            );
+
+
+        const existingDates =
+            new Set(
+
+                (
+                    existingVisits ||
+                    []
+                )
+                    .filter(
+                        visit => {
+
+                            const status =
+                                String(
+                                    visit.status ||
+                                    ""
+                                )
+                                    .trim()
+                                    .toLowerCase();
+
+
+                            // Cancelled services should not
+                            // count toward the weekly minimum.
+
+                            if (
+                                status ===
+                                "cancelled"
+                            ) {
+
+                                return false;
+
+                            }
+
+
+                            return (
+                                visit.visit_date >=
+                                    weekStart &&
+                                visit.visit_date <=
+                                    weekEnd
+                            );
+
+                        }
+                    )
+                    .map(
+                        visit =>
+                            visit.visit_date
+                    )
+
+            );
+
+
+        const newDates =
+            selectedWeeks[
+                weekStart
+            ];
+
+
+        // ========================================
+        // COMBINE UNIQUE EXISTING + NEW DATES
+        // ========================================
+
+        const combinedDates =
+            new Set([
+                ...existingDates,
+                ...newDates
+            ]);
+
+
+        if (
+            combinedDates.size <
+            3
+        ) {
+
+            const existingCount =
+                existingDates.size;
+
+
+            const newCount =
+                Array.from(
+                    newDates
+                )
+                    .filter(
+                        date =>
+                            !existingDates.has(
+                                date
+                            )
+                    )
+                    .length;
+
+
+            const total =
+                combinedDates.size;
+
+
+            const remaining =
+                3 -
+                total;
+
+
+            return {
+                valid: false,
+                message:
+                    `You currently have ${existingCount} ${
+                        serviceType ===
+                        "Dog Walking"
+                            ? existingCount === 1
+                                ? "walk"
+                                : "walks"
+                            : existingCount === 1
+                                ? "drop-in visit"
+                                : "drop-in visits"
+                    } booked for the week of ${formatDate(
+                        weekStart
+                    )}. With ${
+                        newCount
+                    } ${
+                        newCount === 1
+                            ? "new visit"
+                            : "new visits"
+                    }, you still need ${
+                        remaining
+                    } more to meet the 3-per-week minimum.`
+            };
+
+        }
 
     }
 
@@ -5139,8 +5375,9 @@ if (bookingForm) {
             ) {
 
                 const validation =
-                    validateThreePerWeek();
-
+                    await validateThreePerWeek(
+                        serviceType
+                    );
 
                 if (
                     !validation.valid
