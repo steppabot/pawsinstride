@@ -45,7 +45,7 @@ if (loginForm) {
 
         if (error) {
 
-            console.error(error);
+            console.error("Login error:", error);
 
             message.textContent =
                 "Incorrect email or password.";
@@ -54,14 +54,26 @@ if (loginForm) {
         }
 
 
-        console.log("Logged in:", data.user);
+        console.log("Logged in user:", data.user);
+        console.log("Login session:", data.session);
+
+
+        if (!data.session) {
+
+            message.textContent =
+                "Login succeeded, but no session was created.";
+
+            return;
+        }
+
 
         window.location.href =
-            "dashboard.html";
+            "./dashboard.html";
 
     });
 
 }
+
 
 // -------------------------
 // DASHBOARD
@@ -69,156 +81,296 @@ if (loginForm) {
 
 async function loadDashboard() {
 
-  const dashboardContent =
-    document.getElementById("dashboard-content");
+    const dashboardContent =
+        document.getElementById("dashboard-content");
 
-  if (!dashboardContent) return;
-
-
-  // Get logged-in user
-  const {
-    data: { user },
-    error: userError
-  } = await supabaseClient.auth.getUser();
+    const loading =
+        document.getElementById("loading");
 
 
-  if (userError || !user) {
-    window.location.href = "login.html";
-    return;
-  }
+    // If we are not on dashboard.html,
+    // stop here.
+    if (!dashboardContent) return;
 
 
-  // Get client profile
-  const { data: profile, error: profileError } =
-    await supabaseClient
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+    // -------------------------
+    // GET SAVED LOGIN SESSION
+    // -------------------------
+
+    const {
+        data: { session },
+        error: sessionError
+    } = await supabaseClient.auth.getSession();
 
 
-  if (profileError) {
-    console.error("Profile error:", profileError);
-    return;
-  }
+    console.log("Dashboard session:", session);
 
 
-  // Get pets
-  const { data: pets, error: petsError } =
-    await supabaseClient
-      .from("pets")
-      .select("*")
-      .eq("client_id", user.id);
+    if (sessionError) {
+
+        console.error("Session error:", sessionError);
+
+        loading.textContent =
+            "There was a problem loading your login session.";
+
+        return;
+    }
 
 
-  if (petsError) {
-    console.error("Pets error:", petsError);
-  }
+    if (!session) {
+
+        console.log("No login session found.");
+
+        window.location.href =
+            "./login.html";
+
+        return;
+    }
 
 
-  // Get upcoming visits
-  const { data: visits, error: visitsError } =
-    await supabaseClient
-      .from("visits")
-      .select("*")
-      .eq("client_id", user.id)
-      .gte("visit_date", new Date().toISOString().split("T")[0])
-      .order("visit_date", { ascending: true });
+    const user = session.user;
+
+    console.log("Logged-in dashboard user:", user);
 
 
-  if (visitsError) {
-    console.error("Visits error:", visitsError);
-  }
+    // -------------------------
+    // GET CLIENT PROFILE
+    // -------------------------
+
+    const {
+        data: profile,
+        error: profileError
+    } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
 
 
-  // Display client name
-  document.getElementById("welcome-name").textContent =
-    `Welcome, ${profile.full_name}`;
+    if (profileError) {
+
+        console.error("Profile error:", profileError);
+
+        loading.textContent =
+            "We couldn't load your client profile.";
+
+        return;
+    }
 
 
-  // Display pet
-  const petInfo =
-    document.getElementById("pet-info");
+    // -------------------------
+    // GET CLIENT PETS
+    // -------------------------
 
-  if (pets && pets.length > 0) {
-
-    petInfo.innerHTML = pets.map(pet => `
-      <div>
-        <strong>${pet.name}</strong><br>
-        ${pet.breed || ""}
-      </div>
-    `).join("");
-
-  } else {
-
-    petInfo.textContent =
-      "No pets found.";
-
-  }
+    const {
+        data: pets,
+        error: petsError
+    } = await supabaseClient
+        .from("pets")
+        .select("*")
+        .eq("client_id", user.id);
 
 
-  // Display visits
-  const visitsContainer =
-    document.getElementById("upcoming-visits");
+    if (petsError) {
 
-  if (visits && visits.length > 0) {
+        console.error("Pets error:", petsError);
 
-    visitsContainer.innerHTML = visits.map(visit => `
-      <div class="visit-card">
-
-        <strong>${visit.service_name}</strong><br>
-
-        ${visit.visit_date}
-        ${visit.start_time ? `at ${visit.start_time}` : ""}
-
-        <br>
-
-        Status: ${visit.status}
-
-        <br>
-
-        $${Number(visit.price).toFixed(2)}
-
-        <br>
-
-        Payment: ${visit.payment_status}
-
-      </div>
-    `).join("");
-
-  } else {
-
-    visitsContainer.textContent =
-      "No upcoming visits.";
-
-  }
+    }
 
 
-  document.getElementById("loading").style.display =
-    "none";
+    // -------------------------
+    // GET UPCOMING VISITS
+    // -------------------------
 
-  dashboardContent.style.display =
-    "block";
+    const today =
+        new Date().toISOString().split("T")[0];
+
+
+    const {
+        data: visits,
+        error: visitsError
+    } = await supabaseClient
+        .from("visits")
+        .select("*")
+        .eq("client_id", user.id)
+        .gte("visit_date", today)
+        .order("visit_date", { ascending: true })
+        .order("start_time", { ascending: true });
+
+
+    if (visitsError) {
+
+        console.error("Visits error:", visitsError);
+
+    }
+
+
+    // -------------------------
+    // DISPLAY CLIENT NAME
+    // -------------------------
+
+    const welcomeName =
+        document.getElementById("welcome-name");
+
+    welcomeName.textContent =
+        `Welcome, ${profile.full_name}`;
+
+
+    // -------------------------
+    // DISPLAY PETS
+    // -------------------------
+
+    const petInfo =
+        document.getElementById("pet-info");
+
+
+    if (pets && pets.length > 0) {
+
+        petInfo.innerHTML = pets.map(pet => `
+            <div class="pet-card">
+                <strong>${pet.name}</strong><br>
+                ${pet.breed || ""}
+            </div>
+        `).join("");
+
+    } else {
+
+        petInfo.textContent =
+            "No pets found.";
+
+    }
+
+
+    // -------------------------
+    // DISPLAY UPCOMING VISITS
+    // -------------------------
+
+    const visitsContainer =
+        document.getElementById("upcoming-visits");
+
+
+    if (visits && visits.length > 0) {
+
+        visitsContainer.innerHTML = visits.map(visit => {
+
+            const price =
+                visit.price !== null
+                    ? `$${Number(visit.price).toFixed(2)}`
+                    : "";
+
+            const time =
+                visit.start_time
+                    ? formatTime(visit.start_time)
+                    : "";
+
+
+            return `
+                <div class="visit-card">
+
+                    <strong>
+                        ${visit.service_name}
+                    </strong>
+
+                    <br>
+
+                    ${visit.visit_date}
+                    ${time ? `at ${time}` : ""}
+
+                    <br>
+
+                    Status:
+                    ${visit.status}
+
+                    <br>
+
+                    ${price}
+
+                    <br>
+
+                    Payment:
+                    ${visit.payment_status}
+
+                </div>
+            `;
+
+        }).join("");
+
+    } else {
+
+        visitsContainer.textContent =
+            "No upcoming visits.";
+
+    }
+
+
+    // -------------------------
+    // SHOW DASHBOARD
+    // -------------------------
+
+    loading.style.display =
+        "none";
+
+    dashboardContent.style.display =
+        "block";
 
 }
 
 
+// -------------------------
+// FORMAT TIME
+// Converts 12:00:00 to 12:00 PM
+// -------------------------
+
+function formatTime(timeString) {
+
+    if (!timeString) return "";
+
+    const parts =
+        timeString.split(":");
+
+    let hours =
+        parseInt(parts[0], 10);
+
+    const minutes =
+        parts[1];
+
+    const ampm =
+        hours >= 12 ? "PM" : "AM";
+
+
+    hours =
+        hours % 12;
+
+    hours =
+        hours || 12;
+
+
+    return `${hours}:${minutes} ${ampm}`;
+
+}
+
+
+// Run dashboard loader
 loadDashboard();
 
 
-// Logout
+// -------------------------
+// LOGOUT
+// -------------------------
+
 const logoutButton =
-  document.getElementById("logout-button");
+    document.getElementById("logout-button");
+
 
 if (logoutButton) {
 
-  logoutButton.addEventListener("click", async () => {
+    logoutButton.addEventListener("click", async () => {
 
-    await supabaseClient.auth.signOut();
+        await supabaseClient.auth.signOut();
 
-    window.location.href =
-      "login.html";
+        window.location.href =
+            "./login.html";
 
-  });
+    });
 
 }
