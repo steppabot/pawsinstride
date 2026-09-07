@@ -91,7 +91,7 @@ body {
 
 
 /* ========================================
-   SECTIONS / CARDS
+   SECTIONS
    ======================================== */
 
 section {
@@ -103,22 +103,6 @@ section {
 
 section h3 {
     margin-top: 0;
-}
-
-.pet-card {
-    line-height: 1.5;
-}
-
-.visit-card {
-    padding: 15px;
-    margin-bottom: 12px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    line-height: 1.4;
-}
-
-.visit-card:last-child {
-    margin-bottom: 0;
 }
 
 
@@ -142,7 +126,6 @@ button {
     padding: 14px 20px;
     font-weight: 600;
     font-size: 14px;
-    cursor: pointer;
 }
 
 .primary-button:hover {
@@ -163,21 +146,25 @@ button {
     font-weight: 600;
 }
 
+.close-button {
+    width: auto;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    padding: 0 8px;
+}
+
 #logout-button {
     background: #fff;
     border: 1px solid #aaa;
     border-radius: 8px;
-    margin-top: 0;
 }
 
 
 /* ========================================
-   BOOKING FORM
+   GENERIC SECTION HEADER
    ======================================== */
-
-.booking-section {
-    border: 2px solid #111;
-}
 
 .section-header {
     display: flex;
@@ -189,14 +176,13 @@ button {
     margin: 0;
 }
 
-.close-button {
-    width: auto;
-    background: transparent;
-    border: none;
-    font-size: 28px;
-    line-height: 1;
-    padding: 0 8px;
-    cursor: pointer;
+
+/* ========================================
+   BOOKING FORM
+   ======================================== */
+
+.booking-section {
+    border: 2px solid #111;
 }
 
 .booking-section form {
@@ -259,7 +245,7 @@ button {
 
 
 /* ========================================
-   DYNAMIC SERVICE BOOKING
+   DYNAMIC BOOKING
    ======================================== */
 
 #service-option-wrapper,
@@ -284,21 +270,9 @@ button {
     font-size: 14px;
 }
 
-#boarding-booking input,
-#boarding-booking select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 18px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background: #fff;
-    font-family: inherit;
-    font-size: 16px;
-}
-
 
 /* ========================================
-   SELECTED BOOKING DATES
+   SELECTED DATES
    ======================================== */
 
 #selected-dates-container {
@@ -339,7 +313,7 @@ button {
 
 
 /* ========================================
-   SHARED CALENDAR STYLES
+   SHARED CALENDARS
    ======================================== */
 
 .booking-calendar,
@@ -419,7 +393,6 @@ button {
     background: #fff;
     font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
 }
 
 .calendar-day:hover:not(:disabled) {
@@ -443,12 +416,270 @@ button {
 
 
 /* ========================================
-   UPCOMING SERVICES
+   YOUR PETS
    ======================================== */
 
-.upcoming-services-section {
-    padding: 20px;
+.pets-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
 }
+
+.pets-section-header h3 {
+    margin: 0 0 4px;
+}
+
+.pets-section-help {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.pet-add-button {
+    flex-shrink: 0;
+}
+
+
+/* ========================================
+   PET PROFILE CARD
+   ======================================== */
+
+.pet-profile-card {
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 14px;
+}
+
+.pet-profile-top {
+    display: grid;
+    grid-template-columns: 92px 1fr auto;
+    gap: 18px;
+    align-items: center;
+}
+
+.pet-profile-photo {
+    width: 92px;
+    height: 92px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: #f5f5f5;
+}
+
+.pet-profile-summary h4 {
+    margin: 0 0 5px;
+    font-size: 22px;
+}
+
+.pet-profile-subtitle {
+    margin: 0 0 7px;
+    color: #555;
+}
+
+.pet-profile-subtitle span {
+    margin: 0 5px;
+    color: #aaa;
+}
+
+.pet-profile-birthday {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.edit-pet-button {
+    width: auto;
+    padding: 10px 15px;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.edit-pet-button:hover {
+    border-color: #111;
+}
+
+.pet-profile-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #eee;
+}
+
+.pet-detail-block {
+    min-width: 0;
+}
+
+.pet-detail-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #777;
+}
+
+.pet-detail-block p {
+    margin: 0;
+    line-height: 1.55;
+    color: #333;
+}
+
+
+/* ========================================
+   NO PETS
+   ======================================== */
+
+.no-pets-state {
+    text-align: center;
+    padding: 30px 15px;
+    border: 1px dashed #ccc;
+    border-radius: 12px;
+}
+
+.no-pets-avatar {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+}
+
+.no-pets-state strong {
+    display: block;
+    font-size: 17px;
+}
+
+.no-pets-state p {
+    color: #666;
+    margin-bottom: 0;
+}
+
+
+/* ========================================
+   PET ADD / EDIT FORM
+   ======================================== */
+
+.pet-form-panel {
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 2px solid #111;
+    border-radius: 14px;
+    background: #fafafa;
+}
+
+.pet-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.pet-form-header h4 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.pet-photo-editor {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.pet-photo-preview {
+    width: 110px;
+    height: 110px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.pet-photo-controls {
+    flex: 1;
+}
+
+.pet-photo-upload-button {
+    display: inline-block;
+    width: auto;
+    margin: 0;
+    padding: 11px 16px;
+    background: #111;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pet-photo-help {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #777;
+}
+
+.pet-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 18px;
+}
+
+.pet-form-field {
+    margin-bottom: 18px;
+}
+
+.pet-form-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.pet-form-field input,
+.pet-form-field select,
+.pet-form-field textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.pet-form-field textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.45;
+}
+
+.pet-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+#pet-form-message {
+    margin-bottom: 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+
+/* ========================================
+   UPCOMING SERVICES
+   ======================================== */
 
 .upcoming-services-header h3 {
     margin-bottom: 4px;
@@ -473,7 +704,6 @@ button {
     background: #fff;
     border: 1px solid #e2e2e2;
     border-radius: 9px;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -489,8 +719,8 @@ button {
 }
 
 .upcoming-calendar-booked {
-    font-weight: 700;
     border-color: #999;
+    font-weight: 700;
 }
 
 .upcoming-calendar-today {
@@ -634,9 +864,66 @@ button {
         margin: 50px auto;
     }
 
-    .secondary-button {
+
+    /* PETS */
+
+    .pets-section-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pet-add-button {
         width: 100%;
     }
+
+    .pet-profile-top {
+        grid-template-columns: 74px 1fr;
+        gap: 14px;
+    }
+
+    .pet-profile-photo {
+        width: 74px;
+        height: 74px;
+    }
+
+    .pet-profile-summary h4 {
+        font-size: 20px;
+    }
+
+    .edit-pet-button {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .pet-profile-details {
+        grid-template-columns: 1fr;
+    }
+
+    .pet-photo-editor {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .pet-photo-preview {
+        width: 105px;
+        height: 105px;
+    }
+
+    .pet-form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .pet-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .pet-form-actions button {
+        width: 100%;
+    }
+
+
+    /* CALENDARS */
 
     .booking-calendar,
     .upcoming-calendar {
@@ -683,4 +970,5 @@ button {
     .upcoming-service-card-header {
         align-items: flex-start;
     }
+
 }
