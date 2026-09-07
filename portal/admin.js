@@ -71,6 +71,8 @@ let allVisits =
 let allVisitPets =
     [];
 
+let allHouseholds = [];
+
 
 let selectedAdminDate =
     null;
@@ -298,29 +300,30 @@ async function loadAdminDashboard() {
     // ========================================
 
     const [
-
+    
         profilesResult,
         petsResult,
-        visitsResult
-
+        visitsResult,
+        householdsResult
+    
     ] =
         await Promise.all([
-
-
+    
+    
             supabaseClient
                 .from("profiles")
                 .select(
                     "id, full_name, email, phone, role"
                 ),
-
-
+    
+    
             supabaseClient
                 .from("pets")
                 .select(
                     "id, client_id, name, breed, gender"
                 ),
-
-
+    
+    
             supabaseClient
                 .from("visits")
                 .select("*")
@@ -329,9 +332,16 @@ async function loadAdminDashboard() {
                     {
                         ascending: true
                     }
+                ),
+    
+    
+            supabaseClient
+                .from("households")
+                .select(
+                    "client_id, street_address, address_line_2, city, state, zip_code"
                 )
-
-
+    
+    
         ]);
 
 
@@ -397,6 +407,23 @@ async function loadAdminDashboard() {
 
     allVisits =
         visitsResult.data ||
+        [];
+
+    
+    if (
+        householdsResult.error
+    ) {
+    
+        console.error(
+            "Admin households error:",
+            householdsResult.error
+        );
+    
+    }
+    
+    
+    allHouseholds =
+        householdsResult.data ||
         [];
 
 
@@ -2468,6 +2495,82 @@ function buildAdminServiceCard(
         client?.email ||
         "Unknown Client";
 
+    const household =
+        allHouseholds.find(
+            item =>
+                item.client_id ===
+                visit.client_id
+        );
+    
+    
+    const addressParts =
+        [];
+    
+    
+    if (
+        household?.street_address
+    ) {
+    
+        addressParts.push(
+            household.street_address
+        );
+    
+    }
+    
+    
+    if (
+        household?.address_line_2
+    ) {
+    
+        addressParts.push(
+            household.address_line_2
+        );
+    
+    }
+    
+    
+    const cityState =
+        [
+            household?.city,
+            household?.state
+        ]
+            .filter(Boolean)
+            .join(", ");
+    
+    
+    const cityStateZip =
+        `${cityState}${
+            household?.zip_code
+                ? ` ${household.zip_code}`
+                : ""
+        }`
+            .trim();
+    
+    
+    if (
+        cityStateZip
+    ) {
+    
+        addressParts.push(
+            cityStateZip
+        );
+    
+    }
+    
+    
+    const clientAddress =
+        addressParts.join(
+            ", "
+        );
+    
+    
+    const googleMapsUrl =
+        clientAddress
+            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                clientAddress
+            )}`
+            : "";
+
 
 
     const pets =
@@ -2598,18 +2701,46 @@ function buildAdminServiceCard(
 
                     ${
                         client?.phone
-
+                    
                             ? `
-
+                    
                                 <small>
                                     ${escapeHtml(
                                         client.phone
                                     )}
                                 </small>
-
+                    
                             `
-
+                    
                             : ""
+                    }
+                    
+                    
+                    ${
+                        clientAddress
+                    
+                            ? `
+                    
+                                <a
+                                    href="${escapeHtml(
+                                        googleMapsUrl
+                                    )}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="admin-client-address"
+                                >
+                                    ${escapeHtml(
+                                        clientAddress
+                                    )}
+                                </a>
+                    
+                            `
+                    
+                            : `
+                                <small>
+                                    Address not added
+                                </small>
+                            `
                     }
 
 
