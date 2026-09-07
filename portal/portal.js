@@ -6378,8 +6378,28 @@ function renderSelectedUpcomingServices() {
                             `;
 
 
+                    const progress =
+                        getClientVisitProgressInfo(
+                            visit
+                        );
+
+
+                    const cardStateClass =
+                        progress.state ===
+                        "completed"
+                            ? "upcoming-service-card-completed"
+                            : progress.state ===
+                                "checked_in"
+                                ? "upcoming-service-card-in-progress"
+                                : "";
+
+
                     return `
-                        <div class="upcoming-service-card">
+                        <div class="upcoming-service-card ${cardStateClass}">
+
+                            ${buildClientVisitProgressIcon(
+                                progress
+                            )}
 
                             <div class="upcoming-service-card-header">
 
@@ -6393,8 +6413,9 @@ function renderSelectedUpcomingServices() {
 
                                 <span class="service-status">
                                     ${escapeHtml(
-                                        formatStatus(
-                                            visit.status
+                                        getClientVisitStatusLabel(
+                                            visit,
+                                            progress
                                         )
                                     )}
                                 </span>
@@ -6471,6 +6492,12 @@ function renderSelectedUpcomingServices() {
 
                             </div>
 
+
+                            ${buildClientVisitProgressSection(
+                                visit,
+                                progress
+                            )}
+
                         </div>
                     `;
 
@@ -6480,6 +6507,428 @@ function renderSelectedUpcomingServices() {
 
 }
 
+// ========================================
+// CLIENT VISIT PROGRESS
+// ========================================
+
+function getClientVisitProgressInfo(
+    visit
+) {
+
+    const status =
+        String(
+            visit.status ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const hasCheckedIn =
+        Boolean(
+            visit.checked_in_at
+        );
+
+
+    const hasCompleted =
+        Boolean(
+            visit.completed_at
+        ) ||
+        status ===
+        "completed";
+
+
+    if (
+        hasCompleted
+    ) {
+
+        return {
+
+            state:
+                "completed",
+
+            checkedInAt:
+                visit.checked_in_at,
+
+            completedAt:
+                visit.completed_at,
+
+            minutes:
+                getClientVisitDurationMinutes(
+                    visit
+                )
+
+        };
+
+    }
+
+
+    if (
+        hasCheckedIn ||
+        status ===
+        "checked_in"
+    ) {
+
+        return {
+
+            state:
+                "checked_in",
+
+            checkedInAt:
+                visit.checked_in_at,
+
+            completedAt:
+                null,
+
+            minutes:
+                null
+
+        };
+
+    }
+
+
+    return {
+
+        state:
+            "scheduled",
+
+        checkedInAt:
+            null,
+
+        completedAt:
+            null,
+
+        minutes:
+            null
+
+    };
+
+}
+
+
+// ========================================
+// CLIENT-FACING STATUS LABEL
+// ========================================
+
+function getClientVisitStatusLabel(
+    visit,
+    progress
+) {
+
+    if (
+        progress.state ===
+        "completed"
+    ) {
+
+        return "Complete";
+
+    }
+
+
+    if (
+        progress.state ===
+        "checked_in"
+    ) {
+
+        return "In Progress";
+
+    }
+
+
+    return formatStatus(
+        visit.status
+    );
+
+}
+
+
+// ========================================
+// CLIENT VISIT STATUS ICON
+// ========================================
+
+function buildClientVisitProgressIcon(
+    progress
+) {
+
+    if (
+        progress.state ===
+        "completed"
+    ) {
+
+        return `
+            <div
+                class="client-visit-progress-icon client-visit-progress-complete"
+                title="Visit complete"
+                aria-label="Visit complete"
+            >
+                ✓
+            </div>
+        `;
+
+    }
+
+
+    if (
+        progress.state ===
+        "checked_in"
+    ) {
+
+        return `
+            <div
+                class="client-visit-progress-icon client-visit-progress-active"
+                title="Visit in progress"
+                aria-label="Visit in progress"
+            >
+                ◷
+            </div>
+        `;
+
+    }
+
+
+    return "";
+
+}
+
+
+// ========================================
+// CLIENT VISIT PROGRESS MESSAGE
+// ========================================
+
+function buildClientVisitProgressSection(
+    visit,
+    progress
+) {
+
+    if (
+        progress.state ===
+        "completed"
+    ) {
+
+        const checkedIn =
+            formatClientVisitTimestamp(
+                progress.checkedInAt
+            );
+
+
+        const completed =
+            formatClientVisitTimestamp(
+                progress.completedAt
+            );
+
+
+        const durationText =
+            progress.minutes !==
+            null
+                ? `${progress.minutes} ${
+                    progress.minutes === 1
+                        ? "minute"
+                        : "minutes"
+                }`
+                : "";
+
+
+        return `
+            <div class="client-visit-progress client-visit-progress-finished">
+
+                <div class="client-visit-progress-heading">
+                    <span class="client-visit-inline-check">
+                        ✓
+                    </span>
+
+                    <strong>
+                        Visit Complete
+                    </strong>
+                </div>
+
+                ${
+                    checkedIn &&
+                    completed
+                        ? `
+                            <p>
+                                ${escapeHtml(
+                                    checkedIn
+                                )}
+                                –
+                                ${escapeHtml(
+                                    completed
+                                )}
+                                ${
+                                    durationText
+                                        ? ` • ${escapeHtml(
+                                            durationText
+                                        )}`
+                                        : ""
+                                }
+                            </p>
+                        `
+                        : durationText
+                            ? `
+                                <p>
+                                    Total Visit Time:
+                                    ${escapeHtml(
+                                        durationText
+                                    )}
+                                </p>
+                            `
+                            : ""
+                }
+
+            </div>
+        `;
+
+    }
+
+
+    if (
+        progress.state ===
+        "checked_in"
+    ) {
+
+        const checkedIn =
+            formatClientVisitTimestamp(
+                progress.checkedInAt
+            );
+
+
+        return `
+            <div class="client-visit-progress client-visit-progress-live">
+
+                <div class="client-visit-progress-heading">
+
+                    <span class="client-visit-live-dot"></span>
+
+                    <strong>
+                        Visit In Progress
+                    </strong>
+
+                </div>
+
+                <p>
+                    Your pet care provider checked in${
+                        checkedIn
+                            ? ` at ${escapeHtml(
+                                checkedIn
+                            )}`
+                            : ""
+                    }.
+                </p>
+
+            </div>
+        `;
+
+    }
+
+
+    return "";
+
+}
+
+
+// ========================================
+// CLIENT VISIT DURATION
+// ========================================
+
+function getClientVisitDurationMinutes(
+    visit
+) {
+
+    if (
+        !visit.checked_in_at ||
+        !visit.completed_at
+    ) {
+
+        return null;
+
+    }
+
+
+    const start =
+        new Date(
+            visit.checked_in_at
+        );
+
+
+    const end =
+        new Date(
+            visit.completed_at
+        );
+
+
+    const difference =
+        end.getTime() -
+        start.getTime();
+
+
+    if (
+        !Number.isFinite(
+            difference
+        ) ||
+        difference <
+        0
+    ) {
+
+        return null;
+
+    }
+
+
+    return Math.max(
+        0,
+        Math.round(
+            difference /
+            60000
+        )
+    );
+
+}
+
+
+// ========================================
+// CLIENT VISIT TIME
+// ========================================
+
+function formatClientVisitTimestamp(
+    timestamp
+) {
+
+    if (!timestamp) {
+
+        return "";
+
+    }
+
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    return date.toLocaleTimeString(
+        "en-US",
+        {
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit"
+        }
+    );
+
+}
 
 // ========================================
 // BOARDING DATE HELPERS
