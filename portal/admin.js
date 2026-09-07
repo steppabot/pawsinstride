@@ -447,23 +447,28 @@ async function loadAdminDashboard() {
         visitsResult.data ||
         [];
 
-
-
     if (
         householdsResult.error
     ) {
-
-
+    
+    
         console.error(
             "Admin households error:",
             householdsResult.error
         );
-
+    
     }
-
+    
+    
+    allHouseholds =
+        householdsResult.data ||
+        [];
+    
+    
     if (
         visitReportsResult.error
     ) {
+    
     
         console.error(
             "Admin visit reports error:",
