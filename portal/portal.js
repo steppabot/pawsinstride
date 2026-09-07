@@ -12,18 +12,29 @@ const supabaseClient =
     );
 
 
-// Logged-in data
 let currentUser = null;
+
 let currentPets = [];
 
-
-// Booking dates
 let selectedDates = [];
 
 
-// -------------------------
+// Current month displayed
+// in the booking calendar.
+
+const now =
+    new Date();
+
+let calendarYear =
+    now.getFullYear();
+
+let calendarMonth =
+    now.getMonth();
+
+
+// ========================================
 // LOGIN
-// -------------------------
+// ========================================
 
 const loginForm =
     document.getElementById(
@@ -71,7 +82,8 @@ if (loginForm) {
                 data,
                 error
             } =
-                await supabaseClient.auth
+                await supabaseClient
+                    .auth
                     .signInWithPassword({
                         email,
                         password
@@ -111,9 +123,9 @@ if (loginForm) {
 }
 
 
-// -------------------------
+// ========================================
 // DASHBOARD
-// -------------------------
+// ========================================
 
 async function loadDashboard() {
 
@@ -130,18 +142,19 @@ async function loadDashboard() {
         );
 
 
-    if (!dashboardContent) return;
+    if (!dashboardContent) {
+        return;
+    }
 
-
-    // -------------------------
-    // SESSION
-    // -------------------------
 
     const {
-        data: { session },
+        data: {
+            session
+        },
         error: sessionError
     } =
-        await supabaseClient.auth
+        await supabaseClient
+            .auth
             .getSession();
 
 
@@ -173,9 +186,7 @@ async function loadDashboard() {
         session.user;
 
 
-    // -------------------------
     // PROFILE
-    // -------------------------
 
     const {
         data: profile,
@@ -206,9 +217,7 @@ async function loadDashboard() {
     }
 
 
-    // -------------------------
     // PETS
-    // -------------------------
 
     const {
         data: pets,
@@ -237,9 +246,7 @@ async function loadDashboard() {
         pets || [];
 
 
-    // -------------------------
-    // VISITS
-    // -------------------------
+    // UPCOMING VISITS
 
     const today =
         getLocalDateString();
@@ -278,9 +285,7 @@ async function loadDashboard() {
     }
 
 
-    // -------------------------
     // NAME
-    // -------------------------
 
     const welcomeName =
         document.getElementById(
@@ -292,9 +297,7 @@ async function loadDashboard() {
         `Welcome, ${profile.full_name}`;
 
 
-    // -------------------------
     // PET DISPLAY
-    // -------------------------
 
     const petInfo =
         document.getElementById(
@@ -303,7 +306,6 @@ async function loadDashboard() {
 
 
     if (
-        currentPets &&
         currentPets.length > 0
     ) {
 
@@ -337,9 +339,7 @@ async function loadDashboard() {
     populateBookingPets();
 
 
-    // -------------------------
-    // VISIT DISPLAY
-    // -------------------------
+    // UPCOMING WALKS DISPLAY
 
     const visitsContainer =
         document.getElementById(
@@ -366,7 +366,8 @@ async function loadDashboard() {
 
 
                         const timeWindow =
-                            visit.time_window || "";
+                            visit.time_window ||
+                            "";
 
 
                         return `
@@ -424,12 +425,15 @@ async function loadDashboard() {
     dashboardContent.style.display =
         "block";
 
+
+    renderBookingCalendar();
+
 }
 
 
-// -------------------------
+// ========================================
 // PET DROPDOWN
-// -------------------------
+// ========================================
 
 function populateBookingPets() {
 
@@ -440,7 +444,9 @@ function populateBookingPets() {
         );
 
 
-    if (!petSelect) return;
+    if (!petSelect) {
+        return;
+    }
 
 
     petSelect.innerHTML =
@@ -478,9 +484,9 @@ function populateBookingPets() {
 }
 
 
-// -------------------------
+// ========================================
 // OPEN BOOKING
-// -------------------------
+// ========================================
 
 const requestWalkButton =
     document.getElementById(
@@ -507,8 +513,12 @@ if (
                 "block";
 
 
+            renderBookingCalendar();
+
+
             bookingSection.scrollIntoView({
-                behavior: "smooth"
+                behavior: "smooth",
+                block: "start"
             });
 
         }
@@ -517,9 +527,9 @@ if (
 }
 
 
-// -------------------------
+// ========================================
 // CLOSE BOOKING
-// -------------------------
+// ========================================
 
 const closeBookingButton =
     document.getElementById(
@@ -545,104 +555,41 @@ if (
 }
 
 
-// -------------------------
-// DATE MINIMUM
-// -------------------------
+// ========================================
+// CALENDAR NAVIGATION
+// ========================================
 
-const bookingDate =
+const calendarPrev =
     document.getElementById(
-        "booking-date"
+        "calendar-prev"
     );
 
 
-if (bookingDate) {
-
-    bookingDate.min =
-        getLocalDateString();
-
-}
-
-
-// -------------------------
-// ADD DATE
-// -------------------------
-
-const addDateButton =
+const calendarNext =
     document.getElementById(
-        "add-date-button"
+        "calendar-next"
     );
 
 
-if (
-    addDateButton &&
-    bookingDate
-) {
+if (calendarPrev) {
 
-    addDateButton.addEventListener(
+    calendarPrev.addEventListener(
         "click",
         () => {
 
-            const date =
-                bookingDate.value;
+            calendarMonth--;
 
 
-            const message =
-                document.getElementById(
-                    "booking-message"
-                );
+            if (calendarMonth < 0) {
 
+                calendarMonth = 11;
 
-            message.textContent =
-                "";
+                calendarYear--;
 
-
-            if (!date) {
-
-                message.textContent =
-                    "Choose a date first.";
-
-                return;
             }
 
 
-            if (
-                date <
-                getLocalDateString()
-            ) {
-
-                message.textContent =
-                    "Please choose a future date.";
-
-                return;
-            }
-
-
-            if (
-                selectedDates.includes(
-                    date
-                )
-            ) {
-
-                message.textContent =
-                    "That date is already selected.";
-
-                return;
-            }
-
-
-            selectedDates.push(
-                date
-            );
-
-
-            selectedDates.sort();
-
-
-            bookingDate.value =
-                "";
-
-
-            renderSelectedDates();
+            renderBookingCalendar();
 
         }
     );
@@ -650,9 +597,299 @@ if (
 }
 
 
-// -------------------------
-// REMOVE DATE
-// -------------------------
+if (calendarNext) {
+
+    calendarNext.addEventListener(
+        "click",
+        () => {
+
+            calendarMonth++;
+
+
+            if (calendarMonth > 11) {
+
+                calendarMonth = 0;
+
+                calendarYear++;
+
+            }
+
+
+            renderBookingCalendar();
+
+        }
+    );
+
+}
+
+
+// ========================================
+// RENDER BOOKING CALENDAR
+// ========================================
+
+function renderBookingCalendar() {
+
+
+    const grid =
+        document.getElementById(
+            "booking-calendar-grid"
+        );
+
+
+    const monthLabel =
+        document.getElementById(
+            "calendar-month-label"
+        );
+
+
+    if (
+        !grid ||
+        !monthLabel
+    ) {
+
+        return;
+
+    }
+
+
+    const monthDate =
+        new Date(
+            calendarYear,
+            calendarMonth,
+            1
+        );
+
+
+    monthLabel.textContent =
+        monthDate.toLocaleDateString(
+            "en-US",
+            {
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+
+    grid.innerHTML =
+        "";
+
+
+    const firstDay =
+        new Date(
+            calendarYear,
+            calendarMonth,
+            1
+        );
+
+
+    // JS Sunday = 0.
+    // Calendar Monday = first column.
+
+    let leadingBlankDays =
+        firstDay.getDay() - 1;
+
+
+    if (
+        leadingBlankDays < 0
+    ) {
+
+        leadingBlankDays = 6;
+
+    }
+
+
+    for (
+        let i = 0;
+        i < leadingBlankDays;
+        i++
+    ) {
+
+        const blank =
+            document.createElement(
+                "div"
+            );
+
+
+        blank.className =
+            "calendar-empty-day";
+
+
+        grid.appendChild(
+            blank
+        );
+
+    }
+
+
+    const daysInMonth =
+        new Date(
+            calendarYear,
+            calendarMonth + 1,
+            0
+        )
+        .getDate();
+
+
+    const todayString =
+        getLocalDateString();
+
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const dateString =
+            makeDateString(
+                calendarYear,
+                calendarMonth,
+                day
+            );
+
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+
+        button.className =
+            "calendar-day";
+
+
+        button.textContent =
+            day;
+
+
+        button.dataset.date =
+            dateString;
+
+
+        if (
+            dateString <
+            todayString
+        ) {
+
+            button.disabled =
+                true;
+
+
+            button.classList.add(
+                "calendar-day-past"
+            );
+
+        }
+
+
+        if (
+            dateString ===
+            todayString
+        ) {
+
+            button.classList.add(
+                "calendar-day-today"
+            );
+
+        }
+
+
+        if (
+            selectedDates.includes(
+                dateString
+            )
+        ) {
+
+            button.classList.add(
+                "calendar-day-selected"
+            );
+
+        }
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                toggleSelectedDate(
+                    dateString
+                );
+
+            }
+        );
+
+
+        grid.appendChild(
+            button
+        );
+
+    }
+
+}
+
+
+// ========================================
+// TOGGLE SELECTED DATE
+// ========================================
+
+function toggleSelectedDate(
+    date
+) {
+
+
+    const message =
+        document.getElementById(
+            "booking-message"
+        );
+
+
+    if (message) {
+
+        message.textContent =
+            "";
+
+    }
+
+
+    if (
+        selectedDates.includes(
+            date
+        )
+    ) {
+
+        selectedDates =
+            selectedDates.filter(
+                selectedDate =>
+                    selectedDate !== date
+            );
+
+    } else {
+
+        selectedDates.push(
+            date
+        );
+
+    }
+
+
+    selectedDates.sort();
+
+
+    renderSelectedDates();
+
+
+    renderBookingCalendar();
+
+}
+
+
+// ========================================
+// REMOVE DATE FROM LIST
+// ========================================
 
 function removeSelectedDate(
     date
@@ -668,12 +905,15 @@ function removeSelectedDate(
 
     renderSelectedDates();
 
+
+    renderBookingCalendar();
+
 }
 
 
-// -------------------------
-// RENDER DATES
-// -------------------------
+// ========================================
+// SELECTED DATE LIST
+// ========================================
 
 function renderSelectedDates() {
 
@@ -690,7 +930,14 @@ function renderSelectedDates() {
         );
 
 
-    if (!list || !count) return;
+    if (
+        !list ||
+        !count
+    ) {
+
+        return;
+
+    }
 
 
     count.textContent =
@@ -727,7 +974,7 @@ function renderSelectedDates() {
                             <button
                                 type="button"
                                 class="remove-date-button"
-                                onclick="removeSelectedDate('${date}')"
+                                data-remove-date="${date}"
                             >
                                 Remove
                             </button>
@@ -737,6 +984,30 @@ function renderSelectedDates() {
                 )
                 .join("");
 
+
+        const removeButtons =
+            list.querySelectorAll(
+                ".remove-date-button"
+            );
+
+
+        removeButtons.forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        removeSelectedDate(
+                            button.dataset.removeDate
+                        );
+
+                    }
+                );
+
+            }
+        );
+
     }
 
 
@@ -745,9 +1016,9 @@ function renderSelectedDates() {
 }
 
 
-// -------------------------
+// ========================================
 // SERVICE PRICE
-// -------------------------
+// ========================================
 
 const bookingService =
     document.getElementById(
@@ -765,9 +1036,9 @@ if (bookingService) {
 }
 
 
-// -------------------------
-// TOTAL
-// -------------------------
+// ========================================
+// BOOKING TOTAL
+// ========================================
 
 function updateBookingTotal() {
 
@@ -818,7 +1089,8 @@ function updateBookingTotal() {
 
 
     const total =
-        price * numberOfWalks;
+        price *
+        numberOfWalks;
 
 
     countDisplay.textContent =
@@ -835,9 +1107,9 @@ function updateBookingTotal() {
 }
 
 
-// -------------------------
-// WEEK HELPERS
-// -------------------------
+// ========================================
+// WEEK HELPER
+// ========================================
 
 function getWeekKey(
     dateString
@@ -876,36 +1148,18 @@ function getWeekKey(
     );
 
 
-    const year =
-        monday.getFullYear();
-
-
-    const month =
-        String(
-            monday.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const dayOfMonth =
-        String(
-            monday.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    return `${year}-${month}-${dayOfMonth}`;
+    return makeDateString(
+        monday.getFullYear(),
+        monday.getMonth(),
+        monday.getDate()
+    );
 
 }
 
 
-// -------------------------
+// ========================================
 // VALIDATE 3 PER WEEK
-// -------------------------
+// ========================================
 
 function validateThreePerWeek() {
 
@@ -923,7 +1177,8 @@ function validateThreePerWeek() {
     }
 
 
-    const weeks = {};
+    const weeks =
+        {};
 
 
     selectedDates.forEach(
@@ -935,9 +1190,12 @@ function validateThreePerWeek() {
                 );
 
 
-            if (!weeks[weekKey]) {
+            if (
+                !weeks[weekKey]
+            ) {
 
-                weeks[weekKey] = [];
+                weeks[weekKey] =
+                    [];
 
             }
 
@@ -980,9 +1238,9 @@ function validateThreePerWeek() {
 }
 
 
-// -------------------------
-// SUBMIT BOOKING
-// -------------------------
+// ========================================
+// BOOKING SUBMIT
+// ========================================
 
 const bookingForm =
     document.getElementById(
@@ -1091,9 +1349,6 @@ if (bookingForm) {
             }
 
 
-            // One ID ties every walk
-            // in this checkout together.
-
             const bookingGroupId =
                 crypto.randomUUID();
 
@@ -1105,7 +1360,9 @@ if (bookingForm) {
                             currentUser.id,
 
                         pet_id:
-                            Number(petId),
+                            Number(
+                                petId
+                            ),
 
                         service_name:
                             serviceName,
@@ -1189,13 +1446,27 @@ if (bookingForm) {
                 `${walkCount} walks added successfully!`;
 
 
-            selectedDates = [];
+            selectedDates =
+                [];
 
 
             bookingForm.reset();
 
 
+            calendarYear =
+                new Date()
+                    .getFullYear();
+
+
+            calendarMonth =
+                new Date()
+                    .getMonth();
+
+
             renderSelectedDates();
+
+
+            renderBookingCalendar();
 
 
             submitButton.disabled =
@@ -1225,54 +1496,64 @@ if (bookingForm) {
 }
 
 
-// -------------------------
-// LOCAL DATE
-// -------------------------
+// ========================================
+// DATE HELPERS
+// ========================================
 
-function getLocalDateString() {
-
-
-    const now =
-        new Date();
-
-
-    const year =
-        now.getFullYear();
+function makeDateString(
+    year,
+    monthIndex,
+    day
+) {
 
 
     const month =
         String(
-            now.getMonth() + 1
-        ).padStart(
+            monthIndex + 1
+        )
+        .padStart(
             2,
             "0"
         );
 
 
-    const day =
-        String(
-            now.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
+    const dayString =
+        String(day)
+            .padStart(
+                2,
+                "0"
+            );
 
 
-    return `${year}-${month}-${day}`;
+    return `${year}-${month}-${dayString}`;
 
 }
 
 
-// -------------------------
-// FORMAT DATE
-// -------------------------
+function getLocalDateString() {
+
+
+    const currentDate =
+        new Date();
+
+
+    return makeDateString(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate()
+    );
+
+}
+
 
 function formatDate(
     dateString
 ) {
 
 
-    if (!dateString) return "";
+    if (!dateString) {
+        return "";
+    }
 
 
     const parts =
@@ -1300,16 +1581,16 @@ function formatDate(
 }
 
 
-// -------------------------
+// ========================================
 // START DASHBOARD
-// -------------------------
+// ========================================
 
 loadDashboard();
 
 
-// -------------------------
+// ========================================
 // LOGOUT
-// -------------------------
+// ========================================
 
 const logoutButton =
     document.getElementById(
@@ -1323,7 +1604,8 @@ if (logoutButton) {
         "click",
         async () => {
 
-            await supabaseClient.auth
+            await supabaseClient
+                .auth
                 .signOut();
 
 
