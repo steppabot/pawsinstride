@@ -26,10 +26,13 @@ const DEFAULT_PET_AVATAR =
 const PET_PHOTO_BUCKET =
     "pet-photos";
 
-const MAX_PET_PHOTO_SIZE =
+const PROFILE_PHOTO_BUCKET =
+    "profile-photos";
+
+const MAX_PHOTO_SIZE =
     5 * 1024 * 1024;
 
-const ALLOWED_PET_PHOTO_TYPES = [
+const ALLOWED_PHOTO_TYPES = [
     "image/jpeg",
     "image/png",
     "image/webp"
@@ -41,6 +44,12 @@ const ALLOWED_PET_PHOTO_TYPES = [
 // ========================================
 
 let currentUser = null;
+
+let currentProfile = null;
+
+let currentHousehold = null;
+
+let currentPropertyAccess = null;
 
 let currentPets = [];
 
@@ -56,9 +65,16 @@ let editingPet = null;
 
 let pendingPetPhotoFile = null;
 
+let pendingClientPhotoFile = null;
+
 let petPhotoPreviewObjectUrl = null;
 
+let clientPhotoPreviewObjectUrl = null;
+
 const petPhotoUrlCache =
+    new Map();
+
+const profilePhotoUrlCache =
     new Map();
 
 
@@ -139,8 +155,6 @@ const SERVICE_CONFIG = {
 
         optionLabel: "Duration",
 
-        additionalPetFee: 10,
-
         options: [
 
             {
@@ -172,8 +186,6 @@ const SERVICE_CONFIG = {
 
         optionLabel: "Duration",
 
-        additionalPetFee: 10,
-
         options: [
 
             {
@@ -204,8 +216,6 @@ const SERVICE_CONFIG = {
         minimumPerWeek: 0,
 
         optionLabel: "Package",
-
-        additionalPetFee: 0,
 
         options: [
 
@@ -355,7 +365,6 @@ if (loginForm) {
 
 async function loadDashboard() {
 
-
     const dashboardContent =
         document.getElementById(
             "dashboard-content"
@@ -446,6 +455,70 @@ async function loadDashboard() {
     }
 
 
+    currentProfile =
+        profile;
+
+
+    // HOUSEHOLD
+
+    const {
+        data: household,
+        error: householdError
+    } =
+        await supabaseClient
+            .from("households")
+            .select("*")
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if (householdError) {
+
+        console.error(
+            "Household error:",
+            householdError
+        );
+
+    }
+
+
+    currentHousehold =
+        household || null;
+
+
+    // PROPERTY ACCESS
+
+    const {
+        data: propertyAccess,
+        error: propertyAccessError
+    } =
+        await supabaseClient
+            .from("property_access")
+            .select("*")
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if (propertyAccessError) {
+
+        console.error(
+            "Property access error:",
+            propertyAccessError
+        );
+
+    }
+
+
+    currentPropertyAccess =
+        propertyAccess || null;
+
+
     // PETS
 
     const {
@@ -524,17 +597,16 @@ async function loadDashboard() {
         visits || [];
 
 
-    // PETS ATTACHED TO UPCOMING VISITS
+    // VISIT PET RELATIONSHIPS
 
     currentVisitPets =
         [];
 
 
     const visitIds =
-        currentVisits
-            .map(
-                visit => visit.id
-            );
+        currentVisits.map(
+            visit => visit.id
+        );
 
 
     if (
@@ -573,8 +645,6 @@ async function loadDashboard() {
     }
 
 
-    // WELCOME
-
     const welcomeName =
         document.getElementById(
             "welcome-name"
@@ -584,10 +654,12 @@ async function loadDashboard() {
     if (welcomeName) {
 
         welcomeName.textContent =
-            `Welcome, ${profile.full_name}`;
+            `Welcome, ${currentProfile.full_name || "Client"}`;
 
     }
 
+
+    await renderHousehold();
 
     await renderPets();
 
@@ -649,11 +721,1382 @@ async function loadDashboard() {
 
 
 // ========================================
+// HOUSEHOLD DISPLAY
+// ========================================
+
+async function renderHousehold() {
+
+    if (!currentProfile) {
+        return;
+    }
+
+
+    const name =
+        currentProfile.full_name ||
+        "Client";
+
+
+    const email =
+        currentProfile.email ||
+        currentUser?.email ||
+        "Email not available";
+
+
+    const phone =
+        currentProfile.phone ||
+        "Phone not added";
+
+
+    document.getElementById(
+        "household-display-name"
+    ).textContent =
+        name;
+
+
+    document.getElementById(
+        "household-display-email"
+    ).textContent =
+        email;
+
+
+    document.getElementById(
+        "household-display-phone"
+    ).textContent =
+        phone;
+
+
+    const initials =
+        getInitials(
+            name
+        );
+
+
+    const initialsElement =
+        document.getElementById(
+            "client-profile-initials"
+        );
+
+
+    const profileImage =
+        document.getElementById(
+            "client-profile-image"
+        );
+
+
+    initialsElement.textContent =
+        initials;
+
+
+    profileImage.style.display =
+        "none";
+
+
+    initialsElement.style.display =
+        "flex";
+
+
+    if (
+        currentProfile.profile_photo_path
+    ) {
+
+        const photoUrl =
+            await getProfilePhotoUrl(
+                currentProfile.profile_photo_path
+            );
+
+
+        if (photoUrl) {
+
+            profileImage.src =
+                photoUrl;
+
+
+            profileImage.style.display =
+                "block";
+
+
+            initialsElement.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    renderHouseholdAddress();
+
+    renderHouseholdContact();
+
+    renderEmergencyContact();
+
+    renderPropertyAccess();
+
+    renderHomeNotes();
+
+}
+
+
+// ========================================
+// HOUSEHOLD ADDRESS DISPLAY
+// ========================================
+
+function renderHouseholdAddress() {
+
+    const container =
+        document.getElementById(
+            "household-display-address"
+        );
+
+
+    const household =
+        currentHousehold || {};
+
+
+    const lines =
+        [];
+
+
+    if (
+        household.street_address
+    ) {
+
+        lines.push(
+            household.street_address
+        );
+
+    }
+
+
+    if (
+        household.address_line_2
+    ) {
+
+        lines.push(
+            household.address_line_2
+        );
+
+    }
+
+
+    const cityStateZip =
+        [
+            household.city,
+            household.state
+        ]
+            .filter(Boolean)
+            .join(", ") +
+        (
+            household.zip_code
+                ? ` ${household.zip_code}`
+                : ""
+        );
+
+
+    if (
+        cityStateZip.trim()
+    ) {
+
+        lines.push(
+            cityStateZip.trim()
+        );
+
+    }
+
+
+    if (
+        lines.length === 0
+    ) {
+
+        container.textContent =
+            "Not added";
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        lines
+            .map(
+                line =>
+                    escapeHtml(line)
+            )
+            .join("<br>");
+
+}
+
+
+// ========================================
+// CONTACT DISPLAY
+// ========================================
+
+function renderHouseholdContact() {
+
+    document.getElementById(
+        "household-display-contact-method"
+    ).textContent =
+        currentHousehold
+            ?.preferred_contact_method ||
+        "Not added";
+
+}
+
+
+// ========================================
+// EMERGENCY DISPLAY
+// ========================================
+
+function renderEmergencyContact() {
+
+    const container =
+        document.getElementById(
+            "household-display-emergency"
+        );
+
+
+    const name =
+        currentHousehold
+            ?.emergency_contact_name;
+
+
+    const phone =
+        currentHousehold
+            ?.emergency_contact_phone;
+
+
+    if (
+        !name &&
+        !phone
+    ) {
+
+        container.textContent =
+            "Not added";
+
+        return;
+
+    }
+
+
+    const parts =
+        [];
+
+
+    if (name) {
+
+        parts.push(
+            `<strong>${escapeHtml(name)}</strong>`
+        );
+
+    }
+
+
+    if (phone) {
+
+        parts.push(
+            escapeHtml(phone)
+        );
+
+    }
+
+
+    container.innerHTML =
+        parts.join("<br>");
+
+}
+
+
+// ========================================
+// ACCESS DISPLAY
+// ========================================
+
+function renderPropertyAccess() {
+
+    const access =
+        currentPropertyAccess || {};
+
+
+    setMultilineDisplay(
+        "display-gate-code",
+        access.gate_code,
+        "Not added"
+    );
+
+
+    setMultilineDisplay(
+        "display-door-code",
+        access.door_code,
+        "Not added"
+    );
+
+
+    setMultilineDisplay(
+        "display-key-instructions",
+        access.key_instructions,
+        "Not added"
+    );
+
+
+    setMultilineDisplay(
+        "display-alarm-instructions",
+        access.alarm_instructions,
+        "Not added"
+    );
+
+
+    setMultilineDisplay(
+        "display-parking-instructions",
+        access.parking_instructions,
+        "Not added"
+    );
+
+
+    setMultilineDisplay(
+        "display-other-access-notes",
+        access.other_access_notes,
+        "Not added"
+    );
+
+}
+
+
+// ========================================
+// HOME NOTES DISPLAY
+// ========================================
+
+function renderHomeNotes() {
+
+    setMultilineDisplay(
+        "household-display-home-notes",
+        currentHousehold?.home_notes,
+        "No home notes added."
+    );
+
+}
+
+
+// ========================================
+// PROFILE PHOTO URL
+// ========================================
+
+async function getProfilePhotoUrl(
+    photoPath
+) {
+
+    if (!photoPath) {
+
+        return null;
+
+    }
+
+
+    if (
+        profilePhotoUrlCache.has(
+            photoPath
+        )
+    ) {
+
+        return profilePhotoUrlCache.get(
+            photoPath
+        );
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                PROFILE_PHOTO_BUCKET
+            )
+            .createSignedUrl(
+                photoPath,
+                3600
+            );
+
+
+    if (
+        error ||
+        !data?.signedUrl
+    ) {
+
+        console.error(
+            "Profile photo signed URL error:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+
+    profilePhotoUrlCache.set(
+        photoPath,
+        data.signedUrl
+    );
+
+
+    return data.signedUrl;
+
+}
+
+
+// ========================================
+// HOUSEHOLD EDIT FORM
+// ========================================
+
+const editHouseholdButton =
+    document.getElementById(
+        "edit-household-button"
+    );
+
+
+const householdFormPanel =
+    document.getElementById(
+        "household-form-panel"
+    );
+
+
+const householdForm =
+    document.getElementById(
+        "household-form"
+    );
+
+
+if (editHouseholdButton) {
+
+    editHouseholdButton.addEventListener(
+        "click",
+        openHouseholdForm
+    );
+
+}
+
+
+const closeHouseholdFormButton =
+    document.getElementById(
+        "close-household-form-button"
+    );
+
+
+if (closeHouseholdFormButton) {
+
+    closeHouseholdFormButton.addEventListener(
+        "click",
+        closeHouseholdForm
+    );
+
+}
+
+
+const cancelHouseholdButton =
+    document.getElementById(
+        "cancel-household-button"
+    );
+
+
+if (cancelHouseholdButton) {
+
+    cancelHouseholdButton.addEventListener(
+        "click",
+        closeHouseholdForm
+    );
+
+}
+
+
+// ========================================
+// OPEN HOUSEHOLD FORM
+// ========================================
+
+async function openHouseholdForm() {
+
+    pendingClientPhotoFile =
+        null;
+
+
+    clearClientPhotoPreviewUrl();
+
+
+    const profile =
+        currentProfile || {};
+
+
+    const household =
+        currentHousehold || {};
+
+
+    const access =
+        currentPropertyAccess || {};
+
+
+    document.getElementById(
+        "household-full-name"
+    ).value =
+        profile.full_name || "";
+
+
+    document.getElementById(
+        "household-phone"
+    ).value =
+        profile.phone || "";
+
+
+    document.getElementById(
+        "household-email"
+    ).value =
+        profile.email ||
+        currentUser?.email ||
+        "";
+
+
+    document.getElementById(
+        "household-street-address"
+    ).value =
+        household.street_address || "";
+
+
+    document.getElementById(
+        "household-address-line-2"
+    ).value =
+        household.address_line_2 || "";
+
+
+    document.getElementById(
+        "household-city"
+    ).value =
+        household.city || "";
+
+
+    document.getElementById(
+        "household-state"
+    ).value =
+        household.state || "";
+
+
+    document.getElementById(
+        "household-zip"
+    ).value =
+        household.zip_code || "";
+
+
+    document.getElementById(
+        "household-preferred-contact"
+    ).value =
+        household.preferred_contact_method || "";
+
+
+    document.getElementById(
+        "emergency-contact-name"
+    ).value =
+        household.emergency_contact_name || "";
+
+
+    document.getElementById(
+        "emergency-contact-phone"
+    ).value =
+        household.emergency_contact_phone || "";
+
+
+    document.getElementById(
+        "household-home-notes"
+    ).value =
+        household.home_notes || "";
+
+
+    document.getElementById(
+        "access-gate-code"
+    ).value =
+        access.gate_code || "";
+
+
+    document.getElementById(
+        "access-door-code"
+    ).value =
+        access.door_code || "";
+
+
+    document.getElementById(
+        "access-key-instructions"
+    ).value =
+        access.key_instructions || "";
+
+
+    document.getElementById(
+        "access-alarm-instructions"
+    ).value =
+        access.alarm_instructions || "";
+
+
+    document.getElementById(
+        "access-parking-instructions"
+    ).value =
+        access.parking_instructions || "";
+
+
+    document.getElementById(
+        "access-other-notes"
+    ).value =
+        access.other_access_notes || "";
+
+
+    document.getElementById(
+        "household-form-message"
+    ).textContent =
+        "";
+
+
+    await setClientFormPhotoPreview();
+
+
+    householdFormPanel.style.display =
+        "block";
+
+
+    householdFormPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+}
+
+
+// ========================================
+// CLOSE HOUSEHOLD FORM
+// ========================================
+
+function closeHouseholdForm() {
+
+    pendingClientPhotoFile =
+        null;
+
+
+    clearClientPhotoPreviewUrl();
+
+
+    document.getElementById(
+        "client-photo-input"
+    ).value =
+        "";
+
+
+    householdFormPanel.style.display =
+        "none";
+
+}
+
+
+// ========================================
+// CLIENT FORM PHOTO PREVIEW
+// ========================================
+
+async function setClientFormPhotoPreview() {
+
+    const preview =
+        document.getElementById(
+            "client-photo-preview"
+        );
+
+
+    const initials =
+        document.getElementById(
+            "client-photo-preview-initials"
+        );
+
+
+    initials.textContent =
+        getInitials(
+            currentProfile?.full_name ||
+            "Client"
+        );
+
+
+    preview.style.display =
+        "none";
+
+
+    initials.style.display =
+        "flex";
+
+
+    if (
+        currentProfile
+            ?.profile_photo_path
+    ) {
+
+        const url =
+            await getProfilePhotoUrl(
+                currentProfile.profile_photo_path
+            );
+
+
+        if (url) {
+
+            preview.src =
+                url;
+
+
+            preview.style.display =
+                "block";
+
+
+            initials.style.display =
+                "none";
+
+        }
+
+    }
+
+}
+
+
+// ========================================
+// CLIENT PHOTO INPUT
+// ========================================
+
+const clientPhotoInput =
+    document.getElementById(
+        "client-photo-input"
+    );
+
+
+if (clientPhotoInput) {
+
+    clientPhotoInput.addEventListener(
+        "change",
+        event => {
+
+            const file =
+                event.target.files[0];
+
+
+            const message =
+                document.getElementById(
+                    "household-form-message"
+                );
+
+
+            message.textContent =
+                "";
+
+
+            if (!file) {
+
+                pendingClientPhotoFile =
+                    null;
+
+                return;
+
+            }
+
+
+            if (
+                !ALLOWED_PHOTO_TYPES.includes(
+                    file.type
+                )
+            ) {
+
+                clientPhotoInput.value =
+                    "";
+
+
+                pendingClientPhotoFile =
+                    null;
+
+
+                message.textContent =
+                    "Please choose a JPG, PNG, or WebP image.";
+
+                return;
+
+            }
+
+
+            if (
+                file.size >
+                MAX_PHOTO_SIZE
+            ) {
+
+                clientPhotoInput.value =
+                    "";
+
+
+                pendingClientPhotoFile =
+                    null;
+
+
+                message.textContent =
+                    "That photo is larger than 5 MB.";
+
+                return;
+
+            }
+
+
+            pendingClientPhotoFile =
+                file;
+
+
+            clearClientPhotoPreviewUrl();
+
+
+            clientPhotoPreviewObjectUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+
+            const preview =
+                document.getElementById(
+                    "client-photo-preview"
+                );
+
+
+            preview.src =
+                clientPhotoPreviewObjectUrl;
+
+
+            preview.style.display =
+                "block";
+
+
+            document.getElementById(
+                "client-photo-preview-initials"
+            ).style.display =
+                "none";
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SAVE HOUSEHOLD
+// ========================================
+
+if (householdForm) {
+
+    householdForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const message =
+                document.getElementById(
+                    "household-form-message"
+                );
+
+
+            const saveButton =
+                document.getElementById(
+                    "save-household-button"
+                );
+
+
+            message.textContent =
+                "";
+
+
+            const fullName =
+                document
+                    .getElementById(
+                        "household-full-name"
+                    )
+                    .value
+                    .trim();
+
+
+            if (!fullName) {
+
+                message.textContent =
+                    "Please enter your full name.";
+
+                return;
+
+            }
+
+
+            saveButton.disabled =
+                true;
+
+
+            saveButton.textContent =
+                "Saving...";
+
+
+            try {
+
+                // PROFILE
+
+                const {
+                    error: profileUpdateError
+                } =
+                    await supabaseClient
+                        .from("profiles")
+                        .update({
+
+                            full_name:
+                                fullName,
+
+                            phone:
+                                valueOrNull(
+                                    "household-phone"
+                                )
+
+                        })
+                        .eq(
+                            "id",
+                            currentUser.id
+                        );
+
+
+                if (profileUpdateError) {
+
+                    throw profileUpdateError;
+
+                }
+
+
+                // HOUSEHOLD
+
+                const householdPayload = {
+
+                    client_id:
+                        currentUser.id,
+
+                    street_address:
+                        valueOrNull(
+                            "household-street-address"
+                        ),
+
+                    address_line_2:
+                        valueOrNull(
+                            "household-address-line-2"
+                        ),
+
+                    city:
+                        valueOrNull(
+                            "household-city"
+                        ),
+
+                    state:
+                        valueOrNull(
+                            "household-state"
+                        ),
+
+                    zip_code:
+                        valueOrNull(
+                            "household-zip"
+                        ),
+
+                    preferred_contact_method:
+                        valueOrNull(
+                            "household-preferred-contact"
+                        ),
+
+                    emergency_contact_name:
+                        valueOrNull(
+                            "emergency-contact-name"
+                        ),
+
+                    emergency_contact_phone:
+                        valueOrNull(
+                            "emergency-contact-phone"
+                        ),
+
+                    home_notes:
+                        valueOrNull(
+                            "household-home-notes"
+                        ),
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                };
+
+
+                const {
+                    error: householdSaveError
+                } =
+                    await supabaseClient
+                        .from("households")
+                        .upsert(
+                            householdPayload,
+                            {
+                                onConflict:
+                                    "client_id"
+                            }
+                        );
+
+
+                if (householdSaveError) {
+
+                    throw householdSaveError;
+
+                }
+
+
+                // PROPERTY ACCESS
+
+                const accessPayload = {
+
+                    client_id:
+                        currentUser.id,
+
+                    gate_code:
+                        valueOrNull(
+                            "access-gate-code"
+                        ),
+
+                    door_code:
+                        valueOrNull(
+                            "access-door-code"
+                        ),
+
+                    key_instructions:
+                        valueOrNull(
+                            "access-key-instructions"
+                        ),
+
+                    alarm_instructions:
+                        valueOrNull(
+                            "access-alarm-instructions"
+                        ),
+
+                    parking_instructions:
+                        valueOrNull(
+                            "access-parking-instructions"
+                        ),
+
+                    other_access_notes:
+                        valueOrNull(
+                            "access-other-notes"
+                        ),
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                };
+
+
+                const {
+                    error: accessSaveError
+                } =
+                    await supabaseClient
+                        .from("property_access")
+                        .upsert(
+                            accessPayload,
+                            {
+                                onConflict:
+                                    "client_id"
+                            }
+                        );
+
+
+                if (accessSaveError) {
+
+                    throw accessSaveError;
+
+                }
+
+
+                // PROFILE PHOTO
+
+                if (
+                    pendingClientPhotoFile
+                ) {
+
+                    const oldPhotoPath =
+                        currentProfile
+                            ?.profile_photo_path ||
+                        null;
+
+
+                    const newPhotoPath =
+                        await uploadClientPhoto(
+                            pendingClientPhotoFile
+                        );
+
+
+                    const {
+                        error: photoUpdateError
+                    } =
+                        await supabaseClient
+                            .from("profiles")
+                            .update({
+
+                                profile_photo_path:
+                                    newPhotoPath
+
+                            })
+                            .eq(
+                                "id",
+                                currentUser.id
+                            );
+
+
+                    if (
+                        photoUpdateError
+                    ) {
+
+                        await supabaseClient
+                            .storage
+                            .from(
+                                PROFILE_PHOTO_BUCKET
+                            )
+                            .remove([
+                                newPhotoPath
+                            ]);
+
+
+                        throw photoUpdateError;
+
+                    }
+
+
+                    if (
+                        oldPhotoPath &&
+                        oldPhotoPath !==
+                            newPhotoPath
+                    ) {
+
+                        const {
+                            error: oldDeleteError
+                        } =
+                            await supabaseClient
+                                .storage
+                                .from(
+                                    PROFILE_PHOTO_BUCKET
+                                )
+                                .remove([
+                                    oldPhotoPath
+                                ]);
+
+
+                        if (
+                            oldDeleteError
+                        ) {
+
+                            console.warn(
+                                "Old profile photo cleanup failed:",
+                                oldDeleteError
+                            );
+
+                        }
+
+                    }
+
+                }
+
+
+                await refreshHousehold();
+
+
+                closeHouseholdForm();
+
+
+                saveButton.disabled =
+                    false;
+
+
+                saveButton.textContent =
+                    "Save Profile";
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    "Household save error:",
+                    error
+                );
+
+
+                message.textContent =
+                    "We couldn't save your household information.";
+
+
+                saveButton.disabled =
+                    false;
+
+
+                saveButton.textContent =
+                    "Save Profile";
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// UPLOAD CLIENT PHOTO
+// ========================================
+
+async function uploadClientPhoto(
+    file
+) {
+
+    const extension =
+        getFileExtensionForMime(
+            file.type
+        );
+
+
+    const filePath =
+        `${currentUser.id}/${crypto.randomUUID()}.${extension}`;
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                PROFILE_PHOTO_BUCKET
+            )
+            .upload(
+                filePath,
+                file,
+                {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: file.type
+                }
+            );
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+    return filePath;
+
+}
+
+
+// ========================================
+// REFRESH HOUSEHOLD
+// ========================================
+
+async function refreshHousehold() {
+
+    const [
+        profileResult,
+        householdResult,
+        accessResult
+    ] =
+        await Promise.all([
+
+            supabaseClient
+                .from("profiles")
+                .select("*")
+                .eq(
+                    "id",
+                    currentUser.id
+                )
+                .single(),
+
+            supabaseClient
+                .from("households")
+                .select("*")
+                .eq(
+                    "client_id",
+                    currentUser.id
+                )
+                .maybeSingle(),
+
+            supabaseClient
+                .from("property_access")
+                .select("*")
+                .eq(
+                    "client_id",
+                    currentUser.id
+                )
+                .maybeSingle()
+
+        ]);
+
+
+    if (
+        profileResult.error
+    ) {
+
+        throw profileResult.error;
+
+    }
+
+
+    if (
+        householdResult.error
+    ) {
+
+        throw householdResult.error;
+
+    }
+
+
+    if (
+        accessResult.error
+    ) {
+
+        throw accessResult.error;
+
+    }
+
+
+    currentProfile =
+        profileResult.data;
+
+
+    currentHousehold =
+        householdResult.data || null;
+
+
+    currentPropertyAccess =
+        accessResult.data || null;
+
+
+    profilePhotoUrlCache.clear();
+
+
+    const welcomeName =
+        document.getElementById(
+            "welcome-name"
+        );
+
+
+    if (welcomeName) {
+
+        welcomeName.textContent =
+            `Welcome, ${currentProfile.full_name || "Client"}`;
+
+    }
+
+
+    await renderHousehold();
+
+}
+
+
+// ========================================
 // PET DISPLAY
 // ========================================
 
 async function renderPets() {
-
 
     const container =
         document.getElementById(
@@ -857,14 +2300,10 @@ async function renderPets() {
                     "click",
                     () => {
 
-                        const petId =
+                        openEditPetForm(
                             Number(
                                 button.dataset.petId
-                            );
-
-
-                        openEditPetForm(
-                            petId
+                            )
                         );
 
                     }
@@ -883,7 +2322,6 @@ async function renderPets() {
 async function getPetDisplayUrl(
     pet
 ) {
-
 
     if (!pet.photo_path) {
 
@@ -924,12 +2362,6 @@ async function getPetDisplayUrl(
         error ||
         !data?.signedUrl
     ) {
-
-        console.error(
-            "Pet photo signed URL error:",
-            error
-        );
-
 
         return DEFAULT_PET_AVATAR;
 
@@ -979,40 +2411,27 @@ if (addPetButton) {
 }
 
 
-const closePetFormButton =
-    document.getElementById(
+document
+    .getElementById(
         "close-pet-form-button"
-    );
-
-
-if (closePetFormButton) {
-
-    closePetFormButton.addEventListener(
+    )
+    ?.addEventListener(
         "click",
         closePetForm
     );
 
-}
 
-
-const cancelPetButton =
-    document.getElementById(
+document
+    .getElementById(
         "cancel-pet-button"
-    );
-
-
-if (cancelPetButton) {
-
-    cancelPetButton.addEventListener(
+    )
+    ?.addEventListener(
         "click",
         closePetForm
     );
-
-}
 
 
 function openAddPetForm() {
-
 
     editingPet =
         null;
@@ -1026,12 +2445,6 @@ function openAddPetForm() {
 
 
     petForm.reset();
-
-
-    document.getElementById(
-        "pet-id"
-    ).value =
-        "";
 
 
     document.getElementById(
@@ -1077,7 +2490,6 @@ function openAddPetForm() {
 async function openEditPetForm(
     petId
 ) {
-
 
     const pet =
         currentPets.find(
@@ -1169,16 +2581,12 @@ async function openEditPetForm(
         "";
 
 
-    const photoUrl =
-        await getPetDisplayUrl(
-            pet
-        );
-
-
     document.getElementById(
         "pet-photo-preview"
     ).src =
-        photoUrl;
+        await getPetDisplayUrl(
+            pet
+        );
 
 
     petFormPanel.style.display =
@@ -1194,11 +2602,10 @@ async function openEditPetForm(
 
 
 // ========================================
-// CLOSE PET FORM
+// CLOSE PET
 // ========================================
 
 function closePetForm() {
-
 
     editingPet =
         null;
@@ -1211,14 +2618,12 @@ function closePetForm() {
     clearPetPhotoPreviewUrl();
 
 
-    if (petForm) {
-
-        petForm.reset();
-
-    }
+    petForm?.reset();
 
 
-    if (petFormPanel) {
+    if (
+        petFormPanel
+    ) {
 
         petFormPanel.style.display =
             "none";
@@ -1254,10 +2659,6 @@ if (petPhotoInput) {
                 );
 
 
-            message.textContent =
-                "";
-
-
             if (!file) {
 
                 pendingPetPhotoFile =
@@ -1269,17 +2670,13 @@ if (petPhotoInput) {
 
 
             if (
-                !ALLOWED_PET_PHOTO_TYPES.includes(
+                !ALLOWED_PHOTO_TYPES.includes(
                     file.type
                 )
             ) {
 
                 petPhotoInput.value =
                     "";
-
-
-                pendingPetPhotoFile =
-                    null;
 
 
                 message.textContent =
@@ -1292,19 +2689,15 @@ if (petPhotoInput) {
 
             if (
                 file.size >
-                MAX_PET_PHOTO_SIZE
+                MAX_PHOTO_SIZE
             ) {
 
                 petPhotoInput.value =
                     "";
 
 
-                pendingPetPhotoFile =
-                    null;
-
-
                 message.textContent =
-                    "That photo is larger than 5 MB. Please choose a smaller image.";
+                    "That photo is larger than 5 MB.";
 
                 return;
 
@@ -1360,67 +2753,10 @@ if (petForm) {
                 );
 
 
-            message.textContent =
-                "";
-
-
-            if (!currentUser) {
-
-                message.textContent =
-                    "Your login session expired.";
-
-                return;
-
-            }
-
-
             const name =
                 document
                     .getElementById(
                         "pet-name"
-                    )
-                    .value
-                    .trim();
-
-
-            const breed =
-                document
-                    .getElementById(
-                        "pet-breed"
-                    )
-                    .value
-                    .trim();
-
-
-            const gender =
-                document
-                    .getElementById(
-                        "pet-gender"
-                    )
-                    .value;
-
-
-            const birthday =
-                document
-                    .getElementById(
-                        "pet-birthday"
-                    )
-                    .value;
-
-
-            const feedingNotes =
-                document
-                    .getElementById(
-                        "pet-feeding-notes"
-                    )
-                    .value
-                    .trim();
-
-
-            const careNotes =
-                document
-                    .getElementById(
-                        "pet-care-notes"
                     )
                     .value
                     .trim();
@@ -1441,19 +2777,29 @@ if (petForm) {
                 name,
 
                 breed:
-                    breed || null,
+                    valueOrNull(
+                        "pet-breed"
+                    ),
 
                 gender:
-                    gender || null,
+                    valueOrNull(
+                        "pet-gender"
+                    ),
 
                 birthday:
-                    birthday || null,
+                    valueOrNull(
+                        "pet-birthday"
+                    ),
 
                 feeding_notes:
-                    feedingNotes || null,
+                    valueOrNull(
+                        "pet-feeding-notes"
+                    ),
 
                 care_notes:
-                    careNotes || null
+                    valueOrNull(
+                        "pet-care-notes"
+                    )
 
             };
 
@@ -1463,125 +2809,87 @@ if (petForm) {
 
 
             saveButton.textContent =
-                editingPet
-                    ? "Saving..."
-                    : "Adding...";
+                "Saving...";
 
 
-            let savedPet;
+            try {
+
+                let savedPet;
 
 
-            if (editingPet) {
-
-                const {
-                    data,
-                    error
-                } =
-                    await supabaseClient
-                        .from("pets")
-                        .update(
-                            payload
-                        )
-                        .eq(
-                            "id",
-                            editingPet.id
-                        )
-                        .eq(
-                            "client_id",
-                            currentUser.id
-                        )
-                        .select()
-                        .single();
-
-
-                if (error) {
-
-                    console.error(
-                        "Pet update error:",
-                        error
-                    );
-
-
-                    message.textContent =
-                        "We couldn't save those changes.";
-
-
-                    saveButton.disabled =
-                        false;
-
-
-                    saveButton.textContent =
-                        "Save Changes";
-
-                    return;
-
-                }
-
-
-                savedPet =
-                    data;
-
-            } else {
-
-                const {
-                    data,
-                    error
-                } =
-                    await supabaseClient
-                        .from("pets")
-                        .insert({
-
-                            ...payload,
-
-                            client_id:
-                                currentUser.id
-
-                        })
-                        .select()
-                        .single();
-
-
-                if (error) {
-
-                    console.error(
-                        "Pet insert error:",
-                        error
-                    );
-
-
-                    message.textContent =
-                        "We couldn't add your pet.";
-
-
-                    saveButton.disabled =
-                        false;
-
-
-                    saveButton.textContent =
-                        "Add Pet";
-
-                    return;
-
-                }
-
-
-                savedPet =
-                    data;
-
-            }
-
-
-            if (
-                pendingPetPhotoFile
-            ) {
-
-                const oldPhotoPath =
+                if (
                     editingPet
-                        ? editingPet.photo_path
-                        : null;
+                ) {
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient
+                            .from("pets")
+                            .update(
+                                payload
+                            )
+                            .eq(
+                                "id",
+                                editingPet.id
+                            )
+                            .eq(
+                                "client_id",
+                                currentUser.id
+                            )
+                            .select()
+                            .single();
 
 
-                try {
+                    if (error) {
+                        throw error;
+                    }
+
+
+                    savedPet =
+                        data;
+
+                } else {
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient
+                            .from("pets")
+                            .insert({
+
+                                ...payload,
+
+                                client_id:
+                                    currentUser.id
+
+                            })
+                            .select()
+                            .single();
+
+
+                    if (error) {
+                        throw error;
+                    }
+
+
+                    savedPet =
+                        data;
+
+                }
+
+
+                if (
+                    pendingPetPhotoFile
+                ) {
+
+                    const oldPhotoPath =
+                        editingPet
+                            ?.photo_path ||
+                        null;
+
 
                     const newPhotoPath =
                         await uploadPetPhoto(
@@ -1591,13 +2899,15 @@ if (petForm) {
 
 
                     const {
-                        error: photoPathError
+                        error
                     } =
                         await supabaseClient
                             .from("pets")
                             .update({
+
                                 photo_path:
                                     newPhotoPath
+
                             })
                             .eq(
                                 "id",
@@ -1609,19 +2919,9 @@ if (petForm) {
                             );
 
 
-                    if (photoPathError) {
+                    if (error) {
 
-                        await supabaseClient
-                            .storage
-                            .from(
-                                PET_PHOTO_BUCKET
-                            )
-                            .remove([
-                                newPhotoPath
-                            ]);
-
-
-                        throw photoPathError;
+                        throw error;
 
                     }
 
@@ -1632,82 +2932,51 @@ if (petForm) {
                             newPhotoPath
                     ) {
 
-                        const {
-                            error: oldPhotoDeleteError
-                        } =
-                            await supabaseClient
-                                .storage
-                                .from(
-                                    PET_PHOTO_BUCKET
-                                )
-                                .remove([
-                                    oldPhotoPath
-                                ]);
-
-
-                        if (
-                            oldPhotoDeleteError
-                        ) {
-
-                            console.warn(
-                                "Old pet photo cleanup failed:",
-                                oldPhotoDeleteError
-                            );
-
-                        }
-
-
-                        petPhotoUrlCache.delete(
-                            oldPhotoPath
-                        );
+                        await supabaseClient
+                            .storage
+                            .from(
+                                PET_PHOTO_BUCKET
+                            )
+                            .remove([
+                                oldPhotoPath
+                            ]);
 
                     }
 
-                } catch (
-                    photoError
-                ) {
-
-                    console.error(
-                        "Pet photo upload error:",
-                        photoError
-                    );
-
-
-                    await refreshPets();
-
-
-                    message.textContent =
-                        "Your pet was saved, but the photo couldn't be uploaded. You can edit the pet and try the photo again.";
-
-
-                    saveButton.disabled =
-                        false;
-
-
-                    saveButton.textContent =
-                        editingPet
-                            ? "Save Changes"
-                            : "Add Pet";
-
-                    return;
-
                 }
 
+
+                await refreshPets();
+
+
+                closePetForm();
+
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    "Pet save error:",
+                    error
+                );
+
+
+                message.textContent =
+                    "We couldn't save your pet.";
+
+            } finally {
+
+                saveButton.disabled =
+                    false;
+
+
+                saveButton.textContent =
+                    editingPet
+                        ? "Save Changes"
+                        : "Save Pet";
+
             }
-
-
-            await refreshPets();
-
-
-            closePetForm();
-
-
-            saveButton.disabled =
-                false;
-
-
-            saveButton.textContent =
-                "Save Pet";
 
         }
     );
@@ -1724,32 +2993,10 @@ async function uploadPetPhoto(
     file
 ) {
 
-
-    let extension;
-
-
-    switch (
-        file.type
-    ) {
-
-        case "image/jpeg":
-            extension = "jpg";
-            break;
-
-        case "image/png":
-            extension = "png";
-            break;
-
-        case "image/webp":
-            extension = "webp";
-            break;
-
-        default:
-            throw new Error(
-                "Unsupported image type."
-            );
-
-    }
+    const extension =
+        getFileExtensionForMime(
+            file.type
+        );
 
 
     const filePath =
@@ -1792,7 +3039,6 @@ async function uploadPetPhoto(
 // ========================================
 
 async function refreshPets() {
-
 
     const {
         data,
@@ -1842,7 +3088,7 @@ async function refreshPets() {
 
 
 // ========================================
-// BOOKING PET DROPDOWN
+// BOOKING PETS
 // ========================================
 
 const bookingPetSelect =
@@ -1853,13 +3099,12 @@ const bookingPetSelect =
 
 function populateBookingPets() {
 
-
     if (!bookingPetSelect) {
         return;
     }
 
 
-    const existingValue =
+    const previous =
         bookingPetSelect.value;
 
 
@@ -1900,21 +3145,20 @@ function populateBookingPets() {
         currentPets.some(
             pet =>
                 String(pet.id) ===
-                String(existingValue)
+                String(previous)
         )
     ) {
 
         bookingPetSelect.value =
-            existingValue;
+            previous;
 
     }
 
 }
 
 
-if (bookingPetSelect) {
-
-    bookingPetSelect.addEventListener(
+bookingPetSelect
+    ?.addEventListener(
         "change",
         () => {
 
@@ -1925,7 +3169,34 @@ if (bookingPetSelect) {
         }
     );
 
-}
+
+// ========================================
+// SERVICE TYPE
+// ========================================
+
+const serviceTypeSelect =
+    document.getElementById(
+        "service-type"
+    );
+
+
+const serviceOptionSelect =
+    document.getElementById(
+        "service-option"
+    );
+
+
+const bookingTime =
+    document.getElementById(
+        "booking-time"
+    );
+
+
+serviceTypeSelect
+    ?.addEventListener(
+        "change",
+        handleServiceTypeChange
+    );
 
 
 // ========================================
@@ -1933,7 +3204,6 @@ if (bookingPetSelect) {
 // ========================================
 
 function renderAdditionalPets() {
-
 
     const wrapper =
         document.getElementById(
@@ -1997,15 +3267,13 @@ function renderAdditionalPets() {
                 )
             )
                 .map(
-                    checkbox =>
-                        Number(
-                            checkbox.value
-                        )
+                    item =>
+                        Number(item.value)
                 )
         );
 
 
-    const additionalPets =
+    const availablePets =
         currentPets.filter(
             pet =>
                 Number(pet.id) !==
@@ -2013,24 +3281,8 @@ function renderAdditionalPets() {
         );
 
 
-    if (
-        additionalPets.length === 0
-    ) {
-
-        wrapper.style.display =
-            "none";
-
-        return;
-
-    }
-
-
-    wrapper.style.display =
-        "block";
-
-
     list.innerHTML =
-        additionalPets
+        availablePets
             .map(
                 pet => {
 
@@ -2072,6 +3324,10 @@ function renderAdditionalPets() {
             .join("");
 
 
+    wrapper.style.display =
+        "block";
+
+
     list
         .querySelectorAll(
             ".additional-pet-checkbox"
@@ -2093,12 +3349,7 @@ function renderAdditionalPets() {
 }
 
 
-// ========================================
-// MULTI PET HELPERS
-// ========================================
-
 function getAdditionalPetLabel() {
-
 
     const serviceType =
         serviceTypeSelect?.value;
@@ -2131,7 +3382,7 @@ function getAdditionalPetLabel() {
         "Dog Boarding"
     ) {
 
-        return "$100 / night";
+        return "+$100 / night";
 
     }
 
@@ -2142,7 +3393,6 @@ function getAdditionalPetLabel() {
 
 
 function updateAdditionalPetsHelp() {
-
 
     const help =
         document.getElementById(
@@ -2155,70 +3405,53 @@ function updateAdditionalPetsHelp() {
     }
 
 
-    const serviceType =
-        serviceTypeSelect?.value;
-
-
-    if (
-        serviceType ===
-            "Dog Walking"
+    switch (
+        serviceTypeSelect?.value
     ) {
 
-        help.textContent =
-            "Each additional dog is $10 per walk.";
+        case "Dog Walking":
 
-        return;
+            help.textContent =
+                "Each additional dog is $10 per walk.";
 
-    }
-
-
-    if (
-        serviceType ===
-            "Drop-In Visit"
-    ) {
-
-        help.textContent =
-            "Each additional pet is $10 per drop-in visit.";
-
-        return;
-
-    }
+            break;
 
 
-    if (
-        serviceType ===
-            "Pet Sitting"
-    ) {
+        case "Drop-In Visit":
 
-        help.textContent =
-            "There is no additional pet charge for Pet Sitting.";
+            help.textContent =
+                "Each additional pet is $10 per drop-in visit.";
 
-        return;
-
-    }
+            break;
 
 
-    if (
-        serviceType ===
-            "Dog Boarding"
-    ) {
+        case "Pet Sitting":
 
-        help.textContent =
-            "Boarding is $100 per pet, per night.";
+            help.textContent =
+                "Additional pets are included at no additional charge.";
 
-        return;
+            break;
+
+
+        case "Dog Boarding":
+
+            help.textContent =
+                "Boarding is $100 per pet, per night.";
+
+            break;
+
+
+        default:
+
+            help.textContent =
+                "Select any other pets included in this service.";
 
     }
-
-
-    help.textContent =
-        "Select any other pets included in this service.";
 
 }
 
 
 function getSelectedAdditionalPetIds() {
-
 
     return Array.from(
         document.querySelectorAll(
@@ -2235,35 +3468,22 @@ function getSelectedAdditionalPetIds() {
 }
 
 
-function getSelectedPetIds() {
+function getSelectedPetCount() {
 
-
-    const primaryPetId =
-        Number(
+    if (
+        !Number(
             bookingPetSelect?.value
-        );
+        )
+    ) {
 
-
-    if (!primaryPetId) {
-
-        return [];
+        return 0;
 
     }
 
 
-    return [
-        primaryPetId,
-        ...getSelectedAdditionalPetIds()
-    ];
-
-}
-
-
-function getSelectedPetCount() {
-
-
-    return getSelectedPetIds()
-        .length;
+    return 1 +
+        getSelectedAdditionalPetIds()
+            .length;
 
 }
 
@@ -2272,24 +3492,17 @@ function getSelectedPetCount() {
 // BOOKING OPEN / CLOSE
 // ========================================
 
-const requestWalkButton =
-    document.getElementById(
-        "request-walk-button"
-    );
-
-
 const bookingSection =
     document.getElementById(
         "booking-section"
     );
 
 
-if (
-    requestWalkButton &&
-    bookingSection
-) {
-
-    requestWalkButton.addEventListener(
+document
+    .getElementById(
+        "request-walk-button"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
@@ -2310,21 +3523,12 @@ if (
         }
     );
 
-}
 
-
-const closeBookingButton =
-    document.getElementById(
+document
+    .getElementById(
         "close-booking-button"
-    );
-
-
-if (
-    closeBookingButton &&
-    bookingSection
-) {
-
-    closeBookingButton.addEventListener(
+    )
+    ?.addEventListener(
         "click",
         () => {
 
@@ -2334,31 +3538,12 @@ if (
         }
     );
 
-}
-
 
 // ========================================
-// SERVICE TYPE
+// SERVICE CHANGE
 // ========================================
-
-const serviceTypeSelect =
-    document.getElementById(
-        "service-type"
-    );
-
-
-if (serviceTypeSelect) {
-
-    serviceTypeSelect.addEventListener(
-        "change",
-        handleServiceTypeChange
-    );
-
-}
-
 
 function handleServiceTypeChange() {
-
 
     const serviceType =
         serviceTypeSelect.value;
@@ -2388,42 +3573,11 @@ function handleServiceTypeChange() {
         );
 
 
-    const optionSelect =
-        document.getElementById(
-            "service-option"
-        );
-
-
-    const timeSelect =
-        document.getElementById(
-            "booking-time"
-        );
-
-
-    clearBookingMessage();
-
-
     selectedDates =
         [];
 
 
     renderSelectedDates();
-
-
-    optionSelect.innerHTML =
-        `
-            <option value="">
-                Select an option
-            </option>
-        `;
-
-
-    timeSelect.innerHTML =
-        `
-            <option value="">
-                Select a time
-            </option>
-        `;
 
 
     optionWrapper.style.display =
@@ -2440,6 +3594,22 @@ function handleServiceTypeChange() {
 
     boarding.style.display =
         "none";
+
+
+    serviceOptionSelect.innerHTML =
+        `
+            <option value="">
+                Select an option
+            </option>
+        `;
+
+
+    bookingTime.innerHTML =
+        `
+            <option value="">
+                Select a time
+            </option>
+        `;
 
 
     renderAdditionalPets();
@@ -2504,7 +3674,7 @@ function handleServiceTypeChange() {
         document.getElementById(
             "booking-date-help"
         ).textContent =
-            "Select at least 3 service dates per week. Tap a date again to remove it.";
+            "Select at least 3 service dates per week.";
 
     }
 
@@ -2517,7 +3687,7 @@ function handleServiceTypeChange() {
         document.getElementById(
             "booking-date-help"
         ).textContent =
-            "Select one or more pet sitting dates. Tap a date again to remove it.";
+            "Select one or more pet sitting dates.";
 
     }
 
@@ -2539,30 +3709,19 @@ function populateServiceOptions(
     serviceType
 ) {
 
-
     const config =
         SERVICE_CONFIG[
             serviceType
         ];
 
 
-    const optionSelect =
-        document.getElementById(
-            "service-option"
-        );
-
-
-    const optionLabel =
-        document.getElementById(
-            "service-option-label"
-        );
-
-
-    optionLabel.textContent =
+    document.getElementById(
+        "service-option-label"
+    ).textContent =
         config.optionLabel;
 
 
-    optionSelect.innerHTML =
+    serviceOptionSelect.innerHTML =
         `
             <option value="">
                 Select ${config.optionLabel.toLowerCase()}
@@ -2591,7 +3750,7 @@ function populateServiceOptions(
                 option.price;
 
 
-            optionSelect.appendChild(
+            serviceOptionSelect.appendChild(
                 element
             );
 
@@ -2601,28 +3760,13 @@ function populateServiceOptions(
 }
 
 
-// ========================================
-// SERVICE OPTION CHANGE
-// ========================================
-
-const serviceOptionSelect =
-    document.getElementById(
-        "service-option"
-    );
-
-
-if (serviceOptionSelect) {
-
-    serviceOptionSelect.addEventListener(
+serviceOptionSelect
+    ?.addEventListener(
         "change",
         () => {
 
-            const serviceType =
-                serviceTypeSelect.value;
-
-
             if (
-                serviceType ===
+                serviceTypeSelect.value ===
                 "Pet Sitting"
             ) {
 
@@ -2636,15 +3780,12 @@ if (serviceOptionSelect) {
         }
     );
 
-}
-
 
 // ========================================
-// TIME WINDOWS
+// TIMES
 // ========================================
 
 function populatePreferredTimeWindows() {
-
 
     const wrapper =
         document.getElementById(
@@ -2652,27 +3793,17 @@ function populatePreferredTimeWindows() {
         );
 
 
-    const label =
-        document.getElementById(
-            "time-window-label"
-        );
-
-
-    const select =
-        document.getElementById(
-            "booking-time"
-        );
-
-
     wrapper.style.display =
         "block";
 
 
-    label.textContent =
+    document.getElementById(
+        "time-window-label"
+    ).textContent =
         "Preferred Time Window";
 
 
-    select.innerHTML =
+    bookingTime.innerHTML =
         `
             <option value="">
                 Select a time window
@@ -2701,7 +3832,7 @@ function populatePreferredTimeWindows() {
                 window.surcharge;
 
 
-            select.appendChild(
+            bookingTime.appendChild(
                 option
             );
 
@@ -2711,12 +3842,7 @@ function populatePreferredTimeWindows() {
 }
 
 
-// ========================================
-// PET SITTING TIME BLOCKS
-// ========================================
-
 function populatePetSittingTimeBlocks() {
-
 
     const wrapper =
         document.getElementById(
@@ -2724,23 +3850,11 @@ function populatePetSittingTimeBlocks() {
         );
 
 
-    const label =
-        document.getElementById(
-            "time-window-label"
-        );
-
-
-    const select =
-        document.getElementById(
-            "booking-time"
-        );
-
-
     const selectedPackage =
         serviceOptionSelect.value;
 
 
-    select.innerHTML =
+    bookingTime.innerHTML =
         `
             <option value="">
                 Select a time block
@@ -2758,14 +3872,10 @@ function populatePetSittingTimeBlocks() {
     }
 
 
-    const config =
+    const packageInfo =
         SERVICE_CONFIG[
             "Pet Sitting"
-        ];
-
-
-    const packageInfo =
-        config.options.find(
+        ].options.find(
             option =>
                 option.value ===
                 selectedPackage
@@ -2786,7 +3896,9 @@ function populatePetSittingTimeBlocks() {
         "block";
 
 
-    label.textContent =
+    document.getElementById(
+        "time-window-label"
+    ).textContent =
         "Time Block";
 
 
@@ -2807,7 +3919,7 @@ function populatePetSittingTimeBlocks() {
                 block;
 
 
-            select.appendChild(
+            bookingTime.appendChild(
                 option
             );
 
@@ -2817,45 +3929,22 @@ function populatePetSittingTimeBlocks() {
 }
 
 
-// ========================================
-// TIME CHANGE
-// ========================================
-
-const bookingTime =
-    document.getElementById(
-        "booking-time"
-    );
-
-
-if (bookingTime) {
-
-    bookingTime.addEventListener(
+bookingTime
+    ?.addEventListener(
         "change",
         updateBookingTotal
     );
 
-}
-
 
 // ========================================
-// BOOKING CALENDAR NAVIGATION
+// BOOKING CALENDAR
 // ========================================
 
-const calendarPrev =
-    document.getElementById(
+document
+    .getElementById(
         "calendar-prev"
-    );
-
-
-const calendarNext =
-    document.getElementById(
-        "calendar-next"
-    );
-
-
-if (calendarPrev) {
-
-    calendarPrev.addEventListener(
+    )
+    ?.addEventListener(
         "click",
         () => {
 
@@ -2879,12 +3968,12 @@ if (calendarPrev) {
         }
     );
 
-}
 
-
-if (calendarNext) {
-
-    calendarNext.addEventListener(
+document
+    .getElementById(
+        "calendar-next"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
@@ -2908,15 +3997,8 @@ if (calendarNext) {
         }
     );
 
-}
-
-
-// ========================================
-// RENDER BOOKING CALENDAR
-// ========================================
 
 function renderBookingCalendar() {
-
 
     const grid =
         document.getElementById(
@@ -2924,7 +4006,7 @@ function renderBookingCalendar() {
         );
 
 
-    const monthLabel =
+    const label =
         document.getElementById(
             "calendar-month-label"
         );
@@ -2932,13 +4014,13 @@ function renderBookingCalendar() {
 
     if (
         !grid ||
-        !monthLabel
+        !label
     ) {
         return;
     }
 
 
-    monthLabel.textContent =
+    label.textContent =
         new Date(
             calendarYear,
             calendarMonth,
@@ -2965,15 +4047,15 @@ function renderBookingCalendar() {
         );
 
 
-    let leadingBlankDays =
+    let blanks =
         firstDay.getDay() - 1;
 
 
     if (
-        leadingBlankDays < 0
+        blanks < 0
     ) {
 
-        leadingBlankDays =
+        blanks =
             6;
 
     }
@@ -2981,7 +4063,7 @@ function renderBookingCalendar() {
 
     for (
         let i = 0;
-        i < leadingBlankDays;
+        i < blanks;
         i++
     ) {
 
@@ -3002,7 +4084,7 @@ function renderBookingCalendar() {
     }
 
 
-    const daysInMonth =
+    const days =
         new Date(
             calendarYear,
             calendarMonth + 1,
@@ -3010,17 +4092,17 @@ function renderBookingCalendar() {
         ).getDate();
 
 
-    const todayString =
+    const today =
         getLocalDateString();
 
 
     for (
         let day = 1;
-        day <= daysInMonth;
+        day <= days;
         day++
     ) {
 
-        const dateString =
+        const date =
             makeDateString(
                 calendarYear,
                 calendarMonth,
@@ -3047,8 +4129,7 @@ function renderBookingCalendar() {
 
 
         if (
-            dateString <
-            todayString
+            date < today
         ) {
 
             button.disabled =
@@ -3063,8 +4144,7 @@ function renderBookingCalendar() {
 
 
         if (
-            dateString ===
-            todayString
+            date === today
         ) {
 
             button.classList.add(
@@ -3076,7 +4156,7 @@ function renderBookingCalendar() {
 
         if (
             selectedDates.includes(
-                dateString
+                date
             )
         ) {
 
@@ -3092,7 +4172,7 @@ function renderBookingCalendar() {
             () => {
 
                 toggleSelectedDate(
-                    dateString
+                    date
                 );
 
             }
@@ -3108,17 +4188,9 @@ function renderBookingCalendar() {
 }
 
 
-// ========================================
-// SELECT BOOKING DATE
-// ========================================
-
 function toggleSelectedDate(
     date
 ) {
-
-
-    clearBookingMessage();
-
 
     if (
         selectedDates.includes(
@@ -3128,8 +4200,8 @@ function toggleSelectedDate(
 
         selectedDates =
             selectedDates.filter(
-                selectedDate =>
-                    selectedDate !== date
+                item =>
+                    item !== date
             );
 
     } else {
@@ -3151,31 +4223,7 @@ function toggleSelectedDate(
 }
 
 
-function removeSelectedDate(
-    date
-) {
-
-
-    selectedDates =
-        selectedDates.filter(
-            selectedDate =>
-                selectedDate !== date
-        );
-
-
-    renderSelectedDates();
-
-    renderBookingCalendar();
-
-}
-
-
-// ========================================
-// SELECTED BOOKING DATES
-// ========================================
-
 function renderSelectedDates() {
-
 
     const list =
         document.getElementById(
@@ -3231,7 +4279,7 @@ function renderSelectedDates() {
                             <button
                                 type="button"
                                 class="remove-date-button"
-                                data-remove-date="${date}"
+                                data-date="${date}"
                             >
                                 Remove
                             </button>
@@ -3253,9 +4301,17 @@ function renderSelectedDates() {
                         "click",
                         () => {
 
-                            removeSelectedDate(
-                                button.dataset.removeDate
-                            );
+                            selectedDates =
+                                selectedDates.filter(
+                                    item =>
+                                        item !==
+                                        button.dataset.date
+                                );
+
+
+                            renderSelectedDates();
+
+                            renderBookingCalendar();
 
                         }
                     );
@@ -3293,9 +4349,8 @@ const boardingPickupWindow =
     );
 
 
-if (boardingDropoff) {
-
-    boardingDropoff.addEventListener(
+boardingDropoff
+    ?.addEventListener(
         "change",
         () => {
 
@@ -3317,36 +4372,22 @@ if (boardingDropoff) {
         }
     );
 
-}
 
-
-if (boardingPickup) {
-
-    boardingPickup.addEventListener(
+boardingPickup
+    ?.addEventListener(
         "change",
         updateBookingTotal
     );
 
-}
 
-
-if (boardingPickupWindow) {
-
-    boardingPickupWindow.addEventListener(
+boardingPickupWindow
+    ?.addEventListener(
         "change",
         updateBookingTotal
     );
-
-}
 
 
 function resetBoardingDates() {
-
-
-    if (!boardingDropoff) {
-        return;
-    }
-
 
     const today =
         getLocalDateString();
@@ -3377,17 +4418,66 @@ function resetBoardingDates() {
 }
 
 
+function getBoardingNightCount() {
+
+    if (
+        !boardingDropoff?.value ||
+        !boardingPickup?.value
+    ) {
+
+        return 0;
+
+    }
+
+
+    const difference =
+        parseLocalDate(
+            boardingPickup.value
+        ) -
+        parseLocalDate(
+            boardingDropoff.value
+        );
+
+
+    return Math.max(
+        0,
+        Math.round(
+            difference /
+            86400000
+        )
+    );
+
+}
+
+
+function getBoardingPickupFee() {
+
+    if (
+        !boardingPickupWindow?.value
+    ) {
+
+        return 0;
+
+    }
+
+
+    return Number(
+        boardingPickupWindow.options[
+            boardingPickupWindow.selectedIndex
+        ].dataset.fee
+    ) || 0;
+
+}
+
+
 // ========================================
 // BOOKING PRICE
 // ========================================
 
 function updateBookingTotal() {
 
-
     const serviceType =
-        serviceTypeSelect
-            ? serviceTypeSelect.value
-            : "";
+        serviceTypeSelect?.value;
 
 
     const priceDisplay =
@@ -3402,18 +4492,27 @@ function updateBookingTotal() {
         );
 
 
-    const detailDisplay =
+    const details =
         document.getElementById(
             "booking-price-details"
         );
 
 
-    if (
-        !priceDisplay ||
-        !countDisplay ||
-        !detailDisplay
-    ) {
+    if (!serviceType) {
+
+        countDisplay.textContent =
+            "0 services";
+
+
+        priceDisplay.textContent =
+            "$0.00";
+
+
+        details.textContent =
+            "";
+
         return;
+
     }
 
 
@@ -3428,26 +4527,6 @@ function updateBookingTotal() {
         );
 
 
-    if (!serviceType) {
-
-        countDisplay.textContent =
-            "0 services";
-
-
-        priceDisplay.textContent =
-            "$0.00";
-
-
-        detailDisplay.textContent =
-            "";
-
-        return;
-
-    }
-
-
-    // BOARDING
-
     if (
         serviceType ===
         "Dog Boarding"
@@ -3457,24 +4536,21 @@ function updateBookingTotal() {
             getBoardingNightCount();
 
 
-        const pickupFee =
-            getBoardingPickupFee();
-
-
-        const boardingPetCount =
+        const nightlyTotal =
+            100 *
             Math.max(
                 petCount,
                 1
             );
 
 
-        const nightlyTotal =
-            100 *
-            boardingPetCount;
+        const pickupFee =
+            getBoardingPickupFee();
 
 
         const total =
-            (nights * nightlyTotal) +
+            nights *
+            nightlyTotal +
             pickupFee;
 
 
@@ -3490,50 +4566,25 @@ function updateBookingTotal() {
             `$${total.toFixed(2)}`;
 
 
-        if (
+        details.textContent =
             nights > 0 &&
             petCount > 0
-        ) {
-
-            let details =
-                `${boardingPetCount} ${
-                    boardingPetCount === 1
+                ? `${petCount} ${
+                    petCount === 1
                         ? "pet"
                         : "pets"
                 } × $100 × ${nights} ${
                     nights === 1
                         ? "night"
                         : "nights"
-                }`;
-
-
-            if (
-                pickupFee > 0
-            ) {
-
-                details +=
-                    " + $50 extended pickup";
-
-            }
-
-
-            detailDisplay.textContent =
-                details;
-
-        } else {
-
-            detailDisplay.textContent =
-                "";
-
-        }
+                }${pickupFee ? " + $50 extended pickup" : ""}`
+                : "";
 
 
         return;
 
     }
 
-
-    // WALK / DROP-IN / PET SITTING
 
     const selectedOption =
         serviceOptionSelect.options[
@@ -3544,12 +4595,11 @@ function updateBookingTotal() {
     const basePrice =
         Number(
             selectedOption
-                ? selectedOption.dataset.price
-                : 0
+                ?.dataset.price
         ) || 0;
 
 
-    let eveningSurcharge =
+    let surcharge =
         0;
 
 
@@ -3560,23 +4610,17 @@ function updateBookingTotal() {
             "Drop-In Visit"
     ) {
 
-        const timeOption =
-            bookingTime.options[
-                bookingTime.selectedIndex
-            ];
-
-
-        eveningSurcharge =
+        surcharge =
             Number(
-                timeOption
-                    ? timeOption.dataset.surcharge
-                    : 0
+                bookingTime.options[
+                    bookingTime.selectedIndex
+                ]?.dataset.surcharge
             ) || 0;
 
     }
 
 
-    let additionalPetTotal =
+    let additionalPetFee =
         0;
 
 
@@ -3587,31 +4631,21 @@ function updateBookingTotal() {
             "Drop-In Visit"
     ) {
 
-        additionalPetTotal =
-            additionalPetCount * 10;
+        additionalPetFee =
+            additionalPetCount *
+            10;
 
     }
 
 
-    if (
-        serviceType ===
-        "Pet Sitting"
-    ) {
-
-        additionalPetTotal =
-            0;
-
-    }
-
-
-    const pricePerService =
+    const perVisit =
         basePrice +
-        eveningSurcharge +
-        additionalPetTotal;
+        surcharge +
+        additionalPetFee;
 
 
     const total =
-        pricePerService *
+        perVisit *
         selectedDates.length;
 
 
@@ -3627,25 +4661,25 @@ function updateBookingTotal() {
         `$${total.toFixed(2)}`;
 
 
+    const pieces =
+        [];
+
+
     if (
-        selectedDates.length > 0 &&
-        basePrice > 0
+        selectedDates.length &&
+        basePrice
     ) {
 
-        const detailParts =
-            [];
-
-
-        detailParts.push(
+        pieces.push(
             `${selectedDates.length} × $${basePrice}`
         );
 
 
         if (
-            additionalPetTotal > 0
+            additionalPetFee > 0
         ) {
 
-            detailParts.push(
+            pieces.push(
                 `${additionalPetCount} additional ${
                     additionalPetCount === 1
                         ? "pet"
@@ -3662,128 +4696,43 @@ function updateBookingTotal() {
             additionalPetCount > 0
         ) {
 
-            detailParts.push(
+            pieces.push(
                 `${additionalPetCount} additional ${
                     additionalPetCount === 1
-                        ? "pet included"
-                        : "pets included"
-                } at no charge`
+                        ? "pet"
+                        : "pets"
+                } included`
             );
 
         }
 
 
         if (
-            eveningSurcharge > 0
+            surcharge > 0
         ) {
 
-            detailParts.push(
-                `$${eveningSurcharge} evening fee per visit`
+            pieces.push(
+                `$${surcharge} evening fee per visit`
             );
 
         }
 
-
-        detailDisplay.textContent =
-            detailParts.join(" + ");
-
-    } else {
-
-        detailDisplay.textContent =
-            "";
-
     }
+
+
+    details.textContent =
+        pieces.join(" + ");
 
 }
 
 
 // ========================================
-// BOARDING PRICE HELPERS
-// ========================================
-
-function getBoardingNightCount() {
-
-
-    if (
-        !boardingDropoff ||
-        !boardingPickup ||
-        !boardingDropoff.value ||
-        !boardingPickup.value
-    ) {
-
-        return 0;
-
-    }
-
-
-    const start =
-        parseLocalDate(
-            boardingDropoff.value
-        );
-
-
-    const end =
-        parseLocalDate(
-            boardingPickup.value
-        );
-
-
-    const difference =
-        end.getTime() -
-        start.getTime();
-
-
-    if (
-        difference <= 0
-    ) {
-
-        return 0;
-
-    }
-
-
-    return Math.round(
-        difference /
-        86400000
-    );
-
-}
-
-
-function getBoardingPickupFee() {
-
-
-    if (
-        !boardingPickupWindow ||
-        !boardingPickupWindow.value
-    ) {
-
-        return 0;
-
-    }
-
-
-    const option =
-        boardingPickupWindow.options[
-            boardingPickupWindow.selectedIndex
-        ];
-
-
-    return Number(
-        option.dataset.fee
-    ) || 0;
-
-}
-
-
-// ========================================
-// THREE PER WEEK VALIDATION
+// WEEK VALIDATION
 // ========================================
 
 function getWeekKey(
     dateString
 ) {
-
 
     const date =
         parseLocalDate(
@@ -3795,33 +4744,28 @@ function getWeekKey(
         date.getDay();
 
 
-    const differenceToMonday =
+    const difference =
         day === 0
             ? -6
             : 1 - day;
 
 
-    const monday =
-        new Date(date);
-
-
-    monday.setDate(
+    date.setDate(
         date.getDate() +
-        differenceToMonday
+        difference
     );
 
 
     return makeDateString(
-        monday.getFullYear(),
-        monday.getMonth(),
-        monday.getDate()
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
     );
 
 }
 
 
 function validateThreePerWeek() {
-
 
     if (
         selectedDates.length === 0
@@ -3843,21 +4787,17 @@ function validateThreePerWeek() {
     selectedDates.forEach(
         date => {
 
-            const weekKey =
+            const key =
                 getWeekKey(
                     date
                 );
 
 
-            if (!weeks[weekKey]) {
-
-                weeks[weekKey] =
-                    [];
-
-            }
+            weeks[key] =
+                weeks[key] || [];
 
 
-            weeks[weekKey].push(
+            weeks[key].push(
                 date
             );
 
@@ -3865,18 +4805,13 @@ function validateThreePerWeek() {
     );
 
 
-    const invalidWeeks =
+    if (
         Object.values(
             weeks
+        ).some(
+            dates =>
+                dates.length < 3
         )
-            .filter(
-                dates =>
-                    dates.length < 3
-            );
-
-
-    if (
-        invalidWeeks.length > 0
     ) {
 
         return {
@@ -3896,7 +4831,7 @@ function validateThreePerWeek() {
 
 
 // ========================================
-// CREATE VISIT PET ROWS
+// ATTACH PETS
 // ========================================
 
 async function attachPetsToVisits(
@@ -3905,7 +4840,6 @@ async function attachPetsToVisits(
     additionalPetIds,
     serviceType
 ) {
-
 
     const rows =
         [];
@@ -3920,7 +4854,9 @@ async function attachPetsToVisits(
                     visit.id,
 
                 pet_id:
-                    Number(primaryPetId),
+                    Number(
+                        primaryPetId
+                    ),
 
                 is_primary:
                     true,
@@ -3934,7 +4870,7 @@ async function attachPetsToVisits(
             additionalPetIds.forEach(
                 petId => {
 
-                    let additionalFee =
+                    let fee =
                         0;
 
 
@@ -3945,19 +4881,8 @@ async function attachPetsToVisits(
                             "Drop-In Visit"
                     ) {
 
-                        additionalFee =
+                        fee =
                             10;
-
-                    }
-
-
-                    if (
-                        serviceType ===
-                        "Pet Sitting"
-                    ) {
-
-                        additionalFee =
-                            0;
 
                     }
 
@@ -3967,7 +4892,7 @@ async function attachPetsToVisits(
                         "Dog Boarding"
                     ) {
 
-                        additionalFee =
+                        fee =
                             100;
 
                     }
@@ -3985,7 +4910,7 @@ async function attachPetsToVisits(
                             false,
 
                         additional_pet_fee:
-                            additionalFee
+                            fee
 
                     });
 
@@ -3994,15 +4919,6 @@ async function attachPetsToVisits(
 
         }
     );
-
-
-    if (
-        rows.length === 0
-    ) {
-
-        return;
-
-    }
 
 
     const {
@@ -4049,14 +4965,10 @@ if (bookingForm) {
                 );
 
 
-            const submitButton =
+            const button =
                 document.getElementById(
                     "booking-submit-button"
                 );
-
-
-            message.textContent =
-                "";
 
 
             const primaryPetId =
@@ -4079,7 +4991,7 @@ if (bookingForm) {
             ) {
 
                 message.textContent =
-                    "Please select your primary pet and service type.";
+                    "Please select your pet and service type.";
 
                 return;
 
@@ -4095,7 +5007,7 @@ if (bookingForm) {
                     primaryPetId,
                     additionalPetIds,
                     message,
-                    submitButton
+                    button
                 );
 
                 return;
@@ -4111,23 +5023,13 @@ if (bookingForm) {
                 bookingTime.value;
 
 
-            if (!serviceOption) {
+            if (
+                !serviceOption ||
+                !timeWindow
+            ) {
 
                 message.textContent =
-                    "Please select a service option.";
-
-                return;
-
-            }
-
-
-            if (!timeWindow) {
-
-                message.textContent =
-                    serviceType ===
-                        "Pet Sitting"
-                        ? "Please select a pet sitting time block."
-                        : "Please select a preferred time window.";
+                    "Please complete the service details.";
 
                 return;
 
@@ -4157,7 +5059,8 @@ if (bookingForm) {
                 }
 
             } else if (
-                selectedDates.length < 1
+                selectedDates.length <
+                1
             ) {
 
                 message.textContent =
@@ -4168,7 +5071,7 @@ if (bookingForm) {
             }
 
 
-            const selectedOption =
+            const option =
                 serviceOptionSelect.options[
                     serviceOptionSelect.selectedIndex
                 ];
@@ -4176,11 +5079,11 @@ if (bookingForm) {
 
             const basePrice =
                 Number(
-                    selectedOption.dataset.price
+                    option.dataset.price
                 ) || 0;
 
 
-            let eveningSurcharge =
+            let surcharge =
                 0;
 
 
@@ -4191,64 +5094,39 @@ if (bookingForm) {
                     "Drop-In Visit"
             ) {
 
-                const timeOption =
-                    bookingTime.options[
-                        bookingTime.selectedIndex
-                    ];
-
-
-                eveningSurcharge =
+                surcharge =
                     Number(
-                        timeOption.dataset.surcharge
+                        bookingTime.options[
+                            bookingTime.selectedIndex
+                        ].dataset.surcharge
                     ) || 0;
 
             }
 
 
-            let additionalPetCharge =
-                0;
+            const additionalCharge =
+                (
+                    serviceType ===
+                        "Dog Walking" ||
+                    serviceType ===
+                        "Drop-In Visit"
+                )
+                    ? additionalPetIds.length *
+                        10
+                    : 0;
 
 
-            if (
-                serviceType ===
-                    "Dog Walking" ||
-                serviceType ===
-                    "Drop-In Visit"
-            ) {
-
-                additionalPetCharge =
-                    additionalPetIds.length *
-                    10;
-
-            }
-
-
-            if (
-                serviceType ===
-                "Pet Sitting"
-            ) {
-
-                additionalPetCharge =
-                    0;
-
-            }
-
-
-            const pricePerVisit =
+            const price =
                 basePrice +
-                eveningSurcharge +
-                additionalPetCharge;
+                surcharge +
+                additionalCharge;
 
 
-            const bookingGroupId =
+            const groupId =
                 crypto.randomUUID();
 
 
-            const serviceName =
-                `${serviceType} - ${serviceOption}`;
-
-
-            const visitsToInsert =
+            const rows =
                 selectedDates.map(
                     date => ({
 
@@ -4265,7 +5143,7 @@ if (bookingForm) {
                             serviceOption,
 
                         service_name:
-                            serviceName,
+                            `${serviceType} - ${serviceOption}`,
 
                         visit_date:
                             date,
@@ -4276,92 +5154,73 @@ if (bookingForm) {
                         status:
                             "requested",
 
-                        price:
-                            pricePerVisit,
+                        price,
 
                         payment_status:
                             "pending",
 
                         booking_group_id:
-                            bookingGroupId
+                            groupId
 
                     })
                 );
 
 
-            submitButton.disabled =
+            button.disabled =
                 true;
 
 
-            submitButton.textContent =
+            button.textContent =
                 "Submitting...";
 
 
             try {
 
                 const {
-                    data: insertedVisits,
-                    error: visitInsertError
+                    data,
+                    error
                 } =
                     await supabaseClient
                         .from("visits")
                         .insert(
-                            visitsToInsert
+                            rows
                         )
                         .select(
                             "id, visit_date"
                         );
 
 
-                if (visitInsertError) {
-
-                    throw visitInsertError;
-
+                if (error) {
+                    throw error;
                 }
 
 
                 await attachPetsToVisits(
-                    insertedVisits || [],
+                    data,
                     primaryPetId,
                     additionalPetIds,
                     serviceType
                 );
 
 
-                const serviceCount =
-                    selectedDates.length;
-
-
                 message.textContent =
-                    `${serviceCount} ${
-                        serviceCount === 1
-                            ? "service"
-                            : "services"
-                    } added successfully!`;
+                    "Service request submitted successfully!";
 
 
                 resetBookingForm();
 
 
-                submitButton.disabled =
-                    false;
-
-
-                submitButton.textContent =
-                    "Continue";
+                await refreshUpcomingVisits();
 
 
                 setTimeout(
-                    async () => {
+                    () => {
 
                         bookingSection.style.display =
                             "none";
 
-
-                        await loadDashboard();
-
                     },
-                    900
+                    600
                 );
 
             } catch (
@@ -4377,12 +5236,13 @@ if (bookingForm) {
                 message.textContent =
                     "We couldn't submit your service request.";
 
+            } finally {
 
-                submitButton.disabled =
+                button.disabled =
                     false;
 
 
-                submitButton.textContent =
+                button.textContent =
                     "Continue";
 
             }
@@ -4401,9 +5261,8 @@ async function submitBoardingBooking(
     primaryPetId,
     additionalPetIds,
     message,
-    submitButton
+    button
 ) {
-
 
     const dropoff =
         boardingDropoff.value;
@@ -4417,34 +5276,37 @@ async function submitBoardingBooking(
         boardingPickupWindow.value;
 
 
-    if (
-        !dropoff ||
-        !pickup ||
-        !pickupWindow
-    ) {
-
-        message.textContent =
-            "Please select your boarding drop-off date, pick-up date, and pick-up time.";
-
-        return;
-
-    }
-
-
     const nights =
         getBoardingNightCount();
 
 
     if (
+        !dropoff ||
+        !pickup ||
+        !pickupWindow ||
         nights < 1
     ) {
 
         message.textContent =
-            "Your pick-up date must be after your drop-off date.";
+            "Please complete your boarding dates and pickup time.";
 
         return;
 
     }
+
+
+    const petCount =
+        1 +
+        additionalPetIds.length;
+
+
+    const nightlyPrice =
+        100 *
+        petCount;
+
+
+    const pickupFee =
+        getBoardingPickupFee();
 
 
     const boardingDates =
@@ -4454,98 +5316,70 @@ async function submitBoardingBooking(
         );
 
 
-    const pickupFee =
-        getBoardingPickupFee();
-
-
-    const bookingGroupId =
+    const groupId =
         crypto.randomUUID();
-
-
-    const petCount =
-        1 +
-        additionalPetIds.length;
-
-
-    const nightlyPrice =
-        petCount *
-        100;
 
 
     const rows =
         boardingDates.map(
-            (date, index) => {
+            (date, index) => ({
 
-                let rowPrice =
-                    nightlyPrice;
+                client_id:
+                    currentUser.id,
 
+                pet_id:
+                    primaryPetId,
 
-                if (
-                    index ===
-                        boardingDates.length - 1 &&
-                    pickupFee > 0
-                ) {
+                service_type:
+                    "Dog Boarding",
 
-                    rowPrice +=
-                        pickupFee;
+                service_option:
+                    "VIP Overnight Boarding",
 
-                }
+                service_name:
+                    "Dog Boarding - VIP Overnight Boarding",
 
+                visit_date:
+                    date,
 
-                return {
+                time_window:
+                    pickupWindow,
 
-                    client_id:
-                        currentUser.id,
+                status:
+                    "requested",
 
-                    pet_id:
-                        Number(primaryPetId),
+                price:
+                    nightlyPrice +
+                    (
+                        index ===
+                            boardingDates.length - 1
+                            ? pickupFee
+                            : 0
+                    ),
 
-                    service_type:
-                        "Dog Boarding",
+                payment_status:
+                    "pending",
 
-                    service_option:
-                        "VIP Overnight Boarding",
+                booking_group_id:
+                    groupId
 
-                    service_name:
-                        "Dog Boarding - VIP Overnight Boarding",
-
-                    visit_date:
-                        date,
-
-                    time_window:
-                        pickupWindow,
-
-                    status:
-                        "requested",
-
-                    price:
-                        rowPrice,
-
-                    payment_status:
-                        "pending",
-
-                    booking_group_id:
-                        bookingGroupId
-
-                };
-
-            }
+            })
         );
 
 
-    submitButton.disabled =
+    button.disabled =
         true;
 
 
-    submitButton.textContent =
+    button.textContent =
         "Submitting...";
 
 
     try {
 
         const {
-            data: insertedVisits,
-            error: visitInsertError
+            data,
+            error
         } =
             await supabaseClient
                 .from("visits")
@@ -4557,15 +5391,13 @@ async function submitBoardingBooking(
                 );
 
 
-        if (visitInsertError) {
-
-            throw visitInsertError;
-
+        if (error) {
+            throw error;
         }
 
 
         await attachPetsToVisits(
-            insertedVisits || [],
+            data,
             primaryPetId,
             additionalPetIds,
             "Dog Boarding"
@@ -4573,35 +5405,23 @@ async function submitBoardingBooking(
 
 
         message.textContent =
-            `${nights} ${
-                nights === 1
-                    ? "night"
-                    : "nights"
-            } of boarding added successfully!`;
+            "Boarding request submitted successfully!";
 
 
         resetBookingForm();
 
 
-        submitButton.disabled =
-            false;
-
-
-        submitButton.textContent =
-            "Continue";
+        await refreshUpcomingVisits();
 
 
         setTimeout(
-            async () => {
+            () => {
 
                 bookingSection.style.display =
                     "none";
 
-
-                await loadDashboard();
-
             },
-            900
+            600
         );
 
     } catch (
@@ -4609,7 +5429,7 @@ async function submitBoardingBooking(
     ) {
 
         console.error(
-            "Boarding booking error:",
+            "Boarding error:",
             error
         );
 
@@ -4617,12 +5437,13 @@ async function submitBoardingBooking(
         message.textContent =
             "We couldn't submit your boarding request.";
 
+    } finally {
 
-        submitButton.disabled =
+        button.disabled =
             false;
 
 
-        submitButton.textContent =
+        button.textContent =
             "Continue";
 
     }
@@ -4636,22 +5457,11 @@ async function submitBoardingBooking(
 
 function resetBookingForm() {
 
-
     selectedDates =
         [];
 
 
     bookingForm.reset();
-
-
-    calendarYear =
-        new Date()
-            .getFullYear();
-
-
-    calendarMonth =
-        new Date()
-            .getMonth();
 
 
     document.getElementById(
@@ -4688,9 +5498,102 @@ function resetBookingForm() {
 
     renderBookingCalendar();
 
-    renderAdditionalPets();
-
     updateBookingTotal();
+
+}
+
+
+// ========================================
+// REFRESH UPCOMING
+// ========================================
+
+async function refreshUpcomingVisits() {
+
+    const today =
+        getLocalDateString();
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("visits")
+            .select("*")
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .gte(
+                "visit_date",
+                today
+            )
+            .order(
+                "visit_date",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            error
+        );
+
+        return;
+
+    }
+
+
+    currentVisits =
+        data || [];
+
+
+    currentVisitPets =
+        [];
+
+
+    const ids =
+        currentVisits.map(
+            visit =>
+                visit.id
+        );
+
+
+    if (
+        ids.length > 0
+    ) {
+
+        const {
+            data: relationData,
+            error: relationError
+        } =
+            await supabaseClient
+                .from("visit_pets")
+                .select(
+                    "visit_id, pet_id, is_primary, additional_pet_fee"
+                )
+                .in(
+                    "visit_id",
+                    ids
+                );
+
+
+        if (!relationError) {
+
+            currentVisitPets =
+                relationData || [];
+
+        }
+
+    }
+
+
+    renderUpcomingCalendar();
+
+    renderSelectedUpcomingServices();
 
 }
 
@@ -4699,21 +5602,11 @@ function resetBookingForm() {
 // UPCOMING CALENDAR
 // ========================================
 
-const upcomingCalendarPrev =
-    document.getElementById(
+document
+    .getElementById(
         "upcoming-calendar-prev"
-    );
-
-
-const upcomingCalendarNext =
-    document.getElementById(
-        "upcoming-calendar-next"
-    );
-
-
-if (upcomingCalendarPrev) {
-
-    upcomingCalendarPrev.addEventListener(
+    )
+    ?.addEventListener(
         "click",
         () => {
 
@@ -4743,12 +5636,12 @@ if (upcomingCalendarPrev) {
         }
     );
 
-}
 
-
-if (upcomingCalendarNext) {
-
-    upcomingCalendarNext.addEventListener(
+document
+    .getElementById(
+        "upcoming-calendar-next"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
@@ -4778,15 +5671,8 @@ if (upcomingCalendarNext) {
         }
     );
 
-}
-
-
-// ========================================
-// RENDER UPCOMING CALENDAR
-// ========================================
 
 function renderUpcomingCalendar() {
-
 
     const grid =
         document.getElementById(
@@ -4794,7 +5680,7 @@ function renderUpcomingCalendar() {
         );
 
 
-    const monthLabel =
+    const label =
         document.getElementById(
             "upcoming-calendar-month-label"
         );
@@ -4802,13 +5688,13 @@ function renderUpcomingCalendar() {
 
     if (
         !grid ||
-        !monthLabel
+        !label
     ) {
         return;
     }
 
 
-    monthLabel.textContent =
+    label.textContent =
         new Date(
             upcomingCalendarYear,
             upcomingCalendarMonth,
@@ -4835,15 +5721,15 @@ function renderUpcomingCalendar() {
         );
 
 
-    let leadingBlankDays =
+    let blanks =
         firstDay.getDay() - 1;
 
 
     if (
-        leadingBlankDays < 0
+        blanks < 0
     ) {
 
-        leadingBlankDays =
+        blanks =
             6;
 
     }
@@ -4851,7 +5737,7 @@ function renderUpcomingCalendar() {
 
     for (
         let i = 0;
-        i < leadingBlankDays;
+        i < blanks;
         i++
     ) {
 
@@ -4872,7 +5758,7 @@ function renderUpcomingCalendar() {
     }
 
 
-    const daysInMonth =
+    const days =
         new Date(
             upcomingCalendarYear,
             upcomingCalendarMonth + 1,
@@ -4886,11 +5772,11 @@ function renderUpcomingCalendar() {
 
     for (
         let day = 1;
-        day <= daysInMonth;
+        day <= days;
         day++
     ) {
 
-        const dateString =
+        const date =
             makeDateString(
                 upcomingCalendarYear,
                 upcomingCalendarMonth,
@@ -4898,16 +5784,12 @@ function renderUpcomingCalendar() {
             );
 
 
-        const servicesForDate =
+        const serviceCount =
             currentVisits.filter(
                 visit =>
                     visit.visit_date ===
-                    dateString
-            );
-
-
-        const serviceCount =
-            servicesForDate.length;
+                    date
+            ).length;
 
 
         const button =
@@ -4925,7 +5807,7 @@ function renderUpcomingCalendar() {
 
 
         if (
-            serviceCount > 0
+            serviceCount
         ) {
 
             button.classList.add(
@@ -4936,8 +5818,7 @@ function renderUpcomingCalendar() {
 
 
         if (
-            dateString ===
-            today
+            date === today
         ) {
 
             button.classList.add(
@@ -4948,7 +5829,7 @@ function renderUpcomingCalendar() {
 
 
         if (
-            dateString ===
+            date ===
             selectedUpcomingDate
         ) {
 
@@ -4959,48 +5840,22 @@ function renderUpcomingCalendar() {
         }
 
 
-        const number =
-            document.createElement(
-                "span"
-            );
+        button.innerHTML =
+            `
+                <span class="upcoming-day-number">
+                    ${day}
+                </span>
 
-
-        number.className =
-            "upcoming-day-number";
-
-
-        number.textContent =
-            day;
-
-
-        button.appendChild(
-            number
-        );
-
-
-        if (
-            serviceCount > 0
-        ) {
-
-            const badge =
-                document.createElement(
-                    "span"
-                );
-
-
-            badge.className =
-                "upcoming-service-count";
-
-
-            badge.textContent =
-                serviceCount;
-
-
-            button.appendChild(
-                badge
-            );
-
-        }
+                ${
+                    serviceCount
+                        ? `
+                            <span class="upcoming-service-count">
+                                ${serviceCount}
+                            </span>
+                        `
+                        : ""
+                }
+            `;
 
 
         button.addEventListener(
@@ -5008,7 +5863,7 @@ function renderUpcomingCalendar() {
             () => {
 
                 selectedUpcomingDate =
-                    dateString;
+                    date;
 
 
                 renderUpcomingCalendar();
@@ -5029,79 +5884,68 @@ function renderUpcomingCalendar() {
 
 
 // ========================================
-// VISIT PET NAMES
+// UPCOMING DETAILS
 // ========================================
 
 function getPetsForVisit(
     visit
 ) {
 
-
-    let relationships =
+    const relationships =
         currentVisitPets
             .filter(
-                item =>
-                    Number(item.visit_id) ===
-                    Number(visit.id)
+                relation =>
+                    Number(
+                        relation.visit_id
+                    ) ===
+                    Number(
+                        visit.id
+                    )
+            )
+            .sort(
+                (a, b) =>
+                    Number(
+                        b.is_primary
+                    ) -
+                    Number(
+                        a.is_primary
+                    )
             );
 
 
-    relationships.sort(
-        (a, b) => {
-
-            if (
-                a.is_primary ===
-                b.is_primary
-            ) {
-
-                return 0;
-
-            }
-
-
-            return a.is_primary
-                ? -1
-                : 1;
-
-        }
-    );
-
-
-    let pets =
+    const pets =
         relationships
             .map(
-                relationship =>
+                relation =>
                     currentPets.find(
                         pet =>
                             Number(pet.id) ===
                             Number(
-                                relationship.pet_id
+                                relation.pet_id
                             )
                     )
             )
             .filter(Boolean);
 
 
-    // Backwards compatibility
     if (
         pets.length === 0 &&
         visit.pet_id
     ) {
 
-        const legacyPet =
+        const fallback =
             currentPets.find(
                 pet =>
                     Number(pet.id) ===
-                    Number(visit.pet_id)
+                    Number(
+                        visit.pet_id
+                    )
             );
 
 
-        if (legacyPet) {
-
-            pets =
-                [legacyPet];
-
-        }
+        return fallback
+            ? [fallback]
+            : [];
 
     }
 
@@ -5111,14 +5955,9 @@ function getPetsForVisit(
 }
 
 
-// ========================================
-// UPCOMING SERVICE DETAILS
-// ========================================
-
 function renderSelectedUpcomingServices() {
 
-
-    const dateHeading =
+    const heading =
         document.getElementById(
             "selected-upcoming-date"
         );
@@ -5130,17 +5969,9 @@ function renderSelectedUpcomingServices() {
         );
 
 
-    if (
-        !dateHeading ||
-        !container
-    ) {
-        return;
-    }
-
-
     if (!selectedUpcomingDate) {
 
-        dateHeading.textContent =
+        heading.textContent =
             "Select a date";
 
 
@@ -5156,7 +5987,7 @@ function renderSelectedUpcomingServices() {
     }
 
 
-    dateHeading.textContent =
+    heading.textContent =
         formatLongDate(
             selectedUpcomingDate
         );
@@ -5191,39 +6022,14 @@ function renderSelectedUpcomingServices() {
             .map(
                 visit => {
 
-                    const title =
-                        visit.service_name ||
-                        visit.service_type ||
-                        "Service";
-
-
-                    const time =
-                        visit.time_window ||
-                        "";
-
-
-                    const price =
-                        visit.price !== null
-                            ? `$${Number(
-                                visit.price
-                            ).toFixed(2)}`
-                            : "";
-
-
                     const pets =
                         getPetsForVisit(
                             visit
                         );
 
 
-                    const petLabel =
-                        pets.length === 1
-                            ? "PET"
-                            : "PETS";
-
-
-                    const petChips =
-                        pets.length > 0
+                    const chips =
+                        pets.length
                             ? pets
                                 .map(
                                     pet => `
@@ -5246,7 +6052,11 @@ function renderSelectedUpcomingServices() {
                             <div class="upcoming-service-card-header">
 
                                 <strong>
-                                    ${escapeHtml(title)}
+                                    ${escapeHtml(
+                                        visit.service_name ||
+                                        visit.service_type ||
+                                        "Service"
+                                    )}
                                 </strong>
 
                                 <span class="service-status">
@@ -5263,39 +6073,55 @@ function renderSelectedUpcomingServices() {
                             <div class="upcoming-service-pets">
 
                                 <span class="upcoming-service-pets-label">
-                                    ${petLabel}
+                                    ${
+                                        pets.length === 1
+                                            ? "PET"
+                                            : "PETS"
+                                    }
                                 </span>
 
                                 <div class="service-pet-chips">
-                                    ${petChips}
+                                    ${chips}
                                 </div>
 
                             </div>
 
 
                             ${
-                                time
+                                visit.time_window
                                     ? `
                                         <div class="upcoming-service-row">
-                                            <span>Time</span>
+
+                                            <span>
+                                                Time
+                                            </span>
+
                                             <strong>
-                                                ${escapeHtml(time)}
+                                                ${escapeHtml(
+                                                    visit.time_window
+                                                )}
                                             </strong>
+
                                         </div>
                                     `
                                     : ""
                             }
 
-                            ${
-                                price
-                                    ? `
-                                        <div class="upcoming-service-row">
-                                            <span>Price</span>
-                                            <strong>${price}</strong>
-                                        </div>
-                                    `
-                                    : ""
-                            }
+
+                            <div class="upcoming-service-row">
+
+                                <span>
+                                    Price
+                                </span>
+
+                                <strong>
+                                    $${Number(
+                                        visit.price || 0
+                                    ).toFixed(2)}
+                                </strong>
+
+                            </div>
+
 
                             <div class="upcoming-service-row">
 
@@ -5324,7 +6150,7 @@ function renderSelectedUpcomingServices() {
 
 
 // ========================================
-// BOARDING DATES
+// BOARDING DATE HELPERS
 // ========================================
 
 function getBoardingNightDates(
@@ -5332,12 +6158,11 @@ function getBoardingNightDates(
     endDate
 ) {
 
-
     const dates =
         [];
 
 
-    let current =
+    const current =
         parseLocalDate(
             startDate
         );
@@ -5363,7 +6188,8 @@ function getBoardingNightDates(
 
 
         current.setDate(
-            current.getDate() + 1
+            current.getDate() +
+            1
         );
 
     }
@@ -5378,7 +6204,6 @@ function addDaysToDateString(
     dateString,
     days
 ) {
-
 
     const date =
         parseLocalDate(
@@ -5402,22 +6227,151 @@ function addDaysToDateString(
 
 
 // ========================================
-// DATE HELPERS
+// HELPERS
 // ========================================
+
+function valueOrNull(
+    id
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+        return null;
+    }
+
+
+    const value =
+        element.value.trim();
+
+
+    return value ||
+        null;
+
+}
+
+
+function setMultilineDisplay(
+    id,
+    value,
+    fallback
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.innerHTML =
+        value
+            ? formatMultilineText(
+                value
+            )
+            : escapeHtml(
+                fallback
+            );
+
+}
+
+
+function getInitials(
+    name
+) {
+
+    const words =
+        String(
+            name || ""
+        )
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+
+
+    if (
+        words.length === 0
+    ) {
+
+        return "?";
+
+    }
+
+
+    if (
+        words.length === 1
+    ) {
+
+        return words[0]
+            .slice(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        words[0][0] +
+        words[
+            words.length - 1
+        ][0]
+    ).toUpperCase();
+
+}
+
+
+function getFileExtensionForMime(
+    mime
+) {
+
+    switch (
+        mime
+    ) {
+
+        case "image/jpeg":
+            return "jpg";
+
+        case "image/png":
+            return "png";
+
+        case "image/webp":
+            return "webp";
+
+        default:
+            throw new Error(
+                "Unsupported file type."
+            );
+
+    }
+
+}
+
 
 function parseLocalDate(
     dateString
 ) {
 
-
-    const parts =
-        dateString.split("-");
+    const [
+        year,
+        month,
+        day
+    ] =
+        dateString
+            .split("-")
+            .map(Number);
 
 
     return new Date(
-        Number(parts[0]),
-        Number(parts[1]) - 1,
-        Number(parts[2])
+        year,
+        month - 1,
+        day
     );
 
 }
@@ -5425,13 +6379,12 @@ function parseLocalDate(
 
 function makeDateString(
     year,
-    monthIndex,
+    month,
     day
 ) {
 
-
     return `${year}-${String(
-        monthIndex + 1
+        month + 1
     ).padStart(2, "0")}-${String(
         day
     ).padStart(2, "0")}`;
@@ -5440,7 +6393,6 @@ function makeDateString(
 
 
 function getLocalDateString() {
-
 
     const date =
         new Date();
@@ -5459,18 +6411,18 @@ function formatDate(
     dateString
 ) {
 
-
     return parseLocalDate(
         dateString
-    ).toLocaleDateString(
-        "en-US",
-        {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-        }
-    );
+    )
+        .toLocaleDateString(
+            "en-US",
+            {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
 
 }
 
@@ -5479,18 +6431,18 @@ function formatLongDate(
     dateString
 ) {
 
-
     return parseLocalDate(
         dateString
-    ).toLocaleDateString(
-        "en-US",
-        {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-            year: "numeric"
-        }
-    );
+    )
+        .toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
 
 }
 
@@ -5499,29 +6451,24 @@ function formatPetBirthday(
     dateString
 ) {
 
-
     return parseLocalDate(
         dateString
-    ).toLocaleDateString(
-        "en-US",
-        {
-            month: "long",
-            day: "numeric",
-            year: "numeric"
-        }
-    );
+    )
+        .toLocaleDateString(
+            "en-US",
+            {
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
 
 }
 
 
-// ========================================
-// TEXT HELPERS
-// ========================================
-
 function formatStatus(
     status
 ) {
-
 
     if (!status) {
         return "";
@@ -5535,8 +6482,8 @@ function formatStatus(
         )
         .replace(
             /\b\w/g,
-            letter =>
-                letter.toUpperCase()
+            character =>
+                character.toUpperCase()
         );
 
 }
@@ -5546,15 +6493,29 @@ function escapeHtml(
     value
 ) {
 
-
     return String(
         value ?? ""
     )
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
@@ -5562,7 +6523,6 @@ function escapeHtml(
 function formatMultilineText(
     value
 ) {
-
 
     return escapeHtml(
         value
@@ -5575,11 +6535,10 @@ function formatMultilineText(
 
 
 // ========================================
-// PHOTO PREVIEW CLEANUP
+// PREVIEW CLEANUP
 // ========================================
 
 function clearPetPhotoPreviewUrl() {
-
 
     if (
         petPhotoPreviewObjectUrl
@@ -5598,23 +6557,19 @@ function clearPetPhotoPreviewUrl() {
 }
 
 
-// ========================================
-// BOOKING MESSAGE
-// ========================================
+function clearClientPhotoPreviewUrl() {
 
-function clearBookingMessage() {
+    if (
+        clientPhotoPreviewObjectUrl
+    ) {
 
-
-    const message =
-        document.getElementById(
-            "booking-message"
+        URL.revokeObjectURL(
+            clientPhotoPreviewObjectUrl
         );
 
 
-    if (message) {
-
-        message.textContent =
-            "";
+        clientPhotoPreviewObjectUrl =
+            null;
 
     }
 
@@ -5632,15 +6587,11 @@ loadDashboard();
 // LOGOUT
 // ========================================
 
-const logoutButton =
-    document.getElementById(
+document
+    .getElementById(
         "logout-button"
-    );
-
-
-if (logoutButton) {
-
-    logoutButton.addEventListener(
+    )
+    ?.addEventListener(
         "click",
         async () => {
 
@@ -5654,5 +6605,3 @@ if (logoutButton) {
 
         }
     );
-
-}
