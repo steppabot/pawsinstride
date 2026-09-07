@@ -6326,12 +6326,15 @@ function renderSelectedUpcomingServices() {
 
 
     const services =
-        currentVisits.filter(
-            visit =>
-                visit.visit_date ===
-                selectedUpcomingDate
-        );
-
+        currentVisits
+            .filter(
+                visit =>
+                    visit.visit_date ===
+                    selectedUpcomingDate
+            )
+            .sort(
+                compareClientVisits
+            );
 
     if (
         services.length === 0
@@ -6504,6 +6507,136 @@ function renderSelectedUpcomingServices() {
                 }
             )
             .join("");
+
+}
+
+// ========================================
+// CLIENT SERVICE SORTING
+// ========================================
+
+function compareClientVisits(
+    a,
+    b
+) {
+
+    const timeA =
+        getClientTimeWindowSortMinutes(
+            a.time_window
+        );
+
+
+    const timeB =
+        getClientTimeWindowSortMinutes(
+            b.time_window
+        );
+
+
+    if (
+        timeA !==
+        timeB
+    ) {
+
+        return (
+            timeA -
+            timeB
+        );
+
+    }
+
+
+    return (
+        Number(a.id) -
+        Number(b.id)
+    );
+
+}
+
+
+// ========================================
+// CLIENT TIME WINDOW SORT
+// ========================================
+
+function getClientTimeWindowSortMinutes(
+    timeWindow
+) {
+
+    if (
+        !timeWindow
+    ) {
+
+        return 99999;
+
+    }
+
+
+    const firstPart =
+        String(
+            timeWindow
+        )
+            .split("-")[0]
+            .trim();
+
+
+    const match =
+        firstPart.match(
+            /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i
+        );
+
+
+    if (
+        !match
+    ) {
+
+        return 99999;
+
+    }
+
+
+    let hour =
+        Number(
+            match[1]
+        );
+
+
+    const minute =
+        Number(
+            match[2] ||
+            0
+        );
+
+
+    const period =
+        match[3]
+            .toUpperCase();
+
+
+    if (
+        hour ===
+        12
+    ) {
+
+        hour =
+            0;
+
+    }
+
+
+    if (
+        period ===
+        "PM"
+    ) {
+
+        hour +=
+            12;
+
+    }
+
+
+    return (
+        hour *
+        60 +
+        minute
+    );
 
 }
 
