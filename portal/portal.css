@@ -1556,6 +1556,293 @@ section h3 {
     text-decoration-color: #000;
 }
 
+/* ========================================
+   ADMIN VISIT CHECK-IN / PROGRESS
+======================================== */
+
+.admin-service-card {
+    position: relative;
+    overflow: hidden;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+
+/* ========================================
+   VISIT IN PROGRESS
+======================================== */
+
+.admin-service-card-in-progress {
+    border-color: #d9b65f;
+    box-shadow: 0 0 0 1px rgba(217, 182, 95, 0.12);
+}
+
+
+/* ========================================
+   COMPLETED VISIT
+======================================== */
+
+.admin-service-card-completed {
+    border-color: #a9d7b7;
+    background: #fcfffd;
+}
+
+
+/* ========================================
+   TOP-RIGHT VISIT STATUS ICON
+======================================== */
+
+.admin-visit-progress-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    border-radius: 50%;
+
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+
+    pointer-events: none;
+}
+
+
+/* CHECKED IN / ACTIVE */
+
+.admin-visit-progress-active {
+    background: #fff8e6;
+    color: #9a6b00;
+    border: 1px solid #e5c76e;
+}
+
+
+/* COMPLETED */
+
+.admin-visit-progress-complete {
+    background: #e9f8ee;
+    color: #18843d;
+    border: 1px solid #a9d7b7;
+}
+
+
+/*
+   Leave room for the status icon
+   so it doesn't overlap the status pills.
+*/
+
+.admin-service-card-in-progress .admin-service-statuses,
+.admin-service-card-completed .admin-service-statuses {
+    padding-right: 36px;
+}
+
+
+/* ========================================
+   BOTTOM VISIT PROGRESS AREA
+======================================== */
+
+.admin-visit-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+
+    margin-top: 16px;
+    padding-top: 16px;
+
+    border-top: 1px solid #eee;
+}
+
+
+/* ========================================
+   VISIT PROGRESS TEXT
+======================================== */
+
+.admin-visit-progress-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.admin-visit-progress-copy strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #111;
+
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.admin-visit-progress-copy span {
+    display: block;
+
+    color: #666;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+
+/* ========================================
+   READY / NOT STARTED
+======================================== */
+
+.admin-visit-progress-ready
+.admin-visit-progress-copy strong {
+    color: #333;
+}
+
+
+/* ========================================
+   LIVE / CHECKED IN
+======================================== */
+
+.admin-visit-progress-live {
+    margin-right: -16px;
+    margin-bottom: -16px;
+    margin-left: -16px;
+
+    padding:
+        16px;
+
+    background: #fffaf0;
+
+    border-top: 1px solid #ead69a;
+}
+
+.admin-visit-progress-live
+.admin-visit-progress-copy strong {
+    color: #8a6100;
+}
+
+
+/* ========================================
+   COMPLETED
+======================================== */
+
+.admin-visit-progress-finished {
+    margin-right: -16px;
+    margin-bottom: -16px;
+    margin-left: -16px;
+
+    padding:
+        16px;
+
+    background: #f4fbf6;
+
+    border-top: 1px solid #cce8d4;
+}
+
+.admin-visit-progress-finished
+.admin-visit-progress-copy strong {
+    color: #18843d;
+}
+
+
+/* ========================================
+   CHECK-IN / FINISH BUTTON
+======================================== */
+
+.admin-visit-action-button {
+    width: auto;
+    min-width: 145px;
+    flex-shrink: 0;
+
+    padding: 12px 18px;
+}
+
+
+/* CHECK IN */
+
+.admin-check-in-button {
+    background: #111;
+    color: #fff;
+}
+
+
+/* FINISH */
+
+.admin-finish-visit-button {
+    background: #18843d;
+    color: #fff;
+}
+
+.admin-finish-visit-button:hover {
+    opacity: 0.9;
+}
+
+
+/* ========================================
+   REOPEN VISIT BUTTON
+======================================== */
+
+.admin-reopen-visit-button {
+    width: auto;
+    flex-shrink: 0;
+
+    padding: 9px 13px;
+
+    background: transparent;
+    color: #555;
+
+    border: 1px solid #bbb;
+    border-radius: 8px;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-reopen-visit-button:hover {
+    background: #fff;
+    color: #111;
+    border-color: #777;
+}
+
+
+/* ========================================
+   DISABLED VISIT BUTTONS
+======================================== */
+
+.admin-visit-action-button:disabled,
+.admin-reopen-visit-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+
+/* ========================================
+   IN-PROGRESS STATUS PILL
+======================================== */
+
+.admin-service-card-in-progress
+.admin-service-statuses
+.service-status:first-child {
+    background: #fff4d6;
+    color: #815b00;
+}
+
+
+/* ========================================
+   COMPLETED STATUS PILL
+======================================== */
+
+.admin-service-card-completed
+.admin-service-statuses
+.service-status:first-child {
+    background: #e9f8ee;
+    color: #18783a;
+}
 
 /* ========================================
    MOBILE
@@ -1805,6 +2092,49 @@ section h3 {
     .admin-client-address {
         display: block;
         margin-top: 6px;
+    }
+
+       /* VISIT CHECK-IN */
+
+    .admin-service-card-in-progress .admin-service-statuses,
+    .admin-service-card-completed .admin-service-statuses {
+        padding-right: 0;
+    }
+
+    .admin-visit-progress-icon {
+        top: 10px;
+        right: 10px;
+
+        width: 26px;
+        height: 26px;
+
+        font-size: 14px;
+    }
+
+    .admin-service-card-in-progress .admin-service-top,
+    .admin-service-card-completed .admin-service-top {
+        padding-right: 34px;
+    }
+
+    .admin-visit-progress {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .admin-visit-action-button,
+    .admin-reopen-visit-button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .admin-visit-progress-live,
+    .admin-visit-progress-finished {
+        margin-right: -14px;
+        margin-bottom: -14px;
+        margin-left: -14px;
+
+        padding: 14px;
     }
 
 }
