@@ -2,533 +2,756 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-  <title>
-    Client Dashboard | Paws in Stride
-  </title>
+    <title>Client Dashboard | Paws in Stride</title>
 
-  <link
-    rel="stylesheet"
-    href="portal.css"
-  >
+    <link
+        rel="stylesheet"
+        href="portal.css"
+    >
 </head>
 
 <body>
 
-  <main class="dashboard-container">
+<main class="dashboard-container">
+
+    <!-- ========================================
+         DASHBOARD HEADER
+         ======================================== -->
 
     <div class="dashboard-header">
 
-      <div>
-        <h1>Paws in Stride</h1>
-        <h2 id="welcome-name"></h2>
-      </div>
+        <div>
+            <h1>Paws in Stride</h1>
+            <h2 id="welcome-name"></h2>
+        </div>
 
-      <button
-        id="request-walk-button"
-        class="primary-button"
-      >
-        + Request Service
-      </button>
+        <button
+            id="request-walk-button"
+            class="primary-button"
+        >
+            + Request Service
+        </button>
 
     </div>
 
 
     <div id="loading">
-      Loading your account...
+        Loading your account...
     </div>
 
 
     <div
-      id="dashboard-content"
-      style="display:none;"
+        id="dashboard-content"
+        style="display:none;"
     >
 
-      <!-- ========================================
-           BOOKING FORM
-           ======================================== -->
+        <!-- ========================================
+             REQUEST SERVICE
+             ======================================== -->
 
-      <section
-        id="booking-section"
-        class="booking-section"
-        style="display:none;"
-      >
-
-        <div class="section-header">
-
-          <h3>
-            Request Service
-          </h3>
-
-          <button
-            type="button"
-            id="close-booking-button"
-            class="close-button"
-            aria-label="Close booking form"
-          >
-            ×
-          </button>
-
-        </div>
-
-
-        <form id="booking-form">
-
-          <!-- PET -->
-
-          <label for="booking-pet">
-            Pet
-          </label>
-
-          <select
-            id="booking-pet"
-            required
-          >
-
-            <option value="">
-              Select your pet
-            </option>
-
-          </select>
-
-
-          <!-- SERVICE TYPE -->
-
-          <label for="service-type">
-            Service Type
-          </label>
-
-          <select
-            id="service-type"
-            required
-          >
-
-            <option value="">
-              Select a service
-            </option>
-
-            <option value="Dog Walking">
-              Dog Walking
-            </option>
-
-            <option value="Drop-In Visit">
-              Drop-In Visit / Potty Break
-            </option>
-
-            <option value="Pet Sitting">
-              Pet Sitting
-            </option>
-
-            <option value="Dog Boarding">
-              Dog Boarding
-            </option>
-
-          </select>
-
-
-          <!-- SERVICE OPTION -->
-
-          <div
-            id="service-option-wrapper"
+        <section
+            id="booking-section"
+            class="booking-section"
             style="display:none;"
-          >
-
-            <label
-              id="service-option-label"
-              for="service-option"
-            >
-              Duration
-            </label>
-
-            <select id="service-option">
-
-              <option value="">
-                Select an option
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <!-- TIME WINDOW -->
-
-          <div
-            id="time-window-wrapper"
-            style="display:none;"
-          >
-
-            <label
-              id="time-window-label"
-              for="booking-time"
-            >
-              Preferred Time Window
-            </label>
-
-            <select id="booking-time">
-
-              <option value="">
-                Select a time
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <!-- ========================================
-               MULTI-DATE CALENDAR
-               ======================================== -->
-
-          <div
-            id="multi-date-booking"
-            style="display:none;"
-          >
-
-            <label>
-              Dates
-            </label>
-
-            <p
-              id="booking-date-help"
-              class="booking-help"
-            >
-              Select your service dates.
-            </p>
-
-
-            <div class="booking-calendar">
-
-              <div class="calendar-header">
-
-                <button
-                  type="button"
-                  id="calendar-prev"
-                  class="calendar-nav-button"
-                  aria-label="Previous month"
-                >
-                  ‹
-                </button>
-
-                <strong id="calendar-month-label"></strong>
-
-                <button
-                  type="button"
-                  id="calendar-next"
-                  class="calendar-nav-button"
-                  aria-label="Next month"
-                >
-                  ›
-                </button>
-
-              </div>
-
-
-              <div class="calendar-weekdays">
-
-                <span>Mon</span>
-                <span>Tue</span>
-                <span>Wed</span>
-                <span>Thu</span>
-                <span>Fri</span>
-                <span>Sat</span>
-                <span>Sun</span>
-
-              </div>
-
-
-              <div
-                id="booking-calendar-grid"
-                class="calendar-grid"
-              >
-              </div>
-
-            </div>
-
-
-            <div id="selected-dates-container">
-
-              <div class="selected-dates-header">
-
-                <strong>
-                  Selected Dates
-                </strong>
-
-                <span id="selected-date-count">
-                  0 visits
-                </span>
-
-              </div>
-
-
-              <div id="selected-dates-list">
-
-                <p class="empty-dates-message">
-                  No dates selected yet.
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- ========================================
-               BOARDING
-               ======================================== -->
-
-          <div
-            id="boarding-booking"
-            style="display:none;"
-          >
-
-            <div class="boarding-policy">
-
-              <strong>
-                VIP Overnight Boarding — $100/night
-              </strong>
-
-              <p>
-                Drop-off is available beginning at 8:00 AM.
-                Pickup is required by 12:00 PM on the scheduled
-                departure day.
-              </p>
-
-            </div>
-
-
-            <label for="boarding-dropoff">
-              Drop-Off Date
-            </label>
-
-            <input
-              type="date"
-              id="boarding-dropoff"
-            >
-
-
-            <label for="boarding-pickup">
-              Pick-Up Date
-            </label>
-
-            <input
-              type="date"
-              id="boarding-pickup"
-            >
-
-
-            <label for="boarding-pickup-window">
-              Pick-Up Time
-            </label>
-
-            <select id="boarding-pickup-window">
-
-              <option value="">
-                Select pickup time
-              </option>
-
-              <option
-                value="By 12:00 PM"
-                data-fee="0"
-              >
-                By 12:00 PM
-              </option>
-
-              <option
-                value="12:00 PM - 3:00 PM"
-                data-fee="50"
-              >
-                12:00 PM – 3:00 PM (+$50)
-              </option>
-
-            </select>
-
-
-            <p class="booking-help">
-              Care needed after 3:00 PM requires booking
-              through the following day.
-            </p>
-
-          </div>
-
-
-          <!-- TOTAL -->
-
-          <div class="booking-total">
-
-            <div>
-              <span id="booking-count">
-                0 services
-              </span>
-            </div>
-
-            <div>
-              <strong id="booking-price">
-                $0.00
-              </strong>
-            </div>
-
-          </div>
-
-
-          <div
-            id="booking-price-details"
-            class="booking-price-details"
-          >
-          </div>
-
-
-          <button
-            type="submit"
-            id="booking-submit-button"
-            class="primary-button"
-          >
-            Continue
-          </button>
-
-
-          <p id="booking-message"></p>
-
-        </form>
-
-      </section>
-
-
-      <!-- ========================================
-           PET
-           ======================================== -->
-
-      <section>
-
-        <h3>
-          Your Pet
-        </h3>
-
-        <div id="pet-info"></div>
-
-      </section>
-
-
-      <!-- ========================================
-           UPCOMING SERVICES CALENDAR
-           ======================================== -->
-
-      <section class="upcoming-services-section">
-
-        <div class="upcoming-services-header">
-
-          <div>
-            <h3>Upcoming Services</h3>
-
-            <p class="upcoming-calendar-help">
-              Select a date to view scheduled services.
-            </p>
-          </div>
-
-        </div>
-
-
-        <div class="upcoming-calendar">
-
-          <div class="upcoming-calendar-header">
-
-            <button
-              type="button"
-              id="upcoming-calendar-prev"
-              class="calendar-nav-button"
-              aria-label="Previous month"
-            >
-              ‹
-            </button>
-
-
-            <strong id="upcoming-calendar-month-label">
-            </strong>
-
-
-            <button
-              type="button"
-              id="upcoming-calendar-next"
-              class="calendar-nav-button"
-              aria-label="Next month"
-            >
-              ›
-            </button>
-
-          </div>
-
-
-          <div class="upcoming-calendar-weekdays">
-
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
-            <span>Sun</span>
-
-          </div>
-
-
-          <div
-            id="upcoming-calendar-grid"
-            class="upcoming-calendar-grid"
-          >
-          </div>
-
-        </div>
-
-
-        <!-- SELECTED DAY -->
-
-        <div
-          id="selected-upcoming-day"
-          class="selected-upcoming-day"
         >
 
-          <div class="selected-upcoming-header">
+            <div class="section-header">
 
-            <strong id="selected-upcoming-date">
-              Select a date
-            </strong>
+                <h3>Request Service</h3>
 
-          </div>
+                <button
+                    type="button"
+                    id="close-booking-button"
+                    class="close-button"
+                    aria-label="Close booking form"
+                >
+                    ×
+                </button>
 
-
-          <div id="selected-upcoming-services">
-
-            <p class="empty-upcoming-message">
-              Select a booked date on the calendar.
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
+            </div>
 
 
-      <button id="logout-button">
-        Log Out
-      </button>
+            <form id="booking-form">
+
+                <!-- PET -->
+
+                <label for="booking-pet">
+                    Pet
+                </label>
+
+                <select
+                    id="booking-pet"
+                    required
+                >
+                    <option value="">
+                        Select your pet
+                    </option>
+                </select>
+
+
+                <!-- SERVICE TYPE -->
+
+                <label for="service-type">
+                    Service Type
+                </label>
+
+                <select
+                    id="service-type"
+                    required
+                >
+
+                    <option value="">
+                        Select a service
+                    </option>
+
+                    <option value="Dog Walking">
+                        Dog Walking
+                    </option>
+
+                    <option value="Drop-In Visit">
+                        Drop-In Visit / Potty Break
+                    </option>
+
+                    <option value="Pet Sitting">
+                        Pet Sitting
+                    </option>
+
+                    <option value="Dog Boarding">
+                        Dog Boarding
+                    </option>
+
+                </select>
+
+
+                <!-- SERVICE OPTION -->
+
+                <div
+                    id="service-option-wrapper"
+                    style="display:none;"
+                >
+
+                    <label
+                        id="service-option-label"
+                        for="service-option"
+                    >
+                        Duration
+                    </label>
+
+                    <select id="service-option">
+
+                        <option value="">
+                            Select an option
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TIME -->
+
+                <div
+                    id="time-window-wrapper"
+                    style="display:none;"
+                >
+
+                    <label
+                        id="time-window-label"
+                        for="booking-time"
+                    >
+                        Preferred Time Window
+                    </label>
+
+                    <select id="booking-time">
+
+                        <option value="">
+                            Select a time
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- MULTI DATE BOOKING -->
+
+                <div
+                    id="multi-date-booking"
+                    style="display:none;"
+                >
+
+                    <label>
+                        Dates
+                    </label>
+
+                    <p
+                        id="booking-date-help"
+                        class="booking-help"
+                    >
+                        Select your service dates.
+                    </p>
+
+
+                    <div class="booking-calendar">
+
+                        <div class="calendar-header">
+
+                            <button
+                                type="button"
+                                id="calendar-prev"
+                                class="calendar-nav-button"
+                                aria-label="Previous month"
+                            >
+                                ‹
+                            </button>
+
+                            <strong id="calendar-month-label"></strong>
+
+                            <button
+                                type="button"
+                                id="calendar-next"
+                                class="calendar-nav-button"
+                                aria-label="Next month"
+                            >
+                                ›
+                            </button>
+
+                        </div>
+
+
+                        <div class="calendar-weekdays">
+
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                            <span>Sun</span>
+
+                        </div>
+
+
+                        <div
+                            id="booking-calendar-grid"
+                            class="calendar-grid"
+                        ></div>
+
+                    </div>
+
+
+                    <div id="selected-dates-container">
+
+                        <div class="selected-dates-header">
+
+                            <strong>
+                                Selected Dates
+                            </strong>
+
+                            <span id="selected-date-count">
+                                0 visits
+                            </span>
+
+                        </div>
+
+
+                        <div id="selected-dates-list">
+
+                            <p class="empty-dates-message">
+                                No dates selected yet.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BOARDING -->
+
+                <div
+                    id="boarding-booking"
+                    style="display:none;"
+                >
+
+                    <div class="boarding-policy">
+
+                        <strong>
+                            VIP Overnight Boarding — $100/night
+                        </strong>
+
+                        <p>
+                            Drop-off is available beginning at 8:00 AM.
+                            Pickup is required by 12:00 PM on the
+                            scheduled departure day.
+                        </p>
+
+                    </div>
+
+
+                    <label for="boarding-dropoff">
+                        Drop-Off Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="boarding-dropoff"
+                    >
+
+
+                    <label for="boarding-pickup">
+                        Pick-Up Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="boarding-pickup"
+                    >
+
+
+                    <label for="boarding-pickup-window">
+                        Pick-Up Time
+                    </label>
+
+                    <select id="boarding-pickup-window">
+
+                        <option value="">
+                            Select pickup time
+                        </option>
+
+                        <option
+                            value="By 12:00 PM"
+                            data-fee="0"
+                        >
+                            By 12:00 PM
+                        </option>
+
+                        <option
+                            value="12:00 PM - 3:00 PM"
+                            data-fee="50"
+                        >
+                            12:00 PM – 3:00 PM (+$50)
+                        </option>
+
+                    </select>
+
+
+                    <p class="booking-help">
+                        Care needed after 3:00 PM requires booking
+                        through the following day.
+                    </p>
+
+                </div>
+
+
+                <!-- TOTAL -->
+
+                <div class="booking-total">
+
+                    <span id="booking-count">
+                        0 services
+                    </span>
+
+                    <strong id="booking-price">
+                        $0.00
+                    </strong>
+
+                </div>
+
+
+                <div
+                    id="booking-price-details"
+                    class="booking-price-details"
+                ></div>
+
+
+                <button
+                    type="submit"
+                    id="booking-submit-button"
+                    class="primary-button"
+                >
+                    Continue
+                </button>
+
+
+                <p id="booking-message"></p>
+
+            </form>
+
+        </section>
+
+
+        <!-- ========================================
+             YOUR PETS
+             ======================================== -->
+
+        <section class="pets-section">
+
+            <div class="pets-section-header">
+
+                <div>
+
+                    <h3>
+                        Your Pets
+                    </h3>
+
+                    <p class="pets-section-help">
+                        Keep your pet's care information up to date.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="add-pet-button"
+                    class="primary-button pet-add-button"
+                >
+                    + Add Pet
+                </button>
+
+            </div>
+
+
+            <!-- ADD / EDIT PET FORM -->
+
+            <div
+                id="pet-form-panel"
+                class="pet-form-panel"
+                style="display:none;"
+            >
+
+                <div class="pet-form-header">
+
+                    <h4 id="pet-form-title">
+                        Add Pet
+                    </h4>
+
+                    <button
+                        type="button"
+                        id="close-pet-form-button"
+                        class="close-button"
+                        aria-label="Close pet form"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <form id="pet-form">
+
+                    <input
+                        type="hidden"
+                        id="pet-id"
+                    >
+
+
+                    <!-- PHOTO -->
+
+                    <div class="pet-photo-editor">
+
+                        <img
+                            id="pet-photo-preview"
+                            class="pet-photo-preview"
+                            src="./assets/default-pet-avatar.webp"
+                            alt="Pet profile preview"
+                        >
+
+
+                        <div class="pet-photo-controls">
+
+                            <label
+                                for="pet-photo-input"
+                                class="pet-photo-upload-button"
+                            >
+                                Choose Photo
+                            </label>
+
+                            <input
+                                type="file"
+                                id="pet-photo-input"
+                                accept="image/jpeg,image/png,image/webp"
+                                hidden
+                            >
+
+                            <p class="pet-photo-help">
+                                JPG, PNG or WebP. Maximum 5 MB.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pet-form-grid">
+
+                        <!-- NAME -->
+
+                        <div class="pet-form-field">
+
+                            <label for="pet-name">
+                                Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="pet-name"
+                                maxlength="100"
+                                required
+                                placeholder="Pet's name"
+                            >
+
+                        </div>
+
+
+                        <!-- BREED -->
+
+                        <div class="pet-form-field">
+
+                            <label for="pet-breed">
+                                Breed
+                            </label>
+
+                            <input
+                                type="text"
+                                id="pet-breed"
+                                maxlength="150"
+                                placeholder="Golden Retriever"
+                            >
+
+                        </div>
+
+
+                        <!-- GENDER -->
+
+                        <div class="pet-form-field">
+
+                            <label for="pet-gender">
+                                Gender
+                            </label>
+
+                            <select id="pet-gender">
+
+                                <option value="">
+                                    Select gender
+                                </option>
+
+                                <option value="Male">
+                                    Male
+                                </option>
+
+                                <option value="Female">
+                                    Female
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- BIRTHDAY -->
+
+                        <div class="pet-form-field">
+
+                            <label for="pet-birthday">
+                                Birthday
+                            </label>
+
+                            <input
+                                type="date"
+                                id="pet-birthday"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- FEEDING -->
+
+                    <div class="pet-form-field">
+
+                        <label for="pet-feeding-notes">
+                            Feeding Notes
+                        </label>
+
+                        <textarea
+                            id="pet-feeding-notes"
+                            rows="4"
+                            maxlength="2000"
+                            placeholder="Example: 2 cups in the morning and 2 cups in the evening."
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- CARE -->
+
+                    <div class="pet-form-field">
+
+                        <label for="pet-care-notes">
+                            Care Notes
+                        </label>
+
+                        <textarea
+                            id="pet-care-notes"
+                            rows="4"
+                            maxlength="3000"
+                            placeholder="Medications, behavior notes, routines, preferences, or anything else we should know."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="pet-form-actions">
+
+                        <button
+                            type="button"
+                            id="cancel-pet-button"
+                            class="secondary-button"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            id="save-pet-button"
+                            class="primary-button"
+                        >
+                            Save Pet
+                        </button>
+
+                    </div>
+
+
+                    <p id="pet-form-message"></p>
+
+                </form>
+
+            </div>
+
+
+            <!-- PET CARDS -->
+
+            <div id="pet-info"></div>
+
+        </section>
+
+
+        <!-- ========================================
+             UPCOMING SERVICES
+             ======================================== -->
+
+        <section class="upcoming-services-section">
+
+            <div class="upcoming-services-header">
+
+                <h3>
+                    Upcoming Services
+                </h3>
+
+                <p class="upcoming-calendar-help">
+                    Select a date to view scheduled services.
+                </p>
+
+            </div>
+
+
+            <div class="upcoming-calendar">
+
+                <div class="upcoming-calendar-header">
+
+                    <button
+                        type="button"
+                        id="upcoming-calendar-prev"
+                        class="calendar-nav-button"
+                        aria-label="Previous month"
+                    >
+                        ‹
+                    </button>
+
+                    <strong id="upcoming-calendar-month-label"></strong>
+
+                    <button
+                        type="button"
+                        id="upcoming-calendar-next"
+                        class="calendar-nav-button"
+                        aria-label="Next month"
+                    >
+                        ›
+                    </button>
+
+                </div>
+
+
+                <div class="upcoming-calendar-weekdays">
+
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                    <span>Sun</span>
+
+                </div>
+
+
+                <div
+                    id="upcoming-calendar-grid"
+                    class="upcoming-calendar-grid"
+                ></div>
+
+            </div>
+
+
+            <div
+                id="selected-upcoming-day"
+                class="selected-upcoming-day"
+            >
+
+                <div class="selected-upcoming-header">
+
+                    <strong id="selected-upcoming-date">
+                        Select a date
+                    </strong>
+
+                </div>
+
+
+                <div id="selected-upcoming-services">
+
+                    <p class="empty-upcoming-message">
+                        Select a booked date on the calendar.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <button id="logout-button">
+            Log Out
+        </button>
 
     </div>
 
-  </main>
+</main>
 
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script src="./portal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./portal.js"></script>
 
 </body>
-
 </html>
