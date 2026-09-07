@@ -23,15 +23,28 @@ let currentUser = null;
 
 let currentPets = [];
 
+let currentVisits = [];
+
 let selectedDates = [];
 
+let selectedUpcomingDate = null;
 
-const now = new Date();
+
+const now =
+    new Date();
+
 
 let calendarYear =
     now.getFullYear();
 
 let calendarMonth =
+    now.getMonth();
+
+
+let upcomingCalendarYear =
+    now.getFullYear();
+
+let upcomingCalendarMonth =
     now.getMonth();
 
 
@@ -164,17 +177,11 @@ const SERVICE_CONFIG = {
                 price: 100,
 
                 timeBlocks: [
-
                     "7:00 AM - 11:00 AM",
-
                     "11:00 AM - 3:00 PM",
-
                     "3:00 PM - 7:00 PM",
-
                     "7:00 PM - 11:00 PM"
-
                 ]
-
             },
 
             {
@@ -183,13 +190,9 @@ const SERVICE_CONFIG = {
                 price: 180,
 
                 timeBlocks: [
-
                     "7:00 AM - 3:00 PM",
-
                     "3:00 PM - 11:00 PM"
-
                 ]
-
             },
 
             {
@@ -198,13 +201,9 @@ const SERVICE_CONFIG = {
                 price: 240,
 
                 timeBlocks: [
-
                     "7:00 AM - 7:00 PM",
-
                     "11:00 AM - 11:00 PM"
-
                 ]
-
             }
 
         ]
@@ -442,7 +441,7 @@ async function loadDashboard() {
         pets || [];
 
 
-    // VISITS
+    // UPCOMING SERVICES
 
     const today =
         getLocalDateString();
@@ -481,6 +480,10 @@ async function loadDashboard() {
     }
 
 
+    currentVisits =
+        visits || [];
+
+
     // WELCOME
 
     const welcomeName =
@@ -497,7 +500,7 @@ async function loadDashboard() {
     }
 
 
-    // PETS DISPLAY
+    // PET DISPLAY
 
     const petInfo =
         document.getElementById(
@@ -540,92 +543,47 @@ async function loadDashboard() {
     populateBookingPets();
 
 
-    // UPCOMING SERVICE DISPLAY
+    // DEFAULT UPCOMING CALENDAR MONTH
 
-    const visitsContainer =
-        document.getElementById(
-            "upcoming-visits"
-        );
+    if (
+        currentVisits.length > 0 &&
+        !selectedUpcomingDate
+    ) {
+
+        const firstDate =
+            parseLocalDate(
+                currentVisits[0].visit_date
+            );
+
+
+        upcomingCalendarYear =
+            firstDate.getFullYear();
+
+
+        upcomingCalendarMonth =
+            firstDate.getMonth();
+
+
+        selectedUpcomingDate =
+            currentVisits[0].visit_date;
+
+    }
 
 
     if (
-        visitsContainer &&
-        visits &&
-        visits.length > 0
+        currentVisits.length === 0
     ) {
 
-        visitsContainer.innerHTML =
-            visits
-                .map(
-                    visit => {
-
-                        const price =
-                            visit.price !== null
-                                ? `$${Number(
-                                    visit.price
-                                ).toFixed(2)}`
-                                : "";
-
-
-                        const serviceTitle =
-                            visit.service_name ||
-                            visit.service_type ||
-                            "Service";
-
-
-                        const timeWindow =
-                            visit.time_window ||
-                            "";
-
-
-                        return `
-                            <div class="visit-card">
-
-                                <strong>
-                                    ${serviceTitle}
-                                </strong>
-
-                                <br>
-
-                                ${formatDate(
-                                    visit.visit_date
-                                )}
-
-                                ${
-                                    timeWindow
-                                        ? `<br>Time: ${timeWindow}`
-                                        : ""
-                                }
-
-                                <br>
-
-                                Status:
-                                ${visit.status}
-
-                                ${
-                                    price
-                                        ? `<br>${price}`
-                                        : ""
-                                }
-
-                                <br>
-
-                                Payment:
-                                ${visit.payment_status}
-
-                            </div>
-                        `;
-
-                    }
-                )
-                .join("");
-
-    } else if (visitsContainer) {
-
-        visitsContainer.textContent =
-            "No upcoming services.";
+        selectedUpcomingDate =
+            today;
 
     }
+
+
+    renderUpcomingCalendar();
+
+
+    renderSelectedUpcomingServices();
 
 
     loading.style.display =
@@ -824,14 +782,7 @@ function handleServiceTypeChange() {
         );
 
 
-    const message =
-        document.getElementById(
-            "booking-message"
-        );
-
-
-    message.textContent =
-        "";
+    clearBookingMessage();
 
 
     selectedDates =
@@ -880,12 +831,6 @@ function handleServiceTypeChange() {
         return;
 
     }
-
-
-    const config =
-        SERVICE_CONFIG[
-            serviceType
-        ];
 
 
     if (
@@ -1072,7 +1017,7 @@ if (serviceOptionSelect) {
 
 
 // ========================================
-// WALK / DROP-IN TIME WINDOWS
+// TIME WINDOWS
 // ========================================
 
 function populatePreferredTimeWindows() {
@@ -1144,7 +1089,7 @@ function populatePreferredTimeWindows() {
 
 
 // ========================================
-// PET SITTING TIME BLOCKS
+// PET SITTING BLOCKS
 // ========================================
 
 function populatePetSittingTimeBlocks() {
@@ -1222,31 +1167,29 @@ function populatePetSittingTimeBlocks() {
         "Time Block";
 
 
-    packageInfo
-        .timeBlocks
-        .forEach(
-            block => {
+    packageInfo.timeBlocks.forEach(
+        block => {
 
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-
-                option.value =
-                    block;
-
-
-                option.textContent =
-                    block;
-
-
-                select.appendChild(
-                    option
+            const option =
+                document.createElement(
+                    "option"
                 );
 
-            }
-        );
+
+            option.value =
+                block;
+
+
+            option.textContent =
+                block;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
 
 }
 
@@ -1272,7 +1215,7 @@ if (bookingTime) {
 
 
 // ========================================
-// CALENDAR NAVIGATION
+// BOOKING CALENDAR NAVIGATION
 // ========================================
 
 const calendarPrev =
@@ -1348,7 +1291,7 @@ if (calendarNext) {
 
 
 // ========================================
-// RENDER CALENDAR
+// RENDER BOOKING CALENDAR
 // ========================================
 
 function renderBookingCalendar() {
@@ -1374,16 +1317,13 @@ function renderBookingCalendar() {
     }
 
 
-    const monthDate =
+    monthLabel.textContent =
         new Date(
             calendarYear,
             calendarMonth,
             1
-        );
-
-
-    monthLabel.textContent =
-        monthDate.toLocaleDateString(
+        )
+        .toLocaleDateString(
             "en-US",
             {
                 month: "long",
@@ -1485,10 +1425,6 @@ function renderBookingCalendar() {
             day;
 
 
-        button.dataset.date =
-            dateString;
-
-
         if (
             dateString <
             todayString
@@ -1552,7 +1488,7 @@ function renderBookingCalendar() {
 
 
 // ========================================
-// SELECT / REMOVE DATE
+// SELECT BOOKING DATE
 // ========================================
 
 function toggleSelectedDate(
@@ -1572,8 +1508,7 @@ function toggleSelectedDate(
         selectedDates =
             selectedDates.filter(
                 selectedDate =>
-                    selectedDate !==
-                    date
+                    selectedDate !== date
             );
 
     } else {
@@ -1604,8 +1539,7 @@ function removeSelectedDate(
     selectedDates =
         selectedDates.filter(
             selectedDate =>
-                selectedDate !==
-                date
+                selectedDate !== date
         );
 
 
@@ -1618,7 +1552,7 @@ function removeSelectedDate(
 
 
 // ========================================
-// SELECTED DATES DISPLAY
+// SELECTED BOOKING DATES
 // ========================================
 
 function renderSelectedDates() {
@@ -1886,8 +1820,6 @@ function updateBookingTotal() {
     }
 
 
-    // BOARDING
-
     if (
         serviceType ===
         "Dog Boarding"
@@ -1901,12 +1833,8 @@ function updateBookingTotal() {
             getBoardingPickupFee();
 
 
-        const boardingBase =
-            nights * 100;
-
-
         const total =
-            boardingBase +
+            (nights * 100) +
             pickupFee;
 
 
@@ -1940,7 +1868,7 @@ function updateBookingTotal() {
             ) {
 
                 details +=
-                    ` + $50 extended pickup`;
+                    " + $50 extended pickup";
 
             }
 
@@ -2354,9 +2282,7 @@ if (bookingForm) {
                 bookingTime.value;
 
 
-            if (
-                !serviceOption
-            ) {
+            if (!serviceOption) {
 
                 message.textContent =
                     "Please select a service option.";
@@ -2366,9 +2292,7 @@ if (bookingForm) {
             }
 
 
-            if (
-                !timeWindow
-            ) {
+            if (!timeWindow) {
 
                 message.textContent =
                     serviceType ===
@@ -2465,7 +2389,7 @@ if (bookingForm) {
                 crypto.randomUUID();
 
 
-            let serviceName =
+            const serviceName =
                 `${serviceType} - ${serviceOption}`;
 
 
@@ -2689,9 +2613,6 @@ async function submitBoardingBooking(
                     100;
 
 
-                // Put the extended-care fee
-                // onto the final overnight row.
-
                 if (
                     index ===
                         boardingDates.length - 1 &&
@@ -2893,6 +2814,521 @@ function resetBookingForm() {
 
 
 // ========================================
+// UPCOMING CALENDAR NAVIGATION
+// ========================================
+
+const upcomingCalendarPrev =
+    document.getElementById(
+        "upcoming-calendar-prev"
+    );
+
+
+const upcomingCalendarNext =
+    document.getElementById(
+        "upcoming-calendar-next"
+    );
+
+
+if (upcomingCalendarPrev) {
+
+    upcomingCalendarPrev.addEventListener(
+        "click",
+        () => {
+
+            upcomingCalendarMonth--;
+
+
+            if (
+                upcomingCalendarMonth < 0
+            ) {
+
+                upcomingCalendarMonth =
+                    11;
+
+
+                upcomingCalendarYear--;
+
+            }
+
+
+            selectedUpcomingDate =
+                null;
+
+
+            renderUpcomingCalendar();
+
+
+            renderSelectedUpcomingServices();
+
+        }
+    );
+
+}
+
+
+if (upcomingCalendarNext) {
+
+    upcomingCalendarNext.addEventListener(
+        "click",
+        () => {
+
+            upcomingCalendarMonth++;
+
+
+            if (
+                upcomingCalendarMonth > 11
+            ) {
+
+                upcomingCalendarMonth =
+                    0;
+
+
+                upcomingCalendarYear++;
+
+            }
+
+
+            selectedUpcomingDate =
+                null;
+
+
+            renderUpcomingCalendar();
+
+
+            renderSelectedUpcomingServices();
+
+        }
+    );
+
+}
+
+
+// ========================================
+// RENDER UPCOMING CALENDAR
+// ========================================
+
+function renderUpcomingCalendar() {
+
+
+    const grid =
+        document.getElementById(
+            "upcoming-calendar-grid"
+        );
+
+
+    const monthLabel =
+        document.getElementById(
+            "upcoming-calendar-month-label"
+        );
+
+
+    if (
+        !grid ||
+        !monthLabel
+    ) {
+
+        return;
+
+    }
+
+
+    monthLabel.textContent =
+        new Date(
+            upcomingCalendarYear,
+            upcomingCalendarMonth,
+            1
+        )
+        .toLocaleDateString(
+            "en-US",
+            {
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+
+    grid.innerHTML =
+        "";
+
+
+    const firstDay =
+        new Date(
+            upcomingCalendarYear,
+            upcomingCalendarMonth,
+            1
+        );
+
+
+    let leadingBlankDays =
+        firstDay.getDay() - 1;
+
+
+    if (
+        leadingBlankDays < 0
+    ) {
+
+        leadingBlankDays =
+            6;
+
+    }
+
+
+    for (
+        let i = 0;
+        i < leadingBlankDays;
+        i++
+    ) {
+
+        const blank =
+            document.createElement(
+                "div"
+            );
+
+
+        blank.className =
+            "upcoming-calendar-empty";
+
+
+        grid.appendChild(
+            blank
+        );
+
+    }
+
+
+    const daysInMonth =
+        new Date(
+            upcomingCalendarYear,
+            upcomingCalendarMonth + 1,
+            0
+        )
+        .getDate();
+
+
+    const today =
+        getLocalDateString();
+
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const dateString =
+            makeDateString(
+                upcomingCalendarYear,
+                upcomingCalendarMonth,
+                day
+            );
+
+
+        const servicesForDate =
+            currentVisits.filter(
+                visit =>
+                    visit.visit_date ===
+                    dateString
+            );
+
+
+        const serviceCount =
+            servicesForDate.length;
+
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+
+        button.className =
+            "upcoming-calendar-day";
+
+
+        if (
+            serviceCount > 0
+        ) {
+
+            button.classList.add(
+                "upcoming-calendar-booked"
+            );
+
+        }
+
+
+        if (
+            dateString ===
+            today
+        ) {
+
+            button.classList.add(
+                "upcoming-calendar-today"
+            );
+
+        }
+
+
+        if (
+            dateString ===
+            selectedUpcomingDate
+        ) {
+
+            button.classList.add(
+                "upcoming-calendar-selected"
+            );
+
+        }
+
+
+        const dayNumber =
+            document.createElement(
+                "span"
+            );
+
+
+        dayNumber.className =
+            "upcoming-day-number";
+
+
+        dayNumber.textContent =
+            day;
+
+
+        button.appendChild(
+            dayNumber
+        );
+
+
+        if (
+            serviceCount > 0
+        ) {
+
+            const badge =
+                document.createElement(
+                    "span"
+                );
+
+
+            badge.className =
+                "upcoming-service-count";
+
+
+            badge.textContent =
+                serviceCount;
+
+
+            button.appendChild(
+                badge
+            );
+
+        }
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                selectedUpcomingDate =
+                    dateString;
+
+
+                renderUpcomingCalendar();
+
+
+                renderSelectedUpcomingServices();
+
+            }
+        );
+
+
+        grid.appendChild(
+            button
+        );
+
+    }
+
+}
+
+
+// ========================================
+// SELECTED UPCOMING DAY
+// ========================================
+
+function renderSelectedUpcomingServices() {
+
+
+    const dateHeading =
+        document.getElementById(
+            "selected-upcoming-date"
+        );
+
+
+    const container =
+        document.getElementById(
+            "selected-upcoming-services"
+        );
+
+
+    if (
+        !dateHeading ||
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    if (!selectedUpcomingDate) {
+
+        dateHeading.textContent =
+            "Select a date";
+
+
+        container.innerHTML =
+            `
+                <p class="empty-upcoming-message">
+                    Select a date on the calendar to view services.
+                </p>
+            `;
+
+
+        return;
+
+    }
+
+
+    dateHeading.textContent =
+        formatLongDate(
+            selectedUpcomingDate
+        );
+
+
+    const services =
+        currentVisits.filter(
+            visit =>
+                visit.visit_date ===
+                selectedUpcomingDate
+        );
+
+
+    if (
+        services.length === 0
+    ) {
+
+        container.innerHTML =
+            `
+                <p class="empty-upcoming-message">
+                    No services scheduled for this date.
+                </p>
+            `;
+
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        services
+            .map(
+                visit => {
+
+                    const serviceTitle =
+                        visit.service_name ||
+                        visit.service_type ||
+                        "Service";
+
+
+                    const time =
+                        visit.time_window ||
+                        "";
+
+
+                    const price =
+                        visit.price !== null
+                            ? `$${Number(
+                                visit.price
+                            ).toFixed(2)}`
+                            : "";
+
+
+                    const status =
+                        formatStatus(
+                            visit.status
+                        );
+
+
+                    const payment =
+                        formatStatus(
+                            visit.payment_status
+                        );
+
+
+                    return `
+                        <div class="upcoming-service-card">
+
+                            <div class="upcoming-service-card-header">
+
+                                <strong>
+                                    ${serviceTitle}
+                                </strong>
+
+                                <span class="service-status">
+                                    ${status}
+                                </span>
+
+                            </div>
+
+                            ${
+                                time
+                                    ? `
+                                        <div class="upcoming-service-row">
+                                            <span>Time</span>
+                                            <strong>${time}</strong>
+                                        </div>
+                                    `
+                                    : ""
+                            }
+
+                            ${
+                                price
+                                    ? `
+                                        <div class="upcoming-service-row">
+                                            <span>Price</span>
+                                            <strong>${price}</strong>
+                                        </div>
+                                    `
+                                    : ""
+                            }
+
+                            <div class="upcoming-service-row">
+
+                                <span>
+                                    Payment
+                                </span>
+
+                                <strong>
+                                    ${payment}
+                                </strong>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+// ========================================
 // BOARDING DATE HELPERS
 // ========================================
 
@@ -3065,6 +3501,59 @@ function formatDate(
             year: "numeric"
         }
     );
+
+}
+
+
+function formatLongDate(
+    dateString
+) {
+
+
+    if (!dateString) {
+        return "";
+    }
+
+
+    const date =
+        parseLocalDate(
+            dateString
+        );
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+function formatStatus(
+    status
+) {
+
+
+    if (!status) {
+        return "";
+    }
+
+
+    return status
+        .replaceAll(
+            "_",
+            " "
+        )
+        .replace(
+            /\b\w/g,
+            letter =>
+                letter.toUpperCase()
+        );
 
 }
 
