@@ -1173,7 +1173,6 @@ section h3 {
     color: #111;
 }
 
-
 /* ========================================
    UPCOMING SERVICE DETAILS
 ======================================== */
@@ -1279,6 +1278,263 @@ section h3 {
     color: #666;
 }
 
+/* ========================================
+   CLIENT VISIT PROGRESS
+======================================== */
+
+.upcoming-service-card {
+    position: relative;
+    overflow: hidden;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* ========================================
+   CLIENT VISIT IN PROGRESS
+======================================== */
+
+.upcoming-service-card-in-progress {
+    margin-top: 10px;
+    padding: 14px;
+
+    background: #fffdf7;
+
+    border: 1px solid #e2bd54;
+    border-radius: 12px;
+
+    box-shadow:
+        0 0 0 1px rgba(226, 189, 84, 0.08);
+}
+
+
+/* ========================================
+   CLIENT VISIT COMPLETED
+======================================== */
+
+.upcoming-service-card-completed {
+    margin-top: 10px;
+    padding: 14px;
+
+    background: #fcfffd;
+
+    border: 1px solid #a9d7b7;
+    border-radius: 12px;
+}
+
+
+/* ========================================
+   CLIENT TOP-RIGHT PROGRESS ICON
+======================================== */
+
+.client-visit-progress-icon {
+    position: absolute;
+
+    top: 12px;
+    right: 12px;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    border-radius: 50%;
+
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+
+/* ACTIVE */
+
+.client-visit-progress-active {
+    background: #fff8e6;
+    color: #9a6b00;
+
+    border: 1px solid #e5c76e;
+}
+
+
+/* COMPLETE */
+
+.client-visit-progress-complete {
+    background: #e9f8ee;
+    color: #18843d;
+
+    border: 1px solid #a9d7b7;
+}
+
+
+/* ========================================
+   KEEP HEADER CLEAR OF ICON
+======================================== */
+
+.upcoming-service-card-in-progress
+.upcoming-service-card-header,
+
+.upcoming-service-card-completed
+.upcoming-service-card-header {
+    padding-right: 38px;
+}
+
+
+/* ========================================
+   ACTIVE STATUS PILL
+======================================== */
+
+.upcoming-service-card-in-progress
+.service-status {
+    background: #fff4d6;
+    color: #815b00;
+}
+
+
+/* ========================================
+   COMPLETED STATUS PILL
+======================================== */
+
+.upcoming-service-card-completed
+.service-status {
+    background: #e9f8ee;
+    color: #18783a;
+}
+
+
+/* ========================================
+   CLIENT PROGRESS FOOTER
+======================================== */
+
+.client-visit-progress {
+    margin-top: 14px;
+
+    padding-top: 14px;
+
+    border-top: 1px solid #eee;
+}
+
+
+.client-visit-progress-heading {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 4px;
+}
+
+
+.client-visit-progress-heading strong {
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+
+.client-visit-progress p {
+    margin: 0;
+
+    color: #555;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ========================================
+   LIVE VISIT FOOTER
+======================================== */
+
+.client-visit-progress-live {
+    margin-right: -14px;
+    margin-bottom: -14px;
+    margin-left: -14px;
+
+    padding: 14px;
+
+    background: #fffaf0;
+
+    border-top: 1px solid #ead69a;
+}
+
+
+.client-visit-progress-live strong {
+    color: #8a6100;
+}
+
+
+/* ========================================
+   LIVE DOT
+======================================== */
+
+.client-visit-live-dot {
+    width: 8px;
+    height: 8px;
+
+    flex-shrink: 0;
+
+    background: #d39a00;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 4px rgba(211, 154, 0, 0.12);
+}
+
+
+/* ========================================
+   FINISHED VISIT FOOTER
+======================================== */
+
+.client-visit-progress-finished {
+    margin-right: -14px;
+    margin-bottom: -14px;
+    margin-left: -14px;
+
+    padding: 14px;
+
+    background: #f4fbf6;
+
+    border-top: 1px solid #cce8d4;
+}
+
+
+.client-visit-progress-finished strong {
+    color: #18843d;
+}
+
+
+/* ========================================
+   INLINE COMPLETE CHECK
+======================================== */
+
+.client-visit-inline-check {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 18px;
+    height: 18px;
+
+    flex-shrink: 0;
+
+    background: #18843d;
+    color: #fff;
+
+    border-radius: 50%;
+
+    font-size: 11px;
+    font-weight: 800;
+}
 
 /* ========================================
    LOADING
@@ -2135,6 +2391,26 @@ section h3 {
         margin-left: -14px;
 
         padding: 14px;
+    }
+
+       /* CLIENT VISIT PROGRESS */
+
+    .client-visit-progress-icon {
+        top: 10px;
+        right: 10px;
+
+        width: 26px;
+        height: 26px;
+
+        font-size: 14px;
+    }
+
+    .upcoming-service-card-in-progress
+    .upcoming-service-card-header,
+
+    .upcoming-service-card-completed
+    .upcoming-service-card-header {
+        padding-right: 34px;
     }
 
 }
