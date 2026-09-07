@@ -80,10 +80,10 @@
 
             <form id="booking-form">
 
-                <!-- PET -->
+                <!-- PRIMARY PET -->
 
                 <label for="booking-pet">
-                    Pet
+                    Primary Pet
                 </label>
 
                 <select
@@ -94,6 +94,31 @@
                         Select your pet
                     </option>
                 </select>
+
+
+                <!-- ADDITIONAL PETS -->
+
+                <div
+                    id="additional-pets-wrapper"
+                    class="additional-pets-wrapper"
+                    style="display:none;"
+                >
+
+                    <label>
+                        Additional Pets
+                    </label>
+
+                    <div
+                        id="additional-pets-list"
+                        class="additional-pets-list"
+                    ></div>
+
+                    <p
+                        id="additional-pets-help"
+                        class="booking-help additional-pets-help"
+                    ></p>
+
+                </div>
 
 
                 <!-- SERVICE TYPE -->
@@ -285,7 +310,7 @@
                     <div class="boarding-policy">
 
                         <strong>
-                            VIP Overnight Boarding — $100/night
+                            VIP Overnight Boarding — $100 per pet / night
                         </strong>
 
                         <p>
@@ -455,8 +480,6 @@
                     >
 
 
-                    <!-- PHOTO -->
-
                     <div class="pet-photo-editor">
 
                         <img
@@ -494,8 +517,6 @@
 
                     <div class="pet-form-grid">
 
-                        <!-- NAME -->
-
                         <div class="pet-form-field">
 
                             <label for="pet-name">
@@ -513,8 +534,6 @@
                         </div>
 
 
-                        <!-- BREED -->
-
                         <div class="pet-form-field">
 
                             <label for="pet-breed">
@@ -530,8 +549,6 @@
 
                         </div>
 
-
-                        <!-- GENDER -->
 
                         <div class="pet-form-field">
 
@@ -558,8 +575,6 @@
                         </div>
 
 
-                        <!-- BIRTHDAY -->
-
                         <div class="pet-form-field">
 
                             <label for="pet-birthday">
@@ -576,8 +591,6 @@
                     </div>
 
 
-                    <!-- FEEDING -->
-
                     <div class="pet-form-field">
 
                         <label for="pet-feeding-notes">
@@ -593,8 +606,6 @@
 
                     </div>
 
-
-                    <!-- CARE -->
 
                     <div class="pet-form-field">
 
@@ -639,8 +650,6 @@
 
             </div>
 
-
-            <!-- PET CARDS -->
 
             <div id="pet-info"></div>
 
