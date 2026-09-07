@@ -8,11 +8,32 @@ const SUPABASE_URL =
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_U3OIYatZuBUe8Y6Vq0DS2w_IMacau2j";
 
+
 const supabaseClient =
     supabase.createClient(
         SUPABASE_URL,
         SUPABASE_PUBLISHABLE_KEY
     );
+
+
+// ========================================
+// CONSTANTS
+// ========================================
+
+const DEFAULT_PET_AVATAR =
+    "./assets/default-pet-avatar.webp";
+
+const PET_PHOTO_BUCKET =
+    "pet-photos";
+
+const MAX_PET_PHOTO_SIZE =
+    5 * 1024 * 1024;
+
+const ALLOWED_PET_PHOTO_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+];
 
 
 // ========================================
@@ -28,6 +49,15 @@ let currentVisits = [];
 let selectedDates = [];
 
 let selectedUpcomingDate = null;
+
+let editingPet = null;
+
+let pendingPetPhotoFile = null;
+
+let petPhotoPreviewObjectUrl = null;
+
+const petPhotoUrlCache =
+    new Map();
 
 
 const now =
@@ -49,7 +79,7 @@ let upcomingCalendarMonth =
 
 
 // ========================================
-// SERVICE CONFIGURATION
+// SERVICE CONFIG
 // ========================================
 
 const TIME_WINDOWS = [
@@ -243,18 +273,14 @@ if (loginForm) {
 
             const email =
                 document
-                    .getElementById(
-                        "email"
-                    )
+                    .getElementById("email")
                     .value
                     .trim();
 
 
             const password =
                 document
-                    .getElementById(
-                        "password"
-                    )
+                    .getElementById("password")
                     .value;
 
 
@@ -424,6 +450,12 @@ async function loadDashboard() {
             .eq(
                 "client_id",
                 currentUser.id
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
             );
 
 
@@ -441,7 +473,7 @@ async function loadDashboard() {
         pets || [];
 
 
-    // UPCOMING SERVICES
+    // UPCOMING VISITS
 
     const today =
         getLocalDateString();
@@ -500,50 +532,12 @@ async function loadDashboard() {
     }
 
 
-    // PET DISPLAY
-
-    const petInfo =
-        document.getElementById(
-            "pet-info"
-        );
-
-
-    if (
-        petInfo &&
-        currentPets.length > 0
-    ) {
-
-        petInfo.innerHTML =
-            currentPets
-                .map(
-                    pet => `
-                        <div class="pet-card">
-
-                            <strong>
-                                ${pet.name}
-                            </strong>
-
-                            <br>
-
-                            ${pet.breed || ""}
-
-                        </div>
-                    `
-                )
-                .join("");
-
-    } else if (petInfo) {
-
-        petInfo.textContent =
-            "No pets found.";
-
-    }
-
+    await renderPets();
 
     populateBookingPets();
 
 
-    // DEFAULT UPCOMING CALENDAR MONTH
+    // DEFAULT UPCOMING DATE
 
     if (
         currentVisits.length > 0 &&
@@ -582,8 +576,9 @@ async function loadDashboard() {
 
     renderUpcomingCalendar();
 
-
     renderSelectedUpcomingServices();
+
+    renderBookingCalendar();
 
 
     loading.style.display =
@@ -593,14 +588,1214 @@ async function loadDashboard() {
     dashboardContent.style.display =
         "block";
 
+}
 
-    renderBookingCalendar();
+
+// ========================================
+// PET DISPLAY
+// ========================================
+
+async function renderPets() {
+
+
+    const container =
+        document.getElementById(
+            "pet-info"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (
+        currentPets.length === 0
+    ) {
+
+        container.innerHTML =
+            `
+                <div class="no-pets-state">
+
+                    <img
+                        src="${DEFAULT_PET_AVATAR}"
+                        alt=""
+                        class="no-pets-avatar"
+                    >
+
+                    <strong>
+                        No pets added yet
+                    </strong>
+
+                    <p>
+                        Add your first pet to start building their care profile.
+                    </p>
+
+                </div>
+            `;
+
+        return;
+
+    }
+
+
+    const renderedPets =
+        await Promise.all(
+
+            currentPets.map(
+                async pet => {
+
+                    const photoUrl =
+                        await getPetDisplayUrl(
+                            pet
+                        );
+
+
+                    const breed =
+                        pet.breed ||
+                        "Breed not added";
+
+
+                    const gender =
+                        pet.gender ||
+                        "Gender not added";
+
+
+                    const birthday =
+                        pet.birthday
+                            ? formatPetBirthday(
+                                pet.birthday
+                            )
+                            : "Not added";
+
+
+                    const feedingNotes =
+                        pet.feeding_notes ||
+                        "No feeding notes added.";
+
+
+                    const careNotes =
+                        pet.care_notes ||
+                        "No care notes added.";
+
+
+                    return `
+                        <article class="pet-profile-card">
+
+                            <div class="pet-profile-top">
+
+                                <img
+                                    src="${escapeHtml(photoUrl)}"
+                                    alt="${escapeHtml(pet.name)}"
+                                    class="pet-profile-photo"
+                                    data-pet-image
+                                >
+
+
+                                <div class="pet-profile-summary">
+
+                                    <h4>
+                                        ${escapeHtml(pet.name)}
+                                    </h4>
+
+                                    <p class="pet-profile-subtitle">
+                                        ${escapeHtml(breed)}
+                                        <span>•</span>
+                                        ${escapeHtml(gender)}
+                                    </p>
+
+                                    <p class="pet-profile-birthday">
+                                        <strong>Birthday:</strong>
+                                        ${escapeHtml(birthday)}
+                                    </p>
+
+                                </div>
+
+
+                                <button
+                                    type="button"
+                                    class="edit-pet-button"
+                                    data-pet-id="${pet.id}"
+                                >
+                                    Edit Pet
+                                </button>
+
+                            </div>
+
+
+                            <div class="pet-profile-details">
+
+                                <div class="pet-detail-block">
+
+                                    <span class="pet-detail-label">
+                                        Feeding Notes
+                                    </span>
+
+                                    <p>
+                                        ${formatMultilineText(feedingNotes)}
+                                    </p>
+
+                                </div>
+
+
+                                <div class="pet-detail-block">
+
+                                    <span class="pet-detail-label">
+                                        Care Notes
+                                    </span>
+
+                                    <p>
+                                        ${formatMultilineText(careNotes)}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+                    `;
+
+                }
+            )
+
+        );
+
+
+    container.innerHTML =
+        renderedPets.join("");
+
+
+    container
+        .querySelectorAll(
+            "[data-pet-image]"
+        )
+        .forEach(
+            image => {
+
+                image.addEventListener(
+                    "error",
+                    () => {
+
+                        image.src =
+                            DEFAULT_PET_AVATAR;
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
+            }
+        );
+
+
+    container
+        .querySelectorAll(
+            ".edit-pet-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const petId =
+                            Number(
+                                button.dataset.petId
+                            );
+
+
+                        openEditPetForm(
+                            petId
+                        );
+
+                    }
+                );
+
+            }
+        );
 
 }
 
 
 // ========================================
-// PET DROPDOWN
+// PRIVATE PET PHOTO URL
+// ========================================
+
+async function getPetDisplayUrl(
+    pet
+) {
+
+
+    if (!pet.photo_path) {
+
+        return DEFAULT_PET_AVATAR;
+
+    }
+
+
+    if (
+        petPhotoUrlCache.has(
+            pet.photo_path
+        )
+    ) {
+
+        return petPhotoUrlCache.get(
+            pet.photo_path
+        );
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                PET_PHOTO_BUCKET
+            )
+            .createSignedUrl(
+                pet.photo_path,
+                3600
+            );
+
+
+    if (
+        error ||
+        !data?.signedUrl
+    ) {
+
+        console.error(
+            "Pet photo signed URL error:",
+            error
+        );
+
+
+        return DEFAULT_PET_AVATAR;
+
+    }
+
+
+    petPhotoUrlCache.set(
+        pet.photo_path,
+        data.signedUrl
+    );
+
+
+    return data.signedUrl;
+
+}
+
+
+// ========================================
+// ADD / EDIT PET FORM
+// ========================================
+
+const addPetButton =
+    document.getElementById(
+        "add-pet-button"
+    );
+
+
+const petFormPanel =
+    document.getElementById(
+        "pet-form-panel"
+    );
+
+
+const petForm =
+    document.getElementById(
+        "pet-form"
+    );
+
+
+if (addPetButton) {
+
+    addPetButton.addEventListener(
+        "click",
+        openAddPetForm
+    );
+
+}
+
+
+const closePetFormButton =
+    document.getElementById(
+        "close-pet-form-button"
+    );
+
+
+if (closePetFormButton) {
+
+    closePetFormButton.addEventListener(
+        "click",
+        closePetForm
+    );
+
+}
+
+
+const cancelPetButton =
+    document.getElementById(
+        "cancel-pet-button"
+    );
+
+
+if (cancelPetButton) {
+
+    cancelPetButton.addEventListener(
+        "click",
+        closePetForm
+    );
+
+}
+
+
+function openAddPetForm() {
+
+
+    editingPet =
+        null;
+
+
+    pendingPetPhotoFile =
+        null;
+
+
+    clearPetPhotoPreviewUrl();
+
+
+    petForm.reset();
+
+
+    document.getElementById(
+        "pet-id"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "pet-form-title"
+    ).textContent =
+        "Add Pet";
+
+
+    document.getElementById(
+        "save-pet-button"
+    ).textContent =
+        "Add Pet";
+
+
+    document.getElementById(
+        "pet-photo-preview"
+    ).src =
+        DEFAULT_PET_AVATAR;
+
+
+    document.getElementById(
+        "pet-form-message"
+    ).textContent =
+        "";
+
+
+    petFormPanel.style.display =
+        "block";
+
+
+    petFormPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+}
+
+
+// ========================================
+// EDIT PET
+// ========================================
+
+async function openEditPetForm(
+    petId
+) {
+
+
+    const pet =
+        currentPets.find(
+            item =>
+                Number(item.id) ===
+                Number(petId)
+        );
+
+
+    if (!pet) {
+        return;
+    }
+
+
+    editingPet =
+        pet;
+
+
+    pendingPetPhotoFile =
+        null;
+
+
+    clearPetPhotoPreviewUrl();
+
+
+    document.getElementById(
+        "pet-form-title"
+    ).textContent =
+        `Edit ${pet.name}`;
+
+
+    document.getElementById(
+        "save-pet-button"
+    ).textContent =
+        "Save Changes";
+
+
+    document.getElementById(
+        "pet-id"
+    ).value =
+        pet.id;
+
+
+    document.getElementById(
+        "pet-name"
+    ).value =
+        pet.name || "";
+
+
+    document.getElementById(
+        "pet-breed"
+    ).value =
+        pet.breed || "";
+
+
+    document.getElementById(
+        "pet-gender"
+    ).value =
+        pet.gender || "";
+
+
+    document.getElementById(
+        "pet-birthday"
+    ).value =
+        pet.birthday || "";
+
+
+    document.getElementById(
+        "pet-feeding-notes"
+    ).value =
+        pet.feeding_notes || "";
+
+
+    document.getElementById(
+        "pet-care-notes"
+    ).value =
+        pet.care_notes || "";
+
+
+    document.getElementById(
+        "pet-photo-input"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "pet-form-message"
+    ).textContent =
+        "";
+
+
+    const photoUrl =
+        await getPetDisplayUrl(
+            pet
+        );
+
+
+    document.getElementById(
+        "pet-photo-preview"
+    ).src =
+        photoUrl;
+
+
+    petFormPanel.style.display =
+        "block";
+
+
+    petFormPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+}
+
+
+// ========================================
+// CLOSE PET FORM
+// ========================================
+
+function closePetForm() {
+
+
+    editingPet =
+        null;
+
+
+    pendingPetPhotoFile =
+        null;
+
+
+    clearPetPhotoPreviewUrl();
+
+
+    if (petForm) {
+
+        petForm.reset();
+
+    }
+
+
+    if (petFormPanel) {
+
+        petFormPanel.style.display =
+            "none";
+
+    }
+
+}
+
+
+// ========================================
+// PET PHOTO INPUT
+// ========================================
+
+const petPhotoInput =
+    document.getElementById(
+        "pet-photo-input"
+    );
+
+
+if (petPhotoInput) {
+
+    petPhotoInput.addEventListener(
+        "change",
+        event => {
+
+            const file =
+                event.target.files[0];
+
+
+            const message =
+                document.getElementById(
+                    "pet-form-message"
+                );
+
+
+            message.textContent =
+                "";
+
+
+            if (!file) {
+
+                pendingPetPhotoFile =
+                    null;
+
+                return;
+
+            }
+
+
+            if (
+                !ALLOWED_PET_PHOTO_TYPES.includes(
+                    file.type
+                )
+            ) {
+
+                petPhotoInput.value =
+                    "";
+
+
+                pendingPetPhotoFile =
+                    null;
+
+
+                message.textContent =
+                    "Please choose a JPG, PNG, or WebP image.";
+
+                return;
+
+            }
+
+
+            if (
+                file.size >
+                MAX_PET_PHOTO_SIZE
+            ) {
+
+                petPhotoInput.value =
+                    "";
+
+
+                pendingPetPhotoFile =
+                    null;
+
+
+                message.textContent =
+                    "That photo is larger than 5 MB. Please choose a smaller image.";
+
+                return;
+
+            }
+
+
+            pendingPetPhotoFile =
+                file;
+
+
+            clearPetPhotoPreviewUrl();
+
+
+            petPhotoPreviewObjectUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+
+            document.getElementById(
+                "pet-photo-preview"
+            ).src =
+                petPhotoPreviewObjectUrl;
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SAVE PET
+// ========================================
+
+if (petForm) {
+
+    petForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const message =
+                document.getElementById(
+                    "pet-form-message"
+                );
+
+
+            const saveButton =
+                document.getElementById(
+                    "save-pet-button"
+                );
+
+
+            message.textContent =
+                "";
+
+
+            if (!currentUser) {
+
+                message.textContent =
+                    "Your login session expired.";
+
+                return;
+
+            }
+
+
+            const name =
+                document
+                    .getElementById(
+                        "pet-name"
+                    )
+                    .value
+                    .trim();
+
+
+            const breed =
+                document
+                    .getElementById(
+                        "pet-breed"
+                    )
+                    .value
+                    .trim();
+
+
+            const gender =
+                document
+                    .getElementById(
+                        "pet-gender"
+                    )
+                    .value;
+
+
+            const birthday =
+                document
+                    .getElementById(
+                        "pet-birthday"
+                    )
+                    .value;
+
+
+            const feedingNotes =
+                document
+                    .getElementById(
+                        "pet-feeding-notes"
+                    )
+                    .value
+                    .trim();
+
+
+            const careNotes =
+                document
+                    .getElementById(
+                        "pet-care-notes"
+                    )
+                    .value
+                    .trim();
+
+
+            if (!name) {
+
+                message.textContent =
+                    "Please enter your pet's name.";
+
+                return;
+
+            }
+
+
+            const payload = {
+
+                name,
+
+                breed:
+                    breed || null,
+
+                gender:
+                    gender || null,
+
+                birthday:
+                    birthday || null,
+
+                feeding_notes:
+                    feedingNotes || null,
+
+                care_notes:
+                    careNotes || null
+
+            };
+
+
+            saveButton.disabled =
+                true;
+
+
+            saveButton.textContent =
+                editingPet
+                    ? "Saving..."
+                    : "Adding...";
+
+
+            let savedPet;
+
+
+            // EDIT EXISTING PET
+
+            if (editingPet) {
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient
+                        .from("pets")
+                        .update(
+                            payload
+                        )
+                        .eq(
+                            "id",
+                            editingPet.id
+                        )
+                        .eq(
+                            "client_id",
+                            currentUser.id
+                        )
+                        .select()
+                        .single();
+
+
+                if (error) {
+
+                    console.error(
+                        "Pet update error:",
+                        error
+                    );
+
+
+                    message.textContent =
+                        "We couldn't save those changes.";
+
+
+                    saveButton.disabled =
+                        false;
+
+
+                    saveButton.textContent =
+                        "Save Changes";
+
+                    return;
+
+                }
+
+
+                savedPet =
+                    data;
+
+            }
+
+            // ADD NEW PET
+
+            else {
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient
+                        .from("pets")
+                        .insert({
+
+                            ...payload,
+
+                            client_id:
+                                currentUser.id
+
+                        })
+                        .select()
+                        .single();
+
+
+                if (error) {
+
+                    console.error(
+                        "Pet insert error:",
+                        error
+                    );
+
+
+                    message.textContent =
+                        "We couldn't add your pet.";
+
+
+                    saveButton.disabled =
+                        false;
+
+
+                    saveButton.textContent =
+                        "Add Pet";
+
+                    return;
+
+                }
+
+
+                savedPet =
+                    data;
+
+            }
+
+
+            // PHOTO UPLOAD
+
+            if (
+                pendingPetPhotoFile
+            ) {
+
+                const oldPhotoPath =
+                    editingPet
+                        ? editingPet.photo_path
+                        : null;
+
+
+                try {
+
+                    const newPhotoPath =
+                        await uploadPetPhoto(
+                            savedPet.id,
+                            pendingPetPhotoFile
+                        );
+
+
+                    const {
+                        error: photoPathError
+                    } =
+                        await supabaseClient
+                            .from("pets")
+                            .update({
+                                photo_path:
+                                    newPhotoPath
+                            })
+                            .eq(
+                                "id",
+                                savedPet.id
+                            )
+                            .eq(
+                                "client_id",
+                                currentUser.id
+                            );
+
+
+                    if (photoPathError) {
+
+                        // Remove orphaned new upload
+
+                        await supabaseClient
+                            .storage
+                            .from(
+                                PET_PHOTO_BUCKET
+                            )
+                            .remove([
+                                newPhotoPath
+                            ]);
+
+
+                        throw photoPathError;
+
+                    }
+
+
+                    // Remove old photo after new one is safely saved
+
+                    if (
+                        oldPhotoPath &&
+                        oldPhotoPath !==
+                            newPhotoPath
+                    ) {
+
+                        const {
+                            error: oldPhotoDeleteError
+                        } =
+                            await supabaseClient
+                                .storage
+                                .from(
+                                    PET_PHOTO_BUCKET
+                                )
+                                .remove([
+                                    oldPhotoPath
+                                ]);
+
+
+                        if (
+                            oldPhotoDeleteError
+                        ) {
+
+                            console.warn(
+                                "Old pet photo cleanup failed:",
+                                oldPhotoDeleteError
+                            );
+
+                        }
+
+
+                        petPhotoUrlCache.delete(
+                            oldPhotoPath
+                        );
+
+                    }
+
+                } catch (
+                    photoError
+                ) {
+
+                    console.error(
+                        "Pet photo upload error:",
+                        photoError
+                    );
+
+
+                    await refreshPets();
+
+
+                    message.textContent =
+                        "Your pet was saved, but the photo couldn't be uploaded. You can edit the pet and try the photo again.";
+
+
+                    saveButton.disabled =
+                        false;
+
+
+                    saveButton.textContent =
+                        editingPet
+                            ? "Save Changes"
+                            : "Add Pet";
+
+                    return;
+
+                }
+
+            }
+
+
+            await refreshPets();
+
+
+            closePetForm();
+
+
+            saveButton.disabled =
+                false;
+
+
+            saveButton.textContent =
+                "Save Pet";
+
+        }
+    );
+
+}
+
+
+// ========================================
+// UPLOAD PET PHOTO
+// ========================================
+
+async function uploadPetPhoto(
+    petId,
+    file
+) {
+
+
+    let extension;
+
+
+    switch (
+        file.type
+    ) {
+
+        case "image/jpeg":
+            extension = "jpg";
+            break;
+
+        case "image/png":
+            extension = "png";
+            break;
+
+        case "image/webp":
+            extension = "webp";
+            break;
+
+        default:
+            throw new Error(
+                "Unsupported image type."
+            );
+
+    }
+
+
+    const filePath =
+        `${currentUser.id}/${petId}/${crypto.randomUUID()}.${extension}`;
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                PET_PHOTO_BUCKET
+            )
+            .upload(
+                filePath,
+                file,
+                {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: file.type
+                }
+            );
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+    return filePath;
+
+}
+
+
+// ========================================
+// REFRESH PETS
+// ========================================
+
+async function refreshPets() {
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("pets")
+            .select("*")
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Refresh pets error:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    currentPets =
+        data || [];
+
+
+    petPhotoUrlCache.clear();
+
+
+    await renderPets();
+
+    populateBookingPets();
+
+}
+
+
+// ========================================
+// BOOKING PET DROPDOWN
 // ========================================
 
 function populateBookingPets() {
@@ -615,6 +1810,10 @@ function populateBookingPets() {
     if (!petSelect) {
         return;
     }
+
+
+    const existingValue =
+        petSelect.value;
 
 
     petSelect.innerHTML =
@@ -649,11 +1848,25 @@ function populateBookingPets() {
         }
     );
 
+
+    if (
+        currentPets.some(
+            pet =>
+                String(pet.id) ===
+                String(existingValue)
+        )
+    ) {
+
+        petSelect.value =
+            existingValue;
+
+    }
+
 }
 
 
 // ========================================
-// OPEN / CLOSE BOOKING
+// BOOKING OPEN / CLOSE
 // ========================================
 
 const requestWalkButton =
@@ -844,7 +2057,6 @@ function handleServiceTypeChange() {
 
         resetBoardingDates();
 
-
         updateBookingTotal();
 
         return;
@@ -867,9 +2079,9 @@ function handleServiceTypeChange() {
 
     if (
         serviceType ===
-        "Dog Walking" ||
+            "Dog Walking" ||
         serviceType ===
-        "Drop-In Visit"
+            "Drop-In Visit"
     ) {
 
         timeWrapper.style.display =
@@ -901,7 +2113,6 @@ function handleServiceTypeChange() {
 
 
     renderBookingCalendar();
-
 
     updateBookingTotal();
 
@@ -1089,7 +2300,7 @@ function populatePreferredTimeWindows() {
 
 
 // ========================================
-// PET SITTING BLOCKS
+// PET SITTING TIME BLOCKS
 // ========================================
 
 function populatePetSittingTimeBlocks() {
@@ -1246,7 +2457,6 @@ if (calendarPrev) {
                 calendarMonth =
                     11;
 
-
                 calendarYear--;
 
             }
@@ -1275,7 +2485,6 @@ if (calendarNext) {
 
                 calendarMonth =
                     0;
-
 
                 calendarYear++;
 
@@ -1323,13 +2532,13 @@ function renderBookingCalendar() {
             calendarMonth,
             1
         )
-        .toLocaleDateString(
-            "en-US",
-            {
-                month: "long",
-                year: "numeric"
-            }
-        );
+            .toLocaleDateString(
+                "en-US",
+                {
+                    month: "long",
+                    year: "numeric"
+                }
+            );
 
 
     grid.innerHTML =
@@ -1525,7 +2734,6 @@ function toggleSelectedDate(
 
     renderSelectedDates();
 
-
     renderBookingCalendar();
 
 }
@@ -1544,7 +2752,6 @@ function removeSelectedDate(
 
 
     renderSelectedDates();
-
 
     renderBookingCalendar();
 
@@ -1759,7 +2966,7 @@ function resetBoardingDates() {
 
 
 // ========================================
-// PRICE
+// BOOKING PRICE
 // ========================================
 
 function updateBookingTotal() {
@@ -1807,13 +3014,8 @@ function updateBookingTotal() {
             "$0.00";
 
 
-        if (detailDisplay) {
-
-            detailDisplay.textContent =
-                "";
-
-        }
-
+        detailDisplay.textContent =
+            "";
 
         return;
 
@@ -1851,7 +3053,6 @@ function updateBookingTotal() {
 
 
         if (
-            detailDisplay &&
             nights > 0
         ) {
 
@@ -1876,7 +3077,7 @@ function updateBookingTotal() {
             detailDisplay.textContent =
                 details;
 
-        } else if (detailDisplay) {
+        } else {
 
             detailDisplay.textContent =
                 "";
@@ -1953,7 +3154,6 @@ function updateBookingTotal() {
 
 
     if (
-        detailDisplay &&
         selectedDates.length > 0 &&
         basePrice > 0
     ) {
@@ -1967,11 +3167,7 @@ function updateBookingTotal() {
         ) {
 
             details +=
-                ` + $${surcharge} ${
-                    surcharge === 5
-                        ? "after-hours fee per visit"
-                        : "late-evening fee per visit"
-                }`;
+                ` + $${surcharge} evening fee per visit`;
 
         }
 
@@ -1979,7 +3175,7 @@ function updateBookingTotal() {
         detailDisplay.textContent =
             details;
 
-    } else if (detailDisplay) {
+    } else {
 
         detailDisplay.textContent =
             "";
@@ -2069,7 +3265,7 @@ function getBoardingPickupFee() {
 
 
 // ========================================
-// WEEK VALIDATION
+// THREE PER WEEK VALIDATION
 // ========================================
 
 function getWeekKey(
@@ -2161,10 +3357,10 @@ function validateThreePerWeek() {
         Object.values(
             weeks
         )
-        .filter(
-            dates =>
-                dates.length < 3
-        );
+            .filter(
+                dates =>
+                    dates.length < 3
+            );
 
 
     if (
@@ -2222,16 +3418,6 @@ if (bookingForm) {
                 "";
 
 
-            if (!currentUser) {
-
-                message.textContent =
-                    "Your login session expired.";
-
-                return;
-
-            }
-
-
             const petId =
                 document
                     .getElementById(
@@ -2267,7 +3453,6 @@ if (bookingForm) {
                     message,
                     submitButton
                 );
-
 
                 return;
 
@@ -2327,18 +3512,14 @@ if (bookingForm) {
 
                 }
 
-            } else {
+            } else if (
+                selectedDates.length < 1
+            ) {
 
-                if (
-                    selectedDates.length < 1
-                ) {
+                message.textContent =
+                    "Please select at least one date.";
 
-                    message.textContent =
-                        "Please select at least one date.";
-
-                    return;
-
-                }
+                return;
 
             }
 
@@ -2401,9 +3582,7 @@ if (bookingForm) {
                             currentUser.id,
 
                         pet_id:
-                            Number(
-                                petId
-                            ),
+                            Number(petId),
 
                         service_type:
                             serviceType,
@@ -2423,8 +3602,7 @@ if (bookingForm) {
                         status:
                             "requested",
 
-                        price:
-                            price,
+                        price,
 
                         payment_status:
                             "pending",
@@ -2445,15 +3623,13 @@ if (bookingForm) {
 
 
             const {
-                data,
                 error
             } =
                 await supabaseClient
                     .from("visits")
                     .insert(
                         visitsToInsert
-                    )
-                    .select();
+                    );
 
 
             if (error) {
@@ -2475,16 +3651,9 @@ if (bookingForm) {
                 submitButton.textContent =
                     "Continue";
 
-
                 return;
 
             }
-
-
-            console.log(
-                "Bookings created:",
-                data
-            );
 
 
             const serviceCount =
@@ -2597,14 +3766,6 @@ async function submitBoardingBooking(
         crypto.randomUUID();
 
 
-    const serviceOption =
-        "VIP Overnight Boarding";
-
-
-    const serviceName =
-        "Dog Boarding - VIP Overnight Boarding";
-
-
     const rows =
         boardingDates.map(
             (date, index) => {
@@ -2631,18 +3792,16 @@ async function submitBoardingBooking(
                         currentUser.id,
 
                     pet_id:
-                        Number(
-                            petId
-                        ),
+                        Number(petId),
 
                     service_type:
                         "Dog Boarding",
 
                     service_option:
-                        serviceOption,
+                        "VIP Overnight Boarding",
 
                     service_name:
-                        serviceName,
+                        "Dog Boarding - VIP Overnight Boarding",
 
                     visit_date:
                         date,
@@ -2677,15 +3836,13 @@ async function submitBoardingBooking(
 
 
     const {
-        data,
         error
     } =
         await supabaseClient
             .from("visits")
             .insert(
                 rows
-            )
-            .select();
+            );
 
 
     if (error) {
@@ -2707,16 +3864,9 @@ async function submitBoardingBooking(
         submitButton.textContent =
             "Continue";
 
-
         return;
 
     }
-
-
-    console.log(
-        "Boarding created:",
-        data
-    );
 
 
     message.textContent =
@@ -2804,9 +3954,7 @@ function resetBookingForm() {
 
     renderSelectedDates();
 
-
     renderBookingCalendar();
-
 
     updateBookingTotal();
 
@@ -2814,7 +3962,7 @@ function resetBookingForm() {
 
 
 // ========================================
-// UPCOMING CALENDAR NAVIGATION
+// UPCOMING CALENDAR
 // ========================================
 
 const upcomingCalendarPrev =
@@ -2845,7 +3993,6 @@ if (upcomingCalendarPrev) {
                 upcomingCalendarMonth =
                     11;
 
-
                 upcomingCalendarYear--;
 
             }
@@ -2856,7 +4003,6 @@ if (upcomingCalendarPrev) {
 
 
             renderUpcomingCalendar();
-
 
             renderSelectedUpcomingServices();
 
@@ -2882,7 +4028,6 @@ if (upcomingCalendarNext) {
                 upcomingCalendarMonth =
                     0;
 
-
                 upcomingCalendarYear++;
 
             }
@@ -2893,7 +4038,6 @@ if (upcomingCalendarNext) {
 
 
             renderUpcomingCalendar();
-
 
             renderSelectedUpcomingServices();
 
@@ -2926,9 +4070,7 @@ function renderUpcomingCalendar() {
         !grid ||
         !monthLabel
     ) {
-
         return;
-
     }
 
 
@@ -2938,13 +4080,13 @@ function renderUpcomingCalendar() {
             upcomingCalendarMonth,
             1
         )
-        .toLocaleDateString(
-            "en-US",
-            {
-                month: "long",
-                year: "numeric"
-            }
-        );
+            .toLocaleDateString(
+                "en-US",
+                {
+                    month: "long",
+                    year: "numeric"
+                }
+            );
 
 
     grid.innerHTML =
@@ -3001,8 +4143,7 @@ function renderUpcomingCalendar() {
             upcomingCalendarYear,
             upcomingCalendarMonth + 1,
             0
-        )
-        .getDate();
+        ).getDate();
 
 
     const today =
@@ -3084,22 +4225,22 @@ function renderUpcomingCalendar() {
         }
 
 
-        const dayNumber =
+        const number =
             document.createElement(
                 "span"
             );
 
 
-        dayNumber.className =
+        number.className =
             "upcoming-day-number";
 
 
-        dayNumber.textContent =
+        number.textContent =
             day;
 
 
         button.appendChild(
-            dayNumber
+            number
         );
 
 
@@ -3138,7 +4279,6 @@ function renderUpcomingCalendar() {
 
                 renderUpcomingCalendar();
 
-
                 renderSelectedUpcomingServices();
 
             }
@@ -3155,7 +4295,7 @@ function renderUpcomingCalendar() {
 
 
 // ========================================
-// SELECTED UPCOMING DAY
+// UPCOMING SERVICE DETAILS
 // ========================================
 
 function renderSelectedUpcomingServices() {
@@ -3177,9 +4317,7 @@ function renderSelectedUpcomingServices() {
         !dateHeading ||
         !container
     ) {
-
         return;
-
     }
 
 
@@ -3195,7 +4333,6 @@ function renderSelectedUpcomingServices() {
                     Select a date on the calendar to view services.
                 </p>
             `;
-
 
         return;
 
@@ -3227,7 +4364,6 @@ function renderSelectedUpcomingServices() {
                 </p>
             `;
 
-
         return;
 
     }
@@ -3238,7 +4374,7 @@ function renderSelectedUpcomingServices() {
             .map(
                 visit => {
 
-                    const serviceTitle =
+                    const title =
                         visit.service_name ||
                         visit.service_type ||
                         "Service";
@@ -3257,29 +4393,21 @@ function renderSelectedUpcomingServices() {
                             : "";
 
 
-                    const status =
-                        formatStatus(
-                            visit.status
-                        );
-
-
-                    const payment =
-                        formatStatus(
-                            visit.payment_status
-                        );
-
-
                     return `
                         <div class="upcoming-service-card">
 
                             <div class="upcoming-service-card-header">
 
                                 <strong>
-                                    ${serviceTitle}
+                                    ${escapeHtml(title)}
                                 </strong>
 
                                 <span class="service-status">
-                                    ${status}
+                                    ${escapeHtml(
+                                        formatStatus(
+                                            visit.status
+                                        )
+                                    )}
                                 </span>
 
                             </div>
@@ -3289,7 +4417,9 @@ function renderSelectedUpcomingServices() {
                                     ? `
                                         <div class="upcoming-service-row">
                                             <span>Time</span>
-                                            <strong>${time}</strong>
+                                            <strong>
+                                                ${escapeHtml(time)}
+                                            </strong>
                                         </div>
                                     `
                                     : ""
@@ -3313,7 +4443,11 @@ function renderSelectedUpcomingServices() {
                                 </span>
 
                                 <strong>
-                                    ${payment}
+                                    ${escapeHtml(
+                                        formatStatus(
+                                            visit.payment_status
+                                        )
+                                    )}
                                 </strong>
 
                             </div>
@@ -3329,7 +4463,7 @@ function renderSelectedUpcomingServices() {
 
 
 // ========================================
-// BOARDING DATE HELPERS
+// BOARDING DATES
 // ========================================
 
 function getBoardingNightDates(
@@ -3435,27 +4569,11 @@ function makeDateString(
 ) {
 
 
-    const month =
-        String(
-            monthIndex + 1
-        )
-        .padStart(
-            2,
-            "0"
-        );
-
-
-    const dayString =
-        String(
-            day
-        )
-        .padStart(
-            2,
-            "0"
-        );
-
-
-    return `${year}-${month}-${dayString}`;
+    return `${year}-${String(
+        monthIndex + 1
+    ).padStart(2, "0")}-${String(
+        day
+    ).padStart(2, "0")}`;
 
 }
 
@@ -3463,14 +4581,14 @@ function makeDateString(
 function getLocalDateString() {
 
 
-    const currentDate =
+    const date =
         new Date();
 
 
     return makeDateString(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate()
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
     );
 
 }
@@ -3481,18 +4599,9 @@ function formatDate(
 ) {
 
 
-    if (!dateString) {
-        return "";
-    }
-
-
-    const date =
-        parseLocalDate(
-            dateString
-        );
-
-
-    return date.toLocaleDateString(
+    return parseLocalDate(
+        dateString
+    ).toLocaleDateString(
         "en-US",
         {
             weekday: "short",
@@ -3510,18 +4619,9 @@ function formatLongDate(
 ) {
 
 
-    if (!dateString) {
-        return "";
-    }
-
-
-    const date =
-        parseLocalDate(
-            dateString
-        );
-
-
-    return date.toLocaleDateString(
+    return parseLocalDate(
+        dateString
+    ).toLocaleDateString(
         "en-US",
         {
             weekday: "long",
@@ -3533,6 +4633,29 @@ function formatLongDate(
 
 }
 
+
+function formatPetBirthday(
+    dateString
+) {
+
+
+    return parseLocalDate(
+        dateString
+    ).toLocaleDateString(
+        "en-US",
+        {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+// ========================================
+// TEXT HELPERS
+// ========================================
 
 function formatStatus(
     status
@@ -3558,8 +4681,64 @@ function formatStatus(
 }
 
 
+function escapeHtml(
+    value
+) {
+
+
+    return String(
+        value ?? ""
+    )
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+function formatMultilineText(
+    value
+) {
+
+
+    return escapeHtml(
+        value
+    ).replaceAll(
+        "\n",
+        "<br>"
+    );
+
+}
+
+
 // ========================================
-// MESSAGE
+// PHOTO PREVIEW CLEANUP
+// ========================================
+
+function clearPetPhotoPreviewUrl() {
+
+
+    if (
+        petPhotoPreviewObjectUrl
+    ) {
+
+        URL.revokeObjectURL(
+            petPhotoPreviewObjectUrl
+        );
+
+
+        petPhotoPreviewObjectUrl =
+            null;
+
+    }
+
+}
+
+
+// ========================================
+// BOOKING MESSAGE
 // ========================================
 
 function clearBookingMessage() {
@@ -3582,7 +4761,7 @@ function clearBookingMessage() {
 
 
 // ========================================
-// LOAD DASHBOARD
+// LOAD
 // ========================================
 
 loadDashboard();
