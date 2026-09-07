@@ -1,1 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Admin Dashboard | Paws in Stride
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="portal.css"
+    >
+
+</head>
+
+
+<body class="admin-page">
+
+
+<main class="dashboard-container admin-dashboard-container">
+
+
+    <!-- ========================================
+         HEADER
+         ======================================== -->
+
+    <div class="dashboard-header admin-dashboard-header">
+
+        <div>
+
+            <h1>
+                Paws in Stride
+            </h1>
+
+
+            <div class="admin-title-row">
+
+                <h2>
+                    Admin Dashboard
+                </h2>
+
+                <span class="admin-role-badge">
+                    ADMIN
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="admin-logout-button"
+            class="secondary-button admin-header-logout"
+        >
+            Log Out
+        </button>
+
+    </div>
+
+
+
+    <!-- ========================================
+         LOADING
+         ======================================== -->
+
+    <div id="admin-loading">
+        Loading admin dashboard...
+    </div>
+
+
+
+    <!-- ========================================
+         ADMIN CONTENT
+         ======================================== -->
+
+    <div
+        id="admin-content"
+        style="display:none;"
+    >
+
+
+
+        <!-- ========================================
+             MY PROFILE
+             ======================================== -->
+
+        <section class="admin-profile-section">
+
+
+            <div class="household-section-header">
+
+                <div>
+
+                    <h3>
+                        My Profile
+                    </h3>
+
+                    <p class="household-section-help">
+                        Contact and emergency information for your Paws in Stride staff profile.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="admin-edit-profile-button"
+                    class="primary-button household-edit-button"
+                >
+                    Edit Profile
+                </button>
+
+            </div>
+
+
+
+            <!-- ========================================
+                 EDIT PROFILE
+                 ======================================== -->
+
+            <div
+                id="admin-profile-form-panel"
+                class="household-form-panel"
+                style="display:none;"
+            >
+
+
+                <div class="household-form-header">
+
+                    <div>
+
+                        <h4>
+                            Edit Profile
+                        </h4>
+
+                        <p>
+                            Update your personal contact, address, and emergency information.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="admin-close-profile-form-button"
+                        class="close-button"
+                        aria-label="Close profile form"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+
+                <form id="admin-profile-form">
+
+
+                    <!-- PROFILE PHOTO -->
+
+                    <div class="client-photo-editor">
+
+
+                        <div class="client-photo-preview-wrapper">
+
+                            <img
+                                id="admin-photo-preview"
+                                class="client-photo-preview"
+                                alt="Profile photo preview"
+                                style="display:none;"
+                            >
+
+
+                            <span
+                                id="admin-photo-preview-initials"
+                                class="client-photo-preview-initials"
+                            >
+                                ?
+                            </span>
+
+                        </div>
+
+
+                        <div class="client-photo-controls">
+
+
+                            <label
+                                for="admin-photo-input"
+                                class="client-photo-upload-button"
+                            >
+                                Choose Profile Photo
+                            </label>
+
+
+                            <input
+                                type="file"
+                                id="admin-photo-input"
+                                accept="image/jpeg,image/png,image/webp"
+                                hidden
+                            >
+
+
+                            <p class="client-photo-help">
+                                Optional. JPG, PNG or WebP. Maximum 5 MB.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CONTACT -->
+
+                    <div class="household-form-section">
+
+                        <h5>
+                            Contact Information
+                        </h5>
+
+
+                        <div class="household-form-grid">
+
+
+                            <div class="household-form-field">
+
+                                <label for="admin-full-name">
+                                    Full Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="admin-full-name"
+                                    maxlength="150"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="admin-phone">
+                                    Phone Number
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    id="admin-phone"
+                                    maxlength="50"
+                                    placeholder="(555) 555-5555"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="admin-email">
+                                    Email
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="admin-email"
+                                    readonly
+                                    disabled
+                                >
+
+                                <span class="field-help">
+                                    Your login email cannot be changed here.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ADDRESS -->
+
+                    <div class="household-form-section">
+
+                        <h5>
+                            Home Address
+                        </h5>
+
+
+                        <div class="household-form-grid">
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="admin-street-address">
+                                    Street Address
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="admin-street-address"
+                                    maxlength="250"
+                                    autocomplete="street-address"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="admin-address-line-2">
+                                    Apartment, Unit, Building, etc.
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="admin-address-line-2"
+                                    maxlength="150"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="admin-city">
+                                    City
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="admin-city"
+                                    maxlength="100"
+                                    autocomplete="address-level2"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="admin-state">
+                                    State
+                                </label>
+
+                                <select
+                                    id="admin-state"
+                                    autocomplete="address-level1"
+                                >
+
+                                    <option value="">
+                                        Select state
+                                    </option>
+
+                                    <option value="AL">Alabama</option>
+                                    <option value="AK">Alaska</option>
+                                    <option value="AZ">Arizona</option>
+                                    <option value="AR">Arkansas</option>
+                                    <option value="CA">California</option>
+                                    <option value="CO">Colorado</option>
+                                    <option value="CT">Connecticut</option>
+                                    <option value="DE">Delaware</option>
+                                    <option value="DC">District of Columbia</option>
+                                    <option value="FL">Florida</option>
+                                    <option value="GA">Georgia</option>
+                                    <option value="HI">Hawaii</option>
+                                    <option value="ID">Idaho</option>
+                                    <option value="IL">Illinois</option>
+                                    <option value="IN">Indiana</option>
+                                    <option value="IA">Iowa</option>
+                                    <option value="KS">Kansas</option>
+                                    <option value="KY">Kentucky</option>
+                                    <option value="LA">Louisiana</option>
+                                    <option value="ME">Maine</option>
+                                    <option value="MD">Maryland</option>
+                                    <option value="MA">Massachusetts</option>
+                                    <option value="MI">Michigan</option>
+                                    <option value="MN">Minnesota</option>
+                                    <option value="MS">Mississippi</option>
+                                    <option value="MO">Missouri</option>
+                                    <option value="MT">Montana</option>
+                                    <option value="NE">Nebraska</option>
+                                    <option value="NV">Nevada</option>
+                                    <option value="NH">New Hampshire</option>
+                                    <option value="NJ">New Jersey</option>
+                                    <option value="NM">New Mexico</option>
+                                    <option value="NY">New York</option>
+                                    <option value="NC">North Carolina</option>
+                                    <option value="ND">North Dakota</option>
+                                    <option value="OH">Ohio</option>
+                                    <option value="OK">Oklahoma</option>
+                                    <option value="OR">Oregon</option>
+                                    <option value="PA">Pennsylvania</option>
+                                    <option value="RI">Rhode Island</option>
+                                    <option value="SC">South Carolina</option>
+                                    <option value="SD">South Dakota</option>
+                                    <option value="TN">Tennessee</option>
+                                    <option value="TX">Texas</option>
+                                    <option value="UT">Utah</option>
+                                    <option value="VT">Vermont</option>
+                                    <option value="VA">Virginia</option>
+                                    <option value="WA">Washington</option>
+                                    <option value="WV">West Virginia</option>
+                                    <option value="WI">Wisconsin</option>
+                                    <option value="WY">Wyoming</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="admin-zip">
+                                    ZIP Code
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="admin-zip"
+                                    maxlength="20"
+                                    autocomplete="postal-code"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- EMERGENCY CONTACT -->
+
+                    <div class="household-form-section">
+
+                        <h5>
+                            Emergency Contact
+                        </h5>
+
+
+                        <div class="household-form-grid">
+
+
+                            <div class="household-form-field">
+
+                                <label for="admin-emergency-name">
+                                    Contact Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="admin-emergency-name"
+                                    maxlength="150"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="admin-emergency-phone">
+                                    Contact Phone
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    id="admin-emergency-phone"
+                                    maxlength="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- BUTTONS -->
+
+                    <div class="household-form-actions">
+
+                        <button
+                            type="button"
+                            id="admin-cancel-profile-button"
+                            class="secondary-button"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            id="admin-save-profile-button"
+                            class="primary-button"
+                        >
+                            Save Profile
+                        </button>
+
+                    </div>
+
+
+                    <p id="admin-profile-message"></p>
+
+
+                </form>
+
+            </div>
+
+
+
+            <!-- ========================================
+                 PROFILE DISPLAY
+                 ======================================== -->
+
+            <div id="admin-profile-display">
+
+
+                <div class="household-profile-top">
+
+
+                    <div
+                        id="admin-profile-avatar"
+                        class="client-profile-avatar"
+                    >
+
+                        <img
+                            id="admin-profile-image"
+                            alt="Profile photo"
+                            style="display:none;"
+                        >
+
+
+                        <span
+                            id="admin-profile-initials"
+                            class="client-profile-initials"
+                        >
+                            ?
+                        </span>
+
+                    </div>
+
+
+                    <div class="household-profile-summary">
+
+                        <h4 id="admin-display-name">
+                            Admin
+                        </h4>
+
+                        <p id="admin-display-email">
+                            —
+                        </p>
+
+                        <p id="admin-display-phone">
+                            Phone not added
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="household-profile-grid">
+
+
+                    <div class="household-detail-card">
+
+                        <span class="household-detail-label">
+                            Home Address
+                        </span>
+
+                        <div
+                            id="admin-display-address"
+                            class="household-detail-value"
+                        >
+                            Not added
+                        </div>
+
+                    </div>
+
+
+                    <div class="household-detail-card">
+
+                        <span class="household-detail-label">
+                            Emergency Contact
+                        </span>
+
+                        <div
+                            id="admin-display-emergency"
+                            class="household-detail-value"
+                        >
+                            Not added
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ========================================
+             SERVICE CALENDAR
+             ======================================== -->
+
+        <section class="admin-calendar-section">
+
+
+            <div class="admin-calendar-section-heading">
+
+
+                <div>
+
+                    <h3>
+                        Service Calendar
+                    </h3>
+
+                    <p>
+                        All client bookings appear here. Select a date to see the day's schedule.
+                    </p>
+
+                </div>
+
+
+                <div class="admin-calendar-summary">
+
+                    <strong id="admin-month-service-count">
+                        0
+                    </strong>
+
+                    <span>
+                        services this month
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="upcoming-calendar admin-service-calendar">
+
+
+                <div class="upcoming-calendar-header">
+
+
+                    <button
+                        type="button"
+                        id="admin-calendar-prev"
+                        class="calendar-nav-button"
+                        aria-label="Previous month"
+                    >
+                        ‹
+                    </button>
+
+
+                    <strong id="admin-calendar-month-label">
+                    </strong>
+
+
+                    <button
+                        type="button"
+                        id="admin-calendar-next"
+                        class="calendar-nav-button"
+                        aria-label="Next month"
+                    >
+                        ›
+                    </button>
+
+
+                </div>
+
+
+
+                <div class="upcoming-calendar-weekdays">
+
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                    <span>Sun</span>
+
+                </div>
+
+
+
+                <div
+                    id="admin-calendar-grid"
+                    class="upcoming-calendar-grid"
+                ></div>
+
+
+            </div>
+
+
+
+            <!-- ========================================
+                 SELECTED DAY
+                 ======================================== -->
+
+            <div class="admin-selected-day">
+
+
+                <div class="admin-selected-day-heading">
+
+
+                    <div>
+
+                        <span class="admin-selected-day-eyebrow">
+                            DAY SCHEDULE
+                        </span>
+
+                        <h4 id="admin-selected-date">
+                            Select a date
+                        </h4>
+
+                    </div>
+
+
+                    <span
+                        id="admin-selected-service-count"
+                        class="admin-selected-count"
+                    >
+                        0 services
+                    </span>
+
+
+                </div>
+
+
+
+                <div id="admin-day-services">
+
+                    <p class="empty-upcoming-message">
+                        Select a date on the calendar to view booked services.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+    </div>
+
+
+</main>
+
+
+
+<!-- Supabase -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<!-- Admin -->
+
+<script src="./admin.js"></script>
+
+
+</body>
+
+</html>
