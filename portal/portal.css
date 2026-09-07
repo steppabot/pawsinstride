@@ -1464,3 +1464,329 @@ button {
     }
 
 }
+
+/* ========================================
+   ADMIN DASHBOARD
+   ======================================== */
+
+.admin-dashboard-container {
+    max-width: 980px;
+}
+
+
+.admin-dashboard-header {
+    align-items: center;
+}
+
+
+.admin-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.admin-title-row h2 {
+    margin: 0;
+}
+
+
+.admin-role-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 8px;
+    background: #111;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+
+.admin-header-logout {
+    flex-shrink: 0;
+}
+
+
+#admin-loading {
+    padding: 10px 0;
+}
+
+
+
+/* ========================================
+   ADMIN PROFILE
+   ======================================== */
+
+#admin-profile-message {
+    margin-bottom: 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+
+
+/* ========================================
+   ADMIN CALENDAR HEADER
+   ======================================== */
+
+.admin-calendar-section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+
+.admin-calendar-section-heading h3 {
+    margin: 0 0 4px;
+}
+
+
+.admin-calendar-section-heading p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+
+.admin-calendar-summary {
+    min-width: 130px;
+    padding: 11px 14px;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    text-align: right;
+}
+
+
+.admin-calendar-summary strong {
+    display: block;
+    font-size: 22px;
+}
+
+
+.admin-calendar-summary span {
+    color: #666;
+    font-size: 11px;
+}
+
+
+
+/* ========================================
+   ADMIN CALENDAR
+   ======================================== */
+
+.admin-service-calendar {
+    margin-bottom: 18px;
+}
+
+
+.admin-calendar-day {
+    min-height: 54px;
+}
+
+
+
+/* ========================================
+   ADMIN SELECTED DAY
+   ======================================== */
+
+.admin-selected-day {
+    padding: 18px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+}
+
+
+.admin-selected-day-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+
+.admin-selected-day-eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    color: #777;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+
+.admin-selected-day-heading h4 {
+    margin: 0;
+    font-size: 19px;
+}
+
+
+.admin-selected-count {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    background: #f1f1f1;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+
+/* ========================================
+   ADMIN SERVICE CARDS
+   ======================================== */
+
+.admin-service-card {
+    margin-top: 12px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+}
+
+
+.admin-service-card:first-child {
+    margin-top: 0;
+}
+
+
+.admin-service-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+
+.admin-service-time {
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+
+.admin-service-top h5 {
+    margin: 0;
+    font-size: 17px;
+}
+
+
+.admin-service-statuses {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+
+.admin-payment-status {
+    background: #fff;
+    border: 1px solid #ddd;
+}
+
+
+.admin-service-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 18px;
+    padding-top: 14px;
+}
+
+
+.admin-service-detail {
+    min-width: 0;
+}
+
+
+.admin-service-detail > span {
+    display: block;
+    margin-bottom: 6px;
+    color: #777;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+
+.admin-service-detail strong {
+    display: block;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+
+.admin-service-detail small {
+    display: block;
+    margin-top: 3px;
+    color: #666;
+    font-size: 12px;
+}
+
+
+.admin-service-pet-chips {
+    gap: 5px;
+}
+
+
+
+/* ========================================
+   ADMIN MOBILE
+   ======================================== */
+
+@media (max-width: 600px) {
+
+    .admin-dashboard-header {
+        align-items: stretch;
+    }
+
+
+    .admin-header-logout {
+        width: 100%;
+    }
+
+
+    .admin-calendar-section-heading {
+        flex-direction: column;
+    }
+
+
+    .admin-calendar-summary {
+        width: 100%;
+        text-align: left;
+    }
+
+
+    .admin-selected-day-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .admin-service-top {
+        flex-direction: column;
+    }
+
+
+    .admin-service-statuses {
+        justify-content: flex-start;
+    }
+
+
+    .admin-service-main-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+}
