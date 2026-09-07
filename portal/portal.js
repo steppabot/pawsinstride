@@ -674,10 +674,6 @@ async function loadDashboard() {
                 "client_id",
                 currentUser.id
             )
-            .gte(
-                "visit_date",
-                today
-            )
             .order(
                 "visit_date",
                 {
@@ -772,37 +768,63 @@ async function loadDashboard() {
 
 
     if (
-        currentVisits.length > 0 &&
         !selectedUpcomingDate
     ) {
-
-        const firstDate =
-            parseLocalDate(
-                currentVisits[0].visit_date
+    
+        const visitsToday =
+            currentVisits.filter(
+                visit =>
+                    visit.visit_date ===
+                    today
             );
-
-
-        upcomingCalendarYear =
-            firstDate.getFullYear();
-
-
-        upcomingCalendarMonth =
-            firstDate.getMonth();
-
-
-        selectedUpcomingDate =
-            currentVisits[0].visit_date;
-
-    }
-
-
-    if (
-        currentVisits.length === 0
-    ) {
-
-        selectedUpcomingDate =
+    
+    
+        const firstFutureVisit =
+            currentVisits.find(
+                visit =>
+                    visit.visit_date >
+                    today
+            );
+    
+    
+        let startingDate =
             today;
-
+    
+    
+        if (
+            visitsToday.length > 0
+        ) {
+    
+            startingDate =
+                today;
+    
+        } else if (
+            firstFutureVisit
+        ) {
+    
+            startingDate =
+                firstFutureVisit.visit_date;
+    
+        }
+    
+    
+        const startDate =
+            parseLocalDate(
+                startingDate
+            );
+    
+    
+        upcomingCalendarYear =
+            startDate.getFullYear();
+    
+    
+        upcomingCalendarMonth =
+            startDate.getMonth();
+    
+    
+        selectedUpcomingDate =
+            startingDate;
+    
     }
 
 
@@ -5855,10 +5877,6 @@ async function refreshUpcomingVisits() {
             .eq(
                 "client_id",
                 currentUser.id
-            )
-            .gte(
-                "visit_date",
-                today
             )
             .order(
                 "visit_date",
