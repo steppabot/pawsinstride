@@ -100,7 +100,6 @@ if (loginForm) {
 }
 
 
-
 // -------------------------
 // DASHBOARD
 // -------------------------
@@ -123,7 +122,6 @@ async function loadDashboard() {
     if (!dashboardContent) return;
 
 
-
     // -------------------------
     // SESSION
     // -------------------------
@@ -134,7 +132,6 @@ async function loadDashboard() {
     } =
         await supabaseClient.auth
             .getSession();
-
 
 
     if (sessionError) {
@@ -152,7 +149,6 @@ async function loadDashboard() {
     }
 
 
-
     if (!session) {
 
         window.location.href =
@@ -162,10 +158,8 @@ async function loadDashboard() {
     }
 
 
-
     currentUser =
         session.user;
-
 
 
     // -------------------------
@@ -186,7 +180,6 @@ async function loadDashboard() {
             .single();
 
 
-
     if (profileError) {
 
         console.error(
@@ -200,7 +193,6 @@ async function loadDashboard() {
 
         return;
     }
-
 
 
     // -------------------------
@@ -234,7 +226,6 @@ async function loadDashboard() {
         pets || [];
 
 
-
     // -------------------------
     // UPCOMING VISITS
     // -------------------------
@@ -263,12 +254,6 @@ async function loadDashboard() {
                 {
                     ascending: true
                 }
-            )
-            .order(
-                "start_time",
-                {
-                    ascending: true
-                }
             );
 
 
@@ -280,7 +265,6 @@ async function loadDashboard() {
         );
 
     }
-
 
 
     // -------------------------
@@ -295,7 +279,6 @@ async function loadDashboard() {
 
     welcomeName.textContent =
         `Welcome, ${profile.full_name}`;
-
 
 
     // -------------------------
@@ -340,9 +323,7 @@ async function loadDashboard() {
     }
 
 
-
     populateBookingPets();
-
 
 
     // -------------------------
@@ -372,12 +353,8 @@ async function loadDashboard() {
                             : "";
 
 
-                    const time =
-                        visit.start_time
-                            ? formatTime(
-                                visit.start_time
-                            )
-                            : "";
+                    const timeWindow =
+                        visit.time_window || "";
 
 
                     return `
@@ -393,8 +370,8 @@ async function loadDashboard() {
                                 visit.visit_date
                             )}
 
-                            ${time
-                                ? ` at ${time}`
+                            ${timeWindow
+                                ? `<br>Preferred window: ${timeWindow}`
                                 : ""
                             }
 
@@ -427,7 +404,6 @@ async function loadDashboard() {
     }
 
 
-
     loading.style.display =
         "none";
 
@@ -436,7 +412,6 @@ async function loadDashboard() {
         "block";
 
 }
-
 
 
 // -------------------------
@@ -490,7 +465,6 @@ function populateBookingPets() {
 }
 
 
-
 // -------------------------
 // OPEN BOOKING FORM
 // -------------------------
@@ -530,7 +504,6 @@ if (
 }
 
 
-
 // -------------------------
 // CLOSE BOOKING FORM
 // -------------------------
@@ -557,7 +530,6 @@ if (
     );
 
 }
-
 
 
 // -------------------------
@@ -626,7 +598,6 @@ function updateBookingPrice() {
 }
 
 
-
 // -------------------------
 // MINIMUM BOOKING DATE
 // -------------------------
@@ -643,7 +614,6 @@ if (bookingDate) {
         getLocalDateString();
 
 }
-
 
 
 // -------------------------
@@ -684,7 +654,6 @@ if (bookingForm) {
 
                 return;
             }
-
 
 
             const petId =
@@ -733,12 +702,11 @@ if (bookingForm) {
                     .value;
 
 
-
             if (
                 !petId ||
                 !serviceName ||
                 !visitDate ||
-                !startTime ||
+                !timeWindow ||
                 !price
             ) {
 
@@ -747,7 +715,6 @@ if (bookingForm) {
 
                 return;
             }
-
 
 
             submitButton.disabled =
@@ -760,7 +727,6 @@ if (bookingForm) {
 
             message.textContent =
                 "";
-
 
 
             const {
@@ -783,8 +749,8 @@ if (bookingForm) {
                         visit_date:
                             visitDate,
 
-                        start_time:
-                            startTime,
+                        time_window:
+                            timeWindow,
 
                         status:
                             "requested",
@@ -798,7 +764,6 @@ if (bookingForm) {
                     })
                     .select()
                     .single();
-
 
 
             if (error) {
@@ -823,7 +788,6 @@ if (bookingForm) {
 
                 return;
             }
-
 
 
             console.log(
@@ -869,7 +833,6 @@ if (bookingForm) {
 }
 
 
-
 // -------------------------
 // DATE HELPER
 // -------------------------
@@ -905,7 +868,6 @@ function getLocalDateString() {
     return `${year}-${month}-${day}`;
 
 }
-
 
 
 // -------------------------
@@ -944,60 +906,11 @@ function formatDate(
 }
 
 
-
-// -------------------------
-// DISPLAY TIME
-// -------------------------
-
-function formatTime(
-    timeString
-) {
-
-
-    if (!timeString) return "";
-
-
-    const parts =
-        timeString.split(":");
-
-
-    let hours =
-        parseInt(
-            parts[0],
-            10
-        );
-
-
-    const minutes =
-        parts[1];
-
-
-    const ampm =
-        hours >= 12
-            ? "PM"
-            : "AM";
-
-
-    hours =
-        hours % 12;
-
-
-    hours =
-        hours || 12;
-
-
-    return `${hours}:${minutes} ${ampm}`;
-
-}
-
-
-
 // -------------------------
 // START DASHBOARD
 // -------------------------
 
 loadDashboard();
-
 
 
 // -------------------------
