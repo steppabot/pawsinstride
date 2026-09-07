@@ -1198,17 +1198,29 @@ section h3 {
 }
 
 .upcoming-service-card {
-    padding: 14px 0;
-    border-top: 1px solid #eee;
+    position: relative;
+    overflow: hidden;
+
+    margin-top: 12px;
+    padding: 14px;
+
+    background: #fff;
+
+    border: 1px solid #ddd;
+    border-radius: 12px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
 }
 
 .upcoming-service-card:first-child {
-    padding-top: 0;
-    border-top: none;
+    margin-top: 0;
 }
 
 .upcoming-service-card:last-child {
-    padding-bottom: 0;
+    padding-bottom: 14px;
 }
 
 .upcoming-service-card-header {
@@ -1298,34 +1310,22 @@ section h3 {
 ======================================== */
 
 .upcoming-service-card-in-progress {
-    margin-top: 10px;
-    padding: 14px;
+    background: #fff;
 
-    background: #fffdf7;
-
-    border: 1px solid #e2bd54;
-    border-radius: 12px;
+    border-color: #d9b65f;
 
     box-shadow:
-        0 0 0 1px rgba(226, 189, 84, 0.08);
+        0 0 0 1px rgba(217, 182, 95, 0.12);
 }
-
 
 /* ========================================
    CLIENT VISIT COMPLETED
 ======================================== */
 
 .upcoming-service-card-completed {
-    margin-top: 10px;
-    padding: 14px;
-
     background: #fcfffd;
-
-    border: 1px solid #a9d7b7;
-    border-radius: 12px;
+    border-color: #a9d7b7;
 }
-
-
 /* ========================================
    CLIENT TOP-RIGHT PROGRESS ICON
 ======================================== */
