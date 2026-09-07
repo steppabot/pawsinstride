@@ -36,7 +36,6 @@
 
       </div>
 
-
       <button
         id="request-walk-button"
         class="primary-button"
@@ -57,11 +56,6 @@
       style="display:none;"
     >
 
-
-      <!-- ========================================
-           BOOKING FORM
-           ======================================== -->
-
       <section
         id="booking-section"
         class="booking-section"
@@ -73,7 +67,6 @@
           <h3>
             Request Walks
           </h3>
-
 
           <button
             type="button"
@@ -89,9 +82,6 @@
 
         <form id="booking-form">
 
-
-          <!-- PET -->
-
           <label for="booking-pet">
             Pet
           </label>
@@ -100,16 +90,11 @@
             id="booking-pet"
             required
           >
-
             <option value="">
               Select your pet
             </option>
-
           </select>
 
-
-
-          <!-- SERVICE -->
 
           <label for="booking-service">
             Service
@@ -124,7 +109,6 @@
               Select a service
             </option>
 
-
             <option
               value="15 Minute Walk"
               data-price="30"
@@ -132,14 +116,12 @@
               15 Minute Walk — $30
             </option>
 
-
             <option
               value="30 Minute Walk"
               data-price="50"
             >
               30 Minute Walk — $50
             </option>
-
 
             <option
               value="60 Minute Walk"
@@ -150,9 +132,6 @@
 
           </select>
 
-
-
-          <!-- TIME WINDOW -->
 
           <label for="booking-time">
             Preferred Time Window
@@ -198,36 +177,68 @@
           </select>
 
 
-
           <!-- DATES -->
 
-          <label for="booking-date">
+          <label>
             Dates
           </label>
 
           <p class="booking-help">
             Select at least 3 walk dates per week.
+            Tap a date to select it. Tap it again to remove it.
           </p>
 
 
-          <div class="date-picker-row">
+          <!-- INLINE CALENDAR -->
 
-            <input
-              type="date"
-              id="booking-date"
+          <div class="booking-calendar">
+
+            <div class="calendar-header">
+
+              <button
+                type="button"
+                id="calendar-prev"
+                class="calendar-nav-button"
+                aria-label="Previous month"
+              >
+                ‹
+              </button>
+
+              <strong id="calendar-month-label">
+              </strong>
+
+              <button
+                type="button"
+                id="calendar-next"
+                class="calendar-nav-button"
+                aria-label="Next month"
+              >
+                ›
+              </button>
+
+            </div>
+
+
+            <div class="calendar-weekdays">
+
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
+
+            </div>
+
+
+            <div
+              id="booking-calendar-grid"
+              class="calendar-grid"
             >
-
-
-            <button
-              type="button"
-              id="add-date-button"
-              class="secondary-button"
-            >
-              Add Date
-            </button>
+            </div>
 
           </div>
-
 
 
           <!-- SELECTED DATES -->
@@ -258,30 +269,23 @@
           </div>
 
 
-
           <!-- TOTAL -->
 
           <div class="booking-total">
 
             <div>
-
               <span id="booking-count">
                 0 walks
               </span>
-
             </div>
 
-
             <div>
-
               <strong id="booking-price">
                 $0.00
               </strong>
-
             </div>
 
           </div>
-
 
 
           <button
@@ -295,16 +299,10 @@
 
           <p id="booking-message"></p>
 
-
         </form>
 
       </section>
 
-
-
-      <!-- ========================================
-           PETS
-           ======================================== -->
 
       <section>
 
@@ -317,11 +315,6 @@
       </section>
 
 
-
-      <!-- ========================================
-           UPCOMING WALKS
-           ======================================== -->
-
       <section>
 
         <h3>
@@ -333,15 +326,9 @@
       </section>
 
 
-
-      <!-- ========================================
-           LOGOUT
-           ======================================== -->
-
       <button id="logout-button">
         Log Out
       </button>
-
 
     </div>
 
