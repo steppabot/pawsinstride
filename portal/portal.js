@@ -1,9 +1,12 @@
+// ========================================
+// SUPABASE
+// ========================================
+
 const SUPABASE_URL =
     "https://xyhndwopvlmnxjkthtkl.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_U3OIYatZuBUe8Y6Vq0DS2w_IMacau2j";
-
 
 const supabaseClient =
     supabase.createClient(
@@ -12,6 +15,10 @@ const supabaseClient =
     );
 
 
+// ========================================
+// STATE
+// ========================================
+
 let currentUser = null;
 
 let currentPets = [];
@@ -19,17 +26,201 @@ let currentPets = [];
 let selectedDates = [];
 
 
-// Current month displayed
-// in the booking calendar.
-
-const now =
-    new Date();
+const now = new Date();
 
 let calendarYear =
     now.getFullYear();
 
 let calendarMonth =
     now.getMonth();
+
+
+// ========================================
+// SERVICE CONFIGURATION
+// ========================================
+
+const TIME_WINDOWS = [
+
+    {
+        value: "7:00 AM - 10:00 AM",
+        label: "7:00 AM – 10:00 AM",
+        surcharge: 0
+    },
+
+    {
+        value: "10:00 AM - 12:00 PM",
+        label: "10:00 AM – 12:00 PM",
+        surcharge: 0
+    },
+
+    {
+        value: "12:00 PM - 2:00 PM",
+        label: "12:00 PM – 2:00 PM",
+        surcharge: 0
+    },
+
+    {
+        value: "2:00 PM - 4:00 PM",
+        label: "2:00 PM – 4:00 PM",
+        surcharge: 0
+    },
+
+    {
+        value: "4:00 PM - 6:00 PM",
+        label: "4:00 PM – 6:00 PM",
+        surcharge: 0
+    },
+
+    {
+        value: "6:00 PM - 8:00 PM",
+        label: "6:00 PM – 8:00 PM (+$5)",
+        surcharge: 5
+    },
+
+    {
+        value: "8:00 PM - 10:00 PM",
+        label: "8:00 PM – 10:00 PM (+$10)",
+        surcharge: 10
+    }
+
+];
+
+
+const SERVICE_CONFIG = {
+
+    "Dog Walking": {
+
+        minimumPerWeek: 3,
+
+        optionLabel: "Duration",
+
+        options: [
+
+            {
+                value: "15 Minutes",
+                label: "15 Minutes — $30",
+                price: 30
+            },
+
+            {
+                value: "30 Minutes",
+                label: "30 Minutes — $45",
+                price: 45
+            },
+
+            {
+                value: "60 Minutes",
+                label: "60 Minutes — $65",
+                price: 65
+            }
+
+        ]
+
+    },
+
+
+    "Drop-In Visit": {
+
+        minimumPerWeek: 3,
+
+        optionLabel: "Duration",
+
+        options: [
+
+            {
+                value: "15 Minutes",
+                label: "15 Minutes — $30",
+                price: 30
+            },
+
+            {
+                value: "30 Minutes",
+                label: "30 Minutes — $45",
+                price: 45
+            },
+
+            {
+                value: "60 Minutes",
+                label: "60 Minutes — $65",
+                price: 65
+            }
+
+        ]
+
+    },
+
+
+    "Pet Sitting": {
+
+        minimumPerWeek: 0,
+
+        optionLabel: "Package",
+
+        options: [
+
+            {
+                value: "Basic Sit - 4 Hours",
+                label: "Basic Sit — 4 Hours — $100",
+                price: 100,
+
+                timeBlocks: [
+
+                    "7:00 AM - 11:00 AM",
+
+                    "11:00 AM - 3:00 PM",
+
+                    "3:00 PM - 7:00 PM",
+
+                    "7:00 PM - 11:00 PM"
+
+                ]
+
+            },
+
+            {
+                value: "Standard Sit - 8 Hours",
+                label: "Standard Sit — 8 Hours — $180",
+                price: 180,
+
+                timeBlocks: [
+
+                    "7:00 AM - 3:00 PM",
+
+                    "3:00 PM - 11:00 PM"
+
+                ]
+
+            },
+
+            {
+                value: "VIP Sit - 12 Hours",
+                label: "VIP Sit — 12 Hours — $240",
+                price: 240,
+
+                timeBlocks: [
+
+                    "7:00 AM - 7:00 PM",
+
+                    "11:00 AM - 11:00 PM"
+
+                ]
+
+            }
+
+        ]
+
+    },
+
+
+    "Dog Boarding": {
+
+        boarding: true,
+
+        pricePerNight: 100
+
+    }
+
+};
 
 
 // ========================================
@@ -46,7 +237,7 @@ if (loginForm) {
 
     loginForm.addEventListener(
         "submit",
-        async (event) => {
+        async event => {
 
             event.preventDefault();
 
@@ -102,6 +293,7 @@ if (loginForm) {
                     "Incorrect email or password.";
 
                 return;
+
             }
 
 
@@ -111,6 +303,7 @@ if (loginForm) {
                     "Login succeeded, but no session was created.";
 
                 return;
+
             }
 
 
@@ -170,6 +363,7 @@ async function loadDashboard() {
             "There was a problem loading your login session.";
 
         return;
+
     }
 
 
@@ -179,6 +373,7 @@ async function loadDashboard() {
             "./login.html";
 
         return;
+
     }
 
 
@@ -214,6 +409,7 @@ async function loadDashboard() {
             "We couldn't load your client profile.";
 
         return;
+
     }
 
 
@@ -246,7 +442,7 @@ async function loadDashboard() {
         pets || [];
 
 
-    // UPCOMING VISITS
+    // VISITS
 
     const today =
         getLocalDateString();
@@ -285,7 +481,7 @@ async function loadDashboard() {
     }
 
 
-    // NAME
+    // WELCOME
 
     const welcomeName =
         document.getElementById(
@@ -293,11 +489,15 @@ async function loadDashboard() {
         );
 
 
-    welcomeName.textContent =
-        `Welcome, ${profile.full_name}`;
+    if (welcomeName) {
+
+        welcomeName.textContent =
+            `Welcome, ${profile.full_name}`;
+
+    }
 
 
-    // PET DISPLAY
+    // PETS DISPLAY
 
     const petInfo =
         document.getElementById(
@@ -306,6 +506,7 @@ async function loadDashboard() {
 
 
     if (
+        petInfo &&
         currentPets.length > 0
     ) {
 
@@ -328,7 +529,7 @@ async function loadDashboard() {
                 )
                 .join("");
 
-    } else {
+    } else if (petInfo) {
 
         petInfo.textContent =
             "No pets found.";
@@ -339,7 +540,7 @@ async function loadDashboard() {
     populateBookingPets();
 
 
-    // UPCOMING WALKS DISPLAY
+    // UPCOMING SERVICE DISPLAY
 
     const visitsContainer =
         document.getElementById(
@@ -348,6 +549,7 @@ async function loadDashboard() {
 
 
     if (
+        visitsContainer &&
         visits &&
         visits.length > 0
     ) {
@@ -365,6 +567,12 @@ async function loadDashboard() {
                                 : "";
 
 
+                        const serviceTitle =
+                            visit.service_name ||
+                            visit.service_type ||
+                            "Service";
+
+
                         const timeWindow =
                             visit.time_window ||
                             "";
@@ -374,7 +582,7 @@ async function loadDashboard() {
                             <div class="visit-card">
 
                                 <strong>
-                                    ${visit.service_name}
+                                    ${serviceTitle}
                                 </strong>
 
                                 <br>
@@ -385,7 +593,7 @@ async function loadDashboard() {
 
                                 ${
                                     timeWindow
-                                        ? `<br>Preferred window: ${timeWindow}`
+                                        ? `<br>Time: ${timeWindow}`
                                         : ""
                                 }
 
@@ -394,9 +602,11 @@ async function loadDashboard() {
                                 Status:
                                 ${visit.status}
 
-                                <br>
-
-                                ${price}
+                                ${
+                                    price
+                                        ? `<br>${price}`
+                                        : ""
+                                }
 
                                 <br>
 
@@ -410,10 +620,10 @@ async function loadDashboard() {
                 )
                 .join("");
 
-    } else {
+    } else if (visitsContainer) {
 
         visitsContainer.textContent =
-            "No upcoming visits.";
+            "No upcoming services.";
 
     }
 
@@ -485,7 +695,7 @@ function populateBookingPets() {
 
 
 // ========================================
-// OPEN BOOKING
+// OPEN / CLOSE BOOKING
 // ========================================
 
 const requestWalkButton =
@@ -527,10 +737,6 @@ if (
 }
 
 
-// ========================================
-// CLOSE BOOKING
-// ========================================
-
 const closeBookingButton =
     document.getElementById(
         "close-booking-button"
@@ -550,6 +756,516 @@ if (
                 "none";
 
         }
+    );
+
+}
+
+
+// ========================================
+// SERVICE TYPE
+// ========================================
+
+const serviceTypeSelect =
+    document.getElementById(
+        "service-type"
+    );
+
+
+if (serviceTypeSelect) {
+
+    serviceTypeSelect.addEventListener(
+        "change",
+        handleServiceTypeChange
+    );
+
+}
+
+
+function handleServiceTypeChange() {
+
+
+    const serviceType =
+        serviceTypeSelect.value;
+
+
+    const optionWrapper =
+        document.getElementById(
+            "service-option-wrapper"
+        );
+
+
+    const timeWrapper =
+        document.getElementById(
+            "time-window-wrapper"
+        );
+
+
+    const multiDate =
+        document.getElementById(
+            "multi-date-booking"
+        );
+
+
+    const boarding =
+        document.getElementById(
+            "boarding-booking"
+        );
+
+
+    const optionSelect =
+        document.getElementById(
+            "service-option"
+        );
+
+
+    const timeSelect =
+        document.getElementById(
+            "booking-time"
+        );
+
+
+    const message =
+        document.getElementById(
+            "booking-message"
+        );
+
+
+    message.textContent =
+        "";
+
+
+    selectedDates =
+        [];
+
+
+    renderSelectedDates();
+
+
+    optionSelect.innerHTML =
+        `
+            <option value="">
+                Select an option
+            </option>
+        `;
+
+
+    timeSelect.innerHTML =
+        `
+            <option value="">
+                Select a time
+            </option>
+        `;
+
+
+    optionWrapper.style.display =
+        "none";
+
+
+    timeWrapper.style.display =
+        "none";
+
+
+    multiDate.style.display =
+        "none";
+
+
+    boarding.style.display =
+        "none";
+
+
+    if (!serviceType) {
+
+        updateBookingTotal();
+
+        return;
+
+    }
+
+
+    const config =
+        SERVICE_CONFIG[
+            serviceType
+        ];
+
+
+    if (
+        serviceType ===
+        "Dog Boarding"
+    ) {
+
+        boarding.style.display =
+            "block";
+
+
+        resetBoardingDates();
+
+
+        updateBookingTotal();
+
+        return;
+
+    }
+
+
+    optionWrapper.style.display =
+        "block";
+
+
+    multiDate.style.display =
+        "block";
+
+
+    populateServiceOptions(
+        serviceType
+    );
+
+
+    if (
+        serviceType ===
+        "Dog Walking" ||
+        serviceType ===
+        "Drop-In Visit"
+    ) {
+
+        timeWrapper.style.display =
+            "block";
+
+
+        populatePreferredTimeWindows();
+
+
+        document.getElementById(
+            "booking-date-help"
+        ).textContent =
+            "Select at least 3 service dates per week. Tap a date again to remove it.";
+
+    }
+
+
+    if (
+        serviceType ===
+        "Pet Sitting"
+    ) {
+
+        document.getElementById(
+            "booking-date-help"
+        ).textContent =
+            "Select one or more pet sitting dates. Tap a date again to remove it.";
+
+    }
+
+
+    renderBookingCalendar();
+
+
+    updateBookingTotal();
+
+}
+
+
+// ========================================
+// SERVICE OPTIONS
+// ========================================
+
+function populateServiceOptions(
+    serviceType
+) {
+
+
+    const config =
+        SERVICE_CONFIG[
+            serviceType
+        ];
+
+
+    const optionSelect =
+        document.getElementById(
+            "service-option"
+        );
+
+
+    const optionLabel =
+        document.getElementById(
+            "service-option-label"
+        );
+
+
+    optionLabel.textContent =
+        config.optionLabel;
+
+
+    optionSelect.innerHTML =
+        `
+            <option value="">
+                Select ${config.optionLabel.toLowerCase()}
+            </option>
+        `;
+
+
+    config.options.forEach(
+        option => {
+
+            const element =
+                document.createElement(
+                    "option"
+                );
+
+
+            element.value =
+                option.value;
+
+
+            element.textContent =
+                option.label;
+
+
+            element.dataset.price =
+                option.price;
+
+
+            optionSelect.appendChild(
+                element
+            );
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SERVICE OPTION CHANGE
+// ========================================
+
+const serviceOptionSelect =
+    document.getElementById(
+        "service-option"
+    );
+
+
+if (serviceOptionSelect) {
+
+    serviceOptionSelect.addEventListener(
+        "change",
+        () => {
+
+            const serviceType =
+                serviceTypeSelect.value;
+
+
+            if (
+                serviceType ===
+                "Pet Sitting"
+            ) {
+
+                populatePetSittingTimeBlocks();
+
+            }
+
+
+            updateBookingTotal();
+
+        }
+    );
+
+}
+
+
+// ========================================
+// WALK / DROP-IN TIME WINDOWS
+// ========================================
+
+function populatePreferredTimeWindows() {
+
+
+    const wrapper =
+        document.getElementById(
+            "time-window-wrapper"
+        );
+
+
+    const label =
+        document.getElementById(
+            "time-window-label"
+        );
+
+
+    const select =
+        document.getElementById(
+            "booking-time"
+        );
+
+
+    wrapper.style.display =
+        "block";
+
+
+    label.textContent =
+        "Preferred Time Window";
+
+
+    select.innerHTML =
+        `
+            <option value="">
+                Select a time window
+            </option>
+        `;
+
+
+    TIME_WINDOWS.forEach(
+        window => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                window.value;
+
+
+            option.textContent =
+                window.label;
+
+
+            option.dataset.surcharge =
+                window.surcharge;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+// ========================================
+// PET SITTING TIME BLOCKS
+// ========================================
+
+function populatePetSittingTimeBlocks() {
+
+
+    const wrapper =
+        document.getElementById(
+            "time-window-wrapper"
+        );
+
+
+    const label =
+        document.getElementById(
+            "time-window-label"
+        );
+
+
+    const select =
+        document.getElementById(
+            "booking-time"
+        );
+
+
+    const selectedPackage =
+        serviceOptionSelect.value;
+
+
+    select.innerHTML =
+        `
+            <option value="">
+                Select a time block
+            </option>
+        `;
+
+
+    if (!selectedPackage) {
+
+        wrapper.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    const config =
+        SERVICE_CONFIG[
+            "Pet Sitting"
+        ];
+
+
+    const packageInfo =
+        config.options.find(
+            option =>
+                option.value ===
+                selectedPackage
+        );
+
+
+    if (!packageInfo) {
+
+        wrapper.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    wrapper.style.display =
+        "block";
+
+
+    label.textContent =
+        "Time Block";
+
+
+    packageInfo
+        .timeBlocks
+        .forEach(
+            block => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    block;
+
+
+                option.textContent =
+                    block;
+
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+}
+
+
+// ========================================
+// TIME CHANGE
+// ========================================
+
+const bookingTime =
+    document.getElementById(
+        "booking-time"
+    );
+
+
+if (bookingTime) {
+
+    bookingTime.addEventListener(
+        "change",
+        updateBookingTotal
     );
 
 }
@@ -580,9 +1296,13 @@ if (calendarPrev) {
             calendarMonth--;
 
 
-            if (calendarMonth < 0) {
+            if (
+                calendarMonth < 0
+            ) {
 
-                calendarMonth = 11;
+                calendarMonth =
+                    11;
+
 
                 calendarYear--;
 
@@ -606,9 +1326,13 @@ if (calendarNext) {
             calendarMonth++;
 
 
-            if (calendarMonth > 11) {
+            if (
+                calendarMonth > 11
+            ) {
 
-                calendarMonth = 0;
+                calendarMonth =
+                    0;
+
 
                 calendarYear++;
 
@@ -624,7 +1348,7 @@ if (calendarNext) {
 
 
 // ========================================
-// RENDER BOOKING CALENDAR
+// RENDER CALENDAR
 // ========================================
 
 function renderBookingCalendar() {
@@ -646,9 +1370,7 @@ function renderBookingCalendar() {
         !grid ||
         !monthLabel
     ) {
-
         return;
-
     }
 
 
@@ -682,9 +1404,6 @@ function renderBookingCalendar() {
         );
 
 
-    // JS Sunday = 0.
-    // Calendar Monday = first column.
-
     let leadingBlankDays =
         firstDay.getDay() - 1;
 
@@ -693,7 +1412,8 @@ function renderBookingCalendar() {
         leadingBlankDays < 0
     ) {
 
-        leadingBlankDays = 6;
+        leadingBlankDays =
+            6;
 
     }
 
@@ -726,8 +1446,7 @@ function renderBookingCalendar() {
             calendarYear,
             calendarMonth + 1,
             0
-        )
-        .getDate();
+        ).getDate();
 
 
     const todayString =
@@ -833,7 +1552,7 @@ function renderBookingCalendar() {
 
 
 // ========================================
-// TOGGLE SELECTED DATE
+// SELECT / REMOVE DATE
 // ========================================
 
 function toggleSelectedDate(
@@ -841,18 +1560,7 @@ function toggleSelectedDate(
 ) {
 
 
-    const message =
-        document.getElementById(
-            "booking-message"
-        );
-
-
-    if (message) {
-
-        message.textContent =
-            "";
-
-    }
+    clearBookingMessage();
 
 
     if (
@@ -864,7 +1572,8 @@ function toggleSelectedDate(
         selectedDates =
             selectedDates.filter(
                 selectedDate =>
-                    selectedDate !== date
+                    selectedDate !==
+                    date
             );
 
     } else {
@@ -887,10 +1596,6 @@ function toggleSelectedDate(
 }
 
 
-// ========================================
-// REMOVE DATE FROM LIST
-// ========================================
-
 function removeSelectedDate(
     date
 ) {
@@ -899,7 +1604,8 @@ function removeSelectedDate(
     selectedDates =
         selectedDates.filter(
             selectedDate =>
-                selectedDate !== date
+                selectedDate !==
+                date
         );
 
 
@@ -912,7 +1618,7 @@ function removeSelectedDate(
 
 
 // ========================================
-// SELECTED DATE LIST
+// SELECTED DATES DISPLAY
 // ========================================
 
 function renderSelectedDates() {
@@ -934,17 +1640,15 @@ function renderSelectedDates() {
         !list ||
         !count
     ) {
-
         return;
-
     }
 
 
     count.textContent =
         `${selectedDates.length} ${
             selectedDates.length === 1
-                ? "walk"
-                : "walks"
+                ? "visit"
+                : "visits"
         }`;
 
 
@@ -985,28 +1689,26 @@ function renderSelectedDates() {
                 .join("");
 
 
-        const removeButtons =
-            list.querySelectorAll(
+        list
+            .querySelectorAll(
                 ".remove-date-button"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            removeSelectedDate(
+                                button.dataset.removeDate
+                            );
+
+                        }
+                    );
+
+                }
             );
-
-
-        removeButtons.forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        removeSelectedDate(
-                            button.dataset.removeDate
-                        );
-
-                    }
-                );
-
-            }
-        );
 
     }
 
@@ -1017,18 +1719,57 @@ function renderSelectedDates() {
 
 
 // ========================================
-// SERVICE PRICE
+// BOARDING
 // ========================================
 
-const bookingService =
+const boardingDropoff =
     document.getElementById(
-        "booking-service"
+        "boarding-dropoff"
     );
 
 
-if (bookingService) {
+const boardingPickup =
+    document.getElementById(
+        "boarding-pickup"
+    );
 
-    bookingService.addEventListener(
+
+const boardingPickupWindow =
+    document.getElementById(
+        "boarding-pickup-window"
+    );
+
+
+if (boardingDropoff) {
+
+    boardingDropoff.addEventListener(
+        "change",
+        () => {
+
+            if (
+                boardingDropoff.value
+            ) {
+
+                boardingPickup.min =
+                    addDaysToDateString(
+                        boardingDropoff.value,
+                        1
+                    );
+
+            }
+
+
+            updateBookingTotal();
+
+        }
+    );
+
+}
+
+
+if (boardingPickup) {
+
+    boardingPickup.addEventListener(
         "change",
         updateBookingTotal
     );
@@ -1036,17 +1777,64 @@ if (bookingService) {
 }
 
 
+if (boardingPickupWindow) {
+
+    boardingPickupWindow.addEventListener(
+        "change",
+        updateBookingTotal
+    );
+
+}
+
+
+function resetBoardingDates() {
+
+
+    if (!boardingDropoff) {
+        return;
+    }
+
+
+    const today =
+        getLocalDateString();
+
+
+    boardingDropoff.min =
+        today;
+
+
+    boardingPickup.min =
+        addDaysToDateString(
+            today,
+            1
+        );
+
+
+    boardingDropoff.value =
+        "";
+
+
+    boardingPickup.value =
+        "";
+
+
+    boardingPickupWindow.value =
+        "";
+
+}
+
+
 // ========================================
-// BOOKING TOTAL
+// PRICE
 // ========================================
 
 function updateBookingTotal() {
 
 
-    const serviceSelect =
-        document.getElementById(
-            "booking-service"
-        );
+    const serviceType =
+        serviceTypeSelect
+            ? serviceTypeSelect.value
+            : "";
 
 
     const priceDisplay =
@@ -1061,11 +1849,112 @@ function updateBookingTotal() {
         );
 
 
+    const detailDisplay =
+        document.getElementById(
+            "booking-price-details"
+        );
+
+
     if (
-        !serviceSelect ||
         !priceDisplay ||
         !countDisplay
     ) {
+        return;
+    }
+
+
+    if (!serviceType) {
+
+        countDisplay.textContent =
+            "0 services";
+
+
+        priceDisplay.textContent =
+            "$0.00";
+
+
+        if (detailDisplay) {
+
+            detailDisplay.textContent =
+                "";
+
+        }
+
+
+        return;
+
+    }
+
+
+    // BOARDING
+
+    if (
+        serviceType ===
+        "Dog Boarding"
+    ) {
+
+        const nights =
+            getBoardingNightCount();
+
+
+        const pickupFee =
+            getBoardingPickupFee();
+
+
+        const boardingBase =
+            nights * 100;
+
+
+        const total =
+            boardingBase +
+            pickupFee;
+
+
+        countDisplay.textContent =
+            `${nights} ${
+                nights === 1
+                    ? "night"
+                    : "nights"
+            }`;
+
+
+        priceDisplay.textContent =
+            `$${total.toFixed(2)}`;
+
+
+        if (
+            detailDisplay &&
+            nights > 0
+        ) {
+
+            let details =
+                `${nights} ${
+                    nights === 1
+                        ? "night"
+                        : "nights"
+                } × $100`;
+
+
+            if (
+                pickupFee > 0
+            ) {
+
+                details +=
+                    ` + $50 extended pickup`;
+
+            }
+
+
+            detailDisplay.textContent =
+                details;
+
+        } else if (detailDisplay) {
+
+            detailDisplay.textContent =
+                "";
+
+        }
+
 
         return;
 
@@ -1073,42 +1962,186 @@ function updateBookingTotal() {
 
 
     const selectedOption =
-        serviceSelect.options[
-            serviceSelect.selectedIndex
+        serviceOptionSelect.options[
+            serviceOptionSelect.selectedIndex
         ];
 
 
-    const price =
+    const basePrice =
         Number(
-            selectedOption.dataset.price
+            selectedOption
+                ? selectedOption.dataset.price
+                : 0
         ) || 0;
 
 
-    const numberOfWalks =
-        selectedDates.length;
+    let surcharge =
+        0;
+
+
+    if (
+        serviceType ===
+            "Dog Walking" ||
+        serviceType ===
+            "Drop-In Visit"
+    ) {
+
+        const timeOption =
+            bookingTime.options[
+                bookingTime.selectedIndex
+            ];
+
+
+        surcharge =
+            Number(
+                timeOption
+                    ? timeOption.dataset.surcharge
+                    : 0
+            ) || 0;
+
+    }
+
+
+    const pricePerService =
+        basePrice +
+        surcharge;
 
 
     const total =
-        price *
-        numberOfWalks;
+        pricePerService *
+        selectedDates.length;
 
 
     countDisplay.textContent =
-        `${numberOfWalks} ${
-            numberOfWalks === 1
-                ? "walk"
-                : "walks"
+        `${selectedDates.length} ${
+            selectedDates.length === 1
+                ? "service"
+                : "services"
         }`;
 
 
     priceDisplay.textContent =
         `$${total.toFixed(2)}`;
 
+
+    if (
+        detailDisplay &&
+        selectedDates.length > 0 &&
+        basePrice > 0
+    ) {
+
+        let details =
+            `${selectedDates.length} × $${basePrice}`;
+
+
+        if (
+            surcharge > 0
+        ) {
+
+            details +=
+                ` + $${surcharge} ${
+                    surcharge === 5
+                        ? "after-hours fee per visit"
+                        : "late-evening fee per visit"
+                }`;
+
+        }
+
+
+        detailDisplay.textContent =
+            details;
+
+    } else if (detailDisplay) {
+
+        detailDisplay.textContent =
+            "";
+
+    }
+
 }
 
 
 // ========================================
-// WEEK HELPER
+// BOARDING PRICE HELPERS
+// ========================================
+
+function getBoardingNightCount() {
+
+
+    if (
+        !boardingDropoff ||
+        !boardingPickup ||
+        !boardingDropoff.value ||
+        !boardingPickup.value
+    ) {
+
+        return 0;
+
+    }
+
+
+    const start =
+        parseLocalDate(
+            boardingDropoff.value
+        );
+
+
+    const end =
+        parseLocalDate(
+            boardingPickup.value
+        );
+
+
+    const difference =
+        end.getTime() -
+        start.getTime();
+
+
+    if (
+        difference <= 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    return Math.round(
+        difference /
+        86400000
+    );
+
+}
+
+
+function getBoardingPickupFee() {
+
+
+    if (
+        !boardingPickupWindow ||
+        !boardingPickupWindow.value
+    ) {
+
+        return 0;
+
+    }
+
+
+    const option =
+        boardingPickupWindow.options[
+            boardingPickupWindow.selectedIndex
+        ];
+
+
+    return Number(
+        option.dataset.fee
+    ) || 0;
+
+}
+
+
+// ========================================
+// WEEK VALIDATION
 // ========================================
 
 function getWeekKey(
@@ -1116,15 +2149,9 @@ function getWeekKey(
 ) {
 
 
-    const parts =
-        dateString.split("-");
-
-
     const date =
-        new Date(
-            Number(parts[0]),
-            Number(parts[1]) - 1,
-            Number(parts[2])
+        parseLocalDate(
+            dateString
         );
 
 
@@ -1157,10 +2184,6 @@ function getWeekKey(
 }
 
 
-// ========================================
-// VALIDATE 3 PER WEEK
-// ========================================
-
 function validateThreePerWeek() {
 
 
@@ -1171,7 +2194,7 @@ function validateThreePerWeek() {
         return {
             valid: false,
             message:
-                "Please select at least 3 walk dates."
+                "Please select at least 3 service dates."
         };
 
     }
@@ -1190,9 +2213,7 @@ function validateThreePerWeek() {
                 );
 
 
-            if (
-                !weeks[weekKey]
-            ) {
+            if (!weeks[weekKey]) {
 
                 weeks[weekKey] =
                     [];
@@ -1225,7 +2246,7 @@ function validateThreePerWeek() {
         return {
             valid: false,
             message:
-                "Please select at least 3 walk dates for each week you are booking."
+                "Dog Walking and Drop-In Visits require at least 3 selected dates for each week you are booking."
         };
 
     }
@@ -1252,7 +2273,7 @@ if (bookingForm) {
 
     bookingForm.addEventListener(
         "submit",
-        async (event) => {
+        async event => {
 
             event.preventDefault();
 
@@ -1279,6 +2300,7 @@ if (bookingForm) {
                     "Your login session expired.";
 
                 return;
+
             }
 
 
@@ -1290,72 +2312,167 @@ if (bookingForm) {
                     .value;
 
 
-            const serviceSelect =
-                document.getElementById(
-                    "booking-service"
-                );
-
-
-            const serviceName =
-                serviceSelect.value;
-
-
-            const selectedOption =
-                serviceSelect.options[
-                    serviceSelect.selectedIndex
-                ];
-
-
-            const price =
-                Number(
-                    selectedOption.dataset.price
-                );
-
-
-            const timeWindow =
-                document
-                    .getElementById(
-                        "booking-time"
-                    )
-                    .value;
+            const serviceType =
+                serviceTypeSelect.value;
 
 
             if (
                 !petId ||
-                !serviceName ||
-                !price ||
+                !serviceType
+            ) {
+
+                message.textContent =
+                    "Please select your pet and service type.";
+
+                return;
+
+            }
+
+
+            if (
+                serviceType ===
+                "Dog Boarding"
+            ) {
+
+                await submitBoardingBooking(
+                    petId,
+                    message,
+                    submitButton
+                );
+
+
+                return;
+
+            }
+
+
+            const serviceOption =
+                serviceOptionSelect.value;
+
+
+            const timeWindow =
+                bookingTime.value;
+
+
+            if (
+                !serviceOption
+            ) {
+
+                message.textContent =
+                    "Please select a service option.";
+
+                return;
+
+            }
+
+
+            if (
                 !timeWindow
             ) {
 
                 message.textContent =
-                    "Please complete every field.";
+                    serviceType ===
+                        "Pet Sitting"
+                        ? "Please select a pet sitting time block."
+                        : "Please select a preferred time window.";
 
                 return;
+
             }
-
-
-            const dateValidation =
-                validateThreePerWeek();
 
 
             if (
-                !dateValidation.valid
+                serviceType ===
+                    "Dog Walking" ||
+                serviceType ===
+                    "Drop-In Visit"
             ) {
 
-                message.textContent =
-                    dateValidation.message;
+                const validation =
+                    validateThreePerWeek();
 
-                return;
+
+                if (
+                    !validation.valid
+                ) {
+
+                    message.textContent =
+                        validation.message;
+
+                    return;
+
+                }
+
+            } else {
+
+                if (
+                    selectedDates.length < 1
+                ) {
+
+                    message.textContent =
+                        "Please select at least one date.";
+
+                    return;
+
+                }
+
             }
+
+
+            const selectedOption =
+                serviceOptionSelect.options[
+                    serviceOptionSelect.selectedIndex
+                ];
+
+
+            const basePrice =
+                Number(
+                    selectedOption.dataset.price
+                ) || 0;
+
+
+            let surcharge =
+                0;
+
+
+            if (
+                serviceType ===
+                    "Dog Walking" ||
+                serviceType ===
+                    "Drop-In Visit"
+            ) {
+
+                const timeOption =
+                    bookingTime.options[
+                        bookingTime.selectedIndex
+                    ];
+
+
+                surcharge =
+                    Number(
+                        timeOption.dataset.surcharge
+                    ) || 0;
+
+            }
+
+
+            const price =
+                basePrice +
+                surcharge;
 
 
             const bookingGroupId =
                 crypto.randomUUID();
 
 
+            let serviceName =
+                `${serviceType} - ${serviceOption}`;
+
+
             const visitsToInsert =
                 selectedDates.map(
                     date => ({
+
                         client_id:
                             currentUser.id,
 
@@ -1363,6 +2480,12 @@ if (bookingForm) {
                             Number(
                                 petId
                             ),
+
+                        service_type:
+                            serviceType,
+
+                        service_option:
+                            serviceOption,
 
                         service_name:
                             serviceName,
@@ -1384,6 +2507,7 @@ if (bookingForm) {
 
                         booking_group_id:
                             bookingGroupId
+
                     })
                 );
 
@@ -1417,7 +2541,7 @@ if (bookingForm) {
 
 
                 message.textContent =
-                    "We couldn't submit your walk request.";
+                    "We couldn't submit your service request.";
 
 
                 submitButton.disabled =
@@ -1429,6 +2553,7 @@ if (bookingForm) {
 
 
                 return;
+
             }
 
 
@@ -1438,35 +2563,19 @@ if (bookingForm) {
             );
 
 
-            const walkCount =
+            const serviceCount =
                 selectedDates.length;
 
 
             message.textContent =
-                `${walkCount} walks added successfully!`;
+                `${serviceCount} ${
+                    serviceCount === 1
+                        ? "service"
+                        : "services"
+                } added successfully!`;
 
 
-            selectedDates =
-                [];
-
-
-            bookingForm.reset();
-
-
-            calendarYear =
-                new Date()
-                    .getFullYear();
-
-
-            calendarMonth =
-                new Date()
-                    .getMonth();
-
-
-            renderSelectedDates();
-
-
-            renderBookingCalendar();
+            resetBookingForm();
 
 
             submitButton.disabled =
@@ -1487,7 +2596,7 @@ if (bookingForm) {
                     await loadDashboard();
 
                 },
-                1000
+                900
             );
 
         }
@@ -1497,8 +2606,391 @@ if (bookingForm) {
 
 
 // ========================================
+// BOARDING SUBMIT
+// ========================================
+
+async function submitBoardingBooking(
+    petId,
+    message,
+    submitButton
+) {
+
+
+    const dropoff =
+        boardingDropoff.value;
+
+
+    const pickup =
+        boardingPickup.value;
+
+
+    const pickupWindow =
+        boardingPickupWindow.value;
+
+
+    if (
+        !dropoff ||
+        !pickup ||
+        !pickupWindow
+    ) {
+
+        message.textContent =
+            "Please select your boarding drop-off date, pick-up date, and pick-up time.";
+
+        return;
+
+    }
+
+
+    const nights =
+        getBoardingNightCount();
+
+
+    if (
+        nights < 1
+    ) {
+
+        message.textContent =
+            "Your pick-up date must be after your drop-off date.";
+
+        return;
+
+    }
+
+
+    const boardingDates =
+        getBoardingNightDates(
+            dropoff,
+            pickup
+        );
+
+
+    const pickupFee =
+        getBoardingPickupFee();
+
+
+    const bookingGroupId =
+        crypto.randomUUID();
+
+
+    const serviceOption =
+        "VIP Overnight Boarding";
+
+
+    const serviceName =
+        "Dog Boarding - VIP Overnight Boarding";
+
+
+    const rows =
+        boardingDates.map(
+            (date, index) => {
+
+                let rowPrice =
+                    100;
+
+
+                // Put the extended-care fee
+                // onto the final overnight row.
+
+                if (
+                    index ===
+                        boardingDates.length - 1 &&
+                    pickupFee > 0
+                ) {
+
+                    rowPrice +=
+                        pickupFee;
+
+                }
+
+
+                return {
+
+                    client_id:
+                        currentUser.id,
+
+                    pet_id:
+                        Number(
+                            petId
+                        ),
+
+                    service_type:
+                        "Dog Boarding",
+
+                    service_option:
+                        serviceOption,
+
+                    service_name:
+                        serviceName,
+
+                    visit_date:
+                        date,
+
+                    time_window:
+                        pickupWindow,
+
+                    status:
+                        "requested",
+
+                    price:
+                        rowPrice,
+
+                    payment_status:
+                        "pending",
+
+                    booking_group_id:
+                        bookingGroupId
+
+                };
+
+            }
+        );
+
+
+    submitButton.disabled =
+        true;
+
+
+    submitButton.textContent =
+        "Submitting...";
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("visits")
+            .insert(
+                rows
+            )
+            .select();
+
+
+    if (error) {
+
+        console.error(
+            "Boarding booking error:",
+            error
+        );
+
+
+        message.textContent =
+            "We couldn't submit your boarding request.";
+
+
+        submitButton.disabled =
+            false;
+
+
+        submitButton.textContent =
+            "Continue";
+
+
+        return;
+
+    }
+
+
+    console.log(
+        "Boarding created:",
+        data
+    );
+
+
+    message.textContent =
+        `${nights} ${
+            nights === 1
+                ? "night"
+                : "nights"
+        } of boarding added successfully!`;
+
+
+    resetBookingForm();
+
+
+    submitButton.disabled =
+        false;
+
+
+    submitButton.textContent =
+        "Continue";
+
+
+    setTimeout(
+        async () => {
+
+            bookingSection.style.display =
+                "none";
+
+
+            await loadDashboard();
+
+        },
+        900
+    );
+
+}
+
+
+// ========================================
+// RESET BOOKING
+// ========================================
+
+function resetBookingForm() {
+
+
+    selectedDates =
+        [];
+
+
+    bookingForm.reset();
+
+
+    calendarYear =
+        new Date()
+            .getFullYear();
+
+
+    calendarMonth =
+        new Date()
+            .getMonth();
+
+
+    document.getElementById(
+        "service-option-wrapper"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "time-window-wrapper"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "multi-date-booking"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "boarding-booking"
+    ).style.display =
+        "none";
+
+
+    renderSelectedDates();
+
+
+    renderBookingCalendar();
+
+
+    updateBookingTotal();
+
+}
+
+
+// ========================================
+// BOARDING DATE HELPERS
+// ========================================
+
+function getBoardingNightDates(
+    startDate,
+    endDate
+) {
+
+
+    const dates =
+        [];
+
+
+    let current =
+        parseLocalDate(
+            startDate
+        );
+
+
+    const end =
+        parseLocalDate(
+            endDate
+        );
+
+
+    while (
+        current < end
+    ) {
+
+        dates.push(
+            makeDateString(
+                current.getFullYear(),
+                current.getMonth(),
+                current.getDate()
+            )
+        );
+
+
+        current.setDate(
+            current.getDate() + 1
+        );
+
+    }
+
+
+    return dates;
+
+}
+
+
+function addDaysToDateString(
+    dateString,
+    days
+) {
+
+
+    const date =
+        parseLocalDate(
+            dateString
+        );
+
+
+    date.setDate(
+        date.getDate() +
+        days
+    );
+
+
+    return makeDateString(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+    );
+
+}
+
+
+// ========================================
 // DATE HELPERS
 // ========================================
+
+function parseLocalDate(
+    dateString
+) {
+
+
+    const parts =
+        dateString.split("-");
+
+
+    return new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2])
+    );
+
+}
+
 
 function makeDateString(
     year,
@@ -1518,11 +3010,13 @@ function makeDateString(
 
 
     const dayString =
-        String(day)
-            .padStart(
-                2,
-                "0"
-            );
+        String(
+            day
+        )
+        .padStart(
+            2,
+            "0"
+        );
 
 
     return `${year}-${month}-${dayString}`;
@@ -1556,15 +3050,9 @@ function formatDate(
     }
 
 
-    const parts =
-        dateString.split("-");
-
-
     const date =
-        new Date(
-            Number(parts[0]),
-            Number(parts[1]) - 1,
-            Number(parts[2])
+        parseLocalDate(
+            dateString
         );
 
 
@@ -1582,7 +3070,30 @@ function formatDate(
 
 
 // ========================================
-// START DASHBOARD
+// MESSAGE
+// ========================================
+
+function clearBookingMessage() {
+
+
+    const message =
+        document.getElementById(
+            "booking-message"
+        );
+
+
+    if (message) {
+
+        message.textContent =
+            "";
+
+    }
+
+}
+
+
+// ========================================
+// LOAD DASHBOARD
 // ========================================
 
 loadDashboard();
