@@ -5,15 +5,20 @@ const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_U3OIYatZuBUe8Y6Vq0DS2w_IMacau2j";
 
 
-const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
 
 
-// Store logged-in user and pets
+// Logged-in data
 let currentUser = null;
 let currentPets = [];
+
+
+// Booking dates
+let selectedDates = [];
 
 
 // -------------------------
@@ -21,7 +26,9 @@ let currentPets = [];
 // -------------------------
 
 const loginForm =
-    document.getElementById("login-form");
+    document.getElementById(
+        "login-form"
+    );
 
 
 if (loginForm) {
@@ -35,14 +42,18 @@ if (loginForm) {
 
             const email =
                 document
-                    .getElementById("email")
+                    .getElementById(
+                        "email"
+                    )
                     .value
                     .trim();
 
 
             const password =
                 document
-                    .getElementById("password")
+                    .getElementById(
+                        "password"
+                    )
                     .value;
 
 
@@ -62,8 +73,8 @@ if (loginForm) {
             } =
                 await supabaseClient.auth
                     .signInWithPassword({
-                        email: email,
-                        password: password
+                        email,
+                        password
                     });
 
 
@@ -227,7 +238,7 @@ async function loadDashboard() {
 
 
     // -------------------------
-    // UPCOMING VISITS
+    // VISITS
     // -------------------------
 
     const today =
@@ -268,7 +279,7 @@ async function loadDashboard() {
 
 
     // -------------------------
-    // DISPLAY NAME
+    // NAME
     // -------------------------
 
     const welcomeName =
@@ -282,7 +293,7 @@ async function loadDashboard() {
 
 
     // -------------------------
-    // DISPLAY PETS
+    // PET DISPLAY
     // -------------------------
 
     const petInfo =
@@ -327,7 +338,7 @@ async function loadDashboard() {
 
 
     // -------------------------
-    // DISPLAY VISITS
+    // VISIT DISPLAY
     // -------------------------
 
     const visitsContainer =
@@ -342,59 +353,61 @@ async function loadDashboard() {
     ) {
 
         visitsContainer.innerHTML =
-            visits.map(
-                visit => {
+            visits
+                .map(
+                    visit => {
 
-                    const price =
-                        visit.price !== null
-                            ? `$${Number(
-                                visit.price
-                            ).toFixed(2)}`
-                            : "";
-
-
-                    const timeWindow =
-                        visit.time_window || "";
+                        const price =
+                            visit.price !== null
+                                ? `$${Number(
+                                    visit.price
+                                ).toFixed(2)}`
+                                : "";
 
 
-                    return `
-                        <div class="visit-card">
+                        const timeWindow =
+                            visit.time_window || "";
 
-                            <strong>
-                                ${visit.service_name}
-                            </strong>
 
-                            <br>
+                        return `
+                            <div class="visit-card">
 
-                            ${formatDate(
-                                visit.visit_date
-                            )}
+                                <strong>
+                                    ${visit.service_name}
+                                </strong>
 
-                            ${timeWindow
-                                ? `<br>Preferred window: ${timeWindow}`
-                                : ""
-                            }
+                                <br>
 
-                            <br>
+                                ${formatDate(
+                                    visit.visit_date
+                                )}
 
-                            Status:
-                            ${visit.status}
+                                ${
+                                    timeWindow
+                                        ? `<br>Preferred window: ${timeWindow}`
+                                        : ""
+                                }
 
-                            <br>
+                                <br>
 
-                            ${price}
+                                Status:
+                                ${visit.status}
 
-                            <br>
+                                <br>
 
-                            Payment:
-                            ${visit.payment_status}
+                                ${price}
 
-                        </div>
-                    `;
+                                <br>
 
-                }
-            )
-            .join("");
+                                Payment:
+                                ${visit.payment_status}
+
+                            </div>
+                        `;
+
+                    }
+                )
+                .join("");
 
     } else {
 
@@ -415,7 +428,7 @@ async function loadDashboard() {
 
 
 // -------------------------
-// BOOKING PET DROPDOWN
+// PET DROPDOWN
 // -------------------------
 
 function populateBookingPets() {
@@ -466,7 +479,7 @@ function populateBookingPets() {
 
 
 // -------------------------
-// OPEN BOOKING FORM
+// OPEN BOOKING
 // -------------------------
 
 const requestWalkButton =
@@ -505,7 +518,7 @@ if (
 
 
 // -------------------------
-// CLOSE BOOKING FORM
+// CLOSE BOOKING
 // -------------------------
 
 const closeBookingButton =
@@ -533,6 +546,206 @@ if (
 
 
 // -------------------------
+// DATE MINIMUM
+// -------------------------
+
+const bookingDate =
+    document.getElementById(
+        "booking-date"
+    );
+
+
+if (bookingDate) {
+
+    bookingDate.min =
+        getLocalDateString();
+
+}
+
+
+// -------------------------
+// ADD DATE
+// -------------------------
+
+const addDateButton =
+    document.getElementById(
+        "add-date-button"
+    );
+
+
+if (
+    addDateButton &&
+    bookingDate
+) {
+
+    addDateButton.addEventListener(
+        "click",
+        () => {
+
+            const date =
+                bookingDate.value;
+
+
+            const message =
+                document.getElementById(
+                    "booking-message"
+                );
+
+
+            message.textContent =
+                "";
+
+
+            if (!date) {
+
+                message.textContent =
+                    "Choose a date first.";
+
+                return;
+            }
+
+
+            if (
+                date <
+                getLocalDateString()
+            ) {
+
+                message.textContent =
+                    "Please choose a future date.";
+
+                return;
+            }
+
+
+            if (
+                selectedDates.includes(
+                    date
+                )
+            ) {
+
+                message.textContent =
+                    "That date is already selected.";
+
+                return;
+            }
+
+
+            selectedDates.push(
+                date
+            );
+
+
+            selectedDates.sort();
+
+
+            bookingDate.value =
+                "";
+
+
+            renderSelectedDates();
+
+        }
+    );
+
+}
+
+
+// -------------------------
+// REMOVE DATE
+// -------------------------
+
+function removeSelectedDate(
+    date
+) {
+
+
+    selectedDates =
+        selectedDates.filter(
+            selectedDate =>
+                selectedDate !== date
+        );
+
+
+    renderSelectedDates();
+
+}
+
+
+// -------------------------
+// RENDER DATES
+// -------------------------
+
+function renderSelectedDates() {
+
+
+    const list =
+        document.getElementById(
+            "selected-dates-list"
+        );
+
+
+    const count =
+        document.getElementById(
+            "selected-date-count"
+        );
+
+
+    if (!list || !count) return;
+
+
+    count.textContent =
+        `${selectedDates.length} ${
+            selectedDates.length === 1
+                ? "walk"
+                : "walks"
+        }`;
+
+
+    if (
+        selectedDates.length === 0
+    ) {
+
+        list.innerHTML =
+            `
+                <p class="empty-dates-message">
+                    No dates selected yet.
+                </p>
+            `;
+
+    } else {
+
+        list.innerHTML =
+            selectedDates
+                .map(
+                    date => `
+                        <div class="selected-date-item">
+
+                            <span>
+                                ${formatDate(date)}
+                            </span>
+
+                            <button
+                                type="button"
+                                class="remove-date-button"
+                                onclick="removeSelectedDate('${date}')"
+                            >
+                                Remove
+                            </button>
+
+                        </div>
+                    `
+                )
+                .join("");
+
+    }
+
+
+    updateBookingTotal();
+
+}
+
+
+// -------------------------
 // SERVICE PRICE
 // -------------------------
 
@@ -546,13 +759,17 @@ if (bookingService) {
 
     bookingService.addEventListener(
         "change",
-        updateBookingPrice
+        updateBookingTotal
     );
 
 }
 
 
-function updateBookingPrice() {
+// -------------------------
+// TOTAL
+// -------------------------
+
+function updateBookingTotal() {
 
 
     const serviceSelect =
@@ -567,10 +784,21 @@ function updateBookingPrice() {
         );
 
 
+    const countDisplay =
+        document.getElementById(
+            "booking-count"
+        );
+
+
     if (
         !serviceSelect ||
-        !priceDisplay
-    ) return;
+        !priceDisplay ||
+        !countDisplay
+    ) {
+
+        return;
+
+    }
 
 
     const selectedOption =
@@ -580,38 +808,174 @@ function updateBookingPrice() {
 
 
     const price =
-        selectedOption.dataset.price;
+        Number(
+            selectedOption.dataset.price
+        ) || 0;
 
 
-    if (!price) {
+    const numberOfWalks =
+        selectedDates.length;
 
-        priceDisplay.textContent =
-            "$0.00";
 
-        return;
-    }
+    const total =
+        price * numberOfWalks;
+
+
+    countDisplay.textContent =
+        `${numberOfWalks} ${
+            numberOfWalks === 1
+                ? "walk"
+                : "walks"
+        }`;
 
 
     priceDisplay.textContent =
-        `$${Number(price).toFixed(2)}`;
+        `$${total.toFixed(2)}`;
 
 }
 
 
 // -------------------------
-// MINIMUM BOOKING DATE
+// WEEK HELPERS
 // -------------------------
 
-const bookingDate =
-    document.getElementById(
-        "booking-date"
+function getWeekKey(
+    dateString
+) {
+
+
+    const parts =
+        dateString.split("-");
+
+
+    const date =
+        new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+        );
+
+
+    const day =
+        date.getDay();
+
+
+    const differenceToMonday =
+        day === 0
+            ? -6
+            : 1 - day;
+
+
+    const monday =
+        new Date(date);
+
+
+    monday.setDate(
+        date.getDate() +
+        differenceToMonday
     );
 
 
-if (bookingDate) {
+    const year =
+        monday.getFullYear();
 
-    bookingDate.min =
-        getLocalDateString();
+
+    const month =
+        String(
+            monday.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const dayOfMonth =
+        String(
+            monday.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return `${year}-${month}-${dayOfMonth}`;
+
+}
+
+
+// -------------------------
+// VALIDATE 3 PER WEEK
+// -------------------------
+
+function validateThreePerWeek() {
+
+
+    if (
+        selectedDates.length === 0
+    ) {
+
+        return {
+            valid: false,
+            message:
+                "Please select at least 3 walk dates."
+        };
+
+    }
+
+
+    const weeks = {};
+
+
+    selectedDates.forEach(
+        date => {
+
+            const weekKey =
+                getWeekKey(
+                    date
+                );
+
+
+            if (!weeks[weekKey]) {
+
+                weeks[weekKey] = [];
+
+            }
+
+
+            weeks[weekKey].push(
+                date
+            );
+
+        }
+    );
+
+
+    const invalidWeeks =
+        Object.values(
+            weeks
+        )
+        .filter(
+            dates =>
+                dates.length < 3
+        );
+
+
+    if (
+        invalidWeeks.length > 0
+    ) {
+
+        return {
+            valid: false,
+            message:
+                "Please select at least 3 walk dates for each week you are booking."
+        };
+
+    }
+
+
+    return {
+        valid: true
+    };
 
 }
 
@@ -645,6 +1009,10 @@ if (bookingForm) {
                 document.getElementById(
                     "booking-submit-button"
                 );
+
+
+            message.textContent =
+                "";
 
 
             if (!currentUser) {
@@ -686,14 +1054,6 @@ if (bookingForm) {
                 );
 
 
-            const visitDate =
-                document
-                    .getElementById(
-                        "booking-date"
-                    )
-                    .value;
-
-
             const timeWindow =
                 document
                     .getElementById(
@@ -705,9 +1065,8 @@ if (bookingForm) {
             if (
                 !petId ||
                 !serviceName ||
-                !visitDate ||
-                !timeWindow ||
-                !price
+                !price ||
+                !timeWindow
             ) {
 
                 message.textContent =
@@ -717,26 +1076,31 @@ if (bookingForm) {
             }
 
 
-            submitButton.disabled =
-                true;
+            const dateValidation =
+                validateThreePerWeek();
 
 
-            submitButton.textContent =
-                "Submitting...";
+            if (
+                !dateValidation.valid
+            ) {
+
+                message.textContent =
+                    dateValidation.message;
+
+                return;
+            }
 
 
-            message.textContent =
-                "";
+            // One ID ties every walk
+            // in this checkout together.
+
+            const bookingGroupId =
+                crypto.randomUUID();
 
 
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-                    .from("visits")
-                    .insert({
-
+            const visitsToInsert =
+                selectedDates.map(
+                    date => ({
                         client_id:
                             currentUser.id,
 
@@ -747,7 +1111,7 @@ if (bookingForm) {
                             serviceName,
 
                         visit_date:
-                            visitDate,
+                            date,
 
                         time_window:
                             timeWindow,
@@ -759,11 +1123,32 @@ if (bookingForm) {
                             price,
 
                         payment_status:
-                            "pending"
+                            "pending",
 
+                        booking_group_id:
+                            bookingGroupId
                     })
-                    .select()
-                    .single();
+                );
+
+
+            submitButton.disabled =
+                true;
+
+
+            submitButton.textContent =
+                "Submitting...";
+
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("visits")
+                    .insert(
+                        visitsToInsert
+                    )
+                    .select();
 
 
             if (error) {
@@ -783,7 +1168,7 @@ if (bookingForm) {
 
 
                 submitButton.textContent =
-                    "Request Walk";
+                    "Continue";
 
 
                 return;
@@ -791,19 +1176,26 @@ if (bookingForm) {
 
 
             console.log(
-                "Booking created:",
+                "Bookings created:",
                 data
             );
 
 
+            const walkCount =
+                selectedDates.length;
+
+
             message.textContent =
-                "Walk request submitted!";
+                `${walkCount} walks added successfully!`;
+
+
+            selectedDates = [];
 
 
             bookingForm.reset();
 
 
-            updateBookingPrice();
+            renderSelectedDates();
 
 
             submitButton.disabled =
@@ -811,7 +1203,7 @@ if (bookingForm) {
 
 
             submitButton.textContent =
-                "Request Walk";
+                "Continue";
 
 
             setTimeout(
@@ -824,7 +1216,7 @@ if (bookingForm) {
                     await loadDashboard();
 
                 },
-                800
+                1000
             );
 
         }
@@ -834,10 +1226,11 @@ if (bookingForm) {
 
 
 // -------------------------
-// DATE HELPER
+// LOCAL DATE
 // -------------------------
 
 function getLocalDateString() {
+
 
     const now =
         new Date();
@@ -871,7 +1264,7 @@ function getLocalDateString() {
 
 
 // -------------------------
-// DISPLAY DATE
+// FORMAT DATE
 // -------------------------
 
 function formatDate(
@@ -897,6 +1290,7 @@ function formatDate(
     return date.toLocaleDateString(
         "en-US",
         {
+            weekday: "short",
             month: "short",
             day: "numeric",
             year: "numeric"
