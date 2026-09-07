@@ -21,6 +21,7 @@
 
 <main class="dashboard-container">
 
+
     <!-- ========================================
          DASHBOARD HEADER
          ======================================== -->
@@ -28,9 +29,15 @@
     <div class="dashboard-header">
 
         <div>
-            <h1>Paws in Stride</h1>
+
+            <h1>
+                Paws in Stride
+            </h1>
+
             <h2 id="welcome-name"></h2>
+
         </div>
+
 
         <button
             id="request-walk-button"
@@ -52,6 +59,7 @@
         style="display:none;"
     >
 
+
         <!-- ========================================
              REQUEST SERVICE
              ======================================== -->
@@ -64,7 +72,9 @@
 
             <div class="section-header">
 
-                <h3>Request Service</h3>
+                <h3>
+                    Request Service
+                </h3>
 
                 <button
                     type="button"
@@ -80,6 +90,7 @@
 
             <form id="booking-form">
 
+
                 <!-- PRIMARY PET -->
 
                 <label for="booking-pet">
@@ -90,9 +101,11 @@
                     id="booking-pet"
                     required
                 >
+
                     <option value="">
                         Select your pet
                     </option>
+
                 </select>
 
 
@@ -108,10 +121,12 @@
                         Additional Pets
                     </label>
 
+
                     <div
                         id="additional-pets-list"
                         class="additional-pets-list"
                     ></div>
+
 
                     <p
                         id="additional-pets-help"
@@ -414,6 +429,780 @@
         </section>
 
 
+
+        <!-- ========================================
+             YOUR HOUSEHOLD
+             ======================================== -->
+
+        <section class="household-section">
+
+            <div class="household-section-header">
+
+                <div>
+
+                    <h3>
+                        Your Household
+                    </h3>
+
+                    <p class="household-section-help">
+                        Keep your contact, home, and property access information up to date.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="edit-household-button"
+                    class="primary-button household-edit-button"
+                >
+                    Edit Profile
+                </button>
+
+            </div>
+
+
+            <!-- HOUSEHOLD EDIT FORM -->
+
+            <div
+                id="household-form-panel"
+                class="household-form-panel"
+                style="display:none;"
+            >
+
+                <div class="household-form-header">
+
+                    <div>
+
+                        <h4>
+                            Edit Household
+                        </h4>
+
+                        <p>
+                            Update your contact, address, and access information.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="close-household-form-button"
+                        class="close-button"
+                        aria-label="Close household form"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <form id="household-form">
+
+
+                    <!-- PROFILE PHOTO -->
+
+                    <div class="client-photo-editor">
+
+
+                        <div
+                            id="client-photo-preview-wrapper"
+                            class="client-photo-preview-wrapper"
+                        >
+
+                            <img
+                                id="client-photo-preview"
+                                class="client-photo-preview"
+                                alt="Client profile preview"
+                                style="display:none;"
+                            >
+
+                            <span
+                                id="client-photo-preview-initials"
+                                class="client-photo-preview-initials"
+                            >
+                                ?
+                            </span>
+
+                        </div>
+
+
+                        <div class="client-photo-controls">
+
+                            <label
+                                for="client-photo-input"
+                                class="client-photo-upload-button"
+                            >
+                                Choose Profile Photo
+                            </label>
+
+                            <input
+                                type="file"
+                                id="client-photo-input"
+                                accept="image/jpeg,image/png,image/webp"
+                                hidden
+                            >
+
+                            <p class="client-photo-help">
+                                Optional. JPG, PNG or WebP. Maximum 5 MB.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CLIENT INFORMATION -->
+
+                    <div class="household-form-section">
+
+                        <h5>
+                            Client Information
+                        </h5>
+
+
+                        <div class="household-form-grid">
+
+
+                            <div class="household-form-field">
+
+                                <label for="household-full-name">
+                                    Full Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="household-full-name"
+                                    maxlength="150"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="household-phone">
+                                    Phone Number
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    id="household-phone"
+                                    maxlength="50"
+                                    placeholder="(555) 555-5555"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="household-email">
+                                    Email
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="household-email"
+                                    readonly
+                                    disabled
+                                >
+
+                                <span class="field-help">
+                                    Your login email cannot be changed here.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- HOME ADDRESS -->
+
+                    <div class="household-form-section">
+
+                        <h5>
+                            Home Address
+                        </h5>
+
+
+                        <div class="household-form-grid">
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="household-street-address">
+                                    Street Address
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="household-street-address"
+                                    maxlength="250"
+                                    autocomplete="street-address"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="household-address-line-2">
+                                    Apartment, Unit, Building, etc.
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="household-address-line-2"
+                                    maxlength="150"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="household-city">
+                                    City
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="household-city"
+                                    maxlength="100"
+                                    autocomplete="address-level2"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="household-state">
+                                    State
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="household-state"
+                                    maxlength="100"
+                                    autocomplete="address-level1"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="household-zip">
+                                    ZIP Code
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="household-zip"
+                                    maxlength="20"
+                                    autocomplete="postal-code"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="household-preferred-contact">
+                                    Preferred Contact Method
+                                </label>
+
+                                <select id="household-preferred-contact">
+
+                                    <option value="">
+                                        Select preference
+                                    </option>
+
+                                    <option value="Text Message">
+                                        Text Message
+                                    </option>
+
+                                    <option value="Phone Call">
+                                        Phone Call
+                                    </option>
+
+                                    <option value="Email">
+                                        Email
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- EMERGENCY CONTACT -->
+
+                    <div class="household-form-section">
+
+                        <h5>
+                            Emergency Contact
+                        </h5>
+
+
+                        <div class="household-form-grid">
+
+
+                            <div class="household-form-field">
+
+                                <label for="emergency-contact-name">
+                                    Contact Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="emergency-contact-name"
+                                    maxlength="150"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="emergency-contact-phone">
+                                    Contact Phone
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    id="emergency-contact-phone"
+                                    maxlength="50"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- PROPERTY ACCESS -->
+
+                    <div class="household-form-section access-form-section">
+
+                        <div class="access-form-heading">
+
+                            <div>
+
+                                <h5>
+                                    Property Access
+                                </h5>
+
+                                <p>
+                                    Information used to safely access your property during scheduled services.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="household-form-grid">
+
+
+                            <div class="household-form-field">
+
+                                <label for="access-gate-code">
+                                    Gate Code
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="access-gate-code"
+                                    maxlength="100"
+                                    autocomplete="off"
+                                    placeholder="Example: #1234"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field">
+
+                                <label for="access-door-code">
+                                    Door / Entry Code
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="access-door-code"
+                                    maxlength="100"
+                                    autocomplete="off"
+                                >
+
+                            </div>
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="access-key-instructions">
+                                    Key Instructions
+                                </label>
+
+                                <textarea
+                                    id="access-key-instructions"
+                                    rows="3"
+                                    maxlength="2000"
+                                    placeholder="Example: Lockbox is attached to the left side of the garage."
+                                ></textarea>
+
+                            </div>
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="access-alarm-instructions">
+                                    Alarm Instructions
+                                </label>
+
+                                <textarea
+                                    id="access-alarm-instructions"
+                                    rows="3"
+                                    maxlength="2000"
+                                    placeholder="Alarm panel location, arming/disarming instructions, etc."
+                                ></textarea>
+
+                            </div>
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="access-parking-instructions">
+                                    Parking Instructions
+                                </label>
+
+                                <textarea
+                                    id="access-parking-instructions"
+                                    rows="3"
+                                    maxlength="2000"
+                                ></textarea>
+
+                            </div>
+
+
+                            <div class="household-form-field household-form-field-full">
+
+                                <label for="access-other-notes">
+                                    Other Access Notes
+                                </label>
+
+                                <textarea
+                                    id="access-other-notes"
+                                    rows="3"
+                                    maxlength="3000"
+                                ></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- HOME NOTES -->
+
+                    <div class="household-form-section">
+
+                        <h5>
+                            Home Notes
+                        </h5>
+
+
+                        <div class="household-form-field">
+
+                            <label for="household-home-notes">
+                                Anything Else We Should Know?
+                            </label>
+
+                            <textarea
+                                id="household-home-notes"
+                                rows="4"
+                                maxlength="3000"
+                                placeholder="Example: Please don't ring the doorbell. Baby may be sleeping."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="household-form-actions">
+
+                        <button
+                            type="button"
+                            id="cancel-household-button"
+                            class="secondary-button"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            id="save-household-button"
+                            class="primary-button"
+                        >
+                            Save Profile
+                        </button>
+
+                    </div>
+
+
+                    <p id="household-form-message"></p>
+
+                </form>
+
+            </div>
+
+
+            <!-- HOUSEHOLD DISPLAY -->
+
+            <div id="household-profile">
+
+                <div class="household-profile-top">
+
+
+                    <div
+                        id="client-profile-avatar"
+                        class="client-profile-avatar"
+                    >
+
+                        <img
+                            id="client-profile-image"
+                            alt="Client profile photo"
+                            style="display:none;"
+                        >
+
+                        <span
+                            id="client-profile-initials"
+                            class="client-profile-initials"
+                        >
+                            ?
+                        </span>
+
+                    </div>
+
+
+                    <div class="household-profile-summary">
+
+                        <h4 id="household-display-name">
+                            Client
+                        </h4>
+
+                        <p id="household-display-email">
+                            —
+                        </p>
+
+                        <p id="household-display-phone">
+                            Phone not added
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="household-profile-grid">
+
+
+                    <!-- ADDRESS -->
+
+                    <div class="household-detail-card">
+
+                        <span class="household-detail-label">
+                            Home Address
+                        </span>
+
+                        <div
+                            id="household-display-address"
+                            class="household-detail-value"
+                        >
+                            Not added
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- PREFERRED CONTACT -->
+
+                    <div class="household-detail-card">
+
+                        <span class="household-detail-label">
+                            Preferred Contact
+                        </span>
+
+                        <div
+                            id="household-display-contact-method"
+                            class="household-detail-value"
+                        >
+                            Not added
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- EMERGENCY CONTACT -->
+
+                    <div class="household-detail-card">
+
+                        <span class="household-detail-label">
+                            Emergency Contact
+                        </span>
+
+                        <div
+                            id="household-display-emergency"
+                            class="household-detail-value"
+                        >
+                            Not added
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ACCESS -->
+
+                    <div class="household-detail-card household-detail-card-full access-detail-card">
+
+                        <span class="household-detail-label">
+                            Property Access
+                        </span>
+
+
+                        <div class="access-detail-grid">
+
+
+                            <div class="access-detail-item">
+
+                                <span>
+                                    Gate Code
+                                </span>
+
+                                <strong id="display-gate-code">
+                                    Not added
+                                </strong>
+
+                            </div>
+
+
+                            <div class="access-detail-item">
+
+                                <span>
+                                    Door / Entry Code
+                                </span>
+
+                                <strong id="display-door-code">
+                                    Not added
+                                </strong>
+
+                            </div>
+
+
+                            <div class="access-detail-item">
+
+                                <span>
+                                    Key Instructions
+                                </span>
+
+                                <strong id="display-key-instructions">
+                                    Not added
+                                </strong>
+
+                            </div>
+
+
+                            <div class="access-detail-item">
+
+                                <span>
+                                    Alarm Instructions
+                                </span>
+
+                                <strong id="display-alarm-instructions">
+                                    Not added
+                                </strong>
+
+                            </div>
+
+
+                            <div class="access-detail-item">
+
+                                <span>
+                                    Parking Instructions
+                                </span>
+
+                                <strong id="display-parking-instructions">
+                                    Not added
+                                </strong>
+
+                            </div>
+
+
+                            <div class="access-detail-item">
+
+                                <span>
+                                    Other Access Notes
+                                </span>
+
+                                <strong id="display-other-access-notes">
+                                    Not added
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- HOME NOTES -->
+
+                    <div class="household-detail-card household-detail-card-full">
+
+                        <span class="household-detail-label">
+                            Home Notes
+                        </span>
+
+                        <div
+                            id="household-display-home-notes"
+                            class="household-detail-value household-notes-value"
+                        >
+                            No home notes added.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
         <!-- ========================================
              YOUR PETS
              ======================================== -->
@@ -445,8 +1234,6 @@
 
             </div>
 
-
-            <!-- ADD / EDIT PET FORM -->
 
             <div
                 id="pet-form-panel"
@@ -656,6 +1443,7 @@
         </section>
 
 
+
         <!-- ========================================
              UPCOMING SERVICES
              ======================================== -->
@@ -683,7 +1471,6 @@
                         type="button"
                         id="upcoming-calendar-prev"
                         class="calendar-nav-button"
-                        aria-label="Previous month"
                     >
                         ‹
                     </button>
@@ -694,7 +1481,6 @@
                         type="button"
                         id="upcoming-calendar-next"
                         class="calendar-nav-button"
-                        aria-label="Next month"
                     >
                         ›
                     </button>
