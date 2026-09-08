@@ -2668,6 +2668,44 @@ adminDayServicesContainer
         async event => {
 
 
+            const deleteMediaButton =
+                event.target.closest(
+                    "[data-delete-visit-report-media]"
+                );
+
+
+            if (
+                deleteMediaButton
+            ) {
+
+
+                const mediaId =
+                    Number(
+                        deleteMediaButton.dataset
+                            .deleteVisitReportMedia
+                    );
+
+
+                if (
+                    !mediaId
+                ) {
+
+                    return;
+
+                }
+
+
+                await deleteAdminVisitReportMedia(
+                    mediaId,
+                    deleteMediaButton
+                );
+
+
+                return;
+
+            }
+
+
             const openButton =
                 event.target.closest(
                     "[data-visit-report-open]"
@@ -2681,7 +2719,8 @@ adminDayServicesContainer
 
                 const visitId =
                     Number(
-                        openButton.dataset.visitReportOpen
+                        openButton.dataset
+                            .visitReportOpen
                     );
 
 
@@ -2724,7 +2763,6 @@ adminDayServicesContainer
 
         }
     );
-
 
 
 adminDayServicesContainer
@@ -2773,7 +2811,6 @@ adminDayServicesContainer
 
         }
     );
-
 
 
 adminDayServicesContainer
@@ -4196,12 +4233,14 @@ function renderAdminVisitReportForm(
 
     const petNames =
         pets.length
+
             ? pets
                 .map(
                     pet =>
                         pet.name
                 )
                 .join(", ")
+
             : "Pet";
 
 
@@ -4240,11 +4279,13 @@ function renderAdminVisitReportForm(
                             VISIT REPORT
                         </span>
 
+
                         <h5>
                             ${escapeHtml(
                                 petNames
                             )}
                         </h5>
+
 
                         <p>
                             Add care updates, photos, notes, and optional walk summary screenshots.
@@ -4408,26 +4449,46 @@ function renderAdminVisitReportForm(
                                         .map(
                                             item => `
 
-                                                <div class="admin-visit-media-preview">
+                                                <div
+                                                    class="admin-visit-media-preview admin-visit-saved-media"
+                                                    data-saved-visit-media="${item.id}"
+                                                >
+
 
                                                     ${
                                                         item.signed_url
 
                                                             ? `
+
                                                                 <img
                                                                     src="${escapeHtml(
                                                                         item.signed_url
                                                                     )}"
                                                                     alt="Visit photo"
                                                                 >
+
                                                             `
 
                                                             : `
+
                                                                 <div class="admin-visit-media-missing">
                                                                     Photo
                                                                 </div>
+
                                                             `
                                                     }
+
+
+                                                    <button
+                                                        type="button"
+                                                        class="admin-visit-media-delete"
+                                                        data-delete-visit-report-media="${item.id}"
+                                                        aria-label="Delete visit photo"
+                                                        title="Delete photo"
+                                                    >
+                                                        ×
+                                                    </button>
+
 
                                                 </div>
 
@@ -4469,6 +4530,7 @@ function renderAdminVisitReportForm(
 
                 <div class="admin-visit-report-section">
 
+
                     <span class="admin-visit-report-label">
                         Walk Summary
                     </span>
@@ -4490,7 +4552,11 @@ function renderAdminVisitReportForm(
                                         .map(
                                             item => `
 
-                                                <div class="admin-visit-media-preview">
+                                                <div
+                                                    class="admin-visit-media-preview admin-visit-saved-media"
+                                                    data-saved-visit-media="${item.id}"
+                                                >
+
 
                                                     ${
                                                         item.signed_url
@@ -4514,6 +4580,18 @@ function renderAdminVisitReportForm(
 
                                                             `
                                                     }
+
+
+                                                    <button
+                                                        type="button"
+                                                        class="admin-visit-media-delete"
+                                                        data-delete-visit-report-media="${item.id}"
+                                                        aria-label="Delete walk summary photo"
+                                                        title="Delete photo"
+                                                    >
+                                                        ×
+                                                    </button>
+
 
                                                 </div>
 
@@ -4548,6 +4626,7 @@ function renderAdminVisitReportForm(
                         class="admin-visit-pending-route"
                         data-pending-route
                     ></div>
+
 
                 </div>
 
@@ -4588,6 +4667,218 @@ function renderAdminVisitReportForm(
 
 }
 
+// ========================================
+// DELETE SAVED VISIT REPORT MEDIA
+// ========================================
+
+async function deleteAdminVisitReportMedia(
+    mediaId,
+    button
+) {
+
+
+    const mediaItem =
+        activeVisitReportMedia.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    mediaId
+                )
+        );
+
+
+    if (
+        !mediaItem
+    ) {
+
+        alert(
+            "We couldn't find that photo."
+        );
+
+        return;
+
+    }
+
+
+    const mediaLabel =
+        mediaItem.photo_type ===
+        "route"
+
+            ? "walk summary photo"
+
+            : "visit photo";
+
+
+    const confirmed =
+        window.confirm(
+            `Delete this ${mediaLabel}? This cannot be undone.`
+        );
+
+
+    if (
+        !confirmed
+    ) {
+
+        return;
+
+    }
+
+
+    const originalButtonText =
+        button?.textContent ||
+        "×";
+
+
+    if (
+        button
+    ) {
+
+        button.disabled =
+            true;
+
+
+        button.textContent =
+            "…";
+
+    }
+
+
+    try {
+
+
+        // ========================================
+        // DELETE DATABASE RECORD FIRST
+        // ========================================
+
+        const {
+            error: databaseDeleteError
+        } =
+            await supabaseClient
+                .from(
+                    "visit_photos"
+                )
+                .delete()
+                .eq(
+                    "id",
+                    mediaItem.id
+                );
+
+
+        if (
+            databaseDeleteError
+        ) {
+
+            throw databaseDeleteError;
+
+        }
+
+
+        // ========================================
+        // REMOVE FROM CURRENT ADMIN STATE
+        // ========================================
+
+        activeVisitReportMedia =
+            activeVisitReportMedia.filter(
+                item =>
+                    Number(
+                        item.id
+                    ) !==
+                    Number(
+                        mediaItem.id
+                    )
+            );
+
+
+        // ========================================
+        // REMOVE PREVIEW IMMEDIATELY
+        // ========================================
+
+        const preview =
+            button?.closest(
+                "[data-saved-visit-media]"
+            );
+
+
+        if (
+            preview
+        ) {
+
+            preview.remove();
+
+        }
+
+
+        // ========================================
+        // DELETE STORAGE FILE
+        // ========================================
+
+        if (
+            mediaItem.storage_path
+        ) {
+
+
+            const {
+                error: storageDeleteError
+            } =
+                await supabaseClient
+                    .storage
+                    .from(
+                        VISIT_MEDIA_BUCKET
+                    )
+                    .remove([
+                        mediaItem.storage_path
+                    ]);
+
+
+            if (
+                storageDeleteError
+            ) {
+
+
+                console.warn(
+                    "Visit media storage cleanup failed:",
+                    storageDeleteError
+                );
+
+            }
+
+        }
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Delete visit report media error:",
+            error
+        );
+
+
+        alert(
+            "We couldn't delete that photo. Please try again."
+        );
+
+
+        if (
+            button
+        ) {
+
+            button.disabled =
+                false;
+
+
+            button.textContent =
+                originalButtonText;
+
+        }
+
+    }
+
+}
 
 // ========================================
 // HANDLE VISIT PHOTOS
