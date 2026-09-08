@@ -587,17 +587,17 @@ section h3 {
 .household-form-field textarea.household-field-error {
 
     border-color:
-        #d94f4f !important;
+        #dc3545 !important;
 
     background:
-        #fffafa;
+        #fff8f8 !important;
 
     box-shadow:
         0 0 0 3px rgba(
-            217,
-            79,
-            79,
-            0.10
+            220,
+            53,
+            69,
+            0.14
         ) !important;
 }
 
@@ -607,17 +607,19 @@ section h3 {
 .household-form-field textarea.household-field-error:focus {
 
     border-color:
-        #d94f4f !important;
+        #dc3545 !important;
+
+    outline:
+        none !important;
 
     box-shadow:
         0 0 0 3px rgba(
-            217,
-            79,
-            79,
-            0.16
+            220,
+            53,
+            69,
+            0.20
         ) !important;
 }
-
 /* ========================================
    HOUSEHOLD DETAILS
 ======================================== */
