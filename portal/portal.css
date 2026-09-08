@@ -9819,6 +9819,48 @@ a:focus-visible {
 
 
 /* ========================================
+   SIGNUP VALIDATION STATES
+======================================== */
+
+.portal-signup-page
+.signup-field input.signup-field-error,
+.portal-signup-page
+.signup-field select.signup-field-error {
+
+    border-color:
+        #d94f4f !important;
+
+    background:
+        #fffafa;
+
+    box-shadow:
+        0 0 0 3px rgba(
+            217,
+            79,
+            79,
+            0.10
+        ) !important;
+}
+
+
+.portal-signup-page
+.signup-field input.signup-field-error:focus,
+.portal-signup-page
+.signup-field select.signup-field-error:focus {
+
+    border-color:
+        #d94f4f !important;
+
+    box-shadow:
+        0 0 0 3px rgba(
+            217,
+            79,
+            79,
+            0.16
+        ) !important;
+}
+
+/* ========================================
    ERROR / STATUS MESSAGES
 ======================================== */
 
