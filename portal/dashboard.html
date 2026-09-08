@@ -640,147 +640,154 @@
 
 
                             <!-- CLIENT INFORMATION -->
-
+                            
                             <div class="household-form-section">
-
+                            
                                 <h5>
                                     Client Information
                                 </h5>
-
-
+                            
+                            
                                 <div class="household-form-grid">
-
-
+                            
+                            
                                     <div class="household-form-field">
-
+                            
                                         <label for="household-full-name">
                                             Full Name
                                         </label>
-
+                            
                                         <input
                                             type="text"
                                             id="household-full-name"
                                             maxlength="150"
+                                            autocomplete="name"
                                             required
                                         >
-
+                            
                                     </div>
-
-
+                            
+                            
                                     <div class="household-form-field">
-
+                            
                                         <label for="household-phone">
                                             Phone Number
                                         </label>
-
+                            
                                         <input
                                             type="tel"
                                             id="household-phone"
-                                            maxlength="50"
-                                            placeholder="(555) 555-5555"
+                                            maxlength="12"
+                                            inputmode="tel"
+                                            autocomplete="tel"
+                                            placeholder="555-555-5555"
+                                            required
                                         >
-
+                            
                                     </div>
-
-
+                            
+                            
                                     <div class="household-form-field household-form-field-full">
-
+                            
                                         <label for="household-email">
                                             Email
                                         </label>
-
+                            
                                         <input
                                             type="email"
                                             id="household-email"
                                             readonly
                                             disabled
                                         >
-
+                            
                                         <span class="field-help">
                                             Your login email cannot be changed here.
                                         </span>
-
+                            
                                     </div>
-
+                            
                                 </div>
-
+                            
                             </div>
 
-
-
                             <!-- HOME ADDRESS -->
-
+                            
                             <div class="household-form-section">
-
+                            
                                 <h5>
                                     Home Address
                                 </h5>
-
-
+                            
+                            
                                 <div class="household-form-grid">
-
-
+                            
+                            
                                     <div class="household-form-field household-form-field-full">
-
+                            
                                         <label for="household-street-address">
                                             Street Address
                                         </label>
-
+                            
                                         <input
                                             type="text"
                                             id="household-street-address"
                                             maxlength="250"
                                             autocomplete="street-address"
+                                            required
                                         >
-
+                            
                                     </div>
-
-
+                            
+                            
                                     <div class="household-form-field household-form-field-full">
-
+                            
                                         <label for="household-address-line-2">
                                             Apartment, Unit, Building, etc.
                                         </label>
-
+                            
                                         <input
                                             type="text"
                                             id="household-address-line-2"
                                             maxlength="150"
+                                            autocomplete="address-line2"
                                         >
-
+                            
                                     </div>
-
-
+                            
+                            
                                     <div class="household-form-field">
-
+                            
                                         <label for="household-city">
                                             City
                                         </label>
-
+                            
                                         <input
                                             type="text"
                                             id="household-city"
                                             maxlength="100"
                                             autocomplete="address-level2"
+                                            required
                                         >
-
+                            
                                     </div>
-
-
+                            
+                            
                                     <div class="household-form-field">
-
+                            
                                         <label for="household-state">
                                             State
                                         </label>
-
+                            
                                         <select
                                             id="household-state"
                                             autocomplete="address-level1"
+                                            required
                                         >
+                            
                                             <option value="">
                                                 Select state
                                             </option>
-
+                            
                                             <option value="AL">Alabama</option>
                                             <option value="AK">Alaska</option>
                                             <option value="AZ">Arizona</option>
@@ -832,60 +839,61 @@
                                             <option value="WV">West Virginia</option>
                                             <option value="WI">Wisconsin</option>
                                             <option value="WY">Wyoming</option>
+                            
                                         </select>
-
+                            
                                     </div>
-
-
+                            
+                            
                                     <div class="household-form-field">
-
+                            
                                         <label for="household-zip">
                                             ZIP Code
                                         </label>
-
+                            
                                         <input
                                             type="text"
                                             id="household-zip"
-                                            maxlength="20"
+                                            maxlength="5"
+                                            inputmode="numeric"
                                             autocomplete="postal-code"
+                                            required
                                         >
-
+                            
                                     </div>
-
-
+                            
+                            
                                     <div class="household-form-field">
-
+                            
                                         <label for="household-preferred-contact">
                                             Preferred Contact Method
                                         </label>
-
+                            
                                         <select id="household-preferred-contact">
-
+                            
                                             <option value="">
                                                 Select preference
                                             </option>
-
+                            
                                             <option value="Text Message">
                                                 Text Message
                                             </option>
-
+                            
                                             <option value="Phone Call">
                                                 Phone Call
                                             </option>
-
+                            
                                             <option value="Email">
                                                 Email
                                             </option>
-
+                            
                                         </select>
-
+                            
                                     </div>
-
+                            
                                 </div>
-
+                            
                             </div>
-
-
 
                             <!-- EMERGENCY CONTACT -->
 
