@@ -7074,11 +7074,8 @@ document
                     imageUrl
                 ) {
 
-
-                    window.open(
-                        imageUrl,
-                        "_blank",
-                        "noopener,noreferrer"
+                    openClientReportLightbox(
+                        imageUrl
                     );
 
                 }
@@ -7087,7 +7084,7 @@ document
                 return;
 
             }
-            
+
 
             const button =
                 event.target.closest(
@@ -7127,6 +7124,235 @@ document
 
         }
     );
+
+// ========================================
+// CLIENT VISIT REPORT LIGHTBOX
+// ========================================
+
+function openClientReportLightbox(
+    imageUrl
+) {
+
+
+    if (
+        !imageUrl
+    ) {
+
+        return;
+
+    }
+
+
+    closeClientReportLightbox();
+
+
+    const lightbox =
+        document.createElement(
+            "div"
+        );
+
+
+    lightbox.className =
+        "client-report-lightbox";
+
+
+    lightbox.setAttribute(
+        "role",
+        "dialog"
+    );
+
+
+    lightbox.setAttribute(
+        "aria-modal",
+        "true"
+    );
+
+
+    lightbox.setAttribute(
+        "aria-label",
+        "Photo viewer"
+    );
+
+
+    lightbox.innerHTML =
+        `
+
+            <div class="client-report-lightbox-frame">
+
+
+                <button
+                    type="button"
+                    class="client-report-lightbox-close"
+                    aria-label="Close photo"
+                    data-client-report-lightbox-close
+                >
+                    ×
+                </button>
+
+
+                <img
+                    src="${escapeHtml(
+                        imageUrl
+                    )}"
+                    alt="Visit photo preview"
+                    class="client-report-lightbox-image"
+                >
+
+
+            </div>
+
+        `;
+
+
+    document.body.appendChild(
+        lightbox
+    );
+
+
+    document.body.classList.add(
+        "client-report-lightbox-open"
+    );
+
+
+    requestAnimationFrame(
+        () => {
+
+            lightbox.classList.add(
+                "client-report-lightbox-visible"
+            );
+
+        }
+    );
+
+
+    const closeButton =
+        lightbox.querySelector(
+            "[data-client-report-lightbox-close]"
+        );
+
+
+    closeButton
+        ?.addEventListener(
+            "click",
+            closeClientReportLightbox
+        );
+
+
+    lightbox.addEventListener(
+        "click",
+        event => {
+
+
+            if (
+                event.target ===
+                lightbox
+            ) {
+
+                closeClientReportLightbox();
+
+            }
+
+        }
+    );
+
+
+    closeButton
+        ?.focus();
+
+}
+
+
+// ========================================
+// CLOSE CLIENT VISIT REPORT LIGHTBOX
+// ========================================
+
+function closeClientReportLightbox() {
+
+
+    const lightbox =
+        document.querySelector(
+            ".client-report-lightbox"
+        );
+
+
+    if (
+        !lightbox
+    ) {
+
+        document.body.classList.remove(
+            "client-report-lightbox-open"
+        );
+
+        return;
+
+    }
+
+
+    lightbox.classList.remove(
+        "client-report-lightbox-visible"
+    );
+
+
+    document.body.classList.remove(
+        "client-report-lightbox-open"
+    );
+
+
+    window.setTimeout(
+        () => {
+
+
+            if (
+                lightbox.isConnected
+            ) {
+
+                lightbox.remove();
+
+            }
+
+
+        },
+        180
+    );
+
+}
+
+
+// ========================================
+// CLIENT VISIT REPORT LIGHTBOX KEYBOARD
+// ========================================
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+
+        if (
+            event.key !==
+            "Escape"
+        ) {
+
+            return;
+
+        }
+
+
+        const lightbox =
+            document.querySelector(
+                ".client-report-lightbox"
+            );
+
+
+        if (
+            lightbox
+        ) {
+
+            closeClientReportLightbox();
+
+        }
+
+    }
+);
 
 // ========================================
 // TOGGLE CLIENT VISIT REPORT
