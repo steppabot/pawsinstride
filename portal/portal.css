@@ -7775,6 +7775,93 @@ body.portal-login-page {
 
 }
 
+/* ========================================
+   LOGIN PASSWORD
+======================================== */
+
+.portal-login-page
+.login-password-wrap {
+    position: relative;
+
+    width: 100%;
+}
+
+
+.portal-login-page
+.login-password-wrap input {
+    width: 100%;
+
+    padding-right:
+        72px;
+}
+
+
+.portal-login-page
+.login-password-toggle {
+    position: absolute;
+
+    top: 50%;
+    right: 10px;
+
+    width: auto;
+    min-width: 0;
+    height: auto;
+
+    margin: 0;
+    padding:
+        6px
+        9px;
+
+    transform:
+        translateY(-50%);
+
+    border: 0;
+    border-radius: 7px;
+
+    background:
+        transparent;
+
+    color:
+        var(--pis-blue);
+
+    box-shadow:
+        none;
+
+    font-family:
+        inherit;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+
+    cursor: pointer;
+
+    z-index: 2;
+}
+
+
+.portal-login-page
+.login-password-toggle:hover,
+.portal-login-page
+.login-password-toggle:focus {
+    background:
+        rgba(40, 144, 223, 0.08);
+
+    color:
+        var(--pis-blue);
+
+    box-shadow:
+        none;
+}
+
+
+.portal-login-page
+.login-password-toggle:focus-visible {
+    outline:
+        2px solid rgba(40, 144, 223, 0.30);
+
+    outline-offset:
+        1px;
+}
 
 /* ========================================
    SIGN IN BUTTON
