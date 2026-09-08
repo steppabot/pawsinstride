@@ -6407,9 +6407,1873 @@ document.getElementById(
 );
 
 
+// ========================================
+// ADMIN MESSAGING
+// ========================================
+
+let adminConversations =
+    [];
+
+let adminConversationMessages =
+    [];
+
+let activeAdminConversationId =
+    null;
+
+let adminMessageChannel =
+    null;
+
+let adminMessagingInitialized =
+    false;
+
+
+// ========================================
+// INITIALIZE ADMIN MESSAGING
+// ========================================
+
+async function initializeAdminMessaging() {
+
+    if (
+        adminMessagingInitialized ||
+        !currentUser
+    ) {
+        return;
+    }
+
+
+    adminMessagingInitialized =
+        true;
+
+
+    setupAdminMessageEvents();
+
+
+    try {
+
+        await loadAdminConversations();
+
+        subscribeToAdminMessages();
+
+    } catch (error) {
+
+        console.error(
+            "Admin messaging initialization error:",
+            error
+        );
+
+
+        showAdminMessageError(
+            "Messages are temporarily unavailable."
+        );
+
+    }
+
+}
+
+
+// ========================================
+// LOAD ADMIN CONVERSATIONS
+// ========================================
+
+async function loadAdminConversations() {
+
+    const {
+        data: conversations,
+        error: conversationError
+    } =
+        await supabaseClient
+            .from("conversations")
+            .select("*")
+            .order(
+                "last_message_at",
+                {
+                    ascending: false,
+                    nullsFirst: false
+                }
+            );
+
+
+    if (conversationError) {
+
+        throw conversationError;
+
+    }
+
+
+    const conversationData =
+        conversations ||
+        [];
+
+
+    if (
+        conversationData.length ===
+        0
+    ) {
+
+        adminConversations =
+            [];
+
+        renderAdminConversationList();
+
+        updateAdminMessageUnreadBadge();
+
+        return;
+
+    }
+
+
+    const clientIds =
+        [
+            ...new Set(
+                conversationData
+                    .map(
+                        conversation =>
+                            conversation.client_id
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+
+    const conversationIds =
+        conversationData.map(
+            conversation =>
+                conversation.id
+        );
+
+
+    const [
+        profilesResult,
+        messagesResult
+    ] =
+        await Promise.all([
+
+            supabaseClient
+                .from("profiles")
+                .select(
+                    "id, full_name, email, phone"
+                )
+                .in(
+                    "id",
+                    clientIds
+                ),
+
+            supabaseClient
+                .from("messages")
+                .select(
+                    `
+                    id,
+                    conversation_id,
+                    sender_id,
+                    body,
+                    read_at,
+                    created_at
+                    `
+                )
+                .in(
+                    "conversation_id",
+                    conversationIds
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
+
+        ]);
+
+
+    if (profilesResult.error) {
+
+        throw profilesResult.error;
+
+    }
+
+
+    if (messagesResult.error) {
+
+        throw messagesResult.error;
+
+    }
+
+
+    const profiles =
+        profilesResult.data ||
+        [];
+
+
+    const messages =
+        messagesResult.data ||
+        [];
+
+
+    adminConversations =
+        conversationData
+            .map(
+                conversation => {
+
+                    const client =
+                        profiles.find(
+                            profile =>
+                                profile.id ===
+                                conversation.client_id
+                        ) ||
+                        null;
+
+
+                    const conversationMessages =
+                        messages.filter(
+                            message =>
+                                Number(
+                                    message.conversation_id
+                                ) ===
+                                Number(
+                                    conversation.id
+                                )
+                        );
+
+
+                    const latestMessage =
+                        conversationMessages[0] ||
+                        null;
+
+
+                    const unreadCount =
+                        conversationMessages.filter(
+                            message =>
+                                message.sender_id !==
+                                    currentUser.id &&
+                                !message.read_at
+                        )
+                        .length;
+
+
+                    return {
+
+                        ...conversation,
+
+                        client,
+
+                        latestMessage,
+
+                        unreadCount
+
+                    };
+
+                }
+            )
+            .sort(
+                compareAdminConversations
+            );
+
+
+    renderAdminConversationList();
+
+    updateAdminMessageUnreadBadge();
+
+}
+
+
+// ========================================
+// COMPARE ADMIN CONVERSATIONS
+// ========================================
+
+function compareAdminConversations(
+    conversationA,
+    conversationB
+) {
+
+    const timeA =
+        conversationA.last_message_at ||
+        conversationA.latestMessage
+            ?.created_at ||
+        conversationA.created_at ||
+        "";
+
+
+    const timeB =
+        conversationB.last_message_at ||
+        conversationB.latestMessage
+            ?.created_at ||
+        conversationB.created_at ||
+        "";
+
+
+    return (
+        new Date(timeB) -
+        new Date(timeA)
+    );
+
+}
+
+
+// ========================================
+// ADMIN MESSAGE EVENTS
+// ========================================
+
+function setupAdminMessageEvents() {
+
+    const launcher =
+        document.getElementById(
+            "admin-message-launcher"
+        );
+
+    const closeButton =
+        document.getElementById(
+            "admin-message-close"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "admin-message-backdrop"
+        );
+
+    const conversationList =
+        document.getElementById(
+            "admin-conversation-list"
+        );
+
+    const form =
+        document.getElementById(
+            "admin-message-form"
+        );
+
+    const input =
+        document.getElementById(
+            "admin-message-input"
+        );
+
+    const mobileBack =
+        document.getElementById(
+            "admin-message-mobile-back"
+        );
+
+
+    launcher
+        ?.addEventListener(
+            "click",
+            openAdminMessaging
+        );
+
+
+    closeButton
+        ?.addEventListener(
+            "click",
+            closeAdminMessaging
+        );
+
+
+    backdrop
+        ?.addEventListener(
+            "click",
+            closeAdminMessaging
+        );
+
+
+    conversationList
+        ?.addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        "[data-admin-conversation]"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const conversationId =
+                    Number(
+                        button.dataset
+                            .adminConversation
+                    );
+
+
+                if (!conversationId) {
+                    return;
+                }
+
+
+                openAdminConversation(
+                    conversationId
+                );
+
+            }
+        );
+
+
+    form
+        ?.addEventListener(
+            "submit",
+            sendAdminMessage
+        );
+
+
+    input
+        ?.addEventListener(
+            "input",
+            autoResizeAdminMessageInput
+        );
+
+
+    input
+        ?.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                        "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    form?.requestSubmit();
+
+                }
+
+            }
+        );
+
+
+    mobileBack
+        ?.addEventListener(
+            "click",
+            showAdminMessageInbox
+        );
+
+
+    document
+        .addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    closeAdminMessaging();
+
+                }
+
+            }
+        );
+
+}
+
+
+// ========================================
+// OPEN ADMIN MESSAGING
+// ========================================
+
+function openAdminMessaging() {
+
+    const drawer =
+        document.getElementById(
+            "admin-message-drawer"
+        );
+
+    const launcher =
+        document.getElementById(
+            "admin-message-launcher"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "admin-message-backdrop"
+        );
+
+
+    drawer
+        ?.classList
+        .add(
+            "is-open"
+        );
+
+
+    backdrop
+        ?.classList
+        .add(
+            "is-open"
+        );
+
+
+    launcher
+        ?.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+
+    drawer
+        ?.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+    document.body.classList.add(
+        "admin-messaging-open"
+    );
+
+
+    if (
+        activeAdminConversationId
+    ) {
+
+        scrollAdminMessagesToBottom();
+
+    }
+
+}
+
+
+// ========================================
+// CLOSE ADMIN MESSAGING
+// ========================================
+
+function closeAdminMessaging() {
+
+    const drawer =
+        document.getElementById(
+            "admin-message-drawer"
+        );
+
+    const launcher =
+        document.getElementById(
+            "admin-message-launcher"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "admin-message-backdrop"
+        );
+
+
+    drawer
+        ?.classList
+        .remove(
+            "is-open"
+        );
+
+
+    backdrop
+        ?.classList
+        .remove(
+            "is-open"
+        );
+
+
+    launcher
+        ?.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+
+    drawer
+        ?.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+    document.body.classList.remove(
+        "admin-messaging-open"
+    );
+
+}
+
+
+// ========================================
+// RENDER ADMIN CONVERSATION LIST
+// ========================================
+
+function renderAdminConversationList() {
+
+    const list =
+        document.getElementById(
+            "admin-conversation-list"
+        );
+
+    const count =
+        document.getElementById(
+            "admin-message-inbox-count"
+        );
+
+
+    if (
+        !list ||
+        !count
+    ) {
+        return;
+    }
+
+
+    count.textContent =
+        `${adminConversations.length} ${
+
+            adminConversations.length ===
+            1
+
+                ? "conversation"
+
+                : "conversations"
+
+        }`;
+
+
+    list.innerHTML =
+        "";
+
+
+    if (
+        adminConversations.length ===
+        0
+    ) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+
+        empty.className =
+            "admin-message-empty";
+
+
+        empty.textContent =
+            "No client conversations yet.";
+
+
+        list.appendChild(
+            empty
+        );
+
+
+        return;
+
+    }
+
+
+    adminConversations
+        .forEach(
+            conversation => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "admin-conversation-item";
+
+
+                if (
+                    Number(
+                        activeAdminConversationId
+                    ) ===
+                    Number(
+                        conversation.id
+                    )
+                ) {
+
+                    button.classList.add(
+                        "is-active"
+                    );
+
+                }
+
+
+                if (
+                    conversation.unreadCount >
+                    0
+                ) {
+
+                    button.classList.add(
+                        "has-unread"
+                    );
+
+                }
+
+
+                button.dataset
+                    .adminConversation =
+                    conversation.id;
+
+
+                const top =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                top.className =
+                    "admin-conversation-item-top";
+
+
+                const name =
+                    document.createElement(
+                        "strong"
+                    );
+
+
+                name.textContent =
+                    conversation.client
+                        ?.full_name ||
+                    conversation.client
+                        ?.email ||
+                    "Client";
+
+
+                top.appendChild(
+                    name
+                );
+
+
+                if (
+                    conversation.unreadCount >
+                    0
+                ) {
+
+                    const badge =
+                        document.createElement(
+                            "span"
+                        );
+
+
+                    badge.className =
+                        "admin-conversation-unread";
+
+
+                    badge.textContent =
+                        conversation.unreadCount >
+                        99
+
+                            ? "99+"
+
+                            : String(
+                                conversation.unreadCount
+                            );
+
+
+                    top.appendChild(
+                        badge
+                    );
+
+                }
+
+
+                const preview =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                preview.className =
+                    "admin-conversation-preview";
+
+
+                preview.textContent =
+                    conversation.latestMessage
+                        ?.body ||
+                    "No messages yet";
+
+
+                const time =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                time.className =
+                    "admin-conversation-time";
+
+
+                time.textContent =
+                    formatAdminMessageTime(
+                        conversation.latestMessage
+                            ?.created_at ||
+                        conversation.last_message_at ||
+                        conversation.created_at
+                    );
+
+
+                button.append(
+                    top,
+                    preview,
+                    time
+                );
+
+
+                list.appendChild(
+                    button
+                );
+
+            }
+        );
+
+}
+
+
+// ========================================
+// OPEN ADMIN CONVERSATION
+// ========================================
+
+async function openAdminConversation(
+    conversationId
+) {
+
+    const conversation =
+        adminConversations.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    conversationId
+                )
+        );
+
+
+    if (!conversation) {
+        return;
+    }
+
+
+    activeAdminConversationId =
+        Number(
+            conversationId
+        );
+
+
+    renderAdminConversationList();
+
+
+    const name =
+        document.getElementById(
+            "admin-message-client-name"
+        );
+
+    const detail =
+        document.getElementById(
+            "admin-message-client-detail"
+        );
+
+    const form =
+        document.getElementById(
+            "admin-message-form"
+        );
+
+    const list =
+        document.getElementById(
+            "admin-message-list"
+        );
+
+
+    if (name) {
+
+        name.textContent =
+            conversation.client
+                ?.full_name ||
+            conversation.client
+                ?.email ||
+            "Client";
+
+    }
+
+
+    if (detail) {
+
+        detail.textContent =
+            conversation.client
+                ?.phone ||
+            conversation.client
+                ?.email ||
+            "Paws in Stride client";
+
+    }
+
+
+    if (form) {
+
+        form.style.display =
+            "flex";
+
+    }
+
+
+    if (list) {
+
+        list.innerHTML =
+            `
+
+                <div class="admin-message-loading">
+                    Loading messages...
+                </div>
+
+            `;
+
+    }
+
+
+    document
+        .getElementById(
+            "admin-message-drawer"
+        )
+        ?.classList
+        .add(
+            "conversation-open"
+        );
+
+
+    try {
+
+        await loadActiveAdminMessages();
+
+        await markAdminMessagesRead();
+
+    } catch (error) {
+
+        console.error(
+            "Open admin conversation error:",
+            error
+        );
+
+
+        showAdminMessageError(
+            "We couldn't load this conversation."
+        );
+
+    }
+
+}
+
+
+// ========================================
+// LOAD ACTIVE ADMIN MESSAGES
+// ========================================
+
+async function loadActiveAdminMessages() {
+
+    if (
+        !activeAdminConversationId
+    ) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("messages")
+            .select(
+                `
+                id,
+                conversation_id,
+                sender_id,
+                body,
+                read_at,
+                created_at
+                `
+            )
+            .eq(
+                "conversation_id",
+                activeAdminConversationId
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+    adminConversationMessages =
+        data ||
+        [];
+
+
+    renderActiveAdminMessages();
+
+}
+
+
+// ========================================
+// RENDER ACTIVE ADMIN MESSAGES
+// ========================================
+
+function renderActiveAdminMessages() {
+
+    const list =
+        document.getElementById(
+            "admin-message-list"
+        );
+
+
+    if (!list) {
+        return;
+    }
+
+
+    list.innerHTML =
+        "";
+
+
+    if (
+        adminConversationMessages.length ===
+        0
+    ) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+
+        empty.className =
+            "admin-message-empty";
+
+
+        empty.textContent =
+            "No messages in this conversation yet.";
+
+
+        list.appendChild(
+            empty
+        );
+
+
+        return;
+
+    }
+
+
+    const conversation =
+        adminConversations.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    activeAdminConversationId
+                )
+        );
+
+
+    const clientId =
+        conversation
+            ?.client_id;
+
+
+    adminConversationMessages
+        .forEach(
+            message => {
+
+                const sentByAdmin =
+                    message.sender_id ===
+                    currentUser.id;
+
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    `admin-message-row ${
+                        sentByAdmin
+                            ? "is-admin"
+                            : "is-client"
+                    }`;
+
+
+                const sender =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                sender.className =
+                    "admin-message-sender";
+
+
+                sender.textContent =
+                    sentByAdmin
+                        ? "You"
+                        : (
+                            conversation
+                                ?.client
+                                ?.full_name ||
+                            "Client"
+                        );
+
+
+                const bubble =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                bubble.className =
+                    "admin-message-bubble";
+
+
+                bubble.textContent =
+                    message.body;
+
+
+                const time =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                time.className =
+                    "admin-message-time";
+
+
+                time.textContent =
+                    formatAdminMessageTime(
+                        message.created_at
+                    );
+
+
+                row.append(
+                    sender,
+                    bubble,
+                    time
+                );
+
+
+                list.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+    scrollAdminMessagesToBottom();
+
+}
+
+
+// ========================================
+// SEND ADMIN MESSAGE
+// ========================================
+
+async function sendAdminMessage(
+    event
+) {
+
+    event.preventDefault();
+
+
+    if (
+        !currentUser ||
+        !activeAdminConversationId
+    ) {
+        return;
+    }
+
+
+    const input =
+        document.getElementById(
+            "admin-message-input"
+        );
+
+    const sendButton =
+        document.getElementById(
+            "admin-message-send"
+        );
+
+
+    const body =
+        input?.value
+            ?.trim();
+
+
+    if (!body) {
+        return;
+    }
+
+
+    if (
+        body.length >
+        5000
+    ) {
+
+        showAdminMessageError(
+            "Messages cannot be longer than 5,000 characters."
+        );
+
+        return;
+
+    }
+
+
+    clearAdminMessageError();
+
+
+    if (sendButton) {
+
+        sendButton.disabled =
+            true;
+
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("messages")
+                .insert({
+
+                    conversation_id:
+                        activeAdminConversationId,
+
+                    sender_id:
+                        currentUser.id,
+
+                    body
+
+                })
+                .select(
+                    `
+                    id,
+                    conversation_id,
+                    sender_id,
+                    body,
+                    read_at,
+                    created_at
+                    `
+                )
+                .single();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        addAdminMessageIfMissing(
+            data
+        );
+
+
+        if (input) {
+
+            input.value =
+                "";
+
+            input.style.height =
+                "";
+
+            input.focus();
+
+        }
+
+
+        renderActiveAdminMessages();
+
+
+        await loadAdminConversations();
+
+    } catch (error) {
+
+        console.error(
+            "Send admin message error:",
+            error
+        );
+
+
+        showAdminMessageError(
+            "We couldn't send your message. Please try again."
+        );
+
+    } finally {
+
+        if (sendButton) {
+
+            sendButton.disabled =
+                false;
+
+        }
+
+    }
+
+}
+
+
+// ========================================
+// REALTIME ADMIN MESSAGES
+// ========================================
+
+function subscribeToAdminMessages() {
+
+    if (
+        adminMessageChannel
+    ) {
+        return;
+    }
+
+
+    adminMessageChannel =
+        supabaseClient
+            .channel(
+                "admin-client-messages"
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event:
+                        "INSERT",
+
+                    schema:
+                        "public",
+
+                    table:
+                        "messages"
+                },
+                async payload => {
+
+                    const newMessage =
+                        payload.new;
+
+
+                    if (
+                        Number(
+                            newMessage
+                                .conversation_id
+                        ) ===
+                        Number(
+                            activeAdminConversationId
+                        )
+                    ) {
+
+                        addAdminMessageIfMissing(
+                            newMessage
+                        );
+
+
+                        renderActiveAdminMessages();
+
+
+                        const drawer =
+                            document.getElementById(
+                                "admin-message-drawer"
+                            );
+
+
+                        if (
+                            drawer
+                                ?.classList
+                                .contains(
+                                    "is-open"
+                                ) &&
+                            newMessage.sender_id !==
+                                currentUser.id
+                        ) {
+
+                            await markAdminMessagesRead();
+
+                        }
+
+                    }
+
+
+                    await loadAdminConversations();
+
+                }
+            )
+            .subscribe();
+
+}
+
+
+// ========================================
+// ADD ADMIN MESSAGE IF MISSING
+// ========================================
+
+function addAdminMessageIfMissing(
+    message
+) {
+
+    if (!message) {
+        return;
+    }
+
+
+    const exists =
+        adminConversationMessages.some(
+            existingMessage =>
+                Number(
+                    existingMessage.id
+                ) ===
+                Number(
+                    message.id
+                )
+        );
+
+
+    if (exists) {
+        return;
+    }
+
+
+    adminConversationMessages.push(
+        message
+    );
+
+
+    adminConversationMessages.sort(
+        (
+            messageA,
+            messageB
+        ) =>
+            new Date(
+                messageA.created_at
+            ) -
+            new Date(
+                messageB.created_at
+            )
+    );
+
+}
+
+
+// ========================================
+// MARK ADMIN MESSAGES READ
+// ========================================
+
+async function markAdminMessagesRead() {
+
+    if (
+        !activeAdminConversationId ||
+        !currentUser
+    ) {
+        return;
+    }
+
+
+    const unreadMessages =
+        adminConversationMessages.filter(
+            message =>
+                message.sender_id !==
+                    currentUser.id &&
+                !message.read_at
+        );
+
+
+    if (
+        unreadMessages.length ===
+        0
+    ) {
+
+        updateAdminMessageUnreadBadge();
+
+        return;
+
+    }
+
+
+    const now =
+        new Date()
+            .toISOString();
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("messages")
+            .update({
+                read_at:
+                    now
+            })
+            .eq(
+                "conversation_id",
+                activeAdminConversationId
+            )
+            .neq(
+                "sender_id",
+                currentUser.id
+            )
+            .is(
+                "read_at",
+                null
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Mark admin messages read error:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    adminConversationMessages =
+        adminConversationMessages.map(
+            message => {
+
+                if (
+                    message.sender_id !==
+                        currentUser.id &&
+                    !message.read_at
+                ) {
+
+                    return {
+                        ...message,
+                        read_at:
+                            now
+                    };
+
+                }
+
+
+                return message;
+
+            }
+        );
+
+
+    const conversation =
+        adminConversations.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    activeAdminConversationId
+                )
+        );
+
+
+    if (conversation) {
+
+        conversation.unreadCount =
+            0;
+
+    }
+
+
+    renderAdminConversationList();
+
+    updateAdminMessageUnreadBadge();
+
+}
+
+
+// ========================================
+// ADMIN UNREAD BADGE
+// ========================================
+
+function updateAdminMessageUnreadBadge() {
+
+    const badge =
+        document.getElementById(
+            "admin-message-unread-badge"
+        );
+
+
+    if (!badge) {
+        return;
+    }
+
+
+    const unreadCount =
+        adminConversations.reduce(
+            (
+                total,
+                conversation
+            ) =>
+                total +
+                (
+                    conversation
+                        .unreadCount ||
+                    0
+                ),
+            0
+        );
+
+
+    if (
+        unreadCount <=
+        0
+    ) {
+
+        badge.style.display =
+            "none";
+
+        badge.textContent =
+            "0";
+
+        return;
+
+    }
+
+
+    badge.textContent =
+        unreadCount > 99
+            ? "99+"
+            : String(
+                unreadCount
+            );
+
+
+    badge.style.display =
+        "block";
+
+}
+
+
+// ========================================
+// SHOW ADMIN MESSAGE INBOX
+// ========================================
+
+function showAdminMessageInbox() {
+
+    document
+        .getElementById(
+            "admin-message-drawer"
+        )
+        ?.classList
+        .remove(
+            "conversation-open"
+        );
+
+}
+
+
+// ========================================
+// FORMAT ADMIN MESSAGE TIME
+// ========================================
+
+function formatAdminMessageTime(
+    timestamp
+) {
+
+    if (!timestamp) {
+        return "";
+    }
+
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+
+    const now =
+        new Date();
+
+
+    const sameDay =
+        date.getFullYear() ===
+            now.getFullYear() &&
+        date.getMonth() ===
+            now.getMonth() &&
+        date.getDate() ===
+            now.getDate();
+
+
+    if (sameDay) {
+
+        return date
+            .toLocaleTimeString(
+                [],
+                {
+                    hour:
+                        "numeric",
+
+                    minute:
+                        "2-digit"
+                }
+            );
+
+    }
+
+
+    return date
+        .toLocaleString(
+            [],
+            {
+                month:
+                    "short",
+
+                day:
+                    "numeric",
+
+                hour:
+                    "numeric",
+
+                minute:
+                    "2-digit"
+            }
+        );
+
+}
+
+
+// ========================================
+// AUTO RESIZE ADMIN MESSAGE INPUT
+// ========================================
+
+function autoResizeAdminMessageInput(
+    event
+) {
+
+    const input =
+        event.target;
+
+
+    input.style.height =
+        "auto";
+
+
+    input.style.height =
+        `${Math.min(
+            input.scrollHeight,
+            120
+        )}px`;
+
+}
+
+
+// ========================================
+// SCROLL ADMIN MESSAGES
+// ========================================
+
+function scrollAdminMessagesToBottom() {
+
+    const list =
+        document.getElementById(
+            "admin-message-list"
+        );
+
+
+    if (!list) {
+        return;
+    }
+
+
+    window.requestAnimationFrame(
+        () => {
+
+            list.scrollTop =
+                list.scrollHeight;
+
+        }
+    );
+
+}
+
+
+// ========================================
+// ADMIN MESSAGE ERROR
+// ========================================
+
+function showAdminMessageError(
+    message
+) {
+
+    const errorElement =
+        document.getElementById(
+            "admin-message-error"
+        );
+
+
+    if (!errorElement) {
+        return;
+    }
+
+
+    errorElement.textContent =
+        message;
+
+
+    errorElement.style.display =
+        "block";
+
+}
+
+
+// ========================================
+// CLEAR ADMIN MESSAGE ERROR
+// ========================================
+
+function clearAdminMessageError() {
+
+    const errorElement =
+        document.getElementById(
+            "admin-message-error"
+        );
+
+
+    if (!errorElement) {
+        return;
+    }
+
+
+    errorElement.textContent =
+        "";
+
+
+    errorElement.style.display =
+        "none";
+
+}
 
 // ========================================
 // START
 // ========================================
 
-loadAdminDashboard();
+(async function initializeAdminPortal() {
+
+    await loadAdminDashboard();
+
+
+    if (
+        currentUser &&
+        currentProfile
+    ) {
+
+        await initializeAdminMessaging();
+
+    }
+
+})();
