@@ -5321,3 +5321,1908 @@ body.client-report-lightbox-open {
     }
 
 }
+
+/* ========================================
+   PAWS IN STRIDE CLIENT APP THEME
+======================================== */
+
+
+/* ========================================
+   BRAND VARIABLES
+======================================== */
+
+.client-portal-page {
+
+    --pis-blue: #2890df;
+    --pis-blue-dark: #1f7bc2;
+
+    --pis-cyan: #47cee6;
+
+    --pis-orange: #f5ab40;
+    --pis-orange-soft: #f3aa4c;
+    --pis-orange-hover: #ef602c;
+
+    --pis-ink: #202a33;
+    --pis-text: #333333;
+    --pis-muted: #6b7785;
+
+    --pis-app-bg: #f3f8fb;
+    --pis-app-bg-soft: #f8fbfd;
+
+    --pis-card: #ffffff;
+
+    --pis-border: #dce8ef;
+    --pis-border-strong: #c8dce8;
+
+    --pis-blue-soft: #eaf6fc;
+    --pis-orange-soft-bg: #fff7ea;
+
+    --pis-shadow:
+        0 8px 28px rgba(35, 93, 125, 0.08);
+
+    --pis-shadow-hover:
+        0 12px 32px rgba(35, 93, 125, 0.12);
+
+}
+
+
+/* ========================================
+   CLIENT APP PAGE
+======================================== */
+
+body.client-portal-page {
+
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(71, 206, 230, 0.10),
+            transparent 34%
+        ),
+        linear-gradient(
+            180deg,
+            #f8fcfe 0%,
+            var(--pis-app-bg) 45%,
+            #eef6fa 100%
+        );
+
+    color: var(--pis-ink);
+
+    font-family:
+        "Roboto",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+
+/* ========================================
+   CLIENT DASHBOARD WIDTH
+======================================== */
+
+.client-portal-page
+.client-dashboard-container {
+
+    position: relative;
+
+}
+
+
+/* ========================================
+   CLIENT DASHBOARD HEADER
+======================================== */
+
+.client-portal-page
+.client-dashboard-header {
+
+    position: relative;
+
+    align-items: center;
+
+    margin-bottom: 24px;
+
+    padding: 16px 18px;
+
+    background:
+        rgba(255, 255, 255, 0.88);
+
+    border:
+        1px solid rgba(200, 220, 232, 0.82);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 6px 24px rgba(40, 144, 223, 0.07);
+
+    backdrop-filter:
+        blur(14px);
+
+    -webkit-backdrop-filter:
+        blur(14px);
+
+}
+
+
+/* ========================================
+   SUBTLE BRAND ACCENT
+======================================== */
+
+.client-portal-page
+.client-dashboard-header::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: -1px;
+    left: 20px;
+    right: 20px;
+
+    height: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    border-radius:
+        0
+        0
+        999px
+        999px;
+
+}
+
+
+/* ========================================
+   HEADER BRAND
+======================================== */
+
+.client-dashboard-brand {
+
+    display: flex;
+    align-items: center;
+
+    min-width: 0;
+
+    gap: 18px;
+
+}
+
+
+.client-dashboard-logo {
+
+    display: block;
+
+    width: 150px;
+    max-width: 100%;
+
+    height: auto;
+
+    flex: 0 0 auto;
+
+}
+
+
+.client-dashboard-welcome {
+
+    min-width: 0;
+
+    padding-left: 18px;
+
+    border-left:
+        1px solid var(--pis-border);
+
+}
+
+
+.client-portal-label {
+
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: var(--pis-blue);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.10em;
+
+    text-transform: uppercase;
+
+}
+
+
+.client-portal-page
+.client-dashboard-header h2 {
+
+    margin: 0;
+
+    color: var(--pis-ink);
+
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.25;
+
+}
+
+
+/* ========================================
+   LOADING ACCOUNT
+======================================== */
+
+.client-portal-page
+#loading {
+
+    padding:
+        14px
+        18px;
+
+    color: var(--pis-muted);
+
+    font-size: 14px;
+    font-weight: 500;
+
+}
+
+
+/* ========================================
+   CLIENT SECTIONS / CARDS
+======================================== */
+
+.client-portal-page
+section {
+
+    background: var(--pis-card);
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius: 18px;
+
+    box-shadow:
+        var(--pis-shadow);
+
+}
+
+
+/* ========================================
+   SECTION HEADINGS
+======================================== */
+
+.client-portal-page
+section h3,
+
+.client-portal-page
+section h4,
+
+.client-portal-page
+section h5 {
+
+    color: var(--pis-ink);
+
+}
+
+
+.client-portal-page
+.household-section-help,
+
+.client-portal-page
+.pets-section-help,
+
+.client-portal-page
+.upcoming-calendar-help,
+
+.client-portal-page
+.booking-help,
+
+.client-portal-page
+.field-help {
+
+    color: var(--pis-muted);
+
+}
+
+
+/* ========================================
+   PRIMARY BUTTONS
+======================================== */
+
+.client-portal-page
+.primary-button {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-orange),
+            var(--pis-orange-soft)
+        );
+
+    color: #fff;
+
+    border: none;
+
+    border-radius: 999px;
+
+    box-shadow:
+        0 6px 15px rgba(245, 171, 64, 0.22);
+
+    font-weight: 700;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+
+}
+
+
+.client-portal-page
+.primary-button:hover {
+
+    opacity: 1;
+
+    background:
+        var(--pis-orange-hover);
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 8px 18px rgba(239, 96, 44, 0.20);
+
+}
+
+
+.client-portal-page
+.primary-button:active {
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* ========================================
+   HEADER REQUEST SERVICE
+======================================== */
+
+.client-portal-page
+.client-header-request-button {
+
+    min-height: 44px;
+
+    padding:
+        12px
+        18px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ========================================
+   SECONDARY BUTTONS
+======================================== */
+
+.client-portal-page
+.secondary-button {
+
+    color: var(--pis-blue);
+
+    background: #fff;
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    border-radius: 999px;
+
+}
+
+
+.client-portal-page
+.secondary-button:hover {
+
+    background:
+        var(--pis-blue-soft);
+
+    color:
+        var(--pis-blue-dark);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   EDIT / SMALL ACTION BUTTONS
+======================================== */
+
+.client-portal-page
+.edit-pet-button,
+
+.client-portal-page
+.remove-date-button {
+
+    color: var(--pis-blue-dark);
+
+    background: #fff;
+
+    border:
+        1px solid var(--pis-border-strong);
+
+}
+
+
+.client-portal-page
+.edit-pet-button:hover,
+
+.client-portal-page
+.remove-date-button:hover {
+
+    color: var(--pis-blue);
+
+    background: var(--pis-blue-soft);
+
+    border-color: var(--pis-blue);
+
+}
+
+
+/* ========================================
+   LOG OUT
+======================================== */
+
+.client-portal-page
+#logout-button {
+
+    color: var(--pis-muted);
+
+    background:
+        rgba(255, 255, 255, 0.78);
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 3px 12px rgba(35, 93, 125, 0.04);
+
+}
+
+
+.client-portal-page
+#logout-button:hover {
+
+    color: var(--pis-ink);
+
+    border-color:
+        var(--pis-border-strong);
+
+}
+
+
+/* ========================================
+   FOCUS STATES
+======================================== */
+
+.client-portal-page
+button:focus-visible,
+
+.client-portal-page
+input:focus-visible,
+
+.client-portal-page
+select:focus-visible,
+
+.client-portal-page
+textarea:focus-visible,
+
+.client-portal-page
+a:focus-visible {
+
+    outline:
+        3px solid rgba(40, 144, 223, 0.20);
+
+    outline-offset: 2px;
+
+}
+
+
+/* ========================================
+   FORM INPUTS
+======================================== */
+
+.client-portal-page
+.booking-section input,
+
+.client-portal-page
+.booking-section select,
+
+.client-portal-page
+.household-form-field input,
+
+.client-portal-page
+.household-form-field select,
+
+.client-portal-page
+.household-form-field textarea,
+
+.client-portal-page
+.pet-form-field input,
+
+.client-portal-page
+.pet-form-field select,
+
+.client-portal-page
+.pet-form-field textarea {
+
+    color: var(--pis-ink);
+
+    background: #fff;
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    border-radius: 11px;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+
+}
+
+
+.client-portal-page
+.booking-section input:focus,
+
+.client-portal-page
+.booking-section select:focus,
+
+.client-portal-page
+.household-form-field input:focus,
+
+.client-portal-page
+.household-form-field select:focus,
+
+.client-portal-page
+.household-form-field textarea:focus,
+
+.client-portal-page
+.pet-form-field input:focus,
+
+.client-portal-page
+.pet-form-field select:focus,
+
+.client-portal-page
+.pet-form-field textarea:focus {
+
+    outline: none;
+
+    border-color:
+        var(--pis-blue);
+
+    box-shadow:
+        0 0 0 3px rgba(40, 144, 223, 0.11);
+
+}
+
+
+/* ========================================
+   BOOKING SECTION
+======================================== */
+
+.client-portal-page
+.booking-section {
+
+    position: relative;
+
+    overflow: hidden;
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    box-shadow:
+        0 12px 34px rgba(40, 144, 223, 0.10);
+
+}
+
+
+.client-portal-page
+.booking-section::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 4px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--pis-cyan),
+            var(--pis-blue),
+            var(--pis-orange)
+        );
+
+}
+
+
+/* ========================================
+   BOOKING TOTAL
+======================================== */
+
+.client-portal-page
+.booking-total {
+
+    border-top:
+        1px solid var(--pis-border);
+
+}
+
+
+.client-portal-page
+#booking-price {
+
+    color: var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADDITIONAL PETS
+======================================== */
+
+.client-portal-page
+.additional-pets-list {
+
+    border-color:
+        var(--pis-border);
+
+}
+
+
+.client-portal-page
+.additional-pet-option {
+
+    border-bottom-color:
+        var(--pis-border);
+
+}
+
+
+.client-portal-page
+.additional-pet-option:hover {
+
+    background:
+        var(--pis-blue-soft);
+
+}
+
+
+/* ========================================
+   BOARDING POLICY
+======================================== */
+
+.client-portal-page
+.boarding-policy {
+
+    background:
+        var(--pis-orange-soft-bg);
+
+    border:
+        1px solid #f3d7aa;
+
+}
+
+
+/* ========================================
+   SELECTED DATES
+======================================== */
+
+.client-portal-page
+#selected-dates-container {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border-color:
+        var(--pis-border);
+
+}
+
+
+/* ========================================
+   CALENDAR CONTAINERS
+======================================== */
+
+.client-portal-page
+.booking-calendar,
+
+.client-portal-page
+.upcoming-calendar {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius: 14px;
+
+}
+
+
+/* ========================================
+   CALENDAR NAVIGATION
+======================================== */
+
+.client-portal-page
+.calendar-nav-button {
+
+    color:
+        var(--pis-blue);
+
+    background:
+        #fff;
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius: 50%;
+
+}
+
+
+.client-portal-page
+.calendar-nav-button:hover {
+
+    color:
+        #fff;
+
+    background:
+        var(--pis-blue);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   BOOKING CALENDAR DAYS
+======================================== */
+
+.client-portal-page
+.calendar-day {
+
+    color:
+        var(--pis-ink);
+
+    border-color:
+        var(--pis-border);
+
+}
+
+
+.client-portal-page
+.calendar-day:hover:not(:disabled) {
+
+    color:
+        var(--pis-blue);
+
+    background:
+        var(--pis-blue-soft);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+.client-portal-page
+.calendar-day-selected {
+
+    color:
+        #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    border-color:
+        var(--pis-blue);
+
+    box-shadow:
+        0 4px 12px rgba(40, 144, 223, 0.20);
+
+}
+
+
+.client-portal-page
+.calendar-day-today:not(
+    .calendar-day-selected
+) {
+
+    border:
+        2px solid var(--pis-orange);
+
+}
+
+
+/* ========================================
+   UPCOMING CALENDAR
+======================================== */
+
+.client-portal-page
+.upcoming-calendar-day {
+
+    color:
+        var(--pis-ink);
+
+    border-color:
+        var(--pis-border);
+
+}
+
+
+.client-portal-page
+.upcoming-calendar-day:hover {
+
+    color:
+        var(--pis-blue);
+
+    background:
+        var(--pis-blue-soft);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+.client-portal-page
+.upcoming-calendar-selected {
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+.client-portal-page
+.upcoming-calendar-today:not(
+    .upcoming-calendar-selected
+) {
+
+    border:
+        2px solid var(--pis-orange);
+
+}
+
+
+.client-portal-page
+.upcoming-service-count {
+
+    background:
+        var(--pis-orange);
+
+    color:
+        #fff;
+
+}
+
+
+/* ========================================
+   SELECTED UPCOMING DAY
+======================================== */
+
+.client-portal-page
+.selected-upcoming-day {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border:
+        1px solid var(--pis-border);
+
+}
+
+
+/* ========================================
+   SERVICE CARDS
+======================================== */
+
+.client-portal-page
+.upcoming-service-card {
+
+    border-color:
+        var(--pis-border);
+
+    box-shadow:
+        0 4px 14px rgba(35, 93, 125, 0.04);
+
+}
+
+
+.client-portal-page
+.service-pet-chip {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+}
+
+
+/* ========================================
+   HOUSEHOLD DETAILS
+======================================== */
+
+.client-portal-page
+.household-detail-card {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border-color:
+        var(--pis-border);
+
+}
+
+
+.client-portal-page
+.household-detail-label,
+
+.client-portal-page
+.pet-detail-label {
+
+    color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   PROPERTY ACCESS
+======================================== */
+
+.client-portal-page
+.access-detail-card {
+
+    background:
+        linear-gradient(
+            145deg,
+            #f8fcfe,
+            #eef8fc
+        );
+
+}
+
+
+.client-portal-page
+.access-detail-item {
+
+    border-top-color:
+        var(--pis-border);
+
+}
+
+
+/* ========================================
+   HOUSEHOLD / PET EDIT FORMS
+======================================== */
+
+.client-portal-page
+.household-form-panel,
+
+.client-portal-page
+.pet-form-panel {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    border-radius: 16px;
+
+    box-shadow:
+        inset 0 3px 0 rgba(71, 206, 230, 0.30);
+
+}
+
+
+/* ========================================
+   PROFILE AVATAR
+======================================== */
+
+.client-portal-page
+.client-profile-avatar,
+
+.client-portal-page
+.client-photo-preview-wrapper {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    box-shadow:
+        0 5px 16px rgba(40, 144, 223, 0.18);
+
+}
+
+
+/* ========================================
+   PHOTO UPLOAD BUTTONS
+======================================== */
+
+.client-portal-page
+.client-photo-upload-button,
+
+.client-portal-page
+.pet-photo-upload-button {
+
+    background:
+        var(--pis-blue);
+
+    color:
+        #fff;
+
+    border-radius:
+        999px;
+
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease;
+
+}
+
+
+.client-portal-page
+.client-photo-upload-button:hover,
+
+.client-portal-page
+.pet-photo-upload-button:hover {
+
+    background:
+        var(--pis-blue-dark);
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* ========================================
+   PET PROFILE CARDS
+======================================== */
+
+.client-portal-page
+.pet-profile-card {
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        0 4px 16px rgba(35, 93, 125, 0.05);
+
+}
+
+
+.client-portal-page
+.pet-profile-photo {
+
+    border:
+        3px solid #fff;
+
+    box-shadow:
+        0 0 0 2px rgba(71, 206, 230, 0.30);
+
+}
+
+
+/* ========================================
+   BURGER BUTTON
+======================================== */
+
+.client-portal-page
+.client-menu-button {
+
+    background:
+        #fff;
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    box-shadow:
+        0 4px 12px rgba(35, 93, 125, 0.05);
+
+}
+
+
+.client-portal-page
+.client-menu-button:hover {
+
+    background:
+        var(--pis-blue-soft);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+.client-portal-page
+.client-menu-button span {
+
+    background:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   APP NAVIGATION DRAWER
+======================================== */
+
+.client-portal-page
+.client-navigation-drawer {
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f8fcfe 100%
+        );
+
+    border-right:
+        1px solid var(--pis-border);
+
+}
+
+
+/* ========================================
+   NAVIGATION HEADER
+======================================== */
+
+.client-portal-page
+.client-navigation-header {
+
+    position: relative;
+
+    min-height: 98px;
+
+    border-bottom:
+        1px solid var(--pis-border);
+
+}
+
+
+.client-portal-page
+.client-navigation-header::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 4px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--pis-cyan),
+            var(--pis-blue),
+            var(--pis-orange)
+        );
+
+}
+
+
+.client-navigation-brand {
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 5px;
+
+}
+
+
+.client-navigation-logo {
+
+    display: block;
+
+    width: 125px;
+    height: auto;
+
+}
+
+
+.client-portal-page
+.client-navigation-brand span {
+
+    color:
+        var(--pis-blue);
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.09em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+/* ========================================
+   NAVIGATION CLOSE
+======================================== */
+
+.client-portal-page
+.client-navigation-close {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+}
+
+
+.client-portal-page
+.client-navigation-close:hover {
+
+    color:
+        #fff;
+
+    background:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   NAVIGATION LINKS
+======================================== */
+
+.client-portal-page
+.client-navigation-link {
+
+    color:
+        var(--pis-ink);
+
+}
+
+
+.client-portal-page
+.client-navigation-link:hover {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+}
+
+
+.client-portal-page
+.client-navigation-link-icon {
+
+    color:
+        var(--pis-blue);
+
+    background:
+        var(--pis-blue-soft);
+
+}
+
+
+/* ========================================
+   NAVIGATION REQUEST SERVICE
+======================================== */
+
+.client-portal-page
+.client-navigation-request {
+
+    width:
+        100%;
+
+    min-height:
+        48px;
+
+}
+
+
+/* ========================================
+   NAVIGATION LOGOUT
+======================================== */
+
+.client-portal-page
+.client-navigation-logout {
+
+    color:
+        var(--pis-muted);
+
+    border:
+        1px solid var(--pis-border);
+
+}
+
+
+.client-portal-page
+.client-navigation-logout:hover {
+
+    color:
+        var(--pis-ink);
+
+    background:
+        var(--pis-app-bg-soft);
+
+}
+
+
+/* ========================================
+   CLIENT MESSAGE LAUNCHER
+======================================== */
+
+.client-portal-page
+.client-message-launcher {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    color:
+        #fff;
+
+    box-shadow:
+        0 10px 28px rgba(40, 144, 223, 0.30);
+
+}
+
+
+.client-portal-page
+.client-message-launcher:hover {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-blue),
+            var(--pis-blue-dark)
+        );
+
+    box-shadow:
+        0 13px 34px rgba(40, 144, 223, 0.34);
+
+}
+
+
+/* ========================================
+   MESSAGE DRAWER
+======================================== */
+
+.client-portal-page
+.client-message-drawer {
+
+    border:
+        1px solid var(--pis-border);
+
+    box-shadow:
+        0 24px 60px rgba(28, 71, 94, 0.22);
+
+}
+
+
+/* ========================================
+   MESSAGE HEADER
+======================================== */
+
+.client-portal-page
+.client-message-header {
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fdff,
+            #edf8fd
+        );
+
+    border-bottom:
+        1px solid var(--pis-border);
+
+}
+
+
+.client-portal-page
+.client-message-header h3 {
+
+    color:
+        var(--pis-ink);
+
+}
+
+
+.client-portal-page
+.client-message-header p {
+
+    color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   MESSAGE LIST
+======================================== */
+
+.client-portal-page
+.client-message-list {
+
+    background:
+        var(--pis-app-bg-soft);
+
+}
+
+
+/* ========================================
+   CLIENT MESSAGE BUBBLES
+======================================== */
+
+.client-portal-page
+.client-message-row.is-client
+.client-message-bubble {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    color:
+        #fff;
+
+}
+
+
+.client-portal-page
+.client-message-row.is-admin
+.client-message-bubble {
+
+    background:
+        #fff;
+
+    color:
+        var(--pis-ink);
+
+    border:
+        1px solid var(--pis-border);
+
+}
+
+
+/* ========================================
+   MESSAGE INPUT
+======================================== */
+
+.client-portal-page
+.client-message-form textarea {
+
+    border-color:
+        var(--pis-border-strong);
+
+}
+
+
+.client-portal-page
+.client-message-form textarea:focus {
+
+    border-color:
+        var(--pis-blue);
+
+    box-shadow:
+        0 0 0 3px rgba(40, 144, 223, 0.10);
+
+}
+
+
+/* ========================================
+   MESSAGE SEND BUTTON
+======================================== */
+
+.client-portal-page
+.client-message-send {
+
+    background:
+        var(--pis-blue);
+
+    color:
+        #fff;
+
+}
+
+
+.client-portal-page
+.client-message-send:hover {
+
+    background:
+        var(--pis-blue-dark);
+
+}
+
+
+/* ========================================
+   KEEP FUNCTIONAL STATUS COLORS
+======================================== */
+
+.client-portal-page
+.upcoming-service-card-in-progress {
+
+    border-color:
+        #d9b65f;
+
+}
+
+
+.client-portal-page
+.upcoming-service-card-completed {
+
+    border-color:
+        #a9d7b7;
+
+}
+
+
+/* ========================================
+   MOBILE PAWS IN STRIDE APP HEADER
+======================================== */
+
+@media (max-width: 700px) {
+
+    .client-portal-page
+    .client-dashboard-container {
+
+        width:
+            94%;
+
+        margin:
+            0 auto 25px;
+
+    }
+
+
+    .client-portal-page
+    .client-dashboard-header {
+
+        position:
+            sticky;
+
+        top:
+            0;
+
+        z-index:
+            900;
+
+        display:
+            flex;
+
+        flex-direction:
+            row;
+
+        align-items:
+            center;
+
+        justify-content:
+            space-between;
+
+        gap:
+            8px;
+
+        margin:
+            0
+            -3%
+            18px;
+
+        padding:
+            max(
+                10px,
+                env(safe-area-inset-top)
+            )
+            3%
+            10px;
+
+        border-top:
+            0;
+
+        border-right:
+            0;
+
+        border-left:
+            0;
+
+        border-radius:
+            0
+            0
+            16px
+            16px;
+
+        background:
+            rgba(255, 255, 255, 0.94);
+
+        box-shadow:
+            0 5px 18px rgba(35, 93, 125, 0.08);
+
+        backdrop-filter:
+            blur(18px);
+
+        -webkit-backdrop-filter:
+            blur(18px);
+
+    }
+
+
+    .client-portal-page
+    .client-dashboard-header::before {
+
+        left:
+            0;
+
+        right:
+            0;
+
+    }
+
+
+    .client-dashboard-brand {
+
+        flex:
+            1 1 auto;
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+        gap:
+            3px;
+
+        min-width:
+            0;
+
+    }
+
+
+    .client-dashboard-logo {
+
+        width:
+            105px;
+
+    }
+
+
+    .client-dashboard-welcome {
+
+        padding-left:
+            0;
+
+        border-left:
+            0;
+
+    }
+
+
+    .client-portal-label {
+
+        display:
+            none;
+
+    }
+
+
+    .client-portal-page
+    .client-dashboard-header h2 {
+
+        overflow:
+            hidden;
+
+        max-width:
+            130px;
+
+        color:
+            var(--pis-muted);
+
+        font-size:
+            12px;
+
+        font-weight:
+            500;
+
+        line-height:
+            1.2;
+
+        text-overflow:
+            ellipsis;
+
+        white-space:
+            nowrap;
+
+    }
+
+
+    .client-portal-page
+    .client-dashboard-header-actions {
+
+        flex:
+            0 0 auto;
+
+        gap:
+            7px;
+
+    }
+
+
+    .client-portal-page
+    .client-header-request-button {
+
+        display:
+            inline-flex !important;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
+
+        width:
+            auto !important;
+
+        min-height:
+            40px;
+
+        padding:
+            9px
+            12px;
+
+        font-size:
+            11px;
+
+        line-height:
+            1;
+
+        white-space:
+            nowrap;
+
+    }
+
+
+    .client-portal-page
+    .client-menu-button {
+
+        width:
+            40px;
+
+        height:
+            40px;
+
+        flex:
+            0 0 40px;
+
+        border-radius:
+            11px;
+
+    }
+
+
+    .client-portal-page
+    section {
+
+        border-radius:
+            16px;
+
+    }
+
+
+    .client-portal-page
+    .client-message-launcher {
+
+        box-shadow:
+            0 8px 24px rgba(40, 144, 223, 0.30);
+
+    }
+
+
+    .client-navigation-logo {
+
+        width:
+            115px;
+
+    }
+
+}
+
+
+/* ========================================
+   EXTRA SMALL MOBILE HEADER
+======================================== */
+
+@media (max-width: 390px) {
+
+    .client-dashboard-logo {
+
+        width:
+            94px;
+
+    }
+
+
+    .client-portal-page
+    .client-header-request-button {
+
+        padding:
+            9px
+            10px;
+
+        font-size:
+            10px;
+
+    }
+
+
+    .client-portal-page
+    .client-dashboard-header h2 {
+
+        max-width:
+            110px;
+
+    }
+
+}
