@@ -1,1 +1,1062 @@
+// ========================================
+// PAWS IN STRIDE SIGNUP FLOW
+// ========================================
 
+"use strict";
+
+
+// ========================================
+// SIGNUP STATE
+// ========================================
+
+const signupState = {
+    currentStep: 1,
+    clientType: null,
+    owner: {},
+    pets: [],
+    selectedMeetGreet: null
+};
+
+
+// ========================================
+// DOM ELEMENTS
+// ========================================
+
+const signupStepCount =
+    document.getElementById("signup-step-count");
+
+const signupStepLabel =
+    document.getElementById("signup-step-label");
+
+const signupProgressBar =
+    document.getElementById("signup-progress-bar");
+
+const signupError =
+    document.getElementById("signup-error");
+
+
+const ownerStep =
+    document.getElementById("signup-step-owner");
+
+const petsStep =
+    document.getElementById("signup-step-pets");
+
+const meetGreetStep =
+    document.getElementById("signup-step-meet-greet");
+
+const successStep =
+    document.getElementById("signup-step-success");
+
+
+const ownerNextButton =
+    document.getElementById("signup-owner-next");
+
+const petsBackButton =
+    document.getElementById("signup-pets-back");
+
+const petsNextButton =
+    document.getElementById("signup-pets-next");
+
+const meetGreetBackButton =
+    document.getElementById("signup-meet-greet-back");
+
+
+const passwordInput =
+    document.getElementById("signup-password");
+
+const passwordToggle =
+    document.getElementById("signup-password-toggle");
+
+
+const petsContainer =
+    document.getElementById("signup-pets-container");
+
+const addPetButton =
+    document.getElementById("signup-add-pet");
+
+const petTemplate =
+    document.getElementById("signup-pet-template");
+
+
+// ========================================
+// INITIALIZE SIGNUP
+// ========================================
+
+document.addEventListener("DOMContentLoaded", () => {
+    initializeSignup();
+});
+
+
+function initializeSignup() {
+
+    setupSignupEvents();
+
+    updateSignupProgress(
+        1,
+        "Your Information"
+    );
+
+}
+
+
+// ========================================
+// SIGNUP EVENTS
+// ========================================
+
+function setupSignupEvents() {
+
+    ownerNextButton?.addEventListener(
+        "click",
+        handleOwnerContinue
+    );
+
+
+    petsBackButton?.addEventListener(
+        "click",
+        () => {
+            showSignupStep(1);
+        }
+    );
+
+
+    petsNextButton?.addEventListener(
+        "click",
+        handlePetsContinue
+    );
+
+
+    meetGreetBackButton?.addEventListener(
+        "click",
+        () => {
+            showSignupStep(2);
+        }
+    );
+
+
+    addPetButton?.addEventListener(
+        "click",
+        addAnotherPet
+    );
+
+
+    petsContainer?.addEventListener(
+        "click",
+        handlePetContainerClick
+    );
+
+
+    passwordToggle?.addEventListener(
+        "click",
+        toggleSignupPassword
+    );
+
+
+    document
+        .querySelectorAll('input[name="client_type"]')
+        .forEach((radio) => {
+
+            radio.addEventListener(
+                "change",
+                () => {
+                    signupState.clientType = radio.value;
+                    clearSignupError();
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(
+            "#signup-step-owner input, #signup-step-owner select"
+        )
+        .forEach((field) => {
+
+            field.addEventListener(
+                "input",
+                clearSignupError
+            );
+
+            field.addEventListener(
+                "change",
+                clearSignupError
+            );
+
+        });
+
+
+    petsContainer?.addEventListener(
+        "input",
+        clearSignupError
+    );
+
+
+    petsContainer?.addEventListener(
+        "change",
+        clearSignupError
+    );
+
+}
+
+
+// ========================================
+// PASSWORD SHOW / HIDE
+// ========================================
+
+function toggleSignupPassword() {
+
+    if (!passwordInput || !passwordToggle) {
+        return;
+    }
+
+
+    const passwordIsHidden =
+        passwordInput.type === "password";
+
+
+    passwordInput.type =
+        passwordIsHidden
+            ? "text"
+            : "password";
+
+
+    passwordToggle.textContent =
+        passwordIsHidden
+            ? "Hide"
+            : "Show";
+
+
+    passwordToggle.setAttribute(
+        "aria-label",
+        passwordIsHidden
+            ? "Hide password"
+            : "Show password"
+    );
+
+
+    passwordInput.focus();
+
+}
+
+
+// ========================================
+// STEP 1: OWNER CONTINUE
+// ========================================
+
+function handleOwnerContinue() {
+
+    clearSignupError();
+
+
+    if (!validateOwnerStep()) {
+        return;
+    }
+
+
+    saveOwnerData();
+
+
+    showSignupStep(2);
+
+}
+
+
+// ========================================
+// VALIDATE OWNER STEP
+// ========================================
+
+function validateOwnerStep() {
+
+    const clientType =
+        document.querySelector(
+            'input[name="client_type"]:checked'
+        );
+
+
+    const fullName =
+        document.getElementById("signup-full-name");
+
+    const email =
+        document.getElementById("signup-email");
+
+    const phone =
+        document.getElementById("signup-phone");
+
+    const password =
+        document.getElementById("signup-password");
+
+    const addressLine1 =
+        document.getElementById("signup-address-line-1");
+
+    const city =
+        document.getElementById("signup-city");
+
+    const state =
+        document.getElementById("signup-state");
+
+    const zip =
+        document.getElementById("signup-zip");
+
+
+    if (!clientType) {
+
+        showSignupError(
+            "Please tell us whether you are a new or existing client."
+        );
+
+        scrollSignupErrorIntoView();
+
+        return false;
+
+    }
+
+
+    const requiredFields = [
+        {
+            field: fullName,
+            message: "Please enter your full name."
+        },
+        {
+            field: email,
+            message: "Please enter your email address."
+        },
+        {
+            field: phone,
+            message: "Please enter your phone number."
+        },
+        {
+            field: password,
+            message: "Please create a password."
+        },
+        {
+            field: addressLine1,
+            message: "Please enter your street address."
+        },
+        {
+            field: city,
+            message: "Please enter your city."
+        },
+        {
+            field: state,
+            message: "Please select your state."
+        },
+        {
+            field: zip,
+            message: "Please enter your ZIP code."
+        }
+    ];
+
+
+    for (const item of requiredFields) {
+
+        if (
+            !item.field ||
+            !String(item.field.value || "").trim()
+        ) {
+
+            showSignupError(item.message);
+
+            item.field?.focus();
+
+            return false;
+
+        }
+
+    }
+
+
+    if (!email.checkValidity()) {
+
+        showSignupError(
+            "Please enter a valid email address."
+        );
+
+        email.focus();
+
+        return false;
+
+    }
+
+
+    if (password.value.length < 8) {
+
+        showSignupError(
+            "Your password must be at least 8 characters."
+        );
+
+        password.focus();
+
+        return false;
+
+    }
+
+
+    const phoneDigits =
+        phone.value.replace(/\D/g, "");
+
+
+    if (phoneDigits.length < 10) {
+
+        showSignupError(
+            "Please enter a valid phone number."
+        );
+
+        phone.focus();
+
+        return false;
+
+    }
+
+
+    const zipValue =
+        zip.value.trim();
+
+
+    if (!/^\d{5}(-\d{4})?$/.test(zipValue)) {
+
+        showSignupError(
+            "Please enter a valid ZIP code."
+        );
+
+        zip.focus();
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+// ========================================
+// SAVE OWNER DATA
+// ========================================
+
+function saveOwnerData() {
+
+    const clientType =
+        document.querySelector(
+            'input[name="client_type"]:checked'
+        )?.value || null;
+
+
+    signupState.clientType =
+        clientType;
+
+
+    signupState.owner = {
+
+        clientType,
+
+        fullName:
+            document
+                .getElementById("signup-full-name")
+                ?.value
+                .trim() || "",
+
+        email:
+            document
+                .getElementById("signup-email")
+                ?.value
+                .trim()
+                .toLowerCase() || "",
+
+        phone:
+            document
+                .getElementById("signup-phone")
+                ?.value
+                .trim() || "",
+
+        /*
+         * Password intentionally remains only in the form field.
+         * Do not put passwords into signupState, localStorage,
+         * sessionStorage, logs, or public database tables.
+         */
+
+        addressLine1:
+            document
+                .getElementById("signup-address-line-1")
+                ?.value
+                .trim() || "",
+
+        addressLine2:
+            document
+                .getElementById("signup-address-line-2")
+                ?.value
+                .trim() || "",
+
+        city:
+            document
+                .getElementById("signup-city")
+                ?.value
+                .trim() || "",
+
+        state:
+            document
+                .getElementById("signup-state")
+                ?.value || "",
+
+        zip:
+            document
+                .getElementById("signup-zip")
+                ?.value
+                .trim() || ""
+
+    };
+
+}
+
+
+// ========================================
+// STEP 2: PET CONTINUE
+// ========================================
+
+function handlePetsContinue() {
+
+    clearSignupError();
+
+
+    const pets =
+        collectPetData();
+
+
+    if (!pets) {
+        return;
+    }
+
+
+    signupState.pets =
+        pets;
+
+
+    /*
+     * EXISTING CLIENT
+     *
+     * Eventually this is where we will create:
+     * - Auth account
+     * - profile
+     * - household/address
+     * - pets
+     *
+     * Then show the real success screen.
+     *
+     * For this UI test version we only show
+     * the success screen.
+     */
+
+    if (
+        signupState.clientType ===
+        "existing_client"
+    ) {
+
+        showExistingClientTestSuccess();
+
+        return;
+
+    }
+
+
+    /*
+     * NEW CLIENT
+     *
+     * New clients continue to the Meet & Greet
+     * scheduling screen.
+     */
+
+    if (
+        signupState.clientType ===
+        "new_client"
+    ) {
+
+        showSignupStep(3);
+
+        return;
+
+    }
+
+
+    /*
+     * Safety fallback.
+     */
+
+    showSignupError(
+        "Please go back and select whether you are a new or existing client."
+    );
+
+}
+
+
+// ========================================
+// COLLECT + VALIDATE PET DATA
+// ========================================
+
+function collectPetData() {
+
+    const petCards =
+        Array.from(
+            petsContainer.querySelectorAll(
+                ".signup-pet-card"
+            )
+        );
+
+
+    if (!petCards.length) {
+
+        showSignupError(
+            "Please add at least one pet."
+        );
+
+        return null;
+
+    }
+
+
+    const pets = [];
+
+
+    for (
+        let index = 0;
+        index < petCards.length;
+        index++
+    ) {
+
+        const card =
+            petCards[index];
+
+
+        const nameInput =
+            card.querySelector(
+                '[name="pet_name"]'
+            );
+
+        const breedInput =
+            card.querySelector(
+                '[name="pet_breed"]'
+            );
+
+        const birthdayInput =
+            card.querySelector(
+                '[name="pet_birthday"]'
+            );
+
+        const genderInput =
+            card.querySelector(
+                '[name="pet_gender"]'
+            );
+
+
+        const petName =
+            nameInput?.value.trim() || "";
+
+        const breed =
+            breedInput?.value.trim() || "";
+
+
+        if (!petName) {
+
+            showSignupError(
+                `Please enter a name for Pet ${index + 1}.`
+            );
+
+            nameInput?.focus();
+
+            return null;
+
+        }
+
+
+        if (!breed) {
+
+            showSignupError(
+                `Please enter a breed for ${petName}.`
+            );
+
+            breedInput?.focus();
+
+            return null;
+
+        }
+
+
+        pets.push({
+
+            name: petName,
+
+            breed,
+
+            birthday:
+                birthdayInput?.value || null,
+
+            gender:
+                genderInput?.value || null
+
+        });
+
+    }
+
+
+    return pets;
+
+}
+
+
+// ========================================
+// ADD ANOTHER PET
+// ========================================
+
+function addAnotherPet() {
+
+    if (
+        !petTemplate ||
+        !petsContainer
+    ) {
+        return;
+    }
+
+
+    const templateContent =
+        petTemplate.content.cloneNode(true);
+
+
+    petsContainer.appendChild(
+        templateContent
+    );
+
+
+    renumberPetCards();
+
+
+    const petCards =
+        petsContainer.querySelectorAll(
+            ".signup-pet-card"
+        );
+
+
+    const newestCard =
+        petCards[
+            petCards.length - 1
+        ];
+
+
+    newestCard
+        ?.querySelector('[name="pet_name"]')
+        ?.focus();
+
+}
+
+
+// ========================================
+// REMOVE PET
+// ========================================
+
+function handlePetContainerClick(event) {
+
+    const removeButton =
+        event.target.closest(
+            "[data-remove-pet]"
+        );
+
+
+    if (!removeButton) {
+        return;
+    }
+
+
+    const petCard =
+        removeButton.closest(
+            ".signup-pet-card"
+        );
+
+
+    if (!petCard) {
+        return;
+    }
+
+
+    petCard.remove();
+
+
+    renumberPetCards();
+
+}
+
+
+// ========================================
+// RENUMBER PET CARDS
+// ========================================
+
+function renumberPetCards() {
+
+    const petCards =
+        petsContainer.querySelectorAll(
+            ".signup-pet-card"
+        );
+
+
+    petCards.forEach(
+        (card, index) => {
+
+            card.dataset.petIndex =
+                String(index);
+
+
+            const petNumber =
+                card.querySelector(
+                    ".signup-pet-number"
+                );
+
+
+            if (petNumber) {
+
+                petNumber.textContent =
+                    `Pet ${index + 1}`;
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SHOW SIGNUP STEP
+// ========================================
+
+function showSignupStep(stepNumber) {
+
+    clearSignupError();
+
+
+    ownerStep.hidden = true;
+    petsStep.hidden = true;
+    meetGreetStep.hidden = true;
+    successStep.hidden = true;
+
+
+    signupState.currentStep =
+        stepNumber;
+
+
+    if (stepNumber === 1) {
+
+        ownerStep.hidden = false;
+
+        updateSignupProgress(
+            1,
+            "Your Information"
+        );
+
+    }
+
+
+    if (stepNumber === 2) {
+
+        petsStep.hidden = false;
+
+        updateSignupProgress(
+            2,
+            "Your Pet"
+        );
+
+    }
+
+
+    if (stepNumber === 3) {
+
+        meetGreetStep.hidden = false;
+
+        updateSignupProgress(
+            3,
+            "Meet & Greet"
+        );
+
+    }
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+// ========================================
+// UPDATE SIGNUP PROGRESS
+// ========================================
+
+function updateSignupProgress(
+    stepNumber,
+    stepLabel
+) {
+
+    if (signupStepCount) {
+
+        signupStepCount.textContent =
+            `Step ${stepNumber} of 3`;
+
+    }
+
+
+    if (signupStepLabel) {
+
+        signupStepLabel.textContent =
+            stepLabel;
+
+    }
+
+
+    if (signupProgressBar) {
+
+        const progress =
+            (stepNumber / 3) * 100;
+
+
+        signupProgressBar.style.width =
+            `${progress}%`;
+
+    }
+
+}
+
+
+// ========================================
+// EXISTING CLIENT TEST SUCCESS
+// ========================================
+
+function showExistingClientTestSuccess() {
+
+    ownerStep.hidden = true;
+    petsStep.hidden = true;
+    meetGreetStep.hidden = true;
+    successStep.hidden = false;
+
+
+    /*
+     * Hide the progress bar on success because
+     * onboarding is complete.
+     */
+
+    const progress =
+        document.querySelector(
+            ".signup-progress"
+        );
+
+
+    if (progress) {
+        progress.hidden = true;
+    }
+
+
+    const successTitle =
+        document.getElementById(
+            "signup-success-title"
+        );
+
+    const successMessage =
+        document.getElementById(
+            "signup-success-message"
+        );
+
+    const appointment =
+        document.getElementById(
+            "signup-success-appointment"
+        );
+
+    const meetGreetCheck =
+        document.getElementById(
+            "signup-success-meet-greet-check"
+        );
+
+
+    if (successTitle) {
+
+        successTitle.textContent =
+            "You're All Set!";
+
+    }
+
+
+    if (successMessage) {
+
+        successMessage.textContent =
+            "Your Paws in Stride portal setup is ready. Account creation will be connected in the next build step.";
+
+    }
+
+
+    if (appointment) {
+        appointment.hidden = true;
+    }
+
+
+    if (meetGreetCheck) {
+        meetGreetCheck.hidden = true;
+    }
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+// ========================================
+// SHOW SIGNUP ERROR
+// ========================================
+
+function showSignupError(message) {
+
+    if (!signupError) {
+        return;
+    }
+
+
+    signupError.textContent =
+        message;
+
+
+    signupError.hidden =
+        false;
+
+}
+
+
+// ========================================
+// CLEAR SIGNUP ERROR
+// ========================================
+
+function clearSignupError() {
+
+    if (!signupError) {
+        return;
+    }
+
+
+    signupError.textContent =
+        "";
+
+
+    signupError.hidden =
+        true;
+
+}
+
+
+// ========================================
+// SCROLL ERROR INTO VIEW
+// ========================================
+
+function scrollSignupErrorIntoView() {
+
+    signupError?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+}
