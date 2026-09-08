@@ -9808,3 +9808,462 @@ function clearClientMessageError() {
         "none";
 
 }
+
+// ========================================
+// CLIENT APP NAVIGATION
+// ========================================
+
+function openClientNavigation() {
+
+    const drawer =
+        document.getElementById(
+            "client-navigation-drawer"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "client-navigation-backdrop"
+        );
+
+    const menuButton =
+        document.getElementById(
+            "client-menu-button"
+        );
+
+
+    drawer
+        ?.classList
+        .add(
+            "is-open"
+        );
+
+
+    backdrop
+        ?.classList
+        .add(
+            "is-open"
+        );
+
+
+    drawer
+        ?.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+    menuButton
+        ?.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+
+    document.body
+        .classList
+        .add(
+            "client-navigation-open"
+        );
+
+}
+
+
+// ========================================
+// CLOSE CLIENT APP NAVIGATION
+// ========================================
+
+function closeClientNavigation() {
+
+    const drawer =
+        document.getElementById(
+            "client-navigation-drawer"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "client-navigation-backdrop"
+        );
+
+    const menuButton =
+        document.getElementById(
+            "client-menu-button"
+        );
+
+
+    drawer
+        ?.classList
+        .remove(
+            "is-open"
+        );
+
+
+    backdrop
+        ?.classList
+        .remove(
+            "is-open"
+        );
+
+
+    drawer
+        ?.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+    menuButton
+        ?.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+
+    document.body
+        .classList
+        .remove(
+            "client-navigation-open"
+        );
+
+}
+
+
+// ========================================
+// SCROLL TO CLIENT DASHBOARD SECTION
+// ========================================
+
+function scrollToClientDashboardSection(
+    sectionId
+) {
+
+    const section =
+        document.getElementById(
+            sectionId
+        );
+
+
+    if (!section) {
+        return;
+    }
+
+
+    closeClientNavigation();
+
+
+    window.setTimeout(
+        () => {
+
+            section.scrollIntoView({
+
+                behavior:
+                    "smooth",
+
+                block:
+                    "start"
+
+            });
+
+        },
+        120
+    );
+
+}
+
+
+// ========================================
+// CLIENT NAVIGATION ACTIONS
+// ========================================
+
+document
+    .getElementById(
+        "client-menu-button"
+    )
+    ?.addEventListener(
+        "click",
+        openClientNavigation
+    );
+
+
+document
+    .getElementById(
+        "client-navigation-close"
+    )
+    ?.addEventListener(
+        "click",
+        closeClientNavigation
+    );
+
+
+document
+    .getElementById(
+        "client-navigation-backdrop"
+    )
+    ?.addEventListener(
+        "click",
+        closeClientNavigation
+    );
+
+
+document
+    .getElementById(
+        "client-navigation-drawer"
+    )
+    ?.addEventListener(
+        "click",
+        event => {
+
+
+            const sectionButton =
+                event.target.closest(
+                    "[data-client-navigation-target]"
+                );
+
+
+            if (sectionButton) {
+
+                const sectionId =
+                    sectionButton.dataset
+                        .clientNavigationTarget;
+
+
+                scrollToClientDashboardSection(
+                    sectionId
+                );
+
+
+                return;
+
+            }
+
+
+            const actionButton =
+                event.target.closest(
+                    "[data-client-navigation-action]"
+                );
+
+
+            if (!actionButton) {
+                return;
+            }
+
+
+            const action =
+                actionButton.dataset
+                    .clientNavigationAction;
+
+
+            if (
+                action ===
+                "home"
+            ) {
+
+                closeClientNavigation();
+
+
+                window.setTimeout(
+                    () => {
+
+                        window.scrollTo({
+
+                            top:
+                                0,
+
+                            behavior:
+                                "smooth"
+
+                        });
+
+                    },
+                    120
+                );
+
+
+                return;
+
+            }
+
+
+            if (
+                action ===
+                "messages"
+            ) {
+
+                closeClientNavigation();
+
+
+                window.setTimeout(
+                    () => {
+
+                        document
+                            .getElementById(
+                                "client-message-launcher"
+                            )
+                            ?.click();
+
+                    },
+                    180
+                );
+
+
+                return;
+
+            }
+
+
+            if (
+                action ===
+                "request"
+            ) {
+
+                closeClientNavigation();
+
+
+                window.setTimeout(
+                    () => {
+
+                        document
+                            .getElementById(
+                                "request-walk-button"
+                            )
+                            ?.click();
+
+                    },
+                    180
+                );
+
+
+                return;
+
+            }
+
+
+            if (
+                action ===
+                "logout"
+            ) {
+
+                closeClientNavigation();
+
+
+                document
+                    .getElementById(
+                        "logout-button"
+                    )
+                    ?.click();
+
+            }
+
+        }
+    );
+
+
+// ========================================
+// CLOSE NAVIGATION WITH ESCAPE
+// ========================================
+
+document
+    .addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                closeClientNavigation();
+
+            }
+
+        }
+    );
+
+
+// ========================================
+// SYNC MESSAGE UNREAD BADGE TO MENU
+// ========================================
+
+function syncClientNavigationMessageBadge() {
+
+    const messageBadge =
+        document.getElementById(
+            "client-message-unread-badge"
+        );
+
+    const navigationBadge =
+        document.getElementById(
+            "client-navigation-message-badge"
+        );
+
+
+    if (
+        !messageBadge ||
+        !navigationBadge
+    ) {
+        return;
+    }
+
+
+    const unreadCount =
+        messageBadge.textContent
+            ?.trim() ||
+        "0";
+
+
+    const messageBadgeVisible =
+        messageBadge.style.display !==
+        "none";
+
+
+    navigationBadge.textContent =
+        unreadCount;
+
+
+    navigationBadge.style.display =
+        messageBadgeVisible
+            ? "flex"
+            : "none";
+
+}
+
+
+// ========================================
+// WATCH MESSAGE BADGE
+// ========================================
+
+const clientMessageBadgeObserver =
+    new MutationObserver(
+        syncClientNavigationMessageBadge
+    );
+
+
+const clientMessageBadge =
+    document.getElementById(
+        "client-message-unread-badge"
+    );
+
+
+if (clientMessageBadge) {
+
+    clientMessageBadgeObserver.observe(
+        clientMessageBadge,
+        {
+
+            childList:
+                true,
+
+            attributes:
+                true,
+
+            characterData:
+                true,
+
+            subtree:
+                true
+
+        }
+    );
+
+
+    syncClientNavigationMessageBadge();
+
+}
