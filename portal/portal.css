@@ -9510,7 +9510,7 @@ a:focus-visible {
 
 .portal-signup-page .signup-branding {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 .portal-signup-page .signup-logo-link {
@@ -9520,20 +9520,19 @@ a:focus-visible {
 
 .portal-signup-page .signup-logo {
     display: block;
-    width: min(310px, 72vw);
+    width: min(165px, 42vw);
     height: auto;
     margin: 0 auto;
 }
 
 .portal-signup-page .signup-branding-subtitle {
-    margin: 6px 0 0;
+    margin: 3px 0 0;
     color: var(--signup-blue);
-    font-size: 0.82rem;
+    font-size: 0.74rem;
     font-weight: 800;
     letter-spacing: 0.15em;
     text-transform: uppercase;
 }
-
 
 /* ========================================
    SIGNUP CARD
@@ -10384,9 +10383,9 @@ a:focus-visible {
         margin-bottom: 17px;
     }
 
-    .portal-signup-page .signup-logo {
-        width: min(290px, 78vw);
-    }
+   .portal-signup-page .signup-logo {
+       width: min(155px, 42vw);
+   }
 
     .portal-signup-page .signup-card {
         border-radius: 21px;
@@ -10456,9 +10455,9 @@ a:focus-visible {
         width: min(100% - 16px, 820px);
     }
 
-    .portal-signup-page .signup-logo {
-        width: min(275px, 82vw);
-    }
+   .portal-signup-page .signup-logo {
+       width: min(145px, 40vw);
+   }
 
     .portal-signup-page .signup-progress-copy {
         align-items: flex-start;
