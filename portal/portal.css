@@ -10160,35 +10160,392 @@ a:focus-visible {
     font-size: 0.8rem;
 }
 
-
 /* ========================================
-   MEET & GREET CALENDAR PLACEHOLDER
+   MEET & GREET CALENDAR
 ======================================== */
 
-.portal-signup-page .signup-calendar-placeholder {
-    padding: 42px 20px;
-    border: 1px dashed #cbdce7;
+.portal-signup-page #signup-meet-greet-calendar {
+    width: 100%;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid var(--signup-border);
     border-radius: 17px;
-    text-align: center;
-    background: #fbfdfe;
 }
 
-.portal-signup-page .signup-calendar-placeholder-icon {
-    margin-bottom: 9px;
-    font-size: 2rem;
+
+/* ========================================
+   MEET & GREET CALENDAR HEADER
+======================================== */
+
+.portal-signup-page .signup-meet-greet-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 16px;
 }
 
-.portal-signup-page .signup-calendar-placeholder h2 {
-    margin: 0;
-    font-size: 1.08rem;
+.portal-signup-page .signup-meet-greet-calendar-header strong {
+    color: var(--signup-text);
+    font-size: 18px;
+    font-weight: 800;
 }
 
-.portal-signup-page .signup-calendar-placeholder p {
-    margin: 7px 0 0;
+
+/* ========================================
+   MEET & GREET MONTH NAVIGATION
+======================================== */
+
+.portal-signup-page .signup-calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+
+    flex: 0 0 42px;
+
+    padding: 0;
+
+    color: var(--signup-blue);
+    background: #ffffff;
+
+    border: 1px solid var(--signup-border);
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 27px;
+    font-weight: 500;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.portal-signup-page .signup-calendar-nav:hover {
+    border-color: var(--signup-blue);
+    background: rgba(71, 206, 230, 0.05);
+}
+
+.portal-signup-page .signup-calendar-nav:focus-visible {
+    outline: 3px solid rgba(71, 206, 230, 0.25);
+    outline-offset: 2px;
+}
+
+
+/* ========================================
+   MEET & GREET WEEKDAYS
+======================================== */
+
+.portal-signup-page .signup-calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.portal-signup-page .signup-calendar-weekdays span {
+    padding: 4px 0;
+
     color: var(--signup-muted);
-    font-size: 0.84rem;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-align: center;
 }
 
+
+/* ========================================
+   MEET & GREET CALENDAR GRID
+======================================== */
+
+.portal-signup-page .signup-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+
+/* ========================================
+   EMPTY CALENDAR DAYS
+======================================== */
+
+.portal-signup-page .signup-calendar-day-empty {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+}
+
+
+/* ========================================
+   MEET & GREET CALENDAR DAY
+======================================== */
+
+.portal-signup-page .signup-calendar-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 1 / 1;
+
+    padding: 0;
+
+    color: var(--signup-text);
+    background: #ffffff;
+
+    border: 1px solid var(--signup-border);
+    border-radius: 9px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+/* ========================================
+   CALENDAR DAY HOVER
+======================================== */
+
+.portal-signup-page .signup-calendar-day:hover:not(:disabled) {
+    border-color: var(--signup-blue);
+    background: rgba(71, 206, 230, 0.05);
+    transform: translateY(-1px);
+}
+
+
+/* ========================================
+   SELECTED CALENDAR DAY
+======================================== */
+
+.portal-signup-page .signup-calendar-day.selected {
+    color: #ffffff;
+
+    background: linear-gradient(
+        135deg,
+        var(--signup-cyan),
+        var(--signup-blue)
+    );
+
+    border-color: var(--signup-blue);
+
+    box-shadow:
+        0 5px 12px rgba(40, 144, 223, 0.18);
+}
+
+
+/* ========================================
+   DISABLED / PAST CALENDAR DAYS
+======================================== */
+
+.portal-signup-page .signup-calendar-day:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* ========================================
+   CALENDAR DAY FOCUS
+======================================== */
+
+.portal-signup-page .signup-calendar-day:focus-visible {
+    outline: 3px solid rgba(71, 206, 230, 0.25);
+    outline-offset: 2px;
+}
+
+
+/* ========================================
+   MEET & GREET AVAILABLE TIMES
+======================================== */
+
+.portal-signup-page .signup-meet-greet-time-heading {
+    margin: 22px 0 11px;
+
+    color: var(--signup-text);
+
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+
+/* ========================================
+   MEET & GREET TIME GRID
+======================================== */
+
+.portal-signup-page .signup-meet-greet-time-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+}
+
+
+/* ========================================
+   MEET & GREET TIME BUTTON
+======================================== */
+
+.portal-signup-page .signup-meet-greet-time {
+    width: 100%;
+    min-height: 44px;
+
+    padding: 8px 10px;
+
+    color: var(--signup-blue);
+    background: #ffffff;
+
+    border: 1px solid var(--signup-border);
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+}
+
+.portal-signup-page .signup-meet-greet-time:hover:not(:disabled) {
+    border-color: var(--signup-blue);
+    background: rgba(71, 206, 230, 0.05);
+    transform: translateY(-1px);
+}
+
+
+/* ========================================
+   SELECTED MEET & GREET TIME
+======================================== */
+
+.portal-signup-page .signup-meet-greet-time.selected {
+    color: #ffffff;
+    background: var(--signup-blue);
+    border-color: var(--signup-blue);
+
+    box-shadow:
+        0 5px 12px rgba(40, 144, 223, 0.18);
+}
+
+
+/* ========================================
+   UNAVAILABLE MEET & GREET TIME
+======================================== */
+
+.portal-signup-page .signup-meet-greet-time:disabled {
+    opacity: 0.32;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* ========================================
+   MEET & GREET TIME FOCUS
+======================================== */
+
+.portal-signup-page .signup-meet-greet-time:focus-visible {
+    outline: 3px solid rgba(71, 206, 230, 0.25);
+    outline-offset: 2px;
+}
+
+
+/* ========================================
+   MEET & GREET CALENDAR MOBILE
+======================================== */
+
+@media (max-width: 680px) {
+
+    .portal-signup-page #signup-meet-greet-calendar {
+        padding: 12px;
+        border-radius: 15px;
+    }
+
+    .portal-signup-page .signup-meet-greet-calendar-header {
+        margin-bottom: 13px;
+    }
+
+    .portal-signup-page .signup-meet-greet-calendar-header strong {
+        font-size: 16px;
+    }
+
+    .portal-signup-page .signup-calendar-nav {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+        font-size: 24px;
+    }
+
+    .portal-signup-page .signup-calendar-weekdays,
+    .portal-signup-page .signup-calendar-grid {
+        gap: 4px;
+    }
+
+    .portal-signup-page .signup-calendar-weekdays span {
+        font-size: 10px;
+    }
+
+    .portal-signup-page .signup-calendar-day {
+        border-radius: 7px;
+        font-size: 12px;
+    }
+
+    .portal-signup-page .signup-meet-greet-time-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .portal-signup-page .signup-meet-greet-time {
+        min-height: 42px;
+        padding: 7px 5px;
+        font-size: 0.76rem;
+    }
+
+}
+
+
+/* ========================================
+   MEET & GREET CALENDAR SMALL MOBILE
+======================================== */
+
+@media (max-width: 420px) {
+
+    .portal-signup-page #signup-meet-greet-calendar {
+        padding: 10px;
+    }
+
+    .portal-signup-page .signup-calendar-weekdays,
+    .portal-signup-page .signup-calendar-grid {
+        gap: 3px;
+    }
+
+    .portal-signup-page .signup-calendar-day {
+        font-size: 11px;
+    }
+
+    .portal-signup-page .signup-meet-greet-time-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
 
 /* ========================================
    MEET & GREET TIME SLOTS
