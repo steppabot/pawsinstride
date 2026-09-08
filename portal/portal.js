@@ -7461,13 +7461,12 @@ function renderClientVisitReport(
         );
 
 
-    const routePhoto =
-        media.find(
+    const routePhotos =
+        media.filter(
             item =>
                 item.photo_type ===
-                "route"
-        ) ||
-        null;
+                    "route"
+        );
 
 
     const careItems =
