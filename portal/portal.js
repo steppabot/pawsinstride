@@ -275,7 +275,6 @@ const SERVICE_CONFIG = {
 
 };
 
-
 // ========================================
 // LOGIN
 // ========================================
@@ -283,6 +282,73 @@ const SERVICE_CONFIG = {
 const loginForm =
     document.getElementById(
         "login-form"
+    );
+
+
+const loginEmailInput =
+    document.getElementById(
+        "email"
+    );
+
+
+const loginPasswordInput =
+    document.getElementById(
+        "password"
+    );
+
+
+const loginPasswordToggle =
+    document.getElementById(
+        "login-password-toggle"
+    );
+
+
+// ========================================
+// LOGIN PASSWORD SHOW / HIDE
+// ========================================
+
+loginPasswordToggle
+    ?.addEventListener(
+        "click",
+        () => {
+
+            if (
+                !loginPasswordInput
+            ) {
+                return;
+            }
+
+
+            const passwordIsHidden =
+                loginPasswordInput.type ===
+                "password";
+
+
+            loginPasswordInput.type =
+                passwordIsHidden
+                    ? "text"
+                    : "password";
+
+
+            loginPasswordToggle.textContent =
+                passwordIsHidden
+                    ? "Hide"
+                    : "Show";
+
+
+            loginPasswordToggle.setAttribute(
+                "aria-label",
+                passwordIsHidden
+                    ? "Hide password"
+                    : "Show password"
+            );
+
+
+            loginPasswordInput.focus({
+                preventScroll: true
+            });
+
+        }
     );
 
 
@@ -295,23 +361,59 @@ if (loginForm) {
             event.preventDefault();
 
 
-            const email =
-                document
-                    .getElementById("email")
-                    .value
-                    .trim();
-
-
-            const password =
-                document
-                    .getElementById("password")
-                    .value;
-
-
             const message =
                 document.getElementById(
                     "login-message"
                 );
+
+
+            const email =
+                loginEmailInput
+                    ?.value
+                    .trim()
+                    .toLowerCase() || "";
+
+
+            const password =
+                loginPasswordInput
+                    ?.value || "";
+
+
+            // ========================================
+            // LOGIN EMAIL VALIDATION
+            // ========================================
+
+            if (
+                !email ||
+                !loginEmailInput.checkValidity()
+            ) {
+
+                message.textContent =
+                    "Please enter a valid email address.";
+
+
+                loginEmailInput.focus();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // LOGIN PASSWORD VALIDATION
+            // ========================================
+
+            if (!password) {
+
+                message.textContent =
+                    "Please enter your password.";
+
+
+                loginPasswordInput.focus();
+
+                return;
+
+            }
 
 
             message.textContent =
@@ -366,7 +468,9 @@ if (loginForm) {
             } =
                 await supabaseClient
                     .from("profiles")
-                    .select("id, email, role")
+                    .select(
+                        "id, email, role"
+                    )
                     .eq(
                         "id",
                         data.session.user.id
@@ -396,18 +500,6 @@ if (loginForm) {
                 )
                     .trim()
                     .toLowerCase();
-
-
-            console.log(
-                "Signed in user:",
-                data.session.user.email
-            );
-
-
-            console.log(
-                "Profile role:",
-                role
-            );
 
 
             // ========================================
@@ -440,7 +532,6 @@ if (loginForm) {
     );
 
 }
-
 
 // ========================================
 // DASHBOARD
