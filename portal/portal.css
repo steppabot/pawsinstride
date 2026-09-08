@@ -2820,6 +2820,80 @@ body.client-report-lightbox-open {
 }
 
 /* ========================================
+   CLIENT DESKTOP DASHBOARD LAYOUT
+======================================== */
+
+.client-dashboard-container {
+    max-width: 1240px;
+}
+
+
+.client-dashboard-grid {
+    display: block;
+}
+
+
+.client-dashboard-column {
+    min-width: 0;
+}
+
+
+@media (min-width: 1100px) {
+
+    .client-dashboard-container {
+        width: 94%;
+    }
+
+
+    .client-dashboard-grid {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 0.95fr)
+            minmax(0, 1.05fr);
+
+        align-items: start;
+
+        gap: 28px;
+    }
+
+
+    .client-dashboard-column {
+        display: flex;
+        flex-direction: column;
+
+        gap: 20px;
+    }
+
+
+    .client-dashboard-column > section {
+        margin-bottom: 0;
+    }
+
+
+    .client-dashboard-column-left {
+        min-width: 0;
+    }
+
+
+    .client-dashboard-column-right {
+        min-width: 0;
+    }
+
+
+    .client-dashboard-column-right
+    .upcoming-services-section {
+        width: 100%;
+    }
+
+
+    #logout-button {
+        margin-top: 20px;
+    }
+
+}
+
+/* ========================================
    MOBILE
 ======================================== */
 
