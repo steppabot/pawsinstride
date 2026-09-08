@@ -2089,7 +2089,9 @@ function focusHouseholdFieldError(
     );
 
 
-    field.focus();
+    field.focus({
+        preventScroll: true
+    });
 
 
     field.scrollIntoView({
@@ -2110,27 +2112,55 @@ function focusHouseholdFieldError(
 }
 
 
-const householdPhoneInput =
+// ========================================
+// HOUSEHOLD PHONE LIVE FORMATTING
+// ========================================
+
+const validationHouseholdPhoneInput =
     document.getElementById(
         "household-phone"
     );
 
 
-const householdZipInput =
-    document.getElementById(
-        "household-zip"
+if (
+    validationHouseholdPhoneInput
+) {
+
+    validationHouseholdPhoneInput.addEventListener(
+        "input",
+        event => {
+
+            event.target.value =
+                formatHouseholdPhoneNumber(
+                    event.target.value
+                );
+
+
+            clearHouseholdFieldError(
+                event
+            );
+
+        }
     );
 
+}
 
-const emergencyContactPhoneInput =
+
+// ========================================
+// EMERGENCY PHONE LIVE FORMATTING
+// ========================================
+
+const validationEmergencyContactPhoneInput =
     document.getElementById(
         "emergency-contact-phone"
     );
 
 
-if (householdPhoneInput) {
+if (
+    validationEmergencyContactPhoneInput
+) {
 
-    householdPhoneInput.addEventListener(
+    validationEmergencyContactPhoneInput.addEventListener(
         "input",
         event => {
 
@@ -2150,37 +2180,28 @@ if (householdPhoneInput) {
 }
 
 
-if (emergencyContactPhoneInput) {
+// ========================================
+// HOUSEHOLD ZIP LIVE FORMATTING
+// ========================================
 
-    emergencyContactPhoneInput.addEventListener(
-        "input",
-        event => {
-
-            event.target.value =
-                formatHouseholdPhoneNumber(
-                    event.target.value
-                );
-
-
-            clearHouseholdFieldError(
-                event
-            );
-
-        }
+const validationHouseholdZipInput =
+    document.getElementById(
+        "household-zip"
     );
 
-}
 
+if (
+    validationHouseholdZipInput
+) {
 
-if (householdZipInput) {
-
-    householdZipInput.addEventListener(
+    validationHouseholdZipInput.addEventListener(
         "input",
         event => {
 
             event.target.value =
                 String(
-                    event.target.value || ""
+                    event.target.value ||
+                    ""
                 )
                     .replace(
                         /\D/g,
@@ -2201,6 +2222,10 @@ if (householdZipInput) {
 
 }
 
+
+// ========================================
+// CLEAR REQUIRED FIELD ERROR STATES
+// ========================================
 
 [
     "household-full-name",
@@ -2230,7 +2255,6 @@ if (householdZipInput) {
 
         }
     );
-
 // ========================================
 // SAVE HOUSEHOLD
 // ========================================
