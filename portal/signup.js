@@ -4,6 +4,22 @@
 
 "use strict";
 
+// ========================================
+// SUPABASE
+// ========================================
+
+const SUPABASE_URL =
+    "https://xyhndwopvlmnxjkthtkl.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_U3OIYatZuBUe8Y6Vq0DS2w_IMacau2j";
+
+
+const signupSupabase =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
 
 // ========================================
 // SIGNUP STATE
@@ -508,12 +524,11 @@ function saveOwnerData() {
 
 }
 
-
 // ========================================
 // STEP 2: PET CONTINUE
 // ========================================
 
-function handlePetsContinue() {
+async function handlePetsContinue() {
 
     clearSignupError();
 
@@ -531,39 +546,25 @@ function handlePetsContinue() {
         pets;
 
 
-    /*
-     * EXISTING CLIENT
-     *
-     * Eventually this is where we will create:
-     * - Auth account
-     * - profile
-     * - household/address
-     * - pets
-     *
-     * Then show the real success screen.
-     *
-     * For this UI test version we only show
-     * the success screen.
-     */
+    // ========================================
+    // EXISTING CLIENT
+    // ========================================
 
     if (
         signupState.clientType ===
         "existing_client"
     ) {
 
-        showExistingClientTestSuccess();
+        await completeExistingClientSignup();
 
         return;
 
     }
 
 
-    /*
-     * NEW CLIENT
-     *
-     * New clients continue to the Meet & Greet
-     * scheduling screen.
-     */
+    // ========================================
+    // NEW CLIENT
+    // ========================================
 
     if (
         signupState.clientType ===
@@ -577,9 +578,9 @@ function handlePetsContinue() {
     }
 
 
-    /*
-     * Safety fallback.
-     */
+    // ========================================
+    // SAFETY FALLBACK
+    // ========================================
 
     showSignupError(
         "Please go back and select whether you are a new or existing client."
@@ -924,21 +925,273 @@ function updateSignupProgress(
 
 
 // ========================================
-// EXISTING CLIENT TEST SUCCESS
+// EXISTING CLIENT ACCOUNT CREATION
 // ========================================
 
-function showExistingClientTestSuccess() {
+async function completeExistingClientSignup() {
 
-    ownerStep.hidden = true;
-    petsStep.hidden = true;
-    meetGreetStep.hidden = true;
-    successStep.hidden = false;
+    clearSignupError();
 
 
-    /*
-     * Hide the progress bar on success because
-     * onboarding is complete.
-     */
+    if (
+        !signupState.owner ||
+        !signupState.pets.length
+    ) {
+
+        showSignupError(
+            "Your signup information is incomplete. Please go back and review your information."
+        );
+
+        return;
+
+    }
+
+
+    const password =
+        passwordInput?.value || "";
+
+
+    if (password.length < 8) {
+
+        showSignupStep(1);
+
+        showSignupError(
+            "Your password must be at least 8 characters."
+        );
+
+        passwordInput?.focus();
+
+        return;
+
+    }
+
+
+    setSignupButtonLoading(
+        petsNextButton,
+        true,
+        "Creating Account..."
+    );
+
+
+    try {
+
+        // ========================================
+        // CREATE SUPABASE AUTH USER
+        // ========================================
+
+        const {
+            data: authData,
+            error: authError
+        } =
+            await signupSupabase.auth.signUp({
+
+                email:
+                    signupState.owner.email,
+
+                password,
+
+                options: {
+
+                    data: {
+
+                        full_name:
+                            signupState.owner.fullName,
+
+                        phone:
+                            signupState.owner.phone,
+
+                        client_type:
+                            signupState.clientType
+
+                    }
+
+                }
+
+            });
+
+
+        if (authError) {
+            throw authError;
+        }
+
+
+        if (!authData?.user) {
+
+            throw new Error(
+                "Your account could not be created. Please try again."
+            );
+
+        }
+
+
+        // ========================================
+        // REQUIRE ACTIVE SESSION
+        // ========================================
+
+        /*
+         * For this onboarding flow, Supabase email
+         * confirmation should currently be disabled.
+         *
+         * We need an authenticated session so the
+         * household + pets RPC can run immediately.
+         */
+
+        if (!authData.session) {
+
+            throw new Error(
+                "Your account was created, but email confirmation is currently required. Please contact Paws in Stride so we can finish setting up your portal account."
+            );
+
+        }
+
+
+        // ========================================
+        // FINALIZE HOUSEHOLD + PETS
+        // ========================================
+
+        const {
+            error: onboardingError
+        } =
+            await signupSupabase.rpc(
+                "finalize_client_onboarding",
+                {
+
+                    p_street_address:
+                        signupState.owner.addressLine1,
+
+                    p_address_line_2:
+                        signupState.owner.addressLine2 || "",
+
+                    p_city:
+                        signupState.owner.city,
+
+                    p_state:
+                        signupState.owner.state,
+
+                    p_zip_code:
+                        signupState.owner.zip,
+
+                    p_pets:
+                        signupState.pets.map(
+                            (pet) => ({
+
+                                name:
+                                    pet.name,
+
+                                breed:
+                                    pet.breed,
+
+                                birthday:
+                                    pet.birthday || null,
+
+                                gender:
+                                    pet.gender || null
+
+                            })
+                        )
+
+                }
+            );
+
+
+        if (onboardingError) {
+            throw onboardingError;
+        }
+
+
+        // ========================================
+        // SIGN USER BACK OUT
+        // ========================================
+
+        /*
+         * Signup creates a logged-in session when
+         * email confirmation is disabled.
+         *
+         * We sign them back out because the success
+         * screen intentionally sends them through
+         * the normal portal login page.
+         */
+
+        const {
+            error: signOutError
+        } =
+            await signupSupabase.auth.signOut();
+
+
+        if (signOutError) {
+
+            console.warn(
+                "Account created, but automatic sign-out failed:",
+                signOutError
+            );
+
+        }
+
+
+        // ========================================
+        // SHOW REAL SUCCESS SCREEN
+        // ========================================
+
+        showExistingClientSuccess();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Existing client signup failed:",
+            error
+        );
+
+
+        showSignupError(
+            getSignupErrorMessage(error)
+        );
+
+
+        signupError?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+    }
+    finally {
+
+        setSignupButtonLoading(
+            petsNextButton,
+            false,
+            "Continue"
+        );
+
+    }
+
+}
+
+
+// ========================================
+// EXISTING CLIENT SUCCESS
+// ========================================
+
+function showExistingClientSuccess() {
+
+    clearSignupError();
+
+
+    ownerStep.hidden =
+        true;
+
+    petsStep.hidden =
+        true;
+
+    meetGreetStep.hidden =
+        true;
+
+    successStep.hidden =
+        false;
+
+
+    // ========================================
+    // HIDE PROGRESS
+    // ========================================
 
     const progress =
         document.querySelector(
@@ -950,6 +1203,10 @@ function showExistingClientTestSuccess() {
         progress.hidden = true;
     }
 
+
+    // ========================================
+    // SUCCESS CONTENT
+    // ========================================
 
     const successTitle =
         document.getElementById(
@@ -983,7 +1240,7 @@ function showExistingClientTestSuccess() {
     if (successMessage) {
 
         successMessage.textContent =
-            "Your Paws in Stride portal setup is ready. Account creation will be connected in the next build step.";
+            "Your Paws in Stride client portal account has been created. You can now log in to your portal.";
 
     }
 
@@ -1005,6 +1262,130 @@ function showExistingClientTestSuccess() {
 
 }
 
+
+// ========================================
+// SIGNUP BUTTON LOADING STATE
+// ========================================
+
+function setSignupButtonLoading(
+    button,
+    isLoading,
+    text
+) {
+
+    if (!button) {
+        return;
+    }
+
+
+    button.disabled =
+        isLoading;
+
+
+    button.textContent =
+        text;
+
+
+    if (isLoading) {
+
+        button.setAttribute(
+            "aria-busy",
+            "true"
+        );
+
+    }
+    else {
+
+        button.removeAttribute(
+            "aria-busy"
+        );
+
+    }
+
+}
+
+// ========================================
+// FRIENDLY SIGNUP ERROR MESSAGE
+// ========================================
+
+function getSignupErrorMessage(error) {
+
+    const message =
+        String(
+            error?.message || ""
+        ).toLowerCase();
+
+
+    if (
+        message.includes(
+            "already registered"
+        ) ||
+        message.includes(
+            "already been registered"
+        ) ||
+        message.includes(
+            "user already"
+        )
+    ) {
+
+        return "An account already exists with this email address. Please log in instead.";
+
+    }
+
+
+    if (
+        message.includes(
+            "password"
+        )
+    ) {
+
+        return "Please choose a valid password with at least 8 characters.";
+
+    }
+
+
+    if (
+        message.includes(
+            "email"
+        ) &&
+        message.includes(
+            "invalid"
+        )
+    ) {
+
+        return "Please enter a valid email address.";
+
+    }
+
+
+    if (
+        message.includes(
+            "rate limit"
+        )
+    ) {
+
+        return "Too many signup attempts were made. Please wait a moment and try again.";
+
+    }
+
+
+    if (
+        message.includes(
+            "onboarding has already been completed"
+        )
+    ) {
+
+        return "This portal account has already completed signup. Please log in instead.";
+
+    }
+
+
+    return (
+        error?.message ||
+        "We couldn't finish creating your account. Please try again."
+    );
+
+}
 
 // ========================================
 // SHOW SIGNUP ERROR
@@ -1046,7 +1427,6 @@ function clearSignupError() {
         true;
 
 }
-
 
 // ========================================
 // SCROLL ERROR INTO VIEW
