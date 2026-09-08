@@ -5278,8 +5278,18 @@ body.client-report-lightbox-open {
 
 
     .client-header-request-button {
-        display: none;
-    }
+       display: inline-flex;
+       align-items: center;
+       justify-content: center;
+   
+       width: auto;
+   
+       padding: 11px 14px;
+   
+       white-space: nowrap;
+   
+       font-size: 13px;
+   }
 
 
     .client-menu-button {
