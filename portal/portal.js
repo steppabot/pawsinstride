@@ -1795,6 +1795,154 @@ if (clientPhotoInput) {
 
 }
 
+// ========================================
+// CLIENT PROFILE INPUT HELPERS
+// ========================================
+
+function formatClientPhoneNumber(
+    value
+) {
+
+    const digits =
+        String(
+            value || ""
+        )
+            .replace(
+                /\D/g,
+                ""
+            )
+            .slice(
+                0,
+                10
+            );
+
+
+    if (
+        digits.length <=
+        3
+    ) {
+
+        return digits;
+
+    }
+
+
+    if (
+        digits.length <=
+        6
+    ) {
+
+        return (
+            `${digits.slice(0, 3)}-` +
+            `${digits.slice(3)}`
+        );
+
+    }
+
+
+    return (
+        `${digits.slice(0, 3)}-` +
+        `${digits.slice(3, 6)}-` +
+        `${digits.slice(6, 10)}`
+    );
+
+}
+
+
+function isValidClientFullName(
+    value
+) {
+
+    const parts =
+        String(
+            value || ""
+        )
+            .trim()
+            .split(
+                /\s+/
+            )
+            .filter(Boolean);
+
+
+    return (
+        parts.length >= 2 &&
+        parts.every(
+            part =>
+                part.length >= 2
+        )
+    );
+
+}
+
+
+// ========================================
+// CLIENT PROFILE LIVE FORMATTING
+// ========================================
+
+const householdPhoneInput =
+    document.getElementById(
+        "household-phone"
+    );
+
+
+const emergencyPhoneInput =
+    document.getElementById(
+        "emergency-contact-phone"
+    );
+
+
+const householdZipInput =
+    document.getElementById(
+        "household-zip"
+    );
+
+
+householdPhoneInput
+    ?.addEventListener(
+        "input",
+        () => {
+
+            householdPhoneInput.value =
+                formatClientPhoneNumber(
+                    householdPhoneInput.value
+                );
+
+        }
+    );
+
+
+emergencyPhoneInput
+    ?.addEventListener(
+        "input",
+        () => {
+
+            emergencyPhoneInput.value =
+                formatClientPhoneNumber(
+                    emergencyPhoneInput.value
+                );
+
+        }
+    );
+
+
+householdZipInput
+    ?.addEventListener(
+        "input",
+        () => {
+
+            householdZipInput.value =
+                householdZipInput.value
+                    .replace(
+                        /\D/g,
+                        ""
+                    )
+                    .slice(
+                        0,
+                        5
+                    );
+
+        }
+    );
 
 // ========================================
 // SAVE HOUSEHOLD
@@ -1834,10 +1982,120 @@ if (householdForm) {
                     .trim();
 
 
-            if (!fullName) {
+            const phone =
+                document
+                    .getElementById(
+                        "household-phone"
+                    )
+                    .value
+                    .trim();
+
+
+            const zip =
+                document
+                    .getElementById(
+                        "household-zip"
+                    )
+                    .value
+                    .trim();
+
+
+            const emergencyPhone =
+                document
+                    .getElementById(
+                        "emergency-contact-phone"
+                    )
+                    .value
+                    .trim();
+
+
+            // ========================================
+            // FULL NAME VALIDATION
+            // ========================================
+
+            if (
+                !isValidClientFullName(
+                    fullName
+                )
+            ) {
 
                 message.textContent =
-                    "Please enter your full name.";
+                    "Please enter your first and last name.";
+
+
+                document
+                    .getElementById(
+                        "household-full-name"
+                    )
+                    .focus();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // PHONE VALIDATION
+            // ========================================
+
+            if (
+                phone &&
+                phone.replace(
+                    /\D/g,
+                    ""
+                ).length !== 10
+            ) {
+
+                message.textContent =
+                    "Please enter a valid 10-digit phone number.";
+
+
+                householdPhoneInput?.focus();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // ZIP VALIDATION
+            // ========================================
+
+            if (
+                zip &&
+                !/^\d{5}$/.test(
+                    zip
+                )
+            ) {
+
+                message.textContent =
+                    "Please enter a valid 5-digit ZIP code.";
+
+
+                householdZipInput?.focus();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // EMERGENCY PHONE VALIDATION
+            // ========================================
+
+            if (
+                emergencyPhone &&
+                emergencyPhone.replace(
+                    /\D/g,
+                    ""
+                ).length !== 10
+            ) {
+
+                message.textContent =
+                    "Please enter a valid emergency contact phone number.";
+
+
+                emergencyPhoneInput?.focus();
 
                 return;
 
@@ -1877,9 +2135,7 @@ if (householdForm) {
 
 
                 if (profileUpdateError) {
-
                     throw profileUpdateError;
-
                 }
 
 
@@ -1955,9 +2211,7 @@ if (householdForm) {
 
 
                 if (householdSaveError) {
-
                     throw householdSaveError;
-
                 }
 
 
@@ -2007,7 +2261,9 @@ if (householdForm) {
                     error: accessSaveError
                 } =
                     await supabaseClient
-                        .from("property_access")
+                        .from(
+                            "property_access"
+                        )
                         .upsert(
                             accessPayload,
                             {
@@ -2018,9 +2274,7 @@ if (householdForm) {
 
 
                 if (accessSaveError) {
-
                     throw accessSaveError;
-
                 }
 
 
@@ -2083,7 +2337,8 @@ if (householdForm) {
                     ) {
 
                         const {
-                            error: oldDeleteError
+                            error:
+                                oldDeleteError
                         } =
                             await supabaseClient
                                 .storage
@@ -2124,9 +2379,8 @@ if (householdForm) {
                 saveButton.textContent =
                     "Save Profile";
 
-            } catch (
-                error
-            ) {
+            }
+            catch (error) {
 
                 console.error(
                     "Household save error:",
@@ -2151,7 +2405,6 @@ if (householdForm) {
     );
 
 }
-
 
 // ========================================
 // UPLOAD CLIENT PHOTO
