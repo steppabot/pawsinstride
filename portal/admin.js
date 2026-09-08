@@ -4153,8 +4153,8 @@ function closeAdminVisitReport() {
         [];
 
 
-    pendingVisitRouteFile =
-        null;
+    pendingVisitRouteFiles =
+        [];
 
 
     activeVisitReportMedia =
@@ -4872,7 +4872,7 @@ function renderPendingRoutePhoto() {
 }
 
 // ========================================
-// PENDING ROUTE PREVIEW
+// PENDING WALK SUMMARY PREVIEWS
 // ========================================
 
 function renderPendingRoutePhoto() {
@@ -4894,7 +4894,8 @@ function renderPendingRoutePhoto() {
 
 
     if (
-        !pendingVisitRouteFile
+        pendingVisitRouteFiles.length ===
+        0
     ) {
 
 
@@ -4908,49 +4909,71 @@ function renderPendingRoutePhoto() {
 
 
     container.innerHTML =
-        `
+        pendingVisitRouteFiles
+            .map(
+                (
+                    file,
+                    index
+                ) => `
 
-            <div class="admin-pending-media-item">
+                    <div class="admin-pending-media-item">
 
-                <span>
-                    ${escapeHtml(
-                        pendingVisitRouteFile.name
-                    )}
-                </span>
+                        <span>
+                            ${escapeHtml(
+                                file.name
+                            )}
+                        </span>
 
-                <button
-                    type="button"
-                    class="admin-pending-media-remove"
-                    data-remove-pending-route
-                >
-                    ×
-                </button>
+                        <button
+                            type="button"
+                            class="admin-pending-media-remove"
+                            data-remove-pending-route="${index}"
+                        >
+                            ×
+                        </button>
 
-            </div>
+                    </div>
 
-        `;
+                `
+            )
+            .join("");
 
 
     container
-        .querySelector(
+        .querySelectorAll(
             "[data-remove-pending-route]"
         )
-        ?.addEventListener(
-            "click",
-            () => {
+        .forEach(
+            button => {
 
 
-                pendingVisitRouteFile =
-                    null;
+                button.addEventListener(
+                    "click",
+                    () => {
 
 
-                renderPendingRoutePhoto();
+                        const index =
+                            Number(
+                                button.dataset
+                                    .removePendingRoute
+                            );
+
+
+                        pendingVisitRouteFiles.splice(
+                            index,
+                            1
+                        );
+
+
+                        renderPendingRoutePhoto();
+
+                    }
+                );
 
             }
         );
 
 }
-
 
 // ========================================
 // SAVE VISIT REPORT
