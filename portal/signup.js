@@ -205,41 +205,100 @@ function setupSignupEvents() {
 
 
     document
-        .querySelectorAll('input[name="client_type"]')
-        .forEach((radio) => {
+        .querySelectorAll(
+            'input[name="client_type"]'
+        )
+        .forEach(
+            radio => {
 
-            radio.addEventListener(
-                "change",
-                () => {
+                radio.addEventListener(
+                    "change",
+                    () => {
 
-                    signupState.clientType =
-                        radio.value;
+                        signupState.clientType =
+                            radio.value;
 
-                    clearSignupError();
+                        clearSignupError();
 
-                }
-            );
+                    }
+                );
 
-        });
+            }
+        );
+
+
+    // ========================================
+    // SIGNUP PHONE FORMAT
+    // ========================================
+
+    const signupPhone =
+        document.getElementById(
+            "signup-phone"
+        );
+
+
+    signupPhone
+        ?.addEventListener(
+            "input",
+            () => {
+
+                signupPhone.value =
+                    formatUsPhoneNumber(
+                        signupPhone.value
+                    );
+
+                clearSignupError();
+
+            }
+        );
+
+
+    // ========================================
+    // SIGNUP ZIP FORMAT
+    // ========================================
+
+    const signupZip =
+        document.getElementById(
+            "signup-zip"
+        );
+
+
+    signupZip
+        ?.addEventListener(
+            "input",
+            () => {
+
+                signupZip.value =
+                    signupZip.value
+                        .replace(
+                            /\D/g,
+                            ""
+                        )
+                        .slice(
+                            0,
+                            5
+                        );
+
+                clearSignupError();
+
+            }
+        );
 
 
     document
         .querySelectorAll(
             "#signup-step-owner input, #signup-step-owner select"
         )
-        .forEach((field) => {
+        .forEach(
+            field => {
 
-            field.addEventListener(
-                "input",
-                clearSignupError
-            );
+                field.addEventListener(
+                    "change",
+                    clearSignupError
+                );
 
-            field.addEventListener(
-                "change",
-                clearSignupError
-            );
-
-        });
+            }
+        );
 
 
     petsContainer?.addEventListener(
@@ -330,28 +389,51 @@ function validateOwnerStep() {
 
 
     const fullName =
-        document.getElementById("signup-full-name");
+        document.getElementById(
+            "signup-full-name"
+        );
+
 
     const email =
-        document.getElementById("signup-email");
+        document.getElementById(
+            "signup-email"
+        );
+
 
     const phone =
-        document.getElementById("signup-phone");
+        document.getElementById(
+            "signup-phone"
+        );
+
 
     const password =
-        document.getElementById("signup-password");
+        document.getElementById(
+            "signup-password"
+        );
+
 
     const addressLine1 =
-        document.getElementById("signup-address-line-1");
+        document.getElementById(
+            "signup-address-line-1"
+        );
+
 
     const city =
-        document.getElementById("signup-city");
+        document.getElementById(
+            "signup-city"
+        );
+
 
     const state =
-        document.getElementById("signup-state");
+        document.getElementById(
+            "signup-state"
+        );
+
 
     const zip =
-        document.getElementById("signup-zip");
+        document.getElementById(
+            "signup-zip"
+        );
 
 
     if (!clientType) {
@@ -359,6 +441,7 @@ function validateOwnerStep() {
         showSignupError(
             "Please tell us whether you are a new or existing client."
         );
+
 
         scrollSignupErrorIntoView();
 
@@ -368,49 +451,90 @@ function validateOwnerStep() {
 
 
     const requiredFields = [
+
         {
-            field: fullName,
-            message: "Please enter your full name."
+            field:
+                fullName,
+
+            message:
+                "Please enter your full name."
         },
+
         {
-            field: email,
-            message: "Please enter your email address."
+            field:
+                email,
+
+            message:
+                "Please enter your email address."
         },
+
         {
-            field: phone,
-            message: "Please enter your phone number."
+            field:
+                phone,
+
+            message:
+                "Please enter your phone number."
         },
+
         {
-            field: password,
-            message: "Please create a password."
+            field:
+                password,
+
+            message:
+                "Please create a password."
         },
+
         {
-            field: addressLine1,
-            message: "Please enter your street address."
+            field:
+                addressLine1,
+
+            message:
+                "Please enter your street address."
         },
+
         {
-            field: city,
-            message: "Please enter your city."
+            field:
+                city,
+
+            message:
+                "Please enter your city."
         },
+
         {
-            field: state,
-            message: "Please select your state."
+            field:
+                state,
+
+            message:
+                "Please select your state."
         },
+
         {
-            field: zip,
-            message: "Please enter your ZIP code."
+            field:
+                zip,
+
+            message:
+                "Please enter your ZIP code."
         }
+
     ];
 
 
-    for (const item of requiredFields) {
+    for (
+        const item of
+        requiredFields
+    ) {
 
         if (
             !item.field ||
-            !String(item.field.value || "").trim()
+            !String(
+                item.field.value || ""
+            ).trim()
         ) {
 
-            showSignupError(item.message);
+            showSignupError(
+                item.message
+            );
+
 
             item.field?.focus();
 
@@ -421,11 +545,40 @@ function validateOwnerStep() {
     }
 
 
-    if (!email.checkValidity()) {
+    // ========================================
+    // FULL NAME
+    // ========================================
+
+    if (
+        !isValidFullName(
+            fullName.value
+        )
+    ) {
+
+        showSignupError(
+            "Please enter your first and last name."
+        );
+
+
+        fullName.focus();
+
+        return false;
+
+    }
+
+
+    // ========================================
+    // EMAIL
+    // ========================================
+
+    if (
+        !email.checkValidity()
+    ) {
 
         showSignupError(
             "Please enter a valid email address."
         );
+
 
         email.focus();
 
@@ -434,11 +587,19 @@ function validateOwnerStep() {
     }
 
 
-    if (password.value.length < 8) {
+    // ========================================
+    // PASSWORD
+    // ========================================
+
+    if (
+        password.value.length <
+        8
+    ) {
 
         showSignupError(
             "Your password must be at least 8 characters."
         );
+
 
         password.focus();
 
@@ -447,15 +608,26 @@ function validateOwnerStep() {
     }
 
 
+    // ========================================
+    // PHONE
+    // ========================================
+
     const phoneDigits =
-        phone.value.replace(/\D/g, "");
+        phone.value.replace(
+            /\D/g,
+            ""
+        );
 
 
-    if (phoneDigits.length < 10) {
+    if (
+        phoneDigits.length !==
+        10
+    ) {
 
         showSignupError(
-            "Please enter a valid phone number."
+            "Please enter a valid 10-digit phone number."
         );
+
 
         phone.focus();
 
@@ -464,15 +636,20 @@ function validateOwnerStep() {
     }
 
 
-    const zipValue =
-        zip.value.trim();
+    // ========================================
+    // ZIP CODE
+    // ========================================
 
-
-    if (!/^\d{5}(-\d{4})?$/.test(zipValue)) {
+    if (
+        !/^\d{5}$/.test(
+            zip.value
+        )
+    ) {
 
         showSignupError(
-            "Please enter a valid ZIP code."
+            "Please enter a valid 5-digit ZIP code."
         );
+
 
         zip.focus();
 
@@ -485,6 +662,91 @@ function validateOwnerStep() {
 
 }
 
+// ========================================
+// SIGNUP FIELD VALIDATION HELPERS
+// ========================================
+
+function formatUsPhoneNumber(
+    value
+) {
+
+    const digits =
+        String(
+            value || ""
+        )
+            .replace(
+                /\D/g,
+                ""
+            )
+            .slice(
+                0,
+                10
+            );
+
+
+    if (
+        digits.length <=
+        3
+    ) {
+
+        return digits;
+
+    }
+
+
+    if (
+        digits.length <=
+        6
+    ) {
+
+        return (
+            `${digits.slice(0, 3)}-` +
+            `${digits.slice(3)}`
+        );
+
+    }
+
+
+    return (
+        `${digits.slice(0, 3)}-` +
+        `${digits.slice(3, 6)}-` +
+        `${digits.slice(6, 10)}`
+    );
+
+}
+
+
+function isValidFullName(
+    value
+) {
+
+    const parts =
+        String(
+            value || ""
+        )
+            .trim()
+            .split(
+                /\s+/
+            )
+            .filter(Boolean);
+
+
+    if (
+        parts.length <
+        2
+    ) {
+
+        return false;
+
+    }
+
+
+    return parts.every(
+        part =>
+            part.length >= 2
+    );
+
+}
 
 // ========================================
 // SAVE OWNER DATA
