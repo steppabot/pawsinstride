@@ -180,6 +180,12 @@ function setupSignupEvents() {
     );
 
 
+    completeNewClientButton?.addEventListener(
+        "click",
+        completeNewClientSignup
+    );
+
+
     addPetButton?.addEventListener(
         "click",
         addAnotherPet
@@ -205,8 +211,12 @@ function setupSignupEvents() {
             radio.addEventListener(
                 "change",
                 () => {
-                    signupState.clientType = radio.value;
+
+                    signupState.clientType =
+                        radio.value;
+
                     clearSignupError();
+
                 }
             );
 
@@ -244,7 +254,6 @@ function setupSignupEvents() {
     );
 
 }
-
 
 // ========================================
 // PASSWORD SHOW / HIDE
@@ -1352,6 +1361,17 @@ function getSignupErrorMessage(error) {
 
 
     if (
+        isMeetGreetSlotConflict(
+            error
+        )
+    ) {
+
+        return "That Meet & Greet time was just booked. Please choose another available time.";
+
+    }
+
+
+    if (
         message.includes(
             "already registered"
         ) ||
@@ -1415,13 +1435,26 @@ function getSignupErrorMessage(error) {
     }
 
 
+    if (
+        message.includes(
+            "new_client"
+        ) ||
+        message.includes(
+            "new client"
+        )
+    ) {
+
+        return "This account is not configured for the new-client Meet & Greet signup flow.";
+
+    }
+
+
     return (
         error?.message ||
         "We couldn't finish creating your account. Please try again."
     );
 
 }
-
 
 // ========================================
 // INITIALIZE MEET & GREET CALENDAR
@@ -2212,6 +2245,729 @@ function normalizeDatabaseTime(
 
 }
 
+// ========================================
+// NEW CLIENT ACCOUNT + MEET & GREET
+// ========================================
+
+async function completeNewClientSignup() {
+
+    clearSignupError();
+
+
+    // ========================================
+    // REQUIRE SELECTED APPOINTMENT
+    // ========================================
+
+    const selectedMeetGreet =
+        signupState.selectedMeetGreet;
+
+
+    if (
+        !selectedMeetGreet?.date ||
+        !selectedMeetGreet?.time
+    ) {
+
+        showSignupError(
+            "Please select a Meet & Greet date and time."
+        );
+
+        scrollSignupErrorIntoView();
+
+        return;
+
+    }
+
+
+    // ========================================
+    // REQUIRE OWNER + PET INFORMATION
+    // ========================================
+
+    if (
+        !signupState.owner ||
+        !signupState.owner.email ||
+        !signupState.pets.length
+    ) {
+
+        showSignupError(
+            "Your signup information is incomplete. Please go back and review your information."
+        );
+
+        scrollSignupErrorIntoView();
+
+        return;
+
+    }
+
+
+    // ========================================
+    // REQUIRE NEW CLIENT
+    // ========================================
+
+    if (
+        signupState.clientType !==
+        "new_client"
+    ) {
+
+        showSignupError(
+            "This Meet & Greet signup flow is only for new clients."
+        );
+
+        scrollSignupErrorIntoView();
+
+        return;
+
+    }
+
+
+    // ========================================
+    // PASSWORD
+    // ========================================
+
+    const password =
+        passwordInput?.value || "";
+
+
+    if (password.length < 8) {
+
+        showSignupStep(1);
+
+        showSignupError(
+            "Your password must be at least 8 characters."
+        );
+
+        passwordInput?.focus();
+
+        return;
+
+    }
+
+
+    // ========================================
+    // BUTTON LOADING STATE
+    // ========================================
+
+    setSignupButtonLoading(
+        completeNewClientButton,
+        true,
+        "Scheduling..."
+    );
+
+
+    try {
+
+        // ========================================
+        // RECHECK SLOT AVAILABILITY
+        // ========================================
+
+        const selectedDate =
+            selectedMeetGreet.date;
+
+        const selectedTime =
+            normalizeDatabaseTime(
+                selectedMeetGreet.time
+            );
+
+
+        const {
+            data: currentBookedSlots,
+            error: availabilityError
+        } =
+            await signupSupabase.rpc(
+                "get_meet_greet_booked_slots",
+                {
+
+                    p_start_date:
+                        selectedDate,
+
+                    p_end_date:
+                        selectedDate
+
+                }
+            );
+
+
+        if (availabilityError) {
+            throw availabilityError;
+        }
+
+
+        const slotAlreadyBooked =
+            (currentBookedSlots || []).some(
+                (slot) => {
+
+                    return (
+                        slot.visit_date ===
+                            selectedDate &&
+                        normalizeDatabaseTime(
+                            slot.start_time
+                        ) ===
+                            selectedTime
+                    );
+
+                }
+            );
+
+
+        if (slotAlreadyBooked) {
+
+            signupState.selectedMeetGreet =
+                {
+                    date:
+                        selectedDate,
+
+                    time:
+                        null
+                };
+
+
+            await renderMeetGreetCalendar();
+
+
+            updateMeetGreetSelection();
+
+
+            showSignupError(
+                "That Meet & Greet time was just booked by another client. Please choose another available time."
+            );
+
+
+            scrollSignupErrorIntoView();
+
+            return;
+
+        }
+
+
+        // ========================================
+        // CHECK FOR EXISTING SIGNED-IN SESSION
+        // ========================================
+
+        /*
+         * If account creation succeeded previously but
+         * the appointment failed because a slot was taken,
+         * the user may already have an authenticated session.
+         *
+         * Reusing that session prevents us from trying to
+         * create the same Auth account twice.
+         */
+
+        const {
+            data: sessionData,
+            error: sessionError
+        } =
+            await signupSupabase.auth.getSession();
+
+
+        if (sessionError) {
+            throw sessionError;
+        }
+
+
+        let activeSession =
+            sessionData?.session || null;
+
+
+        // ========================================
+        // CREATE AUTH ACCOUNT WHEN NEEDED
+        // ========================================
+
+        if (!activeSession) {
+
+            const {
+                data: authData,
+                error: authError
+            } =
+                await signupSupabase.auth.signUp({
+
+                    email:
+                        signupState.owner.email,
+
+                    password,
+
+                    options: {
+
+                        data: {
+
+                            full_name:
+                                signupState.owner.fullName,
+
+                            phone:
+                                signupState.owner.phone,
+
+                            client_type:
+                                "new_client"
+
+                        }
+
+                    }
+
+                });
+
+
+            if (authError) {
+                throw authError;
+            }
+
+
+            if (!authData?.user) {
+
+                throw new Error(
+                    "Your account could not be created. Please try again."
+                );
+
+            }
+
+
+            if (!authData.session) {
+
+                throw new Error(
+                    "Your account was created, but an authenticated session was not started. Please contact Paws in Stride so we can finish setting up your portal account."
+                );
+
+            }
+
+
+            activeSession =
+                authData.session;
+
+        }
+
+
+        // ========================================
+        // VERIFY SESSION BELONGS TO THIS SIGNUP
+        // ========================================
+
+        const signedInEmail =
+            String(
+                activeSession?.user?.email || ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        const signupEmail =
+            String(
+                signupState.owner.email || ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            signedInEmail &&
+            signupEmail &&
+            signedInEmail !== signupEmail
+        ) {
+
+            throw new Error(
+                "Another portal account is currently signed in. Please sign out and restart signup."
+            );
+
+        }
+
+
+        // ========================================
+        // FINALIZE NEW CLIENT ONBOARDING
+        // ========================================
+
+        /*
+         * This RPC creates:
+         *
+         * - Household
+         * - Pet(s)
+         * - Meet & Greet visit
+         * - visit_pets relationships
+         * - onboarding_completed_at
+         *
+         * The Meet & Greet is inserted into public.visits,
+         * so the SAME appointment is used by:
+         *
+         * - Admin calendar
+         * - Client calendar
+         * - Signup availability
+         */
+
+        const {
+            data: visitId,
+            error: onboardingError
+        } =
+            await signupSupabase.rpc(
+                "finalize_new_client_onboarding",
+                {
+
+                    p_street_address:
+                        signupState.owner.addressLine1,
+
+                    p_address_line_2:
+                        signupState.owner.addressLine2 || "",
+
+                    p_city:
+                        signupState.owner.city,
+
+                    p_state:
+                        signupState.owner.state,
+
+                    p_zip_code:
+                        signupState.owner.zip,
+
+                    p_pets:
+                        signupState.pets.map(
+                            (pet) => ({
+
+                                name:
+                                    pet.name,
+
+                                breed:
+                                    pet.breed,
+
+                                birthday:
+                                    pet.birthday || null,
+
+                                gender:
+                                    pet.gender || null
+
+                            })
+                        ),
+
+                    p_meet_greet_date:
+                        selectedDate,
+
+                    p_meet_greet_time:
+                        selectedTime
+
+                }
+            );
+
+
+        if (onboardingError) {
+
+            // ========================================
+            // SLOT COLLISION / UNIQUE CONFLICT
+            // ========================================
+
+            if (
+                isMeetGreetSlotConflict(
+                    onboardingError
+                )
+            ) {
+
+                signupState.selectedMeetGreet =
+                    {
+                        date:
+                            selectedDate,
+
+                        time:
+                            null
+                    };
+
+
+                await renderMeetGreetCalendar();
+
+
+                updateMeetGreetSelection();
+
+
+                showSignupError(
+                    "That Meet & Greet time was just booked by another client. Your portal account has been started, so simply choose another available time to finish signup."
+                );
+
+
+                scrollSignupErrorIntoView();
+
+                return;
+
+            }
+
+
+            throw onboardingError;
+
+        }
+
+
+        console.log(
+            "New client Meet & Greet created:",
+            visitId
+        );
+
+
+        // ========================================
+        // SIGN USER BACK OUT
+        // ========================================
+
+        /*
+         * We intentionally send the client through
+         * the normal portal login page after signup.
+         */
+
+        const {
+            error: signOutError
+        } =
+            await signupSupabase.auth.signOut();
+
+
+        if (signOutError) {
+
+            console.warn(
+                "New client created, but automatic sign-out failed:",
+                signOutError
+            );
+
+        }
+
+
+        // ========================================
+        // SHOW SUCCESS SCREEN
+        // ========================================
+
+        showNewClientSuccess();
+
+    }
+    catch (error) {
+
+        console.error(
+            "New client signup failed:",
+            error
+        );
+
+
+        showSignupError(
+            getSignupErrorMessage(error)
+        );
+
+
+        scrollSignupErrorIntoView();
+
+    }
+    finally {
+
+        const appointmentSelected =
+            Boolean(
+                signupState.selectedMeetGreet?.date &&
+                signupState.selectedMeetGreet?.time
+            );
+
+
+        setSignupButtonLoading(
+            completeNewClientButton,
+            false,
+            "Schedule Meet & Greet"
+        );
+
+
+        if (completeNewClientButton) {
+
+            completeNewClientButton.disabled =
+                !appointmentSelected;
+
+        }
+
+    }
+
+}
+
+
+// ========================================
+// MEET & GREET SLOT CONFLICT
+// ========================================
+
+function isMeetGreetSlotConflict(error) {
+
+    const message =
+        String(
+            error?.message || ""
+        ).toLowerCase();
+
+
+    const details =
+        String(
+            error?.details || ""
+        ).toLowerCase();
+
+
+    const code =
+        String(
+            error?.code || ""
+        ).toLowerCase();
+
+
+    return (
+        code === "23505" ||
+        message.includes(
+            "visits_unique_active_meet_greet_slot"
+        ) ||
+        details.includes(
+            "visits_unique_active_meet_greet_slot"
+        ) ||
+        (
+            message.includes("duplicate key") &&
+            message.includes("meet")
+        )
+    );
+
+}
+
+
+// ========================================
+// NEW CLIENT SUCCESS
+// ========================================
+
+function showNewClientSuccess() {
+
+    clearSignupError();
+
+
+    const selection =
+        signupState.selectedMeetGreet;
+
+
+    if (
+        !selection?.date ||
+        !selection?.time
+    ) {
+
+        return;
+
+    }
+
+
+    ownerStep.hidden =
+        true;
+
+    petsStep.hidden =
+        true;
+
+    meetGreetStep.hidden =
+        true;
+
+    successStep.hidden =
+        false;
+
+
+    // ========================================
+    // HIDE PROGRESS
+    // ========================================
+
+    const progress =
+        document.querySelector(
+            ".signup-progress"
+        );
+
+
+    if (progress) {
+        progress.hidden = true;
+    }
+
+
+    // ========================================
+    // FORMAT APPOINTMENT
+    // ========================================
+
+    const appointmentDate =
+        new Date(
+            `${selection.date}T${selection.time}`
+        );
+
+
+    const dateLabel =
+        appointmentDate.toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
+
+
+    const timeLabel =
+        appointmentDate.toLocaleTimeString(
+            "en-US",
+            {
+                hour: "numeric",
+                minute: "2-digit"
+            }
+        );
+
+
+    // ========================================
+    // SUCCESS CONTENT
+    // ========================================
+
+    const successTitle =
+        document.getElementById(
+            "signup-success-title"
+        );
+
+    const successMessage =
+        document.getElementById(
+            "signup-success-message"
+        );
+
+    const appointment =
+        document.getElementById(
+            "signup-success-appointment"
+        );
+
+    const meetGreetCheck =
+        document.getElementById(
+            "signup-success-meet-greet-check"
+        );
+
+
+    if (successTitle) {
+
+        successTitle.textContent =
+            "Your Meet & Greet Is Scheduled!";
+
+    }
+
+
+    if (successMessage) {
+
+        successMessage.textContent =
+            "Your Paws in Stride client portal account has been created and your complimentary Meet & Greet is confirmed.";
+
+    }
+
+
+    if (appointment) {
+
+        appointment.hidden =
+            false;
+
+
+        appointment.innerHTML = `
+            <span>
+                Meet & Greet
+            </span>
+
+            <strong>
+                ${dateLabel} at ${timeLabel}
+            </strong>
+
+            <p>
+                30 minutes · Complimentary
+            </p>
+        `;
+
+    }
+
+
+    if (meetGreetCheck) {
+
+        meetGreetCheck.hidden =
+            false;
+
+    }
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
 
 // ========================================
 // SHOW SIGNUP ERROR
