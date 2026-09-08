@@ -21,39 +21,60 @@
 
 <main class="dashboard-container client-dashboard-container">
 
-
     <!-- ========================================
          DASHBOARD HEADER
          ======================================== -->
-
-    <div class="dashboard-header">
-
+    
+    <div class="dashboard-header client-dashboard-header">
+    
         <div>
-
+    
             <h1>
                 Paws in Stride
             </h1>
-
+    
             <h2 id="welcome-name"></h2>
-
+    
         </div>
-
-
-        <button
-            id="request-walk-button"
-            class="primary-button"
-        >
-            + Request Service
-        </button>
-
+    
+    
+        <div class="client-dashboard-header-actions">
+    
+    
+            <button
+                id="request-walk-button"
+                class="primary-button client-header-request-button"
+            >
+                + Request Service
+            </button>
+    
+    
+            <button
+                type="button"
+                id="client-menu-button"
+                class="client-menu-button"
+                aria-label="Open dashboard menu"
+                aria-expanded="false"
+                aria-controls="client-navigation-drawer"
+            >
+    
+                <span></span>
+                <span></span>
+                <span></span>
+    
+            </button>
+    
+    
+        </div>
+    
     </div>
-
-
+    
+    
     <div id="loading">
         Loading your account...
     </div>
-
-
+    
+    
     <div
         id="dashboard-content"
         style="display:none;"
@@ -448,7 +469,9 @@
                      YOUR HOUSEHOLD
                      ======================================== -->
 
-                <section class="household-section">
+                <section
+                    id="household-section"
+                    class="household-section">
 
                     <div class="household-section-header">
 
@@ -1275,7 +1298,9 @@
                      YOUR PETS
                      ======================================== -->
 
-                <section class="pets-section">
+                <section
+                    id="pets-section"
+                    class="pets-section">
 
                     <div class="pets-section-header">
 
@@ -1525,7 +1550,9 @@
                      UPCOMING SERVICES
                      ======================================== -->
 
-                <section class="upcoming-services-section">
+                <section
+                    id="services-section"
+                    class="upcoming-services-section">
 
                     <div class="upcoming-services-header">
 
@@ -1627,7 +1654,198 @@
 
 </main>
 
+<!-- ========================================
+     CLIENT APP NAVIGATION
+     ======================================== -->
 
+<div
+    id="client-navigation-backdrop"
+    class="client-navigation-backdrop"
+></div>
+
+
+<aside
+    id="client-navigation-drawer"
+    class="client-navigation-drawer"
+    aria-hidden="true"
+>
+
+
+    <!-- ========================================
+         NAVIGATION HEADER
+         ======================================== -->
+
+    <div class="client-navigation-header">
+
+        <div>
+
+            <strong>
+                Paws in Stride
+            </strong>
+
+            <span>
+                Client Portal
+            </span>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="client-navigation-close"
+            class="client-navigation-close"
+            aria-label="Close dashboard menu"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <!-- ========================================
+         NAVIGATION LINKS
+         ======================================== -->
+
+    <nav
+        class="client-navigation-links"
+        aria-label="Client dashboard"
+    >
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-action="home"
+        >
+
+            <span class="client-navigation-link-icon">
+               ⌂
+            </span>
+
+            <span>
+                Home
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="household-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ♙
+            </span>
+
+            <span>
+                Household
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="pets-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ♡
+            </span>
+
+            <span>
+                Pets
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="services-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ◫
+            </span>
+
+            <span>
+                Services
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-action="messages"
+        >
+
+            <span class="client-navigation-link-icon">
+                ◌
+            </span>
+
+            <span>
+                Messages
+            </span>
+
+
+            <span
+                id="client-navigation-message-badge"
+                class="client-navigation-message-badge"
+                style="display:none;"
+            >
+                0
+            </span>
+
+        </button>
+
+
+    </nav>
+
+
+    <!-- ========================================
+         NAVIGATION PRIMARY ACTION
+         ======================================== -->
+
+    <div class="client-navigation-primary">
+
+        <button
+            type="button"
+            class="primary-button client-navigation-request"
+            data-client-navigation-action="request"
+        >
+            + Request Service
+        </button>
+
+    </div>
+
+
+    <!-- ========================================
+         NAVIGATION FOOTER
+         ======================================== -->
+
+    <div class="client-navigation-footer">
+
+        <button
+            type="button"
+            class="client-navigation-logout"
+            data-client-navigation-action="logout"
+        >
+            Log Out
+        </button>
+
+    </div>
+
+
+</aside>
+
+    
 <!-- ========================================
      CLIENT MESSAGING
      ======================================== -->
