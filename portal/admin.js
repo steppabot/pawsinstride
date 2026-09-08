@@ -93,8 +93,8 @@ let pendingVisitReportPhotos =
     [];
 
 
-let pendingVisitRouteFile =
-    null;
+let pendingVisitRouteFiles =
+    [];
 
 
 let activeVisitReportMedia =
@@ -3977,8 +3977,8 @@ async function openAdminVisitReport(
         [];
 
 
-    pendingVisitRouteFile =
-        null;
+    pendingVisitRouteFiles =
+        [];
 
 
     activeVisitReportMedia =
@@ -4213,8 +4213,8 @@ function renderAdminVisitReportForm(
         );
 
 
-    const existingRoute =
-        activeVisitReportMedia.find(
+    const existingRoutes =
+        activeVisitReportMedia.filter(
             item =>
                 item.photo_type ===
                 "route"
@@ -4247,7 +4247,7 @@ function renderAdminVisitReportForm(
                         </h5>
 
                         <p>
-                            Add care updates, photos, notes, and an optional route screenshot.
+                            Add care updates, photos, notes, and optional walk summary screenshots.
                         </p>
 
                     </div>
@@ -4469,42 +4469,57 @@ function renderAdminVisitReportForm(
 
                 <div class="admin-visit-report-section">
 
-
                     <span class="admin-visit-report-label">
-                        Walk Route
+                        Walk Summary
                     </span>
 
 
                     <p class="admin-visit-report-help">
-                        Optional — upload a route screenshot from your fitness or walking app.
+                        Add your GPS route, walk time, distance, or other activity screenshots.
                     </p>
 
 
                     ${
-                        existingRoute
+                        existingRoutes.length
 
                             ? `
 
-                                <div class="admin-visit-route-preview">
+                                <div class="admin-visit-existing-media">
 
-                                    ${
-                                        existingRoute.signed_url
+                                    ${existingRoutes
+                                        .map(
+                                            item => `
 
-                                            ? `
-                                                <img
-                                                    src="${escapeHtml(
-                                                        existingRoute.signed_url
-                                                    )}"
-                                                    alt="Walk route screenshot"
-                                                >
-                                            `
+                                                <div class="admin-visit-media-preview">
 
-                                            : `
-                                                <div class="admin-visit-media-missing">
-                                                    Route Screenshot
+                                                    ${
+                                                        item.signed_url
+
+                                                            ? `
+
+                                                                <img
+                                                                    src="${escapeHtml(
+                                                                        item.signed_url
+                                                                    )}"
+                                                                    alt="Walk summary screenshot"
+                                                                >
+
+                                                            `
+
+                                                            : `
+
+                                                                <div class="admin-visit-media-missing">
+                                                                    Walk Summary
+                                                                </div>
+
+                                                            `
+                                                    }
+
                                                 </div>
+
                                             `
-                                    }
+                                        )
+                                        .join("")}
 
                                 </div>
 
@@ -4516,15 +4531,12 @@ function renderAdminVisitReportForm(
 
                     <label class="admin-visit-media-upload-button admin-route-upload-button">
 
-                        ${
-                            existingRoute
-                                ? "Replace Route Screenshot"
-                                : "+ Add Route Screenshot"
-                        }
+                        + Add Walk Summary Photos
 
                         <input
                             type="file"
                             accept="image/jpeg,image/png,image/webp"
+                            multiple
                             hidden
                             data-visit-report-route
                         >
@@ -4536,7 +4548,6 @@ function renderAdminVisitReportForm(
                         class="admin-visit-pending-route"
                         data-pending-route
                     ></div>
-
 
                 </div>
 
@@ -4668,7 +4679,7 @@ function handleVisitReportPhotos(
 
 
 // ========================================
-// HANDLE ROUTE SCREENSHOT
+// HANDLE WALK SUMMARY PHOTOS
 // ========================================
 
 function handleVisitRoutePhoto(
@@ -4676,62 +4687,75 @@ function handleVisitRoutePhoto(
 ) {
 
 
-    const file =
-        input.files?.[0];
-
-
-    if (
-        !file
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !ALLOWED_PHOTO_TYPES.includes(
-            file.type
-        )
-    ) {
-
-
-        alert(
-            "The route screenshot must be a JPG, PNG, or WebP image."
+    const files =
+        Array.from(
+            input.files ||
+            []
         );
 
 
-        input.value =
-            "";
-
+    if (
+        files.length ===
+        0
+    ) {
 
         return;
 
     }
 
 
-    if (
-        file.size >
-        MAX_VISIT_MEDIA_SIZE
+    const validFiles =
+        [];
+
+
+    for (
+        const file of files
     ) {
 
 
-        alert(
-            "The route screenshot must be 10 MB or smaller."
+        if (
+            !ALLOWED_PHOTO_TYPES.includes(
+                file.type
+            )
+        ) {
+
+
+            alert(
+                "Walk summary photos must be JPG, PNG, or WebP images."
+            );
+
+
+            continue;
+
+        }
+
+
+        if (
+            file.size >
+            MAX_VISIT_MEDIA_SIZE
+        ) {
+
+
+            alert(
+                "Each walk summary photo must be 10 MB or smaller."
+            );
+
+
+            continue;
+
+        }
+
+
+        validFiles.push(
+            file
         );
-
-
-        input.value =
-            "";
-
-
-        return;
 
     }
 
 
-    pendingVisitRouteFile =
-        file;
+    pendingVisitRouteFiles.push(
+        ...validFiles
+    );
 
 
     input.value =
@@ -4744,15 +4768,15 @@ function handleVisitRoutePhoto(
 
 
 // ========================================
-// PENDING VISIT PHOTO PREVIEWS
+// PENDING WALK SUMMARY PREVIEWS
 // ========================================
 
-function renderPendingVisitPhotos() {
+function renderPendingRoutePhoto() {
 
 
     const container =
         document.querySelector(
-            "[data-pending-visit-photos]"
+            "[data-pending-route]"
         );
 
 
@@ -4766,7 +4790,7 @@ function renderPendingVisitPhotos() {
 
 
     if (
-        pendingVisitReportPhotos.length ===
+        pendingVisitRouteFiles.length ===
         0
     ) {
 
@@ -4781,7 +4805,7 @@ function renderPendingVisitPhotos() {
 
 
     container.innerHTML =
-        pendingVisitReportPhotos
+        pendingVisitRouteFiles
             .map(
                 (
                     file,
@@ -4799,7 +4823,7 @@ function renderPendingVisitPhotos() {
                         <button
                             type="button"
                             class="admin-pending-media-remove"
-                            data-remove-pending-photo="${index}"
+                            data-remove-pending-route="${index}"
                         >
                             ×
                         </button>
@@ -4813,7 +4837,7 @@ function renderPendingVisitPhotos() {
 
     container
         .querySelectorAll(
-            "[data-remove-pending-photo]"
+            "[data-remove-pending-route]"
         )
         .forEach(
             button => {
@@ -4826,17 +4850,18 @@ function renderPendingVisitPhotos() {
 
                         const index =
                             Number(
-                                button.dataset.removePendingPhoto
+                                button.dataset
+                                    .removePendingRoute
                             );
 
 
-                        pendingVisitReportPhotos.splice(
+                        pendingVisitRouteFiles.splice(
                             index,
                             1
                         );
 
 
-                        renderPendingVisitPhotos();
+                        renderPendingRoutePhoto();
 
                     }
                 );
@@ -4845,7 +4870,6 @@ function renderPendingVisitPhotos() {
         );
 
 }
-
 
 // ========================================
 // PENDING ROUTE PREVIEW
@@ -5072,16 +5096,36 @@ async function saveAdminVisitReport(
         }
 
 
-        if (
-            pendingVisitRouteFile
+        const existingRouteCount =
+            activeVisitReportMedia.filter(
+                item =>
+                    item.photo_type ===
+                    "route"
+            ).length;
+        
+        
+        for (
+            let index = 0;
+            index <
+            pendingVisitRouteFiles.length;
+            index++
         ) {
-
-
-            await saveVisitRouteScreenshot(
+        
+        
+            const file =
+                pendingVisitRouteFiles[
+                    index
+                ];
+        
+        
+            await uploadVisitReportMedia(
                 visitId,
-                pendingVisitRouteFile
+                file,
+                "route",
+                existingRouteCount +
+                index
             );
-
+        
         }
 
 
@@ -5123,8 +5167,8 @@ async function saveAdminVisitReport(
             [];
 
 
-        pendingVisitRouteFile =
-            null;
+        pendingVisitRouteFiles =
+            [];
 
 
         message.textContent =
@@ -5269,172 +5313,6 @@ async function uploadVisitReportMedia(
 
 
         throw databaseError;
-
-    }
-
-}
-
-
-// ========================================
-// SAVE / REPLACE ROUTE SCREENSHOT
-// ========================================
-
-async function saveVisitRouteScreenshot(
-    visitId,
-    file
-) {
-
-
-    const extension =
-        getFileExtensionForMime(
-            file.type
-        );
-
-
-    const newStoragePath =
-        `${visitId}/route-${crypto.randomUUID()}.${extension}`;
-
-
-    const {
-        error: uploadError
-    } =
-        await supabaseClient
-            .storage
-            .from(
-                VISIT_MEDIA_BUCKET
-            )
-            .upload(
-                newStoragePath,
-                file,
-                {
-                    contentType:
-                        file.type,
-
-                    cacheControl:
-                        "3600",
-
-                    upsert:
-                        false
-                }
-            );
-
-
-    if (
-        uploadError
-    ) {
-
-        throw uploadError;
-
-    }
-
-
-    const existingRoute =
-        activeVisitReportMedia.find(
-            item =>
-                item.photo_type ===
-                "route"
-        );
-
-
-    if (
-        existingRoute
-    ) {
-
-
-        const oldStoragePath =
-            existingRoute.storage_path;
-
-
-        const {
-            error: updateError
-        } =
-            await supabaseClient
-                .from("visit_photos")
-                .update({
-
-                    storage_path:
-                        newStoragePath
-
-                })
-                .eq(
-                    "id",
-                    existingRoute.id
-                );
-
-
-        if (
-            updateError
-        ) {
-
-
-            await supabaseClient
-                .storage
-                .from(
-                    VISIT_MEDIA_BUCKET
-                )
-                .remove([
-                    newStoragePath
-                ]);
-
-
-            throw updateError;
-
-        }
-
-
-        await supabaseClient
-            .storage
-            .from(
-                VISIT_MEDIA_BUCKET
-            )
-            .remove([
-                oldStoragePath
-            ]);
-
-
-    } else {
-
-
-        const {
-            error: insertError
-        } =
-            await supabaseClient
-                .from("visit_photos")
-                .insert({
-
-                    visit_id:
-                        visitId,
-
-                    storage_path:
-                        newStoragePath,
-
-                    photo_type:
-                        "route",
-
-                    sort_order:
-                        0
-
-                });
-
-
-        if (
-            insertError
-        ) {
-
-
-            await supabaseClient
-                .storage
-                .from(
-                    VISIT_MEDIA_BUCKET
-                )
-                .remove([
-                    newStoragePath
-                ]);
-
-
-            throw insertError;
-
-        }
 
     }
 
