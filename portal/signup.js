@@ -375,12 +375,164 @@ function handleOwnerContinue() {
 
 }
 
+// ========================================
+// SIGNUP VALIDATION HELPERS
+// ========================================
+
+function isValidSignupEmail(
+    value
+) {
+
+    const email =
+        String(
+            value || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    /*
+     * Deliberately stricter than the browser's
+     * built-in type="email" validation.
+     *
+     * Requires:
+     * something@something.something
+     */
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(
+        email
+    );
+
+}
+
+
+function clearSignupFieldErrors() {
+
+    document
+        .querySelectorAll(
+            ".signup-field-error"
+        )
+        .forEach(
+            field => {
+
+                field.classList.remove(
+                    "signup-field-error"
+                );
+
+                field.removeAttribute(
+                    "aria-invalid"
+                );
+
+            }
+        );
+
+}
+
+
+function markSignupFieldError(
+    field
+) {
+
+    if (!field) {
+        return;
+    }
+
+
+    clearSignupFieldErrors();
+
+
+    field.classList.add(
+        "signup-field-error"
+    );
+
+
+    field.setAttribute(
+        "aria-invalid",
+        "true"
+    );
+
+}
+
+
+function showOwnerValidationError(
+    message,
+    field = null
+) {
+
+    showSignupError(
+        message
+    );
+
+
+    if (field) {
+
+        markSignupFieldError(
+            field
+        );
+
+    }
+
+
+    /*
+     * Keep the user at the error message instead
+     * of allowing focus() to yank the screen down
+     * to the bad field.
+     */
+
+    requestAnimationFrame(
+        () => {
+
+            signupError?.scrollIntoView({
+                behavior:
+                    window.matchMedia(
+                        "(prefers-reduced-motion: reduce)"
+                    ).matches
+                        ? "auto"
+                        : "smooth",
+
+                block:
+                    "center"
+            });
+
+
+            if (field) {
+
+                window.setTimeout(
+                    () => {
+
+                        try {
+
+                            field.focus({
+                                preventScroll: true
+                            });
+
+                        }
+                        catch {
+
+                            field.focus();
+
+                        }
+
+                    },
+                    350
+                );
+
+            }
+
+        }
+    );
+
+}
+
 
 // ========================================
 // VALIDATE OWNER STEP
 // ========================================
 
 function validateOwnerStep() {
+
+    clearSignupFieldErrors();
+
 
     const clientType =
         document.querySelector(
@@ -436,111 +588,17 @@ function validateOwnerStep() {
         );
 
 
+    // ========================================
+    // CLIENT TYPE
+    // ========================================
+
     if (!clientType) {
 
-        showSignupError(
+        showOwnerValidationError(
             "Please tell us whether you are a new or existing client."
         );
 
-
-        scrollSignupErrorIntoView();
-
         return false;
-
-    }
-
-
-    const requiredFields = [
-
-        {
-            field:
-                fullName,
-
-            message:
-                "Please enter your full name."
-        },
-
-        {
-            field:
-                email,
-
-            message:
-                "Please enter your email address."
-        },
-
-        {
-            field:
-                phone,
-
-            message:
-                "Please enter your phone number."
-        },
-
-        {
-            field:
-                password,
-
-            message:
-                "Please create a password."
-        },
-
-        {
-            field:
-                addressLine1,
-
-            message:
-                "Please enter your street address."
-        },
-
-        {
-            field:
-                city,
-
-            message:
-                "Please enter your city."
-        },
-
-        {
-            field:
-                state,
-
-            message:
-                "Please select your state."
-        },
-
-        {
-            field:
-                zip,
-
-            message:
-                "Please enter your ZIP code."
-        }
-
-    ];
-
-
-    for (
-        const item of
-        requiredFields
-    ) {
-
-        if (
-            !item.field ||
-            !String(
-                item.field.value || ""
-            ).trim()
-        ) {
-
-            showSignupError(
-                item.message
-            );
-
-
-            item.field?.focus();
-
-            return false;
-
-        }
 
     }
 
@@ -550,17 +608,32 @@ function validateOwnerStep() {
     // ========================================
 
     if (
+        !fullName ||
+        !String(
+            fullName.value || ""
+        ).trim()
+    ) {
+
+        showOwnerValidationError(
+            "Please enter your full name.",
+            fullName
+        );
+
+        return false;
+
+    }
+
+
+    if (
         !isValidFullName(
             fullName.value
         )
     ) {
 
-        showSignupError(
-            "Please enter your first and last name."
+        showOwnerValidationError(
+            "Please enter your first and last name.",
+            fullName
         );
-
-
-        fullName.focus();
 
         return false;
 
@@ -572,36 +645,32 @@ function validateOwnerStep() {
     // ========================================
 
     if (
-        !email.checkValidity()
+        !email ||
+        !String(
+            email.value || ""
+        ).trim()
     ) {
 
-        showSignupError(
-            "Please enter a valid email address."
+        showOwnerValidationError(
+            "Please enter your email address.",
+            email
         );
-
-
-        email.focus();
 
         return false;
 
     }
 
 
-    // ========================================
-    // PASSWORD
-    // ========================================
-
     if (
-        password.value.length <
-        8
+        !isValidSignupEmail(
+            email.value
+        )
     ) {
 
-        showSignupError(
-            "Your password must be at least 8 characters."
+        showOwnerValidationError(
+            "Please enter a valid email address, such as name@example.com.",
+            email
         );
-
-
-        password.focus();
 
         return false;
 
@@ -611,6 +680,23 @@ function validateOwnerStep() {
     // ========================================
     // PHONE
     // ========================================
+
+    if (
+        !phone ||
+        !String(
+            phone.value || ""
+        ).trim()
+    ) {
+
+        showOwnerValidationError(
+            "Please enter your phone number.",
+            phone
+        );
+
+        return false;
+
+    }
+
 
     const phoneDigits =
         phone.value.replace(
@@ -624,12 +710,107 @@ function validateOwnerStep() {
         10
     ) {
 
-        showSignupError(
-            "Please enter a valid 10-digit phone number."
+        showOwnerValidationError(
+            "Please enter a valid 10-digit phone number.",
+            phone
         );
 
+        return false;
 
-        phone.focus();
+    }
+
+
+    // ========================================
+    // PASSWORD
+    // ========================================
+
+    if (
+        !password ||
+        !password.value
+    ) {
+
+        showOwnerValidationError(
+            "Please create a password.",
+            password
+        );
+
+        return false;
+
+    }
+
+
+    if (
+        password.value.length <
+        8
+    ) {
+
+        showOwnerValidationError(
+            "Your password must be at least 8 characters.",
+            password
+        );
+
+        return false;
+
+    }
+
+
+    // ========================================
+    // STREET ADDRESS
+    // ========================================
+
+    if (
+        !addressLine1 ||
+        !String(
+            addressLine1.value || ""
+        ).trim()
+    ) {
+
+        showOwnerValidationError(
+            "Please enter your street address.",
+            addressLine1
+        );
+
+        return false;
+
+    }
+
+
+    // ========================================
+    // CITY
+    // ========================================
+
+    if (
+        !city ||
+        !String(
+            city.value || ""
+        ).trim()
+    ) {
+
+        showOwnerValidationError(
+            "Please enter your city.",
+            city
+        );
+
+        return false;
+
+    }
+
+
+    // ========================================
+    // STATE
+    // ========================================
+
+    if (
+        !state ||
+        !String(
+            state.value || ""
+        ).trim()
+    ) {
+
+        showOwnerValidationError(
+            "Please select your state.",
+            state
+        );
 
         return false;
 
@@ -641,21 +822,39 @@ function validateOwnerStep() {
     // ========================================
 
     if (
-        !/^\d{5}$/.test(
-            zip.value
-        )
+        !zip ||
+        !String(
+            zip.value || ""
+        ).trim()
     ) {
 
-        showSignupError(
-            "Please enter a valid 5-digit ZIP code."
+        showOwnerValidationError(
+            "Please enter your ZIP code.",
+            zip
         );
-
-
-        zip.focus();
 
         return false;
 
     }
+
+
+    if (
+        !/^\d{5}$/.test(
+            zip.value.trim()
+        )
+    ) {
+
+        showOwnerValidationError(
+            "Please enter a valid 5-digit ZIP code.",
+            zip
+        );
+
+        return false;
+
+    }
+
+
+    clearSignupFieldErrors();
 
 
     return true;
@@ -3256,19 +3455,46 @@ function showSignupError(message) {
 // CLEAR SIGNUP ERROR
 // ========================================
 
-function clearSignupError() {
+function clearSignupError(
+    event
+) {
 
-    if (!signupError) {
-        return;
+    if (signupError) {
+
+        signupError.textContent =
+            "";
+
+        signupError.hidden =
+            true;
+
     }
 
 
-    signupError.textContent =
-        "";
+    /*
+     * If the user edits the field that was
+     * marked invalid, immediately remove its
+     * red error state.
+     */
+
+    const field =
+        event?.target;
 
 
-    signupError.hidden =
-        true;
+    if (
+        field &&
+        field.classList
+    ) {
+
+        field.classList.remove(
+            "signup-field-error"
+        );
+
+
+        field.removeAttribute(
+            "aria-invalid"
+        );
+
+    }
 
 }
 
