@@ -1845,6 +1845,14 @@ function renderMeetGreetTimes(
     }
 
 
+    // ========================================
+    // SHOW TIME SLOT CONTAINER
+    // ========================================
+
+    meetGreetTimes.hidden =
+        false;
+
+
     let html = `
         <div class="signup-meet-greet-time-heading">
             Available Times
@@ -1958,7 +1966,6 @@ function renderMeetGreetTimes(
         );
 
 }
-
 
 // ========================================
 // GENERATE MEET & GREET TIMES
