@@ -21,6 +21,7 @@ const signupSupabase =
         SUPABASE_PUBLISHABLE_KEY
     );
 
+
 // ========================================
 // SIGNUP STATE
 // ========================================
@@ -32,6 +33,21 @@ const signupState = {
     pets: [],
     selectedMeetGreet: null
 };
+
+
+// ========================================
+// MEET & GREET AVAILABILITY
+// ========================================
+
+const MEET_GREET_START_HOUR = 8;
+const MEET_GREET_END_HOUR = 19;
+const MEET_GREET_INTERVAL_MINUTES = 30;
+
+let meetGreetCalendarDate =
+    new Date();
+
+let meetGreetBookedSlots =
+    new Set();
 
 
 // ========================================
@@ -75,6 +91,21 @@ const petsNextButton =
 
 const meetGreetBackButton =
     document.getElementById("signup-meet-greet-back");
+
+const meetGreetCalendar =
+    document.getElementById("signup-meet-greet-calendar");
+
+const meetGreetTimes =
+    document.getElementById("signup-meet-greet-times");
+
+const meetGreetSelected =
+    document.getElementById("signup-meet-greet-selected");
+
+const meetGreetSelectedText =
+    document.getElementById("signup-meet-greet-selected-text");
+
+const completeNewClientButton =
+    document.getElementById("signup-complete-new-client");
 
 
 const passwordInput =
@@ -524,6 +555,7 @@ function saveOwnerData() {
 
 }
 
+
 // ========================================
 // STEP 2: PET CONTINUE
 // ========================================
@@ -572,6 +604,8 @@ async function handlePetsContinue() {
     ) {
 
         showSignupStep(3);
+
+        await initializeMeetGreetCalendar();
 
         return;
 
@@ -1304,6 +1338,7 @@ function setSignupButtonLoading(
 
 }
 
+
 // ========================================
 // FRIENDLY SIGNUP ERROR MESSAGE
 // ========================================
@@ -1387,6 +1422,790 @@ function getSignupErrorMessage(error) {
 
 }
 
+
+// ========================================
+// INITIALIZE MEET & GREET CALENDAR
+// ========================================
+
+async function initializeMeetGreetCalendar() {
+
+    meetGreetCalendarDate =
+        new Date();
+
+    meetGreetCalendarDate.setHours(
+        12,
+        0,
+        0,
+        0
+    );
+
+
+    await renderMeetGreetCalendar();
+
+}
+
+
+// ========================================
+// RENDER MEET & GREET CALENDAR
+// ========================================
+
+async function renderMeetGreetCalendar() {
+
+    if (!meetGreetCalendar) {
+        return;
+    }
+
+
+    const year =
+        meetGreetCalendarDate.getFullYear();
+
+    const month =
+        meetGreetCalendarDate.getMonth();
+
+
+    const firstDay =
+        new Date(
+            year,
+            month,
+            1
+        );
+
+    const lastDay =
+        new Date(
+            year,
+            month + 1,
+            0
+        );
+
+
+    const monthStart =
+        formatDateForDatabase(
+            firstDay
+        );
+
+    const monthEnd =
+        formatDateForDatabase(
+            lastDay
+        );
+
+
+    await loadMeetGreetBookedSlots(
+        monthStart,
+        monthEnd
+    );
+
+
+    const monthName =
+        firstDay.toLocaleDateString(
+            "en-US",
+            {
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+
+    let html = `
+
+        <div class="signup-meet-greet-calendar-header">
+
+            <button
+                type="button"
+                class="signup-calendar-nav"
+                id="signup-meet-greet-prev"
+                aria-label="Previous month"
+            >
+                ‹
+            </button>
+
+            <strong>
+                ${monthName}
+            </strong>
+
+            <button
+                type="button"
+                class="signup-calendar-nav"
+                id="signup-meet-greet-next"
+                aria-label="Next month"
+            >
+                ›
+            </button>
+
+        </div>
+
+
+        <div class="signup-calendar-weekdays">
+
+            <span>Sun</span>
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+
+        </div>
+
+
+        <div class="signup-calendar-grid">
+    `;
+
+
+    const startOffset =
+        firstDay.getDay();
+
+
+    for (
+        let i = 0;
+        i < startOffset;
+        i++
+    ) {
+
+        html += `
+            <span
+                class="signup-calendar-day signup-calendar-day-empty"
+            ></span>
+        `;
+
+    }
+
+
+    const today =
+        new Date();
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    for (
+        let day = 1;
+        day <= lastDay.getDate();
+        day++
+    ) {
+
+        const date =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+        date.setHours(
+            12,
+            0,
+            0,
+            0
+        );
+
+
+        const databaseDate =
+            formatDateForDatabase(
+                date
+            );
+
+
+        const compareDate =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+        compareDate.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+
+        const isPast =
+            compareDate < today;
+
+
+        const isSelected =
+            signupState.selectedMeetGreet?.date ===
+            databaseDate;
+
+
+        html += `
+
+            <button
+                type="button"
+                class="
+                    signup-calendar-day
+                    ${isSelected ? "selected" : ""}
+                "
+                data-meet-greet-date="${databaseDate}"
+                ${isPast ? "disabled" : ""}
+            >
+                ${day}
+            </button>
+
+        `;
+
+    }
+
+
+    html += `
+        </div>
+    `;
+
+
+    meetGreetCalendar.innerHTML =
+        html;
+
+
+    // ========================================
+    // PREVIOUS MONTH
+    // ========================================
+
+    document
+        .getElementById(
+            "signup-meet-greet-prev"
+        )
+        ?.addEventListener(
+            "click",
+            async () => {
+
+                meetGreetCalendarDate =
+                    new Date(
+                        year,
+                        month - 1,
+                        1
+                    );
+
+
+                await renderMeetGreetCalendar();
+
+            }
+        );
+
+
+    // ========================================
+    // NEXT MONTH
+    // ========================================
+
+    document
+        .getElementById(
+            "signup-meet-greet-next"
+        )
+        ?.addEventListener(
+            "click",
+            async () => {
+
+                meetGreetCalendarDate =
+                    new Date(
+                        year,
+                        month + 1,
+                        1
+                    );
+
+
+                await renderMeetGreetCalendar();
+
+            }
+        );
+
+
+    // ========================================
+    // DATE SELECTION
+    // ========================================
+
+    meetGreetCalendar
+        .querySelectorAll(
+            "[data-meet-greet-date]"
+        )
+        .forEach(
+            (button) => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const selectedDate =
+                            button.dataset.meetGreetDate;
+
+
+                        signupState.selectedMeetGreet =
+                            {
+                                date:
+                                    selectedDate,
+
+                                time:
+                                    null
+                            };
+
+
+                        await renderMeetGreetCalendar();
+
+                        renderMeetGreetTimes(
+                            selectedDate
+                        );
+
+                        updateMeetGreetSelection();
+
+                    }
+                );
+
+            }
+        );
+
+
+    if (
+        signupState.selectedMeetGreet?.date
+    ) {
+
+        renderMeetGreetTimes(
+            signupState.selectedMeetGreet.date
+        );
+
+    }
+
+}
+
+
+// ========================================
+// LOAD BOOKED MEET & GREET SLOTS
+// ========================================
+
+async function loadMeetGreetBookedSlots(
+    startDate,
+    endDate
+) {
+
+    const {
+        data,
+        error
+    } =
+        await signupSupabase.rpc(
+            "get_meet_greet_booked_slots",
+            {
+                p_start_date:
+                    startDate,
+
+                p_end_date:
+                    endDate
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Could not load Meet & Greet availability:",
+            error
+        );
+
+
+        meetGreetBookedSlots =
+            new Set();
+
+        return;
+
+    }
+
+
+    meetGreetBookedSlots =
+        new Set(
+            (data || []).map(
+                (slot) => {
+
+                    const time =
+                        normalizeDatabaseTime(
+                            slot.start_time
+                        );
+
+
+                    return (
+                        `${slot.visit_date}|${time}`
+                    );
+
+                }
+            )
+        );
+
+}
+
+
+// ========================================
+// RENDER MEET & GREET TIMES
+// ========================================
+
+function renderMeetGreetTimes(
+    selectedDate
+) {
+
+    if (!meetGreetTimes) {
+        return;
+    }
+
+
+    let html = `
+        <div class="signup-meet-greet-time-heading">
+            Available Times
+        </div>
+
+        <div class="signup-meet-greet-time-grid">
+    `;
+
+
+    const slots =
+        generateMeetGreetTimes();
+
+
+    for (
+        const slot of slots
+    ) {
+
+        const slotKey =
+            `${selectedDate}|${slot.databaseTime}`;
+
+
+        const isBooked =
+            meetGreetBookedSlots.has(
+                slotKey
+            );
+
+
+        const isPast =
+            isMeetGreetSlotPast(
+                selectedDate,
+                slot.databaseTime
+            );
+
+
+        const isUnavailable =
+            isBooked ||
+            isPast;
+
+
+        const isSelected =
+            signupState.selectedMeetGreet?.date ===
+                selectedDate &&
+            signupState.selectedMeetGreet?.time ===
+                slot.databaseTime;
+
+
+        html += `
+
+            <button
+                type="button"
+                class="
+                    signup-meet-greet-time
+                    ${isSelected ? "selected" : ""}
+                "
+                data-meet-greet-time="${slot.databaseTime}"
+                ${isUnavailable ? "disabled" : ""}
+            >
+                ${slot.label}
+            </button>
+
+        `;
+
+    }
+
+
+    html += `
+        </div>
+    `;
+
+
+    meetGreetTimes.innerHTML =
+        html;
+
+
+    meetGreetTimes
+        .querySelectorAll(
+            "[data-meet-greet-time]"
+        )
+        .forEach(
+            (button) => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const selectedTime =
+                            button.dataset.meetGreetTime;
+
+
+                        signupState.selectedMeetGreet =
+                            {
+                                date:
+                                    selectedDate,
+
+                                time:
+                                    selectedTime
+                            };
+
+
+                        renderMeetGreetTimes(
+                            selectedDate
+                        );
+
+
+                        updateMeetGreetSelection();
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+// ========================================
+// GENERATE MEET & GREET TIMES
+// ========================================
+
+function generateMeetGreetTimes() {
+
+    const slots =
+        [];
+
+
+    for (
+        let hour = MEET_GREET_START_HOUR;
+        hour <= MEET_GREET_END_HOUR;
+        hour++
+    ) {
+
+        for (
+            let minute = 0;
+            minute < 60;
+            minute +=
+                MEET_GREET_INTERVAL_MINUTES
+        ) {
+
+            if (
+                hour ===
+                    MEET_GREET_END_HOUR &&
+                minute > 0
+            ) {
+
+                break;
+
+            }
+
+
+            const databaseTime =
+                `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`;
+
+
+            const displayDate =
+                new Date(
+                    2000,
+                    0,
+                    1,
+                    hour,
+                    minute
+                );
+
+
+            const label =
+                displayDate.toLocaleTimeString(
+                    "en-US",
+                    {
+                        hour: "numeric",
+                        minute: "2-digit"
+                    }
+                );
+
+
+            slots.push({
+                databaseTime,
+                label
+            });
+
+        }
+
+    }
+
+
+    return slots;
+
+}
+
+
+// ========================================
+// UPDATE MEET & GREET SELECTION
+// ========================================
+
+function updateMeetGreetSelection() {
+
+    const selection =
+        signupState.selectedMeetGreet;
+
+
+    if (
+        !selection?.date ||
+        !selection?.time
+    ) {
+
+        if (meetGreetSelected) {
+            meetGreetSelected.hidden = true;
+        }
+
+        if (completeNewClientButton) {
+            completeNewClientButton.disabled = true;
+        }
+
+        return;
+
+    }
+
+
+    const appointmentDate =
+        new Date(
+            `${selection.date}T${selection.time}`
+        );
+
+
+    const dateLabel =
+        appointmentDate.toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
+
+
+    const timeLabel =
+        appointmentDate.toLocaleTimeString(
+            "en-US",
+            {
+                hour: "numeric",
+                minute: "2-digit"
+            }
+        );
+
+
+    if (meetGreetSelectedText) {
+        meetGreetSelectedText.textContent =
+            `${dateLabel} at ${timeLabel}`;
+    }
+
+
+    if (meetGreetSelected) {
+        meetGreetSelected.hidden = false;
+    }
+
+
+    if (completeNewClientButton) {
+        completeNewClientButton.disabled = false;
+    }
+
+}
+
+
+// ========================================
+// CHECK PAST MEET & GREET SLOT
+// ========================================
+
+function isMeetGreetSlotPast(
+    date,
+    time
+) {
+
+    const slotDate =
+        new Date(
+            `${date}T${time}`
+        );
+
+
+    return (
+        slotDate.getTime() <=
+        Date.now()
+    );
+
+}
+
+
+// ========================================
+// FORMAT DATE FOR DATABASE
+// ========================================
+
+function formatDateForDatabase(
+    date
+) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        `${year}-${month}-${day}`
+    );
+
+}
+
+
+// ========================================
+// NORMALIZE DATABASE TIME
+// ========================================
+
+function normalizeDatabaseTime(
+    time
+) {
+
+    if (!time) {
+        return "";
+    }
+
+
+    const pieces =
+        String(time).split(":");
+
+
+    const hour =
+        String(
+            pieces[0] || "00"
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const minute =
+        String(
+            pieces[1] || "00"
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        `${hour}:${minute}:00`
+    );
+
+}
+
+
 // ========================================
 // SHOW SIGNUP ERROR
 // ========================================
@@ -1427,6 +2246,7 @@ function clearSignupError() {
         true;
 
 }
+
 
 // ========================================
 // SCROLL ERROR INTO VIEW
