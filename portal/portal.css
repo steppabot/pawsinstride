@@ -9857,37 +9857,64 @@ a:focus-visible {
     border-color: #d88787;
 }
 
-
 /* ========================================
    PASSWORD
 ======================================== */
 
 .portal-signup-page .signup-password-wrap {
     position: relative;
+    width: 100%;
 }
 
 .portal-signup-page .signup-password-wrap input {
-    padding-right: 70px;
+    width: 100%;
+    padding-right: 72px;
 }
 
 .portal-signup-page .signup-password-toggle {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    padding: 6px 8px;
-    transform: translateY(-50%);
-    border: 0;
+    position: absolute !important;
+    top: 50% !important;
+    right: 10px !important;
+    left: auto !important;
+    bottom: auto !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 6px 9px !important;
+
+    transform: translateY(-50%) !important;
+
+    border: 0 !important;
     border-radius: 7px;
-    color: var(--signup-blue);
-    background: transparent;
+
+    color: var(--signup-blue) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+
     cursor: pointer;
     font-family: inherit;
     font-size: 0.78rem;
     font-weight: 700;
+    line-height: 1;
+
+    z-index: 2;
 }
 
-.portal-signup-page .signup-password-toggle:hover {
-    background: rgba(40, 144, 223, 0.08);
+.portal-signup-page .signup-password-toggle:hover,
+.portal-signup-page .signup-password-toggle:focus {
+    color: var(--signup-blue) !important;
+    background: rgba(40, 144, 223, 0.08) !important;
+    box-shadow: none !important;
+}
+
+.portal-signup-page .signup-password-toggle:focus-visible {
+    outline: 2px solid rgba(40, 144, 223, 0.3);
+    outline-offset: 1px;
 }
 
 .portal-signup-page .signup-field-help {
