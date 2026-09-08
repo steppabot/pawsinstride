@@ -8073,3 +8073,1392 @@ input:focus-visible {
     }
 
 }
+
+/* ========================================
+   PAWS IN STRIDE ADMIN APP THEME
+======================================== */
+
+
+/* ========================================
+   ADMIN BRAND VARIABLES
+======================================== */
+
+.admin-page {
+
+    --pis-blue: #2890df;
+    --pis-blue-dark: #1f7bc2;
+    --pis-cyan: #47cee6;
+
+    --pis-orange: #f5ab40;
+    --pis-orange-hover: #ef602c;
+
+    --pis-ink: #202a33;
+    --pis-text: #333333;
+    --pis-muted: #6b7785;
+
+    --pis-app-bg: #f3f8fb;
+    --pis-app-bg-soft: #f8fbfd;
+
+    --pis-card: #ffffff;
+
+    --pis-border: #dce8ef;
+    --pis-border-strong: #c8dce8;
+
+    --pis-blue-soft: #eaf6fc;
+    --pis-orange-soft: #fff7ea;
+
+    --pis-shadow:
+        0 8px 28px rgba(35, 93, 125, 0.08);
+
+}
+
+
+/* ========================================
+   ADMIN APP PAGE
+======================================== */
+
+body.admin-page {
+
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(71, 206, 230, 0.10),
+            transparent 34%
+        ),
+        linear-gradient(
+            180deg,
+            #f8fcfe 0%,
+            var(--pis-app-bg) 45%,
+            #eef6fa 100%
+        );
+
+    color: var(--pis-ink);
+
+    font-family:
+        "Roboto",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+
+/* ========================================
+   ADMIN DASHBOARD HEADER
+======================================== */
+
+.admin-page
+.admin-dashboard-header {
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    margin-bottom: 24px;
+
+    padding: 16px 18px;
+
+    overflow: hidden;
+
+    background:
+        rgba(255, 255, 255, 0.90);
+
+    border:
+        1px solid rgba(200, 220, 232, 0.82);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 6px 24px rgba(40, 144, 223, 0.07);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+}
+
+
+/* ========================================
+   ADMIN HEADER BRAND ACCENT
+======================================== */
+
+.admin-page
+.admin-dashboard-header::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 20px;
+    right: 20px;
+
+    height: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    border-radius:
+        0 0 999px 999px;
+
+}
+
+
+/* ========================================
+   ADMIN BRAND
+======================================== */
+
+.admin-dashboard-brand {
+
+    display: flex;
+    align-items: center;
+
+    min-width: 0;
+
+    gap: 18px;
+
+}
+
+
+.admin-dashboard-logo {
+
+    display: block;
+
+    width: 135px;
+    max-width: 100%;
+
+    height: auto;
+
+    flex: 0 0 auto;
+
+}
+
+
+.admin-dashboard-title {
+
+    min-width: 0;
+
+    padding-left: 18px;
+
+    border-left:
+        1px solid var(--pis-border);
+
+}
+
+
+.admin-portal-label {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    color:
+        var(--pis-blue);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.10em;
+
+    text-transform: uppercase;
+
+}
+
+
+.admin-page
+.admin-title-row {
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+.admin-page
+.admin-title-row h2 {
+
+    margin: 0;
+
+    color:
+        var(--pis-ink);
+
+    font-size: 21px;
+    font-weight: 800;
+
+}
+
+
+/* ========================================
+   ADMIN ROLE BADGE
+======================================== */
+
+.admin-page
+.admin-role-badge {
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        5px 9px;
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+    border:
+        1px solid rgba(40, 144, 223, 0.18);
+
+    border-radius: 999px;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+
+}
+
+
+/* ========================================
+   ADMIN LOGOUT
+======================================== */
+
+.admin-page
+.admin-header-logout {
+
+    width: auto;
+
+    min-height: 42px;
+
+    margin: 0;
+
+    padding:
+        10px 17px;
+
+    color:
+        var(--pis-muted);
+
+    background: #fff;
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    border-radius: 999px;
+
+}
+
+
+.admin-page
+.admin-header-logout:hover {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADMIN LOADING
+======================================== */
+
+.admin-page
+#admin-loading {
+
+    padding:
+        14px 18px;
+
+    color:
+        var(--pis-muted);
+
+    font-size: 14px;
+    font-weight: 500;
+
+}
+
+
+/* ========================================
+   ADMIN MAIN SECTIONS
+======================================== */
+
+.admin-page
+.admin-profile-section,
+
+.admin-page
+.admin-calendar-section {
+
+    background:
+        var(--pis-card);
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius: 18px;
+
+    box-shadow:
+        var(--pis-shadow);
+
+}
+
+
+/* ========================================
+   ADMIN SECTION HEADINGS
+======================================== */
+
+.admin-page
+.admin-profile-section h3,
+
+.admin-page
+.admin-calendar-section h3,
+
+.admin-page
+.admin-calendar-section h4 {
+
+    color:
+        var(--pis-ink);
+
+}
+
+
+.admin-page
+.household-section-help,
+
+.admin-page
+.admin-calendar-section-heading p {
+
+    color:
+        var(--pis-muted);
+
+}
+
+
+/* ========================================
+   ADMIN PRIMARY BUTTONS
+======================================== */
+
+.admin-page
+.primary-button {
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-blue),
+            var(--pis-blue-dark)
+        );
+
+    border: none;
+
+    border-radius: 999px;
+
+    box-shadow:
+        0 6px 15px rgba(40, 144, 223, 0.20);
+
+    font-weight: 700;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+
+}
+
+
+.admin-page
+.primary-button:hover {
+
+    opacity: 1;
+
+    background:
+        var(--pis-blue-dark);
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 8px 18px rgba(40, 144, 223, 0.25);
+
+}
+
+
+/* ========================================
+   ADMIN SECONDARY BUTTONS
+======================================== */
+
+.admin-page
+.secondary-button {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        #fff;
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    border-radius:
+        999px;
+
+}
+
+
+.admin-page
+.secondary-button:hover {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADMIN PROFILE AVATAR
+======================================== */
+
+.admin-page
+.client-profile-avatar,
+
+.admin-page
+.client-photo-preview-wrapper {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    box-shadow:
+        0 5px 16px rgba(40, 144, 223, 0.18);
+
+}
+
+
+/* ========================================
+   ADMIN PHOTO UPLOAD
+======================================== */
+
+.admin-page
+.client-photo-upload-button {
+
+    color: #fff;
+
+    background:
+        var(--pis-blue);
+
+    border-radius: 999px;
+
+}
+
+
+.admin-page
+.client-photo-upload-button:hover {
+
+    background:
+        var(--pis-blue-dark);
+
+}
+
+
+/* ========================================
+   ADMIN PROFILE DETAIL CARDS
+======================================== */
+
+.admin-page
+.household-detail-card {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border-color:
+        var(--pis-border);
+
+}
+
+
+.admin-page
+.household-detail-label {
+
+    color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADMIN PROFILE FORM
+======================================== */
+
+.admin-page
+.household-form-panel {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    border-radius: 16px;
+
+    box-shadow:
+        inset 0 3px 0 rgba(71, 206, 230, 0.30);
+
+}
+
+
+/* ========================================
+   ADMIN FORM INPUTS
+======================================== */
+
+.admin-page
+.household-form-field input,
+
+.admin-page
+.household-form-field select,
+
+.admin-page
+.household-form-field textarea {
+
+    color:
+        var(--pis-ink);
+
+    background:
+        #fff;
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    border-radius: 11px;
+
+}
+
+
+.admin-page
+.household-form-field input:focus,
+
+.admin-page
+.household-form-field select:focus,
+
+.admin-page
+.household-form-field textarea:focus {
+
+    outline: none;
+
+    border-color:
+        var(--pis-blue);
+
+    box-shadow:
+        0 0 0 3px rgba(40, 144, 223, 0.11);
+
+}
+
+
+/* ========================================
+   ADMIN SERVICE CALENDAR
+======================================== */
+
+.admin-page
+.admin-service-calendar {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius: 16px;
+
+}
+
+
+/* ========================================
+   ADMIN CALENDAR SUMMARY
+======================================== */
+
+.admin-page
+.admin-calendar-summary {
+
+    background:
+        var(--pis-blue-soft);
+
+    border:
+        1px solid rgba(40, 144, 223, 0.14);
+
+}
+
+
+.admin-page
+.admin-calendar-summary strong {
+
+    color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADMIN CALENDAR NAVIGATION
+======================================== */
+
+.admin-page
+.calendar-nav-button {
+
+    color:
+        var(--pis-blue);
+
+    background:
+        #fff;
+
+    border:
+        1px solid var(--pis-border);
+
+}
+
+
+.admin-page
+.calendar-nav-button:hover {
+
+    color: #fff;
+
+    background:
+        var(--pis-blue);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADMIN CALENDAR DAYS
+======================================== */
+
+.admin-page
+.upcoming-calendar-day {
+
+    color:
+        var(--pis-ink);
+
+    border-color:
+        var(--pis-border);
+
+}
+
+
+.admin-page
+.upcoming-calendar-day:hover {
+
+    color:
+        var(--pis-blue);
+
+    background:
+        var(--pis-blue-soft);
+
+    border-color:
+        var(--pis-blue);
+
+}
+
+
+.admin-page
+.upcoming-calendar-selected {
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    border-color:
+        var(--pis-blue);
+
+    box-shadow:
+        0 4px 12px rgba(40, 144, 223, 0.20);
+
+}
+
+
+.admin-page
+.upcoming-calendar-today:not(
+    .upcoming-calendar-selected
+) {
+
+    border:
+        2px solid var(--pis-orange);
+
+}
+
+
+.admin-page
+.upcoming-service-count {
+
+    color: #fff;
+
+    background:
+        var(--pis-orange);
+
+}
+
+
+/* ========================================
+   SELECTED ADMIN DAY
+======================================== */
+
+.admin-page
+.admin-selected-day {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius: 16px;
+
+}
+
+
+.admin-page
+.admin-selected-day-eyebrow {
+
+    color:
+        var(--pis-blue);
+
+}
+
+
+.admin-page
+.admin-selected-count {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+    border:
+        1px solid rgba(40, 144, 223, 0.14);
+
+}
+
+
+/* ========================================
+   ADMIN SERVICE CARDS
+======================================== */
+
+.admin-page
+.admin-service-card {
+
+    border-color:
+        var(--pis-border);
+
+    box-shadow:
+        0 4px 14px rgba(35, 93, 125, 0.04);
+
+}
+
+
+/* ========================================
+   ADMIN PET CHIPS
+======================================== */
+
+.admin-page
+.admin-pet-chip,
+
+.admin-page
+.service-pet-chip {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+}
+
+
+/* ========================================
+   ADMIN LINKS
+======================================== */
+
+.admin-page
+a {
+
+    color:
+        var(--pis-blue);
+
+}
+
+
+.admin-page
+a:hover {
+
+    color:
+        var(--pis-blue-dark);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGES LAUNCHER
+======================================== */
+
+.admin-page
+.admin-message-launcher {
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    box-shadow:
+        0 10px 28px rgba(40, 144, 223, 0.30);
+
+}
+
+
+.admin-page
+.admin-message-launcher:hover {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-blue),
+            var(--pis-blue-dark)
+        );
+
+    box-shadow:
+        0 13px 34px rgba(40, 144, 223, 0.34);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE DRAWER
+======================================== */
+
+.admin-page
+.admin-message-drawer {
+
+    border:
+        1px solid var(--pis-border);
+
+    box-shadow:
+        0 24px 60px rgba(28, 71, 94, 0.22);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE HEADER
+======================================== */
+
+.admin-page
+.admin-message-header {
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fdff,
+            #edf8fd
+        );
+
+    border-bottom:
+        1px solid var(--pis-border);
+
+}
+
+
+.admin-page
+.admin-message-header h3 {
+
+    color:
+        var(--pis-ink);
+
+}
+
+
+.admin-page
+.admin-message-header p {
+
+    color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE CLOSE
+======================================== */
+
+.admin-page
+.admin-message-close {
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+}
+
+
+.admin-page
+.admin-message-close:hover {
+
+    color: #fff;
+
+    background:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE INBOX
+======================================== */
+
+.admin-page
+.admin-message-inbox {
+
+    background:
+        var(--pis-app-bg-soft);
+
+    border-right:
+        1px solid var(--pis-border);
+
+}
+
+
+.admin-page
+.admin-message-inbox-heading {
+
+    border-bottom:
+        1px solid var(--pis-border);
+
+}
+
+
+/* ========================================
+   ADMIN CONVERSATION ITEMS
+======================================== */
+
+.admin-page
+.admin-conversation-item:hover {
+
+    background:
+        var(--pis-blue-soft);
+
+}
+
+
+.admin-page
+.admin-conversation-item.is-active {
+
+    background:
+        var(--pis-blue-soft);
+
+    box-shadow:
+        inset 3px 0 0 var(--pis-blue);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE CONVERSATION
+======================================== */
+
+.admin-page
+.admin-message-conversation {
+
+    background:
+        #fff;
+
+}
+
+
+.admin-page
+.admin-message-conversation-header {
+
+    background:
+        #fff;
+
+    border-bottom:
+        1px solid var(--pis-border);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE LIST
+======================================== */
+
+.admin-page
+.admin-message-list {
+
+    background:
+        var(--pis-app-bg-soft);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE BUBBLES
+======================================== */
+
+.admin-page
+.admin-message-row.is-admin
+.admin-message-bubble {
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+}
+
+
+.admin-page
+.admin-message-row.is-client
+.admin-message-bubble {
+
+    color:
+        var(--pis-ink);
+
+    background:
+        #fff;
+
+    border:
+        1px solid var(--pis-border);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE INPUT
+======================================== */
+
+.admin-page
+.admin-message-form textarea {
+
+    border-color:
+        var(--pis-border-strong);
+
+}
+
+
+.admin-page
+.admin-message-form textarea:focus {
+
+    border-color:
+        var(--pis-blue);
+
+    box-shadow:
+        0 0 0 3px rgba(40, 144, 223, 0.10);
+
+}
+
+
+/* ========================================
+   ADMIN MESSAGE SEND
+======================================== */
+
+.admin-page
+.admin-message-send {
+
+    color: #fff;
+
+    background:
+        var(--pis-blue);
+
+}
+
+
+.admin-page
+.admin-message-send:hover {
+
+    background:
+        var(--pis-blue-dark);
+
+}
+
+
+/* ========================================
+   ADMIN FOCUS STATES
+======================================== */
+
+.admin-page
+button:focus-visible,
+
+.admin-page
+input:focus-visible,
+
+.admin-page
+select:focus-visible,
+
+.admin-page
+textarea:focus-visible,
+
+.admin-page
+a:focus-visible {
+
+    outline:
+        3px solid rgba(40, 144, 223, 0.18);
+
+    outline-offset: 2px;
+
+}
+
+
+/* ========================================
+   KEEP ADMIN VISIT STATUS COLORS
+======================================== */
+
+.admin-page
+.admin-service-card-in-progress {
+
+    border-color:
+        #d9b65f;
+
+}
+
+
+.admin-page
+.admin-service-card-completed {
+
+    border-color:
+        #a9d7b7;
+
+}
+
+
+/* ========================================
+   MOBILE ADMIN APP
+======================================== */
+
+@media (max-width: 700px) {
+
+    .admin-page
+    .admin-dashboard-container {
+
+        width: 94%;
+
+        margin:
+            0 auto 25px;
+
+    }
+
+
+    .admin-page
+    .admin-dashboard-header {
+
+        position: sticky;
+
+        top: 0;
+
+        z-index: 900;
+
+        gap: 10px;
+
+        margin:
+            0 -3% 18px;
+
+        padding:
+            max(
+                10px,
+                env(safe-area-inset-top)
+            )
+            3%
+            10px;
+
+        border-top: 0;
+        border-right: 0;
+        border-left: 0;
+
+        border-radius:
+            0 0 16px 16px;
+
+        background:
+            rgba(255, 255, 255, 0.94);
+
+        box-shadow:
+            0 5px 18px rgba(35, 93, 125, 0.08);
+
+        backdrop-filter:
+            blur(18px);
+
+        -webkit-backdrop-filter:
+            blur(18px);
+
+    }
+
+
+    .admin-page
+    .admin-dashboard-header::before {
+
+        left: 0;
+        right: 0;
+
+    }
+
+
+    .admin-dashboard-brand {
+
+        flex:
+            1 1 auto;
+
+        gap: 10px;
+
+    }
+
+
+    .admin-dashboard-logo {
+
+        width: 88px;
+
+    }
+
+
+    .admin-dashboard-title {
+
+        padding-left: 10px;
+
+    }
+
+
+    .admin-portal-label {
+
+        font-size: 8px;
+
+    }
+
+
+    .admin-page
+    .admin-title-row {
+
+        gap: 6px;
+
+    }
+
+
+    .admin-page
+    .admin-title-row h2 {
+
+        font-size: 14px;
+
+    }
+
+
+    .admin-page
+    .admin-role-badge {
+
+        padding:
+            4px 6px;
+
+        font-size: 7px;
+
+    }
+
+
+    .admin-page
+    .admin-header-logout {
+
+        min-height: 38px;
+
+        padding:
+            8px 11px;
+
+        font-size: 11px;
+
+    }
+
+
+    .admin-page
+    .admin-profile-section,
+
+    .admin-page
+    .admin-calendar-section {
+
+        border-radius: 16px;
+
+    }
+
+}
+
+
+/* ========================================
+   EXTRA SMALL ADMIN MOBILE
+======================================== */
+
+@media (max-width: 390px) {
+
+    .admin-dashboard-logo {
+
+        width: 78px;
+
+    }
+
+
+    .admin-dashboard-title {
+
+        padding-left: 8px;
+
+    }
+
+
+    .admin-page
+    .admin-title-row h2 {
+
+        font-size: 12px;
+
+    }
+
+
+    .admin-page
+    .admin-header-logout {
+
+        padding:
+            8px 9px;
+
+        font-size: 10px;
+
+    }
+
+}
