@@ -3318,7 +3318,66 @@ const bookingTime =
 serviceTypeSelect
     ?.addEventListener(
         "change",
-        handleServiceTypeChange
+        () => {
+
+            handleServiceTypeChange();
+
+
+            if (
+                !serviceTypeSelect.value
+            ) {
+                return;
+            }
+
+
+            // ========================================
+            // DOG BOARDING
+            // ========================================
+
+            if (
+                serviceTypeSelect.value ===
+                "Dog Boarding"
+            ) {
+
+                const boardingSection =
+                    document.getElementById(
+                        "boarding-booking"
+                    );
+
+
+                window.setTimeout(
+                    () => {
+
+                        scrollBookingFieldIntoView(
+                            boardingSection
+                        );
+
+                    },
+                    120
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // NORMAL SERVICES
+            // ========================================
+
+            window.setTimeout(
+                () => {
+
+                    scrollBookingFieldIntoView(
+                        serviceOptionSelect
+                    );
+
+                },
+                120
+            );
+
+        }
     );
 
 
@@ -3638,10 +3697,27 @@ document
             renderAdditionalPets();
 
 
-            bookingSection.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
+            /*
+             * Wait until the booking section has
+             * actually been painted before positioning
+             * the first field.
+             */
+
+            window.requestAnimationFrame(
+                () => {
+
+                    window.requestAnimationFrame(
+                        () => {
+
+                            scrollBookingFieldIntoView(
+                                bookingPetSelect
+                            );
+
+                        }
+                    );
+
+                }
+            );
 
         }
     );
@@ -3661,6 +3737,87 @@ document
         }
     );
 
+
+// ========================================
+// GUIDE USER TO NEXT BOOKING FIELD
+// ========================================
+
+function scrollBookingFieldIntoView(
+    element
+) {
+
+    if (!element) {
+        return;
+    }
+
+
+    /*
+     * Desktop doesn't need the guided scrolling.
+     * This is primarily for the smaller mobile
+     * viewport where the form becomes long.
+     */
+
+    if (
+        !window.matchMedia(
+            "(max-width: 700px)"
+        ).matches
+    ) {
+
+        return;
+
+    }
+
+
+    const prefersReducedMotion =
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+
+    element.scrollIntoView({
+        behavior:
+            prefersReducedMotion
+                ? "auto"
+                : "smooth",
+
+        block:
+            "center",
+
+        inline:
+            "nearest"
+    });
+
+
+    /*
+     * Focus after scrolling without asking the
+     * browser to scroll a second time.
+     *
+     * We intentionally DO NOT automatically open
+     * the native select menu.
+     */
+
+    window.setTimeout(
+        () => {
+
+            try {
+
+                element.focus({
+                    preventScroll: true
+                });
+
+            } catch (error) {
+
+                element.focus();
+
+            }
+
+        },
+        prefersReducedMotion
+            ? 0
+            : 260
+    );
+
+}
 
 // ========================================
 // SERVICE CHANGE
@@ -3900,9 +4057,27 @@ serviceOptionSelect
 
             updateBookingTotal();
 
+
+            if (
+                !serviceOptionSelect.value
+            ) {
+                return;
+            }
+
+
+            window.setTimeout(
+                () => {
+
+                    scrollBookingFieldIntoView(
+                        bookingTime
+                    );
+
+                },
+                120
+            );
+
         }
     );
-
 
 // ========================================
 // TIMES
@@ -4055,9 +4230,37 @@ function populatePetSittingTimeBlocks() {
 bookingTime
     ?.addEventListener(
         "change",
-        updateBookingTotal
-    );
+        () => {
 
+            updateBookingTotal();
+
+
+            if (
+                !bookingTime.value
+            ) {
+                return;
+            }
+
+
+            const bookingCalendar =
+                document.querySelector(
+                    ".booking-calendar"
+                );
+
+
+            window.setTimeout(
+                () => {
+
+                    scrollBookingFieldIntoView(
+                        bookingCalendar
+                    );
+
+                },
+                120
+            );
+
+        }
+    );
 
 // ========================================
 // BOOKING CALENDAR
