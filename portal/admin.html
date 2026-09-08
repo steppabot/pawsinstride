@@ -14,9 +14,35 @@
         Admin Dashboard | Paws in Stride
     </title>
 
+
+    <!-- ========================================
+         PAWS IN STRIDE APP FONT
+         ======================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ========================================
+         PORTAL STYLES
+         ======================================== -->
+
     <link
         rel="stylesheet"
-        href="portal.css"
+        href="portal.css?v=20260908-admin-branding-1"
     >
 
 </head>
@@ -31,39 +57,64 @@
     <!-- ========================================
          HEADER
          ======================================== -->
-
+    
     <div class="dashboard-header admin-dashboard-header">
-
-        <div>
-
-            <h1>
-                Paws in Stride
-            </h1>
-
-
-            <div class="admin-title-row">
-
-                <h2>
-                    Admin Dashboard
-                </h2>
-
-                <span class="admin-role-badge">
-                    ADMIN
+    
+    
+        <!-- ========================================
+             ADMIN BRAND
+             ======================================== -->
+    
+        <div class="admin-dashboard-brand">
+    
+            <img
+                src="/pawsnstridelogo1.png"
+                alt="Paws in Stride"
+                class="admin-dashboard-logo"
+            >
+    
+    
+            <div class="admin-dashboard-title">
+    
+                <span class="admin-portal-label">
+                    Operations Portal
                 </span>
-
+    
+    
+                <div class="admin-title-row">
+    
+                    <h2>
+                        Admin Dashboard
+                    </h2>
+    
+                    <span class="admin-role-badge">
+                        ADMIN
+                    </span>
+    
+                </div>
+    
             </div>
-
+    
         </div>
-
-
-        <button
-            type="button"
-            id="admin-logout-button"
-            class="secondary-button admin-header-logout"
-        >
-            Log Out
-        </button>
-
+    
+    
+        <!-- ========================================
+             ADMIN HEADER ACTIONS
+             ======================================== -->
+    
+        <div class="admin-dashboard-header-actions">
+    
+            <button
+                type="button"
+                id="admin-logout-button"
+                class="secondary-button admin-header-logout"
+            >
+                Log Out
+            </button>
+    
+        </div>
+    
+    
     </div>
 
 
