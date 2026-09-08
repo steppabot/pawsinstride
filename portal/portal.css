@@ -2283,6 +2283,75 @@ section h3 {
     object-fit: cover;
 }
 
+/* ========================================
+   ADMIN SAVED MEDIA DELETE
+======================================== */
+
+.admin-visit-saved-media {
+    position: relative;
+}
+
+
+.admin-visit-media-delete {
+    position: absolute;
+
+    top: 5px;
+    right: 5px;
+
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 25px;
+    height: 25px;
+
+    padding: 0;
+
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+
+    box-shadow:
+        0 2px 7px rgba(0, 0, 0, 0.25);
+
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease,
+        opacity 0.18s ease;
+}
+
+
+.admin-visit-media-delete:hover {
+    background: #b42318;
+
+    transform: scale(1.08);
+}
+
+
+.admin-visit-media-delete:disabled {
+    opacity: 0.55;
+
+    cursor: wait;
+
+    transform: none;
+}
+
+
+.admin-visit-media-delete:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
 .admin-visit-route-preview {
     max-width: 300px;
     margin-bottom: 12px;
