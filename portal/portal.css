@@ -2529,6 +2529,7 @@ section h3 {
 
 .client-visit-report-route {
     overflow: hidden;
+    max-width: 420px;
     background: #fafafa;
     border-radius: 10px;
 }
@@ -2540,7 +2541,6 @@ section h3 {
     border: 1px solid #ddd;
     border-radius: 10px;
 }
-
 .client-visit-report-loading,
 .client-visit-report-empty,
 .client-visit-report-error {
