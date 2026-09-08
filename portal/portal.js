@@ -7128,7 +7128,6 @@ document
         }
     );
 
-
 // ========================================
 // TOGGLE CLIENT VISIT REPORT
 // ========================================
@@ -7465,7 +7464,7 @@ function renderClientVisitReport(
         media.filter(
             item =>
                 item.photo_type ===
-                    "route"
+                "route"
         );
 
 
@@ -7624,25 +7623,52 @@ function renderClientVisitReport(
 
 
     const routeHtml =
-        routePhoto &&
-        routePhoto.signed_url
+        routePhotos.length
 
-            ? `
+            ? routePhotos
+                .map(
+                    photo => {
 
-                <img
-                    src="${escapeHtml(
-                        routePhoto.signed_url
-                    )}"
-                    alt="Walk route"
-                    class="client-visit-report-route-image"
-                >
 
-            `
+                        if (
+                            !photo.signed_url
+                        ) {
+
+                            return "";
+
+                        }
+
+
+                        return `
+
+                            <button
+                                type="button"
+                                class="client-visit-report-photo-button"
+                                data-client-report-image="${escapeHtml(
+                                    photo.signed_url
+                                )}"
+                            >
+
+                                <img
+                                    src="${escapeHtml(
+                                        photo.signed_url
+                                    )}"
+                                    alt="Walk summary"
+                                    class="client-visit-report-photo"
+                                >
+
+                            </button>
+
+                        `;
+
+                    }
+                )
+                .join("")
 
             : `
 
                 <p class="client-visit-report-muted">
-                    No route screenshot was added.
+                    No walk summary was added.
                 </p>
 
             `;
@@ -7721,11 +7747,11 @@ function renderClientVisitReport(
                 <div class="client-visit-report-section">
 
                     <span class="client-visit-report-label">
-                        Walk Route
+                        Walk Summary
                     </span>
 
 
-                    <div class="client-visit-report-route">
+                    <div class="client-visit-report-photo-grid">
 
                         ${routeHtml}
 
