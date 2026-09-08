@@ -1945,6 +1945,293 @@ householdZipInput
     );
 
 // ========================================
+// HOUSEHOLD FIELD VALIDATION
+// ========================================
+
+function formatHouseholdPhoneNumber(
+    value
+) {
+
+    const digits =
+        String(
+            value || ""
+        )
+            .replace(
+                /\D/g,
+                ""
+            )
+            .slice(
+                0,
+                10
+            );
+
+
+    if (
+        digits.length <=
+        3
+    ) {
+
+        return digits;
+
+    }
+
+
+    if (
+        digits.length <=
+        6
+    ) {
+
+        return (
+            `${digits.slice(0, 3)}-` +
+            `${digits.slice(3)}`
+        );
+
+    }
+
+
+    return (
+        `${digits.slice(0, 3)}-` +
+        `${digits.slice(3, 6)}-` +
+        `${digits.slice(6, 10)}`
+    );
+
+}
+
+
+function isValidHouseholdFullName(
+    value
+) {
+
+    const parts =
+        String(
+            value || ""
+        )
+            .trim()
+            .split(
+                /\s+/
+            )
+            .filter(Boolean);
+
+
+    return (
+        parts.length >=
+        2
+    );
+
+}
+
+
+function clearHouseholdFieldErrors() {
+
+    document
+        .querySelectorAll(
+            ".household-field-error"
+        )
+        .forEach(
+            field => {
+
+                field.classList.remove(
+                    "household-field-error"
+                );
+
+                field.removeAttribute(
+                    "aria-invalid"
+                );
+
+            }
+        );
+
+}
+
+
+function clearHouseholdFieldError(
+    event
+) {
+
+    const field =
+        event?.target;
+
+
+    if (!field) {
+        return;
+    }
+
+
+    field.classList.remove(
+        "household-field-error"
+    );
+
+
+    field.removeAttribute(
+        "aria-invalid"
+    );
+
+}
+
+
+function focusHouseholdFieldError(
+    field
+) {
+
+    if (!field) {
+        return false;
+    }
+
+
+    field.classList.add(
+        "household-field-error"
+    );
+
+
+    field.setAttribute(
+        "aria-invalid",
+        "true"
+    );
+
+
+    field.focus();
+
+
+    field.scrollIntoView({
+        behavior:
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches
+                ? "auto"
+                : "smooth",
+
+        block:
+            "center"
+    });
+
+
+    return false;
+
+}
+
+
+const householdPhoneInput =
+    document.getElementById(
+        "household-phone"
+    );
+
+
+const householdZipInput =
+    document.getElementById(
+        "household-zip"
+    );
+
+
+const emergencyContactPhoneInput =
+    document.getElementById(
+        "emergency-contact-phone"
+    );
+
+
+if (householdPhoneInput) {
+
+    householdPhoneInput.addEventListener(
+        "input",
+        event => {
+
+            event.target.value =
+                formatHouseholdPhoneNumber(
+                    event.target.value
+                );
+
+
+            clearHouseholdFieldError(
+                event
+            );
+
+        }
+    );
+
+}
+
+
+if (emergencyContactPhoneInput) {
+
+    emergencyContactPhoneInput.addEventListener(
+        "input",
+        event => {
+
+            event.target.value =
+                formatHouseholdPhoneNumber(
+                    event.target.value
+                );
+
+
+            clearHouseholdFieldError(
+                event
+            );
+
+        }
+    );
+
+}
+
+
+if (householdZipInput) {
+
+    householdZipInput.addEventListener(
+        "input",
+        event => {
+
+            event.target.value =
+                String(
+                    event.target.value || ""
+                )
+                    .replace(
+                        /\D/g,
+                        ""
+                    )
+                    .slice(
+                        0,
+                        5
+                    );
+
+
+            clearHouseholdFieldError(
+                event
+            );
+
+        }
+    );
+
+}
+
+
+[
+    "household-full-name",
+    "household-street-address",
+    "household-city",
+    "household-state"
+]
+    .forEach(
+        id => {
+
+            const field =
+                document.getElementById(
+                    id
+                );
+
+
+            field?.addEventListener(
+                "input",
+                clearHouseholdFieldError
+            );
+
+
+            field?.addEventListener(
+                "change",
+                clearHouseholdFieldError
+            );
+
+        }
+    );
+
+// ========================================
 // SAVE HOUSEHOLD
 // ========================================
 
