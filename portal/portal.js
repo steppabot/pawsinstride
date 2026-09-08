@@ -8570,3 +8570,1241 @@ document
 
         }
     );
+
+// ========================================
+// CLIENT MESSAGING
+// ========================================
+
+let clientConversation =
+    null;
+
+let clientMessages =
+    [];
+
+let clientMessageChannel =
+    null;
+
+let clientMessagingInitialized =
+    false;
+
+
+// ========================================
+// INITIALIZE CLIENT MESSAGING
+// ========================================
+
+async function initializeClientMessaging() {
+
+    if (
+        clientMessagingInitialized ||
+        !currentUser
+    ) {
+        return;
+    }
+
+
+    clientMessagingInitialized =
+        true;
+
+
+    setupClientMessageEvents();
+
+
+    try {
+
+        await getOrCreateClientConversation();
+
+        await loadClientMessages();
+
+        subscribeToClientMessages();
+
+    } catch (error) {
+
+        console.error(
+            "Client messaging initialization error:",
+            error
+        );
+
+
+        showClientMessageError(
+            "Messages are temporarily unavailable."
+        );
+
+    }
+
+}
+
+
+// ========================================
+// GET OR CREATE CONVERSATION
+// ========================================
+
+async function getOrCreateClientConversation() {
+
+    const {
+        data: existingConversation,
+        error: conversationError
+    } =
+        await supabaseClient
+            .from("conversations")
+            .select("*")
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if (conversationError) {
+
+        throw conversationError;
+
+    }
+
+
+    if (existingConversation) {
+
+        clientConversation =
+            existingConversation;
+
+        return;
+
+    }
+
+
+    const {
+        data: newConversation,
+        error: createError
+    } =
+        await supabaseClient
+            .from("conversations")
+            .insert({
+                client_id:
+                    currentUser.id
+            })
+            .select()
+            .single();
+
+
+    if (createError) {
+
+        /*
+         * A second browser/tab could theoretically
+         * create the conversation at the same time.
+         * Because client_id is unique, simply fetch
+         * the conversation again if that happens.
+         */
+
+        const {
+            data: retryConversation,
+            error: retryError
+        } =
+            await supabaseClient
+                .from("conversations")
+                .select("*")
+                .eq(
+                    "client_id",
+                    currentUser.id
+                )
+                .maybeSingle();
+
+
+        if (
+            retryError ||
+            !retryConversation
+        ) {
+
+            throw createError;
+
+        }
+
+
+        clientConversation =
+            retryConversation;
+
+        return;
+
+    }
+
+
+    clientConversation =
+        newConversation;
+
+}
+
+
+// ========================================
+// LOAD CLIENT MESSAGES
+// ========================================
+
+async function loadClientMessages() {
+
+    if (!clientConversation) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("messages")
+            .select(
+                `
+                id,
+                conversation_id,
+                sender_id,
+                body,
+                read_at,
+                created_at
+                `
+            )
+            .eq(
+                "conversation_id",
+                clientConversation.id
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+    clientMessages =
+        data || [];
+
+
+    renderClientMessages();
+
+    updateClientMessageUnreadBadge();
+
+}
+
+
+// ========================================
+// CLIENT MESSAGE EVENTS
+// ========================================
+
+function setupClientMessageEvents() {
+
+    const launcher =
+        document.getElementById(
+            "client-message-launcher"
+        );
+
+    const closeButton =
+        document.getElementById(
+            "client-message-close"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "client-message-backdrop"
+        );
+
+    const form =
+        document.getElementById(
+            "client-message-form"
+        );
+
+    const input =
+        document.getElementById(
+            "client-message-input"
+        );
+
+
+    launcher
+        ?.addEventListener(
+            "click",
+            openClientMessaging
+        );
+
+
+    closeButton
+        ?.addEventListener(
+            "click",
+            closeClientMessaging
+        );
+
+
+    backdrop
+        ?.addEventListener(
+            "click",
+            closeClientMessaging
+        );
+
+
+    form
+        ?.addEventListener(
+            "submit",
+            sendClientMessage
+        );
+
+
+    input
+        ?.addEventListener(
+            "input",
+            autoResizeClientMessageInput
+        );
+
+
+    input
+        ?.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                        "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    form?.requestSubmit();
+
+                }
+
+            }
+        );
+
+
+    document
+        .addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    closeClientMessaging();
+
+                }
+
+            }
+        );
+
+}
+
+
+// ========================================
+// OPEN CLIENT MESSAGING
+// ========================================
+
+async function openClientMessaging() {
+
+    const drawer =
+        document.getElementById(
+            "client-message-drawer"
+        );
+
+    const launcher =
+        document.getElementById(
+            "client-message-launcher"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "client-message-backdrop"
+        );
+
+    const input =
+        document.getElementById(
+            "client-message-input"
+        );
+
+
+    drawer
+        ?.classList
+        .add(
+            "is-open"
+        );
+
+
+    backdrop
+        ?.classList
+        .add(
+            "is-open"
+        );
+
+
+    launcher
+        ?.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+
+    drawer
+        ?.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+    document.body.classList.add(
+        "client-messaging-open"
+    );
+
+
+    scrollClientMessagesToBottom();
+
+
+    await markClientMessagesRead();
+
+
+    window.setTimeout(
+        () => {
+
+            input?.focus();
+
+        },
+        180
+    );
+
+}
+
+
+// ========================================
+// CLOSE CLIENT MESSAGING
+// ========================================
+
+function closeClientMessaging() {
+
+    const drawer =
+        document.getElementById(
+            "client-message-drawer"
+        );
+
+    const launcher =
+        document.getElementById(
+            "client-message-launcher"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "client-message-backdrop"
+        );
+
+
+    drawer
+        ?.classList
+        .remove(
+            "is-open"
+        );
+
+
+    backdrop
+        ?.classList
+        .remove(
+            "is-open"
+        );
+
+
+    launcher
+        ?.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+
+    drawer
+        ?.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+    document.body.classList.remove(
+        "client-messaging-open"
+    );
+
+}
+
+
+// ========================================
+// SEND CLIENT MESSAGE
+// ========================================
+
+async function sendClientMessage(
+    event
+) {
+
+    event.preventDefault();
+
+
+    if (
+        !currentUser ||
+        !clientConversation
+    ) {
+        return;
+    }
+
+
+    const input =
+        document.getElementById(
+            "client-message-input"
+        );
+
+    const sendButton =
+        document.getElementById(
+            "client-message-send"
+        );
+
+
+    const body =
+        input?.value
+            ?.trim();
+
+
+    if (!body) {
+        return;
+    }
+
+
+    if (
+        body.length >
+        5000
+    ) {
+
+        showClientMessageError(
+            "Messages cannot be longer than 5,000 characters."
+        );
+
+        return;
+
+    }
+
+
+    clearClientMessageError();
+
+
+    if (sendButton) {
+        sendButton.disabled =
+            true;
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("messages")
+                .insert({
+                    conversation_id:
+                        clientConversation.id,
+
+                    sender_id:
+                        currentUser.id,
+
+                    body
+                })
+                .select(
+                    `
+                    id,
+                    conversation_id,
+                    sender_id,
+                    body,
+                    read_at,
+                    created_at
+                    `
+                )
+                .single();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        addClientMessageIfMissing(
+            data
+        );
+
+
+        if (input) {
+
+            input.value =
+                "";
+
+            input.style.height =
+                "";
+
+            input.focus();
+
+        }
+
+
+        renderClientMessages();
+
+        scrollClientMessagesToBottom();
+
+    } catch (error) {
+
+        console.error(
+            "Send client message error:",
+            error
+        );
+
+
+        showClientMessageError(
+            "We couldn't send your message. Please try again."
+        );
+
+    } finally {
+
+        if (sendButton) {
+
+            sendButton.disabled =
+                false;
+
+        }
+
+    }
+
+}
+
+
+// ========================================
+// RENDER CLIENT MESSAGES
+// ========================================
+
+function renderClientMessages() {
+
+    const list =
+        document.getElementById(
+            "client-message-list"
+        );
+
+
+    if (!list) {
+        return;
+    }
+
+
+    list.innerHTML =
+        "";
+
+
+    if (
+        clientMessages.length ===
+        0
+    ) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+
+        empty.className =
+            "client-message-empty";
+
+
+        empty.textContent =
+            "No messages yet. Send us a message anytime you have a question or something we should know.";
+
+
+        list.appendChild(
+            empty
+        );
+
+
+        return;
+
+    }
+
+
+    clientMessages
+        .forEach(
+            message => {
+
+                const isClient =
+                    message.sender_id ===
+                    currentUser.id;
+
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    `client-message-row ${
+                        isClient
+                            ? "is-client"
+                            : "is-business"
+                    }`;
+
+
+                row.dataset.messageId =
+                    message.id;
+
+
+                const sender =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                sender.className =
+                    "client-message-sender";
+
+
+                sender.textContent =
+                    isClient
+                        ? "You"
+                        : "Paws in Stride";
+
+
+                const bubble =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                bubble.className =
+                    "client-message-bubble";
+
+
+                /*
+                 * textContent intentionally used instead of
+                 * innerHTML so user messages cannot inject HTML.
+                 */
+
+                bubble.textContent =
+                    message.body;
+
+
+                const time =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                time.className =
+                    "client-message-time";
+
+
+                time.textContent =
+                    formatClientMessageTime(
+                        message.created_at
+                    );
+
+
+                row.append(
+                    sender,
+                    bubble,
+                    time
+                );
+
+
+                list.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+    scrollClientMessagesToBottom();
+
+}
+
+
+// ========================================
+// FORMAT MESSAGE TIME
+// ========================================
+
+function formatClientMessageTime(
+    timestamp
+) {
+
+    if (!timestamp) {
+        return "";
+    }
+
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+
+    const now =
+        new Date();
+
+
+    const sameDay =
+        date.getFullYear() ===
+            now.getFullYear() &&
+        date.getMonth() ===
+            now.getMonth() &&
+        date.getDate() ===
+            now.getDate();
+
+
+    if (sameDay) {
+
+        return date
+            .toLocaleTimeString(
+                [],
+                {
+                    hour:
+                        "numeric",
+
+                    minute:
+                        "2-digit"
+                }
+            );
+
+    }
+
+
+    return date
+        .toLocaleString(
+            [],
+            {
+                month:
+                    "short",
+
+                day:
+                    "numeric",
+
+                hour:
+                    "numeric",
+
+                minute:
+                    "2-digit"
+            }
+        );
+
+}
+
+
+// ========================================
+// ADD MESSAGE IF MISSING
+// ========================================
+
+function addClientMessageIfMissing(
+    message
+) {
+
+    if (!message) {
+        return;
+    }
+
+
+    const alreadyExists =
+        clientMessages.some(
+            existingMessage =>
+                Number(
+                    existingMessage.id
+                ) ===
+                Number(
+                    message.id
+                )
+        );
+
+
+    if (alreadyExists) {
+        return;
+    }
+
+
+    clientMessages.push(
+        message
+    );
+
+
+    clientMessages.sort(
+        (
+            messageA,
+            messageB
+        ) =>
+            new Date(
+                messageA.created_at
+            ) -
+            new Date(
+                messageB.created_at
+            )
+    );
+
+}
+
+
+// ========================================
+// REALTIME CLIENT MESSAGES
+// ========================================
+
+function subscribeToClientMessages() {
+
+    if (
+        !clientConversation ||
+        clientMessageChannel
+    ) {
+        return;
+    }
+
+
+    clientMessageChannel =
+        supabaseClient
+            .channel(
+                `client-messages-${clientConversation.id}`
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event:
+                        "INSERT",
+
+                    schema:
+                        "public",
+
+                    table:
+                        "messages",
+
+                    filter:
+                        `conversation_id=eq.${clientConversation.id}`
+                },
+                payload => {
+
+                    const newMessage =
+                        payload.new;
+
+
+                    addClientMessageIfMissing(
+                        newMessage
+                    );
+
+
+                    renderClientMessages();
+
+
+                    const drawer =
+                        document.getElementById(
+                            "client-message-drawer"
+                        );
+
+
+                    const drawerIsOpen =
+                        drawer
+                            ?.classList
+                            .contains(
+                                "is-open"
+                            );
+
+
+                    if (
+                        newMessage.sender_id !==
+                        currentUser.id
+                    ) {
+
+                        if (drawerIsOpen) {
+
+                            markClientMessagesRead();
+
+                        } else {
+
+                            updateClientMessageUnreadBadge();
+
+                        }
+
+                    }
+
+                }
+            )
+            .subscribe();
+
+}
+
+
+// ========================================
+// MARK CLIENT MESSAGES READ
+// ========================================
+
+async function markClientMessagesRead() {
+
+    if (
+        !currentUser ||
+        !clientConversation
+    ) {
+        return;
+    }
+
+
+    const unreadMessages =
+        clientMessages.filter(
+            message =>
+                message.sender_id !==
+                    currentUser.id &&
+                !message.read_at
+        );
+
+
+    if (
+        unreadMessages.length ===
+        0
+    ) {
+
+        updateClientMessageUnreadBadge();
+
+        return;
+
+    }
+
+
+    const now =
+        new Date()
+            .toISOString();
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("messages")
+            .update({
+                read_at:
+                    now
+            })
+            .eq(
+                "conversation_id",
+                clientConversation.id
+            )
+            .neq(
+                "sender_id",
+                currentUser.id
+            )
+            .is(
+                "read_at",
+                null
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Mark client messages read error:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    clientMessages =
+        clientMessages.map(
+            message => {
+
+                if (
+                    message.sender_id !==
+                        currentUser.id &&
+                    !message.read_at
+                ) {
+
+                    return {
+                        ...message,
+                        read_at:
+                            now
+                    };
+
+                }
+
+
+                return message;
+
+            }
+        );
+
+
+    updateClientMessageUnreadBadge();
+
+}
+
+
+// ========================================
+// UPDATE UNREAD BADGE
+// ========================================
+
+function updateClientMessageUnreadBadge() {
+
+    const badge =
+        document.getElementById(
+            "client-message-unread-badge"
+        );
+
+
+    if (
+        !badge ||
+        !currentUser
+    ) {
+        return;
+    }
+
+
+    const unreadCount =
+        clientMessages.filter(
+            message =>
+                message.sender_id !==
+                    currentUser.id &&
+                !message.read_at
+        )
+        .length;
+
+
+    if (
+        unreadCount <=
+        0
+    ) {
+
+        badge.style.display =
+            "none";
+
+        badge.textContent =
+            "0";
+
+        return;
+
+    }
+
+
+    badge.textContent =
+        unreadCount > 99
+            ? "99+"
+            : String(
+                unreadCount
+            );
+
+
+    badge.style.display =
+        "block";
+
+}
+
+
+// ========================================
+// MESSAGE INPUT AUTO RESIZE
+// ========================================
+
+function autoResizeClientMessageInput(
+    event
+) {
+
+    const input =
+        event.target;
+
+
+    input.style.height =
+        "auto";
+
+
+    input.style.height =
+        `${Math.min(
+            input.scrollHeight,
+            120
+        )}px`;
+
+}
+
+
+// ========================================
+// SCROLL MESSAGES TO BOTTOM
+// ========================================
+
+function scrollClientMessagesToBottom() {
+
+    const list =
+        document.getElementById(
+            "client-message-list"
+        );
+
+
+    if (!list) {
+        return;
+    }
+
+
+    window.requestAnimationFrame(
+        () => {
+
+            list.scrollTop =
+                list.scrollHeight;
+
+        }
+    );
+
+}
+
+
+// ========================================
+// CLIENT MESSAGE ERROR
+// ========================================
+
+function showClientMessageError(
+    message
+) {
+
+    const errorElement =
+        document.getElementById(
+            "client-message-error"
+        );
+
+
+    if (!errorElement) {
+        return;
+    }
+
+
+    errorElement.textContent =
+        message;
+
+
+    errorElement.style.display =
+        "block";
+
+}
+
+
+// ========================================
+// CLEAR CLIENT MESSAGE ERROR
+// ========================================
+
+function clearClientMessageError() {
+
+    const errorElement =
+        document.getElementById(
+            "client-message-error"
+        );
+
+
+    if (!errorElement) {
+        return;
+    }
+
+
+    errorElement.textContent =
+        "";
+
+
+    errorElement.style.display =
+        "none";
+
+}
