@@ -770,11 +770,237 @@
 </main>
 
 
+<!-- ========================================
+     ADMIN MESSAGING
+     ======================================== -->
+
+<div
+    id="admin-message-backdrop"
+    class="admin-message-backdrop"
+></div>
+
+
+<button
+    type="button"
+    id="admin-message-launcher"
+    class="admin-message-launcher"
+    aria-label="Open messages"
+    aria-expanded="false"
+>
+
+    <span class="admin-message-launcher-icon">
+
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+        >
+            <path
+                d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"
+            ></path>
+        </svg>
+
+    </span>
+
+    <span>
+        Messages
+    </span>
+
+    <span
+        id="admin-message-unread-badge"
+        class="admin-message-unread-badge"
+        style="display:none;"
+    >
+        0
+    </span>
+
+</button>
+
+
+<aside
+    id="admin-message-drawer"
+    class="admin-message-drawer"
+    aria-hidden="true"
+>
+
+    <!-- ========================================
+         ADMIN MESSAGE HEADER
+         ======================================== -->
+
+    <div class="admin-message-header">
+
+        <div>
+
+            <h3>
+                Messages
+            </h3>
+
+            <p>
+                Client conversations
+            </p>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="admin-message-close"
+            class="admin-message-close"
+            aria-label="Close messages"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <!-- ========================================
+         ADMIN MESSAGE BODY
+         ======================================== -->
+
+    <div class="admin-message-body">
+
+
+        <!-- ========================================
+             CONVERSATION INBOX
+             ======================================== -->
+
+        <div class="admin-message-inbox">
+
+            <div class="admin-message-inbox-heading">
+
+                <strong>
+                    Inbox
+                </strong>
+
+                <span id="admin-message-inbox-count">
+                    0 conversations
+                </span>
+
+            </div>
+
+
+            <div
+                id="admin-conversation-list"
+                class="admin-conversation-list"
+            >
+
+                <div class="admin-message-loading">
+                    Loading conversations...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================
+             ACTIVE CONVERSATION
+             ======================================== -->
+
+        <div class="admin-message-conversation">
+
+
+            <div
+                id="admin-message-conversation-header"
+                class="admin-message-conversation-header"
+            >
+
+                <button
+                    type="button"
+                    id="admin-message-mobile-back"
+                    class="admin-message-mobile-back"
+                    aria-label="Back to conversations"
+                >
+                    ‹
+                </button>
+
+
+                <div>
+
+                    <strong id="admin-message-client-name">
+                        Select a conversation
+                    </strong>
+
+                    <span id="admin-message-client-detail">
+                        Choose a client from your inbox.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="admin-message-list"
+                class="admin-message-list"
+            >
+
+                <div class="admin-message-empty">
+                    Select a client conversation to view messages.
+                </div>
+
+            </div>
+
+
+            <form
+                id="admin-message-form"
+                class="admin-message-form"
+                style="display:none;"
+            >
+
+                <textarea
+                    id="admin-message-input"
+                    rows="1"
+                    maxlength="5000"
+                    placeholder="Type a reply..."
+                    aria-label="Type a reply"
+                ></textarea>
+
+
+                <button
+                    type="submit"
+                    id="admin-message-send"
+                    class="admin-message-send"
+                    aria-label="Send message"
+                >
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            d="M22 2 11 13"
+                        ></path>
+
+                        <path
+                            d="m22 2-7 20-4-9-9-4Z"
+                        ></path>
+                    </svg>
+
+                </button>
+
+            </form>
+
+
+            <div
+                id="admin-message-error"
+                class="admin-message-error"
+            ></div>
+
+
+        </div>
+
+
+    </div>
+
+</aside>
+
+
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- Admin -->
-<script src="./admin.js?v=20260907-admin-routing-1"></script>
+<script src="./admin.js?v=20260908-admin-messaging-1"></script>
 
 
 </body>
