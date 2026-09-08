@@ -1,57 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Login | Paws in Stride</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="portal.css">
+    <title>
+        Login | Paws in Stride
+    </title>
+
+
+    <!-- ========================================
+         PAWS IN STRIDE APP FONT
+         ======================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ========================================
+         PORTAL STYLES
+         ======================================== -->
+
+    <link
+        rel="stylesheet"
+        href="portal.css?v=20260908-login-branding-1"
+    >
+
 </head>
 
-<body>
 
-    <main class="login-container">
+<body class="portal-login-page">
 
-        <h1>Paws in Stride</h1>
-        <h2>Portal Login</h2>
 
-        <form id="login-form">
+    <!-- ========================================
+         LOGIN PAGE
+         ======================================== -->
 
-            <label for="email">Email</label>
+    <main class="login-page-shell">
 
-            <input
-                type="email"
-                id="email"
-                autocomplete="email"
-                required
-            >
 
-            <label for="password">Password</label>
+        <!-- ========================================
+             LOGIN BRAND AREA
+             ======================================== -->
 
-            <input
-                type="password"
-                id="password"
-                autocomplete="current-password"
-                required
-            >
+        <section class="login-brand-panel">
 
-            <button type="submit">
-                Sign In
-            </button>
+            <div class="login-brand-content">
 
-        </form>
+                <img
+                    src="/pawsnstridelogo1.png"
+                    alt="Paws in Stride"
+                    class="login-brand-logo"
+                >
 
-        <p id="login-message"></p>
+
+                <span class="login-brand-eyebrow">
+                    Client Portal
+                </span>
+
+
+                <h1>
+                    Welcome Back
+                </h1>
+
+
+                <p>
+                    Manage your pet care, upcoming services,
+                    visit reports, and messages all in one place.
+                </p>
+
+
+                <div class="login-brand-trust">
+
+                    <span>
+                        Professional Care
+                    </span>
+
+                    <span>
+                        Personalized Service
+                    </span>
+
+                    <span>
+                        Peace of Mind
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========================================
+             LOGIN FORM AREA
+             ======================================== -->
+
+        <section class="login-form-panel">
+
+
+            <div class="login-container">
+
+
+                <div class="login-mobile-logo-wrapper">
+
+                    <img
+                        src="/pawsnstridelogo1.png"
+                        alt="Paws in Stride"
+                        class="login-mobile-logo"
+                    >
+
+                </div>
+
+
+                <div class="login-form-heading">
+
+                    <span>
+                        Paws in Stride
+                    </span>
+
+                    <h2>
+                        Sign in to your portal
+                    </h2>
+
+                    <p>
+                        Access your pet care account.
+                    </p>
+
+                </div>
+
+
+                <form id="login-form">
+
+
+                    <div class="login-field">
+
+                        <label for="email">
+                            Email
+                        </label>
+
+
+                        <input
+                            type="email"
+                            id="email"
+                            autocomplete="email"
+                            placeholder="you@example.com"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="login-field">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+
+                        <input
+                            type="password"
+                            id="password"
+                            autocomplete="current-password"
+                            placeholder="Enter your password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="login-submit-button"
+                    >
+                        Sign In
+                    </button>
+
+
+                </form>
+
+
+                <p id="login-message"></p>
+
+
+                <div class="login-footer-note">
+
+                    <span>
+                        Paws in Stride
+                    </span>
+
+                    <span>
+                        Professional Pet Care
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
 
     </main>
 
 
-    <!-- Supabase -->
+    <!-- ========================================
+         SUPABASE
+         ======================================== -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Portal -->
+
+
+    <!-- ========================================
+         PORTAL
+         ======================================== -->
+
     <script src="portal.js?v=20260907-admin-routing-1"></script>
 
+
 </body>
+
 </html>
