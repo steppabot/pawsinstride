@@ -3822,7 +3822,6 @@ body.client-report-lightbox-open {
         visibility 0.2s ease;
 }
 
-
 /* ========================================
    CLIENT MESSAGING MOBILE
 ======================================== */
@@ -3859,7 +3858,10 @@ body.client-report-lightbox-open {
         inset: 0;
 
         width: 100%;
+        height: 100vh;
+        height: 100svh;
         height: 100dvh;
+
         max-width: none;
         max-height: none;
 
@@ -3902,6 +3904,8 @@ body.client-report-lightbox-open {
 
 
     .client-message-form {
+        align-items: flex-end;
+
         padding:
             10px
             10px
@@ -3909,6 +3913,29 @@ body.client-report-lightbox-open {
                 10px,
                 env(safe-area-inset-bottom)
             );
+    }
+
+
+    /*
+     * IMPORTANT:
+     * iOS Safari zooms focused form fields when
+     * their text size is below 16px.
+     */
+
+    .client-message-form textarea {
+        min-width: 0;
+
+        font-size: 16px;
+        line-height: 1.4;
+    }
+
+
+    .client-message-send {
+        flex:
+            0 0 42px;
+
+        width: 42px;
+        height: 42px;
     }
 
 
@@ -7262,11 +7289,20 @@ a:focus-visible {
    LOGIN PAGE BODY
 ======================================== */
 
+html:has(body.portal-login-page) {
+    min-height: 100%;
+    background: #f4f9fc;
+}
+
 body.portal-login-page {
 
     min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
 
     margin: 0;
+
+    overflow-x: hidden;
 
     background:
         linear-gradient(
@@ -7287,7 +7323,6 @@ body.portal-login-page {
 
 }
 
-
 /* ========================================
    LOGIN PAGE SHELL
 ======================================== */
@@ -7300,7 +7335,11 @@ body.portal-login-page {
         minmax(420px, 0.95fr)
         minmax(500px, 1.05fr);
 
+    width: 100%;
+
     min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
 
 }
 
