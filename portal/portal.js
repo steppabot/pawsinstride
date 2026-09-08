@@ -8521,20 +8521,31 @@ function clearClientPhotoPreviewUrl() {
 
 }
 
-
 // ========================================
 // LOAD
 // ========================================
 
-if (
-    document.getElementById(
-        "dashboard-content"
-    )
-) {
+(async function initializeClientPortal() {
 
-    loadDashboard();
+    await loadDashboard();
 
-}
+
+    if (
+        currentUser &&
+        currentProfile &&
+        String(
+            currentProfile.role || ""
+        )
+            .trim()
+            .toLowerCase() !==
+            "admin"
+    ) {
+
+        await initializeClientMessaging();
+
+    }
+
+})();
 
 
 // ========================================
