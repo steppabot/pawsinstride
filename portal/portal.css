@@ -9462,3 +9462,1041 @@ a:focus-visible {
     }
 
 }
+
+/* ========================================
+   PAWS IN STRIDE SIGNUP FLOW
+======================================== */
+
+.portal-signup-page {
+    --signup-blue: #2890df;
+    --signup-cyan: #47cee6;
+    --signup-orange: #f5ab40;
+    --signup-orange-hover: #ef602c;
+    --signup-text: #182433;
+    --signup-muted: #6c7a89;
+    --signup-border: #dce8f0;
+    --signup-background: #f4f9fc;
+    --signup-card: #ffffff;
+    --signup-success: #35a76f;
+
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Roboto", sans-serif;
+    color: var(--signup-text);
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(71, 206, 230, 0.13),
+            transparent 34rem
+        ),
+        var(--signup-background);
+}
+
+
+/* ========================================
+   SIGNUP SHELL
+======================================== */
+
+.portal-signup-page .signup-shell {
+    width: min(100% - 32px, 820px);
+    margin: 0 auto;
+    padding: 36px 0 48px;
+}
+
+
+/* ========================================
+   SIGNUP BRANDING
+======================================== */
+
+.portal-signup-page .signup-branding {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.portal-signup-page .signup-logo-link {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.portal-signup-page .signup-logo {
+    display: block;
+    width: min(310px, 72vw);
+    height: auto;
+    margin: 0 auto;
+}
+
+.portal-signup-page .signup-branding-subtitle {
+    margin: 6px 0 0;
+    color: var(--signup-blue);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+
+/* ========================================
+   SIGNUP CARD
+======================================== */
+
+.portal-signup-page .signup-card {
+    background: var(--signup-card);
+    border: 1px solid rgba(40, 144, 223, 0.12);
+    border-radius: 26px;
+    box-shadow:
+        0 18px 50px rgba(38, 81, 111, 0.09),
+        0 4px 14px rgba(38, 81, 111, 0.05);
+    overflow: hidden;
+}
+
+
+/* ========================================
+   SIGNUP PROGRESS
+======================================== */
+
+.portal-signup-page .signup-progress {
+    padding: 24px 30px 0;
+}
+
+.portal-signup-page .signup-progress-copy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 11px;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.portal-signup-page #signup-step-count {
+    color: var(--signup-blue);
+}
+
+.portal-signup-page #signup-step-label {
+    color: var(--signup-muted);
+}
+
+.portal-signup-page .signup-progress-track {
+    width: 100%;
+    height: 7px;
+    overflow: hidden;
+    background: #eaf1f5;
+    border-radius: 999px;
+}
+
+.portal-signup-page .signup-progress-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--signup-cyan),
+        var(--signup-blue)
+    );
+    transition: width 0.3s ease;
+}
+
+
+/* ========================================
+   SIGNUP STEPS
+======================================== */
+
+.portal-signup-page .signup-step {
+    padding: 34px 30px 32px;
+}
+
+.portal-signup-page .signup-step[hidden] {
+    display: none !important;
+}
+
+.portal-signup-page .signup-step-heading {
+    margin-bottom: 30px;
+}
+
+.portal-signup-page .signup-eyebrow {
+    margin: 0 0 8px;
+    color: var(--signup-blue);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.portal-signup-page .signup-step-heading h1,
+.portal-signup-page .signup-success h1 {
+    margin: 0;
+    color: var(--signup-text);
+    font-size: clamp(1.8rem, 4vw, 2.35rem);
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+}
+
+.portal-signup-page .signup-step-heading > p:last-child {
+    max-width: 610px;
+    margin: 10px 0 0;
+    color: var(--signup-muted);
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+
+/* ========================================
+   ERROR / STATUS MESSAGES
+======================================== */
+
+.portal-signup-page .signup-message {
+    margin: 24px 30px 0;
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.portal-signup-page .signup-message[hidden] {
+    display: none !important;
+}
+
+.portal-signup-page .signup-message-error {
+    color: #a23535;
+    background: #fff1f1;
+    border: 1px solid #f0c8c8;
+}
+
+
+/* ========================================
+   CLIENT TYPE
+======================================== */
+
+.portal-signup-page .signup-field-group {
+    margin-bottom: 30px;
+}
+
+.portal-signup-page .signup-field-heading {
+    margin-bottom: 13px;
+}
+
+.portal-signup-page .signup-field-heading label {
+    display: block;
+    color: var(--signup-text);
+    font-size: 0.93rem;
+    font-weight: 700;
+}
+
+.portal-signup-page .signup-field-heading label span,
+.portal-signup-page .signup-field > label > span[aria-hidden="true"] {
+    color: var(--signup-orange-hover);
+}
+
+.portal-signup-page .signup-field-heading p {
+    margin: 5px 0 0;
+    color: var(--signup-muted);
+    font-size: 0.83rem;
+}
+
+.portal-signup-page .signup-client-type-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.portal-signup-page .signup-choice-card {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+.portal-signup-page .signup-choice-card input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.portal-signup-page .signup-choice-card-content {
+    display: flex;
+    align-items: center;
+    min-height: 96px;
+    padding: 18px;
+    border: 2px solid var(--signup-border);
+    border-radius: 17px;
+    background: #ffffff;
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        transform 0.18s ease;
+}
+
+.portal-signup-page .signup-choice-card:hover .signup-choice-card-content {
+    border-color: rgba(40, 144, 223, 0.45);
+    transform: translateY(-1px);
+}
+
+.portal-signup-page .signup-choice-card input:focus-visible +
+.signup-choice-card-content {
+    outline: 3px solid rgba(71, 206, 230, 0.22);
+    outline-offset: 3px;
+}
+
+.portal-signup-page .signup-choice-card input:checked +
+.signup-choice-card-content {
+    border-color: var(--signup-blue);
+    background: rgba(71, 206, 230, 0.07);
+    box-shadow: 0 0 0 3px rgba(40, 144, 223, 0.08);
+}
+
+.portal-signup-page .signup-choice-card-icon {
+    display: grid;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    margin-right: 13px;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--signup-blue);
+    background: rgba(71, 206, 230, 0.13);
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.portal-signup-page .signup-choice-card input:checked +
+.signup-choice-card-content .signup-choice-card-icon {
+    color: #ffffff;
+    background: linear-gradient(
+        135deg,
+        var(--signup-cyan),
+        var(--signup-blue)
+    );
+}
+
+.portal-signup-page .signup-choice-card-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.portal-signup-page .signup-choice-card-copy strong {
+    font-size: 0.98rem;
+}
+
+.portal-signup-page .signup-choice-card-copy small {
+    color: var(--signup-muted);
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+
+
+/* ========================================
+   FORM GRID
+======================================== */
+
+.portal-signup-page .signup-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 19px 18px;
+}
+
+.portal-signup-page .signup-field {
+    min-width: 0;
+}
+
+.portal-signup-page .signup-field-full {
+    grid-column: 1 / -1;
+}
+
+.portal-signup-page .signup-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--signup-text);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.portal-signup-page .signup-optional {
+    margin-left: 5px;
+    color: #9aa7b2;
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.portal-signup-page .signup-field input,
+.portal-signup-page .signup-field select {
+    box-sizing: border-box;
+    width: 100%;
+    height: 49px;
+    padding: 0 14px;
+    border: 1px solid var(--signup-border);
+    border-radius: 11px;
+    outline: none;
+    color: var(--signup-text);
+    background: #ffffff;
+    font: inherit;
+    font-size: 0.91rem;
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.portal-signup-page .signup-field input::placeholder {
+    color: #a5b0b9;
+}
+
+.portal-signup-page .signup-field input:hover,
+.portal-signup-page .signup-field select:hover {
+    border-color: #bfd4e2;
+}
+
+.portal-signup-page .signup-field input:focus,
+.portal-signup-page .signup-field select:focus {
+    border-color: var(--signup-blue);
+    box-shadow: 0 0 0 3px rgba(40, 144, 223, 0.11);
+}
+
+.portal-signup-page .signup-field input:invalid:not(:placeholder-shown) {
+    border-color: #d88787;
+}
+
+
+/* ========================================
+   PASSWORD
+======================================== */
+
+.portal-signup-page .signup-password-wrap {
+    position: relative;
+}
+
+.portal-signup-page .signup-password-wrap input {
+    padding-right: 70px;
+}
+
+.portal-signup-page .signup-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    padding: 6px 8px;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 7px;
+    color: var(--signup-blue);
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.portal-signup-page .signup-password-toggle:hover {
+    background: rgba(40, 144, 223, 0.08);
+}
+
+.portal-signup-page .signup-field-help {
+    display: block;
+    margin-top: 6px;
+    color: var(--signup-muted);
+    font-size: 0.75rem;
+}
+
+
+/* ========================================
+   FORM SECTIONS
+======================================== */
+
+.portal-signup-page .signup-section-divider {
+    height: 1px;
+    margin: 32px 0 27px;
+    background: #eaf0f4;
+}
+
+.portal-signup-page .signup-subsection-heading {
+    margin-bottom: 20px;
+}
+
+.portal-signup-page .signup-subsection-heading h2 {
+    margin: 0;
+    color: var(--signup-text);
+    font-size: 1.15rem;
+}
+
+.portal-signup-page .signup-subsection-heading p {
+    margin: 6px 0 0;
+    color: var(--signup-muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+
+/* ========================================
+   BUTTONS / ACTIONS
+======================================== */
+
+.portal-signup-page .signup-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.portal-signup-page .signup-actions-end {
+    justify-content: flex-end;
+}
+
+.portal-signup-page .signup-primary-button,
+.portal-signup-page .signup-secondary-button,
+.portal-signup-page .signup-add-pet-button {
+    box-sizing: border-box;
+    min-height: 48px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.portal-signup-page .signup-primary-button {
+    display: inline-flex;
+    min-width: 150px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 22px;
+    border: 1px solid var(--signup-orange);
+    color: #ffffff;
+    background: var(--signup-orange);
+    box-shadow: 0 7px 18px rgba(245, 171, 64, 0.21);
+    text-decoration: none;
+}
+
+.portal-signup-page .signup-primary-button:hover:not(:disabled) {
+    border-color: var(--signup-orange-hover);
+    background: var(--signup-orange-hover);
+    box-shadow: 0 9px 21px rgba(239, 96, 44, 0.2);
+    transform: translateY(-1px);
+}
+
+.portal-signup-page .signup-primary-button:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.portal-signup-page .signup-secondary-button {
+    min-width: 105px;
+    padding: 0 18px;
+    border: 1px solid var(--signup-border);
+    color: var(--signup-blue);
+    background: #ffffff;
+}
+
+.portal-signup-page .signup-secondary-button:hover {
+    border-color: var(--signup-blue);
+    background: rgba(40, 144, 223, 0.04);
+}
+
+.portal-signup-page .signup-primary-button:focus-visible,
+.portal-signup-page .signup-secondary-button:focus-visible,
+.portal-signup-page .signup-add-pet-button:focus-visible {
+    outline: 3px solid rgba(71, 206, 230, 0.25);
+    outline-offset: 3px;
+}
+
+
+/* ========================================
+   PET CARDS
+======================================== */
+
+.portal-signup-page .signup-pet-card {
+    margin-bottom: 18px;
+    padding: 22px;
+    border: 1px solid var(--signup-border);
+    border-radius: 18px;
+    background: #fbfdfe;
+}
+
+.portal-signup-page .signup-pet-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.portal-signup-page .signup-pet-number {
+    margin: 0 0 4px;
+    color: var(--signup-blue);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.portal-signup-page .signup-pet-card-header h2 {
+    margin: 0;
+    color: var(--signup-text);
+    font-size: 1.08rem;
+}
+
+.portal-signup-page .signup-remove-pet-button {
+    padding: 7px 10px;
+    border: 1px solid #efcccc;
+    border-radius: 8px;
+    color: #b84c4c;
+    background: #ffffff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.portal-signup-page .signup-remove-pet-button:hover {
+    background: #fff2f2;
+}
+
+.portal-signup-page .signup-add-pet-button {
+    width: 100%;
+    padding: 0 18px;
+    border: 1px dashed rgba(40, 144, 223, 0.45);
+    color: var(--signup-blue);
+    background: rgba(71, 206, 230, 0.04);
+}
+
+.portal-signup-page .signup-add-pet-button span {
+    margin-right: 6px;
+    font-size: 1.15rem;
+}
+
+.portal-signup-page .signup-add-pet-button:hover {
+    border-color: var(--signup-blue);
+    background: rgba(71, 206, 230, 0.09);
+}
+
+.portal-signup-page .signup-pet-note {
+    margin-top: 20px;
+    padding: 15px 17px;
+    border-radius: 13px;
+    color: var(--signup-muted);
+    background: #f5f9fb;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.portal-signup-page .signup-pet-note strong {
+    color: var(--signup-text);
+}
+
+.portal-signup-page .signup-pet-note p {
+    margin: 4px 0 0;
+}
+
+
+/* ========================================
+   MEET & GREET SUMMARY
+======================================== */
+
+.portal-signup-page .signup-meet-greet-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding: 16px 18px;
+    border: 1px solid rgba(40, 144, 223, 0.15);
+    border-radius: 15px;
+    background: rgba(71, 206, 230, 0.055);
+}
+
+.portal-signup-page .signup-meet-greet-icon {
+    display: grid;
+    width: 45px;
+    height: 45px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 13px;
+    background: #ffffff;
+    box-shadow: 0 3px 10px rgba(38, 81, 111, 0.07);
+    font-size: 1.25rem;
+}
+
+.portal-signup-page .signup-meet-greet-summary strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.95rem;
+}
+
+.portal-signup-page .signup-meet-greet-summary p {
+    margin: 0;
+    color: var(--signup-muted);
+    font-size: 0.8rem;
+}
+
+
+/* ========================================
+   MEET & GREET CALENDAR PLACEHOLDER
+======================================== */
+
+.portal-signup-page .signup-calendar-placeholder {
+    padding: 42px 20px;
+    border: 1px dashed #cbdce7;
+    border-radius: 17px;
+    text-align: center;
+    background: #fbfdfe;
+}
+
+.portal-signup-page .signup-calendar-placeholder-icon {
+    margin-bottom: 9px;
+    font-size: 2rem;
+}
+
+.portal-signup-page .signup-calendar-placeholder h2 {
+    margin: 0;
+    font-size: 1.08rem;
+}
+
+.portal-signup-page .signup-calendar-placeholder p {
+    margin: 7px 0 0;
+    color: var(--signup-muted);
+    font-size: 0.84rem;
+}
+
+
+/* ========================================
+   MEET & GREET TIME SLOTS
+======================================== */
+
+.portal-signup-page .signup-time-slots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.portal-signup-page .signup-time-slots[hidden] {
+    display: none !important;
+}
+
+.portal-signup-page .signup-time-slot {
+    min-height: 44px;
+    padding: 8px;
+    border: 1px solid var(--signup-border);
+    border-radius: 10px;
+    color: var(--signup-blue);
+    background: #ffffff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.portal-signup-page .signup-time-slot:hover {
+    border-color: var(--signup-blue);
+    background: rgba(71, 206, 230, 0.05);
+}
+
+.portal-signup-page .signup-time-slot.is-selected {
+    border-color: var(--signup-blue);
+    color: #ffffff;
+    background: var(--signup-blue);
+}
+
+
+/* ========================================
+   SELECTED APPOINTMENT
+======================================== */
+
+.portal-signup-page .signup-selected-appointment {
+    margin-top: 20px;
+    padding: 15px 17px;
+    border: 1px solid rgba(40, 144, 223, 0.18);
+    border-radius: 13px;
+    background: rgba(71, 206, 230, 0.06);
+}
+
+.portal-signup-page .signup-selected-appointment[hidden] {
+    display: none !important;
+}
+
+.portal-signup-page .signup-selected-appointment span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--signup-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.portal-signup-page .signup-selected-appointment strong {
+    color: var(--signup-text);
+    font-size: 0.92rem;
+}
+
+
+/* ========================================
+   SUCCESS SCREEN
+======================================== */
+
+.portal-signup-page .signup-success {
+    padding-top: 46px;
+    padding-bottom: 46px;
+    text-align: center;
+}
+
+.portal-signup-page .signup-success-icon {
+    display: grid;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    place-items: center;
+    border-radius: 50%;
+    color: #ffffff;
+    background: var(--signup-success);
+    box-shadow: 0 10px 24px rgba(53, 167, 111, 0.2);
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.portal-signup-page .signup-success-message {
+    max-width: 520px;
+    margin: 12px auto 0;
+    color: var(--signup-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.portal-signup-page .signup-success-appointment {
+    max-width: 470px;
+    margin: 25px auto 0;
+    padding: 18px;
+    border: 1px solid rgba(40, 144, 223, 0.17);
+    border-radius: 15px;
+    background: rgba(71, 206, 230, 0.06);
+}
+
+.portal-signup-page .signup-success-appointment[hidden] {
+    display: none !important;
+}
+
+.portal-signup-page .signup-success-appointment span {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--signup-blue);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.portal-signup-page .signup-success-appointment strong {
+    display: block;
+    font-size: 1rem;
+}
+
+.portal-signup-page .signup-success-appointment p {
+    margin: 5px 0 0;
+    color: var(--signup-muted);
+    font-size: 0.86rem;
+}
+
+.portal-signup-page .signup-success-checklist {
+    display: grid;
+    max-width: 470px;
+    gap: 9px;
+    margin: 25px auto 28px;
+    text-align: left;
+}
+
+.portal-signup-page .signup-success-checklist > div {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 11px;
+    background: #f6faf8;
+    color: #405248;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.portal-signup-page .signup-success-checklist > div[hidden] {
+    display: none !important;
+}
+
+.portal-signup-page .signup-success-checklist span {
+    display: inline-grid;
+    width: 23px;
+    height: 23px;
+    margin-right: 10px;
+    place-items: center;
+    border-radius: 50%;
+    color: #ffffff;
+    background: var(--signup-success);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.portal-signup-page .signup-login-button {
+    min-width: 220px;
+}
+
+
+/* ========================================
+   SIGNUP FOOTER
+======================================== */
+
+.portal-signup-page .signup-footer {
+    padding: 20px 0 0;
+    text-align: center;
+}
+
+.portal-signup-page .signup-footer p {
+    margin: 0;
+    color: var(--signup-muted);
+    font-size: 0.82rem;
+}
+
+.portal-signup-page .signup-footer a {
+    color: var(--signup-blue);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.portal-signup-page .signup-footer a:hover {
+    text-decoration: underline;
+}
+
+
+/* ========================================
+   TABLET / MOBILE
+======================================== */
+
+@media (max-width: 680px) {
+
+    .portal-signup-page .signup-shell {
+        width: min(100% - 22px, 820px);
+        padding: 22px 0 34px;
+    }
+
+    .portal-signup-page .signup-branding {
+        margin-bottom: 17px;
+    }
+
+    .portal-signup-page .signup-logo {
+        width: min(290px, 78vw);
+    }
+
+    .portal-signup-page .signup-card {
+        border-radius: 21px;
+    }
+
+    .portal-signup-page .signup-progress {
+        padding: 20px 20px 0;
+    }
+
+    .portal-signup-page .signup-step {
+        padding: 28px 20px 24px;
+    }
+
+    .portal-signup-page .signup-message {
+        margin: 20px 20px 0;
+    }
+
+    .portal-signup-page .signup-client-type-options {
+        grid-template-columns: 1fr;
+    }
+
+    .portal-signup-page .signup-choice-card-content {
+        min-height: 82px;
+    }
+
+    .portal-signup-page .signup-form-grid {
+        grid-template-columns: 1fr;
+        gap: 17px;
+    }
+
+    .portal-signup-page .signup-field-full {
+        grid-column: auto;
+    }
+
+    .portal-signup-page .signup-field input,
+    .portal-signup-page .signup-field select {
+        height: 51px;
+        font-size: 16px;
+    }
+
+    .portal-signup-page .signup-pet-card {
+        padding: 18px;
+    }
+
+    .portal-signup-page .signup-time-slots {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .portal-signup-page .signup-actions {
+        margin-top: 27px;
+    }
+
+    .portal-signup-page .signup-primary-button {
+        min-width: 135px;
+    }
+
+}
+
+
+/* ========================================
+   SMALL MOBILE
+======================================== */
+
+@media (max-width: 430px) {
+
+    .portal-signup-page .signup-shell {
+        width: min(100% - 16px, 820px);
+    }
+
+    .portal-signup-page .signup-logo {
+        width: min(275px, 82vw);
+    }
+
+    .portal-signup-page .signup-progress-copy {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .portal-signup-page .signup-step-heading h1,
+    .portal-signup-page .signup-success h1 {
+        font-size: 1.75rem;
+    }
+
+    .portal-signup-page .signup-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .portal-signup-page .signup-actions-end {
+        display: flex;
+    }
+
+    .portal-signup-page .signup-actions-end .signup-primary-button {
+        width: 100%;
+    }
+
+    .portal-signup-page .signup-actions .signup-secondary-button,
+    .portal-signup-page .signup-actions .signup-primary-button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .portal-signup-page .signup-time-slots {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .portal-signup-page .signup-login-button {
+        width: 100%;
+        min-width: 0;
+    }
+
+}
