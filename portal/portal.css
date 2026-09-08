@@ -7226,3 +7226,850 @@ a:focus-visible {
     }
 
 }
+
+/* ========================================
+   PAWS IN STRIDE LOGIN THEME
+======================================== */
+
+
+/* ========================================
+   LOGIN PAGE VARIABLES
+======================================== */
+
+.portal-login-page {
+
+    --pis-blue: #2890df;
+    --pis-blue-dark: #1f7bc2;
+
+    --pis-cyan: #47cee6;
+
+    --pis-orange: #f5ab40;
+    --pis-orange-hover: #ef602c;
+
+    --pis-ink: #202a33;
+    --pis-text: #333333;
+    --pis-muted: #6b7785;
+
+    --pis-border: #dce8ef;
+    --pis-border-strong: #c8dce8;
+
+    --pis-blue-soft: #edf8fd;
+
+}
+
+
+/* ========================================
+   LOGIN PAGE BODY
+======================================== */
+
+body.portal-login-page {
+
+    min-height: 100vh;
+
+    margin: 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eef9fd 0%,
+            #f8fcfe 50%,
+            #f4f9fc 100%
+        );
+
+    color:
+        var(--pis-ink);
+
+    font-family:
+        "Roboto",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+
+/* ========================================
+   LOGIN PAGE SHELL
+======================================== */
+
+.login-page-shell {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(420px, 0.95fr)
+        minmax(500px, 1.05fr);
+
+    min-height: 100vh;
+
+}
+
+
+/* ========================================
+   LEFT BRAND PANEL
+======================================== */
+
+.login-brand-panel {
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    padding:
+        60px
+        70px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #47cee6 0%,
+            #2890df 58%,
+            #227ec5 100%
+        );
+
+}
+
+
+/* ========================================
+   BRAND PANEL DECORATION
+======================================== */
+
+.login-brand-panel::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 420px;
+    height: 420px;
+
+    top: -140px;
+    left: -130px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+}
+
+
+.login-brand-panel::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 330px;
+    height: 330px;
+
+    right: -120px;
+    bottom: -130px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+}
+
+
+/* ========================================
+   BRAND CONTENT
+======================================== */
+
+.login-brand-content {
+
+    position: relative;
+
+    z-index: 2;
+
+    width: 100%;
+    max-width: 520px;
+
+    color: #fff;
+
+}
+
+
+.login-brand-logo {
+
+    display: block;
+
+    width: 220px;
+    height: auto;
+
+    margin-bottom: 32px;
+
+}
+
+
+.login-brand-eyebrow {
+
+    display: inline-block;
+
+    margin-bottom: 14px;
+
+    padding:
+        7px
+        12px;
+
+    background:
+        rgba(255, 255, 255, 0.16);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.22);
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.10em;
+
+    text-transform: uppercase;
+
+}
+
+
+.login-brand-content h1 {
+
+    margin:
+        0
+        0
+        16px;
+
+    color: #fff;
+
+    font-size:
+        clamp(
+            38px,
+            4vw,
+            54px
+        );
+
+    font-weight: 800;
+
+    line-height: 1.05;
+
+}
+
+
+.login-brand-content p {
+
+    max-width: 460px;
+
+    margin:
+        0
+        0
+        28px;
+
+    color:
+        rgba(255, 255, 255, 0.90);
+
+    font-size: 17px;
+
+    line-height: 1.65;
+
+}
+
+
+/* ========================================
+   TRUST POINTS
+======================================== */
+
+.login-brand-trust {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+}
+
+
+.login-brand-trust span {
+
+    display: inline-flex;
+    align-items: center;
+
+    padding:
+        8px
+        12px;
+
+    background:
+        rgba(255, 255, 255, 0.13);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.20);
+
+    border-radius: 999px;
+
+    color: #fff;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+
+/* ========================================
+   LOGIN FORM PANEL
+======================================== */
+
+.login-form-panel {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        60px
+        40px;
+
+}
+
+
+/* ========================================
+   LOGIN CARD
+======================================== */
+
+.portal-login-page
+.login-container {
+
+    width: 100%;
+    max-width: 440px;
+
+    margin: 0;
+
+    padding:
+        38px
+        36px;
+
+    background:
+        rgba(255, 255, 255, 0.96);
+
+    border:
+        1px solid var(--pis-border);
+
+    border-radius: 22px;
+
+    box-shadow:
+        0 18px 55px rgba(35, 93, 125, 0.13);
+
+}
+
+
+/* ========================================
+   MOBILE LOGO
+======================================== */
+
+.login-mobile-logo-wrapper {
+
+    display: none;
+
+}
+
+
+.login-mobile-logo {
+
+    width: 150px;
+    height: auto;
+
+}
+
+
+/* ========================================
+   LOGIN FORM HEADING
+======================================== */
+
+.login-form-heading {
+
+    margin-bottom: 28px;
+
+}
+
+
+.login-form-heading > span {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color:
+        var(--pis-blue);
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.10em;
+
+    text-transform: uppercase;
+
+}
+
+
+.login-form-heading h2 {
+
+    margin:
+        0
+        0
+        7px;
+
+    color:
+        var(--pis-ink);
+
+    font-size: 27px;
+
+    font-weight: 800;
+
+}
+
+
+.login-form-heading p {
+
+    margin: 0;
+
+    color:
+        var(--pis-muted);
+
+    font-size: 14px;
+
+}
+
+
+/* ========================================
+   LOGIN FORM
+======================================== */
+
+.portal-login-page
+#login-form {
+
+    margin: 0;
+
+}
+
+
+/* ========================================
+   LOGIN FIELDS
+======================================== */
+
+.login-field {
+
+    margin-bottom: 20px;
+
+}
+
+
+.portal-login-page
+.login-field label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        var(--pis-ink);
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+}
+
+
+.portal-login-page
+.login-field input {
+
+    width: 100%;
+
+    margin: 0;
+
+    padding:
+        13px
+        14px;
+
+    background: #fff;
+
+    color:
+        var(--pis-ink);
+
+    border:
+        1px solid var(--pis-border-strong);
+
+    border-radius: 11px;
+
+    font-size: 16px;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+
+}
+
+
+.portal-login-page
+.login-field input::placeholder {
+
+    color:
+        #9aa5ad;
+
+}
+
+
+.portal-login-page
+.login-field input:focus {
+
+    outline: none;
+
+    border-color:
+        var(--pis-blue);
+
+    box-shadow:
+        0 0 0 3px rgba(40, 144, 223, 0.11);
+
+}
+
+
+/* ========================================
+   SIGN IN BUTTON
+======================================== */
+
+.login-submit-button {
+
+    width: 100%;
+
+    min-height: 48px;
+
+    margin-top: 4px;
+
+    padding:
+        13px
+        18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f5ab40,
+            #f3aa4c
+        );
+
+    color: #fff;
+
+    border: none;
+
+    border-radius: 999px;
+
+    box-shadow:
+        0 7px 18px rgba(245, 171, 64, 0.26);
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+
+}
+
+
+.login-submit-button:hover {
+
+    background:
+        var(--pis-orange-hover);
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 9px 22px rgba(239, 96, 44, 0.22);
+
+}
+
+
+.login-submit-button:active {
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* ========================================
+   LOGIN MESSAGE
+======================================== */
+
+.portal-login-page
+#login-message {
+
+    margin:
+        16px
+        0
+        0;
+
+    text-align: center;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+/* ========================================
+   LOGIN FOOTER
+======================================== */
+
+.login-footer-note {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 28px;
+
+    padding-top: 20px;
+
+    border-top:
+        1px solid var(--pis-border);
+
+    color:
+        var(--pis-muted);
+
+    font-size: 11px;
+
+}
+
+
+.login-footer-note span:first-child {
+
+    color:
+        var(--pis-blue);
+
+    font-weight: 700;
+
+}
+
+
+.login-footer-note span:last-child::before {
+
+    content: "•";
+
+    margin-right: 8px;
+
+    color:
+        var(--pis-orange);
+
+}
+
+
+/* ========================================
+   LOGIN FOCUS ACCESSIBILITY
+======================================== */
+
+.portal-login-page
+button:focus-visible,
+
+.portal-login-page
+input:focus-visible {
+
+    outline:
+        3px solid rgba(40, 144, 223, 0.18);
+
+    outline-offset: 2px;
+
+}
+
+
+/* ========================================
+   LOGIN TABLET
+======================================== */
+
+@media (max-width: 900px) {
+
+    .login-page-shell {
+
+        grid-template-columns:
+            minmax(300px, 0.8fr)
+            minmax(400px, 1fr);
+
+    }
+
+
+    .login-brand-panel {
+
+        padding:
+            45px
+            40px;
+
+    }
+
+
+    .login-brand-logo {
+
+        width:
+            180px;
+
+    }
+
+
+    .login-brand-content h1 {
+
+        font-size:
+            38px;
+
+    }
+
+
+    .login-brand-content p {
+
+        font-size:
+            15px;
+
+    }
+
+}
+
+
+/* ========================================
+   LOGIN MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    .login-page-shell {
+
+        display: block;
+
+        min-height: 100vh;
+
+    }
+
+
+    .login-brand-panel {
+
+        display: none;
+
+    }
+
+
+    .login-form-panel {
+
+        min-height: 100vh;
+
+        align-items: center;
+
+        padding:
+            28px
+            18px;
+
+    }
+
+
+    .portal-login-page
+    .login-container {
+
+        max-width:
+            430px;
+
+        padding:
+            30px
+            24px;
+
+        border-radius:
+            20px;
+
+    }
+
+
+    .login-mobile-logo-wrapper {
+
+        display: flex;
+
+        justify-content: center;
+
+        margin-bottom:
+            22px;
+
+    }
+
+
+    .login-mobile-logo {
+
+        width:
+            165px;
+
+    }
+
+
+    .login-form-heading {
+
+        text-align:
+            center;
+
+    }
+
+
+    .login-form-heading h2 {
+
+        font-size:
+            24px;
+
+    }
+
+
+    .login-form-heading p {
+
+        font-size:
+            13px;
+
+    }
+
+}
+
+
+/* ========================================
+   EXTRA SMALL LOGIN MOBILE
+======================================== */
+
+@media (max-width: 390px) {
+
+    .login-form-panel {
+
+        padding:
+            20px
+            14px;
+
+    }
+
+
+    .portal-login-page
+    .login-container {
+
+        padding:
+            27px
+            20px;
+
+    }
+
+
+    .login-mobile-logo {
+
+        width:
+            150px;
+
+    }
+
+}
