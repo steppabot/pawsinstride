@@ -7054,6 +7054,41 @@ document
         async event => {
 
 
+            const reportImageButton =
+                event.target.closest(
+                    "[data-client-report-image]"
+                );
+
+
+            if (
+                reportImageButton
+            ) {
+
+
+                const imageUrl =
+                    reportImageButton.dataset
+                        .clientReportImage;
+
+
+                if (
+                    imageUrl
+                ) {
+
+
+                    window.open(
+                        imageUrl,
+                        "_blank",
+                        "noopener,noreferrer"
+                    );
+
+                }
+
+
+                return;
+
+            }
+            
+
             const button =
                 event.target.closest(
                     "[data-client-visit-report-open]"
