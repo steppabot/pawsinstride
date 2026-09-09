@@ -8613,7 +8613,6 @@ async function validateThreePerWeek(
 
 }
 
-
 // ========================================
 // BOOKING SUBMIT
 // ========================================
@@ -8621,6 +8620,124 @@ async function validateThreePerWeek(
 const bookingForm =
     document.getElementById(
         "booking-form"
+    );
+
+
+// ========================================
+// BOOKING FIELD ERROR HELPERS
+// ========================================
+
+function clearBookingFieldErrors() {
+
+    document
+        .querySelectorAll(
+            ".booking-field-error"
+        )
+        .forEach(
+            field => {
+
+                field.classList.remove(
+                    "booking-field-error"
+                );
+
+
+                field.removeAttribute(
+                    "aria-invalid"
+                );
+
+            }
+        );
+
+}
+
+
+function clearBookingFieldError(
+    field
+) {
+
+    if (!field) {
+        return;
+    }
+
+
+    field.classList.remove(
+        "booking-field-error"
+    );
+
+
+    field.removeAttribute(
+        "aria-invalid"
+    );
+
+}
+
+
+function focusBookingFieldError(
+    field
+) {
+
+    if (!field) {
+        return;
+    }
+
+
+    field.classList.add(
+        "booking-field-error"
+    );
+
+
+    field.setAttribute(
+        "aria-invalid",
+        "true"
+    );
+
+
+    field.focus({
+        preventScroll: true
+    });
+
+
+    field.scrollIntoView({
+        behavior:
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches
+                ? "auto"
+                : "smooth",
+
+        block:
+            "center"
+    });
+
+}
+
+
+// ========================================
+// CLEAR BOOKING ERROR WHILE EDITING
+// ========================================
+
+[
+    bookingPetSelect,
+    serviceTypeSelect,
+    serviceOptionSelect,
+    bookingTime
+]
+    .filter(Boolean)
+    .forEach(
+        field => {
+
+            field.addEventListener(
+                "change",
+                () => {
+
+                    clearBookingFieldError(
+                        field
+                    );
+
+                }
+            );
+
+        }
     );
 
 
@@ -8649,6 +8766,9 @@ if (bookingForm) {
                 "";
 
 
+            clearBookingFieldErrors();
+
+
             const primaryPetId =
                 Number(
                     bookingPetSelect.value
@@ -8664,16 +8784,38 @@ if (bookingForm) {
 
 
             // ========================================
-            // BASIC VALIDATION
+            // PRIMARY PET VALIDATION
             // ========================================
 
-            if (
-                !primaryPetId ||
-                !serviceType
-            ) {
+            if (!primaryPetId) {
 
                 message.textContent =
-                    "Please select your pet and service type.";
+                    "Please select a pet.";
+
+
+                focusBookingFieldError(
+                    bookingPetSelect
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // SERVICE TYPE VALIDATION
+            // ========================================
+
+            if (!serviceType) {
+
+                message.textContent =
+                    "Please select a service.";
+
+
+                focusBookingFieldError(
+                    serviceTypeSelect
+                );
 
 
                 return;
@@ -8715,13 +8857,53 @@ if (bookingForm) {
                 bookingTime.value;
 
 
-            if (
-                !serviceOption ||
-                !timeWindow
-            ) {
+            // ========================================
+            // SERVICE OPTION VALIDATION
+            // ========================================
+
+            if (!serviceOption) {
+
+                const config =
+                    SERVICE_CONFIG[
+                        serviceType
+                    ];
+
+
+                const fieldName =
+                    config?.optionLabel ||
+                    "service option";
+
 
                 message.textContent =
-                    "Please complete the service details.";
+                    `Please select a ${fieldName.toLowerCase()}.`;
+
+
+                focusBookingFieldError(
+                    serviceOptionSelect
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // TIME WINDOW VALIDATION
+            // ========================================
+
+            if (!timeWindow) {
+
+                message.textContent =
+                    serviceType ===
+                        "Pet Sitting"
+                        ? "Please select a time block."
+                        : "Please select a preferred time window.";
+
+
+                focusBookingFieldError(
+                    bookingTime
+                );
 
 
                 return;
@@ -8761,6 +8943,25 @@ if (bookingForm) {
                         validation.message;
 
 
+                    const calendar =
+                        document.getElementById(
+                            "multi-date-booking"
+                        );
+
+
+                    calendar?.scrollIntoView({
+                        behavior:
+                            window.matchMedia(
+                                "(prefers-reduced-motion: reduce)"
+                            ).matches
+                                ? "auto"
+                                : "smooth",
+
+                        block:
+                            "center"
+                    });
+
+
                     return;
 
                 }
@@ -8773,6 +8974,25 @@ if (bookingForm) {
 
                 message.textContent =
                     "Please select at least one date.";
+
+
+                const calendar =
+                    document.getElementById(
+                        "multi-date-booking"
+                    );
+
+
+                calendar?.scrollIntoView({
+                    behavior:
+                        window.matchMedia(
+                            "(prefers-reduced-motion: reduce)"
+                        ).matches
+                            ? "auto"
+                            : "smooth",
+
+                    block:
+                        "center"
+                });
 
 
                 return;
@@ -8919,6 +9139,16 @@ if (bookingForm) {
                 }
                 else if (
                     serverMessage.includes(
+                        "time window just filled up"
+                    )
+                ) {
+
+                    message.textContent =
+                        serverMessage;
+
+                }
+                else if (
+                    serverMessage.includes(
                         "Pricing is unavailable"
                     )
                 ) {
@@ -8960,7 +9190,6 @@ if (bookingForm) {
     );
 
 }
-
 
 // ========================================
 // BOARDING SUBMIT
