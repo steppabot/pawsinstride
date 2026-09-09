@@ -6441,20 +6441,15 @@ let preferredTimeAvailabilityRequestId =
 // temporarily clear the actual dropdown
 // because one newly-added date conflicts.
 //
-// Example:
+// When that happens:
 //
-// Sep 22 + Sep 23
-// Client selects 12-2
+// - conflicting visit stays red
+// - Preferred Time Window turns red
+// - invalid select value is cleared
+// - remembered window stays in the summary
 //
-// Then Sep 21 is added and 12-2 is full.
-//
-// We clear the actual select so the booking
-// cannot submit, but remember 12-2 so:
-//
-// - Sep 21 can stay visibly marked red
-// - removing Sep 21 can restore 12-2
-// - adding Sep 21 back re-creates the
-//   conflict instead of forgetting it.
+// Removing the conflicting date restores the
+// original window when it becomes valid again.
 // ========================================
 
 let selectedDateCapacityConflicts =
@@ -6679,6 +6674,54 @@ function showTimeWindowCapacityHelp() {
 
 
 // ========================================
+// TIME WINDOW CONFLICT ERROR
+// ========================================
+//
+// Uses the SAME booking-field-error class
+// already used by Request Service validation.
+// No new CSS is required.
+// ========================================
+
+function showTimeWindowConflictError() {
+
+    if (!bookingTime) {
+        return;
+    }
+
+
+    bookingTime.classList.add(
+        "booking-field-error"
+    );
+
+
+    bookingTime.setAttribute(
+        "aria-invalid",
+        "true"
+    );
+
+}
+
+
+function clearTimeWindowConflictError() {
+
+    if (!bookingTime) {
+        return;
+    }
+
+
+    bookingTime.classList.remove(
+        "booking-field-error"
+    );
+
+
+    bookingTime.removeAttribute(
+        "aria-invalid"
+    );
+
+}
+
+
+// ========================================
 // REFRESH TIME-WINDOW CAPACITY
 // ========================================
 
@@ -6696,6 +6739,9 @@ async function refreshPreferredTimeWindowAvailability() {
     ) {
 
         selectedDateCapacityConflicts.clear();
+
+
+        clearTimeWindowConflictError();
 
 
         clearTimeWindowCapacityHelp();
@@ -6716,6 +6762,9 @@ async function refreshPreferredTimeWindowAvailability() {
     if (!requestedMinutes) {
 
         selectedDateCapacityConflicts.clear();
+
+
+        clearTimeWindowConflictError();
 
 
         clearTimeWindowCapacityHelp();
@@ -6741,14 +6790,7 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
     // ========================================
-    // TRACK THE CLIENT'S INTENDED WINDOW
-    // ========================================
-    //
-    // Use the real select value when present.
-    //
-    // If the select was automatically cleared
-    // because of a capacity conflict, continue
-    // checking lastSelectedTimeWindow.
+    // TRACK CLIENT'S INTENDED WINDOW
     // ========================================
 
     const currentSelectedWindow =
@@ -6780,6 +6822,9 @@ async function refreshPreferredTimeWindowAvailability() {
     ) {
 
         selectedDateCapacityConflicts.clear();
+
+
+        clearTimeWindowConflictError();
 
 
         clearTimeWindowCapacityHelp();
@@ -7179,14 +7224,7 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
     // ========================================
-    // RECHECK THE TRACKED TIME WINDOW
-    // ========================================
-    //
-    // This is the important fix.
-    //
-    // Even when bookingTime.value is blank
-    // because we cleared it earlier, continue
-    // evaluating lastSelectedTimeWindow.
+    // RECHECK TRACKED TIME WINDOW
     // ========================================
 
     selectedDateCapacityConflicts.clear();
@@ -7247,8 +7285,19 @@ async function refreshPreferredTimeWindowAvailability() {
             );
 
 
+            // The invalid time cannot remain
+            // selected because it must never be
+            // submitted to the booking RPC.
+
             bookingTime.value =
                 "";
+
+
+            // Make the empty dropdown visually
+            // obvious so the client knows where
+            // they need to make a new choice.
+
+            showTimeWindowConflictError();
 
 
             updateBookingTotal();
@@ -7257,16 +7306,6 @@ async function refreshPreferredTimeWindowAvailability() {
 
         // ========================================
         // TRACKED WINDOW IS VALID AGAIN
-        // ========================================
-        //
-        // Example:
-        //
-        // Sep 21 caused 12-2 to fail.
-        //
-        // Client removes Sep 21.
-        //
-        // Sep 22 + Sep 23 can use 12-2,
-        // so restore the original selection.
         // ========================================
 
         else if (
@@ -7282,9 +7321,19 @@ async function refreshPreferredTimeWindowAvailability() {
                 trackedTimeWindow;
 
 
+            clearTimeWindowConflictError();
+
+
             updateBookingTotal();
 
         }
+
+    } else {
+
+        // No remembered selection means there
+        // is no capacity conflict to display.
+
+        clearTimeWindowConflictError();
 
     }
 
@@ -7329,6 +7378,9 @@ async function populatePreferredTimeWindows() {
 
     lastSelectedTimeWindow =
         "";
+
+
+    clearTimeWindowConflictError();
 
 
     clearTimeWindowCapacityHelp();
@@ -7404,9 +7456,6 @@ bookingTime
         "change",
         () => {
 
-            selectedDateCapacityConflicts.clear();
-
-
             // ========================================
             // CLIENT SELECTED A REAL WINDOW
             // ========================================
@@ -7418,28 +7467,35 @@ bookingTime
                 lastSelectedTimeWindow =
                     bookingTime.value;
 
+
+                selectedDateCapacityConflicts.clear();
+
+
+                clearTimeWindowConflictError();
+
+
+                renderSelectedDates();
+
+
+                return;
+
             }
 
+
             // ========================================
-            // CLIENT MANUALLY CHOSE PLACEHOLDER
-            // ========================================
-            //
-            // If there are no capacity conflicts,
-            // clearing the dropdown manually means
-            // they genuinely no longer want the
-            // previously selected window.
-            //
-            // Do NOT erase the remembered window
-            // during an automatic capacity clear.
+            // CLIENT MANUALLY CLEARED WINDOW
             // ========================================
 
-            else if (
+            if (
                 selectedDateCapacityConflicts.size ===
                 0
             ) {
 
                 lastSelectedTimeWindow =
                     "";
+
+
+                clearTimeWindowConflictError();
 
             }
 
@@ -7531,6 +7587,9 @@ function populatePetSittingTimeBlocks() {
         "";
 
 
+    clearTimeWindowConflictError();
+
+
     clearTimeWindowCapacityHelp();
 
 
@@ -7610,6 +7669,7 @@ function populatePetSittingTimeBlocks() {
     renderSelectedDates();
 
 }
+
 
 // ========================================
 // BOOKING CALENDAR
