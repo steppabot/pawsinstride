@@ -129,9 +129,14 @@ const petTemplate =
 // INITIALIZE SIGNUP
 // ========================================
 
-document.addEventListener("DOMContentLoaded", () => {
-    initializeSignup();
-});
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        initializeSignup();
+
+    }
+);
 
 
 function initializeSignup() {
@@ -142,6 +147,17 @@ function initializeSignup() {
         1,
         "Your Information"
     );
+
+
+    /*
+     * Breed loading is intentionally
+     * non-blocking.
+     *
+     * Signup still works normally if the
+     * external Dog API is unavailable.
+     */
+
+    loadSignupDogBreeds();
 
 }
 
@@ -806,6 +822,186 @@ function setupSignupEvents() {
         "change",
         clearSignupError
     );
+
+}
+
+// ========================================
+// DOG BREED AUTOCOMPLETE
+// ========================================
+
+const DOG_BREEDS_API_URL =
+    "https://dogapi.dog/api/v2/breeds";
+
+
+let signupDogBreeds =
+    [];
+
+
+// ========================================
+// LOAD DOG BREEDS
+// ========================================
+
+async function loadSignupDogBreeds() {
+
+    const breedList =
+        document.getElementById(
+            "signup-dog-breeds"
+        );
+
+
+    if (!breedList) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                DOG_BREEDS_API_URL,
+                {
+                    method: "GET",
+                    headers: {
+                        Accept:
+                            "application/json"
+                    }
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Dog breed API returned ${response.status}.`
+            );
+
+        }
+
+
+        const payload =
+            await response.json();
+
+
+        if (
+            !Array.isArray(
+                payload?.data
+            )
+        ) {
+
+            throw new Error(
+                "Dog breed API returned an unexpected response."
+            );
+
+        }
+
+
+        // ========================================
+        // EXTRACT BREED NAMES
+        // ========================================
+
+        signupDogBreeds =
+            payload.data
+                .map(
+                    breed => {
+
+                        return String(
+                            breed
+                                ?.attributes
+                                ?.name ||
+                            ""
+                        ).trim();
+
+                    }
+                )
+                .filter(Boolean);
+
+
+        // ========================================
+        // REMOVE DUPLICATES
+        // ========================================
+
+        signupDogBreeds =
+            Array.from(
+                new Set(
+                    signupDogBreeds
+                )
+            );
+
+
+        // ========================================
+        // SORT ALPHABETICALLY
+        // ========================================
+
+        signupDogBreeds.sort(
+            (a, b) =>
+                a.localeCompare(
+                    b,
+                    undefined,
+                    {
+                        sensitivity:
+                            "base"
+                    }
+                )
+        );
+
+
+        // ========================================
+        // BUILD AUTOCOMPLETE OPTIONS
+        // ========================================
+
+        const fragment =
+            document.createDocumentFragment();
+
+
+        signupDogBreeds.forEach(
+            breedName => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    breedName;
+
+
+                fragment.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        breedList.replaceChildren(
+            fragment
+        );
+
+
+        console.info(
+            `Loaded ${signupDogBreeds.length} dog breeds for signup autocomplete.`
+        );
+
+    }
+    catch (error) {
+
+        /*
+         * Never block signup because an
+         * optional autocomplete service
+         * could not load.
+         */
+
+        console.warn(
+            "Dog breed autocomplete could not be loaded:",
+            error
+        );
+
+
+        signupDogBreeds =
+            [];
+
+    }
 
 }
 
