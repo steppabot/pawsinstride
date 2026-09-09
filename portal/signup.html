@@ -587,15 +587,23 @@
                                     <span aria-hidden="true">*</span>
                                 </label>
                 
-                                <input
-                                    name="pet_breed"
-                                    type="text"
-                                    autocomplete="off"
-                                    list="signup-dog-breeds"
-                                    placeholder="Start typing a breed"
-                                    maxlength="80"
-                                    required
-                                >
+                                <div class="signup-breed-autocomplete">
+                
+                                    <input
+                                        name="pet_breed"
+                                        type="text"
+                                        autocomplete="off"
+                                        placeholder="Start typing a breed"
+                                        maxlength="80"
+                                        required
+                                    >
+                
+                                    <div
+                                        class="signup-breed-suggestions"
+                                        hidden
+                                    ></div>
+                
+                                </div>
                 
                             </div>
                 
@@ -649,13 +657,6 @@
                     </article>
                 
                 </div>
-                
-                
-                <!-- ========================================
-                     DOG BREED AUTOCOMPLETE LIST
-                ======================================== -->
-                <datalist id="signup-dog-breeds"></datalist>
-
 
                 <!-- ========================================
                      ADD ANOTHER PET
@@ -1011,15 +1012,23 @@
                         <span aria-hidden="true">*</span>
                     </label>
     
-                    <input
-                        name="pet_breed"
-                        type="text"
-                        autocomplete="off"
-                        list="signup-dog-breeds"
-                        placeholder="Start typing a breed"
-                        maxlength="80"
-                        required
-                    >
+                    <div class="signup-breed-autocomplete">
+    
+                        <input
+                            name="pet_breed"
+                            type="text"
+                            autocomplete="off"
+                            placeholder="Start typing a breed"
+                            maxlength="80"
+                            required
+                        >
+    
+                        <div
+                            class="signup-breed-suggestions"
+                            hidden
+                        ></div>
+    
+                    </div>
     
                 </div>
     
@@ -1073,7 +1082,6 @@
         </article>
     
     </template>
-
 
     <!-- ========================================
          SUPABASE + GOOGLE MAPS + SIGNUP SCRIPT
