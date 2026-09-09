@@ -537,36 +537,38 @@
                      PET FORMS CONTAINER
                 ======================================== -->
                 <div id="signup-pets-container">
-
+                
                     <article
                         class="signup-pet-card"
                         data-pet-index="0"
                     >
-
+                
                         <div class="signup-pet-card-header">
-
+                
                             <div>
+                
                                 <p class="signup-pet-number">
                                     Pet 1
                                 </p>
-
+                
                                 <h2>
                                     Pet Information
                                 </h2>
+                
                             </div>
-
+                
                         </div>
-
-
+                
+                
                         <div class="signup-form-grid">
-
+                
                             <div class="signup-field">
-
+                
                                 <label>
                                     Pet Name
                                     <span aria-hidden="true">*</span>
                                 </label>
-
+                
                                 <input
                                     name="pet_name"
                                     type="text"
@@ -574,77 +576,85 @@
                                     placeholder="Pet's name"
                                     required
                                 >
-
+                
                             </div>
-
-
+                
+                
                             <div class="signup-field">
-
+                
                                 <label>
                                     Breed
                                     <span aria-hidden="true">*</span>
                                 </label>
-
+                
                                 <input
                                     name="pet_breed"
                                     type="text"
                                     autocomplete="off"
-                                    placeholder="Golden Retriever"
+                                    list="signup-dog-breeds"
+                                    placeholder="Start typing a breed"
+                                    maxlength="80"
                                     required
                                 >
-
+                
                             </div>
-
-
+                
+                
                             <div class="signup-field">
-
+                
                                 <label>
                                     Birthday
                                     <span class="signup-optional">
                                         Optional
                                     </span>
                                 </label>
-
+                
                                 <input
                                     name="pet_birthday"
                                     type="date"
                                 >
-
+                
                             </div>
-
-
+                
+                
                             <div class="signup-field">
-
+                
                                 <label>
                                     Gender
                                     <span class="signup-optional">
                                         Optional
                                     </span>
                                 </label>
-
+                
                                 <select name="pet_gender">
-
+                
                                     <option value="">
                                         Select gender
                                     </option>
-
+                
                                     <option value="Male">
                                         Male
                                     </option>
-
+                
                                     <option value="Female">
                                         Female
                                     </option>
-
+                
                                 </select>
-
+                
                             </div>
-
+                
                         </div>
-
+                
                     </article>
-
+                
                 </div>
+                
+                
+                <!-- ========================================
+                     DOG BREED AUTOCOMPLETE LIST
+                ======================================== -->
+                <datalist id="signup-dog-breeds"></datalist>
 
 
                 <!-- ========================================
@@ -941,27 +951,27 @@
          USED BY SIGNUP.JS
     ======================================== -->
     <template id="signup-pet-template">
-
+    
         <article
             class="signup-pet-card"
             data-pet-index=""
         >
-
+    
             <div class="signup-pet-card-header">
-
+    
                 <div>
-
+    
                     <p class="signup-pet-number">
                         Pet
                     </p>
-
+    
                     <h2>
                         Pet Information
                     </h2>
-
+    
                 </div>
-
-
+    
+    
                 <button
                     class="signup-remove-pet-button"
                     type="button"
@@ -970,19 +980,19 @@
                 >
                     Remove
                 </button>
-
+    
             </div>
-
-
+    
+    
             <div class="signup-form-grid">
-
+    
                 <div class="signup-field">
-
+    
                     <label>
                         Pet Name
                         <span aria-hidden="true">*</span>
                     </label>
-
+    
                     <input
                         name="pet_name"
                         type="text"
@@ -990,76 +1000,78 @@
                         placeholder="Pet's name"
                         required
                     >
-
+    
                 </div>
-
-
+    
+    
                 <div class="signup-field">
-
+    
                     <label>
                         Breed
                         <span aria-hidden="true">*</span>
                     </label>
-
+    
                     <input
                         name="pet_breed"
                         type="text"
                         autocomplete="off"
-                        placeholder="Golden Retriever"
+                        list="signup-dog-breeds"
+                        placeholder="Start typing a breed"
+                        maxlength="80"
                         required
                     >
-
+    
                 </div>
-
-
+    
+    
                 <div class="signup-field">
-
+    
                     <label>
                         Birthday
                         <span class="signup-optional">
                             Optional
                         </span>
                     </label>
-
+    
                     <input
                         name="pet_birthday"
                         type="date"
                     >
-
+    
                 </div>
-
-
+    
+    
                 <div class="signup-field">
-
+    
                     <label>
                         Gender
                         <span class="signup-optional">
                             Optional
                         </span>
                     </label>
-
+    
                     <select name="pet_gender">
-
+    
                         <option value="">
                             Select gender
                         </option>
-
+    
                         <option value="Male">
                             Male
                         </option>
-
+    
                         <option value="Female">
                             Female
                         </option>
-
+    
                     </select>
-
+    
                 </div>
-
+    
             </div>
-
+    
         </article>
-
+    
     </template>
 
 
