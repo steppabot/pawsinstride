@@ -6433,6 +6433,32 @@ let preferredTimeAvailabilityRequestId =
 
 
 // ========================================
+// SELECTED VISIT CAPACITY STATE
+// ========================================
+//
+// If somebody selects a valid time window
+// and THEN adds a date that is full for that
+// same window, we remember the attempted
+// window and the exact conflicting dates.
+//
+// This allows Selected Visits to show:
+//
+// Sep 21
+// 12:00 PM – 2:00 PM
+// UNAVAILABLE
+//
+// while Sep 22 / Sep 23 remain normal.
+// ========================================
+
+let selectedDateCapacityConflicts =
+    new Set();
+
+
+let lastSelectedTimeWindow =
+    "";
+
+
+// ========================================
 // REQUESTED SERVICE MINUTES
 // ========================================
 
@@ -6636,7 +6662,7 @@ function showTimeWindowCapacityHelp() {
 
 
     help.textContent =
-        "Some time windows are unavailable on specific selected dates. The unavailable date is shown next to the time window. Remove that date if you want to use that window.";
+        "Some time windows are unavailable on specific selected dates. Remove the unavailable date if you want to use that time window.";
 
 
     help.style.display =
@@ -6662,7 +6688,11 @@ async function refreshPreferredTimeWindowAvailability() {
             "Drop-In Visit"
     ) {
 
+        selectedDateCapacityConflicts.clear();
+
         clearTimeWindowCapacityHelp();
+
+        renderSelectedDates();
 
         return;
 
@@ -6675,7 +6705,11 @@ async function refreshPreferredTimeWindowAvailability() {
 
     if (!requestedMinutes) {
 
+        selectedDateCapacityConflicts.clear();
+
         clearTimeWindowCapacityHelp();
+
+        renderSelectedDates();
 
         return;
 
@@ -6697,6 +6731,16 @@ async function refreshPreferredTimeWindowAvailability() {
         bookingTime.value;
 
 
+    if (
+        previousValue
+    ) {
+
+        lastSelectedTimeWindow =
+            previousValue;
+
+    }
+
+
     // ========================================
     // NO DATES YET
     // ========================================
@@ -6704,6 +6748,8 @@ async function refreshPreferredTimeWindowAvailability() {
     if (
         selectedDates.length === 0
     ) {
+
+        selectedDateCapacityConflicts.clear();
 
         clearTimeWindowCapacityHelp();
 
@@ -6764,6 +6810,8 @@ async function refreshPreferredTimeWindowAvailability() {
             }
         );
 
+
+        renderSelectedDates();
 
         return;
 
@@ -6902,7 +6950,6 @@ async function refreshPreferredTimeWindowAvailability() {
 
         clearTimeWindowCapacityHelp();
 
-
         return;
 
     }
@@ -7005,7 +7052,7 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
             // ========================================
-            // EVERY SELECTED DATE IS FULL
+            // EVERY SELECTED DATE UNAVAILABLE
             // ========================================
 
             if (
@@ -7035,22 +7082,7 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
             // ========================================
-            // PARTIALLY UNAVAILABLE
-            // ========================================
-            //
-            // Example:
-            //
-            // Sep 21 = FULL
-            // Sep 22 = AVAILABLE
-            // Sep 23 = AVAILABLE
-            //
-            // The option still cannot be selected
-            // because one booking currently uses
-            // the same time window for every date.
-            //
-            // But we identify the actual conflicting
-            // date instead of calling the entire
-            // window FULL.
+            // ONLY SOME DATES UNAVAILABLE
             // ========================================
 
             hasPartialAvailability =
@@ -7114,11 +7146,23 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
     // ========================================
-    // CLEAR SELECTED WINDOW IF IT BECAME
-    // UNAVAILABLE FOR ANY SELECTED DATE
+    // UPDATE CONFLICTING SELECTED VISITS
     // ========================================
 
-    if (previousValue) {
+    selectedDateCapacityConflicts.clear();
+
+
+    if (
+        previousValue
+    ) {
+
+        const selectedResult =
+            results.find(
+                result =>
+                    result.window.value ===
+                    previousValue
+            );
+
 
         const selectedOption =
             Array.from(
@@ -7135,6 +7179,27 @@ async function refreshPreferredTimeWindowAvailability() {
                 ?.disabled
         ) {
 
+            lastSelectedTimeWindow =
+                previousValue;
+
+
+            selectedResult
+                ?.dateChecks
+                ?.filter(
+                    check =>
+                        !check.available
+                )
+                .forEach(
+                    check => {
+
+                        selectedDateCapacityConflicts.add(
+                            check.date
+                        );
+
+                    }
+                );
+
+
             bookingTime.value =
                 "";
 
@@ -7146,9 +7211,16 @@ async function refreshPreferredTimeWindowAvailability() {
             bookingTime.value =
                 previousValue;
 
+
+            lastSelectedTimeWindow =
+                previousValue;
+
         }
 
     }
+
+
+    renderSelectedDates();
 
 }
 
@@ -7181,6 +7253,13 @@ async function populatePreferredTimeWindows() {
                 Select a time window
             </option>
         `;
+
+
+    selectedDateCapacityConflicts.clear();
+
+
+    lastSelectedTimeWindow =
+        "";
 
 
     clearTimeWindowCapacityHelp();
@@ -7239,9 +7318,45 @@ async function populatePreferredTimeWindows() {
     );
 
 
+    renderSelectedDates();
+
+
     await refreshPreferredTimeWindowAvailability();
 
 }
+
+
+// ========================================
+// UPDATE SELECTED VISITS WHEN TIME CHANGES
+// ========================================
+
+bookingTime
+    ?.addEventListener(
+        "change",
+        () => {
+
+            selectedDateCapacityConflicts.clear();
+
+
+            if (
+                bookingTime.value
+            ) {
+
+                lastSelectedTimeWindow =
+                    bookingTime.value;
+
+            } else {
+
+                lastSelectedTimeWindow =
+                    "";
+
+            }
+
+
+            renderSelectedDates();
+
+        }
+    );
 
 
 // ========================================
@@ -7318,6 +7433,13 @@ function populatePetSittingTimeBlocks() {
         `;
 
 
+    selectedDateCapacityConflicts.clear();
+
+
+    lastSelectedTimeWindow =
+        "";
+
+
     clearTimeWindowCapacityHelp();
 
 
@@ -7325,6 +7447,9 @@ function populatePetSittingTimeBlocks() {
 
         wrapper.style.display =
             "none";
+
+
+        renderSelectedDates();
 
         return;
 
@@ -7345,6 +7470,9 @@ function populatePetSittingTimeBlocks() {
 
         wrapper.style.display =
             "none";
+
+
+        renderSelectedDates();
 
         return;
 
@@ -7385,7 +7513,12 @@ function populatePetSittingTimeBlocks() {
         }
     );
 
+
+    renderSelectedDates();
+
 }
+
+
 // ========================================
 // BOOKING CALENDAR
 // ========================================
@@ -7606,11 +7739,6 @@ function renderBookingCalendar() {
         // ========================================
         // HOLIDAY INDICATOR
         // ========================================
-        //
-        // Holidays receive a small ✦ marker.
-        // The permanent holiday engine above
-        // determines the holiday automatically.
-        // ========================================
 
         if (
             holidayName
@@ -7725,6 +7853,10 @@ function renderBookingCalendar() {
 }
 
 
+// ========================================
+// TOGGLE SELECTED DATE
+// ========================================
+
 function toggleSelectedDate(
     date
 ) {
@@ -7741,6 +7873,11 @@ function toggleSelectedDate(
                     item !== date
             );
 
+
+        selectedDateCapacityConflicts.delete(
+            date
+        );
+
     } else {
 
         selectedDates.push(
@@ -7755,10 +7892,15 @@ function toggleSelectedDate(
 
     renderSelectedDates();
 
+
     renderBookingCalendar();
 
 }
 
+
+// ========================================
+// SELECTED VISITS
+// ========================================
 
 function renderSelectedDates() {
 
@@ -7790,6 +7932,20 @@ function renderSelectedDates() {
         }`;
 
 
+    // ========================================
+    // TIME WINDOW SHOWN IN SUMMARY
+    // ========================================
+
+    const summaryTimeWindow =
+        bookingTime?.value ||
+        lastSelectedTimeWindow ||
+        "";
+
+
+    // ========================================
+    // EMPTY STATE
+    // ========================================
+
     if (
         selectedDates.length === 0
     ) {
@@ -7797,7 +7953,7 @@ function renderSelectedDates() {
         list.innerHTML =
             `
                 <p class="empty-dates-message">
-                    No dates selected yet.
+                    No visits selected yet.
                 </p>
             `;
 
@@ -7806,23 +7962,79 @@ function renderSelectedDates() {
         list.innerHTML =
             selectedDates
                 .map(
-                    date => `
-                        <div class="selected-date-item">
+                    date => {
 
-                            <span>
-                                ${formatDate(date)}
-                            </span>
+                        const hasConflict =
+                            selectedDateCapacityConflicts.has(
+                                date
+                            );
 
-                            <button
-                                type="button"
-                                class="remove-date-button"
-                                data-date="${date}"
+
+                        const timeText =
+                            summaryTimeWindow
+                                ? summaryTimeWindow
+                                : "Time window not selected";
+
+
+                        return `
+                            <div
+                                class="
+                                    selected-date-item
+                                    ${
+                                        hasConflict
+                                            ? "selected-date-item-conflict"
+                                            : ""
+                                    }
+                                "
                             >
-                                Remove
-                            </button>
 
-                        </div>
-                    `
+                                <div class="selected-visit-summary">
+
+                                    <strong class="selected-visit-date">
+                                        ${formatDate(date)}
+                                    </strong>
+
+                                    <div class="selected-visit-time-row">
+
+                                        <span
+                                            class="
+                                                selected-visit-time
+                                                ${
+                                                    hasConflict
+                                                        ? "selected-visit-time-conflict"
+                                                        : ""
+                                                }
+                                            "
+                                        >
+                                            ${timeText}
+                                        </span>
+
+                                        ${
+                                            hasConflict
+                                                ? `
+                                                    <span class="selected-visit-unavailable">
+                                                        Unavailable
+                                                    </span>
+                                                `
+                                                : ""
+                                        }
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="remove-date-button"
+                                    data-date="${date}"
+                                >
+                                    Remove
+                                </button>
+
+                            </div>
+                        `;
+
+                    }
                 )
                 .join("");
 
@@ -7838,15 +8050,24 @@ function renderSelectedDates() {
                         "click",
                         () => {
 
+                            const date =
+                                button.dataset.date;
+
+
                             selectedDates =
                                 selectedDates.filter(
                                     item =>
-                                        item !==
-                                        button.dataset.date
+                                        item !== date
                                 );
 
 
+                            selectedDateCapacityConflicts.delete(
+                                date
+                            );
+
+
                             renderSelectedDates();
+
 
                             renderBookingCalendar();
 
@@ -7862,6 +8083,7 @@ function renderSelectedDates() {
     updateBookingTotal();
 
 }
+
 
 // ========================================
 // BOARDING
