@@ -727,6 +727,595 @@ if (forgotPasswordForm) {
 
 }
 
+// ========================================
+// RESET PASSWORD
+// ========================================
+
+const resetPasswordForm =
+    document.getElementById(
+        "reset-password-form"
+    );
+
+
+if (resetPasswordForm) {
+
+    const resetPasswordMessage =
+        document.getElementById(
+            "reset-password-message"
+        );
+
+
+    const resetPasswordLoginLink =
+        document.getElementById(
+            "reset-password-login-link"
+        );
+
+
+    const resetNewPasswordField =
+        document.getElementById(
+            "reset-new-password"
+        );
+
+
+    const resetConfirmPasswordField =
+        document.getElementById(
+            "reset-confirm-password"
+        );
+
+
+    const resetPasswordSubmit =
+        document.getElementById(
+            "reset-password-submit"
+        );
+
+
+    let passwordRecoveryReady =
+        false;
+
+
+    // ========================================
+    // RESET FIELD ERROR
+    // ========================================
+
+    function clearResetPasswordFieldError(
+        field
+    ) {
+
+        if (!field) {
+            return;
+        }
+
+
+        field.style.borderColor =
+            "";
+
+
+        field.style.boxShadow =
+            "";
+
+    }
+
+
+    // ========================================
+    // SHOW FIELD ERROR
+    // ========================================
+
+    function showResetPasswordFieldError(
+        field
+    ) {
+
+        if (!field) {
+            return;
+        }
+
+
+        field.style.borderColor =
+            "#dc3545";
+
+
+        field.style.boxShadow =
+            "0 0 0 3px rgba(220, 53, 69, 0.14)";
+
+
+        field.focus();
+
+    }
+
+
+    // ========================================
+    // ENABLE RESET FORM
+    // ========================================
+
+    function enablePasswordRecoveryForm() {
+
+        passwordRecoveryReady =
+            true;
+
+
+        resetPasswordForm.style.display =
+            "";
+
+
+        resetPasswordMessage.textContent =
+            "";
+
+
+        resetPasswordLoginLink.style.display =
+            "none";
+
+    }
+
+
+    // ========================================
+    // INVALID OR EXPIRED LINK
+    // ========================================
+
+    function showInvalidRecoveryLink() {
+
+        passwordRecoveryReady =
+            false;
+
+
+        resetPasswordForm.style.display =
+            "none";
+
+
+        resetPasswordMessage.textContent =
+            "This password reset link is invalid or has expired. Please request a new reset link.";
+
+
+        resetPasswordLoginLink.style.display =
+            "";
+
+    }
+
+
+    // ========================================
+    // WATCH SUPABASE AUTH RECOVERY
+    // ========================================
+
+    const {
+        data: resetAuthListener
+    } =
+        supabaseClient
+            .auth
+            .onAuthStateChange(
+                (
+                    event,
+                    session
+                ) => {
+
+                    if (
+                        event ===
+                            "PASSWORD_RECOVERY" &&
+                        session
+                    ) {
+
+                        enablePasswordRecoveryForm();
+
+                    }
+
+                }
+            );
+
+
+    // ========================================
+    // CHECK RECOVERY SESSION
+    // ========================================
+
+    async function initializePasswordRecovery() {
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .auth
+                    .getSession();
+
+
+            if (error) {
+
+                console.error(
+                    "Password recovery session error:",
+                    error
+                );
+
+
+                showInvalidRecoveryLink();
+
+                return;
+
+            }
+
+
+            if (
+                data?.session
+            ) {
+
+                enablePasswordRecoveryForm();
+
+                return;
+
+            }
+
+
+            /*
+             * Give Supabase a moment to process the
+             * recovery information from the URL.
+             */
+
+            window.setTimeout(
+                () => {
+
+                    if (
+                        !passwordRecoveryReady
+                    ) {
+
+                        showInvalidRecoveryLink();
+
+                    }
+
+                },
+                1500
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "Password recovery initialization error:",
+                error
+            );
+
+
+            showInvalidRecoveryLink();
+
+        }
+
+    }
+
+
+    initializePasswordRecovery();
+
+
+    // ========================================
+    // PASSWORD FIELD LISTENERS
+    // ========================================
+
+    resetNewPasswordField
+        ?.addEventListener(
+            "input",
+            () => {
+
+                clearResetPasswordFieldError(
+                    resetNewPasswordField
+                );
+
+            }
+        );
+
+
+    resetConfirmPasswordField
+        ?.addEventListener(
+            "input",
+            () => {
+
+                clearResetPasswordFieldError(
+                    resetConfirmPasswordField
+                );
+
+            }
+        );
+
+
+    // ========================================
+    // NEW PASSWORD SHOW / HIDE
+    // ========================================
+
+    const resetNewPasswordToggle =
+        document.getElementById(
+            "reset-new-password-toggle"
+        );
+
+
+    resetNewPasswordToggle
+        ?.addEventListener(
+            "click",
+            () => {
+
+                const showing =
+                    resetNewPasswordField
+                        .type ===
+                    "text";
+
+
+                resetNewPasswordField.type =
+                    showing
+                        ? "password"
+                        : "text";
+
+
+                resetNewPasswordToggle
+                    .textContent =
+                        showing
+                            ? "Show"
+                            : "Hide";
+
+
+                resetNewPasswordToggle
+                    .setAttribute(
+                        "aria-label",
+                        showing
+                            ? "Show new password"
+                            : "Hide new password"
+                    );
+
+            }
+        );
+
+
+    // ========================================
+    // CONFIRM PASSWORD SHOW / HIDE
+    // ========================================
+
+    const resetConfirmPasswordToggle =
+        document.getElementById(
+            "reset-confirm-password-toggle"
+        );
+
+
+    resetConfirmPasswordToggle
+        ?.addEventListener(
+            "click",
+            () => {
+
+                const showing =
+                    resetConfirmPasswordField
+                        .type ===
+                    "text";
+
+
+                resetConfirmPasswordField.type =
+                    showing
+                        ? "password"
+                        : "text";
+
+
+                resetConfirmPasswordToggle
+                    .textContent =
+                        showing
+                            ? "Show"
+                            : "Hide";
+
+
+                resetConfirmPasswordToggle
+                    .setAttribute(
+                        "aria-label",
+                        showing
+                            ? "Show confirmed password"
+                            : "Hide confirmed password"
+                    );
+
+            }
+        );
+
+
+    // ========================================
+    // SAVE NEW PASSWORD
+    // ========================================
+
+    resetPasswordForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            resetPasswordMessage.textContent =
+                "";
+
+
+            clearResetPasswordFieldError(
+                resetNewPasswordField
+            );
+
+
+            clearResetPasswordFieldError(
+                resetConfirmPasswordField
+            );
+
+
+            if (
+                !passwordRecoveryReady
+            ) {
+
+                showInvalidRecoveryLink();
+
+                return;
+
+            }
+
+
+            const newPassword =
+                String(
+                    resetNewPasswordField
+                        ?.value ||
+                    ""
+                );
+
+
+            const confirmPassword =
+                String(
+                    resetConfirmPasswordField
+                        ?.value ||
+                    ""
+                );
+
+
+            // ========================================
+            // PASSWORD LENGTH
+            // ========================================
+
+            if (
+                newPassword.length <
+                8
+            ) {
+
+                showResetPasswordFieldError(
+                    resetNewPasswordField
+                );
+
+
+                resetPasswordMessage.textContent =
+                    "Your password must be at least 8 characters.";
+
+                return;
+
+            }
+
+
+            // ========================================
+            // PASSWORD MATCH
+            // ========================================
+
+            if (
+                newPassword !==
+                confirmPassword
+            ) {
+
+                showResetPasswordFieldError(
+                    resetConfirmPasswordField
+                );
+
+
+                resetPasswordMessage.textContent =
+                    "The passwords do not match.";
+
+                return;
+
+            }
+
+
+            // ========================================
+            // UPDATE BUTTON
+            // ========================================
+
+            resetPasswordSubmit.disabled =
+                true;
+
+
+            resetPasswordSubmit.textContent =
+                "Updating...";
+
+
+            try {
+
+                // ========================================
+                // UPDATE PASSWORD IN SUPABASE
+                // ========================================
+
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .auth
+                        .updateUser({
+
+                            password:
+                                newPassword
+
+                        });
+
+
+                if (error) {
+
+                    throw error;
+
+                }
+
+
+                // ========================================
+                // SUCCESS
+                // ========================================
+
+                resetPasswordForm.style.display =
+                    "none";
+
+
+                resetPasswordMessage.textContent =
+                    "Your password has been updated successfully. You can now sign in with your new password.";
+
+
+                resetPasswordLoginLink.style.display =
+                    "";
+
+
+                // ========================================
+                // SIGN OUT RECOVERY SESSION
+                // ========================================
+
+                const {
+                    error: signOutError
+                } =
+                    await supabaseClient
+                        .auth
+                        .signOut();
+
+
+                if (signOutError) {
+
+                    console.warn(
+                        "Recovery session sign-out error:",
+                        signOutError
+                    );
+
+                }
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Password update error:",
+                    error
+                );
+
+
+                resetPasswordMessage.textContent =
+                    "We couldn't update your password. Your reset link may have expired. Please request a new one.";
+
+
+                resetPasswordSubmit.disabled =
+                    false;
+
+
+                resetPasswordSubmit.textContent =
+                    "Update Password";
+
+            }
+
+        }
+    );
+
+
+    // ========================================
+    // CLEAN UP AUTH LISTENER
+    // ========================================
+
+    window.addEventListener(
+        "beforeunload",
+        () => {
+
+            resetAuthListener
+                ?.subscription
+                ?.unsubscribe();
+
+        }
+    );
+
+}
 
 // ========================================
 // DASHBOARD
