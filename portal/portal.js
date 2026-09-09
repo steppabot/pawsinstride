@@ -423,6 +423,323 @@ function formatServicePrice(
 
 }
 
+
+// ========================================
+// PERMANENT HOLIDAY DISPLAY ENGINE
+// ========================================
+//
+// IMPORTANT:
+// This mirrors the permanent Supabase holiday
+// engine so the client can SEE holiday pricing
+// before submitting.
+//
+// Supabase create_service_booking() remains
+// authoritative for the actual stored price.
+// ========================================
+
+function getNthWeekdayOfMonth(
+    year,
+    monthIndex,
+    weekday,
+    occurrence
+) {
+
+    const firstDay =
+        new Date(
+            year,
+            monthIndex,
+            1
+        );
+
+
+    const firstWeekday =
+        firstDay.getDay();
+
+
+    const offset =
+        (
+            weekday -
+            firstWeekday +
+            7
+        ) % 7;
+
+
+    return (
+        1 +
+        offset +
+        (
+            (occurrence - 1) *
+            7
+        )
+    );
+
+}
+
+
+function getLastWeekdayOfMonth(
+    year,
+    monthIndex,
+    weekday
+) {
+
+    const lastDay =
+        new Date(
+            year,
+            monthIndex + 1,
+            0
+        );
+
+
+    const offset =
+        (
+            lastDay.getDay() -
+            weekday +
+            7
+        ) % 7;
+
+
+    return (
+        lastDay.getDate() -
+        offset
+    );
+
+}
+
+
+function getServiceHolidayName(
+    dateString
+) {
+
+    if (!dateString) {
+        return null;
+    }
+
+
+    const [
+        yearString,
+        monthString,
+        dayString
+    ] =
+        dateString.split("-");
+
+
+    const year =
+        Number(
+            yearString
+        );
+
+
+    const month =
+        Number(
+            monthString
+        );
+
+
+    const day =
+        Number(
+            dayString
+        );
+
+
+    if (
+        !year ||
+        !month ||
+        !day
+    ) {
+        return null;
+    }
+
+
+    // ========================================
+    // FIXED-DATE HOLIDAYS
+    // ========================================
+
+    if (
+        month === 1 &&
+        day === 1
+    ) {
+        return "New Year's Day";
+    }
+
+
+    if (
+        month === 6 &&
+        day === 19
+    ) {
+        return "Juneteenth";
+    }
+
+
+    if (
+        month === 7 &&
+        day === 4
+    ) {
+        return "Independence Day";
+    }
+
+
+    if (
+        month === 11 &&
+        day === 11
+    ) {
+        return "Veterans Day";
+    }
+
+
+    if (
+        month === 12 &&
+        day === 24
+    ) {
+        return "Christmas Eve";
+    }
+
+
+    if (
+        month === 12 &&
+        day === 25
+    ) {
+        return "Christmas Day";
+    }
+
+
+    if (
+        month === 12 &&
+        day === 31
+    ) {
+        return "New Year's Eve";
+    }
+
+
+    // ========================================
+    // MLK DAY
+    // THIRD MONDAY IN JANUARY
+    // ========================================
+
+    if (
+        month === 1 &&
+        day ===
+            getNthWeekdayOfMonth(
+                year,
+                0,
+                1,
+                3
+            )
+    ) {
+        return "Martin Luther King Jr. Day";
+    }
+
+
+    // ========================================
+    // PRESIDENTS DAY
+    // THIRD MONDAY IN FEBRUARY
+    // ========================================
+
+    if (
+        month === 2 &&
+        day ===
+            getNthWeekdayOfMonth(
+                year,
+                1,
+                1,
+                3
+            )
+    ) {
+        return "Presidents Day";
+    }
+
+
+    // ========================================
+    // MEMORIAL DAY
+    // LAST MONDAY IN MAY
+    // ========================================
+
+    if (
+        month === 5 &&
+        day ===
+            getLastWeekdayOfMonth(
+                year,
+                4,
+                1
+            )
+    ) {
+        return "Memorial Day";
+    }
+
+
+    // ========================================
+    // LABOR DAY
+    // FIRST MONDAY IN SEPTEMBER
+    // ========================================
+
+    if (
+        month === 9 &&
+        day ===
+            getNthWeekdayOfMonth(
+                year,
+                8,
+                1,
+                1
+            )
+    ) {
+        return "Labor Day";
+    }
+
+
+    // ========================================
+    // COLUMBUS DAY
+    // SECOND MONDAY IN OCTOBER
+    // ========================================
+
+    if (
+        month === 10 &&
+        day ===
+            getNthWeekdayOfMonth(
+                year,
+                9,
+                1,
+                2
+            )
+    ) {
+        return "Columbus Day";
+    }
+
+
+    // ========================================
+    // THANKSGIVING
+    // FOURTH THURSDAY IN NOVEMBER
+    // ========================================
+
+    if (
+        month === 11 &&
+        day ===
+            getNthWeekdayOfMonth(
+                year,
+                10,
+                4,
+                4
+            )
+    ) {
+        return "Thanksgiving Day";
+    }
+
+
+    return null;
+
+}
+
+
+function isServiceHoliday(
+    dateString
+) {
+
+    return Boolean(
+        getServiceHolidayName(
+            dateString
+        )
+    );
+
+}
+
 // ========================================
 // LOGIN
 // ========================================
@@ -6810,7 +7127,6 @@ function getBoardingPickupFee() {
 
 }
 
-
 // ========================================
 // BOOKING PRICE
 // ========================================
@@ -6890,6 +7206,12 @@ function updateBookingTotal() {
             ) || 0;
 
 
+        const holidayFee =
+            Number(
+                pricing?.holiday_fee
+            ) || 0;
+
+
         const nights =
             getBoardingNightCount();
 
@@ -6906,9 +7228,48 @@ function updateBookingTotal() {
             getBoardingPickupFee();
 
 
+        const boardingNightDates =
+            (
+                boardingDropoff?.value &&
+                boardingPickup?.value
+            )
+                ? getBoardingNightDates(
+                    boardingDropoff.value,
+                    boardingPickup.value
+                )
+                : [];
+
+
+        const holidayNights =
+            boardingNightDates
+                .map(
+                    date => ({
+                        date,
+                        holidayName:
+                            getServiceHolidayName(
+                                date
+                            )
+                    })
+                )
+                .filter(
+                    item =>
+                        Boolean(
+                            item.holidayName
+                        )
+                );
+
+
+        const holidayTotal =
+            holidayNights.length *
+            holidayFee;
+
+
         const total =
-            nights *
-            nightlyTotal +
+            (
+                nights *
+                nightlyTotal
+            ) +
+            holidayTotal +
             pickupFee;
 
 
@@ -6924,11 +7285,18 @@ function updateBookingTotal() {
             `$${total.toFixed(2)}`;
 
 
-        details.textContent =
+        const pieces =
+            [];
+
+
+        if (
             nights > 0 &&
             petCount > 0 &&
             nightlyBasePrice > 0
-                ? `${petCount} ${
+        ) {
+
+            pieces.push(
+                `${petCount} ${
                     petCount === 1
                         ? "pet"
                         : "pets"
@@ -6938,8 +7306,50 @@ function updateBookingTotal() {
                     nights === 1
                         ? "night"
                         : "nights"
-                }${pickupFee ? " + $50 extended pickup" : ""}`
-                : "";
+                }`
+            );
+
+        }
+
+
+        if (
+            holidayNights.length === 1 &&
+            holidayFee > 0
+        ) {
+
+            pieces.push(
+                `${holidayNights[0].holidayName} +$${formatServicePrice(
+                    holidayFee
+                )}`
+            );
+
+        } else if (
+            holidayNights.length > 1 &&
+            holidayFee > 0
+        ) {
+
+            pieces.push(
+                `${holidayNights.length} holiday nights × $${formatServicePrice(
+                    holidayFee
+                )}`
+            );
+
+        }
+
+
+        if (
+            pickupFee > 0
+        ) {
+
+            pieces.push(
+                "$50.00 extended pickup"
+            );
+
+        }
+
+
+        details.textContent =
+            pieces.join(" + ");
 
 
         return;
@@ -6961,6 +7371,19 @@ function updateBookingTotal() {
         Number(
             selectedOption
                 ?.dataset.price
+        ) || 0;
+
+
+    const pricing =
+        getServicePrice(
+            serviceType,
+            serviceOptionSelect.value
+        );
+
+
+    const holidayFee =
+        Number(
+            pricing?.holiday_fee
         ) || 0;
 
 
@@ -6989,25 +7412,18 @@ function updateBookingTotal() {
         0;
 
 
+    const perAdditionalPetFee =
+        Number(
+            pricing?.additional_pet_fee
+        ) || 0;
+
+
     if (
         serviceType ===
             "Dog Walking" ||
         serviceType ===
             "Drop-In Visit"
     ) {
-
-        const pricing =
-            getServicePrice(
-                serviceType,
-                serviceOptionSelect.value
-            );
-
-
-        const perAdditionalPetFee =
-            Number(
-                pricing?.additional_pet_fee
-            ) || 0;
-
 
         additionalPetFee =
             additionalPetCount *
@@ -7022,9 +7438,36 @@ function updateBookingTotal() {
         additionalPetFee;
 
 
+    const holidayDates =
+        selectedDates
+            .map(
+                date => ({
+                    date,
+                    holidayName:
+                        getServiceHolidayName(
+                            date
+                        )
+                })
+            )
+            .filter(
+                item =>
+                    Boolean(
+                        item.holidayName
+                    )
+            );
+
+
+    const holidayTotal =
+        holidayDates.length *
+        holidayFee;
+
+
     const total =
-        perVisit *
-        selectedDates.length;
+        (
+            perVisit *
+            selectedDates.length
+        ) +
+        holidayTotal;
 
 
     countDisplay.textContent =
@@ -7058,19 +7501,6 @@ function updateBookingTotal() {
         if (
             additionalPetFee > 0
         ) {
-
-            const pricing =
-                getServicePrice(
-                    serviceType,
-                    serviceOptionSelect.value
-                );
-
-
-            const perAdditionalPetFee =
-                Number(
-                    pricing?.additional_pet_fee
-                ) || 0;
-
 
             pieces.push(
                 `${additionalPetCount} additional ${
@@ -7110,6 +7540,35 @@ function updateBookingTotal() {
                 `$${formatServicePrice(
                     surcharge
                 )} evening fee per visit`
+            );
+
+        }
+
+
+        // ========================================
+        // HOLIDAY PRICE BREAKDOWN
+        // ========================================
+
+        if (
+            holidayDates.length === 1 &&
+            holidayFee > 0
+        ) {
+
+            pieces.push(
+                `${holidayDates[0].holidayName} +$${formatServicePrice(
+                    holidayFee
+                )}`
+            );
+
+        } else if (
+            holidayDates.length > 1 &&
+            holidayFee > 0
+        ) {
+
+            pieces.push(
+                `${holidayDates.length} holiday services × $${formatServicePrice(
+                    holidayFee
+                )}`
             );
 
         }
