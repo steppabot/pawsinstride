@@ -830,7 +830,7 @@ function setupSignupEvents() {
 // ========================================
 
 const DOG_BREEDS_API_URL =
-    "https://dogapi.dog/api/v2/breeds";
+    "https://dogapi.dog/api/v2/breeds?page[number]=1&page[size]=1000";
 
 
 let signupDogBreeds =
@@ -843,17 +843,6 @@ let signupDogBreeds =
 
 async function loadSignupDogBreeds() {
 
-    const breedList =
-        document.getElementById(
-            "signup-dog-breeds"
-        );
-
-
-    if (!breedList) {
-        return;
-    }
-
-
     try {
 
         const response =
@@ -861,6 +850,7 @@ async function loadSignupDogBreeds() {
                 DOG_BREEDS_API_URL,
                 {
                     method: "GET",
+
                     headers: {
                         Accept:
                             "application/json"
@@ -945,40 +935,6 @@ async function loadSignupDogBreeds() {
         );
 
 
-        // ========================================
-        // BUILD AUTOCOMPLETE OPTIONS
-        // ========================================
-
-        const fragment =
-            document.createDocumentFragment();
-
-
-        signupDogBreeds.forEach(
-            breedName => {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-
-                option.value =
-                    breedName;
-
-
-                fragment.appendChild(
-                    option
-                );
-
-            }
-        );
-
-
-        breedList.replaceChildren(
-            fragment
-        );
-
-
         console.info(
             `Loaded ${signupDogBreeds.length} dog breeds for signup autocomplete.`
         );
@@ -987,9 +943,9 @@ async function loadSignupDogBreeds() {
     catch (error) {
 
         /*
-         * Never block signup because an
-         * optional autocomplete service
-         * could not load.
+         * Breed autocomplete is optional.
+         * Signup must still work if the API
+         * cannot be reached.
          */
 
         console.warn(
@@ -1002,6 +958,401 @@ async function loadSignupDogBreeds() {
             [];
 
     }
+
+}
+
+
+// ========================================
+// BREED INPUT EVENT
+// ========================================
+
+petsContainer?.addEventListener(
+    "input",
+    event => {
+
+        const breedInput =
+            event.target.closest(
+                '[name="pet_breed"]'
+            );
+
+
+        if (!breedInput) {
+            return;
+        }
+
+
+        renderSignupBreedSuggestions(
+            breedInput
+        );
+
+    }
+);
+
+
+// ========================================
+// BREED INPUT FOCUS
+// ========================================
+
+petsContainer?.addEventListener(
+    "focusin",
+    event => {
+
+        const breedInput =
+            event.target.closest(
+                '[name="pet_breed"]'
+            );
+
+
+        if (!breedInput) {
+            return;
+        }
+
+
+        renderSignupBreedSuggestions(
+            breedInput
+        );
+
+    }
+);
+
+
+// ========================================
+// BREED SUGGESTION CLICK
+// ========================================
+
+petsContainer?.addEventListener(
+    "click",
+    event => {
+
+        const suggestion =
+            event.target.closest(
+                "[data-breed-suggestion]"
+            );
+
+
+        if (!suggestion) {
+            return;
+        }
+
+
+        const autocomplete =
+            suggestion.closest(
+                ".signup-breed-autocomplete"
+            );
+
+
+        const breedInput =
+            autocomplete?.querySelector(
+                '[name="pet_breed"]'
+            );
+
+
+        const suggestionList =
+            autocomplete?.querySelector(
+                ".signup-breed-suggestions"
+            );
+
+
+        if (!breedInput) {
+            return;
+        }
+
+
+        breedInput.value =
+            suggestion.dataset
+                .breedSuggestion || "";
+
+
+        breedInput.classList.remove(
+            "signup-field-error"
+        );
+
+
+        breedInput.removeAttribute(
+            "aria-invalid"
+        );
+
+
+        if (suggestionList) {
+
+            suggestionList.hidden =
+                true;
+
+            suggestionList.innerHTML =
+                "";
+
+        }
+
+
+        clearSignupError();
+
+
+        breedInput.focus();
+
+    }
+);
+
+
+// ========================================
+// CLOSE BREED AUTOCOMPLETE
+// ========================================
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target.closest(
+                ".signup-breed-autocomplete"
+            )
+        ) {
+            return;
+        }
+
+
+        closeAllSignupBreedSuggestions();
+
+    }
+);
+
+
+// ========================================
+// ESCAPE KEY CLOSE
+// ========================================
+
+petsContainer?.addEventListener(
+    "keydown",
+    event => {
+
+        const breedInput =
+            event.target.closest(
+                '[name="pet_breed"]'
+            );
+
+
+        if (!breedInput) {
+            return;
+        }
+
+
+        if (
+            event.key ===
+            "Escape"
+        ) {
+
+            closeAllSignupBreedSuggestions();
+
+            breedInput.blur();
+
+        }
+
+    }
+);
+
+
+// ========================================
+// RENDER BREED SUGGESTIONS
+// ========================================
+
+function renderSignupBreedSuggestions(
+    breedInput
+) {
+
+    const autocomplete =
+        breedInput.closest(
+            ".signup-breed-autocomplete"
+        );
+
+
+    const suggestionList =
+        autocomplete?.querySelector(
+            ".signup-breed-suggestions"
+        );
+
+
+    if (!suggestionList) {
+        return;
+    }
+
+
+    const searchValue =
+        String(
+            breedInput.value || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    /*
+     * Don't dump hundreds of breeds into
+     * a dropdown when the field is empty.
+     *
+     * Start suggesting after 2 characters.
+     */
+
+    if (
+        searchValue.length < 2 ||
+        !signupDogBreeds.length
+    ) {
+
+        suggestionList.hidden =
+            true;
+
+        suggestionList.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    // ========================================
+    // FIND MATCHING BREEDS
+    // ========================================
+
+    const startsWithMatches =
+        signupDogBreeds.filter(
+            breed => {
+
+                return breed
+                    .toLowerCase()
+                    .startsWith(
+                        searchValue
+                    );
+
+            }
+        );
+
+
+    const containsMatches =
+        signupDogBreeds.filter(
+            breed => {
+
+                const normalizedBreed =
+                    breed.toLowerCase();
+
+
+                return (
+                    !normalizedBreed
+                        .startsWith(
+                            searchValue
+                        ) &&
+                    normalizedBreed
+                        .includes(
+                            searchValue
+                        )
+                );
+
+            }
+        );
+
+
+    const matches =
+        [
+            ...startsWithMatches,
+            ...containsMatches
+        ]
+            .slice(
+                0,
+                8
+            );
+
+
+    // ========================================
+    // NO MATCHES
+    // ========================================
+
+    if (!matches.length) {
+
+        suggestionList.hidden =
+            true;
+
+        suggestionList.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    // ========================================
+    // BUILD SUGGESTIONS
+    // ========================================
+
+    suggestionList.innerHTML =
+        "";
+
+
+    const fragment =
+        document.createDocumentFragment();
+
+
+    matches.forEach(
+        breedName => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.type =
+                "button";
+
+
+            button.className =
+                "signup-breed-suggestion";
+
+
+            button.dataset
+                .breedSuggestion =
+                    breedName;
+
+
+            button.textContent =
+                breedName;
+
+
+            fragment.appendChild(
+                button
+            );
+
+        }
+    );
+
+
+    suggestionList.appendChild(
+        fragment
+    );
+
+
+    suggestionList.hidden =
+        false;
+
+}
+
+
+// ========================================
+// CLOSE ALL BREED SUGGESTIONS
+// ========================================
+
+function closeAllSignupBreedSuggestions() {
+
+    document
+        .querySelectorAll(
+            ".signup-breed-suggestions"
+        )
+        .forEach(
+            suggestionList => {
+
+                suggestionList.hidden =
+                    true;
+
+                suggestionList.innerHTML =
+                    "";
+
+            }
+        );
 
 }
 
