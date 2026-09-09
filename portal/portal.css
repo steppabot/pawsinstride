@@ -7905,6 +7905,62 @@ body.portal-login-page {
 }
 
 /* ========================================
+   FORGOT PASSWORD LINK
+======================================== */
+
+.login-forgot-password-row {
+
+    display: flex;
+    justify-content: flex-end;
+
+    margin-top: 8px;
+
+}
+
+
+.login-forgot-password-link {
+
+    color:
+        var(--pis-blue);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        color 0.18s ease;
+
+}
+
+
+.login-forgot-password-link:hover {
+
+    color:
+        var(--pis-orange-hover);
+
+    text-decoration: underline;
+
+}
+
+
+.login-forgot-password-link:focus-visible {
+
+    outline:
+        3px solid rgba(
+            40,
+            144,
+            223,
+            0.16
+        );
+
+    outline-offset: 3px;
+
+    border-radius: 4px;
+
+}
+
+/* ========================================
    SIGN IN BUTTON
 ======================================== */
 
