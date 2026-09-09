@@ -111,43 +111,43 @@ const TIME_WINDOWS = [
     {
         value: "7:00 AM - 10:00 AM",
         label: "7:00 AM – 10:00 AM",
-        surcharge: 0
+        surchargeType: null
     },
 
     {
         value: "10:00 AM - 12:00 PM",
         label: "10:00 AM – 12:00 PM",
-        surcharge: 0
+        surchargeType: null
     },
 
     {
         value: "12:00 PM - 2:00 PM",
         label: "12:00 PM – 2:00 PM",
-        surcharge: 0
+        surchargeType: null
     },
 
     {
         value: "2:00 PM - 4:00 PM",
         label: "2:00 PM – 4:00 PM",
-        surcharge: 0
+        surchargeType: null
     },
 
     {
         value: "4:00 PM - 6:00 PM",
         label: "4:00 PM – 6:00 PM",
-        surcharge: 0
+        surchargeType: null
     },
 
     {
         value: "6:00 PM - 8:00 PM",
-        label: "6:00 PM – 8:00 PM (+$5)",
-        surcharge: 5
+        label: "6:00 PM – 8:00 PM",
+        surchargeType: "after_6_fee"
     },
 
     {
         value: "8:00 PM - 10:00 PM",
-        label: "8:00 PM – 10:00 PM (+$10)",
-        surcharge: 10
+        label: "8:00 PM – 10:00 PM",
+        surchargeType: "after_8_fee"
     }
 
 ];
@@ -161,24 +161,27 @@ const SERVICE_CONFIG = {
 
         optionLabel: "Duration",
 
+        databaseServiceType:
+            "dog_walking",
+
         options: [
 
             {
                 value: "15 Minutes",
-                label: "15 Minutes — $30",
-                price: 30
+                databaseOption:
+                    "15_min"
             },
 
             {
                 value: "30 Minutes",
-                label: "30 Minutes — $45",
-                price: 45
+                databaseOption:
+                    "30_min"
             },
 
             {
                 value: "60 Minutes",
-                label: "60 Minutes — $65",
-                price: 65
+                databaseOption:
+                    "60_min"
             }
 
         ]
@@ -192,24 +195,27 @@ const SERVICE_CONFIG = {
 
         optionLabel: "Duration",
 
+        databaseServiceType:
+            "drop_in",
+
         options: [
 
             {
                 value: "15 Minutes",
-                label: "15 Minutes — $30",
-                price: 30
+                databaseOption:
+                    "15_min"
             },
 
             {
                 value: "30 Minutes",
-                label: "30 Minutes — $45",
-                price: 45
+                databaseOption:
+                    "30_min"
             },
 
             {
                 value: "60 Minutes",
-                label: "60 Minutes — $65",
-                price: 65
+                databaseOption:
+                    "60_min"
             }
 
         ]
@@ -223,12 +229,17 @@ const SERVICE_CONFIG = {
 
         optionLabel: "Package",
 
+        databaseServiceType:
+            "pet_sitting",
+
         options: [
 
             {
-                value: "Basic Sit - 4 Hours",
-                label: "Basic Sit — 4 Hours — $100",
-                price: 100,
+                value:
+                    "Basic Sit - 4 Hours",
+
+                databaseOption:
+                    "basic_4_hour",
 
                 timeBlocks: [
                     "7:00 AM - 11:00 AM",
@@ -239,9 +250,11 @@ const SERVICE_CONFIG = {
             },
 
             {
-                value: "Standard Sit - 8 Hours",
-                label: "Standard Sit — 8 Hours — $180",
-                price: 180,
+                value:
+                    "Standard Sit - 8 Hours",
+
+                databaseOption:
+                    "standard_8_hour",
 
                 timeBlocks: [
                     "7:00 AM - 3:00 PM",
@@ -250,9 +263,11 @@ const SERVICE_CONFIG = {
             },
 
             {
-                value: "VIP Sit - 12 Hours",
-                label: "VIP Sit — 12 Hours — $240",
-                price: 240,
+                value:
+                    "VIP Sit - 12 Hours",
+
+                databaseOption:
+                    "vip_12_hour",
 
                 timeBlocks: [
                     "7:00 AM - 7:00 PM",
@@ -269,11 +284,144 @@ const SERVICE_CONFIG = {
 
         boarding: true,
 
-        pricePerPetPerNight: 100
+        databaseServiceType:
+            "dog_boarding",
+
+        databaseOption:
+            "vip_overnight"
 
     }
 
 };
+
+
+// ========================================
+// CLIENT SERVICE PRICING
+// ========================================
+
+let currentServicePrices =
+    [];
+
+
+async function loadMyServicePrices() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "get_my_service_prices"
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Service pricing error:",
+            error
+        );
+
+        throw error;
+
+    }
+
+
+    currentServicePrices =
+        data || [];
+
+
+    console.log(
+        "Loaded client service pricing:",
+        currentServicePrices.length
+    );
+
+
+    return currentServicePrices;
+
+}
+
+
+function getServicePrice(
+    serviceType,
+    serviceOption = null
+) {
+
+    const config =
+        SERVICE_CONFIG[
+            serviceType
+        ];
+
+
+    if (!config) {
+        return null;
+    }
+
+
+    const databaseServiceType =
+        config.databaseServiceType;
+
+
+    let databaseOption =
+        null;
+
+
+    if (
+        serviceType ===
+        "Dog Boarding"
+    ) {
+
+        databaseOption =
+            config.databaseOption;
+
+    } else {
+
+        const option =
+            config.options.find(
+                item =>
+                    item.value ===
+                    serviceOption
+            );
+
+
+        databaseOption =
+            option?.databaseOption ||
+            null;
+
+    }
+
+
+    if (
+        !databaseServiceType ||
+        !databaseOption
+    ) {
+        return null;
+    }
+
+
+    return (
+        currentServicePrices.find(
+            price =>
+                price.service_type ===
+                    databaseServiceType &&
+                price.service_option ===
+                    databaseOption
+        ) ||
+        null
+    );
+
+}
+
+
+function formatServicePrice(
+    value
+) {
+
+    return Number(
+        value || 0
+    ).toFixed(2);
+
+}
 
 // ========================================
 // LOGIN
@@ -5283,38 +5431,92 @@ document
     )
     ?.addEventListener(
         "click",
-        () => {
+        async () => {
 
-            bookingSection.style.display =
-                "block";
-
-
-            renderBookingCalendar();
-
-            renderAdditionalPets();
+            const message =
+                document.getElementById(
+                    "booking-message"
+                );
 
 
-            /*
-             * Wait until the booking section has
-             * actually been painted before positioning
-             * the first field.
-             */
+            try {
 
-            window.requestAnimationFrame(
-                () => {
+                if (
+                    currentServicePrices
+                        .length === 0
+                ) {
 
-                    window.requestAnimationFrame(
-                        () => {
+                    if (message) {
 
-                            scrollBookingFieldIntoView(
-                                bookingPetSelect
-                            );
+                        message.textContent =
+                            "Loading current service pricing...";
 
-                        }
-                    );
+                    }
+
+
+                    await loadMyServicePrices();
 
                 }
-            );
+
+
+                if (message) {
+
+                    message.textContent =
+                        "";
+
+                }
+
+
+                bookingSection.style.display =
+                    "block";
+
+
+                renderBookingCalendar();
+
+                renderAdditionalPets();
+
+                updateBookingTotal();
+
+
+                /*
+                 * Wait until the booking section has
+                 * actually been painted before positioning
+                 * the first field.
+                 */
+
+                window.requestAnimationFrame(
+                    () => {
+
+                        window.requestAnimationFrame(
+                            () => {
+
+                                scrollBookingFieldIntoView(
+                                    bookingPetSelect
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Unable to open booking pricing:",
+                    error
+                );
+
+
+                if (message) {
+
+                    message.textContent =
+                        "We couldn't load current service pricing. Please try again.";
+
+                }
+
+            }
 
         }
     );
@@ -5333,7 +5535,6 @@ document
 
         }
     );
-
 
 // ========================================
 // GUIDE USER TO NEXT BOOKING FIELD
@@ -5609,6 +5810,13 @@ function populateServiceOptions(
     config.options.forEach(
         option => {
 
+            const pricing =
+                getServicePrice(
+                    serviceType,
+                    option.value
+                );
+
+
             const element =
                 document.createElement(
                     "option"
@@ -5619,12 +5827,31 @@ function populateServiceOptions(
                 option.value;
 
 
-            element.textContent =
-                option.label;
+            if (pricing) {
+
+                const price =
+                    Number(
+                        pricing.base_price
+                    );
 
 
-            element.dataset.price =
-                option.price;
+                element.textContent =
+                    `${option.value} — $${formatServicePrice(price)}`;
+
+
+                element.dataset.price =
+                    String(price);
+
+            } else {
+
+                element.textContent =
+                    option.value;
+
+
+                element.dataset.price =
+                    "0";
+
+            }
 
 
             serviceOptionSelect.appendChild(
@@ -5652,6 +5879,20 @@ serviceOptionSelect
             }
 
 
+            if (
+                serviceTypeSelect.value ===
+                    "Dog Walking" ||
+                serviceTypeSelect.value ===
+                    "Drop-In Visit"
+            ) {
+
+                populatePreferredTimeWindows();
+
+            }
+
+
+            renderAdditionalPets();
+
             updateBookingTotal();
 
 
@@ -5675,6 +5916,7 @@ serviceOptionSelect
 
         }
     );
+
 
 // ========================================
 // TIMES
@@ -5706,6 +5948,21 @@ function populatePreferredTimeWindows() {
         `;
 
 
+    const serviceType =
+        serviceTypeSelect.value;
+
+
+    const serviceOption =
+        serviceOptionSelect.value;
+
+
+    const pricing =
+        getServicePrice(
+            serviceType,
+            serviceOption
+        );
+
+
     TIME_WINDOWS.forEach(
         window => {
 
@@ -5719,12 +5976,33 @@ function populatePreferredTimeWindows() {
                 window.value;
 
 
+            let surcharge =
+                0;
+
+
+            if (
+                window.surchargeType &&
+                pricing
+            ) {
+
+                surcharge =
+                    Number(
+                        pricing[
+                            window.surchargeType
+                        ]
+                    ) || 0;
+
+            }
+
+
             option.textContent =
-                window.label;
+                surcharge > 0
+                    ? `${window.label} (+$${formatServicePrice(surcharge)})`
+                    : window.label;
 
 
             option.dataset.surcharge =
-                window.surcharge;
+                String(surcharge);
 
 
             bookingTime.appendChild(
@@ -5822,43 +6100,6 @@ function populatePetSittingTimeBlocks() {
     );
 
 }
-
-
-bookingTime
-    ?.addEventListener(
-        "change",
-        () => {
-
-            updateBookingTotal();
-
-
-            if (
-                !bookingTime.value
-            ) {
-                return;
-            }
-
-
-            const bookingCalendar =
-                document.querySelector(
-                    ".booking-calendar"
-                );
-
-
-            window.setTimeout(
-                () => {
-
-                    scrollBookingFieldIntoView(
-                        bookingCalendar
-                    );
-
-                },
-                120
-            );
-
-        }
-    );
-
 // ========================================
 // BOOKING CALENDAR
 // ========================================
