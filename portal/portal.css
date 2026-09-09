@@ -8076,6 +8076,124 @@ body.portal-login-page {
 }
 
 /* ========================================
+   PASSWORD RESET SUCCESS
+======================================== */
+
+.reset-password-success {
+
+    text-align: center;
+
+    padding:
+        10px
+        0
+        4px;
+
+}
+
+
+.reset-password-success[hidden] {
+
+    display: none;
+
+}
+
+
+.reset-password-success-icon {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 64px;
+    height: 64px;
+
+    margin:
+        0
+        auto
+        20px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(
+            34,
+            197,
+            94,
+            0.12
+        );
+
+    color:
+        #22a447;
+
+    font-size: 34px;
+    font-weight: 800;
+
+    line-height: 1;
+
+}
+
+
+.reset-password-success h2 {
+
+    margin:
+        0
+        0
+        10px;
+
+    color:
+        var(--pis-text);
+
+    font-size: 26px;
+    font-weight: 800;
+
+    line-height: 1.2;
+
+}
+
+
+.reset-password-success p {
+
+    max-width: 380px;
+
+    margin:
+        0
+        auto
+        24px;
+
+    color:
+        var(--pis-muted);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+}
+
+
+.reset-password-success-button {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
+    text-decoration: none;
+
+    box-sizing: border-box;
+
+}
+
+
+.reset-password-success-button:hover {
+
+    text-decoration: none;
+
+}
+
+/* ========================================
    LOGIN FOOTER
 ======================================== */
 
