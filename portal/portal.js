@@ -2255,6 +2255,8 @@ if (
 
         }
     );
+
+
 // ========================================
 // SAVE HOUSEHOLD
 // ========================================
@@ -2280,43 +2282,112 @@ if (householdForm) {
                 );
 
 
-            message.textContent =
-                "";
+            const fullNameField =
+                document.getElementById(
+                    "household-full-name"
+                );
+
+
+            const phoneField =
+                document.getElementById(
+                    "household-phone"
+                );
+
+
+            const streetAddressField =
+                document.getElementById(
+                    "household-street-address"
+                );
+
+
+            const cityField =
+                document.getElementById(
+                    "household-city"
+                );
+
+
+            const stateField =
+                document.getElementById(
+                    "household-state"
+                );
+
+
+            const zipField =
+                document.getElementById(
+                    "household-zip"
+                );
+
+
+            const emergencyPhoneField =
+                document.getElementById(
+                    "emergency-contact-phone"
+                );
+
+
+            if (message) {
+
+                message.textContent =
+                    "";
+
+            }
+
+
+            clearHouseholdFieldErrors();
 
 
             const fullName =
-                document
-                    .getElementById(
-                        "household-full-name"
-                    )
-                    .value
+                String(
+                    fullNameField?.value ||
+                    ""
+                )
                     .trim();
 
 
             const phone =
-                document
-                    .getElementById(
-                        "household-phone"
-                    )
-                    .value
+                String(
+                    phoneField?.value ||
+                    ""
+                )
+                    .trim();
+
+
+            const streetAddress =
+                String(
+                    streetAddressField?.value ||
+                    ""
+                )
+                    .trim();
+
+
+            const city =
+                String(
+                    cityField?.value ||
+                    ""
+                )
+                    .trim();
+
+
+            const state =
+                String(
+                    stateField?.value ||
+                    ""
+                )
                     .trim();
 
 
             const zip =
-                document
-                    .getElementById(
-                        "household-zip"
-                    )
-                    .value
+                String(
+                    zipField?.value ||
+                    ""
+                )
                     .trim();
 
 
             const emergencyPhone =
-                document
-                    .getElementById(
-                        "emergency-contact-phone"
-                    )
-                    .value
+                String(
+                    emergencyPhoneField?.value ||
+                    ""
+                )
                     .trim();
 
 
@@ -2325,20 +2396,14 @@ if (householdForm) {
             // ========================================
 
             if (
-                !isValidClientFullName(
+                !isValidHouseholdFullName(
                     fullName
                 )
             ) {
 
-                message.textContent =
-                    "Please enter your first and last name.";
-
-
-                document
-                    .getElementById(
-                        "household-full-name"
-                    )
-                    .focus();
+                focusHouseholdFieldError(
+                    fullNameField
+                );
 
                 return;
 
@@ -2349,19 +2414,72 @@ if (householdForm) {
             // PHONE VALIDATION
             // ========================================
 
-            if (
-                phone &&
+            const phoneDigits =
                 phone.replace(
                     /\D/g,
                     ""
-                ).length !== 10
+                );
+
+
+            if (
+                phoneDigits.length !==
+                10
             ) {
 
-                message.textContent =
-                    "Please enter a valid 10-digit phone number.";
+                focusHouseholdFieldError(
+                    phoneField
+                );
+
+                return;
+
+            }
 
 
-                householdPhoneInput?.focus();
+            // ========================================
+            // STREET ADDRESS VALIDATION
+            // ========================================
+
+            if (
+                !streetAddress
+            ) {
+
+                focusHouseholdFieldError(
+                    streetAddressField
+                );
+
+                return;
+
+            }
+
+
+            // ========================================
+            // CITY VALIDATION
+            // ========================================
+
+            if (
+                !city
+            ) {
+
+                focusHouseholdFieldError(
+                    cityField
+                );
+
+                return;
+
+            }
+
+
+            // ========================================
+            // STATE VALIDATION
+            // ========================================
+
+            if (
+                !state
+            ) {
+
+                focusHouseholdFieldError(
+                    stateField
+                );
 
                 return;
 
@@ -2373,17 +2491,14 @@ if (householdForm) {
             // ========================================
 
             if (
-                zip &&
                 !/^\d{5}$/.test(
                     zip
                 )
             ) {
 
-                message.textContent =
-                    "Please enter a valid 5-digit ZIP code.";
-
-
-                householdZipInput?.focus();
+                focusHouseholdFieldError(
+                    zipField
+                );
 
                 return;
 
@@ -2399,14 +2514,13 @@ if (householdForm) {
                 emergencyPhone.replace(
                     /\D/g,
                     ""
-                ).length !== 10
+                ).length !==
+                10
             ) {
 
-                message.textContent =
-                    "Please enter a valid emergency contact phone number.";
-
-
-                emergencyPhoneInput?.focus();
+                focusHouseholdFieldError(
+                    emergencyPhoneField
+                );
 
                 return;
 
@@ -2422,6 +2536,10 @@ if (householdForm) {
 
 
             try {
+
+                // ========================================
+                // UPDATE CLIENT PROFILE
+                // ========================================
 
                 const {
                     error: profileUpdateError
@@ -2445,10 +2563,18 @@ if (householdForm) {
                         );
 
 
-                if (profileUpdateError) {
+                if (
+                    profileUpdateError
+                ) {
+
                     throw profileUpdateError;
+
                 }
 
+
+                // ========================================
+                // SAVE HOUSEHOLD
+                // ========================================
 
                 const householdPayload = {
 
@@ -2521,10 +2647,18 @@ if (householdForm) {
                         );
 
 
-                if (householdSaveError) {
+                if (
+                    householdSaveError
+                ) {
+
                     throw householdSaveError;
+
                 }
 
+
+                // ========================================
+                // SAVE PROPERTY ACCESS
+                // ========================================
 
                 const accessPayload = {
 
@@ -2584,10 +2718,18 @@ if (householdForm) {
                         );
 
 
-                if (accessSaveError) {
+                if (
+                    accessSaveError
+                ) {
+
                     throw accessSaveError;
+
                 }
 
+
+                // ========================================
+                // SAVE PROFILE PHOTO
+                // ========================================
 
                 if (
                     pendingClientPhotoFile
@@ -2677,6 +2819,10 @@ if (householdForm) {
                 }
 
 
+                // ========================================
+                // REFRESH + CLOSE
+                // ========================================
+
                 await refreshHousehold();
 
 
@@ -2699,8 +2845,12 @@ if (householdForm) {
                 );
 
 
-                message.textContent =
-                    "We couldn't save your household information.";
+                if (message) {
+
+                    message.textContent =
+                        "We couldn't save your household information.";
+
+                }
 
 
                 saveButton.disabled =
