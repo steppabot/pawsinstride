@@ -6415,8 +6415,562 @@ serviceOptionSelect
 // ========================================
 // TIMES
 // ========================================
+//
+// Dog Walking + Drop-In time windows are
+// capacity-aware.
+//
+// The browser checks Supabase so clients can
+// SEE whether their selected duration fits.
+//
+// IMPORTANT:
+// create_service_booking() remains the final
+// server-side authority and independently
+// enforces capacity.
+// ========================================
 
-function populatePreferredTimeWindows() {
+let preferredTimeAvailabilityRequestId =
+    0;
+
+
+// ========================================
+// REQUESTED SERVICE MINUTES
+// ========================================
+
+function getRequestedServiceMinutes() {
+
+    const serviceOption =
+        serviceOptionSelect?.value;
+
+
+    switch (serviceOption) {
+
+        case "15 Minutes":
+
+            return 15;
+
+
+        case "30 Minutes":
+
+            return 30;
+
+
+        case "60 Minutes":
+
+            return 60;
+
+
+        default:
+
+            return null;
+
+    }
+
+}
+
+
+// ========================================
+// FORMAT SHORT CAPACITY DATE
+// ========================================
+
+function formatCapacityDate(
+    dateString
+) {
+
+    if (!dateString) {
+        return "";
+    }
+
+
+    const date =
+        parseLocalDate(
+            dateString
+        );
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+// ========================================
+// BUILD NORMAL TIME-WINDOW LABEL
+// ========================================
+
+function getPreferredTimeWindowLabel(
+    window,
+    pricing
+) {
+
+    let surcharge =
+        0;
+
+
+    if (
+        window.surchargeType &&
+        pricing
+    ) {
+
+        surcharge =
+            Number(
+                pricing[
+                    window.surchargeType
+                ]
+            ) || 0;
+
+    }
+
+
+    return {
+
+        surcharge,
+
+        label:
+            surcharge > 0
+                ? `${window.label} (+$${formatServicePrice(surcharge)})`
+                : window.label
+
+    };
+
+}
+
+
+// ========================================
+// REFRESH TIME-WINDOW CAPACITY
+// ========================================
+
+async function refreshPreferredTimeWindowAvailability() {
+
+    const serviceType =
+        serviceTypeSelect?.value;
+
+
+    if (
+        serviceType !==
+            "Dog Walking" &&
+        serviceType !==
+            "Drop-In Visit"
+    ) {
+        return;
+    }
+
+
+    const requestedMinutes =
+        getRequestedServiceMinutes();
+
+
+    if (!requestedMinutes) {
+        return;
+    }
+
+
+    const pricing =
+        getServicePrice(
+            serviceType,
+            serviceOptionSelect.value
+        );
+
+
+    const currentRequestId =
+        ++preferredTimeAvailabilityRequestId;
+
+
+    const previousValue =
+        bookingTime.value;
+
+
+    // ========================================
+    // NO DATES YET
+    // ========================================
+    //
+    // Availability cannot be calculated until
+    // the client chooses at least one date.
+    //
+    // Keep every window enabled and restore
+    // its normal pricing label.
+    // ========================================
+
+    if (
+        selectedDates.length === 0
+    ) {
+
+        Array.from(
+            bookingTime.options
+        ).forEach(
+            option => {
+
+                if (!option.value) {
+                    return;
+                }
+
+
+                const window =
+                    TIME_WINDOWS.find(
+                        item =>
+                            item.value ===
+                            option.value
+                    );
+
+
+                if (!window) {
+                    return;
+                }
+
+
+                const display =
+                    getPreferredTimeWindowLabel(
+                        window,
+                        pricing
+                    );
+
+
+                option.disabled =
+                    false;
+
+
+                option.textContent =
+                    display.label;
+
+
+                option.dataset.surcharge =
+                    String(
+                        display.surcharge
+                    );
+
+
+                option.removeAttribute(
+                    "data-capacity-full"
+                );
+
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // CHECK EVERY WINDOW AGAINST EVERY DATE
+    // ========================================
+
+    const availabilityChecks =
+        TIME_WINDOWS.map(
+            async window => {
+
+                const dateChecks =
+                    await Promise.all(
+                        selectedDates.map(
+                            async date => {
+
+                                const {
+                                    data,
+                                    error
+                                } =
+                                    await supabaseClient
+                                        .rpc(
+                                            "get_service_window_availability",
+                                            {
+
+                                                p_visit_date:
+                                                    date,
+
+                                                p_time_window:
+                                                    window.value,
+
+                                                p_requested_minutes:
+                                                    requestedMinutes
+
+                                            }
+                                        );
+
+
+                                if (error) {
+
+                                    console.error(
+                                        "Service window availability error:",
+                                        {
+                                            date,
+                                            timeWindow:
+                                                window.value,
+                                            error
+                                        }
+                                    );
+
+
+                                    throw error;
+
+                                }
+
+
+                                const availability =
+                                    Array.isArray(
+                                        data
+                                    )
+                                        ? data[0]
+                                        : data;
+
+
+                                return {
+
+                                    date,
+
+                                    available:
+                                        Boolean(
+                                            availability
+                                                ?.available
+                                        ),
+
+                                    capacityMinutes:
+                                        Number(
+                                            availability
+                                                ?.capacity_minutes ||
+                                            0
+                                        ),
+
+                                    bookedMinutes:
+                                        Number(
+                                            availability
+                                                ?.booked_minutes ||
+                                            0
+                                        ),
+
+                                    remainingMinutes:
+                                        Number(
+                                            availability
+                                                ?.remaining_minutes ||
+                                            0
+                                        )
+
+                                };
+
+                            }
+                        )
+                    );
+
+
+                return {
+
+                    window,
+
+                    dateChecks
+
+                };
+
+            }
+        );
+
+
+    let results;
+
+
+    try {
+
+        results =
+            await Promise.all(
+                availabilityChecks
+            );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Preferred time availability refresh failed:",
+            error
+        );
+
+
+        /*
+         * Do not falsely mark windows FULL if the
+         * availability request itself failed.
+         *
+         * The secure booking RPC will still enforce
+         * capacity when the client submits.
+         */
+
+        return;
+
+    }
+
+
+    // ========================================
+    // IGNORE STALE AVAILABILITY RESPONSE
+    // ========================================
+    //
+    // If the client changed dates/duration while
+    // Supabase was responding, a newer refresh
+    // request may already be running.
+    // ========================================
+
+    if (
+        currentRequestId !==
+        preferredTimeAvailabilityRequestId
+    ) {
+        return;
+    }
+
+
+    // ========================================
+    // APPLY FULL / AVAILABLE STATES
+    // ========================================
+
+    results.forEach(
+        result => {
+
+            const option =
+                Array.from(
+                    bookingTime.options
+                ).find(
+                    item =>
+                        item.value ===
+                        result.window.value
+                );
+
+
+            if (!option) {
+                return;
+            }
+
+
+            const display =
+                getPreferredTimeWindowLabel(
+                    result.window,
+                    pricing
+                );
+
+
+            const unavailableDates =
+                result.dateChecks.filter(
+                    check =>
+                        !check.available
+                );
+
+
+            if (
+                unavailableDates.length === 0
+            ) {
+
+                option.disabled =
+                    false;
+
+
+                option.textContent =
+                    display.label;
+
+
+                option.dataset.surcharge =
+                    String(
+                        display.surcharge
+                    );
+
+
+                option.removeAttribute(
+                    "data-capacity-full"
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // WINDOW IS FULL FOR AT LEAST ONE DATE
+            // ========================================
+
+            option.disabled =
+                true;
+
+
+            option.dataset.capacityFull =
+                "true";
+
+
+            const firstUnavailableDate =
+                formatCapacityDate(
+                    unavailableDates[0]
+                        .date
+                );
+
+
+            let fullLabel =
+                `${display.label} — FULL`;
+
+
+            if (
+                unavailableDates.length === 1
+            ) {
+
+                fullLabel +=
+                    ` (${firstUnavailableDate})`;
+
+            } else {
+
+                fullLabel +=
+                    ` (${firstUnavailableDate} +${
+                        unavailableDates.length - 1
+                    } more)`;
+
+            }
+
+
+            option.textContent =
+                fullLabel;
+
+        }
+    );
+
+
+    // ========================================
+    // CLEAR SELECTED WINDOW IF IT BECAME FULL
+    // ========================================
+
+    if (previousValue) {
+
+        const selectedOption =
+            Array.from(
+                bookingTime.options
+            ).find(
+                option =>
+                    option.value ===
+                    previousValue
+            );
+
+
+        if (
+            selectedOption
+                ?.disabled
+        ) {
+
+            bookingTime.value =
+                "";
+
+
+            updateBookingTotal();
+
+        } else {
+
+            bookingTime.value =
+                previousValue;
+
+        }
+
+    }
+
+}
+
+
+// ========================================
+// POPULATE PREFERRED TIME WINDOWS
+// ========================================
+
+async function populatePreferredTimeWindows() {
 
     const wrapper =
         document.getElementById(
@@ -6470,33 +7024,21 @@ function populatePreferredTimeWindows() {
                 window.value;
 
 
-            let surcharge =
-                0;
-
-
-            if (
-                window.surchargeType &&
-                pricing
-            ) {
-
-                surcharge =
-                    Number(
-                        pricing[
-                            window.surchargeType
-                        ]
-                    ) || 0;
-
-            }
+            const display =
+                getPreferredTimeWindowLabel(
+                    window,
+                    pricing
+                );
 
 
             option.textContent =
-                surcharge > 0
-                    ? `${window.label} (+$${formatServicePrice(surcharge)})`
-                    : window.label;
+                display.label;
 
 
             option.dataset.surcharge =
-                String(surcharge);
+                String(
+                    display.surcharge
+                );
 
 
             bookingTime.appendChild(
@@ -6506,8 +7048,72 @@ function populatePreferredTimeWindows() {
         }
     );
 
+
+    await refreshPreferredTimeWindowAvailability();
+
 }
 
+
+// ========================================
+// REFRESH CAPACITY WHEN DATES CHANGE
+// ========================================
+//
+// Calendar-day and Remove buttons already update
+// selectedDates before this listener runs.
+//
+// Waiting one event-loop tick lets the existing
+// booking-calendar code finish first.
+// ========================================
+
+document.addEventListener(
+    "click",
+    event => {
+
+        const dateButton =
+            event.target.closest(
+                ".calendar-day"
+            );
+
+
+        const removeButton =
+            event.target.closest(
+                ".remove-date-button"
+            );
+
+
+        if (
+            !dateButton &&
+            !removeButton
+        ) {
+            return;
+        }
+
+
+        window.setTimeout(
+            () => {
+
+                if (
+                    serviceTypeSelect?.value ===
+                        "Dog Walking" ||
+                    serviceTypeSelect?.value ===
+                        "Drop-In Visit"
+                ) {
+
+                    refreshPreferredTimeWindowAvailability();
+
+                }
+
+            },
+            0
+        );
+
+    }
+);
+
+
+// ========================================
+// PET SITTING TIME BLOCKS
+// ========================================
 
 function populatePetSittingTimeBlocks() {
 
