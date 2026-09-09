@@ -534,6 +534,201 @@ if (loginForm) {
 }
 
 // ========================================
+// FORGOT PASSWORD
+// ========================================
+
+const forgotPasswordForm =
+    document.getElementById(
+        "forgot-password-form"
+    );
+
+
+if (forgotPasswordForm) {
+
+    forgotPasswordForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const emailField =
+                document.getElementById(
+                    "forgot-password-email"
+                );
+
+
+            const message =
+                document.getElementById(
+                    "forgot-password-message"
+                );
+
+
+            const submitButton =
+                document.getElementById(
+                    "forgot-password-submit"
+                );
+
+
+            const email =
+                String(
+                    emailField?.value ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            message.textContent =
+                "";
+
+
+            // ========================================
+            // EMAIL VALIDATION
+            // ========================================
+
+            const emailPattern =
+                /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+
+            if (
+                !emailPattern.test(
+                    email
+                )
+            ) {
+
+                emailField.focus();
+
+                emailField.style.borderColor =
+                    "#dc3545";
+
+                emailField.style.boxShadow =
+                    "0 0 0 3px rgba(220, 53, 69, 0.14)";
+
+                return;
+
+            }
+
+
+            emailField.style.borderColor =
+                "";
+
+            emailField.style.boxShadow =
+                "";
+
+
+            submitButton.disabled =
+                true;
+
+
+            submitButton.textContent =
+                "Sending...";
+
+
+            try {
+
+                // ========================================
+                // SEND SUPABASE RESET EMAIL
+                // ========================================
+
+                const resetRedirectUrl =
+                    `${window.location.origin}/portal/reset-password.html`;
+
+
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .auth
+                        .resetPasswordForEmail(
+                            email,
+                            {
+                                redirectTo:
+                                    resetRedirectUrl
+                            }
+                        );
+
+
+                if (error) {
+
+                    throw error;
+
+                }
+
+
+                // ========================================
+                // SUCCESS
+                // ========================================
+
+                message.textContent =
+                    "If an account exists for that email, we've sent a password reset link. Check your inbox and spam folder.";
+
+
+                emailField.value =
+                    "";
+
+
+                submitButton.textContent =
+                    "Reset Link Sent";
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Password reset request error:",
+                    error
+                );
+
+
+                message.textContent =
+                    "We couldn't send the reset link right now. Please try again.";
+
+
+                submitButton.disabled =
+                    false;
+
+
+                submitButton.textContent =
+                    "Send Reset Link";
+
+            }
+
+        }
+    );
+
+
+    // ========================================
+    // CLEAR EMAIL ERROR WHILE TYPING
+    // ========================================
+
+    const forgotPasswordEmailField =
+        document.getElementById(
+            "forgot-password-email"
+        );
+
+
+    forgotPasswordEmailField?.addEventListener(
+        "input",
+        () => {
+
+            forgotPasswordEmailField
+                .style
+                .borderColor =
+                    "";
+
+
+            forgotPasswordEmailField
+                .style
+                .boxShadow =
+                    "";
+
+        }
+    );
+
+}
+
+
+// ========================================
 // DASHBOARD
 // ========================================
 
