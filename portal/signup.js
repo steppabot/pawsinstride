@@ -145,6 +145,501 @@ function initializeSignup() {
 
 }
 
+// ========================================
+// GOOGLE ADDRESS AUTOCOMPLETE
+// ========================================
+
+let signupAddressAutocomplete = null;
+
+let signupAddressWasSelected =
+    false;
+
+
+/*
+ * Google calls this function automatically
+ * after the Maps JavaScript API + Places
+ * library have finished loading.
+ *
+ * It must be attached to window because the
+ * callback originates from Google's script.
+ */
+
+window.initializeSignupAddressAutocomplete =
+    function initializeSignupAddressAutocomplete() {
+
+        const addressInput =
+            document.getElementById(
+                "signup-address-line-1"
+            );
+
+        const cityInput =
+            document.getElementById(
+                "signup-city"
+            );
+
+        const stateInput =
+            document.getElementById(
+                "signup-state"
+            );
+
+        const zipInput =
+            document.getElementById(
+                "signup-zip"
+            );
+
+
+        if (
+            !addressInput ||
+            !cityInput ||
+            !stateInput ||
+            !zipInput
+        ) {
+
+            console.warn(
+                "Signup address fields were not found."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !window.google ||
+            !google.maps ||
+            !google.maps.places
+        ) {
+
+            console.warn(
+                "Google Places did not load."
+            );
+
+            return;
+
+        }
+
+
+        // ========================================
+        // CREATE AUTOCOMPLETE
+        // ========================================
+
+        signupAddressAutocomplete =
+            new google.maps.places.Autocomplete(
+                addressInput,
+                {
+
+                    /*
+                     * We only provide service
+                     * addresses inside the U.S.
+                     */
+
+                    componentRestrictions: {
+                        country: "us"
+                    },
+
+
+                    /*
+                     * Ask Google only for the data
+                     * needed to populate our form.
+                     */
+
+                    fields: [
+                        "address_components",
+                        "formatted_address",
+                        "geometry"
+                    ],
+
+
+                    /*
+                     * Prefer full street addresses
+                     * instead of businesses.
+                     */
+
+                    types: [
+                        "address"
+                    ]
+
+                }
+            );
+
+
+        // ========================================
+        // BIAS RESULTS TOWARD NORTH DALLAS
+        // ========================================
+
+        /*
+         * This does NOT prevent somebody from
+         * entering another U.S. address.
+         *
+         * It simply makes Frisco / Prosper /
+         * Celina / Plano / Little Elm area
+         * results more relevant first.
+         */
+
+        const northDallasBounds =
+            new google.maps.LatLngBounds(
+                new google.maps.LatLng(
+                    32.95,
+                    -97.05
+                ),
+                new google.maps.LatLng(
+                    33.45,
+                    -96.55
+                )
+            );
+
+
+        signupAddressAutocomplete.setBounds(
+            northDallasBounds
+        );
+
+
+        signupAddressAutocomplete.setOptions({
+            strictBounds: false
+        });
+
+
+        // ========================================
+        // ADDRESS SELECTED
+        // ========================================
+
+        signupAddressAutocomplete.addListener(
+            "place_changed",
+            () => {
+
+                const place =
+                    signupAddressAutocomplete
+                        .getPlace();
+
+
+                if (
+                    !place ||
+                    !place.address_components
+                ) {
+
+                    signupAddressWasSelected =
+                        false;
+
+                    return;
+
+                }
+
+
+                const address =
+                    getSignupGoogleAddressParts(
+                        place.address_components
+                    );
+
+
+                // ========================================
+                // REQUIRE STREET NUMBER + ROUTE
+                // ========================================
+
+                if (
+                    !address.streetNumber ||
+                    !address.route
+                ) {
+
+                    signupAddressWasSelected =
+                        false;
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // POPULATE STREET
+                // ========================================
+
+                addressInput.value =
+                    `${address.streetNumber} ${address.route}`
+                        .trim();
+
+
+                // ========================================
+                // POPULATE CITY
+                // ========================================
+
+                if (address.city) {
+
+                    cityInput.value =
+                        address.city;
+
+                }
+
+
+                // ========================================
+                // POPULATE STATE
+                // ========================================
+
+                if (address.state) {
+
+                    stateInput.value =
+                        address.state;
+
+                }
+
+
+                // ========================================
+                // POPULATE ZIP
+                // ========================================
+
+                if (address.zip) {
+
+                    zipInput.value =
+                        address.zip;
+
+                }
+
+
+                signupAddressWasSelected =
+                    true;
+
+
+                // ========================================
+                // CLEAR EXISTING VALIDATION ERRORS
+                // ========================================
+
+                [
+                    addressInput,
+                    cityInput,
+                    stateInput,
+                    zipInput
+                ].forEach(
+                    field => {
+
+                        field.classList.remove(
+                            "signup-field-error"
+                        );
+
+                        field.removeAttribute(
+                            "aria-invalid"
+                        );
+
+                    }
+                );
+
+
+                clearSignupError();
+
+
+                // ========================================
+                // MOVE TO ADDRESS LINE 2
+                // ========================================
+
+                const addressLine2 =
+                    document.getElementById(
+                        "signup-address-line-2"
+                    );
+
+
+                if (addressLine2) {
+
+                    window.setTimeout(
+                        () => {
+
+                            addressLine2.focus({
+                                preventScroll: true
+                            });
+
+                        },
+                        100
+                    );
+
+                }
+
+            }
+        );
+
+
+        // ========================================
+        // MANUAL STREET EDIT
+        // ========================================
+
+        /*
+         * If Google filled an address and the
+         * client later changes the street manually,
+         * it is no longer considered a Google
+         * selected address.
+         *
+         * Manual entry is still allowed.
+         */
+
+        addressInput.addEventListener(
+            "input",
+            () => {
+
+                signupAddressWasSelected =
+                    false;
+
+            }
+        );
+
+    };
+
+
+// ========================================
+// PARSE GOOGLE ADDRESS COMPONENTS
+// ========================================
+
+function getSignupGoogleAddressParts(
+    components
+) {
+
+    const result = {
+
+        streetNumber: "",
+        route: "",
+        city: "",
+        state: "",
+        zip: ""
+
+    };
+
+
+    components.forEach(
+        component => {
+
+            const types =
+                component.types || [];
+
+
+            // ========================================
+            // STREET NUMBER
+            // ========================================
+
+            if (
+                types.includes(
+                    "street_number"
+                )
+            ) {
+
+                result.streetNumber =
+                    component.long_name || "";
+
+            }
+
+
+            // ========================================
+            // STREET NAME
+            // ========================================
+
+            if (
+                types.includes(
+                    "route"
+                )
+            ) {
+
+                result.route =
+                    component.long_name || "";
+
+            }
+
+
+            // ========================================
+            // CITY
+            // ========================================
+
+            if (
+                types.includes(
+                    "locality"
+                )
+            ) {
+
+                result.city =
+                    component.long_name || "";
+
+            }
+
+
+            /*
+             * Some valid U.S. addresses do not
+             * return locality. Google may instead
+             * return a postal town or administrative
+             * area for the city-level value.
+             */
+
+            if (
+                !result.city &&
+                types.includes(
+                    "postal_town"
+                )
+            ) {
+
+                result.city =
+                    component.long_name || "";
+
+            }
+
+
+            if (
+                !result.city &&
+                types.includes(
+                    "sublocality_level_1"
+                )
+            ) {
+
+                result.city =
+                    component.long_name || "";
+
+            }
+
+
+            // ========================================
+            // STATE
+            // ========================================
+
+            if (
+                types.includes(
+                    "administrative_area_level_1"
+                )
+            ) {
+
+                /*
+                 * Our State dropdown stores
+                 * two-letter abbreviations such
+                 * as TX rather than "Texas".
+                 */
+
+                result.state =
+                    component.short_name || "";
+
+            }
+
+
+            // ========================================
+            // ZIP CODE
+            // ========================================
+
+            if (
+                types.includes(
+                    "postal_code"
+                )
+            ) {
+
+                result.zip =
+                    String(
+                        component.long_name || ""
+                    )
+                        .replace(
+                            /\D/g,
+                            ""
+                        )
+                        .slice(
+                            0,
+                            5
+                        );
+
+            }
+
+        }
+    );
+
+
+    return result;
+
+}
 
 // ========================================
 // SIGNUP EVENTS
