@@ -6436,18 +6436,25 @@ let preferredTimeAvailabilityRequestId =
 // SELECTED VISIT CAPACITY STATE
 // ========================================
 //
-// If somebody selects a valid time window
-// and THEN adds a date that is full for that
-// same window, we remember the attempted
-// window and the exact conflicting dates.
+// lastSelectedTimeWindow remembers the time
+// window the client selected even if we must
+// temporarily clear the actual dropdown
+// because one newly-added date conflicts.
 //
-// This allows Selected Visits to show:
+// Example:
 //
-// Sep 21
-// 12:00 PM – 2:00 PM
-// UNAVAILABLE
+// Sep 22 + Sep 23
+// Client selects 12-2
 //
-// while Sep 22 / Sep 23 remain normal.
+// Then Sep 21 is added and 12-2 is full.
+//
+// We clear the actual select so the booking
+// cannot submit, but remember 12-2 so:
+//
+// - Sep 21 can stay visibly marked red
+// - removing Sep 21 can restore 12-2
+// - adding Sep 21 back re-creates the
+//   conflict instead of forgetting it.
 // ========================================
 
 let selectedDateCapacityConflicts =
@@ -6662,7 +6669,7 @@ function showTimeWindowCapacityHelp() {
 
 
     help.textContent =
-        "Some time windows are unavailable on specific selected dates. Remove the unavailable date if you want to use that time window.";
+        "Some time windows are unavailable on specific selected dates. Remove the unavailable date or choose another available time window.";
 
 
     help.style.display =
@@ -6690,9 +6697,12 @@ async function refreshPreferredTimeWindowAvailability() {
 
         selectedDateCapacityConflicts.clear();
 
+
         clearTimeWindowCapacityHelp();
 
+
         renderSelectedDates();
+
 
         return;
 
@@ -6707,9 +6717,12 @@ async function refreshPreferredTimeWindowAvailability() {
 
         selectedDateCapacityConflicts.clear();
 
+
         clearTimeWindowCapacityHelp();
 
+
         renderSelectedDates();
+
 
         return;
 
@@ -6727,18 +6740,35 @@ async function refreshPreferredTimeWindowAvailability() {
         ++preferredTimeAvailabilityRequestId;
 
 
-    const previousValue =
+    // ========================================
+    // TRACK THE CLIENT'S INTENDED WINDOW
+    // ========================================
+    //
+    // Use the real select value when present.
+    //
+    // If the select was automatically cleared
+    // because of a capacity conflict, continue
+    // checking lastSelectedTimeWindow.
+    // ========================================
+
+    const currentSelectedWindow =
         bookingTime.value;
 
 
     if (
-        previousValue
+        currentSelectedWindow
     ) {
 
         lastSelectedTimeWindow =
-            previousValue;
+            currentSelectedWindow;
 
     }
+
+
+    const trackedTimeWindow =
+        currentSelectedWindow ||
+        lastSelectedTimeWindow ||
+        "";
 
 
     // ========================================
@@ -6750,6 +6780,7 @@ async function refreshPreferredTimeWindowAvailability() {
     ) {
 
         selectedDateCapacityConflicts.clear();
+
 
         clearTimeWindowCapacityHelp();
 
@@ -6812,6 +6843,7 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
         renderSelectedDates();
+
 
         return;
 
@@ -6949,6 +6981,7 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
         clearTimeWindowCapacityHelp();
+
 
         return;
 
@@ -7146,58 +7179,72 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
     // ========================================
-    // UPDATE CONFLICTING SELECTED VISITS
+    // RECHECK THE TRACKED TIME WINDOW
+    // ========================================
+    //
+    // This is the important fix.
+    //
+    // Even when bookingTime.value is blank
+    // because we cleared it earlier, continue
+    // evaluating lastSelectedTimeWindow.
     // ========================================
 
     selectedDateCapacityConflicts.clear();
 
 
     if (
-        previousValue
+        trackedTimeWindow
     ) {
 
-        const selectedResult =
+        const trackedResult =
             results.find(
                 result =>
                     result.window.value ===
-                    previousValue
+                    trackedTimeWindow
             );
 
 
-        const selectedOption =
+        const trackedOption =
             Array.from(
                 bookingTime.options
             ).find(
                 option =>
                     option.value ===
-                    previousValue
+                    trackedTimeWindow
             );
 
 
-        if (
-            selectedOption
-                ?.disabled
-        ) {
-
-            lastSelectedTimeWindow =
-                previousValue;
-
-
-            selectedResult
+        const conflictingDates =
+            trackedResult
                 ?.dateChecks
                 ?.filter(
                     check =>
                         !check.available
-                )
-                .forEach(
-                    check => {
+                ) || [];
 
-                        selectedDateCapacityConflicts.add(
-                            check.date
-                        );
 
-                    }
-                );
+        // ========================================
+        // TRACKED WINDOW HAS A CONFLICT
+        // ========================================
+
+        if (
+            conflictingDates.length > 0 ||
+            trackedOption?.disabled
+        ) {
+
+            lastSelectedTimeWindow =
+                trackedTimeWindow;
+
+
+            conflictingDates.forEach(
+                check => {
+
+                    selectedDateCapacityConflicts.add(
+                        check.date
+                    );
+
+                }
+            );
 
 
             bookingTime.value =
@@ -7206,14 +7253,36 @@ async function refreshPreferredTimeWindowAvailability() {
 
             updateBookingTotal();
 
-        } else {
+        }
+
+        // ========================================
+        // TRACKED WINDOW IS VALID AGAIN
+        // ========================================
+        //
+        // Example:
+        //
+        // Sep 21 caused 12-2 to fail.
+        //
+        // Client removes Sep 21.
+        //
+        // Sep 22 + Sep 23 can use 12-2,
+        // so restore the original selection.
+        // ========================================
+
+        else if (
+            trackedOption &&
+            !trackedOption.disabled
+        ) {
 
             bookingTime.value =
-                previousValue;
+                trackedTimeWindow;
 
 
             lastSelectedTimeWindow =
-                previousValue;
+                trackedTimeWindow;
+
+
+            updateBookingTotal();
 
         }
 
@@ -7338,6 +7407,10 @@ bookingTime
             selectedDateCapacityConflicts.clear();
 
 
+            // ========================================
+            // CLIENT SELECTED A REAL WINDOW
+            // ========================================
+
             if (
                 bookingTime.value
             ) {
@@ -7345,7 +7418,25 @@ bookingTime
                 lastSelectedTimeWindow =
                     bookingTime.value;
 
-            } else {
+            }
+
+            // ========================================
+            // CLIENT MANUALLY CHOSE PLACEHOLDER
+            // ========================================
+            //
+            // If there are no capacity conflicts,
+            // clearing the dropdown manually means
+            // they genuinely no longer want the
+            // previously selected window.
+            //
+            // Do NOT erase the remembered window
+            // during an automatic capacity clear.
+            // ========================================
+
+            else if (
+                selectedDateCapacityConflicts.size ===
+                0
+            ) {
 
                 lastSelectedTimeWindow =
                     "";
@@ -7451,6 +7542,7 @@ function populatePetSittingTimeBlocks() {
 
         renderSelectedDates();
 
+
         return;
 
     }
@@ -7473,6 +7565,7 @@ function populatePetSittingTimeBlocks() {
 
 
         renderSelectedDates();
+
 
         return;
 
@@ -7517,7 +7610,6 @@ function populatePetSittingTimeBlocks() {
     renderSelectedDates();
 
 }
-
 
 // ========================================
 // BOOKING CALENDAR
