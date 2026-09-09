@@ -6594,6 +6594,7 @@ function populatePetSittingTimeBlocks() {
     );
 
 }
+
 // ========================================
 // BOOKING CALENDAR
 // ========================================
@@ -6768,6 +6769,12 @@ function renderBookingCalendar() {
             );
 
 
+        const holidayName =
+            getServiceHolidayName(
+                date
+            );
+
+
         const button =
             document.createElement(
                 "button"
@@ -6782,8 +6789,89 @@ function renderBookingCalendar() {
             "calendar-day";
 
 
-        button.textContent =
+        // ========================================
+        // DAY NUMBER
+        // ========================================
+
+        const dayNumber =
+            document.createElement(
+                "span"
+            );
+
+
+        dayNumber.className =
+            "calendar-day-number";
+
+
+        dayNumber.textContent =
             day;
+
+
+        button.appendChild(
+            dayNumber
+        );
+
+
+        // ========================================
+        // HOLIDAY INDICATOR
+        // ========================================
+        //
+        // Holidays receive a small ✦ marker.
+        // The permanent holiday engine above
+        // determines the holiday automatically.
+        // ========================================
+
+        if (
+            holidayName
+        ) {
+
+            button.classList.add(
+                "calendar-day-holiday"
+            );
+
+
+            const holidayStar =
+                document.createElement(
+                    "span"
+                );
+
+
+            holidayStar.className =
+                "calendar-holiday-star";
+
+
+            holidayStar.textContent =
+                "✦";
+
+
+            holidayStar.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+            button.appendChild(
+                holidayStar
+            );
+
+
+            button.title =
+                `${holidayName} — holiday pricing applies`;
+
+
+            button.setAttribute(
+                "aria-label",
+                `${day}, ${holidayName}. Holiday pricing applies.`
+            );
+
+        } else {
+
+            button.setAttribute(
+                "aria-label",
+                String(day)
+            );
+
+        }
 
 
         if (
@@ -6983,7 +7071,6 @@ function renderSelectedDates() {
     updateBookingTotal();
 
 }
-
 
 // ========================================
 // BOARDING
