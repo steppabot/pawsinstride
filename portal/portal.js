@@ -7463,116 +7463,6 @@ async function validateThreePerWeek(
 
 
 // ========================================
-// ATTACH PETS
-// ========================================
-
-async function attachPetsToVisits(
-    insertedVisits,
-    primaryPetId,
-    additionalPetIds,
-    serviceType
-) {
-
-    const rows =
-        [];
-
-
-    insertedVisits.forEach(
-        visit => {
-
-            rows.push({
-
-                visit_id:
-                    visit.id,
-
-                pet_id:
-                    Number(
-                        primaryPetId
-                    ),
-
-                is_primary:
-                    true,
-
-                additional_pet_fee:
-                    0
-
-            });
-
-
-            additionalPetIds.forEach(
-                petId => {
-
-                    let fee =
-                        0;
-
-
-                    if (
-                        serviceType ===
-                            "Dog Walking" ||
-                        serviceType ===
-                            "Drop-In Visit"
-                    ) {
-
-                        fee =
-                            10;
-
-                    }
-
-
-                    if (
-                        serviceType ===
-                        "Dog Boarding"
-                    ) {
-
-                        fee =
-                            100;
-
-                    }
-
-
-                    rows.push({
-
-                        visit_id:
-                            visit.id,
-
-                        pet_id:
-                            Number(petId),
-
-                        is_primary:
-                            false,
-
-                        additional_pet_fee:
-                            fee
-
-                    });
-
-                }
-            );
-
-        }
-    );
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("visit_pets")
-            .insert(
-                rows
-            );
-
-
-    if (error) {
-
-        throw error;
-
-    }
-
-}
-
-
-// ========================================
 // BOOKING SUBMIT
 // ========================================
 
@@ -7603,6 +7493,10 @@ if (bookingForm) {
                 );
 
 
+            message.textContent =
+                "";
+
+
             const primaryPetId =
                 Number(
                     bookingPetSelect.value
@@ -7617,6 +7511,10 @@ if (bookingForm) {
                 serviceTypeSelect.value;
 
 
+            // ========================================
+            // BASIC VALIDATION
+            // ========================================
+
             if (
                 !primaryPetId ||
                 !serviceType
@@ -7625,10 +7523,15 @@ if (bookingForm) {
                 message.textContent =
                     "Please select your pet and service type.";
 
+
                 return;
 
             }
 
+
+            // ========================================
+            // DOG BOARDING
+            // ========================================
 
             if (
                 serviceType ===
@@ -7642,10 +7545,15 @@ if (bookingForm) {
                     button
                 );
 
+
                 return;
 
             }
 
+
+            // ========================================
+            // STANDARD SERVICE DETAILS
+            // ========================================
 
             const serviceOption =
                 serviceOptionSelect.value;
@@ -7663,10 +7571,22 @@ if (bookingForm) {
                 message.textContent =
                     "Please complete the service details.";
 
+
                 return;
 
             }
 
+
+            // ========================================
+            // DATE VALIDATION
+            // ========================================
+            //
+            // Keep the friendly browser-side
+            // validation for immediate feedback.
+            //
+            // Supabase ALSO validates the weekly
+            // minimum inside create_service_booking.
+            // ========================================
 
             if (
                 serviceType ===
@@ -7680,6 +7600,7 @@ if (bookingForm) {
                         serviceType
                     );
 
+
                 if (
                     !validation.valid
                 ) {
@@ -7687,11 +7608,13 @@ if (bookingForm) {
                     message.textContent =
                         validation.message;
 
+
                     return;
 
                 }
 
-            } else if (
+            }
+            else if (
                 selectedDates.length <
                 1
             ) {
@@ -7699,105 +7622,29 @@ if (bookingForm) {
                 message.textContent =
                     "Please select at least one date.";
 
+
                 return;
 
             }
 
 
-            const option =
-                serviceOptionSelect.options[
-                    serviceOptionSelect.selectedIndex
-                ];
-
-
-            const basePrice =
-                Number(
-                    option.dataset.price
-                ) || 0;
-
-
-            let surcharge =
-                0;
-
-
-            if (
-                serviceType ===
-                    "Dog Walking" ||
-                serviceType ===
-                    "Drop-In Visit"
-            ) {
-
-                surcharge =
-                    Number(
-                        bookingTime.options[
-                            bookingTime.selectedIndex
-                        ].dataset.surcharge
-                    ) || 0;
-
-            }
-
-
-            const additionalCharge =
-                (
-                    serviceType ===
-                        "Dog Walking" ||
-                    serviceType ===
-                        "Drop-In Visit"
-                )
-                    ? additionalPetIds.length *
-                        10
-                    : 0;
-
-
-            const price =
-                basePrice +
-                surcharge +
-                additionalCharge;
-
-
-            const groupId =
-                crypto.randomUUID();
-
-
-            const rows =
-                selectedDates.map(
-                    date => ({
-
-                        client_id:
-                            currentUser.id,
-
-                        pet_id:
-                            primaryPetId,
-
-                        service_type:
-                            serviceType,
-
-                        service_option:
-                            serviceOption,
-
-                        service_name:
-                            `${serviceType} - ${serviceOption}`,
-
-                        visit_date:
-                            date,
-
-                        time_window:
-                            timeWindow,
-
-                        status:
-                            "requested",
-
-                        price,
-
-                        payment_status:
-                            "pending",
-
-                        booking_group_id:
-                            groupId
-
-                    })
-                );
-
+            // ========================================
+            // SUBMIT THROUGH SECURE DATABASE RPC
+            // ========================================
+            //
+            // IMPORTANT:
+            //
+            // We intentionally DO NOT send:
+            //
+            // - price
+            // - pricing tier
+            // - base price
+            // - additional pet fee
+            // - evening surcharge
+            // - booking group ID
+            //
+            // Supabase determines all of those.
+            // ========================================
 
             button.disabled =
                 true;
@@ -7814,27 +7661,57 @@ if (bookingForm) {
                     error
                 } =
                     await supabaseClient
-                        .from("visits")
-                        .insert(
-                            rows
-                        )
-                        .select(
-                            "id, visit_date"
+                        .rpc(
+                            "create_service_booking",
+                            {
+
+                                p_service_type:
+                                    serviceType,
+
+                                p_service_option:
+                                    serviceOption,
+
+                                p_dates:
+                                    selectedDates,
+
+                                p_time_window:
+                                    timeWindow,
+
+                                p_primary_pet_id:
+                                    primaryPetId,
+
+                                p_additional_pet_ids:
+                                    additionalPetIds,
+
+                                p_boarding_dropoff:
+                                    null,
+
+                                p_boarding_pickup:
+                                    null,
+
+                                p_boarding_pickup_window:
+                                    null
+
+                            }
                         );
 
 
                 if (error) {
+
                     throw error;
+
                 }
 
 
-                await attachPetsToVisits(
-                    data,
-                    primaryPetId,
-                    additionalPetIds,
-                    serviceType
+                console.log(
+                    "Secure booking created:",
+                    data
                 );
 
+
+                // ========================================
+                // SUCCESS
+                // ========================================
 
                 message.textContent =
                     "Service request submitted successfully!";
@@ -7856,20 +7733,67 @@ if (bookingForm) {
                     600
                 );
 
-            } catch (
+            }
+            catch (
                 error
             ) {
 
                 console.error(
-                    "Booking error:",
+                    "Secure booking error:",
                     error
                 );
 
 
-                message.textContent =
-                    "We couldn't submit your service request.";
+                // ========================================
+                // SERVER VALIDATION MESSAGE
+                // ========================================
 
-            } finally {
+                const serverMessage =
+                    String(
+                        error?.message ||
+                        ""
+                    );
+
+
+                if (
+                    serverMessage.includes(
+                        "require at least 3 service dates per week"
+                    )
+                ) {
+
+                    message.textContent =
+                        "Dog Walking and Drop-In bookings require at least 3 service dates per week.";
+
+                }
+                else if (
+                    serverMessage.includes(
+                        "Pricing is unavailable"
+                    )
+                ) {
+
+                    message.textContent =
+                        "Pricing is currently unavailable for this service. Please try again.";
+
+                }
+                else if (
+                    serverMessage.includes(
+                        "does not belong to this account"
+                    )
+                ) {
+
+                    message.textContent =
+                        "One of the selected pets could not be verified for your account.";
+
+                }
+                else {
+
+                    message.textContent =
+                        "We couldn't submit your service request. Please try again.";
+
+                }
+
+            }
+            finally {
 
                 button.disabled =
                     false;
@@ -7913,6 +7837,10 @@ async function submitBoardingBooking(
         getBoardingNightCount();
 
 
+    // ========================================
+    // BOARDING VALIDATION
+    // ========================================
+
     if (
         !dropoff ||
         !pickup ||
@@ -7929,102 +7857,23 @@ async function submitBoardingBooking(
     }
 
 
-    const pricing =
-        getServicePrice(
-            "Dog Boarding"
-        );
-
-
-    const baseNightlyPrice =
-        Number(
-            pricing?.base_price
-        ) || 0;
-
-
-    if (
-        baseNightlyPrice <= 0
-    ) {
-
-        message.textContent =
-            "We couldn't load your boarding price. Please close Request Service and try again.";
-
-
-        return;
-
-    }
-
-
-    const petCount =
-        1 +
-        additionalPetIds.length;
-
-
-    const nightlyPrice =
-        baseNightlyPrice *
-        petCount;
-
-
-    const pickupFee =
-        getBoardingPickupFee();
-
-
-    const boardingDates =
-        getBoardingNightDates(
-            dropoff,
-            pickup
-        );
-
-
-    const groupId =
-        crypto.randomUUID();
-
-
-    const rows =
-        boardingDates.map(
-            (date, index) => ({
-
-                client_id:
-                    currentUser.id,
-
-                pet_id:
-                    primaryPetId,
-
-                service_type:
-                    "Dog Boarding",
-
-                service_option:
-                    "VIP Overnight Boarding",
-
-                service_name:
-                    "Dog Boarding - VIP Overnight Boarding",
-
-                visit_date:
-                    date,
-
-                time_window:
-                    pickupWindow,
-
-                status:
-                    "requested",
-
-                price:
-                    nightlyPrice +
-                    (
-                        index ===
-                            boardingDates.length - 1
-                            ? pickupFee
-                            : 0
-                    ),
-
-                payment_status:
-                    "pending",
-
-                booking_group_id:
-                    groupId
-
-            })
-        );
-
+    // ========================================
+    // SUBMIT THROUGH SECURE DATABASE RPC
+    // ========================================
+    //
+    // The browser does NOT calculate or send
+    // the boarding price.
+    //
+    // Supabase determines:
+    //
+    // - Standard vs Grandfathered
+    // - $100 vs $85 nightly base
+    // - number of pets
+    // - number of nights
+    // - $50 extended pickup fee
+    // - booking group ID
+    // - visit_pets rows
+    // ========================================
 
     button.disabled =
         true;
@@ -8041,27 +7890,57 @@ async function submitBoardingBooking(
             error
         } =
             await supabaseClient
-                .from("visits")
-                .insert(
-                    rows
-                )
-                .select(
-                    "id, visit_date"
+                .rpc(
+                    "create_service_booking",
+                    {
+
+                        p_service_type:
+                            "Dog Boarding",
+
+                        p_service_option:
+                            null,
+
+                        p_dates:
+                            null,
+
+                        p_time_window:
+                            null,
+
+                        p_primary_pet_id:
+                            primaryPetId,
+
+                        p_additional_pet_ids:
+                            additionalPetIds,
+
+                        p_boarding_dropoff:
+                            dropoff,
+
+                        p_boarding_pickup:
+                            pickup,
+
+                        p_boarding_pickup_window:
+                            pickupWindow
+
+                    }
                 );
 
 
         if (error) {
+
             throw error;
+
         }
 
 
-        await attachPetsToVisits(
-            data,
-            primaryPetId,
-            additionalPetIds,
-            "Dog Boarding"
+        console.log(
+            "Secure boarding created:",
+            data
         );
 
+
+        // ========================================
+        // SUCCESS
+        // ========================================
 
         message.textContent =
             "Boarding request submitted successfully!";
@@ -8089,13 +7968,68 @@ async function submitBoardingBooking(
     ) {
 
         console.error(
-            "Boarding error:",
+            "Secure boarding error:",
             error
         );
 
 
-        message.textContent =
-            "We couldn't submit your boarding request.";
+        // ========================================
+        // SERVER VALIDATION MESSAGE
+        // ========================================
+
+        const serverMessage =
+            String(
+                error?.message ||
+                ""
+            );
+
+
+        if (
+            serverMessage.includes(
+                "Pricing is unavailable"
+            )
+        ) {
+
+            message.textContent =
+                "Boarding pricing is currently unavailable. Please try again.";
+
+        }
+        else if (
+            serverMessage.includes(
+                "pickup must be after"
+            )
+        ) {
+
+            message.textContent =
+                "Your pickup date must be after your drop-off date.";
+
+        }
+        else if (
+            serverMessage.includes(
+                "Invalid boarding pickup"
+            )
+        ) {
+
+            message.textContent =
+                "Please select a valid boarding pickup time.";
+
+        }
+        else if (
+            serverMessage.includes(
+                "does not belong to this account"
+            )
+        ) {
+
+            message.textContent =
+                "One of the selected pets could not be verified for your account.";
+
+        }
+        else {
+
+            message.textContent =
+                "We couldn't submit your boarding request. Please try again.";
+
+        }
 
     }
     finally {
