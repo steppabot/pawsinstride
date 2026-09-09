@@ -6541,6 +6541,111 @@ function getPreferredTimeWindowLabel(
 
 
 // ========================================
+// TIME WINDOW CAPACITY HELP
+// ========================================
+
+function getTimeWindowCapacityHelp() {
+
+    const wrapper =
+        document.getElementById(
+            "time-window-wrapper"
+        );
+
+
+    if (!wrapper) {
+        return null;
+    }
+
+
+    let help =
+        document.getElementById(
+            "time-window-capacity-help"
+        );
+
+
+    if (!help) {
+
+        help =
+            document.createElement(
+                "p"
+            );
+
+
+        help.id =
+            "time-window-capacity-help";
+
+
+        help.className =
+            "booking-help";
+
+
+        help.style.display =
+            "none";
+
+
+        wrapper.appendChild(
+            help
+        );
+
+    }
+
+
+    return help;
+
+}
+
+
+// ========================================
+// CLEAR CAPACITY HELP
+// ========================================
+
+function clearTimeWindowCapacityHelp() {
+
+    const help =
+        getTimeWindowCapacityHelp();
+
+
+    if (!help) {
+        return;
+    }
+
+
+    help.textContent =
+        "";
+
+
+    help.style.display =
+        "none";
+
+}
+
+
+// ========================================
+// SHOW PARTIAL AVAILABILITY HELP
+// ========================================
+
+function showTimeWindowCapacityHelp() {
+
+    const help =
+        getTimeWindowCapacityHelp();
+
+
+    if (!help) {
+        return;
+    }
+
+
+    help.textContent =
+        "Some time windows are unavailable on specific selected dates. The unavailable date is shown next to the time window. Remove that date if you want to use that window.";
+
+
+    help.style.display =
+        "block";
+
+}
+
+
+// ========================================
 // REFRESH TIME-WINDOW CAPACITY
 // ========================================
 
@@ -6556,7 +6661,11 @@ async function refreshPreferredTimeWindowAvailability() {
         serviceType !==
             "Drop-In Visit"
     ) {
+
+        clearTimeWindowCapacityHelp();
+
         return;
+
     }
 
 
@@ -6565,7 +6674,11 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
     if (!requestedMinutes) {
+
+        clearTimeWindowCapacityHelp();
+
         return;
+
     }
 
 
@@ -6587,17 +6700,13 @@ async function refreshPreferredTimeWindowAvailability() {
     // ========================================
     // NO DATES YET
     // ========================================
-    //
-    // Availability cannot be calculated until
-    // the client chooses at least one date.
-    //
-    // Keep every window enabled and restore
-    // its normal pricing label.
-    // ========================================
 
     if (
         selectedDates.length === 0
     ) {
+
+        clearTimeWindowCapacityHelp();
+
 
         Array.from(
             bookingTime.options
@@ -6645,6 +6754,11 @@ async function refreshPreferredTimeWindowAvailability() {
 
                 option.removeAttribute(
                     "data-capacity-full"
+                );
+
+
+                option.removeAttribute(
+                    "data-capacity-partial"
                 );
 
             }
@@ -6786,13 +6900,8 @@ async function refreshPreferredTimeWindowAvailability() {
         );
 
 
-        /*
-         * Do not falsely mark windows FULL if the
-         * availability request itself failed.
-         *
-         * The secure booking RPC will still enforce
-         * capacity when the client submits.
-         */
+        clearTimeWindowCapacityHelp();
+
 
         return;
 
@@ -6801,11 +6910,6 @@ async function refreshPreferredTimeWindowAvailability() {
 
     // ========================================
     // IGNORE STALE AVAILABILITY RESPONSE
-    // ========================================
-    //
-    // If the client changed dates/duration while
-    // Supabase was responding, a newer refresh
-    // request may already be running.
     // ========================================
 
     if (
@@ -6816,8 +6920,12 @@ async function refreshPreferredTimeWindowAvailability() {
     }
 
 
+    let hasPartialAvailability =
+        false;
+
+
     // ========================================
-    // APPLY FULL / AVAILABLE STATES
+    // APPLY AVAILABILITY STATES
     // ========================================
 
     results.forEach(
@@ -6852,6 +6960,17 @@ async function refreshPreferredTimeWindowAvailability() {
                 );
 
 
+            const availableDates =
+                result.dateChecks.filter(
+                    check =>
+                        check.available
+                );
+
+
+            // ========================================
+            // ALL SELECTED DATES AVAILABLE
+            // ========================================
+
             if (
                 unavailableDates.length === 0
             ) {
@@ -6875,21 +6994,80 @@ async function refreshPreferredTimeWindowAvailability() {
                 );
 
 
+                option.removeAttribute(
+                    "data-capacity-partial"
+                );
+
+
                 return;
 
             }
 
 
             // ========================================
-            // WINDOW IS FULL FOR AT LEAST ONE DATE
+            // EVERY SELECTED DATE IS FULL
             // ========================================
+
+            if (
+                availableDates.length === 0
+            ) {
+
+                option.disabled =
+                    true;
+
+
+                option.dataset.capacityFull =
+                    "true";
+
+
+                option.removeAttribute(
+                    "data-capacity-partial"
+                );
+
+
+                option.textContent =
+                    `${display.label} — FULL`;
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // PARTIALLY UNAVAILABLE
+            // ========================================
+            //
+            // Example:
+            //
+            // Sep 21 = FULL
+            // Sep 22 = AVAILABLE
+            // Sep 23 = AVAILABLE
+            //
+            // The option still cannot be selected
+            // because one booking currently uses
+            // the same time window for every date.
+            //
+            // But we identify the actual conflicting
+            // date instead of calling the entire
+            // window FULL.
+            // ========================================
+
+            hasPartialAvailability =
+                true;
+
 
             option.disabled =
                 true;
 
 
-            option.dataset.capacityFull =
+            option.dataset.capacityPartial =
                 "true";
+
+
+            option.removeAttribute(
+                "data-capacity-full"
+            );
 
 
             const firstUnavailableDate =
@@ -6899,36 +7077,45 @@ async function refreshPreferredTimeWindowAvailability() {
                 );
 
 
-            let fullLabel =
-                `${display.label} — FULL`;
+            let unavailableLabel =
+                `${display.label} — Unavailable ${firstUnavailableDate}`;
 
 
             if (
-                unavailableDates.length === 1
+                unavailableDates.length > 1
             ) {
 
-                fullLabel +=
-                    ` (${firstUnavailableDate})`;
-
-            } else {
-
-                fullLabel +=
-                    ` (${firstUnavailableDate} +${
-                        unavailableDates.length - 1
-                    } more)`;
+                unavailableLabel +=
+                    ` +${unavailableDates.length - 1} more`;
 
             }
 
 
             option.textContent =
-                fullLabel;
+                unavailableLabel;
 
         }
     );
 
 
     // ========================================
-    // CLEAR SELECTED WINDOW IF IT BECAME FULL
+    // EXPLAIN PARTIAL AVAILABILITY
+    // ========================================
+
+    if (hasPartialAvailability) {
+
+        showTimeWindowCapacityHelp();
+
+    } else {
+
+        clearTimeWindowCapacityHelp();
+
+    }
+
+
+    // ========================================
+    // CLEAR SELECTED WINDOW IF IT BECAME
+    // UNAVAILABLE FOR ANY SELECTED DATE
     // ========================================
 
     if (previousValue) {
@@ -6996,6 +7183,9 @@ async function populatePreferredTimeWindows() {
         `;
 
 
+    clearTimeWindowCapacityHelp();
+
+
     const serviceType =
         serviceTypeSelect.value;
 
@@ -7056,13 +7246,6 @@ async function populatePreferredTimeWindows() {
 
 // ========================================
 // REFRESH CAPACITY WHEN DATES CHANGE
-// ========================================
-//
-// Calendar-day and Remove buttons already update
-// selectedDates before this listener runs.
-//
-// Waiting one event-loop tick lets the existing
-// booking-calendar code finish first.
 // ========================================
 
 document.addEventListener(
@@ -7135,6 +7318,9 @@ function populatePetSittingTimeBlocks() {
         `;
 
 
+    clearTimeWindowCapacityHelp();
+
+
     if (!selectedPackage) {
 
         wrapper.style.display =
@@ -7200,7 +7386,6 @@ function populatePetSittingTimeBlocks() {
     );
 
 }
-
 // ========================================
 // BOOKING CALENDAR
 // ========================================
