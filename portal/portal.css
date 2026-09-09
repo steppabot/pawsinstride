@@ -11346,3 +11346,101 @@ a:focus-visible {
     }
 
 }
+
+/* ========================================
+   SIGNUP BREED AUTOCOMPLETE
+======================================== */
+
+.signup-breed-autocomplete {
+    position: relative;
+    width: 100%;
+}
+
+
+/* ========================================
+   BREED SUGGESTION MENU
+======================================== */
+
+.signup-breed-suggestions {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+
+    z-index: 100;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #d9e5ee;
+    border-radius: 12px;
+
+    box-shadow:
+        0 12px 30px
+        rgba(18, 48, 77, 0.14);
+}
+
+
+.signup-breed-suggestions[hidden] {
+    display: none;
+}
+
+
+/* ========================================
+   BREED SUGGESTION
+======================================== */
+
+.signup-breed-suggestion {
+    display: block;
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border: 0;
+    border-bottom: 1px solid #edf2f6;
+
+    background: #ffffff;
+
+    color: #102338;
+
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.signup-breed-suggestion:last-child {
+    border-bottom: 0;
+}
+
+
+.signup-breed-suggestion:hover,
+.signup-breed-suggestion:focus-visible {
+    background: #eef9fd;
+    color: #2890df;
+    outline: none;
+}
+
+
+/* ========================================
+   MOBILE BREED AUTOCOMPLETE
+======================================== */
+
+@media (max-width: 700px) {
+
+    .signup-breed-suggestion {
+        padding: 13px 14px;
+        font-size: 16px;
+    }
+
+}
