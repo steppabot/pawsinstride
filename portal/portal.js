@@ -1240,17 +1240,25 @@ if (resetPasswordForm) {
                 // ========================================
                 // SUCCESS
                 // ========================================
-
-                resetPasswordForm.style.display =
+                
+                const resetPasswordContent =
+                    document.getElementById(
+                        "reset-password-content"
+                    );
+                
+                
+                const resetPasswordSuccess =
+                    document.getElementById(
+                        "reset-password-success"
+                    );
+                
+                
+                resetPasswordContent.style.display =
                     "none";
-
-
-                resetPasswordMessage.textContent =
-                    "Your password has been updated successfully. You can now sign in with your new password.";
-
-
-                resetPasswordLoginLink.style.display =
-                    "";
+                
+                
+                resetPasswordSuccess.hidden =
+                    false;
 
 
                 // ========================================
