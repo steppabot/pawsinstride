@@ -8048,6 +8048,30 @@ body.portal-login-page {
 
 }
 
+/* ========================================
+   PASSWORD RECOVERY MESSAGE
+======================================== */
+
+.portal-login-page
+#forgot-password-message {
+
+    margin:
+        16px
+        0
+        0;
+
+    color:
+        var(--pis-muted);
+
+    text-align: center;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    line-height: 1.5;
+
+}
+
 
 /* ========================================
    LOGIN FOOTER
