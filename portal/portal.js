@@ -5833,10 +5833,44 @@ function handleServiceTypeChange() {
     }
 
 
+    // ========================================
+    // DOG BOARDING
+    // ========================================
+
     if (
         serviceType ===
         "Dog Boarding"
     ) {
+
+        const pricing =
+            getServicePrice(
+                "Dog Boarding"
+            );
+
+
+        const nightlyPrice =
+            Number(
+                pricing?.base_price
+            ) || 0;
+
+
+        const boardingPolicyPrice =
+            document.getElementById(
+                "boarding-policy-price"
+            );
+
+
+        if (boardingPolicyPrice) {
+
+            boardingPolicyPrice.textContent =
+                nightlyPrice > 0
+                    ? `VIP Overnight Boarding — $${formatServicePrice(
+                        nightlyPrice
+                    )} per pet / night`
+                    : "VIP Overnight Boarding";
+
+        }
+
 
         boarding.style.display =
             "block";
@@ -5844,14 +5878,20 @@ function handleServiceTypeChange() {
 
         resetBoardingDates();
 
+
         renderAdditionalPets();
 
         updateBookingTotal();
+
 
         return;
 
     }
 
+
+    // ========================================
+    // STANDARD SERVICES
+    // ========================================
 
     optionWrapper.style.display =
         "block";
@@ -5865,6 +5905,10 @@ function handleServiceTypeChange() {
         serviceType
     );
 
+
+    // ========================================
+    // WALKING / DROP-IN
+    // ========================================
 
     if (
         serviceType ===
@@ -5888,6 +5932,10 @@ function handleServiceTypeChange() {
     }
 
 
+    // ========================================
+    // PET SITTING
+    // ========================================
+
     if (
         serviceType ===
         "Pet Sitting"
@@ -5908,8 +5956,6 @@ function handleServiceTypeChange() {
     updateBookingTotal();
 
 }
-
-
 // ========================================
 // SERVICE OPTIONS
 // ========================================
