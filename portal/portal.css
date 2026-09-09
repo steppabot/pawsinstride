@@ -392,7 +392,6 @@ section h3 {
     color: #777;
 }
 
-
 /* ========================================
    CALENDARS
 ======================================== */
@@ -405,9 +404,11 @@ section h3 {
     border-radius: 12px;
 }
 
+
 .booking-calendar {
     margin-bottom: 18px;
 }
+
 
 .calendar-header,
 .upcoming-calendar-header {
@@ -418,10 +419,12 @@ section h3 {
     margin-bottom: 16px;
 }
 
+
 .calendar-header strong,
 .upcoming-calendar-header strong {
     font-size: 18px;
 }
+
 
 .calendar-nav-button {
     width: 42px;
@@ -434,23 +437,30 @@ section h3 {
     line-height: 1;
 }
 
+
 .calendar-nav-button:hover {
     border-color: #111;
 }
+
 
 .calendar-weekdays,
 .calendar-grid,
 .upcoming-calendar-weekdays,
 .upcoming-calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(
+        7,
+        minmax(0, 1fr)
+    );
     gap: 6px;
 }
+
 
 .calendar-weekdays,
 .upcoming-calendar-weekdays {
     margin-bottom: 6px;
 }
+
 
 .calendar-weekdays span,
 .upcoming-calendar-weekdays span {
@@ -461,25 +471,68 @@ section h3 {
     text-align: center;
 }
 
+
 .calendar-empty-day,
 .upcoming-calendar-empty {
     aspect-ratio: 1 / 1;
 }
 
+
+/* ========================================
+   BOOKING CALENDAR DAY
+======================================== */
+
 .calendar-day {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     width: 100%;
     aspect-ratio: 1 / 1;
+
     padding: 0;
+
     background: #fff;
+    color: #111;
+
     border: 1px solid #ddd;
     border-radius: 8px;
+
     font-size: 14px;
     font-weight: 600;
 }
 
+
+/* ========================================
+   DAY NUMBER
+======================================== */
+
+.calendar-day-number {
+    position: relative;
+    z-index: 1;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    line-height: 1;
+}
+
+
+/* ========================================
+   CALENDAR HOVER
+======================================== */
+
 .calendar-day:hover:not(:disabled) {
     border-color: #111;
 }
+
+
+/* ========================================
+   SELECTED DATE
+======================================== */
 
 .calendar-day-selected {
     background: #111;
@@ -487,15 +540,89 @@ section h3 {
     border-color: #111;
 }
 
-.calendar-day-today:not(.calendar-day-selected) {
+
+/* ========================================
+   TODAY
+======================================== */
+
+.calendar-day-today:not(
+    .calendar-day-selected
+) {
     border: 2px solid #111;
 }
+
+
+/* ========================================
+   PAST DATE
+======================================== */
 
 .calendar-day-past {
     opacity: 0.3;
     cursor: not-allowed;
 }
 
+
+/* ========================================
+   HOLIDAY DATE
+======================================== */
+
+.calendar-day-holiday {
+    position: relative;
+}
+
+
+/* ========================================
+   HOLIDAY STAR
+======================================== */
+
+.calendar-holiday-star {
+    position: absolute;
+
+    top: 4px;
+    right: 5px;
+
+    z-index: 2;
+
+    color: #f5ab40;
+
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+
+    pointer-events: none;
+}
+
+
+/* ========================================
+   HOLIDAY STAR ON SELECTED DATE
+======================================== */
+
+.calendar-day-selected
+.calendar-holiday-star {
+    color: #f5ab40;
+}
+
+
+/* ========================================
+   HOLIDAY DATE HOVER
+======================================== */
+
+.calendar-day-holiday:hover:not(
+    :disabled
+) {
+    border-color: #f5ab40;
+}
+
+
+/* ========================================
+   HOLIDAY DATE TOOLTIP CURSOR
+======================================== */
+
+.calendar-day-holiday:not(
+    :disabled
+) {
+    cursor: pointer;
+}
 
 /* ========================================
    HOUSEHOLD SECTION
