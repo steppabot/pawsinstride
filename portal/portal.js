@@ -6675,6 +6675,7 @@ function updateBookingTotal() {
         details.textContent =
             "";
 
+
         return;
 
     }
@@ -6691,17 +6692,33 @@ function updateBookingTotal() {
         );
 
 
+    // ========================================
+    // DOG BOARDING
+    // ========================================
+
     if (
         serviceType ===
         "Dog Boarding"
     ) {
+
+        const pricing =
+            getServicePrice(
+                "Dog Boarding"
+            );
+
+
+        const nightlyBasePrice =
+            Number(
+                pricing?.base_price
+            ) || 0;
+
 
         const nights =
             getBoardingNightCount();
 
 
         const nightlyTotal =
-            100 *
+            nightlyBasePrice *
             Math.max(
                 petCount,
                 1
@@ -6732,12 +6749,15 @@ function updateBookingTotal() {
 
         details.textContent =
             nights > 0 &&
-            petCount > 0
+            petCount > 0 &&
+            nightlyBasePrice > 0
                 ? `${petCount} ${
                     petCount === 1
                         ? "pet"
                         : "pets"
-                } × $100 × ${nights} ${
+                } × $${formatServicePrice(
+                    nightlyBasePrice
+                )} × ${nights} ${
                     nights === 1
                         ? "night"
                         : "nights"
@@ -6749,6 +6769,10 @@ function updateBookingTotal() {
 
     }
 
+
+    // ========================================
+    // NON-BOARDING SERVICES
+    // ========================================
 
     const selectedOption =
         serviceOptionSelect.options[
@@ -6795,9 +6819,22 @@ function updateBookingTotal() {
             "Drop-In Visit"
     ) {
 
+        const pricing =
+            getServicePrice(
+                serviceType,
+                serviceOptionSelect.value
+            );
+
+
+        const perAdditionalPetFee =
+            Number(
+                pricing?.additional_pet_fee
+            ) || 0;
+
+
         additionalPetFee =
             additionalPetCount *
-            10;
+            perAdditionalPetFee;
 
     }
 
@@ -6835,7 +6872,9 @@ function updateBookingTotal() {
     ) {
 
         pieces.push(
-            `${selectedDates.length} × $${basePrice}`
+            `${selectedDates.length} × $${formatServicePrice(
+                basePrice
+            )}`
         );
 
 
@@ -6843,12 +6882,27 @@ function updateBookingTotal() {
             additionalPetFee > 0
         ) {
 
+            const pricing =
+                getServicePrice(
+                    serviceType,
+                    serviceOptionSelect.value
+                );
+
+
+            const perAdditionalPetFee =
+                Number(
+                    pricing?.additional_pet_fee
+                ) || 0;
+
+
             pieces.push(
                 `${additionalPetCount} additional ${
                     additionalPetCount === 1
                         ? "pet"
                         : "pets"
-                } × $10 per visit`
+                } × $${formatServicePrice(
+                    perAdditionalPetFee
+                )} per visit`
             );
 
         }
@@ -6876,7 +6930,9 @@ function updateBookingTotal() {
         ) {
 
             pieces.push(
-                `$${surcharge} evening fee per visit`
+                `$${formatServicePrice(
+                    surcharge
+                )} evening fee per visit`
             );
 
         }
@@ -6888,7 +6944,6 @@ function updateBookingTotal() {
         pieces.join(" + ");
 
 }
-
 
 // ========================================
 // WEEK VALIDATION
@@ -7691,6 +7746,32 @@ async function submitBoardingBooking(
         message.textContent =
             "Please complete your boarding dates and pickup time.";
 
+
+        return;
+
+    }
+
+
+    const pricing =
+        getServicePrice(
+            "Dog Boarding"
+        );
+
+
+    const baseNightlyPrice =
+        Number(
+            pricing?.base_price
+        ) || 0;
+
+
+    if (
+        baseNightlyPrice <= 0
+    ) {
+
+        message.textContent =
+            "We couldn't load your boarding price. Please close Request Service and try again.";
+
+
         return;
 
     }
@@ -7702,7 +7783,7 @@ async function submitBoardingBooking(
 
 
     const nightlyPrice =
-        100 *
+        baseNightlyPrice *
         petCount;
 
 
@@ -7825,7 +7906,8 @@ async function submitBoardingBooking(
             600
         );
 
-    } catch (
+    }
+    catch (
         error
     ) {
 
@@ -7838,7 +7920,8 @@ async function submitBoardingBooking(
         message.textContent =
             "We couldn't submit your boarding request.";
 
-    } finally {
+    }
+    finally {
 
         button.disabled =
             false;
@@ -7850,7 +7933,6 @@ async function submitBoardingBooking(
     }
 
 }
-
 
 // ========================================
 // RESET BOOKING
