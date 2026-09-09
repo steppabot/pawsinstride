@@ -5181,6 +5181,7 @@ function renderAdditionalPets() {
         help.textContent =
             "";
 
+
         return;
 
     }
@@ -5282,6 +5283,10 @@ function getAdditionalPetLabel() {
         serviceTypeSelect?.value;
 
 
+    // ========================================
+    // WALKING / DROP-IN
+    // ========================================
+
     if (
         serviceType ===
             "Dog Walking" ||
@@ -5289,10 +5294,31 @@ function getAdditionalPetLabel() {
             "Drop-In Visit"
     ) {
 
-        return "+$10 / visit";
+        const pricing =
+            getServicePrice(
+                serviceType,
+                serviceOptionSelect?.value
+            );
+
+
+        const fee =
+            Number(
+                pricing?.additional_pet_fee
+            ) || 0;
+
+
+        return fee > 0
+            ? `+$${formatServicePrice(
+                fee
+            )} / visit`
+            : "Included";
 
     }
 
+
+    // ========================================
+    // PET SITTING
+    // ========================================
 
     if (
         serviceType ===
@@ -5304,12 +5330,32 @@ function getAdditionalPetLabel() {
     }
 
 
+    // ========================================
+    // DOG BOARDING
+    // ========================================
+
     if (
         serviceType ===
         "Dog Boarding"
     ) {
 
-        return "+$100 / night";
+        const pricing =
+            getServicePrice(
+                "Dog Boarding"
+            );
+
+
+        const nightlyPrice =
+            Number(
+                pricing?.base_price
+            ) || 0;
+
+
+        return nightlyPrice > 0
+            ? `+$${formatServicePrice(
+                nightlyPrice
+            )} / night`
+            : "Additional pet";
 
     }
 
@@ -5332,48 +5378,134 @@ function updateAdditionalPetsHelp() {
     }
 
 
-    switch (
-        serviceTypeSelect?.value
+    const serviceType =
+        serviceTypeSelect?.value;
+
+
+    // ========================================
+    // DOG WALKING
+    // ========================================
+
+    if (
+        serviceType ===
+        "Dog Walking"
     ) {
 
-        case "Dog Walking":
-
-            help.textContent =
-                "Each additional dog is $10 per walk.";
-
-            break;
-
-
-        case "Drop-In Visit":
-
-            help.textContent =
-                "Each additional pet is $10 per drop-in visit.";
-
-            break;
+        const pricing =
+            getServicePrice(
+                "Dog Walking",
+                serviceOptionSelect?.value
+            );
 
 
-        case "Pet Sitting":
-
-            help.textContent =
-                "Additional pets are included at no additional charge.";
-
-            break;
+        const fee =
+            Number(
+                pricing?.additional_pet_fee
+            ) || 0;
 
 
-        case "Dog Boarding":
+        help.textContent =
+            fee > 0
+                ? `Each additional dog is $${formatServicePrice(
+                    fee
+                )} per walk.`
+                : "Additional dogs are included at no additional charge.";
 
-            help.textContent =
-                "Boarding is $100 per pet, per night.";
 
-            break;
-
-
-        default:
-
-            help.textContent =
-                "Select any other pets included in this service.";
+        return;
 
     }
+
+
+    // ========================================
+    // DROP-IN
+    // ========================================
+
+    if (
+        serviceType ===
+        "Drop-In Visit"
+    ) {
+
+        const pricing =
+            getServicePrice(
+                "Drop-In Visit",
+                serviceOptionSelect?.value
+            );
+
+
+        const fee =
+            Number(
+                pricing?.additional_pet_fee
+            ) || 0;
+
+
+        help.textContent =
+            fee > 0
+                ? `Each additional pet is $${formatServicePrice(
+                    fee
+                )} per drop-in visit.`
+                : "Additional pets are included at no additional charge.";
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // PET SITTING
+    // ========================================
+
+    if (
+        serviceType ===
+        "Pet Sitting"
+    ) {
+
+        help.textContent =
+            "Additional pets are included at no additional charge.";
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // DOG BOARDING
+    // ========================================
+
+    if (
+        serviceType ===
+        "Dog Boarding"
+    ) {
+
+        const pricing =
+            getServicePrice(
+                "Dog Boarding"
+            );
+
+
+        const nightlyPrice =
+            Number(
+                pricing?.base_price
+            ) || 0;
+
+
+        help.textContent =
+            nightlyPrice > 0
+                ? `Boarding is $${formatServicePrice(
+                    nightlyPrice
+                )} per pet, per night.`
+                : "Boarding pricing is currently unavailable.";
+
+
+        return;
+
+    }
+
+
+    help.textContent =
+        "Select any other pets included in this service.";
 
 }
 
@@ -5413,7 +5545,6 @@ function getSelectedPetCount() {
             .length;
 
 }
-
 
 // ========================================
 // BOOKING OPEN / CLOSE
