@@ -8053,7 +8053,10 @@ body.portal-login-page {
 ======================================== */
 
 .portal-login-page
-#forgot-password-message {
+#forgot-password-message,
+
+.portal-login-page
+#reset-password-message {
 
     margin:
         16px
@@ -8071,7 +8074,6 @@ body.portal-login-page {
     line-height: 1.5;
 
 }
-
 
 /* ========================================
    LOGIN FOOTER
