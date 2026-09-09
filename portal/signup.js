@@ -810,6 +810,87 @@ function setupSignupEvents() {
 }
 
 // ========================================
+// PET FIELD ERROR CLEARING
+// ========================================
+
+petsContainer?.addEventListener(
+    "input",
+    event => {
+
+        const field =
+            event.target.closest(
+                "input, select"
+            );
+
+
+        if (!field) {
+            return;
+        }
+
+
+        if (
+            field.classList.contains(
+                "signup-field-error"
+            )
+        ) {
+
+            field.classList.remove(
+                "signup-field-error"
+            );
+
+
+            field.removeAttribute(
+                "aria-invalid"
+            );
+
+        }
+
+
+        clearSignupError();
+
+    }
+);
+
+
+petsContainer?.addEventListener(
+    "change",
+    event => {
+
+        const field =
+            event.target.closest(
+                "input, select"
+            );
+
+
+        if (!field) {
+            return;
+        }
+
+
+        if (
+            field.classList.contains(
+                "signup-field-error"
+            )
+        ) {
+
+            field.classList.remove(
+                "signup-field-error"
+            );
+
+
+            field.removeAttribute(
+                "aria-invalid"
+            );
+
+        }
+
+
+        clearSignupError();
+
+    }
+);
+
+// ========================================
 // PASSWORD SHOW / HIDE
 // ========================================
 
@@ -1587,12 +1668,14 @@ async function handlePetsContinue() {
 
 }
 
-
 // ========================================
 // COLLECT + VALIDATE PET DATA
 // ========================================
 
 function collectPetData() {
+
+    clearSignupFieldErrors();
+
 
     const petCards =
         Array.from(
@@ -1631,15 +1714,18 @@ function collectPetData() {
                 '[name="pet_name"]'
             );
 
+
         const breedInput =
             card.querySelector(
                 '[name="pet_breed"]'
             );
 
+
         const birthdayInput =
             card.querySelector(
                 '[name="pet_birthday"]'
             );
+
 
         const genderInput =
             card.querySelector(
@@ -1650,9 +1736,14 @@ function collectPetData() {
         const petName =
             nameInput?.value.trim() || "";
 
+
         const breed =
             breedInput?.value.trim() || "";
 
+
+        // ========================================
+        // PET NAME
+        // ========================================
 
         if (!petName) {
 
@@ -1660,12 +1751,54 @@ function collectPetData() {
                 `Please enter a name for Pet ${index + 1}.`
             );
 
-            nameInput?.focus();
+
+            markSignupFieldError(
+                nameInput
+            );
+
+
+            nameInput?.scrollIntoView({
+                behavior:
+                    window.matchMedia(
+                        "(prefers-reduced-motion: reduce)"
+                    ).matches
+                        ? "auto"
+                        : "smooth",
+
+                block:
+                    "center"
+            });
+
+
+            window.setTimeout(
+                () => {
+
+                    try {
+
+                        nameInput?.focus({
+                            preventScroll: true
+                        });
+
+                    }
+                    catch {
+
+                        nameInput?.focus();
+
+                    }
+
+                },
+                300
+            );
+
 
             return null;
 
         }
 
+
+        // ========================================
+        // BREED
+        // ========================================
 
         if (!breed) {
 
@@ -1673,16 +1806,59 @@ function collectPetData() {
                 `Please enter a breed for ${petName}.`
             );
 
-            breedInput?.focus();
+
+            markSignupFieldError(
+                breedInput
+            );
+
+
+            breedInput?.scrollIntoView({
+                behavior:
+                    window.matchMedia(
+                        "(prefers-reduced-motion: reduce)"
+                    ).matches
+                        ? "auto"
+                        : "smooth",
+
+                block:
+                    "center"
+            });
+
+
+            window.setTimeout(
+                () => {
+
+                    try {
+
+                        breedInput?.focus({
+                            preventScroll: true
+                        });
+
+                    }
+                    catch {
+
+                        breedInput?.focus();
+
+                    }
+
+                },
+                300
+            );
+
 
             return null;
 
         }
 
 
+        // ========================================
+        // SAVE PET
+        // ========================================
+
         pets.push({
 
-            name: petName,
+            name:
+                petName,
 
             breed,
 
@@ -1695,6 +1871,9 @@ function collectPetData() {
         });
 
     }
+
+
+    clearSignupFieldErrors();
 
 
     return pets;
