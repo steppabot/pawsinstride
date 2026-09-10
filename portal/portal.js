@@ -9693,57 +9693,15 @@ if (bookingForm) {
                 
                 
                 // ========================================
-                // START PAYPAL CHECKOUT
+                // GO TO PAYMENT PAGE
                 // ========================================
                 
                 message.textContent =
-                    "Preparing secure checkout...";
+                    "Opening secure checkout...";
                 
-                
-                const {
-                    data: paypalData,
-                    error: paypalError
-                } =
-                    await supabaseClient
-                        .functions
-                        .invoke(
-                            "paypal-create-order",
-                            {
-                                body: {
-                                    checkout_id:
-                                        checkout.checkout_id
-                                }
-                            }
-                        );
-                
-                
-                if (
-                    paypalError ||
-                    !paypalData?.success ||
-                    !paypalData?.approvalLink
-                ) {
-                
-                    console.error(
-                        "PayPal order error:",
-                        paypalError,
-                        paypalData
-                    );
-                
-                
-                    throw new Error(
-                        paypalData?.error ||
-                        "Could not start PayPal checkout."
-                    );
-                
-                }
-                
-                
-                // ========================================
-                // SEND CLIENT TO PAYPAL
-                // ========================================
                 
                 window.location.href =
-                    paypalData.approvalLink;
+                    `./payment.html?checkout=${encodeURIComponent(checkout.checkout_id)}`;
 
             }
             catch (
@@ -9887,13 +9845,15 @@ async function submitBoardingBooking(
     //
     // Supabase determines:
     //
-    // - Standard vs Grandfathered
-    // - $100 vs $85 nightly base
+    // - pricing tier
+    // - nightly base price
     // - number of pets
     // - number of nights
-    // - $50 extended pickup fee
-    // - booking group ID
-    // - visit_pets rows
+    // - extended pickup fee
+    // - holiday fees
+    // - final checkout total
+    //
+    // No real visits are created yet.
     // ========================================
 
     button.disabled =
@@ -9954,7 +9914,7 @@ async function submitBoardingBooking(
 
 
         console.log(
-            "Secure boarding created:",
+            "Secure boarding checkout created:",
             data
         );
 
@@ -9962,76 +9922,34 @@ async function submitBoardingBooking(
         // ========================================
         // CHECKOUT CREATED
         // ========================================
-        
+
         const checkout =
             Array.isArray(data)
                 ? data[0]
                 : data;
-        
-        
+
+
         if (
             !checkout?.checkout_id
         ) {
-        
+
             throw new Error(
                 "Checkout was created but no checkout ID was returned."
             );
-        
+
         }
-        
-        
+
+
         // ========================================
-        // START PAYPAL CHECKOUT
+        // GO TO PAYMENT PAGE
         // ========================================
-        
+
         message.textContent =
-            "Preparing secure checkout...";
-        
-        
-        const {
-            data: paypalData,
-            error: paypalError
-        } =
-            await supabaseClient
-                .functions
-                .invoke(
-                    "paypal-create-order",
-                    {
-                        body: {
-                            checkout_id:
-                                checkout.checkout_id
-                        }
-                    }
-                );
-        
-        
-        if (
-            paypalError ||
-            !paypalData?.success ||
-            !paypalData?.approvalLink
-        ) {
-        
-            console.error(
-                "PayPal order error:",
-                paypalError,
-                paypalData
-            );
-        
-        
-            throw new Error(
-                paypalData?.error ||
-                "Could not start PayPal checkout."
-            );
-        
-        }
-        
-        
-        // ========================================
-        // SEND CLIENT TO PAYPAL
-        // ========================================
-        
+            "Opening secure checkout...";
+
+
         window.location.href =
-            paypalData.approvalLink;
+            `./payment.html?checkout=${encodeURIComponent(checkout.checkout_id)}`;
 
     }
     catch (
