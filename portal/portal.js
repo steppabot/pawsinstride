@@ -14434,6 +14434,10 @@ function syncClientNavigationMessageBadge() {
 // PUSH NOTIFICATIONS
 // ========================================
 
+const VAPID_PUBLIC_KEY =
+    "BJMZyLb__6L55n-7l1SB3H97mQDGkUXiudH4X9EQMjqO2Do7jIGtS9Gu-gxkIZ5sMxrfLsCo5EaWpGb6kRi5_DA";
+
+
 const pushNotificationCard =
     document.getElementById(
         "push-notification-card"
@@ -14495,6 +14499,214 @@ function browserSupportsPushNotifications() {
 
 
 // ========================================
+// CONVERT BASE64URL TO UINT8ARRAY
+// ========================================
+
+function urlBase64ToUint8Array(
+    base64String
+) {
+
+    const padding =
+        "=".repeat(
+            (
+                4 -
+                (
+                    base64String.length %
+                    4
+                )
+            ) %
+            4
+        );
+
+
+    const base64 =
+        (
+            base64String +
+            padding
+        )
+            .replace(
+                /-/g,
+                "+"
+            )
+            .replace(
+                /_/g,
+                "/"
+            );
+
+
+    const rawData =
+        window.atob(
+            base64
+        );
+
+
+    return Uint8Array.from(
+        [...rawData]
+            .map(
+                character =>
+                    character.charCodeAt(0)
+            )
+    );
+
+}
+
+
+// ========================================
+// SAVE PUSH SUBSCRIPTION
+// ========================================
+
+async function savePushSubscription(
+    subscription
+) {
+
+    if (
+        !currentUser?.id
+    ) {
+
+        throw new Error(
+            "No authenticated user is available."
+        );
+
+    }
+
+
+    const subscriptionJson =
+        subscription.toJSON();
+
+
+    const p256dh =
+        subscriptionJson
+            ?.keys
+            ?.p256dh;
+
+
+    const auth =
+        subscriptionJson
+            ?.keys
+            ?.auth;
+
+
+    if (
+        !subscription.endpoint ||
+        !p256dh ||
+        !auth
+    ) {
+
+        throw new Error(
+            "Push subscription information is incomplete."
+        );
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "push_subscriptions"
+            )
+            .upsert(
+                {
+                    user_id:
+                        currentUser.id,
+
+                    endpoint:
+                        subscription.endpoint,
+
+                    p256dh,
+
+                    auth,
+
+                    user_agent:
+                        navigator.userAgent
+
+                },
+                {
+                    onConflict:
+                        "endpoint"
+                }
+            );
+
+
+    if (
+        error
+    ) {
+
+        throw error;
+
+    }
+
+
+    console.log(
+        "Push subscription saved."
+    );
+
+}
+
+
+// ========================================
+// CREATE OR RESTORE PUSH SUBSCRIPTION
+// ========================================
+
+async function ensurePushSubscription() {
+
+    const registration =
+        await navigator
+            .serviceWorker
+            .ready;
+
+
+    let subscription =
+        await registration
+            .pushManager
+            .getSubscription();
+
+
+    // ========================================
+    // CREATE NEW SUBSCRIPTION
+    // ========================================
+
+    if (
+        !subscription
+    ) {
+
+        const applicationServerKey =
+            urlBase64ToUint8Array(
+                VAPID_PUBLIC_KEY
+            );
+
+
+        subscription =
+            await registration
+                .pushManager
+                .subscribe(
+                    {
+                        userVisibleOnly:
+                            true,
+
+                        applicationServerKey
+                    }
+                );
+
+    }
+
+
+    // ========================================
+    // SAVE DEVICE TO SUPABASE
+    // ========================================
+
+    await savePushSubscription(
+        subscription
+    );
+
+
+    return subscription;
+
+}
+
+
+// ========================================
 // UPDATE PUSH NOTIFICATION UI
 // ========================================
 
@@ -14534,8 +14746,40 @@ async function updatePushNotificationUI() {
         "granted"
     ) {
 
-        pushNotificationCard.style.display =
-            "none";
+        try {
+
+            await ensurePushSubscription();
+
+
+            pushNotificationCard.style.display =
+                "none";
+
+        }
+        catch (error) {
+
+            console.error(
+                "Existing push subscription setup error:",
+                error
+            );
+
+
+            pushNotificationCard.style.display =
+                "flex";
+
+
+            enablePushNotificationsButton.textContent =
+                "Finish Notification Setup";
+
+
+            enablePushNotificationsButton.disabled =
+                false;
+
+
+            setPushNotificationStatus(
+                "Notifications are allowed, but this device still needs to finish registration."
+            );
+
+        }
 
 
         return;
@@ -14627,9 +14871,24 @@ async function enablePushNotifications() {
 
     try {
 
-        const permission =
-            await Notification
-                .requestPermission();
+        let permission =
+            Notification.permission;
+
+
+        // ========================================
+        // ASK FOR PERMISSION
+        // ========================================
+
+        if (
+            permission ===
+            "default"
+        ) {
+
+            permission =
+                await Notification
+                    .requestPermission();
+
+        }
 
 
         // ========================================
@@ -14649,48 +14908,17 @@ async function enablePushNotifications() {
 
 
         // ========================================
-        // WAIT FOR SERVICE WORKER
+        // CREATE + SAVE SUBSCRIPTION
         // ========================================
 
-        const registration =
-            await navigator
-                .serviceWorker
-                .ready;
+        const subscription =
+            await ensurePushSubscription();
 
 
         console.log(
-            "Push service worker ready:",
-            registration.scope
+            "Push subscription ready:",
+            subscription.endpoint
         );
-
-
-        // ========================================
-        // CHECK EXISTING SUBSCRIPTION
-        // ========================================
-
-        const existingSubscription =
-            await registration
-                .pushManager
-                .getSubscription();
-
-
-        if (
-            existingSubscription
-        ) {
-
-            console.log(
-                "Existing push subscription:",
-                existingSubscription
-            );
-
-        }
-        else {
-
-            console.log(
-                "Notification permission granted. Device is ready for push subscription."
-            );
-
-        }
 
 
         // ========================================
@@ -14718,7 +14946,7 @@ async function enablePushNotifications() {
 
 
         setPushNotificationStatus(
-            "We couldn't enable notifications on this device."
+            "We couldn't finish setting up notifications on this device."
         );
 
     }
