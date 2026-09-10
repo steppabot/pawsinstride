@@ -14554,6 +14554,35 @@ function urlBase64ToUint8Array(
 // ========================================
 // SAVE PUSH SUBSCRIPTION
 // ========================================
+//
+// The browser does NOT directly insert or
+// update push_subscriptions.
+//
+// Instead, the authenticated user claims
+// this physical browser/PWA subscription
+// through the secure Supabase RPC.
+//
+// This is important because the same phone
+// may previously have been registered while
+// another Paws in Stride account was signed
+// in.
+//
+// Example:
+//
+// Test Client
+//     ↓
+// Same iPhone PWA
+//     ↓
+// Log out
+//     ↓
+// Admin logs in
+//     ↓
+// Same push endpoint is reassigned to Admin
+//
+// The server derives the authenticated user
+// from auth.uid(). The browser does not get
+// to choose another user's ID.
+// ========================================
 
 async function savePushSubscription(
     subscription
@@ -14599,32 +14628,29 @@ async function savePushSubscription(
     }
 
 
+    // ========================================
+    // CLAIM THIS DEVICE FOR CURRENT USER
+    // ========================================
+
     const {
+        data,
         error
     } =
         await supabaseClient
-            .from(
-                "push_subscriptions"
-            )
-            .upsert(
+            .rpc(
+                "claim_push_subscription",
                 {
-                    user_id:
-                        currentUser.id,
-
-                    endpoint:
+                    p_endpoint:
                         subscription.endpoint,
 
-                    p256dh,
+                    p_p256dh:
+                        p256dh,
 
-                    auth,
+                    p_auth:
+                        auth,
 
-                    user_agent:
+                    p_user_agent:
                         navigator.userAgent
-
-                },
-                {
-                    onConflict:
-                        "endpoint"
                 }
             );
 
@@ -14633,17 +14659,29 @@ async function savePushSubscription(
         error
     ) {
 
+        console.error(
+            "Push subscription claim error:",
+            error
+        );
+
+
         throw error;
 
     }
 
 
     console.log(
-        "Push subscription saved."
+        "Push subscription claimed for current user:",
+        {
+            userId:
+                currentUser.id,
+
+            result:
+                data
+        }
     );
 
 }
-
 
 // ========================================
 // CREATE OR RESTORE PUSH SUBSCRIPTION
