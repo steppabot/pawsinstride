@@ -10996,6 +10996,10 @@ function getClientVisitStatusLabel(
     progress
 ) {
 
+    // ========================================
+    // COMPLETED VISIT
+    // ========================================
+
     if (
         progress.state ===
         "completed"
@@ -11005,6 +11009,10 @@ function getClientVisitStatusLabel(
 
     }
 
+
+    // ========================================
+    // VISIT CURRENTLY IN PROGRESS
+    // ========================================
 
     if (
         progress.state ===
@@ -11016,12 +11024,34 @@ function getClientVisitStatusLabel(
     }
 
 
+    // ========================================
+    // PAID VISIT = BOOKED
+    // ========================================
+
+    if (
+        String(
+            visit.payment_status ||
+            ""
+        )
+            .trim()
+            .toLowerCase() ===
+        "paid"
+    ) {
+
+        return "Booked";
+
+    }
+
+
+    // ========================================
+    // FALLBACK STATUS
+    // ========================================
+
     return formatStatus(
         visit.status
     );
 
 }
-
 
 // ========================================
 // CLIENT VISIT STATUS ICON
