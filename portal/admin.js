@@ -284,6 +284,8 @@ async function loadAdminDashboard() {
     currentProfile =
         profile;
 
+    await ensureAdminPushSubscription();
+
 
 
     // ========================================
@@ -6378,6 +6380,249 @@ function clearAdminPhotoPreviewUrl() {
 
 }
 
+
+// ========================================
+// ADMIN PUSH NOTIFICATIONS
+// ========================================
+
+const ADMIN_VAPID_PUBLIC_KEY =
+    "BJMZyLb__6L55n-7l1SB3H97mQDGkUXiudH4X9EQMjqO2Do7jIGtS9Gu-gxkIZ5sMxrfLsCo5EaWpGb6kRi5_DA";
+
+
+// ========================================
+// CONVERT BASE64URL TO UINT8ARRAY
+// ========================================
+
+function adminUrlBase64ToUint8Array(
+    base64String
+) {
+
+    const padding =
+        "=".repeat(
+            (
+                4 -
+                (
+                    base64String.length %
+                    4
+                )
+            ) %
+            4
+        );
+
+
+    const base64 =
+        (
+            base64String +
+            padding
+        )
+            .replace(
+                /-/g,
+                "+"
+            )
+            .replace(
+                /_/g,
+                "/"
+            );
+
+
+    const rawData =
+        window.atob(
+            base64
+        );
+
+
+    return Uint8Array.from(
+        [...rawData]
+            .map(
+                character =>
+                    character.charCodeAt(0)
+            )
+    );
+
+}
+
+
+// ========================================
+// SAVE ADMIN PUSH SUBSCRIPTION
+// ========================================
+
+async function saveAdminPushSubscription(
+    subscription
+) {
+
+    if (
+        !currentUser?.id
+    ) {
+        return;
+    }
+
+
+    const subscriptionJson =
+        subscription.toJSON();
+
+
+    const p256dh =
+        subscriptionJson
+            ?.keys
+            ?.p256dh;
+
+
+    const auth =
+        subscriptionJson
+            ?.keys
+            ?.auth;
+
+
+    if (
+        !subscription.endpoint ||
+        !p256dh ||
+        !auth
+    ) {
+
+        console.error(
+            "Admin push subscription information is incomplete."
+        );
+
+        return;
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "push_subscriptions"
+            )
+            .upsert(
+                {
+                    user_id:
+                        currentUser.id,
+
+                    endpoint:
+                        subscription.endpoint,
+
+                    p256dh,
+
+                    auth,
+
+                    user_agent:
+                        navigator.userAgent
+                },
+                {
+                    onConflict:
+                        "endpoint"
+                }
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Admin push subscription save error:",
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    console.log(
+        "Admin push subscription saved."
+    );
+
+}
+
+
+// ========================================
+// ENSURE ADMIN PUSH SUBSCRIPTION
+// ========================================
+
+async function ensureAdminPushSubscription() {
+
+    if (
+        !(
+            "serviceWorker" in navigator
+        ) ||
+        !(
+            "PushManager" in window
+        ) ||
+        !(
+            "Notification" in window
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        Notification.permission !==
+        "granted"
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const registration =
+            await navigator
+                .serviceWorker
+                .ready;
+
+
+        let subscription =
+            await registration
+                .pushManager
+                .getSubscription();
+
+
+        if (
+            !subscription
+        ) {
+
+            subscription =
+                await registration
+                    .pushManager
+                    .subscribe(
+                        {
+                            userVisibleOnly:
+                                true,
+
+                            applicationServerKey:
+                                adminUrlBase64ToUint8Array(
+                                    ADMIN_VAPID_PUBLIC_KEY
+                                )
+                        }
+                    );
+
+        }
+
+
+        await saveAdminPushSubscription(
+            subscription
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Admin push setup error:",
+            error
+        );
+
+    }
+
+}
 
 
 // ========================================
