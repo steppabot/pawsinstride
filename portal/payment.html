@@ -1,1 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Secure Checkout | Paws in Stride
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="./portal.css"
+    >
+</head>
+
+<body>
+
+    <main
+        style="
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        "
+    >
+
+        <!-- ========================================
+             PAYMENT HEADER
+             ======================================== -->
+
+        <section
+            style="
+                text-align: center;
+                margin-bottom: 30px;
+            "
+        >
+
+            <h1>
+                Secure Checkout
+            </h1>
+
+            <p>
+                Complete your payment to confirm your pet care services.
+            </p>
+
+        </section>
+
+
+        <!-- ========================================
+             ORDER SUMMARY
+             ======================================== -->
+
+        <section
+            id="payment-summary"
+            style="
+                background: white;
+                border-radius: 16px;
+                padding: 24px;
+                margin-bottom: 24px;
+            "
+        >
+
+            <h2>
+                Order Summary
+            </h2>
+
+            <div
+                id="payment-summary-content"
+            >
+                Loading your booking...
+            </div>
+
+        </section>
+
+
+        <!-- ========================================
+             PAYMENT METHODS
+             ======================================== -->
+
+        <section
+            id="payment-methods"
+            style="
+                background: white;
+                border-radius: 16px;
+                padding: 24px;
+            "
+        >
+
+            <h2>
+                Choose Payment Method
+            </h2>
+
+
+            <div
+                id="paypal-button-container"
+            ></div>
+
+
+            <div
+                id="payment-message"
+                style="
+                    margin-top: 16px;
+                "
+            ></div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ========================================
+         SUPABASE
+         ======================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <!-- ========================================
+         PAYMENT LOGIC
+         ======================================== -->
+
+    <script src="./payment.js"></script>
+
+</body>
+</html>
