@@ -6453,7 +6453,13 @@ async function saveAdminPushSubscription(
     if (
         !currentUser?.id
     ) {
+
+        console.error(
+            "No authenticated admin user is available for push registration."
+        );
+
         return;
+
     }
 
 
@@ -6488,31 +6494,37 @@ async function saveAdminPushSubscription(
     }
 
 
+    // ========================================
+    // CLAIM THIS DEVICE FOR CURRENT USER
+    // ========================================
+    //
+    // The database derives user_id from
+    // auth.uid(). This also safely transfers
+    // an existing PWA endpoint when another
+    // account signs into this installation.
+    // ========================================
+
     const {
+        data:
+            subscriptionId,
+
         error
     } =
         await supabaseClient
-            .from(
-                "push_subscriptions"
-            )
-            .upsert(
+            .rpc(
+                "claim_push_subscription",
                 {
-                    user_id:
-                        currentUser.id,
-
-                    endpoint:
+                    p_endpoint:
                         subscription.endpoint,
 
-                    p256dh,
+                    p_p256dh:
+                        p256dh,
 
-                    auth,
+                    p_auth:
+                        auth,
 
-                    user_agent:
+                    p_user_agent:
                         navigator.userAgent
-                },
-                {
-                    onConflict:
-                        "endpoint"
                 }
             );
 
@@ -6522,7 +6534,7 @@ async function saveAdminPushSubscription(
     ) {
 
         console.error(
-            "Admin push subscription save error:",
+            "Admin push subscription claim error:",
             error
         );
 
@@ -6533,11 +6545,11 @@ async function saveAdminPushSubscription(
 
 
     console.log(
-        "Admin push subscription saved."
+        "Admin push subscription claimed:",
+        subscriptionId
     );
 
 }
-
 
 // ========================================
 // ENSURE ADMIN PUSH SUBSCRIPTION
