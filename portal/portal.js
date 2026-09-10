@@ -14747,6 +14747,111 @@ async function ensurePushSubscription() {
 // ========================================
 // UPDATE PUSH NOTIFICATION UI
 // ========================================
+//
+// Push notifications are intended for the
+// installed Paws in Stride mobile PWA.
+//
+// Normal desktop browsers should NEVER
+// show the notification setup card.
+//
+// Normal mobile Safari / Chrome should also
+// keep the card hidden unless Paws in Stride
+// is actually running as an installed PWA.
+//
+// If notification permission is already
+// granted inside the installed PWA, we still
+// silently restore / claim the physical push
+// subscription for the currently signed-in
+// account.
+// ========================================
+
+function isMobileDeviceForPush() {
+
+    // ========================================
+    // MODERN MOBILE HINT
+    // ========================================
+
+    if (
+        navigator.userAgentData
+            ?.mobile ===
+        true
+    ) {
+
+        return true;
+
+    }
+
+
+    // ========================================
+    // MOBILE USER AGENT FALLBACK
+    // ========================================
+
+    if (
+        /Android|iPhone|iPad|iPod|Mobile/i
+            .test(
+                navigator.userAgent
+            )
+    ) {
+
+        return true;
+
+    }
+
+
+    // ========================================
+    // IPADOS DESKTOP-STYLE USER AGENT
+    // ========================================
+
+    if (
+        navigator.platform ===
+            "MacIntel" &&
+        navigator.maxTouchPoints >
+            1
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+function isInstalledPawsInStridePWA() {
+
+    const displayModeStandalone =
+        window
+            .matchMedia(
+                "(display-mode: standalone)"
+            )
+            .matches;
+
+
+    const iosStandalone =
+        window.navigator
+            .standalone ===
+        true;
+
+
+    return (
+        displayModeStandalone ||
+        iosStandalone
+    );
+
+}
+
+
+function shouldUseMobilePushNotifications() {
+
+    return (
+        isMobileDeviceForPush() &&
+        isInstalledPawsInStridePWA()
+    );
+
+}
+
 
 async function updatePushNotificationUI() {
 
@@ -14754,7 +14859,31 @@ async function updatePushNotificationUI() {
         !pushNotificationCard ||
         !enablePushNotificationsButton
     ) {
+
         return;
+
+    }
+
+
+    // ========================================
+    // NOT INSTALLED MOBILE PWA
+    // ========================================
+    //
+    // Desktop browsers and ordinary mobile
+    // browser tabs should never display this
+    // card.
+    // ========================================
+
+    if (
+        !shouldUseMobilePushNotifications()
+    ) {
+
+        pushNotificationCard.style.display =
+            "none";
+
+
+        return;
+
     }
 
 
@@ -14777,6 +14906,13 @@ async function updatePushNotificationUI() {
 
     // ========================================
     // PERMISSION ALREADY GRANTED
+    // ========================================
+    //
+    // Do not show a setup prompt.
+    //
+    // Silently make sure this physical PWA
+    // subscription belongs to whichever user
+    // is currently signed in.
     // ========================================
 
     if (
@@ -14888,14 +15024,41 @@ async function enablePushNotifications() {
     if (
         !enablePushNotificationsButton
     ) {
+
         return;
+
+    }
+
+
+    // ========================================
+    // INSTALLED MOBILE PWA ONLY
+    // ========================================
+
+    if (
+        !shouldUseMobilePushNotifications()
+    ) {
+
+        if (
+            pushNotificationCard
+        ) {
+
+            pushNotificationCard.style.display =
+                "none";
+
+        }
+
+
+        return;
+
     }
 
 
     if (
         !browserSupportsPushNotifications()
     ) {
+
         return;
+
     }
 
 
@@ -14939,6 +15102,7 @@ async function enablePushNotifications() {
         ) {
 
             await updatePushNotificationUI();
+
 
             return;
 
