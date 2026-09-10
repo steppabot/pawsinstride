@@ -87,24 +87,155 @@ self.addEventListener(
     }
 );
 
-
 // ========================================
 // PUSH
-// ========================================
-//
-// Placeholder for Phase 3.
-//
-// Once push subscriptions are wired,
-// notifications will be handled here.
 // ========================================
 
 self.addEventListener(
     "push",
     event => {
 
-        console.log(
-            "Push received:",
-            event
+        let payload = {
+            title:
+                "Paws in Stride",
+
+            body:
+                "You have a new notification.",
+
+            url:
+                "/portal/"
+        };
+
+
+        try {
+
+            if (
+                event.data
+            ) {
+
+                payload =
+                    event.data.json();
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Push payload parse error:",
+                error
+            );
+
+        }
+
+
+        const title =
+            payload.title ||
+            "Paws in Stride";
+
+
+        const options = {
+
+            body:
+                payload.body ||
+                "You have a new update.",
+
+            icon:
+                "/portal/assets/pwa-icon-192.png",
+
+            badge:
+                "/portal/assets/pwa-icon-192.png",
+
+            data: {
+                url:
+                    payload.url ||
+                    "/portal/"
+            }
+
+        };
+
+
+        event.waitUntil(
+            self.registration
+                .showNotification(
+                    title,
+                    options
+                )
+        );
+
+    }
+);
+
+
+// ========================================
+// NOTIFICATION CLICK
+// ========================================
+
+self.addEventListener(
+    "notificationclick",
+    event => {
+
+        event.notification
+            .close();
+
+
+        const targetUrl =
+            event.notification
+                ?.data
+                ?.url ||
+            "/portal/";
+
+
+        event.waitUntil(
+
+            clients
+                .matchAll(
+                    {
+                        type:
+                            "window",
+
+                        includeUncontrolled:
+                            true
+                    }
+                )
+                .then(
+                    clientList => {
+
+                        for (
+                            const client
+                            of clientList
+                        ) {
+
+                            if (
+                                "focus" in client
+                            ) {
+
+                                client.navigate(
+                                    targetUrl
+                                );
+
+
+                                return client.focus();
+
+                            }
+
+                        }
+
+
+                        if (
+                            clients.openWindow
+                        ) {
+
+                            return clients
+                                .openWindow(
+                                    targetUrl
+                                );
+
+                        }
+
+                    }
+                )
+
         );
 
     }
