@@ -14399,6 +14399,68 @@ function syncClientNavigationMessageBadge() {
 
 }
 
+// ========================================
+// PWA SERVICE WORKER
+// ========================================
+
+async function registerPawsInStrideServiceWorker() {
+
+    if (
+        !(
+            "serviceWorker" in navigator
+        )
+    ) {
+
+        console.log(
+            "Service workers are not supported in this browser."
+        );
+
+
+        return;
+
+    }
+
+
+    try {
+
+        const registration =
+            await navigator
+                .serviceWorker
+                .register(
+                    "/portal/service-worker.js",
+                    {
+                        scope:
+                            "/portal/"
+                    }
+                );
+
+
+        console.log(
+            "Paws in Stride service worker registered:",
+            registration.scope
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Paws in Stride service worker registration failed:",
+            error
+        );
+
+    }
+
+}
+
+
+window.addEventListener(
+    "load",
+    () => {
+
+        registerPawsInStrideServiceWorker();
+
+    }
+);
 
 // ========================================
 // WATCH MESSAGE BADGE
@@ -14436,6 +14498,8 @@ if (clientMessageBadge) {
 
         }
     );
+
+
 
 
     syncClientNavigationMessageBadge();
