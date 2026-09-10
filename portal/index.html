@@ -49,22 +49,370 @@
 
 
     <!-- ========================================
-         PORTAL ENTRY ROUTE
+         LAUNCH SCREEN
     ======================================== -->
 
-    <meta
-        http-equiv="refresh"
-        content="0; url=/portal/login.html"
-    >
+    <style>
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            min-height: 100%;
+            background: #f7fbfe;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-launcher {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .app-launcher img {
+            width: min(240px, 68vw);
+            height: auto;
+            display: block;
+        }
+
+        .app-launcher-status {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #53616d;
+        }
+
+        .app-launcher-spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(40, 144, 223, 0.18);
+            border-top-color: #2890df;
+            border-radius: 50%;
+            animation: appLauncherSpin 0.7s linear infinite;
+        }
+
+        @keyframes appLauncherSpin {
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+    </style>
 
 </head>
 
+
 <body>
 
+    <!-- ========================================
+         PWA LAUNCH SCREEN
+    ======================================== -->
+
+    <main class="app-launcher">
+
+        <img
+            src="/portal/assets/pwa-icon-512.png"
+            alt="Paws in Stride"
+        >
+
+        <div
+            class="app-launcher-spinner"
+            aria-hidden="true"
+        ></div>
+
+        <p
+            id="app-launcher-status"
+            class="app-launcher-status"
+        >
+            Opening Paws in Stride...
+        </p>
+
+    </main>
+
+
+    <!-- ========================================
+         SUPABASE
+    ======================================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+
+    <!-- ========================================
+         SMART PORTAL ENTRY ROUTE
+    ======================================== -->
+
     <script>
-        window.location.replace(
-            "/portal/login.html"
-        );
+
+        const SUPABASE_URL =
+            "https://xyhndwopvlmnxjkthtkl.supabase.co";
+
+
+        const SUPABASE_PUBLISHABLE_KEY =
+            "sb_publishable_U3OIYatZuBUe8V6Vq0DS2w_IMacau2j";
+
+
+        const supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_PUBLISHABLE_KEY,
+                {
+                    auth: {
+
+                        persistSession:
+                            true,
+
+                        autoRefreshToken:
+                            true,
+
+                        detectSessionInUrl:
+                            true
+
+                    }
+                }
+            );
+
+
+        // ========================================
+        // UPDATE LAUNCH STATUS
+        // ========================================
+
+        function setLaunchStatus(
+            message
+        ) {
+
+            const status =
+                document.getElementById(
+                    "app-launcher-status"
+                );
+
+
+            if (status) {
+
+                status.textContent =
+                    message;
+
+            }
+
+        }
+
+
+        // ========================================
+        // SEND USER TO LOGIN
+        // ========================================
+
+        function goToLogin() {
+
+            window.location.replace(
+                "/portal/login.html"
+            );
+
+        }
+
+
+        // ========================================
+        // ROUTE AUTHENTICATED USER
+        // ========================================
+
+        async function routeAuthenticatedUser(
+            user
+        ) {
+
+            if (!user?.id) {
+
+                goToLogin();
+
+                return;
+
+            }
+
+
+            setLaunchStatus(
+                "Loading your portal..."
+            );
+
+
+            const {
+                data: profile,
+                error
+            } =
+                await supabaseClient
+                    .from(
+                        "profiles"
+                    )
+                    .select(
+                        "role"
+                    )
+                    .eq(
+                        "id",
+                        user.id
+                    )
+                    .single();
+
+
+            if (error) {
+
+                console.error(
+                    "PWA profile routing error:",
+                    error
+                );
+
+
+                goToLogin();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // ADMIN
+            // ========================================
+
+            if (
+                profile?.role ===
+                "admin"
+            ) {
+
+                window.location.replace(
+                    "/portal/admin.html"
+                );
+
+                return;
+
+            }
+
+
+            // ========================================
+            // CLIENT
+            // ========================================
+
+            if (
+                profile?.role ===
+                "client"
+            ) {
+
+                window.location.replace(
+                    "/portal/dashboard.html"
+                );
+
+                return;
+
+            }
+
+
+            // ========================================
+            // UNKNOWN ROLE
+            // ========================================
+
+            console.warn(
+                "Unknown portal role:",
+                profile?.role
+            );
+
+
+            goToLogin();
+
+        }
+
+
+        // ========================================
+        // LAUNCH PAWS IN STRIDE
+        // ========================================
+
+        async function launchPawsInStride() {
+
+            try {
+
+                setLaunchStatus(
+                    "Checking your session..."
+                );
+
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient
+                        .auth
+                        .getSession();
+
+
+                if (error) {
+
+                    console.error(
+                        "PWA session check error:",
+                        error
+                    );
+
+
+                    goToLogin();
+
+                    return;
+
+                }
+
+
+                const session =
+                    data?.session;
+
+
+                // ========================================
+                // NO ACTIVE SESSION
+                // ========================================
+
+                if (
+                    !session?.user
+                ) {
+
+                    goToLogin();
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // ACTIVE SESSION
+                // ========================================
+
+                await routeAuthenticatedUser(
+                    session.user
+                );
+
+            }
+            catch (error) {
+
+                console.error(
+                    "PWA launcher error:",
+                    error
+                );
+
+
+                goToLogin();
+
+            }
+
+        }
+
+
+        launchPawsInStride();
+
     </script>
 
 </body>
