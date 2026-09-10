@@ -95,15 +95,51 @@
             </h2>
 
 
-            <div
-                id="paypal-button-container"
-            ></div>
+            <!-- ========================================
+                 PAYPAL
+                 ======================================== -->
 
+            <div
+                id="paypal-payment-wrapper"
+                hidden
+            >
+
+                <div
+                    id="paypal-button-container"
+                ></div>
+
+            </div>
+
+
+            <!-- ========================================
+                 VENMO
+                 ======================================== -->
+
+            <div
+                id="venmo-payment-wrapper"
+                hidden
+                style="
+                    margin-top: 12px;
+                "
+            >
+
+                <venmo-button
+                    id="venmo-button"
+                    type="pay"
+                ></venmo-button>
+
+            </div>
+
+
+            <!-- ========================================
+                 PAYMENT STATUS
+                 ======================================== -->
 
             <div
                 id="payment-message"
                 style="
                     margin-top: 16px;
+                    text-align: center;
                 "
             ></div>
 
@@ -116,14 +152,29 @@
          SUPABASE
          ======================================== -->
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
 
 
     <!-- ========================================
          PAYMENT LOGIC
          ======================================== -->
 
-    <script src="./payment.js"></script>
+    <script
+        src="./payment.js"
+    ></script>
+
+
+    <!-- ========================================
+         PAYPAL WEB SDK V6 - SANDBOX
+         ======================================== -->
+
+    <script
+        async
+        src="https://www.sandbox.paypal.com/web-sdk/v6/core"
+        onload="onPayPalWebSdkLoaded()"
+    ></script>
 
 </body>
 </html>
