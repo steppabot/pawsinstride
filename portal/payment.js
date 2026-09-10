@@ -1,5 +1,10 @@
 // ========================================
-// SUPABASE
+// PAWS IN STRIDE - SECURE CHECKOUT
+// ========================================
+
+
+// ========================================
+// SUPABASE CONFIG
 // ========================================
 
 const SUPABASE_URL =
@@ -16,7 +21,6 @@ const supabaseClient =
         SUPABASE_PUBLISHABLE_KEY,
         {
             auth: {
-
                 persistSession:
                     true,
 
@@ -24,29 +28,67 @@ const supabaseClient =
                     true,
 
                 detectSessionInUrl:
-                    true,
-
-                storage:
-                    window.localStorage
-
+                    true
             }
         }
     );
 
 
 // ========================================
-// PAGE ELEMENTS
+// PAYPAL SANDBOX CLIENT ID
 // ========================================
 
-const summaryContainer =
+const PAYPAL_CLIENT_ID =
+    "ARdjYFfzimXClI11bBwuU4KZZokujgcd3JHtX1kk-QwAHgU-BMPlHs__K98JFCkDulu9P8VO_KYWXIht";
+
+
+// ========================================
+// PAGE STATE
+// ========================================
+
+let checkoutId =
+    null;
+
+
+let checkoutData =
+    null;
+
+
+let checkoutVisits =
+    [];
+
+
+let currentUser =
+    null;
+
+
+let paypalSdkLoaded =
+    false;
+
+
+let pageLoaded =
+    false;
+
+
+let paymentMethodsInitialized =
+    false;
+
+
+let checkoutExpired =
+    false;
+
+
+let expirationTimer =
+    null;
+
+
+// ========================================
+// ELEMENTS
+// ========================================
+
+const paymentSummaryContent =
     document.getElementById(
         "payment-summary-content"
-    );
-
-
-const paymentContainer =
-    document.getElementById(
-        "paypal-button-container"
     );
 
 
@@ -56,33 +98,37 @@ const paymentMessage =
     );
 
 
+const paypalWrapper =
+    document.getElementById(
+        "paypal-payment-wrapper"
+    );
+
+
+const paypalButton =
+    document.getElementById(
+        "paypal-button"
+    );
+
+
+const venmoWrapper =
+    document.getElementById(
+        "venmo-payment-wrapper"
+    );
+
+
+const venmoButton =
+    document.getElementById(
+        "venmo-button"
+    );
+
+
 // ========================================
-// CHECKOUT STATE
-// ========================================
-
-let currentUser =
-    null;
-
-
-let currentCheckout =
-    null;
-
-
-let checkoutVisits =
-    [];
-
-
-let checkoutPets =
-    [];
-
-
-// ========================================
-// MONEY FORMATTER
+// FORMAT MONEY
 // ========================================
 
 function formatMoney(
     cents,
-    currency = "usd"
+    currency = "USD"
 ) {
 
     return new Intl.NumberFormat(
@@ -94,9 +140,8 @@ function formatMoney(
             currency:
                 String(
                     currency ||
-                    "usd"
-                )
-                    .toUpperCase()
+                    "USD"
+                ).toUpperCase()
         }
     ).format(
         Number(cents || 0) /
@@ -107,10 +152,10 @@ function formatMoney(
 
 
 // ========================================
-// DATE FORMATTER
+// FORMAT DATE
 // ========================================
 
-function formatServiceDate(
+function formatDate(
     dateString
 ) {
 
@@ -160,62 +205,95 @@ function formatServiceDate(
 
 
 // ========================================
-// EXPIRATION CHECK
+// SET MESSAGE
 // ========================================
 
-function checkoutIsExpired(
-    expiresAt
+function setPaymentMessage(
+    message,
+    type = ""
 ) {
 
-    if (!expiresAt) {
-
-        return true;
-
-    }
+    paymentMessage.textContent =
+        message;
 
 
-    return (
-        new Date(expiresAt).getTime() <=
-        Date.now()
-    );
+    paymentMessage.style.color =
+        type === "error"
+            ? "#b42318"
+            : type === "success"
+                ? "#067647"
+                : "";
 
 }
 
 
 // ========================================
-// SHOW ERROR
+// DISABLE PAYMENT METHODS
 // ========================================
 
-function showCheckoutError(
-    message
-) {
+function disablePaymentMethods() {
 
-    summaryContainer.innerHTML =
-        `
-            <div>
-                <strong>
-                    We couldn't load this checkout.
-                </strong>
+    if (paypalButton) {
 
-                <p>
-                    ${message}
-                </p>
+        paypalButton.setAttribute(
+            "disabled",
+            ""
+        );
 
-                <p>
-                    <a href="./dashboard.html">
-                        Return to your portal
-                    </a>
-                </p>
-            </div>
-        `;
+    }
 
 
-    paymentContainer.innerHTML =
-        "";
+    if (venmoButton) {
+
+        venmoButton.setAttribute(
+            "disabled",
+            ""
+        );
+
+    }
+
+}
 
 
-    paymentMessage.textContent =
-        "";
+// ========================================
+// HIDE PAYMENT METHODS
+// ========================================
+
+function hidePaymentMethods() {
+
+    if (paypalWrapper) {
+
+        paypalWrapper.hidden =
+            true;
+
+    }
+
+
+    if (venmoWrapper) {
+
+        venmoWrapper.hidden =
+            true;
+
+    }
+
+}
+
+
+// ========================================
+// GET CHECKOUT ID
+// ========================================
+
+function getCheckoutIdFromUrl() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    return params.get(
+        "checkout"
+    );
 
 }
 
@@ -258,33 +336,10 @@ async function loadCurrentUser() {
 
 
 // ========================================
-// GET CHECKOUT ID FROM URL
-// ========================================
-
-function getCheckoutId() {
-
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
-
-
-    return (
-        params.get(
-            "checkout"
-        ) || ""
-    ).trim();
-
-}
-
-
-// ========================================
 // LOAD CHECKOUT
 // ========================================
 
-async function loadCheckout(
-    checkoutId
-) {
+async function loadCheckout() {
 
     const {
         data,
@@ -294,23 +349,21 @@ async function loadCheckout(
             .from(
                 "booking_checkouts"
             )
-            .select(
-                `
-                    id,
-                    client_id,
-                    status,
-                    payment_provider,
-                    currency,
-                    subtotal_cents,
-                    surcharge_cents,
-                    total_cents,
-                    pricing_tier,
-                    paypal_order_id,
-                    payment_confirmed_at,
-                    expires_at,
-                    created_at
-                `
-            )
+            .select(`
+                id,
+                client_id,
+                status,
+                payment_provider,
+                currency,
+                subtotal_cents,
+                surcharge_cents,
+                total_cents,
+                paypal_order_id,
+                paypal_capture_id,
+                payment_confirmed_at,
+                expires_at,
+                created_at
+            `)
             .eq(
                 "id",
                 checkoutId
@@ -331,7 +384,7 @@ async function loadCheckout(
 
 
         throw new Error(
-            "Your checkout information could not be loaded."
+            "We couldn't load your checkout."
         );
 
     }
@@ -346,7 +399,7 @@ async function loadCheckout(
     }
 
 
-    currentCheckout =
+    checkoutData =
         data;
 
 }
@@ -356,9 +409,7 @@ async function loadCheckout(
 // LOAD CHECKOUT VISITS
 // ========================================
 
-async function loadCheckoutVisits(
-    checkoutId
-) {
+async function loadCheckoutVisits() {
 
     const {
         data,
@@ -368,23 +419,15 @@ async function loadCheckoutVisits(
             .from(
                 "booking_checkout_visits"
             )
-            .select(
-                `
-                    id,
-                    checkout_id,
-                    visit_date,
-                    service_name,
-                    service_type,
-                    service_option,
-                    time_window,
-                    base_price_cents,
-                    additional_pet_fee_cents,
-                    evening_fee_cents,
-                    holiday_fee_cents,
-                    late_pickup_fee_cents,
-                    total_price_cents
-                `
-            )
+            .select(`
+                id,
+                visit_date,
+                service_name,
+                service_type,
+                service_option,
+                time_window,
+                total_price_cents
+            `)
             .eq(
                 "checkout_id",
                 checkoutId
@@ -395,399 +438,289 @@ async function loadCheckoutVisits(
                     ascending:
                         true
                 }
+            )
+            .order(
+                "id",
+                {
+                    ascending:
+                        true
+                }
             );
 
 
     if (error) {
 
         console.error(
-            "Checkout visits error:",
+            "Checkout visit load error:",
             error
         );
 
 
         throw new Error(
-            "Your service details could not be loaded."
+            "We couldn't load your service details."
         );
 
     }
 
 
     checkoutVisits =
-        data || [];
+        data ||
+        [];
 
 }
 
 
 // ========================================
-// LOAD CHECKOUT PETS
-// ========================================
-
-async function loadCheckoutPets(
-    checkoutId
-) {
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from(
-                "booking_checkout_pets"
-            )
-            .select(
-                `
-                    id,
-                    checkout_id,
-                    pet_id,
-                    is_primary
-                `
-            )
-            .eq(
-                "checkout_id",
-                checkoutId
-            )
-            .order(
-                "is_primary",
-                {
-                    ascending:
-                        false
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Checkout pets error:",
-            error
-        );
-
-
-        throw new Error(
-            "Your pet information could not be loaded."
-        );
-
-    }
-
-
-    checkoutPets =
-        data || [];
-
-}
-
-
-// ========================================
-// LOAD PET NAMES
-// ========================================
-
-async function loadPetNames() {
-
-    if (
-        checkoutPets.length ===
-        0
-    ) {
-
-        return;
-
-    }
-
-
-    const petIds =
-        checkoutPets.map(
-            pet =>
-                pet.pet_id
-        );
-
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from(
-                "pets"
-            )
-            .select(
-                "id, name"
-            )
-            .in(
-                "id",
-                petIds
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Pet name load error:",
-            error
-        );
-
-
-        return;
-
-    }
-
-
-    const namesById =
-        new Map(
-            (data || []).map(
-                pet => [
-                    Number(pet.id),
-                    pet.name
-                ]
-            )
-        );
-
-
-    checkoutPets =
-        checkoutPets.map(
-            pet => ({
-                ...pet,
-
-                name:
-                    namesById.get(
-                        Number(
-                            pet.pet_id
-                        )
-                    ) ||
-                    "Pet"
-            })
-        );
-
-}
-
-
-// ========================================
-// RENDER ORDER SUMMARY
+// BUILD SUMMARY
 // ========================================
 
 function renderCheckoutSummary() {
 
-    const currency =
-        currentCheckout.currency ||
-        "usd";
+    paymentSummaryContent.innerHTML =
+        "";
 
 
-    const petNames =
-        checkoutPets
-            .map(
-                pet =>
-                    pet.name ||
-                    "Pet"
-            )
-            .join(", ");
+    // ========================================
+    // SERVICE ROWS
+    // ========================================
+
+    if (
+        checkoutVisits.length >
+        0
+    ) {
+
+        checkoutVisits.forEach(
+            visit => {
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
 
 
-    const visitMarkup =
-        checkoutVisits
-            .map(
-                visit => {
-
-                    const option =
-                        visit.service_option
-                            ? ` - ${visit.service_option}`
-                            : "";
+                row.style.padding =
+                    "14px 0";
 
 
-                    const timeWindow =
-                        visit.time_window
-                            ? `
-                                <div
-                                    style="
-                                        margin-top: 4px;
-                                        color: #666;
-                                        font-size: 0.92rem;
-                                    "
-                                >
-                                    ${visit.time_window}
-                                </div>
-                              `
-                            : "";
+                row.style.borderBottom =
+                    "1px solid #e5e7eb";
 
 
-                    return `
-                        <div
-                            style="
-                                display: flex;
-                                justify-content: space-between;
-                                gap: 20px;
-                                padding: 14px 0;
-                                border-bottom: 1px solid #ececec;
-                            "
-                        >
-
-                            <div>
-
-                                <strong>
-                                    ${visit.service_type}${option}
-                                </strong>
-
-                                <div
-                                    style="
-                                        margin-top: 4px;
-                                    "
-                                >
-                                    ${formatServiceDate(
-                                        visit.visit_date
-                                    )}
-                                </div>
-
-                                ${timeWindow}
-
-                            </div>
+                const serviceName =
+                    document.createElement(
+                        "div"
+                    );
 
 
-                            <strong>
-                                ${formatMoney(
-                                    visit.total_price_cents,
-                                    currency
-                                )}
-                            </strong>
-
-                        </div>
-                    `;
-
-                }
-            )
-            .join("");
+                serviceName.style.fontWeight =
+                    "600";
 
 
-    summaryContainer.innerHTML =
-        `
-
-            <div
-                style="
-                    margin-bottom: 18px;
-                "
-            >
-
-                <strong>
-                    Pet${checkoutPets.length === 1 ? "" : "s"}:
-                </strong>
-
-                ${petNames || "Selected pet"}
-
-            </div>
+                serviceName.textContent =
+                    visit.service_name ||
+                    visit.service_type ||
+                    "Pet Care Service";
 
 
-            <div>
-                ${visitMarkup}
-            </div>
+                const serviceDetails =
+                    document.createElement(
+                        "div"
+                    );
 
 
-            <div
-                style="
-                    display: flex;
-                    justify-content: space-between;
-                    gap: 20px;
-                    padding-top: 20px;
-                    font-size: 1.2rem;
-                "
-            >
-
-                <strong>
-                    Total
-                </strong>
+                serviceDetails.style.marginTop =
+                    "4px";
 
 
-                <strong>
-                    ${formatMoney(
-                        currentCheckout.total_cents,
-                        currency
-                    )}
-                </strong>
-
-            </div>
-
-        `;
-
-}
+                serviceDetails.style.fontSize =
+                    "14px";
 
 
-// ========================================
-// CREATE PAYMENT METHOD UI
-// ========================================
-
-function renderPaymentMethods() {
-
-    paymentContainer.innerHTML =
-        `
-
-            <div
-                style="
-                    display: grid;
-                    gap: 12px;
-                    margin-top: 18px;
-                "
-            >
-
-                <button
-                    type="button"
-                    id="paypal-payment-button"
-                    style="
-                        width: 100%;
-                        min-height: 54px;
-                        border: 0;
-                        border-radius: 10px;
-                        cursor: pointer;
-                        font-size: 1rem;
-                        font-weight: 700;
-                        padding: 14px 18px;
-                    "
-                >
-                    Pay with PayPal
-                </button>
-
-            </div>
+                serviceDetails.style.opacity =
+                    "0.75";
 
 
-            <div
-                style="
-                    margin-top: 18px;
-                    font-size: 0.9rem;
-                    color: #666;
-                    text-align: center;
-                "
-            >
-                Additional payment methods including cards,
-                Venmo, Apple Pay and Google Pay will appear
-                when supported and enabled.
-            </div>
+                const details = [
+                    formatDate(
+                        visit.visit_date
+                    ),
 
-        `;
+                    visit.time_window
+                ]
+                    .filter(Boolean)
+                    .join(" • ");
 
 
-    const paypalButton =
-        document.getElementById(
-            "paypal-payment-button"
+                serviceDetails.textContent =
+                    details;
+
+
+                const servicePrice =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                servicePrice.style.marginTop =
+                    "6px";
+
+
+                servicePrice.style.fontWeight =
+                    "600";
+
+
+                servicePrice.textContent =
+                    formatMoney(
+                        visit.total_price_cents,
+                        checkoutData.currency
+                    );
+
+
+                row.appendChild(
+                    serviceName
+                );
+
+
+                row.appendChild(
+                    serviceDetails
+                );
+
+
+                row.appendChild(
+                    servicePrice
+                );
+
+
+                paymentSummaryContent.appendChild(
+                    row
+                );
+
+            }
+        );
+
+    }
+
+
+    // ========================================
+    // TOTAL
+    // ========================================
+
+    const totalRow =
+        document.createElement(
+            "div"
         );
 
 
-    paypalButton?.addEventListener(
-        "click",
-        startPayPalCheckout
+    totalRow.style.display =
+        "flex";
+
+
+    totalRow.style.justifyContent =
+        "space-between";
+
+
+    totalRow.style.alignItems =
+        "center";
+
+
+    totalRow.style.paddingTop =
+        "20px";
+
+
+    totalRow.style.fontSize =
+        "20px";
+
+
+    totalRow.style.fontWeight =
+        "700";
+
+
+    const totalLabel =
+        document.createElement(
+            "span"
+        );
+
+
+    totalLabel.textContent =
+        "Total";
+
+
+    const totalAmount =
+        document.createElement(
+            "span"
+        );
+
+
+    totalAmount.textContent =
+        formatMoney(
+            checkoutData.total_cents,
+            checkoutData.currency
+        );
+
+
+    totalRow.appendChild(
+        totalLabel
+    );
+
+
+    totalRow.appendChild(
+        totalAmount
+    );
+
+
+    paymentSummaryContent.appendChild(
+        totalRow
+    );
+
+
+    // ========================================
+    // EXPIRATION
+    // ========================================
+
+    const expiration =
+        document.createElement(
+            "div"
+        );
+
+
+    expiration.id =
+        "checkout-expiration";
+
+
+    expiration.style.marginTop =
+        "12px";
+
+
+    expiration.style.fontSize =
+        "14px";
+
+
+    expiration.style.opacity =
+        "0.7";
+
+
+    paymentSummaryContent.appendChild(
+        expiration
     );
 
 }
 
 
 // ========================================
-// START PAYPAL CHECKOUT
+// EXPIRATION TIMER
 // ========================================
 
-async function startPayPalCheckout() {
+function startExpirationTimer() {
 
-    const button =
+    const expirationElement =
         document.getElementById(
-            "paypal-payment-button"
+            "checkout-expiration"
         );
 
 
     if (
-        !currentCheckout ||
-        !button
+        !expirationElement ||
+        !checkoutData?.expires_at
     ) {
 
         return;
@@ -795,327 +728,893 @@ async function startPayPalCheckout() {
     }
 
 
-    if (
-        checkoutIsExpired(
-            currentCheckout.expires_at
-        )
-    ) {
+    function updateTimer() {
 
-        paymentMessage.textContent =
-            "This checkout has expired. Please return to your portal and select your services again.";
+        const expires =
+            new Date(
+                checkoutData.expires_at
+            ).getTime();
 
 
-        button.disabled =
-            true;
-
-
-        return;
-
-    }
-
-
-    button.disabled =
-        true;
-
-
-    button.textContent =
-        "Opening PayPal...";
-
-
-    paymentMessage.textContent =
-        "Preparing your secure payment...";
-
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .functions
-                .invoke(
-                    "paypal-create-order",
-                    {
-                        body: {
-
-                            checkout_id:
-                                currentCheckout.id
-
-                        }
-                    }
-                );
+        const remaining =
+            expires -
+            Date.now();
 
 
         if (
-            error ||
-            !data?.success ||
-            !data?.approvalLink
+            remaining <=
+            0
         ) {
 
-            console.error(
-                "PayPal create order error:",
-                error,
-                data
+            checkoutExpired =
+                true;
+
+
+            expirationElement.textContent =
+                "This checkout has expired.";
+
+
+            disablePaymentMethods();
+
+
+            hidePaymentMethods();
+
+
+            setPaymentMessage(
+                "This checkout expired. Please return to the portal and select your services again.",
+                "error"
             );
 
 
-            throw new Error(
-                data?.error ||
-                "PayPal checkout could not be started."
-            );
+            if (expirationTimer) {
 
-        }
+                clearInterval(
+                    expirationTimer
+                );
 
+            }
 
-        window.location.href =
-            data.approvalLink;
-
-    }
-    catch (
-        error
-    ) {
-
-        console.error(
-            "Payment error:",
-            error
-        );
-
-
-        paymentMessage.textContent =
-            error?.message ||
-            "We couldn't start your payment. Please try again.";
-
-
-        button.disabled =
-            false;
-
-
-        button.textContent =
-            "Pay with PayPal";
-
-    }
-
-}
-
-
-// ========================================
-// CHECKOUT STATUS
-// ========================================
-
-function validateCheckoutStatus() {
-
-    if (
-        currentCheckout.status ===
-        "completed"
-    ) {
-
-        summaryContainer.innerHTML =
-            `
-                <div>
-                    <strong>
-                        This booking has already been paid and confirmed.
-                    </strong>
-
-                    <p>
-                        <a href="./dashboard.html">
-                            Return to your portal
-                        </a>
-                    </p>
-                </div>
-            `;
-
-
-        paymentContainer.innerHTML =
-            "";
-
-
-        return false;
-
-    }
-
-
-    if (
-        currentCheckout.status ===
-        "paid"
-    ) {
-
-        summaryContainer.innerHTML =
-            `
-                <div>
-                    <strong>
-                        Your payment has already been received.
-                    </strong>
-
-                    <p>
-                        We're finishing your booking confirmation.
-                    </p>
-                </div>
-            `;
-
-
-        paymentContainer.innerHTML =
-            "";
-
-
-        return false;
-
-    }
-
-
-    if (
-        ![
-            "pending_payment",
-            "processing"
-        ].includes(
-            currentCheckout.status
-        )
-    ) {
-
-        showCheckoutError(
-            "This checkout is no longer available."
-        );
-
-
-        return false;
-
-    }
-
-
-    if (
-        checkoutIsExpired(
-            currentCheckout.expires_at
-        )
-    ) {
-
-        showCheckoutError(
-            "This checkout has expired. Please return to your portal and select your services again."
-        );
-
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-
-// ========================================
-// INITIALIZE PAYMENT PAGE
-// ========================================
-
-async function initializePaymentPage() {
-
-    try {
-
-        paymentMessage.textContent =
-            "";
-
-
-        // ========================================
-        // REQUIRE SIGNED-IN USER
-        // ========================================
-
-        const userLoaded =
-            await loadCurrentUser();
-
-
-        if (!userLoaded) {
 
             return;
 
         }
 
 
+        const minutes =
+            Math.floor(
+                remaining /
+                60000
+            );
+
+
+        const seconds =
+            Math.floor(
+                (
+                    remaining %
+                    60000
+                ) /
+                1000
+            );
+
+
+        expirationElement.textContent =
+            `Checkout reserved for ${minutes}:${String(seconds).padStart(2, "0")}`;
+
+    }
+
+
+    updateTimer();
+
+
+    expirationTimer =
+        setInterval(
+            updateTimer,
+            1000
+        );
+
+}
+
+
+// ========================================
+// CREATE PAYMENT ORDER
+// ========================================
+
+async function createOrder(
+    paymentMethod
+) {
+
+    if (
+        checkoutExpired
+    ) {
+
+        throw new Error(
+            "This checkout has expired."
+        );
+
+    }
+
+
+    setPaymentMessage(
+        "Preparing secure payment..."
+    );
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .functions
+            .invoke(
+                "paypal-create-order",
+                {
+                    body: {
+                        checkout_id:
+                            checkoutId,
+
+                        payment_method:
+                            paymentMethod
+                    }
+                }
+            );
+
+
+    if (
+        error ||
+        !data?.success ||
+        !data?.orderID
+    ) {
+
+        console.error(
+            "Create order error:",
+            error,
+            data
+        );
+
+
+        throw new Error(
+            data?.error ||
+            "Could not start your payment."
+        );
+
+    }
+
+
+    return {
+        orderId:
+            data.orderID
+    };
+
+}
+
+
+// ========================================
+// CAPTURE PAYMENT
+// ========================================
+
+async function captureOrder(
+    orderId
+) {
+
+    setPaymentMessage(
+        "Confirming payment..."
+    );
+
+
+    disablePaymentMethods();
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .functions
+            .invoke(
+                "paypal-capture-order",
+                {
+                    body: {
+                        orderID:
+                            orderId,
+
+                        checkout_id:
+                            checkoutId
+                    }
+                }
+            );
+
+
+    if (
+        error ||
+        !data?.success
+    ) {
+
+        console.error(
+            "Capture order error:",
+            error,
+            data
+        );
+
+
+        if (
+            data?.paymentCaptured
+        ) {
+
+            throw new Error(
+                "Your payment was received, but we could not finish confirming the booking. Please contact Paws in Stride."
+            );
+
+        }
+
+
+        throw new Error(
+            data?.error ||
+            "Your payment could not be completed."
+        );
+
+    }
+
+
+    return data;
+
+}
+
+
+// ========================================
+// PAYMENT SUCCESS
+// ========================================
+
+function handlePaymentSuccess(
+    data
+) {
+
+    if (expirationTimer) {
+
+        clearInterval(
+            expirationTimer
+        );
+
+    }
+
+
+    hidePaymentMethods();
+
+
+    setPaymentMessage(
+        "Payment complete! Your booking is confirmed.",
+        "success"
+    );
+
+
+    const params =
+        new URLSearchParams();
+
+
+    params.set(
+        "payment",
+        "success"
+    );
+
+
+    if (
+        data?.booking_group_id
+    ) {
+
+        params.set(
+            "booking_group",
+            data.booking_group_id
+        );
+
+    }
+
+
+    setTimeout(
+        () => {
+
+            window.location.href =
+                `./dashboard.html?${params.toString()}`;
+
+        },
+        1500
+    );
+
+}
+
+
+// ========================================
+// PAYMENT CANCELLED
+// ========================================
+
+function handlePaymentCancellation() {
+
+    setPaymentMessage(
+        "Payment was cancelled. Your booking has not been charged."
+    );
+
+}
+
+
+// ========================================
+// PAYMENT ERROR
+// ========================================
+
+function handlePaymentError(
+    error
+) {
+
+    console.error(
+        "Payment error:",
+        error
+    );
+
+
+    const message =
+        error instanceof Error
+            ? error.message
+            : "Payment could not be completed.";
+
+
+    setPaymentMessage(
+        message,
+        "error"
+    );
+
+}
+
+
+// ========================================
+// PAYPAL SESSION
+// ========================================
+
+async function setupPayPal(
+    sdkInstance
+) {
+
+    const session =
+        await sdkInstance
+            .createPayPalOneTimePaymentSession({
+                onApprove:
+                    async data => {
+
+                        try {
+
+                            const result =
+                                await captureOrder(
+                                    data.orderId
+                                );
+
+
+                            handlePaymentSuccess(
+                                result
+                            );
+
+
+                            return result;
+
+                        }
+                        catch (
+                            error
+                        ) {
+
+                            handlePaymentError(
+                                error
+                            );
+
+
+                            throw error;
+
+                        }
+
+                    },
+
+
+                onCancel:
+                    data => {
+
+                        console.log(
+                            "PayPal cancelled:",
+                            data
+                        );
+
+
+                        handlePaymentCancellation();
+
+                    },
+
+
+                onError:
+                    error => {
+
+                        handlePaymentError(
+                            error
+                        );
+
+                    }
+            });
+
+
+    paypalWrapper.hidden =
+        false;
+
+
+    paypalButton.hidden =
+        false;
+
+
+    paypalButton.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                if (
+                    checkoutExpired
+                ) {
+
+                    throw new Error(
+                        "This checkout has expired."
+                    );
+
+                }
+
+
+                // IMPORTANT:
+                // Do not await createOrder here.
+                // PayPal recommends passing the
+                // promise directly into start()
+                // so browser activation is preserved.
+
+                const orderPromise =
+                    createOrder(
+                        "paypal"
+                    );
+
+
+                await session.start(
+                    {
+                        presentationMode:
+                            "auto"
+                    },
+                    orderPromise
+                );
+
+            }
+            catch (
+                error
+            ) {
+
+                handlePaymentError(
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// VENMO SESSION
+// ========================================
+
+async function setupVenmo(
+    sdkInstance
+) {
+
+    const session =
+        await sdkInstance
+            .createVenmoOneTimePaymentSession({
+                onApprove:
+                    async data => {
+
+                        try {
+
+                            const result =
+                                await captureOrder(
+                                    data.orderId
+                                );
+
+
+                            handlePaymentSuccess(
+                                result
+                            );
+
+
+                            return result;
+
+                        }
+                        catch (
+                            error
+                        ) {
+
+                            handlePaymentError(
+                                error
+                            );
+
+
+                            throw error;
+
+                        }
+
+                    },
+
+
+                onCancel:
+                    data => {
+
+                        console.log(
+                            "Venmo cancelled:",
+                            data
+                        );
+
+
+                        handlePaymentCancellation();
+
+                    },
+
+
+                onError:
+                    error => {
+
+                        handlePaymentError(
+                            error
+                        );
+
+                    }
+            });
+
+
+    venmoWrapper.hidden =
+        false;
+
+
+    venmoButton.hidden =
+        false;
+
+
+    venmoButton.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                if (
+                    checkoutExpired
+                ) {
+
+                    throw new Error(
+                        "This checkout has expired."
+                    );
+
+                }
+
+
+                const orderPromise =
+                    createOrder(
+                        "venmo"
+                    );
+
+
+                // Venmo v6 supports auto mode.
+
+                await session.start(
+                    {
+                        presentationMode:
+                            "auto"
+                    },
+                    orderPromise
+                );
+
+            }
+            catch (
+                error
+            ) {
+
+                handlePaymentError(
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// INITIALIZE PAYMENT METHODS
+// ========================================
+
+async function initializePaymentMethods() {
+
+    if (
+        paymentMethodsInitialized ||
+        !paypalSdkLoaded ||
+        !pageLoaded ||
+        !checkoutData ||
+        checkoutExpired
+    ) {
+
+        return;
+
+    }
+
+
+    paymentMethodsInitialized =
+        true;
+
+
+    try {
+
+        setPaymentMessage(
+            "Loading available payment methods..."
+        );
+
+
+        const sdkInstance =
+            await window.paypal
+                .createInstance({
+                    clientId:
+                        PAYPAL_CLIENT_ID,
+
+                    components: [
+                        "paypal-payments",
+                        "venmo-payments"
+                    ],
+
+                    pageType:
+                        "checkout"
+                });
+
+
+        const eligibleMethods =
+            await sdkInstance
+                .findEligibleMethods({
+                    currencyCode:
+                        String(
+                            checkoutData.currency ||
+                            "USD"
+                        ).toUpperCase()
+                });
+
+
+        let methodFound =
+            false;
+
+
         // ========================================
-        // REQUIRE CHECKOUT ID
+        // PAYPAL ELIGIBILITY
         // ========================================
 
-        const checkoutId =
-            getCheckoutId();
+        if (
+            eligibleMethods.isEligible(
+                "paypal"
+            )
+        ) {
+
+            methodFound =
+                true;
+
+
+            await setupPayPal(
+                sdkInstance
+            );
+
+        }
+
+
+        // ========================================
+        // VENMO ELIGIBILITY
+        // ========================================
+
+        if (
+            eligibleMethods.isEligible(
+                "venmo"
+            )
+        ) {
+
+            methodFound =
+                true;
+
+
+            await setupVenmo(
+                sdkInstance
+            );
+
+        }
+
+
+        if (
+            !methodFound
+        ) {
+
+            setPaymentMessage(
+                "No supported payment methods are available for this browser or device.",
+                "error"
+            );
+
+
+            return;
+
+        }
+
+
+        setPaymentMessage(
+            ""
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        paymentMethodsInitialized =
+            false;
+
+
+        console.error(
+            "PayPal SDK initialization error:",
+            error
+        );
+
+
+        setPaymentMessage(
+            "Secure payment options could not be loaded. Please refresh the page and try again.",
+            "error"
+        );
+
+    }
+
+}
+
+
+// ========================================
+// PAYPAL SDK CALLBACK
+// ========================================
+//
+// payment.html calls this when the PayPal
+// Web SDK has finished loading.
+// ========================================
+
+window.onPayPalWebSdkLoaded =
+    async function () {
+
+        paypalSdkLoaded =
+            true;
+
+
+        await initializePaymentMethods();
+
+    };
+
+
+// ========================================
+// PAGE INITIALIZATION
+// ========================================
+
+async function initializeCheckoutPage() {
+
+    try {
+
+        checkoutId =
+            getCheckoutIdFromUrl();
 
 
         if (!checkoutId) {
 
-            showCheckoutError(
-                "No checkout ID was provided."
-            );
-
-
-            return;
-
-        }
-
-
-        // ========================================
-        // LOAD CHECKOUT DATA
-        // ========================================
-
-        await loadCheckout(
-            checkoutId
-        );
-
-
-        // ========================================
-        // VALIDATE CHECKOUT
-        // ========================================
-
-        if (
-            !validateCheckoutStatus()
-        ) {
-
-            return;
-
-        }
-
-
-        // ========================================
-        // LOAD SERVICE + PET DETAILS
-        // ========================================
-
-        await Promise.all([
-
-            loadCheckoutVisits(
-                checkoutId
-            ),
-
-            loadCheckoutPets(
-                checkoutId
-            )
-
-        ]);
-
-
-        await loadPetNames();
-
-
-        // ========================================
-        // REQUIRE BOOKING DETAILS
-        // ========================================
-
-        if (
-            checkoutVisits.length ===
-            0
-        ) {
-
             throw new Error(
-                "No services were found for this checkout."
+                "No checkout was provided."
             );
 
         }
 
 
-        // ========================================
-        // RENDER CHECKOUT
-        // ========================================
+        const authenticated =
+            await loadCurrentUser();
+
+
+        if (!authenticated) {
+
+            return;
+
+        }
+
+
+        await loadCheckout();
+
+
+        await loadCheckoutVisits();
+
 
         renderCheckoutSummary();
 
 
-        renderPaymentMethods();
+        // ========================================
+        // ALREADY COMPLETED
+        // ========================================
+
+        if (
+            checkoutData.status ===
+            "completed"
+        ) {
+
+            hidePaymentMethods();
+
+
+            setPaymentMessage(
+                "This booking has already been paid and confirmed.",
+                "success"
+            );
+
+
+            return;
+
+        }
+
+
+        // ========================================
+        // EXPIRED CHECKOUT
+        // ========================================
+
+        if (
+            checkoutData.status ===
+            "expired"
+        ) {
+
+            checkoutExpired =
+                true;
+
+
+            hidePaymentMethods();
+
+
+            setPaymentMessage(
+                "This checkout has expired. Please return to the portal and select your services again.",
+                "error"
+            );
+
+
+            return;
+
+        }
+
+
+        // ========================================
+        // VALID CHECKOUT STATUS
+        // ========================================
+
+        if (
+            checkoutData.status !==
+                "pending_payment" &&
+            checkoutData.status !==
+                "processing"
+        ) {
+
+            hidePaymentMethods();
+
+
+            setPaymentMessage(
+                `This checkout cannot be paid while its status is ${checkoutData.status}.`,
+                "error"
+            );
+
+
+            return;
+
+        }
+
+
+        startExpirationTimer();
+
+
+        pageLoaded =
+            true;
+
+
+        await initializePaymentMethods();
 
     }
     catch (
@@ -1123,14 +1622,23 @@ async function initializePaymentPage() {
     ) {
 
         console.error(
-            "Payment page initialization error:",
+            "Checkout page error:",
             error
         );
 
 
-        showCheckoutError(
-            error?.message ||
-            "Something went wrong while loading your checkout."
+        hidePaymentMethods();
+
+
+        paymentSummaryContent.textContent =
+            "Checkout unavailable.";
+
+
+        setPaymentMessage(
+            error instanceof Error
+                ? error.message
+                : "We couldn't load this checkout.",
+            "error"
         );
 
     }
@@ -1139,7 +1647,10 @@ async function initializePaymentPage() {
 
 
 // ========================================
-// START PAYMENT PAGE
+// START PAGE
 // ========================================
 
-initializePaymentPage();
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeCheckoutPage
+);
