@@ -14431,6 +14431,321 @@ function syncClientNavigationMessageBadge() {
 }
 
 // ========================================
+// PUSH NOTIFICATIONS
+// ========================================
+
+const pushNotificationCard =
+    document.getElementById(
+        "push-notification-card"
+    );
+
+
+const enablePushNotificationsButton =
+    document.getElementById(
+        "enable-push-notifications"
+    );
+
+
+const pushNotificationStatus =
+    document.getElementById(
+        "push-notification-status"
+    );
+
+
+// ========================================
+// UPDATE PUSH STATUS
+// ========================================
+
+function setPushNotificationStatus(
+    message
+) {
+
+    if (
+        !pushNotificationStatus
+    ) {
+        return;
+    }
+
+
+    pushNotificationStatus.textContent =
+        message || "";
+
+
+    pushNotificationStatus.style.display =
+        message
+            ? "block"
+            : "none";
+
+}
+
+
+// ========================================
+// DETECT PUSH SUPPORT
+// ========================================
+
+function browserSupportsPushNotifications() {
+
+    return (
+        "serviceWorker" in navigator &&
+        "PushManager" in window &&
+        "Notification" in window
+    );
+
+}
+
+
+// ========================================
+// UPDATE PUSH NOTIFICATION UI
+// ========================================
+
+async function updatePushNotificationUI() {
+
+    if (
+        !pushNotificationCard ||
+        !enablePushNotificationsButton
+    ) {
+        return;
+    }
+
+
+    // ========================================
+    // PUSH NOT SUPPORTED
+    // ========================================
+
+    if (
+        !browserSupportsPushNotifications()
+    ) {
+
+        pushNotificationCard.style.display =
+            "none";
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // PERMISSION ALREADY GRANTED
+    // ========================================
+
+    if (
+        Notification.permission ===
+        "granted"
+    ) {
+
+        pushNotificationCard.style.display =
+            "none";
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // PERMISSION BLOCKED
+    // ========================================
+
+    if (
+        Notification.permission ===
+        "denied"
+    ) {
+
+        pushNotificationCard.style.display =
+            "flex";
+
+
+        enablePushNotificationsButton.textContent =
+            "Notifications Blocked";
+
+
+        enablePushNotificationsButton.disabled =
+            true;
+
+
+        setPushNotificationStatus(
+            "Notifications are currently blocked for Paws in Stride on this device."
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // PERMISSION NOT YET REQUESTED
+    // ========================================
+
+    pushNotificationCard.style.display =
+        "flex";
+
+
+    enablePushNotificationsButton.textContent =
+        "Enable Notifications";
+
+
+    enablePushNotificationsButton.disabled =
+        false;
+
+
+    setPushNotificationStatus(
+        ""
+    );
+
+}
+
+
+// ========================================
+// REQUEST NOTIFICATION PERMISSION
+// ========================================
+
+async function enablePushNotifications() {
+
+    if (
+        !enablePushNotificationsButton
+    ) {
+        return;
+    }
+
+
+    if (
+        !browserSupportsPushNotifications()
+    ) {
+        return;
+    }
+
+
+    enablePushNotificationsButton.disabled =
+        true;
+
+
+    enablePushNotificationsButton.textContent =
+        "Enabling...";
+
+
+    try {
+
+        const permission =
+            await Notification
+                .requestPermission();
+
+
+        // ========================================
+        // PERMISSION NOT GRANTED
+        // ========================================
+
+        if (
+            permission !==
+            "granted"
+        ) {
+
+            await updatePushNotificationUI();
+
+            return;
+
+        }
+
+
+        // ========================================
+        // WAIT FOR SERVICE WORKER
+        // ========================================
+
+        const registration =
+            await navigator
+                .serviceWorker
+                .ready;
+
+
+        console.log(
+            "Push service worker ready:",
+            registration.scope
+        );
+
+
+        // ========================================
+        // CHECK EXISTING SUBSCRIPTION
+        // ========================================
+
+        const existingSubscription =
+            await registration
+                .pushManager
+                .getSubscription();
+
+
+        if (
+            existingSubscription
+        ) {
+
+            console.log(
+                "Existing push subscription:",
+                existingSubscription
+            );
+
+        }
+        else {
+
+            console.log(
+                "Notification permission granted. Device is ready for push subscription."
+            );
+
+        }
+
+
+        // ========================================
+        // HIDE SETUP PROMPT
+        // ========================================
+
+        pushNotificationCard.style.display =
+            "none";
+
+    }
+    catch (error) {
+
+        console.error(
+            "Push notification setup error:",
+            error
+        );
+
+
+        enablePushNotificationsButton.disabled =
+            false;
+
+
+        enablePushNotificationsButton.textContent =
+            "Enable Notifications";
+
+
+        setPushNotificationStatus(
+            "We couldn't enable notifications on this device."
+        );
+
+    }
+
+}
+
+
+// ========================================
+// PUSH NOTIFICATION BUTTON
+// ========================================
+
+if (
+    enablePushNotificationsButton
+) {
+
+    enablePushNotificationsButton
+        .addEventListener(
+            "click",
+            enablePushNotifications
+        );
+
+
+    updatePushNotificationUI();
+
+}
+
+// ========================================
 // PWA SERVICE WORKER
 // ========================================
 
