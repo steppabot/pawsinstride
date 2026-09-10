@@ -20,7 +20,7 @@ const SUPABASE_URL =
 
 
 const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_U3OIYatZuBUe8V6Vq0DS2w_IMacau2j";
+    "sb_publishable_U3OIYatZuBUe8Y6Vq0DS2w_IMacau2j";
 
 
 const supabaseClient =
