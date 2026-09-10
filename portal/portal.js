@@ -1,18 +1,49 @@
 // ========================================
 // SUPABASE
 // ========================================
+//
+// Use persistent browser storage so the
+// authenticated session survives:
+//
+// - normal page navigation
+// - closing Safari
+// - closing the installed PWA
+// - reopening Paws in Stride later
+//
+// We never store the user's password.
+// Supabase stores and refreshes the auth
+// session tokens.
+// ========================================
 
 const SUPABASE_URL =
     "https://xyhndwopvlmnxjkthtkl.supabase.co";
 
+
 const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_U3OIYatZuBUe8Y6Vq0DS2w_IMacau2j";
+    "sb_publishable_U3OIYatZuBUe8V6Vq0DS2w_IMacau2j";
 
 
 const supabaseClient =
     supabase.createClient(
         SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+            auth: {
+
+                persistSession:
+                    true,
+
+                autoRefreshToken:
+                    true,
+
+                detectSessionInUrl:
+                    true,
+
+                storage:
+                    window.localStorage
+
+            }
+        }
     );
 
 
