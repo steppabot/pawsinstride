@@ -9613,7 +9613,7 @@ if (bookingForm) {
 
 
             button.textContent =
-                "Submitting...";
+                "Preparing Checkout...";
 
 
             try {
@@ -9624,7 +9624,7 @@ if (bookingForm) {
                 } =
                     await supabaseClient
                         .rpc(
-                            "create_service_booking",
+                            "create_booking_checkout",
                             {
 
                                 p_service_type:
@@ -9672,28 +9672,78 @@ if (bookingForm) {
 
 
                 // ========================================
-                // SUCCESS
+                // CHECKOUT CREATED
                 // ========================================
-
+                
+                const checkout =
+                    Array.isArray(data)
+                        ? data[0]
+                        : data;
+                
+                
+                if (
+                    !checkout?.checkout_id
+                ) {
+                
+                    throw new Error(
+                        "Checkout was created but no checkout ID was returned."
+                    );
+                
+                }
+                
+                
+                // ========================================
+                // START PAYPAL CHECKOUT
+                // ========================================
+                
                 message.textContent =
-                    "Service request submitted successfully!";
-
-
-                resetBookingForm();
-
-
-                await refreshUpcomingVisits();
-
-
-                setTimeout(
-                    () => {
-
-                        bookingSection.style.display =
-                            "none";
-
-                    },
-                    600
-                );
+                    "Preparing secure checkout...";
+                
+                
+                const {
+                    data: paypalData,
+                    error: paypalError
+                } =
+                    await supabaseClient
+                        .functions
+                        .invoke(
+                            "paypal-create-order",
+                            {
+                                body: {
+                                    checkout_id:
+                                        checkout.checkout_id
+                                }
+                            }
+                        );
+                
+                
+                if (
+                    paypalError ||
+                    !paypalData?.success ||
+                    !paypalData?.approvalLink
+                ) {
+                
+                    console.error(
+                        "PayPal order error:",
+                        paypalError,
+                        paypalData
+                    );
+                
+                
+                    throw new Error(
+                        paypalData?.error ||
+                        "Could not start PayPal checkout."
+                    );
+                
+                }
+                
+                
+                // ========================================
+                // SEND CLIENT TO PAYPAL
+                // ========================================
+                
+                window.location.href =
+                    paypalData.approvalLink;
 
             }
             catch (
@@ -9851,7 +9901,7 @@ async function submitBoardingBooking(
 
 
     button.textContent =
-        "Submitting...";
+        "Preparing Checkout...";
 
 
     try {
@@ -9862,7 +9912,7 @@ async function submitBoardingBooking(
         } =
             await supabaseClient
                 .rpc(
-                    "create_service_booking",
+                    "create_booking_checkout",
                     {
 
                         p_service_type:
@@ -9910,28 +9960,78 @@ async function submitBoardingBooking(
 
 
         // ========================================
-        // SUCCESS
+        // CHECKOUT CREATED
         // ========================================
-
+        
+        const checkout =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+        
+        
+        if (
+            !checkout?.checkout_id
+        ) {
+        
+            throw new Error(
+                "Checkout was created but no checkout ID was returned."
+            );
+        
+        }
+        
+        
+        // ========================================
+        // START PAYPAL CHECKOUT
+        // ========================================
+        
         message.textContent =
-            "Boarding request submitted successfully!";
-
-
-        resetBookingForm();
-
-
-        await refreshUpcomingVisits();
-
-
-        setTimeout(
-            () => {
-
-                bookingSection.style.display =
-                    "none";
-
-            },
-            600
-        );
+            "Preparing secure checkout...";
+        
+        
+        const {
+            data: paypalData,
+            error: paypalError
+        } =
+            await supabaseClient
+                .functions
+                .invoke(
+                    "paypal-create-order",
+                    {
+                        body: {
+                            checkout_id:
+                                checkout.checkout_id
+                        }
+                    }
+                );
+        
+        
+        if (
+            paypalError ||
+            !paypalData?.success ||
+            !paypalData?.approvalLink
+        ) {
+        
+            console.error(
+                "PayPal order error:",
+                paypalError,
+                paypalData
+            );
+        
+        
+            throw new Error(
+                paypalData?.error ||
+                "Could not start PayPal checkout."
+            );
+        
+        }
+        
+        
+        // ========================================
+        // SEND CLIENT TO PAYPAL
+        // ========================================
+        
+        window.location.href =
+            paypalData.approvalLink;
 
     }
     catch (
