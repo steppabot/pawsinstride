@@ -39,7 +39,7 @@ const supabaseClient =
 // ========================================
 
 const PAYPAL_CLIENT_ID =
-    "ARdjYFfzimXClI11bBwuU4KZZokujgcd3JHtX1kk-QwAHgU-BMPlHs__K98JFCkDulu9P8VO_KYWXIht";
+    "BAAVcKVQ0rmCromROr57TzR6ex0A8nCD6eufi_rwCYCsX2nYFYAcDywOEkAT97zy4A5hzdQ7_hOm7o68e8";
 
 
 // ========================================
