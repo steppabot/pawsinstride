@@ -1929,15 +1929,28 @@ async function setupGooglePay(
 
             }
 
-
             // ========================================
             // CAPTURE PAYMENT
             // ========================================
             
-            const result =
-                await captureOrder(
+            const capturePromise =
+                captureOrder(
                     order.orderId
                 );
+            
+            
+            const recoveryPromise =
+                waitForCheckoutCompletion(
+                    30000,
+                    1000
+                );
+            
+            
+            const result =
+                await Promise.race([
+                    capturePromise,
+                    recoveryPromise
+                ]);
             
             
             // ========================================
