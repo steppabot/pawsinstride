@@ -1743,13 +1743,148 @@ async function setupGooglePay(
 
 
     // ========================================
+    // PAYMENT AUTHORIZATION
+    // ========================================
+
+    async function onPaymentAuthorized(
+        paymentData
+    ) {
+
+        try {
+
+            if (
+                checkoutExpired
+            ) {
+
+                throw new Error(
+                    "This checkout has expired."
+                );
+
+            }
+
+
+            // ========================================
+            // CREATE PAYPAL ORDER
+            // ========================================
+
+            const order =
+                await createOrder(
+                    "googlepay"
+                );
+
+
+            if (
+                !order?.orderId
+            ) {
+
+                throw new Error(
+                    "Google Pay order was not created."
+                );
+
+            }
+
+
+            // ========================================
+            // CONFIRM GOOGLE PAY WITH PAYPAL
+            // ========================================
+
+            const confirmation =
+                await googlePaySession
+                    .confirmOrder({
+                        orderId:
+                            order.orderId,
+
+                        paymentMethodData:
+                            paymentData.paymentMethodData
+                    });
+
+
+            console.log(
+                "Google Pay confirmation:",
+                confirmation
+            );
+
+
+            // ========================================
+            // REQUIRE APPROVED PAYMENT
+            // ========================================
+
+            if (
+                confirmation?.status ===
+                "PAYER_ACTION_REQUIRED"
+            ) {
+
+                throw new Error(
+                    "Google Pay requires additional payer action."
+                );
+
+            }
+
+
+            // ========================================
+            // CAPTURE PAYMENT
+            // ========================================
+
+            await captureOrder(
+                order.orderId
+            );
+
+
+            // ========================================
+            // GOOGLE PAY SUCCESS
+            // ========================================
+
+            return {
+                transactionState:
+                    "SUCCESS"
+            };
+
+        }
+        catch (
+            error
+        ) {
+
+            console.error(
+                "Google Pay payment error:",
+                error
+            );
+
+
+            handlePaymentError(
+                error
+            );
+
+
+            return {
+                transactionState:
+                    "ERROR",
+
+                error: {
+                    message:
+                        error instanceof Error
+                            ? error.message
+                            : "Google Pay payment failed."
+                }
+            };
+
+        }
+
+    }
+
+
+    // ========================================
     // CREATE GOOGLE PAY CLIENT
     // ========================================
 
     const paymentsClient =
         new google.payments.api.PaymentsClient({
             environment:
-                "TEST"
+                "TEST",
+
+            paymentDataCallbacks: {
+                onPaymentAuthorized:
+                    onPaymentAuthorized
+            }
         });
 
 
@@ -1809,23 +1944,18 @@ async function setupGooglePay(
                 onClick:
                     async () => {
 
-                        if (
-                            checkoutExpired
-                        ) {
-
-                            handlePaymentError(
-                                new Error(
-                                    "This checkout has expired."
-                                )
-                            );
-
-
-                            return;
-
-                        }
-
-
                         try {
+
+                            if (
+                                checkoutExpired
+                            ) {
+
+                                throw new Error(
+                                    "This checkout has expired."
+                                );
+
+                            }
+
 
                             // ========================================
                             // BUILD GOOGLE PAY REQUEST
@@ -1865,44 +1995,22 @@ async function setupGooglePay(
                                     countryCode:
                                         googlePayConfig.countryCode ||
                                         "US"
-                                }
+                                },
+
+                                callbackIntents: [
+                                    "PAYMENT_AUTHORIZATION"
+                                ]
                             };
 
 
                             // ========================================
-                            // SHOW GOOGLE PAY SHEET
+                            // OPEN GOOGLE PAY SHEET
                             // ========================================
 
-                            const paymentData =
-                                await paymentsClient
-                                    .loadPaymentData(
-                                        paymentDataRequest
-                                    );
-
-
-                            console.log(
-                                "Google Pay payment data received.",
-                                paymentData
-                            );
-
-
-                            // ========================================
-                            // TEMPORARY STOP POINT
-                            // ========================================
-                            //
-                            // We are intentionally stopping here.
-                            //
-                            // Next we will:
-                            // 1. create the PayPal order
-                            // 2. confirm it with Google Pay
-                            // 3. capture it server-side
-                            //
-                            // Do not process payment yet.
-                            // ========================================
-
-                            setPaymentMessage(
-                                "Google Pay is ready. Payment processing will be connected next."
-                            );
+                            await paymentsClient
+                                .loadPaymentData(
+                                    paymentDataRequest
+                                );
 
                         }
                         catch (
