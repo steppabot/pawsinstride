@@ -11973,7 +11973,6 @@ a:focus-visible {
 
 }
 
-
 /* ========================================
    PAWS IN STRIDE PAYMENT PAGE
 ======================================== */
@@ -12107,6 +12106,51 @@ a:focus-visible {
 
 
 /* ========================================
+   PAYMENT HEADER BRAND
+======================================== */
+
+.payment-header-brand {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        18px;
+
+    min-width:
+        0;
+
+}
+
+
+/* ========================================
+   PAYMENT HEADER LOGO
+======================================== */
+
+.payment-header-logo {
+
+    display:
+        block;
+
+    width:
+        130px;
+
+    max-width:
+        100%;
+
+    height:
+        auto;
+
+    flex:
+        0 0 auto;
+
+}
+
+
+/* ========================================
    PAYMENT HEADER COPY
 ======================================== */
 
@@ -12114,6 +12158,13 @@ a:focus-visible {
 
     min-width:
         0;
+
+    padding-left:
+        18px;
+
+    border-left:
+        1px solid
+        var(--pis-border);
 
 }
 
@@ -12430,7 +12481,7 @@ a:focus-visible {
         column;
 
     gap:
-        12px;
+        10px;
 
     width:
         100%;
@@ -12461,7 +12512,13 @@ a:focus-visible {
         block;
 
     width:
-        100%;
+        100% !important;
+
+    min-width:
+        100% !important;
+
+    max-width:
+        none !important;
 
     height:
         50px;
@@ -12472,18 +12529,19 @@ a:focus-visible {
 }
 
 
-#google-pay-button {
+/* ========================================
+   GOOGLE PAY FULL WIDTH
+======================================== */
+
+#google-pay-wrapper {
 
     width:
         100%;
 
-    min-height:
-        50px;
-
 }
 
 
-#google-pay-button > * {
+#google-pay-button {
 
     width:
         100% !important;
@@ -12491,8 +12549,43 @@ a:focus-visible {
     min-width:
         100% !important;
 
+    max-width:
+        none !important;
+
+    min-height:
+        50px;
+
 }
 
+
+#google-pay-button > div,
+#google-pay-button button,
+#google-pay-button iframe {
+
+    display:
+        block !important;
+
+    width:
+        100% !important;
+
+    min-width:
+        100% !important;
+
+    max-width:
+        none !important;
+
+    height:
+        50px !important;
+
+    min-height:
+        50px !important;
+
+}
+
+
+/* ========================================
+   APPLE PAY BUTTON
+======================================== */
 
 #apple-pay-button {
 
@@ -13014,6 +13107,42 @@ a:focus-visible {
     }
 
 
+    .payment-header-brand {
+
+        flex:
+            1 1 auto;
+
+        gap:
+            10px;
+
+        min-width:
+            0;
+
+    }
+
+
+    .payment-header-logo {
+
+        width:
+            95px;
+
+    }
+
+
+    .payment-header-copy {
+
+        min-width:
+            0;
+
+        padding-left:
+            0;
+
+        border-left:
+            0;
+
+    }
+
+
     .payment-header-copy h1 {
 
         font-size:
@@ -13079,6 +13208,22 @@ a:focus-visible {
     max-width:
         420px
 ) {
+
+    .payment-header-logo {
+
+        width:
+            82px;
+
+    }
+
+
+    .payment-header-copy h1 {
+
+        font-size:
+            18px;
+
+    }
+
 
     .payment-card-field-grid {
 
