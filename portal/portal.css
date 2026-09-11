@@ -286,6 +286,21 @@ a:focus-visible {
         width: 100%;
     }
 
+   .payment-layout {
+   
+       grid-template-columns:
+           1fr;
+   
+   }
+   
+   
+   .payment-summary-card {
+   
+       position:
+           static;
+   
+   }
+
 }
 
 /* ========================================
@@ -11988,7 +12003,7 @@ a:focus-visible {
         92%;
 
     max-width:
-        820px;
+        1180px;
 
     margin:
         0 auto;
@@ -12325,13 +12340,39 @@ a:focus-visible {
         grid;
 
     grid-template-columns:
-        1fr;
+        minmax(0, 0.42fr)
+        minmax(0, 0.58fr);
+
+    align-items:
+        start;
 
     gap:
-        20px;
+        22px;
 
 }
 
+/* ========================================
+   DESKTOP CHECKOUT COLUMNS
+======================================== */
+
+.payment-summary-card,
+.payment-methods-card {
+
+    min-width:
+        0;
+
+}
+
+
+.payment-summary-card {
+
+    position:
+        sticky;
+
+    top:
+        24px;
+
+}
 
 /* ========================================
    PAYMENT SUMMARY SERVICES
