@@ -2207,42 +2207,70 @@ async function setupGooglePay(
 }
 
 // ========================================
-// APPLE PAY SESSION
+// APPLE PAY SETUP
 // ========================================
 
 async function setupApplePay(
     sdkInstance,
-    applePayConfig
+    eligibleMethods
 ) {
 
     if (
         !applePayWrapper ||
         !applePayButton
     ) {
-
-        throw new Error(
-            "Apple Pay elements are missing from the checkout page."
-        );
-
-    }
-
-
-    if (
-        !window.ApplePaySession
-    ) {
-
-        console.log(
-            "Apple Pay is not available on this browser or device."
-        );
-
-
         return false;
-
     }
 
 
     // ========================================
-    // SHOW APPLE PAY BUTTON
+    // DEVICE SUPPORT
+    // ========================================
+
+    if (
+        !window.ApplePaySession ||
+        !ApplePaySession.canMakePayments()
+    ) {
+
+        console.log(
+            "Apple Pay is not available on this device."
+        );
+
+        return false;
+    }
+
+
+    // ========================================
+    // PAYPAL ELIGIBILITY
+    // ========================================
+
+    if (
+        !eligibleMethods.isEligible(
+            "applepay"
+        )
+    ) {
+
+        console.log(
+            "Apple Pay is not eligible for this checkout."
+        );
+
+        return false;
+    }
+
+
+    const applePayDetails =
+        eligibleMethods.getDetails(
+            "applepay"
+        );
+
+
+    const applePaySession =
+        sdkInstance
+            .createApplePayOneTimePaymentSession();
+
+
+    // ========================================
+    // SHOW BUTTON
     // ========================================
 
     applePayWrapper.hidden =
@@ -2250,33 +2278,23 @@ async function setupApplePay(
 
 
     // ========================================
-    // APPLE PAY CLICK
+    // CLICK
     // ========================================
 
     applePayButton.addEventListener(
         "click",
-        async () => {
+        () => {
 
             try {
 
-                if (
-                    checkoutExpired
-                ) {
-
-                    throw new Error(
-                        "This checkout has expired."
-                    );
-
-                }
-
-
-                // ========================================
-                // CREATE PAYMENT REQUEST
-                // ========================================
-
                 const paymentRequest = {
+
+                    ...applePaySession
+                        .formatConfigForPaymentRequest(
+                            applePayDetails.config
+                        ),
+
                     countryCode:
-                        applePayConfig.countryCode ||
                         "US",
 
                     currencyCode:
@@ -2284,12 +2302,6 @@ async function setupApplePay(
                             checkoutData.currency ||
                             "USD"
                         ).toUpperCase(),
-
-                    merchantCapabilities:
-                        applePayConfig.merchantCapabilities,
-
-                    supportedNetworks:
-                        applePayConfig.supportedNetworks,
 
                     total: {
                         label:
@@ -2305,15 +2317,20 @@ async function setupApplePay(
                                 ) /
                                 100
                             ).toFixed(2)
-                    }
+                    },
+
+                    requiredBillingContactFields: [
+                        "name",
+                        "postalAddress"
+                    ]
                 };
 
 
                 // ========================================
-                // CREATE APPLE PAY SESSION
+                // CREATE NATIVE APPLE PAY SESSION
                 // ========================================
 
-                const session =
+                const nativeSession =
                     new ApplePaySession(
                         4,
                         paymentRequest
@@ -2324,45 +2341,37 @@ async function setupApplePay(
                 // MERCHANT VALIDATION
                 // ========================================
 
-                session.onvalidatemerchant =
-                    async event => {
+                nativeSession
+                    .onvalidatemerchant =
+                    event => {
 
-                        try {
+                        applePaySession
+                            .validateMerchant({
+                                validationUrl:
+                                    event.validationURL
+                            })
+                            .then(
+                                payload => {
 
-                            const validation =
-                                await sdkInstance
-                                    .validateMerchant({
-                                        validationUrl:
-                                            event.validationURL,
+                                    nativeSession
+                                        .completeMerchantValidation(
+                                            payload.merchantSession
+                                        );
 
-                                        displayName:
-                                            "Paws in Stride"
-                                    });
+                                }
+                            )
+                            .catch(
+                                error => {
 
+                                    console.error(
+                                        "Apple Pay merchant validation failed:",
+                                        error
+                                    );
 
-                            session.completeMerchantValidation(
-                                validation.merchantSession
+                                    nativeSession.abort();
+
+                                }
                             );
-
-                        }
-                        catch (
-                            error
-                        ) {
-
-                            console.error(
-                                "Apple Pay merchant validation failed:",
-                                error
-                            );
-
-
-                            session.abort();
-
-
-                            handlePaymentError(
-                                error
-                            );
-
-                        }
 
                     };
 
@@ -2371,7 +2380,8 @@ async function setupApplePay(
                 // PAYMENT AUTHORIZED
                 // ========================================
 
-                session.onpaymentauthorized =
+                nativeSession
+                    .onpaymentauthorized =
                     async event => {
 
                         try {
@@ -2382,21 +2392,19 @@ async function setupApplePay(
                                 );
 
 
-                            const confirmation =
-                                await sdkInstance
-                                    .confirmOrder({
-                                        orderId:
-                                            order.orderId,
+                            await applePaySession
+                                .confirmOrder({
 
-                                        payment:
-                                            event.payment
-                                    });
+                                    orderId:
+                                        order.orderId,
 
+                                    token:
+                                        event.payment.token,
 
-                            console.log(
-                                "Apple Pay confirmation:",
-                                confirmation
-                            );
+                                    billingContact:
+                                        event.payment.billingContact
+
+                                });
 
 
                             const capturePromise =
@@ -2419,9 +2427,12 @@ async function setupApplePay(
                                 ]);
 
 
-                            session.completePayment(
-                                ApplePaySession.STATUS_SUCCESS
-                            );
+                            nativeSession
+                                .completePayment({
+                                    status:
+                                        ApplePaySession
+                                            .STATUS_SUCCESS
+                                });
 
 
                             handlePaymentSuccess(
@@ -2439,9 +2450,12 @@ async function setupApplePay(
                             );
 
 
-                            session.completePayment(
-                                ApplePaySession.STATUS_FAILURE
-                            );
+                            nativeSession
+                                .completePayment({
+                                    status:
+                                        ApplePaySession
+                                            .STATUS_FAILURE
+                                });
 
 
                             handlePaymentError(
@@ -2454,10 +2468,10 @@ async function setupApplePay(
 
 
                 // ========================================
-                // PAYMENT CANCELLED
+                // CANCEL
                 // ========================================
 
-                session.oncancel =
+                nativeSession.oncancel =
                     () => {
 
                         handlePaymentCancellation();
@@ -2469,7 +2483,7 @@ async function setupApplePay(
                 // BEGIN APPLE PAY
                 // ========================================
 
-                session.begin();
+                nativeSession.begin();
 
             }
             catch (
@@ -2623,6 +2637,30 @@ async function initializePaymentMethods() {
 
             }
 
+        }
+
+
+        // ========================================
+        // APPLE PAY ELIGIBILITY
+        // ========================================
+        
+        if (
+            walletEligibleMethods.isEligible(
+                "applepay"
+            )
+        ) {
+            const applePayReady =
+                await setupApplePay(
+                    walletSdkInstance,
+                    walletEligibleMethods
+                );
+        
+            if (
+                applePayReady
+            ) {
+                methodFound =
+                    true;
+            }
         }
 
 
