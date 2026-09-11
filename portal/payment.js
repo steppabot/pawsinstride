@@ -151,6 +151,21 @@ const cardCvvContainer =
         "paypal-card-fields-cvv"
     );
 
+// ========================================
+// GOOGLE PAY ELEMENTS
+// ========================================
+
+const googlePayWrapper =
+    document.getElementById(
+        "google-pay-wrapper"
+    );
+
+
+const googlePayButtonContainer =
+    document.getElementById(
+        "google-pay-button"
+    );
+
 
 // ========================================
 // FORMAT MONEY
@@ -318,6 +333,15 @@ function hidePaymentMethods() {
     if (cardWrapper) {
 
         cardWrapper.hidden =
+            true;
+        
+
+    }
+    
+
+    if (googlePayWrapper) {
+
+        googlePayWrapper.hidden =
             true;
 
     }
@@ -1666,6 +1690,260 @@ async function setupCardFields(
 
 }
 
+// ========================================
+// GOOGLE PAY SESSION
+// ========================================
+
+async function setupGooglePay(
+    sdkInstance
+) {
+
+    if (
+        !googlePayWrapper ||
+        !googlePayButtonContainer
+    ) {
+
+        throw new Error(
+            "Google Pay container is missing from the checkout page."
+        );
+
+    }
+
+
+    if (
+        !window.google?.payments?.api
+    ) {
+
+        console.warn(
+            "Google Pay SDK is not available."
+        );
+
+
+        return false;
+
+    }
+
+
+    // ========================================
+    // CREATE PAYPAL GOOGLE PAY SESSION
+    // ========================================
+
+    const googlePaySession =
+        sdkInstance
+            .createGooglePayOneTimePaymentSession();
+
+
+    // ========================================
+    // GET PAYPAL GOOGLE PAY CONFIG
+    // ========================================
+
+    const googlePayConfig =
+        await googlePaySession
+            .getGooglePayConfig();
+
+
+    // ========================================
+    // CREATE GOOGLE PAY CLIENT
+    // ========================================
+
+    const paymentsClient =
+        new google.payments.api.PaymentsClient({
+            environment:
+                "TEST"
+        });
+
+
+    // ========================================
+    // CHECK GOOGLE PAY AVAILABILITY
+    // ========================================
+
+    const readyToPay =
+        await paymentsClient
+            .isReadyToPay({
+                apiVersion:
+                    googlePayConfig.apiVersion,
+
+                apiVersionMinor:
+                    googlePayConfig.apiVersionMinor,
+
+                allowedPaymentMethods:
+                    googlePayConfig.allowedPaymentMethods
+            });
+
+
+    if (
+        !readyToPay?.result
+    ) {
+
+        console.log(
+            "Google Pay is not available on this browser or device."
+        );
+
+
+        return false;
+
+    }
+
+
+    // ========================================
+    // CLEAR EXISTING BUTTON
+    // ========================================
+
+    googlePayButtonContainer.innerHTML =
+        "";
+
+
+    // ========================================
+    // CREATE GOOGLE PAY BUTTON
+    // ========================================
+
+    const googlePayButton =
+        paymentsClient
+            .createButton({
+                buttonType:
+                    "pay",
+
+                buttonColor:
+                    "black",
+
+                onClick:
+                    async () => {
+
+                        if (
+                            checkoutExpired
+                        ) {
+
+                            handlePaymentError(
+                                new Error(
+                                    "This checkout has expired."
+                                )
+                            );
+
+
+                            return;
+
+                        }
+
+
+                        try {
+
+                            // ========================================
+                            // BUILD GOOGLE PAY REQUEST
+                            // ========================================
+
+                            const paymentDataRequest = {
+                                apiVersion:
+                                    googlePayConfig.apiVersion,
+
+                                apiVersionMinor:
+                                    googlePayConfig.apiVersionMinor,
+
+                                allowedPaymentMethods:
+                                    googlePayConfig.allowedPaymentMethods,
+
+                                merchantInfo:
+                                    googlePayConfig.merchantInfo,
+
+                                transactionInfo: {
+                                    totalPriceStatus:
+                                        "FINAL",
+
+                                    totalPrice:
+                                        (
+                                            Number(
+                                                checkoutData.total_cents
+                                            ) /
+                                            100
+                                        ).toFixed(2),
+
+                                    currencyCode:
+                                        String(
+                                            checkoutData.currency ||
+                                            "USD"
+                                        ).toUpperCase(),
+
+                                    countryCode:
+                                        googlePayConfig.countryCode ||
+                                        "US"
+                                }
+                            };
+
+
+                            // ========================================
+                            // SHOW GOOGLE PAY SHEET
+                            // ========================================
+
+                            const paymentData =
+                                await paymentsClient
+                                    .loadPaymentData(
+                                        paymentDataRequest
+                                    );
+
+
+                            console.log(
+                                "Google Pay payment data received.",
+                                paymentData
+                            );
+
+
+                            // ========================================
+                            // TEMPORARY STOP POINT
+                            // ========================================
+                            //
+                            // We are intentionally stopping here.
+                            //
+                            // Next we will:
+                            // 1. create the PayPal order
+                            // 2. confirm it with Google Pay
+                            // 3. capture it server-side
+                            //
+                            // Do not process payment yet.
+                            // ========================================
+
+                            setPaymentMessage(
+                                "Google Pay is ready. Payment processing will be connected next."
+                            );
+
+                        }
+                        catch (
+                            error
+                        ) {
+
+                            if (
+                                error?.statusCode ===
+                                "CANCELED"
+                            ) {
+
+                                handlePaymentCancellation();
+
+
+                                return;
+
+                            }
+
+
+                            handlePaymentError(
+                                error
+                            );
+
+                        }
+
+                    }
+            });
+
+
+    googlePayButtonContainer.appendChild(
+        googlePayButton
+    );
+
+
+    googlePayWrapper.hidden =
+        false;
+
+
+    return true;
+
+}
 
 // ========================================
 // INITIALIZE PAYMENT METHODS
@@ -1706,12 +1984,13 @@ async function initializePaymentMethods() {
                 .createInstance({
                     clientId:
                         PAYPAL_CLIENT_ID,
-
+        
                     components: [
                         "paypal-payments",
-                        "venmo-payments"
+                        "venmo-payments",
+                        "googlepay-payments"
                     ],
-
+        
                     pageType:
                         "checkout"
                 });
@@ -1770,6 +2049,33 @@ async function initializePaymentMethods() {
             await setupVenmo(
                 walletSdkInstance
             );
+
+        }
+
+        // ========================================
+        // GOOGLE PAY ELIGIBILITY
+        // ========================================
+
+        if (
+            walletEligibleMethods.isEligible(
+                "googlepay"
+            )
+        ) {
+
+            const googlePayReady =
+                await setupGooglePay(
+                    walletSdkInstance
+                );
+
+
+            if (
+                googlePayReady
+            ) {
+
+                methodFound =
+                    true;
+
+            }
 
         }
 
