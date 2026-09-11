@@ -134,6 +134,24 @@
 
 
             <!-- ========================================
+                 GOOGLE PAY
+                 ======================================== -->
+            
+            <div
+                id="google-pay-wrapper"
+                hidden
+                style="
+                    margin-top: 12px;
+                "
+            >
+            
+                <div
+                    id="google-pay-button"
+                ></div>
+            
+            </div>
+            
+            <!-- ========================================
                  CREDIT / DEBIT CARD
                  ======================================== -->
             
@@ -271,10 +289,21 @@
     ></script>
 
 
+
+
+    <!-- ========================================
+         GOOGLE PAY WEB SDK
+         ======================================== -->
+    
+    <script
+        async
+        src="https://pay.google.com/gp/p/js/pay.js"
+    ></script>
+
     <!-- ========================================
          PAYPAL WEB SDK V6 - SANDBOX
          ======================================== -->
-
+    
     <script
         async
         src="https://www.sandbox.paypal.com/web-sdk/v6/core"
