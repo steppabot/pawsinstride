@@ -12378,20 +12378,21 @@ a:focus-visible {
         minmax(0, 0.42fr)
         minmax(0, 0.58fr);
 
+    align-items:
+        start;
+
 }
 
 
 .payment-layout-multi
-.payment-summary-card {
+.payment-summary-card,
+.payment-layout-multi
+.payment-methods-card {
 
-    position:
-        sticky;
-
-    top:
-        24px;
+    align-self:
+        start;
 
 }
-
 
 /* ========================================
    CHECKOUT COLUMN SAFETY
@@ -13605,17 +13606,6 @@ a:focus-visible {
 
     }
 
-
-    .payment-layout-multi
-    .payment-summary-card {
-
-        position:
-            static;
-
-        top:
-            auto;
-
-    }
 
 
     /* ========================================
