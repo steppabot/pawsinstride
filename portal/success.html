@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Booking Confirmed | Paws in Stride
+    </title>
+
+
+    <!-- ========================================
+         PAWS IN STRIDE APP FONT
+         ======================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ========================================
+         PORTAL STYLES
+         ======================================== -->
+
+    <link
+        rel="stylesheet"
+        href="./portal.css"
+    >
+
+</head>
+
+
+<body
+    class="
+        client-portal-page
+        booking-success-page
+    "
+>
+
+
+    <!-- ========================================
+         SUCCESS PAGE
+         ======================================== -->
+
+    <main
+        class="booking-success-shell"
+    >
+
+
+        <!-- ========================================
+             SUCCESS HEADER
+             ======================================== -->
+
+        <header
+            class="booking-success-header"
+        >
+
+            <img
+                src="/pawsnstridelogo1.png"
+                alt="Paws in Stride"
+                class="booking-success-logo"
+            >
+
+
+            <div
+                class="booking-success-header-copy"
+            >
+
+                <span>
+                    Booking Confirmation
+                </span>
+
+                <h1>
+                    Your service is booked
+                </h1>
+
+            </div>
+
+        </header>
+
+
+        <!-- ========================================
+             SUCCESS CARD
+             ======================================== -->
+
+        <section
+            class="booking-success-card"
+        >
+
+
+            <!-- ========================================
+                 SUCCESS ICON
+                 ======================================== -->
+
+            <div
+                class="booking-success-icon"
+                aria-hidden="true"
+            >
+                ✓
+            </div>
+
+
+            <!-- ========================================
+                 SUCCESS MESSAGE
+                 ======================================== -->
+
+            <div
+                class="booking-success-copy"
+            >
+
+                <span
+                    class="booking-success-eyebrow"
+                >
+                    Service Booked
+                </span>
+
+                <h2>
+                    You’re all set!
+                </h2>
+
+                <p>
+                    Your payment was received and your pet care service has been confirmed.
+                </p>
+
+            </div>
+
+
+            <!-- ========================================
+                 PAYMENT STATUS
+                 ======================================== -->
+
+            <div
+                class="booking-success-payment-status"
+            >
+
+                <span
+                    class="booking-success-payment-dot"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Payment Confirmed
+                </span>
+
+            </div>
+
+
+            <!-- ========================================
+                 BOOKING DETAILS
+                 ======================================== -->
+
+            <div
+                id="booking-success-details"
+                class="booking-success-details"
+            >
+
+                <div
+                    class="booking-success-loading"
+                >
+                    Loading your booking details...
+                </div>
+
+            </div>
+
+
+            <!-- ========================================
+                 SUPPORTING NOTE
+                 ======================================== -->
+
+            <div
+                class="booking-success-note"
+            >
+
+                <strong>
+                    What happens next?
+                </strong>
+
+                <p>
+                    Your booking is now available in Upcoming Services inside your Paws in Stride portal.
+                </p>
+
+            </div>
+
+
+            <!-- ========================================
+                 BACK TO PORTAL
+                 ======================================== -->
+
+            <a
+                href="./dashboard.html"
+                class="booking-success-button"
+            >
+                Back to Portal
+            </a>
+
+
+            <!-- ========================================
+                 REFERENCE
+                 ======================================== -->
+
+            <div
+                id="booking-success-reference"
+                class="booking-success-reference"
+            ></div>
+
+
+        </section>
+
+
+    </main>
+
+
+    <!-- ========================================
+         SUPABASE
+         ======================================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+
+    <!-- ========================================
+         SUCCESS PAGE LOGIC
+         ======================================== -->
+
+    <script
+        src="./success.js"
+    ></script>
+
+
+</body>
+
+</html>
