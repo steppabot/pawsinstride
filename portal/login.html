@@ -40,37 +40,41 @@
          PORTAL STYLES
          ======================================== -->
 
-    <link rel="stylesheet" href="portal.css">
+    <link
+        rel="stylesheet"
+        href="portal.css"
+    >
+
 
     <!-- ========================================
          PWA / HOME SCREEN APP
-    ======================================== -->
-    
+         ======================================== -->
+
     <link
         rel="manifest"
         href="/portal/manifest.webmanifest"
     >
-    
+
     <meta
         name="theme-color"
         content="#2890df"
     >
-    
+
     <meta
         name="apple-mobile-web-app-capable"
         content="yes"
     >
-    
+
     <meta
         name="apple-mobile-web-app-status-bar-style"
         content="default"
     >
-    
+
     <meta
         name="apple-mobile-web-app-title"
         content="Paws in Stride"
     >
-    
+
     <link
         rel="apple-touch-icon"
         href="/portal/assets/apple-touch-icon.png"
@@ -144,50 +148,66 @@
         <!-- ========================================
              LOGIN FORM AREA
              ======================================== -->
-        
+
         <section class="login-form-panel">
-        
-        
+
+
             <div class="login-container">
-        
-        
+
+
+                <!-- ========================================
+                     MOBILE LOGO
+                     ======================================== -->
+
                 <div class="login-mobile-logo-wrapper">
-        
+
                     <img
                         src="/pawsnstridelogo1.png"
                         alt="Paws in Stride"
                         class="login-mobile-logo"
                     >
-        
+
                 </div>
-        
-        
+
+
+                <!-- ========================================
+                     LOGIN HEADING
+                     ======================================== -->
+
                 <div class="login-form-heading">
-        
+
                     <span>
                         Paws in Stride
                     </span>
-        
+
                     <h2>
                         Sign in to your portal
                     </h2>
-        
+
                     <p>
                         Access your pet care account.
                     </p>
-        
+
                 </div>
-        
-        
+
+
+                <!-- ========================================
+                     LOGIN FORM
+                     ======================================== -->
+
                 <form id="login-form">
-        
-        
+
+
+                    <!-- ========================================
+                         EMAIL
+                         ======================================== -->
+
                     <div class="login-field">
-        
+
                         <label for="email">
                             Email Address
                         </label>
-        
+
                         <input
                             type="email"
                             id="email"
@@ -197,18 +217,22 @@
                             placeholder="you@example.com"
                             required
                         >
-        
+
                     </div>
-        
-        
+
+
+                    <!-- ========================================
+                         PASSWORD
+                         ======================================== -->
+
                     <div class="login-field">
-        
+
                         <label for="password">
                             Password
                         </label>
-        
+
                         <div class="login-password-wrap">
-        
+
                             <input
                                 type="password"
                                 id="password"
@@ -216,7 +240,7 @@
                                 autocomplete="current-password"
                                 required
                             >
-        
+
                             <button
                                 type="button"
                                 id="login-password-toggle"
@@ -225,53 +249,86 @@
                             >
                                 Show
                             </button>
-        
+
                         </div>
-        
-        
+
+
+                        <!-- ========================================
+                             FORGOT PASSWORD
+                             ======================================== -->
+
                         <div class="login-forgot-password-row">
-        
+
                             <a
                                 href="./forgot-password.html"
                                 class="login-forgot-password-link"
                             >
                                 Forgot Password?
                             </a>
-        
+
                         </div>
-        
+
                     </div>
-        
-        
+
+
+                    <!-- ========================================
+                         SIGN IN BUTTON
+                         ======================================== -->
+
                     <button
                         type="submit"
                         class="login-submit-button"
                     >
                         Sign In
                     </button>
-        
-        
+
+
                 </form>
-        
-        
+
+
+                <!-- ========================================
+                     LOGIN SIGNUP PROMPT
+                     ======================================== -->
+
+                <div class="login-signup-prompt">
+
+                    <span>
+                        New to Paws in Stride?
+                    </span>
+
+                    <a href="./signup.html">
+                        Create an account
+                    </a>
+
+                </div>
+
+
+                <!-- ========================================
+                     LOGIN MESSAGE
+                     ======================================== -->
+
                 <p id="login-message"></p>
-        
-        
+
+
+                <!-- ========================================
+                     LOGIN FOOTER
+                     ======================================== -->
+
                 <div class="login-footer-note">
-        
+
                     <span>
                         Paws in Stride
                     </span>
-        
+
                     <span>
                         Professional Pet Care
                     </span>
-        
+
                 </div>
-        
-        
+
+
             </div>
-        
+
         </section>
 
 
@@ -282,14 +339,18 @@
          SUPABASE
          ======================================== -->
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
 
 
     <!-- ========================================
          PORTAL
          ======================================== -->
 
-    <script src="portal.js"></script>
+    <script
+        src="portal.js"
+    ></script>
 
 
 </body>
