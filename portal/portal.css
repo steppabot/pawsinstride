@@ -14140,3 +14140,1084 @@ a:focus-visible {
     }
 
 }
+
+/* ========================================
+   PAWS IN STRIDE BOOKING SUCCESS PAGE
+======================================== */
+
+
+/* ========================================
+   SUCCESS PAGE
+======================================== */
+
+body.booking-success-page {
+
+    min-height:
+        100vh;
+
+    min-height:
+        100svh;
+
+    margin:
+        0;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(
+                71,
+                206,
+                230,
+                0.12
+            ),
+            transparent 34rem
+        ),
+        linear-gradient(
+            180deg,
+            #f8fcfe 0%,
+            #f3f8fb 50%,
+            #edf6fa 100%
+        );
+
+    color:
+        var(--pis-ink);
+
+    font-family:
+        "Roboto",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+
+/* ========================================
+   SUCCESS PAGE SHELL
+======================================== */
+
+.booking-success-shell {
+
+    width:
+        min(
+            92%,
+            760px
+        );
+
+    margin:
+        0 auto;
+
+    padding:
+        42px 0 60px;
+
+}
+
+
+/* ========================================
+   SUCCESS HEADER
+======================================== */
+
+.booking-success-header {
+
+    position:
+        relative;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        18px;
+
+    margin-bottom:
+        22px;
+
+    padding:
+        20px 24px;
+
+    overflow:
+        hidden;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.92
+        );
+
+    border:
+        1px solid
+        var(--pis-border);
+
+    border-radius:
+        18px;
+
+    box-shadow:
+        0 8px 28px
+        rgba(
+            35,
+            93,
+            125,
+            0.08
+        );
+
+}
+
+
+/* ========================================
+   SUCCESS HEADER ACCENT
+======================================== */
+
+.booking-success-header::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    left:
+        22px;
+
+    right:
+        22px;
+
+    height:
+        4px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--pis-cyan),
+            var(--pis-blue),
+            var(--pis-orange)
+        );
+
+    border-radius:
+        0 0 999px 999px;
+
+}
+
+
+/* ========================================
+   SUCCESS LOGO
+======================================== */
+
+.booking-success-logo {
+
+    width:
+        120px;
+
+    height:
+        auto;
+
+    flex:
+        0 0 auto;
+
+}
+
+
+/* ========================================
+   SUCCESS HEADER COPY
+======================================== */
+
+.booking-success-header-copy {
+
+    min-width:
+        0;
+
+    padding-left:
+        18px;
+
+    border-left:
+        1px solid
+        var(--pis-border);
+
+}
+
+
+.booking-success-header-copy span {
+
+    display:
+        block;
+
+    margin-bottom:
+        4px;
+
+    color:
+        var(--pis-blue);
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.10em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.booking-success-header-copy h1 {
+
+    margin:
+        0;
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        25px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+
+}
+
+
+/* ========================================
+   SUCCESS CARD
+======================================== */
+
+.booking-success-card {
+
+    position:
+        relative;
+
+    padding:
+        34px;
+
+    overflow:
+        hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #fbfdfe 100%
+        );
+
+    border:
+        1px solid
+        var(--pis-border-strong);
+
+    border-radius:
+        22px;
+
+    box-shadow:
+        0 16px 50px
+        rgba(
+            35,
+            93,
+            125,
+            0.11
+        );
+
+    text-align:
+        center;
+
+}
+
+
+/* ========================================
+   SUCCESS CARD ACCENT
+======================================== */
+
+.booking-success-card::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    height:
+        5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--pis-cyan),
+            var(--pis-blue),
+            var(--pis-orange)
+        );
+
+}
+
+
+/* ========================================
+   SUCCESS ICON
+======================================== */
+
+.booking-success-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        84px;
+
+    height:
+        84px;
+
+    margin:
+        2px auto 22px;
+
+    color:
+        #ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #35b877,
+            #22995e
+        );
+
+    border-radius:
+        50%;
+
+    box-shadow:
+        0 10px 28px
+        rgba(
+            35,
+            184,
+            119,
+            0.24
+        );
+
+    font-size:
+        42px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   SUCCESS COPY
+======================================== */
+
+.booking-success-copy {
+
+    max-width:
+        540px;
+
+    margin:
+        0 auto;
+
+}
+
+
+.booking-success-eyebrow {
+
+    display:
+        block;
+
+    margin-bottom:
+        6px;
+
+    color:
+        #22995e;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.10em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.booking-success-copy h2 {
+
+    margin:
+        0 0 8px;
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        30px;
+
+    font-weight:
+        800;
+
+}
+
+
+.booking-success-copy p {
+
+    margin:
+        0;
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        14px;
+
+    line-height:
+        1.6;
+
+}
+
+
+/* ========================================
+   PAYMENT CONFIRMED BADGE
+======================================== */
+
+.booking-success-payment-status {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        7px;
+
+    margin-top:
+        18px;
+
+    padding:
+        8px 12px;
+
+    color:
+        #187545;
+
+    background:
+        #ecf9f1;
+
+    border:
+        1px solid
+        #c8ead5;
+
+    border-radius:
+        999px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+
+}
+
+
+.booking-success-payment-dot {
+
+    width:
+        8px;
+
+    height:
+        8px;
+
+    background:
+        #35b877;
+
+    border-radius:
+        50%;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(
+            53,
+            184,
+            119,
+            0.10
+        );
+
+}
+
+
+/* ========================================
+   BOOKING DETAILS
+======================================== */
+
+.booking-success-details {
+
+    margin-top:
+        28px;
+
+    text-align:
+        left;
+
+}
+
+
+/* ========================================
+   SUCCESS DETAIL CARD
+======================================== */
+
+.booking-success-service {
+
+    position:
+        relative;
+
+    margin-top:
+        12px;
+
+    padding:
+        16px 18px 16px 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f8fcfe
+        );
+
+    border:
+        1px solid
+        var(--pis-border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 4px 14px
+        rgba(
+            35,
+            93,
+            125,
+            0.05
+        );
+
+}
+
+
+/* ========================================
+   SUCCESS DETAIL ACCENT
+======================================== */
+
+.booking-success-service::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        12px;
+
+    bottom:
+        12px;
+
+    left:
+        0;
+
+    width:
+        4px;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
+    border-radius:
+        0 4px 4px 0;
+
+}
+
+
+/* ========================================
+   SUCCESS SERVICE NAME
+======================================== */
+
+.booking-success-service-name {
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   SUCCESS PETS
+======================================== */
+
+.booking-success-pets {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        6px;
+
+    margin-top:
+        8px;
+
+}
+
+
+.booking-success-pet-chip {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    padding:
+        5px 9px;
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+    border-radius:
+        999px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   SUCCESS SERVICE DETAILS
+======================================== */
+
+.booking-success-service-details {
+
+    margin-top:
+        8px;
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* ========================================
+   SUCCESS SERVICE PRICE
+======================================== */
+
+.booking-success-service-price {
+
+    margin-top:
+        8px;
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   SUCCESS TOTAL
+======================================== */
+
+.booking-success-total {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        20px;
+
+    margin-top:
+        18px;
+
+    padding:
+        16px 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fffaf1,
+            #fff3d9
+        );
+
+    border:
+        1px solid
+        rgba(
+            245,
+            171,
+            64,
+            0.30
+        );
+
+    border-radius:
+        14px;
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        20px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   SUCCESS NOTE
+======================================== */
+
+.booking-success-note {
+
+    margin-top:
+        22px;
+
+    padding:
+        15px 16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #f8fcfe,
+            #eef8fc
+        );
+
+    border:
+        1px solid
+        var(--pis-border);
+
+    border-radius:
+        14px;
+
+    text-align:
+        left;
+
+}
+
+
+.booking-success-note strong {
+
+    display:
+        block;
+
+    margin-bottom:
+        4px;
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        13px;
+
+}
+
+
+.booking-success-note p {
+
+    margin:
+        0;
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* ========================================
+   SUCCESS BUTTON
+======================================== */
+
+.booking-success-button {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        100%;
+
+    min-height:
+        50px;
+
+    margin-top:
+        22px;
+
+    padding:
+        14px 18px;
+
+    color:
+        #ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--pis-orange),
+            #f7b84d
+        );
+
+    border-radius:
+        999px;
+
+    box-shadow:
+        0 7px 20px
+        rgba(
+            245,
+            171,
+            64,
+            0.24
+        );
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+    text-decoration:
+        none;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+
+}
+
+
+.booking-success-button:hover {
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 9px 24px
+        rgba(
+            245,
+            171,
+            64,
+            0.30
+        );
+
+}
+
+
+/* ========================================
+   SUCCESS REFERENCE
+======================================== */
+
+.booking-success-reference {
+
+    margin-top:
+        16px;
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        10px;
+
+    line-height:
+        1.5;
+
+    overflow-wrap:
+        anywhere;
+
+}
+
+
+/* ========================================
+   SUCCESS LOADING
+======================================== */
+
+.booking-success-loading {
+
+    padding:
+        18px;
+
+    color:
+        var(--pis-muted);
+
+    background:
+        var(--pis-blue-soft);
+
+    border-radius:
+        12px;
+
+    font-size:
+        13px;
+
+    text-align:
+        center;
+
+}
+
+
+/* ========================================
+   SUCCESS PAGE MOBILE
+======================================== */
+
+@media (
+    max-width:
+        700px
+) {
+
+    .booking-success-shell {
+
+        width:
+            94%;
+
+        padding:
+            18px 0 30px;
+
+    }
+
+
+    .booking-success-header {
+
+        padding:
+            16px 18px;
+
+        gap:
+            12px;
+
+    }
+
+
+    .booking-success-logo {
+
+        width:
+            90px;
+
+    }
+
+
+    .booking-success-header-copy {
+
+        padding-left:
+            12px;
+
+    }
+
+
+    .booking-success-header-copy h1 {
+
+        font-size:
+            19px;
+
+    }
+
+
+    .booking-success-card {
+
+        padding:
+            26px 18px;
+
+        border-radius:
+            18px;
+
+    }
+
+
+    .booking-success-icon {
+
+        width:
+            72px;
+
+        height:
+            72px;
+
+        font-size:
+            34px;
+
+    }
+
+
+    .booking-success-copy h2 {
+
+        font-size:
+            25px;
+
+    }
+
+
+    .booking-success-total {
+
+        font-size:
+            18px;
+
+    }
+
+}
