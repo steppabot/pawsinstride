@@ -2258,19 +2258,25 @@ async function setupApplePay(
     }
 
 
-    const applePayDetails =
-        eligibleMethods.getDetails(
-            "applepay"
-        );
+    // ========================================
+    // CREATE PAYPAL APPLE PAY SESSION
+    // ========================================
 
-
-    const applePaySession =
-        sdkInstance
+    const paypalApplePaySession =
+        await sdkInstance
             .createApplePayOneTimePaymentSession();
 
 
+    const {
+        merchantCapabilities,
+        supportedNetworks
+    } =
+        await paypalApplePaySession
+            .config();
+
+
     // ========================================
-    // SHOW BUTTON
+    // SHOW APPLE PAY BUTTON
     // ========================================
 
     applePayWrapper.hidden =
@@ -2278,7 +2284,7 @@ async function setupApplePay(
 
 
     // ========================================
-    // CLICK
+    // APPLE PAY CLICK
     // ========================================
 
     applePayButton.addEventListener(
@@ -2287,12 +2293,22 @@ async function setupApplePay(
 
             try {
 
-                const paymentRequest = {
+                if (
+                    checkoutExpired
+                ) {
 
-                    ...applePaySession
-                        .formatConfigForPaymentRequest(
-                            applePayDetails.config
-                        ),
+                    throw new Error(
+                        "This checkout has expired."
+                    );
+
+                }
+
+
+                // ========================================
+                // PAYMENT REQUEST
+                // ========================================
+
+                const paymentRequest = {
 
                     countryCode:
                         "US",
@@ -2303,12 +2319,22 @@ async function setupApplePay(
                             "USD"
                         ).toUpperCase(),
 
+                    merchantCapabilities:
+                        merchantCapabilities,
+
+                    supportedNetworks:
+                        supportedNetworks,
+
+                    requiredBillingContactFields: [
+                        "name",
+                        "postalAddress"
+                    ],
+
+                    requiredShippingContactFields: [],
+
                     total: {
                         label:
                             "Paws in Stride",
-
-                        type:
-                            "final",
 
                         amount:
                             (
@@ -2316,13 +2342,12 @@ async function setupApplePay(
                                     checkoutData.total_cents
                                 ) /
                                 100
-                            ).toFixed(2)
-                    },
+                            ).toFixed(2),
 
-                    requiredBillingContactFields: [
-                        "name",
-                        "postalAddress"
-                    ]
+                        type:
+                            "final"
+                    }
+
                 };
 
 
@@ -2345,7 +2370,7 @@ async function setupApplePay(
                     .onvalidatemerchant =
                     event => {
 
-                        applePaySession
+                        paypalApplePaySession
                             .validateMerchant({
                                 validationUrl:
                                     event.validationURL
@@ -2377,6 +2402,23 @@ async function setupApplePay(
 
 
                 // ========================================
+                // PAYMENT METHOD SELECTED
+                // ========================================
+
+                nativeSession
+                    .onpaymentmethodselected =
+                    () => {
+
+                        nativeSession
+                            .completePaymentMethodSelection({
+                                newTotal:
+                                    paymentRequest.total
+                            });
+
+                    };
+
+
+                // ========================================
                 // PAYMENT AUTHORIZED
                 // ========================================
 
@@ -2392,7 +2434,7 @@ async function setupApplePay(
                                 );
 
 
-                            await applePaySession
+                            await paypalApplePaySession
                                 .confirmOrder({
 
                                     orderId:
@@ -2402,7 +2444,10 @@ async function setupApplePay(
                                         event.payment.token,
 
                                     billingContact:
-                                        event.payment.billingContact
+                                        event.payment.billingContact,
+
+                                    shippingContact:
+                                        event.payment.shippingContact
 
                                 });
 
