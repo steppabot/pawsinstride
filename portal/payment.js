@@ -1820,6 +1820,7 @@ async function setupCardFields(
 
 }
 
+
 // ========================================
 // GOOGLE PAY SESSION
 // ========================================
@@ -1925,7 +1926,8 @@ async function setupGooglePay(
                             order.orderId,
 
                         paymentMethodData:
-                            paymentData.paymentMethodData
+                            paymentData
+                                .paymentMethodData
                     });
 
 
@@ -1936,48 +1938,51 @@ async function setupGooglePay(
 
 
             // ========================================
-            // REQUIRE APPROVED PAYMENT
+            // HANDLE REQUIRED PAYER ACTION
             // ========================================
 
             if (
-                confirmation?.status ===
+                confirmation.status ===
                 "PAYER_ACTION_REQUIRED"
             ) {
 
-                throw new Error(
-                    "Google Pay requires additional payer action."
-                );
+                await googlePaySession
+                    .initiatePayerAction({
+                        orderId:
+                            order.orderId
+                    });
 
             }
+
 
             // ========================================
             // CAPTURE PAYMENT
             // ========================================
-            
+
             const capturePromise =
                 captureOrder(
                     order.orderId
                 );
-            
-            
+
+
             const recoveryPromise =
                 waitForCheckoutCompletion(
                     30000,
                     1000
                 );
-            
-            
+
+
             const result =
                 await Promise.race([
                     capturePromise,
                     recoveryPromise
                 ]);
-            
-            
+
+
             // ========================================
             // COMPLETE BOOKING
             // ========================================
-            
+
             handlePaymentSuccess(
                 result
             );
@@ -2205,6 +2210,7 @@ async function setupGooglePay(
     return true;
 
 }
+
 
 // ========================================
 // APPLE PAY SETUP
