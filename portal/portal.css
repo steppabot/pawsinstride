@@ -12334,6 +12334,189 @@ a:focus-visible {
 
 
 /* ========================================
+   PAYMENT SUMMARY SERVICES
+======================================== */
+
+.payment-summary-service {
+
+    padding:
+        16px 0;
+
+    border-bottom:
+        1px solid
+        var(--pis-border);
+
+}
+
+
+.payment-summary-service:first-child {
+
+    padding-top:
+        4px;
+
+}
+
+
+.payment-summary-service-name {
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.4;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY PETS
+======================================== */
+
+.payment-summary-pets {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        6px;
+
+    margin-top:
+        7px;
+
+}
+
+
+.payment-summary-pet-chip {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    padding:
+        5px 9px;
+
+    color:
+        var(--pis-blue-dark);
+
+    background:
+        var(--pis-blue-soft);
+
+    border-radius:
+        999px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY DETAILS
+======================================== */
+
+.payment-summary-service-details {
+
+    margin-top:
+        8px;
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.45;
+
+}
+
+
+.payment-summary-service-price {
+
+    margin-top:
+        7px;
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY TOTAL
+======================================== */
+
+.payment-summary-total {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        20px;
+
+    padding-top:
+        20px;
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        20px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY EXPIRATION
+======================================== */
+
+.payment-summary-expiration {
+
+    margin-top:
+        12px;
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        12px;
+
+}
+
+
+/* ========================================
    PAYMENT CARDS
 ======================================== */
 
