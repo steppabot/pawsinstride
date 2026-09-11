@@ -740,12 +740,26 @@ async function loadCheckoutPets() {
 // ========================================
 // BUILD SUMMARY
 // ========================================
-
 function renderCheckoutSummary() {
 
     paymentSummaryContent.innerHTML =
         "";
 
+
+    const paymentLayout =
+        document.querySelector(
+            ".payment-layout"
+        );
+
+
+    if (paymentLayout) {
+
+        paymentLayout.classList.toggle(
+            "payment-layout-multi",
+            checkoutVisits.length >= 2
+        );
+
+    }
 
     // ========================================
     // PET NAMES
