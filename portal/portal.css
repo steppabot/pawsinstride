@@ -6189,18 +6189,96 @@ body.client-portal-page {
 .client-portal-page
 section {
 
-    background: var(--pis-card);
+    background:
+        var(--pis-card);
 
     border:
-        1px solid var(--pis-border);
+        1px solid
+        var(--pis-border);
 
-    border-radius: 18px;
+    border-radius:
+        18px;
 
     box-shadow:
         var(--pis-shadow);
 
 }
 
+
+/* ========================================
+   MAJOR CLIENT SECTION ACCENTS
+======================================== */
+
+.client-portal-page
+#household-section,
+
+.client-portal-page
+#pets-section,
+
+.client-portal-page
+#services-section,
+
+.client-portal-page
+.booking-section {
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+}
+
+
+/* ========================================
+   MAJOR CLIENT SECTION BRAND BAR
+======================================== */
+
+.client-portal-page
+#household-section::before,
+
+.client-portal-page
+#pets-section::before,
+
+.client-portal-page
+#services-section::before,
+
+.client-portal-page
+.booking-section::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    left:
+        18px;
+
+    right:
+        18px;
+
+    height:
+        3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--pis-cyan),
+            var(--pis-blue),
+            var(--pis-orange)
+        );
+
+    border-radius:
+        0 0 999px 999px;
+
+    pointer-events:
+        none;
+
+}
 
 /* ========================================
    SECTION HEADINGS
