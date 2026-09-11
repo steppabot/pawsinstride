@@ -134,9 +134,112 @@
 
 
             <!-- ========================================
+                 CREDIT / DEBIT CARD
+                 ======================================== -->
+            
+            <div
+                id="card-payment-wrapper"
+                hidden
+                style="
+                    margin-top: 20px;
+                    padding-top: 20px;
+                    border-top: 1px solid #e5e5e5;
+                "
+            >
+            
+                <h3
+                    style="
+                        margin-top: 0;
+                        margin-bottom: 16px;
+                    "
+                >
+                    Credit or Debit Card
+                </h3>
+            
+            
+                <!-- ========================================
+                     CARD NUMBER
+                     ======================================== -->
+            
+                <div
+                    id="paypal-card-fields-number"
+                    style="
+                        height: 52px;
+                        border: 1px solid #cccccc;
+                        border-radius: 8px;
+                        margin-bottom: 12px;
+                        overflow: hidden;
+                        background: white;
+                    "
+                ></div>
+            
+            
+                <!-- ========================================
+                     EXPIRATION + CVV
+                     ======================================== -->
+            
+                <div
+                    style="
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 12px;
+                        margin-bottom: 16px;
+                    "
+                >
+            
+                    <div
+                        id="paypal-card-fields-expiry"
+                        style="
+                            height: 52px;
+                            border: 1px solid #cccccc;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            background: white;
+                        "
+                    ></div>
+            
+            
+                    <div
+                        id="paypal-card-fields-cvv"
+                        style="
+                            height: 52px;
+                            border: 1px solid #cccccc;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            background: white;
+                        "
+                    ></div>
+            
+                </div>
+            
+            
+                <!-- ========================================
+                     CARD PAY BUTTON
+                     ======================================== -->
+            
+                <button
+                    id="card-pay-button"
+                    type="button"
+                    style="
+                        width: 100%;
+                        min-height: 50px;
+                        border: 0;
+                        border-radius: 8px;
+                        font-size: 17px;
+                        font-weight: 700;
+                        cursor: pointer;
+                    "
+                >
+                    Pay with Card
+                </button>
+            
+            </div>
+            
+            
+            <!-- ========================================
                  PAYMENT STATUS
                  ======================================== -->
-
+            
             <div
                 id="payment-message"
                 style="
