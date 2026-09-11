@@ -1824,9 +1824,19 @@ async function setupGooglePay(
             // ========================================
             // CAPTURE PAYMENT
             // ========================================
-
-            await captureOrder(
-                order.orderId
+            
+            const result =
+                await captureOrder(
+                    order.orderId
+                );
+            
+            
+            // ========================================
+            // COMPLETE BOOKING
+            // ========================================
+            
+            handlePaymentSuccess(
+                result
             );
 
 
