@@ -166,6 +166,20 @@ const googlePayButtonContainer =
         "google-pay-button"
     );
 
+// ========================================
+// APPLE PAY ELEMENTS
+// ========================================
+
+const applePayWrapper =
+    document.getElementById(
+        "apple-pay-wrapper"
+    );
+
+
+const applePayButton =
+    document.getElementById(
+        "apple-pay-button"
+    );
 
 // ========================================
 // FORMAT MONEY
@@ -344,6 +358,14 @@ function hidePaymentMethods() {
         googlePayWrapper.hidden =
             true;
 
+    }
+
+
+    if (applePayWrapper) {
+    
+        applePayWrapper.hidden =
+            true;
+    
     }
 
 }
@@ -2186,6 +2208,290 @@ async function setupGooglePay(
 }
 
 // ========================================
+// APPLE PAY SESSION
+// ========================================
+
+async function setupApplePay(
+    sdkInstance,
+    applePayConfig
+) {
+
+    if (
+        !applePayWrapper ||
+        !applePayButton
+    ) {
+
+        throw new Error(
+            "Apple Pay elements are missing from the checkout page."
+        );
+
+    }
+
+
+    if (
+        !window.ApplePaySession
+    ) {
+
+        console.log(
+            "Apple Pay is not available on this browser or device."
+        );
+
+
+        return false;
+
+    }
+
+
+    // ========================================
+    // SHOW APPLE PAY BUTTON
+    // ========================================
+
+    applePayWrapper.hidden =
+        false;
+
+
+    // ========================================
+    // APPLE PAY CLICK
+    // ========================================
+
+    applePayButton.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                if (
+                    checkoutExpired
+                ) {
+
+                    throw new Error(
+                        "This checkout has expired."
+                    );
+
+                }
+
+
+                // ========================================
+                // CREATE PAYMENT REQUEST
+                // ========================================
+
+                const paymentRequest = {
+                    countryCode:
+                        applePayConfig.countryCode ||
+                        "US",
+
+                    currencyCode:
+                        String(
+                            checkoutData.currency ||
+                            "USD"
+                        ).toUpperCase(),
+
+                    merchantCapabilities:
+                        applePayConfig.merchantCapabilities,
+
+                    supportedNetworks:
+                        applePayConfig.supportedNetworks,
+
+                    total: {
+                        label:
+                            "Paws in Stride",
+
+                        type:
+                            "final",
+
+                        amount:
+                            (
+                                Number(
+                                    checkoutData.total_cents
+                                ) /
+                                100
+                            ).toFixed(2)
+                    }
+                };
+
+
+                // ========================================
+                // CREATE APPLE PAY SESSION
+                // ========================================
+
+                const session =
+                    new ApplePaySession(
+                        4,
+                        paymentRequest
+                    );
+
+
+                // ========================================
+                // MERCHANT VALIDATION
+                // ========================================
+
+                session.onvalidatemerchant =
+                    async event => {
+
+                        try {
+
+                            const validation =
+                                await sdkInstance
+                                    .validateMerchant({
+                                        validationUrl:
+                                            event.validationURL,
+
+                                        displayName:
+                                            "Paws in Stride"
+                                    });
+
+
+                            session.completeMerchantValidation(
+                                validation.merchantSession
+                            );
+
+                        }
+                        catch (
+                            error
+                        ) {
+
+                            console.error(
+                                "Apple Pay merchant validation failed:",
+                                error
+                            );
+
+
+                            session.abort();
+
+
+                            handlePaymentError(
+                                error
+                            );
+
+                        }
+
+                    };
+
+
+                // ========================================
+                // PAYMENT AUTHORIZED
+                // ========================================
+
+                session.onpaymentauthorized =
+                    async event => {
+
+                        try {
+
+                            const order =
+                                await createOrder(
+                                    "applepay"
+                                );
+
+
+                            const confirmation =
+                                await sdkInstance
+                                    .confirmOrder({
+                                        orderId:
+                                            order.orderId,
+
+                                        payment:
+                                            event.payment
+                                    });
+
+
+                            console.log(
+                                "Apple Pay confirmation:",
+                                confirmation
+                            );
+
+
+                            const capturePromise =
+                                captureOrder(
+                                    order.orderId
+                                );
+
+
+                            const recoveryPromise =
+                                waitForCheckoutCompletion(
+                                    30000,
+                                    1000
+                                );
+
+
+                            const result =
+                                await Promise.race([
+                                    capturePromise,
+                                    recoveryPromise
+                                ]);
+
+
+                            session.completePayment(
+                                ApplePaySession.STATUS_SUCCESS
+                            );
+
+
+                            handlePaymentSuccess(
+                                result
+                            );
+
+                        }
+                        catch (
+                            error
+                        ) {
+
+                            console.error(
+                                "Apple Pay payment error:",
+                                error
+                            );
+
+
+                            session.completePayment(
+                                ApplePaySession.STATUS_FAILURE
+                            );
+
+
+                            handlePaymentError(
+                                error
+                            );
+
+                        }
+
+                    };
+
+
+                // ========================================
+                // PAYMENT CANCELLED
+                // ========================================
+
+                session.oncancel =
+                    () => {
+
+                        handlePaymentCancellation();
+
+                    };
+
+
+                // ========================================
+                // BEGIN APPLE PAY
+                // ========================================
+
+                session.begin();
+
+            }
+            catch (
+                error
+            ) {
+
+                handlePaymentError(
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    return true;
+
+}
+
+// ========================================
 // INITIALIZE PAYMENT METHODS
 // ========================================
 
@@ -2228,7 +2534,8 @@ async function initializePaymentMethods() {
                     components: [
                         "paypal-payments",
                         "venmo-payments",
-                        "googlepay-payments"
+                        "googlepay-payments",
+                        "applepay-payments"
                     ],
         
                     pageType:
