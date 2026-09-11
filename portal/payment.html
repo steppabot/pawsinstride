@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -16,283 +18,406 @@
         rel="stylesheet"
         href="./portal.css"
     >
+
 </head>
 
-<body>
+
+<body
+    class="
+        client-portal-page
+        payment-page
+    "
+>
+
+
+    <!-- ========================================
+         PAYMENT PAGE
+         ======================================== -->
 
     <main
-        style="
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        "
+        class="payment-page-container"
     >
+
 
         <!-- ========================================
              PAYMENT HEADER
              ======================================== -->
 
-        <section
-            style="
-                text-align: center;
-                margin-bottom: 30px;
-            "
+        <header
+            class="payment-page-header"
         >
 
-            <h1>
-                Secure Checkout
-            </h1>
+            <div
+                class="payment-header-copy"
+            >
 
-            <p>
-                Complete your payment to confirm your pet care services.
-            </p>
+                <span
+                    class="payment-eyebrow"
+                >
+                    Paws in Stride
+                </span>
 
-        </section>
+                <h1>
+                    Secure Checkout
+                </h1>
+
+                <p>
+                    Complete your payment to confirm your pet care services.
+                </p>
+
+            </div>
+
+
+            <div
+                class="payment-security-badge"
+            >
+
+                <span
+                    class="payment-security-icon"
+                    aria-hidden="true"
+                >
+                    ✓
+                </span>
+
+                <span>
+                    Secure Payment
+                </span>
+
+            </div>
+
+        </header>
 
 
         <!-- ========================================
-             ORDER SUMMARY
+             CHECKOUT LAYOUT
              ======================================== -->
 
-        <section
-            id="payment-summary"
-            style="
-                background: white;
-                border-radius: 16px;
-                padding: 24px;
-                margin-bottom: 24px;
-            "
+        <div
+            class="payment-layout"
         >
 
-            <h2>
-                Order Summary
-            </h2>
-
-            <div
-                id="payment-summary-content"
-            >
-                Loading your booking...
-            </div>
-
-        </section>
-
-
-        <!-- ========================================
-             PAYMENT METHODS
-             ======================================== -->
-
-        <section
-            id="payment-methods"
-            style="
-                background: white;
-                border-radius: 16px;
-                padding: 24px;
-            "
-        >
-
-            <h2>
-                Choose Payment Method
-            </h2>
-
 
             <!-- ========================================
-                 PAYPAL
-                 ======================================== -->
-            
-            <div
-                id="paypal-payment-wrapper"
-                hidden
-            >
-            
-                <paypal-button
-                    id="paypal-button"
-                    type="pay"
-                    hidden
-                ></paypal-button>
-            
-            </div>
-
-
-            <!-- ========================================
-                 VENMO
+                 ORDER SUMMARY
                  ======================================== -->
 
-            <div
-                id="venmo-payment-wrapper"
-                hidden
-                style="
-                    margin-top: 12px;
-                "
+            <section
+                id="payment-summary"
+                class="payment-card payment-summary-card"
             >
 
-                <venmo-button
-                    id="venmo-button"
-                    type="pay"
-                ></venmo-button>
-
-            </div>
-
-
-            <!-- ========================================
-                 GOOGLE PAY
-                 ======================================== -->
-            
-            <div
-                id="google-pay-wrapper"
-                hidden
-                style="
-                    margin-top: 12px;
-                "
-            >
-            
                 <div
-                    id="google-pay-button"
-                ></div>
-            
-            </div>
-
-           <!-- ========================================
-                 APPLE PAY
-                 ======================================== -->
-
-            <div
-                id="apple-pay-wrapper"
-                hidden
-                style="
-                    margin-top: 12px;
-                "
-            >
-            
-                <apple-pay-button
-                    id="apple-pay-button"
-                    buttonstyle="black"
-                    type="pay"
-                    locale="en-US"
-                    style="
-                        width: 100%;
-                        height: 48px;
-                        --apple-pay-button-border-radius: 8px;
-                    "
-                ></apple-pay-button>
-            
-            </div>
-            
-            <!-- ========================================
-                 CREDIT / DEBIT CARD
-                 ======================================== -->
-            
-            <div
-                id="card-payment-wrapper"
-                hidden
-                style="
-                    margin-top: 20px;
-                    padding-top: 20px;
-                    border-top: 1px solid #e5e5e5;
-                "
-            >
-            
-                <h3
-                    style="
-                        margin-top: 0;
-                        margin-bottom: 16px;
-                    "
+                    class="payment-card-heading"
                 >
-                    Credit or Debit Card
-                </h3>
-            
-            
-                <!-- ========================================
-                     CARD NUMBER
-                     ======================================== -->
-            
-                <div
-                    id="paypal-card-fields-number"
-                    style="
-                        height: 52px;
-                        border: 1px solid #cccccc;
-                        border-radius: 8px;
-                        margin-bottom: 12px;
-                        overflow: hidden;
-                        background: white;
-                    "
-                ></div>
-            
-            
-                <!-- ========================================
-                     EXPIRATION + CVV
-                     ======================================== -->
-            
-                <div
-                    style="
-                        display: grid;
-                        grid-template-columns: 1fr 1fr;
-                        gap: 12px;
-                        margin-bottom: 16px;
-                    "
-                >
-            
-                    <div
-                        id="paypal-card-fields-expiry"
-                        style="
-                            height: 52px;
-                            border: 1px solid #cccccc;
-                            border-radius: 8px;
-                            overflow: hidden;
-                            background: white;
-                        "
-                    ></div>
-            
-            
-                    <div
-                        id="paypal-card-fields-cvv"
-                        style="
-                            height: 52px;
-                            border: 1px solid #cccccc;
-                            border-radius: 8px;
-                            overflow: hidden;
-                            background: white;
-                        "
-                    ></div>
-            
+
+                    <div>
+
+                        <span
+                            class="payment-card-eyebrow"
+                        >
+                            Your Booking
+                        </span>
+
+                        <h2>
+                            Order Summary
+                        </h2>
+
+                    </div>
+
                 </div>
-            
-            
-                <!-- ========================================
-                     CARD PAY BUTTON
-                     ======================================== -->
-            
-                <button
-                    id="card-pay-button"
-                    type="button"
-                    style="
-                        width: 100%;
-                        min-height: 50px;
-                        border: 0;
-                        border-radius: 8px;
-                        font-size: 17px;
-                        font-weight: 700;
-                        cursor: pointer;
-                    "
-                >
-                    Pay with Card
-                </button>
-            
-            </div>
-            
-            
-            <!-- ========================================
-                 PAYMENT STATUS
-                 ======================================== -->
-            
-            <div
-                id="payment-message"
-                style="
-                    margin-top: 16px;
-                    text-align: center;
-                "
-            ></div>
 
-        </section>
+
+                <div
+                    id="payment-summary-content"
+                    class="payment-summary-content"
+                >
+                    Loading your booking...
+                </div>
+
+            </section>
+
+
+            <!-- ========================================
+                 PAYMENT METHODS
+                 ======================================== -->
+
+            <section
+                id="payment-methods"
+                class="payment-card payment-methods-card"
+            >
+
+                <div
+                    class="payment-card-heading"
+                >
+
+                    <div>
+
+                        <span
+                            class="payment-card-eyebrow"
+                        >
+                            Payment
+                        </span>
+
+                        <h2>
+                            Choose Payment Method
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <p
+                    class="payment-method-help"
+                >
+                    Select one of the secure payment options below.
+                </p>
+
+
+                <!-- ========================================
+                     WALLET PAYMENT METHODS
+                     ======================================== -->
+
+                <div
+                    class="payment-wallet-methods"
+                >
+
+
+                    <!-- ========================================
+                         APPLE PAY
+                         ======================================== -->
+
+                    <div
+                        id="apple-pay-wrapper"
+                        class="payment-wallet-wrapper"
+                        hidden
+                    >
+
+                        <apple-pay-button
+                            id="apple-pay-button"
+                            buttonstyle="black"
+                            type="pay"
+                            locale="en-US"
+                        ></apple-pay-button>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         GOOGLE PAY
+                         ======================================== -->
+
+                    <div
+                        id="google-pay-wrapper"
+                        class="payment-wallet-wrapper"
+                        hidden
+                    >
+
+                        <div
+                            id="google-pay-button"
+                        ></div>
+
+                    </div>
+
+                    <!-- ========================================
+                         VENMO
+                         ======================================== -->
+
+                    <div
+                        id="venmo-payment-wrapper"
+                        class="payment-wallet-wrapper"
+                        hidden
+                    >
+
+                        <venmo-button
+                            id="venmo-button"
+                            type="pay"
+                        ></venmo-button>
+
+                    </div>
+
+                    
+                    <!-- ========================================
+                         PAYPAL
+                         ======================================== -->
+
+                    <div
+                        id="paypal-payment-wrapper"
+                        class="payment-wallet-wrapper"
+                        hidden
+                    >
+
+                        <paypal-button
+                            id="paypal-button"
+                            type="pay"
+                            hidden
+                        ></paypal-button>
+
+                    </div>
+                </div>
+
+
+                <!-- ========================================
+                     CARD DIVIDER
+                     ======================================== -->
+
+                <div
+                    id="payment-card-divider"
+                    class="payment-divider"
+                >
+
+                    <span>
+                        or pay with card
+                    </span>
+
+                </div>
+
+
+                <!-- ========================================
+                     CREDIT / DEBIT CARD
+                     ======================================== -->
+
+                <div
+                    id="card-payment-wrapper"
+                    class="card-payment-wrapper"
+                    hidden
+                >
+
+
+                    <div
+                        class="card-payment-heading"
+                    >
+
+                        <h3>
+                            Credit or Debit Card
+                        </h3>
+
+                        <p>
+                            Enter your card information securely.
+                        </p>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         CARD NUMBER
+                         ======================================== -->
+
+                    <div
+                        class="payment-card-field"
+                    >
+
+                        <span
+                            class="payment-field-label"
+                        >
+                            Card Number
+                        </span>
+
+                        <div
+                            id="paypal-card-fields-number"
+                            class="paypal-card-field-host"
+                        ></div>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         EXPIRATION + CVV
+                         ======================================== -->
+
+                    <div
+                        class="payment-card-field-grid"
+                    >
+
+
+                        <div
+                            class="payment-card-field"
+                        >
+
+                            <span
+                                class="payment-field-label"
+                            >
+                                Expiration
+                            </span>
+
+                            <div
+                                id="paypal-card-fields-expiry"
+                                class="paypal-card-field-host"
+                            ></div>
+
+                        </div>
+
+
+                        <div
+                            class="payment-card-field"
+                        >
+
+                            <span
+                                class="payment-field-label"
+                            >
+                                Security Code
+                            </span>
+
+                            <div
+                                id="paypal-card-fields-cvv"
+                                class="paypal-card-field-host"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         CARD PAY BUTTON
+                         ======================================== -->
+
+                    <button
+                        id="card-pay-button"
+                        class="payment-card-pay-button"
+                        type="button"
+                    >
+                        Pay with Card
+                    </button>
+
+                </div>
+
+
+                <!-- ========================================
+                     PAYMENT STATUS
+                     ======================================== -->
+
+                <div
+                    id="payment-message"
+                    class="payment-message"
+                    aria-live="polite"
+                ></div>
+
+
+                <!-- ========================================
+                     SECURITY NOTE
+                     ======================================== -->
+
+                <div
+                    class="payment-security-note"
+                >
+
+                    <span
+                        class="payment-security-note-icon"
+                        aria-hidden="true"
+                    >
+                        🔒
+                    </span>
+
+                    <p>
+                        Your payment information is securely processed by our payment providers. Paws in Stride does not store your card number.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
 
     </main>
 
@@ -315,12 +440,10 @@
     ></script>
 
 
-
-
     <!-- ========================================
          GOOGLE PAY WEB SDK
          ======================================== -->
-    
+
     <script
         async
         src="https://pay.google.com/gp/p/js/pay.js"
@@ -330,21 +453,24 @@
     <!-- ========================================
          APPLE PAY WEB SDK
          ======================================== -->
-    
+
     <script
         async
         src="https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js"
     ></script>
-    
+
+
     <!-- ========================================
          PAYPAL WEB SDK V6 - SANDBOX
          ======================================== -->
-    
+
     <script
         async
         src="https://www.sandbox.paypal.com/web-sdk/v6/core"
         onload="onPayPalWebSdkLoaded()"
     ></script>
 
+
 </body>
+
 </html>
