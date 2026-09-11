@@ -84,6 +84,63 @@ a:focus-visible {
     text-align: center;
 }
 
+/* ========================================
+   LOGIN SIGNUP PROMPT
+======================================== */
+
+.login-signup-prompt {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        6px;
+
+    margin-top:
+        18px;
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        13px;
+
+}
+
+
+.login-signup-prompt a {
+
+    color:
+        var(--pis-blue);
+
+    font-weight:
+        800;
+
+    text-decoration:
+        none;
+
+}
+
+
+.login-signup-prompt a:hover {
+
+    color:
+        var(--pis-orange-hover);
+
+    text-decoration:
+        underline;
+
+}
+
 
 /* ========================================
    DASHBOARD
