@@ -57,6 +57,8 @@ let checkoutData =
 let checkoutVisits =
     [];
 
+let checkoutPets =
+    [];
 
 let currentUser =
     null;
@@ -562,6 +564,180 @@ async function loadCheckoutVisits() {
 
 
 // ========================================
+// LOAD CHECKOUT PETS
+// ========================================
+
+async function loadCheckoutPets() {
+
+    const {
+        data:
+            checkoutPetRows,
+        error:
+            checkoutPetError
+    } =
+        await supabaseClient
+            .from(
+                "booking_checkout_pets"
+            )
+            .select(`
+                pet_id,
+                is_primary
+            `)
+            .eq(
+                "checkout_id",
+                checkoutId
+            );
+
+
+    if (
+        checkoutPetError
+    ) {
+
+        console.error(
+            "Checkout pet load error:",
+            checkoutPetError
+        );
+
+
+        throw new Error(
+            "We couldn't load your pet details."
+        );
+
+    }
+
+
+    const petIds =
+        (
+            checkoutPetRows ||
+            []
+        )
+            .map(
+                row =>
+                    row.pet_id
+            )
+            .filter(
+                petId =>
+                    petId !==
+                    null &&
+                    petId !==
+                    undefined
+            );
+
+
+    if (
+        petIds.length ===
+        0
+    ) {
+
+        checkoutPets =
+            [];
+
+        return;
+
+    }
+
+
+    const {
+        data:
+            petRows,
+        error:
+            petError
+    } =
+        await supabaseClient
+            .from(
+                "pets"
+            )
+            .select(`
+                id,
+                name
+            `)
+            .in(
+                "id",
+                petIds
+            )
+            .eq(
+                "client_id",
+                currentUser.id
+            );
+
+
+    if (
+        petError
+    ) {
+
+        console.error(
+            "Pet name load error:",
+            petError
+        );
+
+
+        throw new Error(
+            "We couldn't load your pet details."
+        );
+
+    }
+
+
+    const petMap =
+        new Map(
+            (
+                petRows ||
+                []
+            )
+                .map(
+                    pet => [
+                        pet.id,
+                        pet
+                    ]
+                )
+        );
+
+
+    checkoutPets =
+        (
+            checkoutPetRows ||
+            []
+        )
+            .map(
+                row => {
+
+                    const pet =
+                        petMap.get(
+                            row.pet_id
+                        );
+
+
+                    if (
+                        !pet
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    return {
+                        id:
+                            pet.id,
+
+                        name:
+                            pet.name,
+
+                        is_primary:
+                            Boolean(
+                                row.is_primary
+                            )
+                    };
+
+                }
+            )
+            .filter(
+                Boolean
+            );
+
+}
+
+// ========================================
 // BUILD SUMMARY
 // ========================================
 
@@ -569,6 +745,21 @@ function renderCheckoutSummary() {
 
     paymentSummaryContent.innerHTML =
         "";
+
+
+    // ========================================
+    // PET NAMES
+    // ========================================
+
+    const petNames =
+        checkoutPets
+            .map(
+                pet =>
+                    pet.name
+            )
+            .filter(
+                Boolean
+            );
 
 
     // ========================================
@@ -589,13 +780,13 @@ function renderCheckoutSummary() {
                     );
 
 
-                row.style.padding =
-                    "14px 0";
+                row.className =
+                    "payment-summary-service";
 
 
-                row.style.borderBottom =
-                    "1px solid #e5e7eb";
-
+                // ========================================
+                // SERVICE NAME
+                // ========================================
 
                 const serviceName =
                     document.createElement(
@@ -603,8 +794,8 @@ function renderCheckoutSummary() {
                     );
 
 
-                serviceName.style.fontWeight =
-                    "600";
+                serviceName.className =
+                    "payment-summary-service-name";
 
 
                 serviceName.textContent =
@@ -613,22 +804,64 @@ function renderCheckoutSummary() {
                     "Pet Care Service";
 
 
+                // ========================================
+                // PET CHIPS
+                // ========================================
+
+                const petList =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                petList.className =
+                    "payment-summary-pets";
+
+
+                if (
+                    petNames.length >
+                    0
+                ) {
+
+                    petNames.forEach(
+                        petName => {
+
+                            const petChip =
+                                document.createElement(
+                                    "span"
+                                );
+
+
+                            petChip.className =
+                                "payment-summary-pet-chip";
+
+
+                            petChip.textContent =
+                                petName;
+
+
+                            petList.appendChild(
+                                petChip
+                            );
+
+                        }
+                    );
+
+                }
+
+
+                // ========================================
+                // SERVICE DETAILS
+                // ========================================
+
                 const serviceDetails =
                     document.createElement(
                         "div"
                     );
 
 
-                serviceDetails.style.marginTop =
-                    "4px";
-
-
-                serviceDetails.style.fontSize =
-                    "14px";
-
-
-                serviceDetails.style.opacity =
-                    "0.75";
+                serviceDetails.className =
+                    "payment-summary-service-details";
 
 
                 const details = [
@@ -638,13 +871,21 @@ function renderCheckoutSummary() {
 
                     visit.time_window
                 ]
-                    .filter(Boolean)
-                    .join(" • ");
+                    .filter(
+                        Boolean
+                    )
+                    .join(
+                        " • "
+                    );
 
 
                 serviceDetails.textContent =
                     details;
 
+
+                // ========================================
+                // SERVICE PRICE
+                // ========================================
 
                 const servicePrice =
                     document.createElement(
@@ -652,12 +893,8 @@ function renderCheckoutSummary() {
                     );
 
 
-                servicePrice.style.marginTop =
-                    "6px";
-
-
-                servicePrice.style.fontWeight =
-                    "600";
+                servicePrice.className =
+                    "payment-summary-service-price";
 
 
                 servicePrice.textContent =
@@ -667,9 +904,25 @@ function renderCheckoutSummary() {
                     );
 
 
+                // ========================================
+                // ADD SERVICE ROW
+                // ========================================
+
                 row.appendChild(
                     serviceName
                 );
+
+
+                if (
+                    petNames.length >
+                    0
+                ) {
+
+                    row.appendChild(
+                        petList
+                    );
+
+                }
 
 
                 row.appendChild(
@@ -702,28 +955,8 @@ function renderCheckoutSummary() {
         );
 
 
-    totalRow.style.display =
-        "flex";
-
-
-    totalRow.style.justifyContent =
-        "space-between";
-
-
-    totalRow.style.alignItems =
-        "center";
-
-
-    totalRow.style.paddingTop =
-        "20px";
-
-
-    totalRow.style.fontSize =
-        "20px";
-
-
-    totalRow.style.fontWeight =
-        "700";
+    totalRow.className =
+        "payment-summary-total";
 
 
     const totalLabel =
@@ -778,16 +1011,8 @@ function renderCheckoutSummary() {
         "checkout-expiration";
 
 
-    expiration.style.marginTop =
-        "12px";
-
-
-    expiration.style.fontSize =
-        "14px";
-
-
-    expiration.style.opacity =
-        "0.7";
+    expiration.className =
+        "payment-summary-expiration";
 
 
     paymentSummaryContent.appendChild(
@@ -795,7 +1020,6 @@ function renderCheckoutSummary() {
     );
 
 }
-
 
 // ========================================
 // EXPIRATION TIMER
@@ -3124,8 +3348,11 @@ async function initializeCheckoutPage() {
 
 
         await loadCheckoutVisits();
-
-
+        
+        
+        await loadCheckoutPets();
+        
+        
         renderCheckoutSummary();
 
 
