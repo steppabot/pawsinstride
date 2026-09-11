@@ -12329,7 +12329,6 @@ a:focus-visible {
 
 }
 
-
 /* ========================================
    PAYMENT LAYOUT
 ======================================== */
@@ -12340,14 +12339,38 @@ a:focus-visible {
         grid;
 
     grid-template-columns:
-        minmax(0, 0.42fr)
-        minmax(0, 0.58fr);
+        1fr;
 
     align-items:
         start;
 
     gap:
         22px;
+
+}
+
+
+/* ========================================
+   MULTI-SERVICE DESKTOP CHECKOUT
+======================================== */
+
+.payment-layout-multi {
+
+    grid-template-columns:
+        minmax(0, 0.42fr)
+        minmax(0, 0.58fr);
+
+}
+
+
+.payment-layout-multi
+.payment-summary-card {
+
+    position:
+        sticky;
+
+    top:
+        24px;
 
 }
 
@@ -13261,6 +13284,35 @@ a:focus-visible {
     }
 
 
+    /* ========================================
+       MOBILE CHECKOUT LAYOUT
+    ======================================== */
+
+    .payment-layout,
+    .payment-layout-multi {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .payment-layout-multi
+    .payment-summary-card {
+
+        position:
+            static;
+
+        top:
+            auto;
+
+    }
+
+
+    /* ========================================
+       MOBILE PAYMENT HEADER
+    ======================================== */
+
     .payment-page-header {
 
         position:
@@ -13331,6 +13383,10 @@ a:focus-visible {
     }
 
 
+    /* ========================================
+       MOBILE HEADER BRAND
+    ======================================== */
+
     .payment-header-brand {
 
         flex:
@@ -13383,6 +13439,10 @@ a:focus-visible {
     }
 
 
+    /* ========================================
+       MOBILE SECURITY BADGE
+    ======================================== */
+
     .payment-security-badge {
 
         padding:
@@ -13393,6 +13453,10 @@ a:focus-visible {
 
     }
 
+
+    /* ========================================
+       MOBILE PAYMENT CARDS
+    ======================================== */
 
     .payment-page
     .payment-card {
@@ -13433,6 +13497,10 @@ a:focus-visible {
         420px
 ) {
 
+    /* ========================================
+       EXTRA SMALL HEADER
+    ======================================== */
+
     .payment-header-logo {
 
         width:
@@ -13449,6 +13517,10 @@ a:focus-visible {
     }
 
 
+    /* ========================================
+       EXTRA SMALL CARD FIELDS
+    ======================================== */
+
     .payment-card-field-grid {
 
         grid-template-columns:
@@ -13460,6 +13532,10 @@ a:focus-visible {
     }
 
 
+    /* ========================================
+       EXTRA SMALL PAYMENT CARDS
+    ======================================== */
+
     .payment-page
     .payment-card {
 
@@ -13468,6 +13544,10 @@ a:focus-visible {
 
     }
 
+
+    /* ========================================
+       EXTRA SMALL SECURITY BADGE
+    ======================================== */
 
     .payment-security-badge span:last-child {
 
