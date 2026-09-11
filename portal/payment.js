@@ -122,6 +122,36 @@ const venmoButton =
     );
 
 
+const cardWrapper =
+    document.getElementById(
+        "card-payment-wrapper"
+    );
+
+
+const cardPayButton =
+    document.getElementById(
+        "card-pay-button"
+    );
+
+
+const cardNumberContainer =
+    document.getElementById(
+        "paypal-card-fields-number"
+    );
+
+
+const cardExpiryContainer =
+    document.getElementById(
+        "paypal-card-fields-expiry"
+    );
+
+
+const cardCvvContainer =
+    document.getElementById(
+        "paypal-card-fields-cvv"
+    );
+
+
 // ========================================
 // FORMAT MONEY
 // ========================================
@@ -252,6 +282,14 @@ function disablePaymentMethods() {
 
     }
 
+
+    if (cardPayButton) {
+
+        cardPayButton.disabled =
+            true;
+
+    }
+
 }
 
 
@@ -272,6 +310,14 @@ function hidePaymentMethods() {
     if (venmoWrapper) {
 
         venmoWrapper.hidden =
+            true;
+
+    }
+
+
+    if (cardWrapper) {
+
+        cardWrapper.hidden =
             true;
 
     }
@@ -1325,6 +1371,303 @@ async function setupVenmo(
 
 
 // ========================================
+// GET PAYPAL CLIENT TOKEN
+// ========================================
+
+async function getPayPalClientToken() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .functions
+            .invoke(
+                "paypal-client-token",
+                {
+                    body: {}
+                }
+            );
+
+
+    if (
+        error ||
+        !data?.clientToken
+    ) {
+
+        console.error(
+            "PayPal client token error:",
+            error,
+            data
+        );
+
+
+        throw new Error(
+            data?.error ||
+            "Could not initialize secure card payments."
+        );
+
+    }
+
+
+    return data.clientToken;
+
+}
+
+
+// ========================================
+// CARD FIELDS SESSION
+// ========================================
+
+async function setupCardFields(
+    sdkInstance
+) {
+
+    if (
+        !cardWrapper ||
+        !cardPayButton ||
+        !cardNumberContainer ||
+        !cardExpiryContainer ||
+        !cardCvvContainer
+    ) {
+
+        throw new Error(
+            "Card payment fields are missing from the checkout page."
+        );
+
+    }
+
+
+    const session =
+        sdkInstance
+            .createCardFieldsOneTimePaymentSession();
+
+
+    const fieldStyle = {
+        input: {
+            fontSize:
+                "16px",
+
+            lineHeight:
+                "24px",
+
+            padding:
+                "13px 14px",
+
+            color:
+                "#111827"
+        }
+    };
+
+
+    const numberField =
+        session
+            .createCardFieldsComponent({
+                type:
+                    "number",
+
+                placeholder:
+                    "Card number",
+
+                style:
+                    fieldStyle
+            });
+
+
+    const expiryField =
+        session
+            .createCardFieldsComponent({
+                type:
+                    "expiry",
+
+                placeholder:
+                    "MM/YY",
+
+                style:
+                    fieldStyle
+            });
+
+
+    const cvvField =
+        session
+            .createCardFieldsComponent({
+                type:
+                    "cvv",
+
+                placeholder:
+                    "CVV",
+
+                style:
+                    fieldStyle
+            });
+
+
+    cardNumberContainer.replaceChildren(
+        numberField
+    );
+
+
+    cardExpiryContainer.replaceChildren(
+        expiryField
+    );
+
+
+    cardCvvContainer.replaceChildren(
+        cvvField
+    );
+
+
+    cardWrapper.hidden =
+        false;
+
+
+    cardPayButton.disabled =
+        false;
+
+
+    cardPayButton.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                if (
+                    checkoutExpired
+                ) {
+
+                    throw new Error(
+                        "This checkout has expired."
+                    );
+
+                }
+
+
+                cardPayButton.disabled =
+                    true;
+
+
+                setPaymentMessage(
+                    "Preparing secure card payment..."
+                );
+
+
+                const order =
+                    await createOrder(
+                        "card"
+                    );
+
+
+                const {
+                    state,
+                    data
+                } =
+                    await session.submit(
+                        order.orderId
+                    );
+
+
+                switch (
+                    state
+                ) {
+
+                    case "succeeded": {
+
+                        const approvedOrderId =
+                            data?.orderId ||
+                            order.orderId;
+
+
+                        const result =
+                            await captureOrder(
+                                approvedOrderId
+                            );
+
+
+                        handlePaymentSuccess(
+                            result
+                        );
+
+
+                        break;
+
+                    }
+
+
+                    case "canceled": {
+
+                        handlePaymentCancellation();
+
+
+                        break;
+
+                    }
+
+
+                    case "failed": {
+
+                        console.error(
+                            "Card submission failed:",
+                            data
+                        );
+
+
+                        throw new Error(
+                            data?.message ||
+                            "Your card could not be processed. Please check your card details and try again."
+                        );
+
+                    }
+
+
+                    default: {
+
+                        console.warn(
+                            "Unhandled card payment state:",
+                            state,
+                            data
+                        );
+
+
+                        throw new Error(
+                            "Your card payment could not be completed."
+                        );
+
+                    }
+
+                }
+
+            }
+            catch (
+                error
+            ) {
+
+                handlePaymentError(
+                    error
+                );
+
+            }
+            finally {
+
+                if (
+                    !checkoutExpired &&
+                    checkoutData?.status !==
+                        "completed"
+                ) {
+
+                    cardPayButton.disabled =
+                        false;
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
 // INITIALIZE PAYMENT METHODS
 // ========================================
 
@@ -1354,7 +1697,11 @@ async function initializePaymentMethods() {
         );
 
 
-        const sdkInstance =
+        // ========================================
+        // PAYPAL + VENMO SDK INSTANCE
+        // ========================================
+
+        const walletSdkInstance =
             await window.paypal
                 .createInstance({
                     clientId:
@@ -1370,8 +1717,8 @@ async function initializePaymentMethods() {
                 });
 
 
-        const eligibleMethods =
-            await sdkInstance
+        const walletEligibleMethods =
+            await walletSdkInstance
                 .findEligibleMethods({
                     currencyCode:
                         String(
@@ -1390,7 +1737,7 @@ async function initializePaymentMethods() {
         // ========================================
 
         if (
-            eligibleMethods.isEligible(
+            walletEligibleMethods.isEligible(
                 "paypal"
             )
         ) {
@@ -1400,7 +1747,7 @@ async function initializePaymentMethods() {
 
 
             await setupPayPal(
-                sdkInstance
+                walletSdkInstance
             );
 
         }
@@ -1411,7 +1758,7 @@ async function initializePaymentMethods() {
         // ========================================
 
         if (
-            eligibleMethods.isEligible(
+            walletEligibleMethods.isEligible(
                 "venmo"
             )
         ) {
@@ -1421,7 +1768,76 @@ async function initializePaymentMethods() {
 
 
             await setupVenmo(
-                sdkInstance
+                walletSdkInstance
+            );
+
+        }
+
+
+        // ========================================
+        // CARD FIELDS SDK INSTANCE
+        // ========================================
+
+        try {
+
+            const clientToken =
+                await getPayPalClientToken();
+
+
+            const cardSdkInstance =
+                await window.paypal
+                    .createInstance({
+                        clientToken:
+                            clientToken,
+
+                        components: [
+                            "card-fields"
+                        ],
+
+                        pageType:
+                            "checkout"
+                    });
+
+
+            const cardEligibleMethods =
+                await cardSdkInstance
+                    .findEligibleMethods({
+                        currencyCode:
+                            String(
+                                checkoutData.currency ||
+                                "USD"
+                            ).toUpperCase()
+                    });
+
+
+            // ========================================
+            // CARD ELIGIBILITY
+            // ========================================
+
+            if (
+                cardEligibleMethods.isEligible(
+                    "advanced_cards"
+                )
+            ) {
+
+                methodFound =
+                    true;
+
+
+                await setupCardFields(
+                    cardSdkInstance
+                );
+
+            }
+
+        }
+        catch (
+            cardError
+        ) {
+
+            console.error(
+                "Card Fields initialization error:",
+                cardError
             );
 
         }
