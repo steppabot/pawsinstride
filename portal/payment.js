@@ -1139,14 +1139,186 @@ function handlePaymentError(
     );
 
 
-    const message =
+    // ========================================
+    // GET RAW ERROR MESSAGE
+    // ========================================
+
+    const rawMessage =
         error instanceof Error
             ? error.message
-            : "Payment could not be completed.";
+            : String(
+                error?.message ||
+                error ||
+                ""
+            );
 
+
+    const normalizedMessage =
+        rawMessage
+            .toLowerCase();
+
+
+    let friendlyMessage =
+        "Your payment couldn't be completed. Please try again or use another payment method.";
+
+
+    // ========================================
+    // CARD DECLINED
+    // ========================================
+
+    if (
+        normalizedMessage.includes(
+            "card_declined"
+        ) ||
+        normalizedMessage.includes(
+            "card declined"
+        ) ||
+        normalizedMessage.includes(
+            "instrument_declined"
+        ) ||
+        normalizedMessage.includes(
+            "payer cannot pay"
+        ) ||
+        normalizedMessage.includes(
+            "payer_cannot_pay"
+        )
+    ) {
+
+        friendlyMessage =
+            "Your card was declined. Please try another card or payment method.";
+
+    }
+
+
+    // ========================================
+    // INSUFFICIENT FUNDS
+    // ========================================
+
+    else if (
+        normalizedMessage.includes(
+            "insufficient"
+        ) ||
+        normalizedMessage.includes(
+            "insufficient_funds"
+        )
+    ) {
+
+        friendlyMessage =
+            "This card doesn't have enough available funds. Please try another card or payment method.";
+
+    }
+
+
+    // ========================================
+    // CARD AUTHENTICATION / 3DS
+    // ========================================
+
+    else if (
+        normalizedMessage.includes(
+            "authentication"
+        ) ||
+        normalizedMessage.includes(
+            "3ds"
+        ) ||
+        normalizedMessage.includes(
+            "3d secure"
+        ) ||
+        normalizedMessage.includes(
+            "liability"
+        ) ||
+        normalizedMessage.includes(
+            "payer action"
+        )
+    ) {
+
+        friendlyMessage =
+            "We couldn't verify your card. Please try again or use another payment method.";
+
+    }
+
+
+    // ========================================
+    // EXPIRED CHECKOUT
+    // ========================================
+
+    else if (
+        normalizedMessage.includes(
+            "expired"
+        )
+    ) {
+
+        friendlyMessage =
+            "This checkout has expired. Please return to your dashboard and book the service again.";
+
+    }
+
+
+    // ========================================
+    // PAYMENT RECEIVED / BOOKING FINALIZING
+    // ========================================
+
+    else if (
+        normalizedMessage.includes(
+            "payment was received"
+        ) ||
+        normalizedMessage.includes(
+            "finish confirming"
+        ) ||
+        normalizedMessage.includes(
+            "still being confirmed"
+        )
+    ) {
+
+        friendlyMessage =
+            "Your payment was received. We're finishing your booking now. Please wait a moment before trying again.";
+
+    }
+
+
+    // ========================================
+    // CANCELLED PAYMENT
+    // ========================================
+
+    else if (
+        normalizedMessage.includes(
+            "cancel"
+        )
+    ) {
+
+        friendlyMessage =
+            "Payment was cancelled. Your booking has not been charged.";
+
+    }
+
+
+    // ========================================
+    // NETWORK / CONNECTION ERROR
+    // ========================================
+
+    else if (
+        normalizedMessage.includes(
+            "network"
+        ) ||
+        normalizedMessage.includes(
+            "fetch"
+        ) ||
+        normalizedMessage.includes(
+            "connection"
+        )
+    ) {
+
+        friendlyMessage =
+            "We couldn't connect to the payment service. Please check your connection and try again.";
+
+    }
+
+
+    // ========================================
+    // SHOW FRIENDLY MESSAGE
+    // ========================================
 
     setPaymentMessage(
-        message,
+        friendlyMessage,
         "error"
     );
 
@@ -1940,20 +2112,88 @@ async function setupGooglePay(
             // ========================================
             // HANDLE REQUIRED PAYER ACTION
             // ========================================
-
+            
             if (
                 confirmation.status ===
                 "PAYER_ACTION_REQUIRED"
             ) {
-
+            
                 await googlePaySession
                     .initiatePayerAction({
                         orderId:
                             order.orderId
                     });
-
+            
+            
+                // ========================================
+                // VERIFY 3DS RESULT ON SERVER
+                // ========================================
+            
+                const {
+                    data:
+                        verificationData,
+                    error:
+                        verificationError
+                } =
+                    await supabaseClient
+                        .functions
+                        .invoke(
+                            "paypal-get-order",
+                            {
+                                body: {
+                                    orderID:
+                                        order.orderId,
+            
+                                    checkout_id:
+                                        checkoutId
+                                }
+                            }
+                        );
+            
+            
+                if (
+                    verificationError ||
+                    !verificationData?.success
+                ) {
+            
+                    console.error(
+                        "Google Pay 3DS verification error:",
+                        verificationError,
+                        verificationData
+                    );
+            
+            
+                    throw new Error(
+                        verificationData?.error ||
+                        "Could not verify card authentication."
+                    );
+            
+                }
+            
+            
+                console.log(
+                    "Google Pay 3DS verification:",
+                    verificationData
+                );
+            
+            
+                // ========================================
+                // REQUIRE SAFE LIABILITY SHIFT
+                // ========================================
+            
+                if (
+                    verificationData
+                        .liability_shift !==
+                    "POSSIBLE"
+                ) {
+            
+                    throw new Error(
+                        "Card authentication could not be verified. Please try another payment method."
+                    );
+            
+                }
+            
             }
-
 
             // ========================================
             // CAPTURE PAYMENT
