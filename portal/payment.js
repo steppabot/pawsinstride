@@ -2515,7 +2515,7 @@ async function setupGooglePay(
     const paymentsClient =
         new google.payments.api.PaymentsClient({
             environment:
-                "TEST",
+                "PRODUCTION",
 
             paymentDataCallbacks: {
                 onPaymentAuthorized:
