@@ -1131,6 +1131,115 @@ function handlePaymentError(
 
 }
 
+// ========================================
+// WAIT FOR CHECKOUT COMPLETION
+// ========================================
+
+async function waitForCheckoutCompletion(
+    timeoutMs = 30000,
+    intervalMs = 1000
+) {
+
+    const startedAt =
+        Date.now();
+
+
+    while (
+        Date.now() -
+            startedAt <
+        timeoutMs
+    ) {
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    intervalMs
+                )
+        );
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "booking_checkouts"
+                )
+                .select(
+                    "status"
+                )
+                .eq(
+                    "id",
+                    checkoutId
+                )
+                .eq(
+                    "client_id",
+                    currentUser.id
+                )
+                .maybeSingle();
+
+
+        if (error) {
+
+            console.warn(
+                "Checkout recovery check failed:",
+                error
+            );
+
+
+            continue;
+
+        }
+
+
+        if (
+            data?.status ===
+            "completed"
+        ) {
+
+            console.log(
+                "Checkout completed on server. Recovering frontend."
+            );
+
+
+            return {
+                success:
+                    true,
+
+                recovered:
+                    true
+            };
+
+        }
+
+
+        if (
+            data?.status ===
+                "failed" ||
+            data?.status ===
+                "cancelled" ||
+            data?.status ===
+                "expired" ||
+            data?.status ===
+                "refunded"
+        ) {
+
+            throw new Error(
+                `Payment could not be completed. Checkout status: ${data.status}`
+            );
+
+        }
+
+    }
+
+
+    throw new Error(
+        "Your payment is still being confirmed. Please wait a moment and refresh the page."
+    );
+
+}
 
 // ========================================
 // PAYPAL SESSION
