@@ -1320,8 +1320,8 @@ function handlePaymentSuccess(
 
 
     params.set(
-        "payment",
-        "success"
+        "checkout",
+        checkoutId
     );
 
 
@@ -1341,10 +1341,10 @@ function handlePaymentSuccess(
         () => {
 
             window.location.href =
-                `./dashboard.html?${params.toString()}`;
+                `./success.html?${params.toString()}`;
 
         },
-        1500
+        1200
     );
 
 }
