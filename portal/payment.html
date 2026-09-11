@@ -150,6 +150,32 @@
                 ></div>
             
             </div>
+
+           <!-- ========================================
+                 APPLE PAY
+                 ======================================== -->
+
+            <div
+                id="apple-pay-wrapper"
+                hidden
+                style="
+                    margin-top: 12px;
+                "
+            >
+            
+                <apple-pay-button
+                    id="apple-pay-button"
+                    buttonstyle="black"
+                    type="pay"
+                    locale="en-US"
+                    style="
+                        width: 100%;
+                        height: 48px;
+                        --apple-pay-button-border-radius: 8px;
+                    "
+                ></apple-pay-button>
+            
+            </div>
             
             <!-- ========================================
                  CREDIT / DEBIT CARD
@@ -300,6 +326,16 @@
         src="https://pay.google.com/gp/p/js/pay.js"
     ></script>
 
+
+    <!-- ========================================
+         APPLE PAY WEB SDK
+         ======================================== -->
+    
+    <script
+        async
+        src="https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js"
+    ></script>
+    
     <!-- ========================================
          PAYPAL WEB SDK V6 - SANDBOX
          ======================================== -->
