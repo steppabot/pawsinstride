@@ -1272,34 +1272,167 @@ section h3 {
     background: #f7f7f7;
 }
 
+
+/* ========================================
+   PROPERTY ACCESS COLLAPSE TOGGLE
+======================================== */
+
+.detail-collapse-toggle {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 0;
+
+    background: transparent;
+
+    border: none;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+
+.detail-collapse-heading {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.detail-collapse-toggle
+.household-detail-label {
+    margin-bottom: 0;
+}
+
+
+.detail-collapse-status {
+    color: #666;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    line-height: 1.4;
+}
+
+
+.detail-collapse-chevron {
+    flex: 0 0 auto;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    color: #666;
+
+    font-size: 28px;
+    font-weight: 400;
+
+    line-height: 1;
+
+    transform: rotate(90deg);
+
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.detail-collapse-toggle[aria-expanded="true"]
+.detail-collapse-chevron {
+    transform: rotate(-90deg);
+}
+
+
+.detail-collapse-toggle:hover
+.detail-collapse-chevron {
+    color: #111;
+}
+
+
+/* ========================================
+   PROPERTY ACCESS COLLAPSE CONTENT
+======================================== */
+
+.detail-collapse-content {
+    margin-top: 14px;
+
+    padding-top: 4px;
+
+    border-top: 1px solid #e5e5e5;
+}
+
+
+.detail-collapse-content[hidden] {
+    display: none;
+}
+
+
+/* ========================================
+   PROPERTY ACCESS DETAILS
+======================================== */
+
 .access-detail-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr;
+
     gap: 0 24px;
 }
 
+
 .access-detail-item {
     padding: 12px 0;
-    border-top: 1px solid #e5e5e5;
+
+    border-top:
+        1px solid #e5e5e5;
 }
+
 
 .access-detail-item:nth-child(1),
 .access-detail-item:nth-child(2) {
     border-top: none;
 }
 
+
 .access-detail-item span {
     display: block;
+
     margin-bottom: 5px;
+
     color: #777;
-    font-size: 12px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.03em;
+
+    text-transform: uppercase;
 }
+
 
 .access-detail-item strong {
     display: block;
+
+    color: #222;
+
     font-size: 14px;
     font-weight: 600;
+
     line-height: 1.5;
+
     overflow-wrap: anywhere;
 }
 
