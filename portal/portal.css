@@ -2115,6 +2115,434 @@ section h3 {
 }
 
 /* ========================================
+   CLIENT CANCELLATION ACTION
+======================================== */
+
+.upcoming-service-actions {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #eee;
+}
+
+
+.client-cancel-service-button {
+    width: 100%;
+
+    padding: 11px 14px;
+
+    background: #ffffff;
+    color: #b42318;
+
+    border: 1px solid #d92d20;
+    border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.client-cancel-service-button:hover {
+    background: #fff1f0;
+    border-color: #b42318;
+}
+
+
+.client-cancel-service-button:active {
+    transform: scale(0.99);
+}
+
+
+/* ========================================
+   LOCK PAGE WHILE MODAL IS OPEN
+======================================== */
+
+body.client-modal-open {
+    overflow: hidden;
+}
+
+
+/* ========================================
+   CLIENT CANCELLATION MODAL BACKDROP
+======================================== */
+
+.client-cancellation-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 10000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    background: rgba(
+        12,
+        24,
+        32,
+        0.58
+    );
+
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+
+/* ========================================
+   CLIENT CANCELLATION DIALOG
+======================================== */
+
+.client-cancellation-dialog {
+    width: 100%;
+    max-width: 480px;
+
+    max-height: calc(
+        100vh - 48px
+    );
+
+    overflow-y: auto;
+
+    padding: 24px;
+
+    background: #ffffff;
+
+    border: 1px solid rgba(
+        40,
+        144,
+        223,
+        0.16
+    );
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 24px 70px
+        rgba(
+            19,
+            44,
+            58,
+            0.24
+        );
+}
+
+
+/* ========================================
+   CANCELLATION HEADER
+======================================== */
+
+.client-cancellation-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin-bottom: 20px;
+}
+
+
+.client-cancellation-eyebrow {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #d92d20;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+}
+
+
+.client-cancellation-header h3 {
+    margin: 0;
+
+    color: #243746;
+
+    font-size: 22px;
+    font-weight: 800;
+}
+
+
+/* ========================================
+   CANCELLATION CLOSE BUTTON
+======================================== */
+
+.client-cancellation-close {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 auto;
+
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f4f6f7;
+    color: #53616d;
+
+    border: none;
+    border-radius: 50%;
+
+    font-size: 22px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+
+.client-cancellation-close:hover {
+    background: #e9edef;
+    color: #111111;
+}
+
+
+/* ========================================
+   CANCELLATION SERVICE SUMMARY
+======================================== */
+
+.client-cancellation-service {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+
+    margin-bottom: 18px;
+    padding: 16px;
+
+    background: #f7fafc;
+
+    border: 1px solid #e1e9ee;
+    border-radius: 12px;
+}
+
+
+.client-cancellation-service strong {
+    color: #243746;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.client-cancellation-service span {
+    color: #667784;
+
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+
+/* ========================================
+   CANCELLATION POLICY
+======================================== */
+
+.client-cancellation-policy {
+    margin-bottom: 18px;
+    padding: 16px;
+
+    background: #fffaf2;
+
+    border: 1px solid #f1d7a9;
+    border-radius: 12px;
+}
+
+
+.client-cancellation-policy strong {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #6f4d12;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.client-cancellation-policy p {
+    margin: 8px 0 0;
+
+    color: #65583f;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* ========================================
+   CANCELLATION PRICE
+======================================== */
+
+.client-cancellation-price {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 14px 0;
+
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+
+.client-cancellation-price span {
+    color: #667784;
+
+    font-size: 13px;
+}
+
+
+.client-cancellation-price strong {
+    color: #243746;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+
+/* ========================================
+   CANCELLATION NOTE
+======================================== */
+
+.client-cancellation-note {
+    margin: 14px 0 0;
+
+    color: #667784;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ========================================
+   CANCELLATION ACTIONS
+======================================== */
+
+.client-cancellation-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 22px;
+}
+
+
+.client-cancellation-actions
+.secondary-button {
+    flex: 1;
+
+    width: auto;
+
+    border-color: #c8d1d6;
+
+    color: #243746;
+}
+
+
+.client-cancellation-confirm {
+    flex: 1;
+
+    width: auto;
+
+    padding: 12px 18px;
+
+    background: #d92d20;
+    color: #ffffff;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.client-cancellation-confirm:hover {
+    background: #b42318;
+}
+
+
+.client-cancellation-confirm:active {
+    transform: scale(0.98);
+}
+
+
+.client-cancellation-confirm:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+
+/* ========================================
+   CANCELLATION MODAL - MOBILE
+======================================== */
+
+@media (max-width: 600px) {
+
+    .client-cancellation-modal {
+        align-items: flex-end;
+
+        padding: 12px;
+    }
+
+
+    .client-cancellation-dialog {
+        max-width: none;
+
+        max-height: calc(
+            100vh - 24px
+        );
+
+        padding: 20px;
+
+        border-radius: 18px 18px 14px 14px;
+    }
+
+
+    .client-cancellation-header h3 {
+        font-size: 20px;
+    }
+
+
+    .client-cancellation-actions {
+        flex-direction: column-reverse;
+    }
+
+
+    .client-cancellation-actions
+    .secondary-button,
+
+    .client-cancellation-confirm {
+        width: 100%;
+    }
+
+}
+
+/* ========================================
    CLIENT VISIT PROGRESS
 ======================================== */
 
