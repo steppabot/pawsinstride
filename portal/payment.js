@@ -1637,6 +1637,54 @@ function renderCheckoutSummary() {
 }
 
 // ========================================
+// RELEASE EXPIRED CHECKOUT CREDIT
+// ========================================
+
+async function releaseExpiredCheckoutCredit() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "release_expired_checkout_credit",
+                {
+                    p_checkout_id:
+                        checkoutId
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Expired checkout credit release error:",
+            error
+        );
+
+
+        throw new Error(
+            error.message ||
+            "Account credit could not be released."
+        );
+
+    }
+
+
+    const releasedCreditCents =
+        Number(
+            data ||
+            0
+        );
+
+
+    return releasedCreditCents;
+
+}
+
+
+// ========================================
 // EXPIRATION TIMER
 // ========================================
 
@@ -1658,7 +1706,11 @@ function startExpirationTimer() {
     }
 
 
-    function updateTimer() {
+    let expirationHandled =
+        false;
+
+
+    async function updateTimer() {
 
         const expires =
             new Date(
@@ -1676,8 +1728,34 @@ function startExpirationTimer() {
             0
         ) {
 
+            if (
+                expirationHandled
+            ) {
+
+                return;
+
+            }
+
+
+            expirationHandled =
+                true;
+
+
             checkoutExpired =
                 true;
+
+
+            if (expirationTimer) {
+
+                clearInterval(
+                    expirationTimer
+                );
+
+
+                expirationTimer =
+                    null;
+
+            }
 
 
             expirationElement.textContent =
@@ -1696,10 +1774,48 @@ function startExpirationTimer() {
             );
 
 
-            if (expirationTimer) {
+            try {
 
-                clearInterval(
-                    expirationTimer
+                const releasedCreditCents =
+                    await releaseExpiredCheckoutCredit();
+
+
+                if (
+                    releasedCreditCents >
+                    0
+                ) {
+
+                    checkoutData.credit_applied_cents =
+                        0;
+
+
+                    checkoutData.amount_due_cents =
+                        Number(
+                            checkoutData.total_cents ||
+                            0
+                        );
+
+
+                    checkoutData.credit_applied_at =
+                        null;
+
+                }
+
+
+                checkoutData.status =
+                    "expired";
+
+
+                renderCheckoutSummary();
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "Could not release expired checkout credit:",
+                    error
                 );
 
             }
@@ -1743,7 +1859,6 @@ function startExpirationTimer() {
         );
 
 }
-
 
 // ========================================
 // CREATE PAYMENT ORDER
