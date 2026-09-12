@@ -2386,15 +2386,32 @@ async function renderHousehold() {
 
 async function renderAccountCredit() {
 
+    const card =
+        document.getElementById(
+            "household-credit-card"
+        );
+
+
     const container =
         document.getElementById(
             "household-display-credit"
         );
 
 
-    if (!container) {
+    if (
+        !card ||
+        !container
+    ) {
         return;
     }
+
+
+    // ========================================
+    // HIDE UNTIL POSITIVE CREDIT IS CONFIRMED
+    // ========================================
+
+    card.style.display =
+        "none";
 
 
     container.textContent =
@@ -2423,14 +2440,28 @@ async function renderAccountCredit() {
             );
 
 
-        container.textContent =
-            balance.toLocaleString(
-                "en-US",
-                {
-                    style: "currency",
-                    currency: "USD"
-                }
-            );
+        // ========================================
+        // SHOW ONLY POSITIVE CREDIT BALANCES
+        // ========================================
+
+        if (
+            balance > 0
+        ) {
+
+            container.textContent =
+                balance.toLocaleString(
+                    "en-US",
+                    {
+                        style: "currency",
+                        currency: "USD"
+                    }
+                );
+
+
+            card.style.display =
+                "";
+
+        }
 
     }
     catch (error) {
@@ -2441,8 +2472,8 @@ async function renderAccountCredit() {
         );
 
 
-        container.textContent =
-            "$0.00";
+        card.style.display =
+            "none";
 
     }
 
