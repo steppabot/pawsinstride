@@ -2371,12 +2371,82 @@ async function renderHousehold() {
 
     renderEmergencyContact();
 
+    await renderAccountCredit();
+
     renderPropertyAccess();
 
     renderHomeNotes();
 
 }
 
+
+// ========================================
+// ACCOUNT CREDIT DISPLAY
+// ========================================
+
+async function renderAccountCredit() {
+
+    const container =
+        document.getElementById(
+            "household-display-credit"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.textContent =
+        "$0.00";
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.rpc(
+                "get_my_credit_balance"
+            );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        const balance =
+            Number(
+                data || 0
+            );
+
+
+        container.textContent =
+            balance.toLocaleString(
+                "en-US",
+                {
+                    style: "currency",
+                    currency: "USD"
+                }
+            );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Credit balance error:",
+            error
+        );
+
+
+        container.textContent =
+            "$0.00";
+
+    }
+
+}
 
 // ========================================
 // HOUSEHOLD ADDRESS DISPLAY
