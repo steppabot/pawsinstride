@@ -451,6 +451,9 @@ async function loadCheckout() {
                 subtotal_cents,
                 surcharge_cents,
                 total_cents,
+                credit_applied_cents,
+                amount_due_cents,
+                credit_applied_at,
                 paypal_order_id,
                 paypal_capture_id,
                 payment_confirmed_at,
@@ -497,6 +500,92 @@ async function loadCheckout() {
 
 }
 
+
+// ========================================
+// APPLY ACCOUNT CREDIT TO CHECKOUT
+// ========================================
+
+async function applyAccountCreditToCheckout() {
+
+    if (!checkoutId) {
+
+        throw new Error(
+            "Checkout ID is required to apply account credit."
+        );
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "apply_account_credit_to_checkout",
+                {
+                    p_checkout_id:
+                        checkoutId
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Account credit error:",
+            error
+        );
+
+
+        throw new Error(
+            error.message ||
+            "We couldn't apply your account credit."
+        );
+
+    }
+
+
+    const result =
+        Array.isArray(data)
+            ? data[0]
+            : data;
+
+
+    if (!result) {
+
+        throw new Error(
+            "Account credit information was not returned."
+        );
+
+    }
+
+
+    checkoutData.credit_applied_cents =
+        Number(
+            result.credit_applied_cents ||
+            0
+        );
+
+
+    checkoutData.amount_due_cents =
+        Number(
+            result.amount_due_cents ??
+            checkoutData.total_cents ??
+            0
+        );
+
+
+    checkoutData.remaining_credit_cents =
+        Number(
+            result.remaining_credit_cents ||
+            0
+        );
+
+
+    return result;
+
+}
 
 // ========================================
 // LOAD CHECKOUT VISITS
@@ -1335,56 +1424,193 @@ function renderCheckoutSummary() {
     }
 
     // ========================================
-    // TOTAL
+    // CHECKOUT TOTALS
     // ========================================
-
+    
+    const originalTotalCents =
+        Number(
+            checkoutData.total_cents ||
+            0
+        );
+    
+    
+    const creditAppliedCents =
+        Number(
+            checkoutData.credit_applied_cents ||
+            0
+        );
+    
+    
+    const amountDueCents =
+        Number(
+            checkoutData.amount_due_cents ??
+            originalTotalCents
+        );
+    
+    
+    // ========================================
+    // SERVICE TOTAL
+    // ========================================
+    
     const totalRow =
         document.createElement(
             "div"
         );
-
-
+    
+    
     totalRow.className =
         "payment-summary-total";
-
-
+    
+    
     const totalLabel =
         document.createElement(
             "span"
         );
-
-
+    
+    
     totalLabel.textContent =
-        "Total";
-
-
+        creditAppliedCents > 0
+            ? "Service Total"
+            : "Total";
+    
+    
     const totalAmount =
         document.createElement(
             "span"
         );
-
-
+    
+    
     totalAmount.textContent =
         formatMoney(
-            checkoutData.total_cents,
+            originalTotalCents,
             checkoutData.currency
         );
-
-
+    
+    
     totalRow.appendChild(
         totalLabel
     );
-
-
+    
+    
     totalRow.appendChild(
         totalAmount
     );
-
-
+    
+    
     paymentSummaryContent.appendChild(
         totalRow
     );
-
+    
+    
+    // ========================================
+    // ACCOUNT CREDIT
+    // ========================================
+    
+    if (
+        creditAppliedCents >
+        0
+    ) {
+    
+        const creditRow =
+            document.createElement(
+                "div"
+            );
+    
+    
+        creditRow.className =
+            "payment-summary-credit";
+    
+    
+        const creditLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        creditLabel.textContent =
+            "Account Credit";
+    
+    
+        const creditAmount =
+            document.createElement(
+                "span"
+            );
+    
+    
+        creditAmount.textContent =
+            `-${formatMoney(
+                creditAppliedCents,
+                checkoutData.currency
+            )}`;
+    
+    
+        creditRow.appendChild(
+            creditLabel
+        );
+    
+    
+        creditRow.appendChild(
+            creditAmount
+        );
+    
+    
+        paymentSummaryContent.appendChild(
+            creditRow
+        );
+    
+    
+        // ========================================
+        // AMOUNT DUE
+        // ========================================
+    
+        const amountDueRow =
+            document.createElement(
+                "div"
+            );
+    
+    
+        amountDueRow.className =
+            "payment-summary-total";
+    
+    
+        const amountDueLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        amountDueLabel.textContent =
+            "Amount Due";
+    
+    
+        const amountDueAmount =
+            document.createElement(
+                "span"
+            );
+    
+    
+        amountDueAmount.textContent =
+            formatMoney(
+                amountDueCents,
+                checkoutData.currency
+            );
+    
+    
+        amountDueRow.appendChild(
+            amountDueLabel
+        );
+    
+    
+        amountDueRow.appendChild(
+            amountDueAmount
+        );
+    
+    
+        paymentSummaryContent.appendChild(
+            amountDueRow
+        );
+    
+    }
 
     // ========================================
     // EXPIRATION
@@ -2971,48 +3197,48 @@ async function setupGooglePay(
                             // ========================================
                             // BUILD GOOGLE PAY REQUEST
                             // ========================================
-
+                            
                             const paymentDataRequest = {
                                 apiVersion:
                                     googlePayConfig.apiVersion,
-
+                            
                                 apiVersionMinor:
                                     googlePayConfig.apiVersionMinor,
-
+                            
                                 allowedPaymentMethods:
                                     googlePayConfig.allowedPaymentMethods,
-
+                            
                                 merchantInfo:
                                     googlePayConfig.merchantInfo,
-
+                            
                                 transactionInfo: {
                                     totalPriceStatus:
                                         "FINAL",
-
+                            
                                     totalPrice:
                                         (
                                             Number(
+                                                checkoutData.amount_due_cents ??
                                                 checkoutData.total_cents
                                             ) /
                                             100
                                         ).toFixed(2),
-
+                            
                                     currencyCode:
                                         String(
                                             checkoutData.currency ||
                                             "USD"
                                         ).toUpperCase(),
-
+                            
                                     countryCode:
                                         googlePayConfig.countryCode ||
                                         "US"
                                 },
-
+                            
                                 callbackIntents: [
                                     "PAYMENT_AUTHORIZATION"
                                 ]
                             };
-
 
                             // ========================================
                             // OPEN GOOGLE PAY SHEET
@@ -3166,47 +3392,48 @@ async function setupApplePay(
                 // ========================================
                 // PAYMENT REQUEST
                 // ========================================
-
+                
                 const paymentRequest = {
-
+                
                     countryCode:
                         "US",
-
+                
                     currencyCode:
                         String(
                             checkoutData.currency ||
                             "USD"
                         ).toUpperCase(),
-
+                
                     merchantCapabilities:
                         merchantCapabilities,
-
+                
                     supportedNetworks:
                         supportedNetworks,
-
+                
                     requiredBillingContactFields: [
                         "name",
                         "postalAddress"
                     ],
-
+                
                     requiredShippingContactFields: [],
-
+                
                     total: {
                         label:
                             "Paws in Stride",
-
+                
                         amount:
                             (
                                 Number(
+                                    checkoutData.amount_due_cents ??
                                     checkoutData.total_cents
                                 ) /
                                 100
                             ).toFixed(2),
-
+                
                         type:
                             "final"
                     }
-
+                
                 };
 
 
@@ -3732,7 +3959,6 @@ window.onPayPalWebSdkLoaded =
 
     };
 
-
 // ========================================
 // PAGE INITIALIZATION
 // ========================================
@@ -3769,12 +3995,9 @@ async function initializeCheckoutPage() {
 
 
         await loadCheckoutVisits();
-        
-        
+
+
         await loadCheckoutPets();
-        
-        
-        renderCheckoutSummary();
 
 
         // ========================================
@@ -3785,6 +4008,9 @@ async function initializeCheckoutPage() {
             checkoutData.status ===
             "completed"
         ) {
+
+            renderCheckoutSummary();
+
 
             hidePaymentMethods();
 
@@ -3808,6 +4034,9 @@ async function initializeCheckoutPage() {
             checkoutData.status ===
             "expired"
         ) {
+
+            renderCheckoutSummary();
+
 
             checkoutExpired =
                 true;
@@ -3838,6 +4067,9 @@ async function initializeCheckoutPage() {
                 "processing"
         ) {
 
+            renderCheckoutSummary();
+
+
             hidePaymentMethods();
 
 
@@ -3852,12 +4084,38 @@ async function initializeCheckoutPage() {
         }
 
 
+        // ========================================
+        // APPLY AVAILABLE ACCOUNT CREDIT
+        // ========================================
+
+        await applyAccountCreditToCheckout();
+
+
+        // ========================================
+        // BUILD FINAL CHECKOUT SUMMARY
+        // ========================================
+
+        renderCheckoutSummary();
+
+
+        // ========================================
+        // START EXPIRATION TIMER
+        // ========================================
+
         startExpirationTimer();
 
+
+        // ========================================
+        // MARK PAGE READY
+        // ========================================
 
         pageLoaded =
             true;
 
+
+        // ========================================
+        // INITIALIZE PAYMENT METHODS
+        // ========================================
 
         await initializePaymentMethods();
 
@@ -3889,7 +4147,6 @@ async function initializeCheckoutPage() {
     }
 
 }
-
 
 // ========================================
 // START PAGE
