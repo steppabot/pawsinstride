@@ -1010,27 +1010,108 @@ function renderCheckoutSummary() {
                 // ========================================
                 // SORT VISITS WITHIN DATE
                 // ========================================
-    
+                
+                function getTimeWindowStartMinutes(
+                    timeWindow
+                ) {
+                
+                    const startTime =
+                        String(
+                            timeWindow ||
+                            ""
+                        )
+                            .split(
+                                "-"
+                            )[0]
+                            .trim();
+                
+                
+                    const match =
+                        startTime.match(
+                            /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i
+                        );
+                
+                
+                    if (
+                        !match
+                    ) {
+                
+                        return 9999;
+                
+                    }
+                
+                
+                    let hours =
+                        Number(
+                            match[1]
+                        );
+                
+                
+                    const minutes =
+                        Number(
+                            match[2]
+                        );
+                
+                
+                    const period =
+                        match[3]
+                            .toUpperCase();
+                
+                
+                    if (
+                        period ===
+                        "AM" &&
+                        hours ===
+                        12
+                    ) {
+                
+                        hours =
+                            0;
+                
+                    }
+                
+                
+                    if (
+                        period ===
+                        "PM" &&
+                        hours !==
+                        12
+                    ) {
+                
+                        hours +=
+                            12;
+                
+                    }
+                
+                
+                    return (
+                        hours *
+                        60
+                    ) +
+                    minutes;
+                
+                }
+                
+                
                 visits.sort(
                     (
                         firstVisit,
                         secondVisit
                     ) => {
-    
-                        return String(
-                            firstVisit.time_window ||
-                            ""
-                        ).localeCompare(
-                            String(
-                                secondVisit.time_window ||
-                                ""
+                
+                        return (
+                            getTimeWindowStartMinutes(
+                                firstVisit.time_window
+                            ) -
+                            getTimeWindowStartMinutes(
+                                secondVisit.time_window
                             )
                         );
-    
+                
                     }
                 );
-    
-    
+                
+                
                 // ========================================
                 // BUILD SERVICE ROWS
                 // ========================================
