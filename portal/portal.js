@@ -10775,7 +10775,13 @@ function renderUpcomingCalendar() {
             currentVisits.filter(
                 visit =>
                     visit.visit_date ===
-                    date
+                        date &&
+                    String(
+                        visit.status || ""
+                    )
+                        .trim()
+                        .toLowerCase() !==
+                        "cancelled"
             ).length;
 
 
@@ -10985,7 +10991,13 @@ function renderSelectedUpcomingServices() {
             .filter(
                 visit =>
                     visit.visit_date ===
-                    selectedUpcomingDate
+                        selectedUpcomingDate &&
+                    String(
+                        visit.status || ""
+                    )
+                        .trim()
+                        .toLowerCase() !==
+                        "cancelled"
             )
             .sort(
                 compareClientVisits
