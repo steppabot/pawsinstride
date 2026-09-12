@@ -11844,7 +11844,7 @@ function buildClientVisitProgressSection(
 }
 
 // ========================================
-// CLIENT VISIT REPORT ACTIONS
+// CLIENT SERVICE ACTIONS
 // ========================================
 
 document
@@ -11855,6 +11855,65 @@ document
         "click",
         async event => {
 
+
+            // ========================================
+            // CANCEL SERVICE
+            // ========================================
+
+            const cancelButton =
+                event.target.closest(
+                    "[data-client-cancel-visit]"
+                );
+
+
+            if (
+                cancelButton
+            ) {
+
+                const visitId =
+                    Number(
+                        cancelButton.dataset
+                            .clientCancelVisit
+                    );
+
+
+                if (
+                    !visitId
+                ) {
+                    return;
+                }
+
+
+                const visit =
+                    currentVisits.find(
+                        item =>
+                            Number(
+                                item.id
+                            ) ===
+                            visitId
+                    );
+
+
+                if (
+                    !visit
+                ) {
+                    return;
+                }
+
+
+                openClientCancellationModal(
+                    visit
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // REPORT IMAGE
+            // ========================================
 
             const reportImageButton =
                 event.target.closest(
@@ -11888,6 +11947,10 @@ document
             }
 
 
+            // ========================================
+            // VISIT REPORT
+            // ========================================
+
             const button =
                 event.target.closest(
                     "[data-client-visit-report-open]"
@@ -11897,9 +11960,7 @@ document
             if (
                 !button
             ) {
-
                 return;
-
             }
 
 
@@ -11913,9 +11974,7 @@ document
             if (
                 !visitId
             ) {
-
                 return;
-
             }
 
 
@@ -11927,10 +11986,246 @@ document
         }
     );
 
+
+// ========================================
+// CLIENT CANCELLATION MODAL
+// ========================================
+
+function openClientCancellationModal(
+    visit
+) {
+
+    closeClientCancellationModal();
+
+
+    const price =
+        Number(
+            visit.price || 0
+        );
+
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+
+    overlay.id =
+        "client-cancellation-modal";
+
+
+    overlay.className =
+        "client-cancellation-modal";
+
+
+    overlay.innerHTML =
+        `
+            <div
+                class="client-cancellation-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="client-cancellation-title"
+            >
+
+                <div class="client-cancellation-header">
+
+                    <div>
+
+                        <span class="client-cancellation-eyebrow">
+                            Cancellation
+                        </span>
+
+                        <h3 id="client-cancellation-title">
+                            Cancel this service?
+                        </h3>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="client-cancellation-close"
+                        data-client-cancellation-close
+                        aria-label="Close cancellation window"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div class="client-cancellation-service">
+
+                    <strong>
+                        ${escapeHtml(
+                            visit.service_name ||
+                            visit.service_type ||
+                            "Service"
+                        )}
+                    </strong>
+
+                    <span>
+                        ${escapeHtml(
+                            formatLongDate(
+                                visit.visit_date
+                            )
+                        )}
+                    </span>
+
+                    ${
+                        visit.time_window
+                            ? `
+                                <span>
+                                    ${escapeHtml(
+                                        visit.time_window
+                                    )}
+                                </span>
+                            `
+                            : ""
+                    }
+
+                </div>
+
+
+                <div class="client-cancellation-policy">
+
+                    <strong>
+                        Cancellation Policy
+                    </strong>
+
+                    <p>
+                        Cancel at least 24 hours before your scheduled
+                        service to receive 100% of the service price
+                        back as Paws in Stride account credit.
+                    </p>
+
+                    <p>
+                        Cancellations made less than 24 hours before
+                        the scheduled service receive 50% account
+                        credit.
+                    </p>
+
+                </div>
+
+
+                <div class="client-cancellation-price">
+
+                    <span>
+                        Service Price
+                    </span>
+
+                    <strong>
+                        ${price.toLocaleString(
+                            "en-US",
+                            {
+                                style: "currency",
+                                currency: "USD"
+                            }
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <p class="client-cancellation-note">
+                    Your exact credit will be calculated when you
+                    confirm the cancellation.
+                </p>
+
+
+                <div class="client-cancellation-actions">
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        data-client-cancellation-close
+                    >
+                        Keep Service
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="client-cancellation-confirm"
+                        data-client-cancellation-confirm="${Number(
+                            visit.id
+                        )}"
+                    >
+                        Confirm Cancellation
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    overlay.addEventListener(
+        "click",
+        event => {
+
+
+            if (
+                event.target ===
+                overlay
+            ) {
+
+                closeClientCancellationModal();
+
+                return;
+
+            }
+
+
+            if (
+                event.target.closest(
+                    "[data-client-cancellation-close]"
+                )
+            ) {
+
+                closeClientCancellationModal();
+
+            }
+
+        }
+    );
+
+
+    document.body.classList.add(
+        "client-modal-open"
+    );
+
+}
+
+
+// ========================================
+// CLOSE CLIENT CANCELLATION MODAL
+// ========================================
+
+function closeClientCancellationModal() {
+
+    document
+        .getElementById(
+            "client-cancellation-modal"
+        )
+        ?.remove();
+
+
+    document.body.classList.remove(
+        "client-modal-open"
+    );
+
+}
+
+
 // ========================================
 // CLIENT VISIT REPORT LIGHTBOX
 // ========================================
-
 function openClientReportLightbox(
     imageUrl
 ) {
