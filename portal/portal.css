@@ -15136,6 +15136,215 @@ body.booking-success-page {
 
 
 /* ========================================
+   SUCCESS DATE GROUP
+======================================== */
+
+.booking-success-date-group {
+
+    overflow:
+        hidden;
+
+    margin-top:
+        12px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.78
+        );
+
+    border:
+        1px solid
+        var(--pis-border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 4px 14px
+        rgba(
+            35,
+            93,
+            125,
+            0.05
+        );
+
+}
+
+
+/* ========================================
+   SUCCESS DATE HEADER
+======================================== */
+
+.booking-success-date-header {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        14px;
+
+    width:
+        100%;
+
+    padding:
+        15px 16px;
+
+    color:
+        var(--pis-ink);
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f8fcfe
+        );
+
+    border:
+        0;
+
+    cursor:
+        pointer;
+
+    text-align:
+        left;
+
+}
+
+
+.booking-success-date-header:hover {
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f3fafe
+        );
+
+}
+
+
+/* ========================================
+   SUCCESS DATE HEADER TEXT
+======================================== */
+
+.booking-success-date-header-text {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        4px;
+
+    min-width:
+        0;
+
+}
+
+
+.booking-success-date-title {
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+}
+
+
+.booking-success-date-meta {
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        12px;
+
+    font-weight:
+        600;
+
+    line-height:
+        1.4;
+
+}
+
+
+/* ========================================
+   SUCCESS DATE ARROW
+======================================== */
+
+.booking-success-date-arrow {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex:
+        0 0 auto;
+
+    width:
+        30px;
+
+    height:
+        30px;
+
+    color:
+        var(--pis-blue);
+
+    font-size:
+        18px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   SUCCESS DATE CONTENT
+======================================== */
+
+.booking-success-date-content {
+
+    padding:
+        0 12px 12px;
+
+    border-top:
+        1px solid
+        var(--pis-border);
+
+}
+
+
+.booking-success-date-content[hidden] {
+
+    display:
+        none;
+
+}
+
+
+/* ========================================
    SUCCESS DETAIL CARD
 ======================================== */
 
@@ -15162,7 +15371,7 @@ body.booking-success-page {
         var(--pis-border);
 
     border-radius:
-        14px;
+        12px;
 
     box-shadow:
         0 4px 14px
@@ -15665,11 +15874,119 @@ body.booking-success-page {
     }
 
 
+    /* ========================================
+       MOBILE SUCCESS DATE GROUP
+    ======================================== */
+
+    .booking-success-date-group {
+
+        margin-top:
+            10px;
+
+        border-radius:
+            12px;
+
+    }
+
+
+    .booking-success-date-header {
+
+        gap:
+            10px;
+
+        padding:
+            13px 14px;
+
+    }
+
+
+    .booking-success-date-title {
+
+        font-size:
+            14px;
+
+    }
+
+
+    .booking-success-date-meta {
+
+        font-size:
+            11px;
+
+    }
+
+
+    .booking-success-date-arrow {
+
+        width:
+            26px;
+
+        height:
+            26px;
+
+        font-size:
+            16px;
+
+    }
+
+
+    .booking-success-date-content {
+
+        padding:
+            0 10px 10px;
+
+    }
+
+
+    /* ========================================
+       MOBILE SUCCESS SERVICE CARD
+    ======================================== */
+
+    .booking-success-service {
+
+        margin-top:
+            10px;
+
+        padding:
+            14px 14px 14px 18px;
+
+        border-radius:
+            11px;
+
+    }
+
+
+    .booking-success-service-name {
+
+        font-size:
+            14px;
+
+    }
+
+
+    .booking-success-service-details {
+
+        font-size:
+            11px;
+
+    }
+
+
+    .booking-success-service-price {
+
+        font-size:
+            13px;
+
+    }
+
+
     .booking-success-total {
 
         font-size:
             18px;
 
     }
+
+}
 
 }
