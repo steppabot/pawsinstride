@@ -1891,6 +1891,70 @@ async function captureOrder(
 
 
 // ========================================
+// COMPLETE WITH ACCOUNT CREDIT
+// ========================================
+
+async function completeCheckoutWithAccountCredit() {
+
+    setPaymentMessage(
+        "Applying account credit and confirming your booking..."
+    );
+
+
+    disablePaymentMethods();
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "complete_checkout_with_account_credit",
+                {
+                    p_checkout_id:
+                        checkoutId
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Account credit completion error:",
+            error
+        );
+
+
+        throw new Error(
+            error.message ||
+            "We couldn't complete your booking with account credit."
+        );
+
+    }
+
+
+    const result =
+        Array.isArray(data)
+            ? data[0]
+            : data;
+
+
+    if (!result) {
+
+        throw new Error(
+            "Booking confirmation was not returned."
+        );
+
+    }
+
+
+    return result;
+
+}
+
+
+// ========================================
 // PAYMENT SUCCESS
 // ========================================
 
@@ -4085,37 +4149,63 @@ async function initializeCheckoutPage() {
 
 
         // ========================================
-        // APPLY AVAILABLE ACCOUNT CREDIT
+        // APPLY ACCOUNT CREDIT
         // ========================================
 
         await applyAccountCreditToCheckout();
 
 
-        // ========================================
-        // BUILD FINAL CHECKOUT SUMMARY
-        // ========================================
-
         renderCheckoutSummary();
 
 
         // ========================================
-        // START EXPIRATION TIMER
+        // FULLY COVERED BY ACCOUNT CREDIT
+        // ========================================
+
+        const amountDueCents =
+            Number(
+                checkoutData.amount_due_cents ??
+                checkoutData.total_cents ??
+                0
+            );
+
+
+        if (
+            amountDueCents ===
+            0
+        ) {
+
+            hidePaymentMethods();
+
+
+            const result =
+                await completeCheckoutWithAccountCredit();
+
+
+            checkoutData.status =
+                "completed";
+
+
+            handlePaymentSuccess(
+                result
+            );
+
+
+            return;
+
+        }
+
+
+        // ========================================
+        // PAYMENT REQUIRED
         // ========================================
 
         startExpirationTimer();
 
 
-        // ========================================
-        // MARK PAGE READY
-        // ========================================
-
         pageLoaded =
             true;
 
-
-        // ========================================
-        // INITIALIZE PAYMENT METHODS
-        // ========================================
 
         await initializePaymentMethods();
 
