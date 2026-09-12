@@ -599,7 +599,8 @@
 
                 <section
                     id="household-section"
-                    class="household-section">
+                    class="household-section"
+                >
 
                     <div class="household-section-header">
 
@@ -627,7 +628,9 @@
                     </div>
 
 
-                    <!-- HOUSEHOLD EDIT FORM -->
+                    <!-- ========================================
+                         HOUSEHOLD EDIT FORM
+                         ======================================== -->
 
                     <div
                         id="household-form-panel"
@@ -662,10 +665,15 @@
                         </div>
 
 
-                        <form id="household-form" novalidate>
+                        <form
+                            id="household-form"
+                            novalidate
+                        >
 
 
-                            <!-- PROFILE PHOTO -->
+                            <!-- ========================================
+                                 PROFILE PHOTO
+                                 ======================================== -->
 
                             <div class="client-photo-editor">
 
@@ -718,24 +726,26 @@
 
 
 
-                            <!-- CLIENT INFORMATION -->
-                            
+                            <!-- ========================================
+                                 CLIENT INFORMATION
+                                 ======================================== -->
+
                             <div class="household-form-section">
-                            
+
                                 <h5>
                                     Client Information
                                 </h5>
-                            
-                            
+
+
                                 <div class="household-form-grid">
-                            
-                            
+
+
                                     <div class="household-form-field">
-                            
+
                                         <label for="household-full-name">
                                             Full Name
                                         </label>
-                            
+
                                         <input
                                             type="text"
                                             id="household-full-name"
@@ -743,16 +753,16 @@
                                             autocomplete="name"
                                             required
                                         >
-                            
+
                                     </div>
-                            
-                            
+
+
                                     <div class="household-form-field">
-                            
+
                                         <label for="household-phone">
                                             Phone Number
                                         </label>
-                            
+
                                         <input
                                             type="tel"
                                             id="household-phone"
@@ -762,51 +772,54 @@
                                             placeholder="555-555-5555"
                                             required
                                         >
-                            
+
                                     </div>
-                            
-                            
+
+
                                     <div class="household-form-field household-form-field-full">
-                            
+
                                         <label for="household-email">
                                             Email
                                         </label>
-                            
+
                                         <input
                                             type="email"
                                             id="household-email"
                                             readonly
                                             disabled
                                         >
-                            
+
                                         <span class="field-help">
                                             Your login email cannot be changed here.
                                         </span>
-                            
+
                                     </div>
-                            
+
                                 </div>
-                            
+
                             </div>
 
-                            <!-- HOME ADDRESS -->
-                            
+
+                            <!-- ========================================
+                                 HOME ADDRESS
+                                 ======================================== -->
+
                             <div class="household-form-section">
-                            
+
                                 <h5>
                                     Home Address
                                 </h5>
-                            
-                            
+
+
                                 <div class="household-form-grid">
-                            
-                            
+
+
                                     <div class="household-form-field household-form-field-full">
-                            
+
                                         <label for="household-street-address">
                                             Street Address
                                         </label>
-                            
+
                                         <input
                                             type="text"
                                             id="household-street-address"
@@ -814,32 +827,32 @@
                                             autocomplete="street-address"
                                             required
                                         >
-                            
+
                                     </div>
-                            
-                            
+
+
                                     <div class="household-form-field household-form-field-full">
-                            
+
                                         <label for="household-address-line-2">
                                             Apartment, Unit, Building, etc.
                                         </label>
-                            
+
                                         <input
                                             type="text"
                                             id="household-address-line-2"
                                             maxlength="150"
                                             autocomplete="address-line2"
                                         >
-                            
+
                                     </div>
-                            
-                            
+
+
                                     <div class="household-form-field">
-                            
+
                                         <label for="household-city">
                                             City
                                         </label>
-                            
+
                                         <input
                                             type="text"
                                             id="household-city"
@@ -847,26 +860,26 @@
                                             autocomplete="address-level2"
                                             required
                                         >
-                            
+
                                     </div>
-                            
-                            
+
+
                                     <div class="household-form-field">
-                            
+
                                         <label for="household-state">
                                             State
                                         </label>
-                            
+
                                         <select
                                             id="household-state"
                                             autocomplete="address-level1"
                                             required
                                         >
-                            
+
                                             <option value="">
                                                 Select state
                                             </option>
-                            
+
                                             <option value="AL">Alabama</option>
                                             <option value="AK">Alaska</option>
                                             <option value="AZ">Arizona</option>
@@ -918,18 +931,18 @@
                                             <option value="WV">West Virginia</option>
                                             <option value="WI">Wisconsin</option>
                                             <option value="WY">Wyoming</option>
-                            
+
                                         </select>
-                            
+
                                     </div>
-                            
-                            
+
+
                                     <div class="household-form-field">
-                            
+
                                         <label for="household-zip">
                                             ZIP Code
                                         </label>
-                            
+
                                         <input
                                             type="text"
                                             id="household-zip"
@@ -938,43 +951,46 @@
                                             autocomplete="postal-code"
                                             required
                                         >
-                            
+
                                     </div>
-                            
-                            
+
+
                                     <div class="household-form-field">
-                            
+
                                         <label for="household-preferred-contact">
                                             Preferred Contact Method
                                         </label>
-                            
+
                                         <select id="household-preferred-contact">
-                            
+
                                             <option value="">
                                                 Select preference
                                             </option>
-                            
+
                                             <option value="Text Message">
                                                 Text Message
                                             </option>
-                            
+
                                             <option value="Phone Call">
                                                 Phone Call
                                             </option>
-                            
+
                                             <option value="Email">
                                                 Email
                                             </option>
-                            
+
                                         </select>
-                            
+
                                     </div>
-                            
+
                                 </div>
-                            
+
                             </div>
 
-                            <!-- EMERGENCY CONTACT -->
+
+                            <!-- ========================================
+                                 EMERGENCY CONTACT
+                                 ======================================== -->
 
                             <div class="household-form-section">
 
@@ -1020,8 +1036,9 @@
                             </div>
 
 
-
-                            <!-- PROPERTY ACCESS -->
+                            <!-- ========================================
+                                 PROPERTY ACCESS
+                                 ======================================== -->
 
                             <div class="household-form-section access-form-section">
 
@@ -1144,8 +1161,9 @@
                             </div>
 
 
-
-                            <!-- HOME NOTES -->
+                            <!-- ========================================
+                                 HOME NOTES
+                                 ======================================== -->
 
                             <div class="household-form-section">
 
@@ -1172,6 +1190,9 @@
                             </div>
 
 
+                            <!-- ========================================
+                                 HOUSEHOLD FORM ACTIONS
+                                 ======================================== -->
 
                             <div class="household-form-actions">
 
@@ -1202,7 +1223,9 @@
                     </div>
 
 
-                    <!-- HOUSEHOLD DISPLAY -->
+                    <!-- ========================================
+                         HOUSEHOLD DISPLAY
+                         ======================================== -->
 
                     <div id="household-profile">
 
@@ -1249,11 +1272,12 @@
                         </div>
 
 
-
                         <div class="household-profile-grid">
 
 
-                            <!-- ADDRESS -->
+                            <!-- ========================================
+                                 ADDRESS
+                                 ======================================== -->
 
                             <div class="household-detail-card">
 
@@ -1271,8 +1295,9 @@
                             </div>
 
 
-
-                            <!-- PREFERRED CONTACT -->
+                            <!-- ========================================
+                                 PREFERRED CONTACT
+                                 ======================================== -->
 
                             <div class="household-detail-card">
 
@@ -1290,8 +1315,9 @@
                             </div>
 
 
-
-                            <!-- EMERGENCY CONTACT -->
+                            <!-- ========================================
+                                 EMERGENCY CONTACT
+                                 ======================================== -->
 
                             <div class="household-detail-card">
 
@@ -1309,33 +1335,32 @@
                             </div>
 
 
-
                             <!-- ========================================
                                  HOME NOTES
                                  ======================================== -->
-                            
+
                             <div class="household-detail-card household-detail-card-full">
-                            
+
                                 <span class="household-detail-label">
                                     Home Notes
                                 </span>
-                            
+
                                 <div
                                     id="household-display-home-notes"
                                     class="household-detail-value household-notes-value"
                                 >
                                     No home notes added.
                                 </div>
-                            
+
                             </div>
-                            
-                            
+
+
                             <!-- ========================================
                                  PROPERTY ACCESS - COLLAPSIBLE DISPLAY
                                  ======================================== -->
-                            
+
                             <div class="household-detail-card household-detail-card-full access-detail-card">
-                            
+
                                 <button
                                     type="button"
                                     id="property-access-toggle"
@@ -1343,121 +1368,130 @@
                                     aria-expanded="false"
                                     aria-controls="property-access-content"
                                 >
-                            
+
                                     <span class="detail-collapse-heading">
-                            
+
                                         <span class="household-detail-label">
                                             Property Access
                                         </span>
-                            
+
                                         <span class="detail-collapse-status">
                                             Saved access information
                                         </span>
-                            
+
                                     </span>
-                            
+
+
                                     <span
                                         class="detail-collapse-chevron"
                                         aria-hidden="true"
                                     >
                                         ›
                                     </span>
-                            
+
                                 </button>
-                            
-                            
+
+
                                 <div
                                     id="property-access-content"
                                     class="detail-collapse-content"
                                     hidden
                                 >
-                            
+
                                     <div class="access-detail-grid">
-                            
-                            
+
+
                                         <div class="access-detail-item">
-                            
+
                                             <span>
                                                 Gate Code
                                             </span>
-                            
+
                                             <strong id="display-gate-code">
                                                 Not added
                                             </strong>
-                            
+
                                         </div>
-                            
-                            
+
+
                                         <div class="access-detail-item">
-                            
+
                                             <span>
                                                 Door / Entry Code
                                             </span>
-                            
+
                                             <strong id="display-door-code">
                                                 Not added
                                             </strong>
-                            
+
                                         </div>
-                            
-                            
+
+
                                         <div class="access-detail-item">
-                            
+
                                             <span>
                                                 Key Instructions
                                             </span>
-                            
+
                                             <strong id="display-key-instructions">
                                                 Not added
                                             </strong>
-                            
+
                                         </div>
-                            
-                            
+
+
                                         <div class="access-detail-item">
-                            
+
                                             <span>
                                                 Alarm Instructions
                                             </span>
-                            
+
                                             <strong id="display-alarm-instructions">
                                                 Not added
                                             </strong>
-                            
+
                                         </div>
-                            
-                            
+
+
                                         <div class="access-detail-item">
-                            
+
                                             <span>
                                                 Parking Instructions
                                             </span>
-                            
+
                                             <strong id="display-parking-instructions">
                                                 Not added
                                             </strong>
-                            
+
                                         </div>
-                            
-                            
+
+
                                         <div class="access-detail-item">
-                            
+
                                             <span>
                                                 Other Access Notes
                                             </span>
-                            
+
                                             <strong id="display-other-access-notes">
                                                 Not added
                                             </strong>
-                            
+
                                         </div>
-                            
-                            
+
+
                                     </div>
-                            
+
                                 </div>
-                            
+
                             </div>
+
+
+                        </div>
+
+                    </div>
+
+                </section>
+                            
                 <!-- ========================================
                      YOUR PETS
                      ======================================== -->
