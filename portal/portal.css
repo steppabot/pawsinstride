@@ -12983,6 +12983,240 @@ a:focus-visible {
 
 
 /* ========================================
+   PAYMENT SUMMARY DATE GROUP
+======================================== */
+
+.payment-summary-date-group {
+
+    overflow:
+        hidden;
+
+    margin-bottom:
+        12px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.82
+        );
+
+    border:
+        1px solid
+        var(--pis-border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 4px 14px
+        rgba(
+            35,
+            93,
+            125,
+            0.05
+        );
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY DATE HEADER
+======================================== */
+
+.payment-summary-date-header {
+
+    width:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    padding:
+        15px 16px;
+
+    color:
+        var(--pis-ink);
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #f5fbfd
+        );
+
+    border:
+        none;
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY DATE HEADER HOVER
+======================================== */
+
+.payment-summary-date-header:hover {
+
+    background:
+        linear-gradient(
+            135deg,
+            #fbfdfe,
+            #edf8fc
+        );
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY DATE HEADER TEXT
+======================================== */
+
+.payment-summary-date-header-text {
+
+    min-width:
+        0;
+
+    flex:
+        1;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY DATE TITLE
+======================================== */
+
+.payment-summary-date-title {
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.35;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY DATE META
+======================================== */
+
+.payment-summary-date-meta {
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        12px;
+
+    font-weight:
+        600;
+
+    line-height:
+        1.4;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY DATE ARROW
+======================================== */
+
+.payment-summary-date-arrow {
+
+    flex:
+        0 0 auto;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        30px;
+
+    height:
+        30px;
+
+    color:
+        var(--pis-blue);
+
+    font-size:
+        18px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+}
+
+
+/* ========================================
+   PAYMENT SUMMARY DATE CONTENT
+======================================== */
+
+.payment-summary-date-content {
+
+    padding:
+        0 12px 12px;
+
+    border-top:
+        1px solid
+        var(--pis-border);
+
+}
+
+
+/* ========================================
+   HIDDEN PAYMENT SUMMARY DATE CONTENT
+======================================== */
+
+.payment-summary-date-content[hidden] {
+
+    display:
+        none;
+
+}
+
+
+/* ========================================
    PAYMENT SUMMARY SERVICE CARD
 ======================================== */
 
@@ -12991,8 +13225,11 @@ a:focus-visible {
     position:
         relative;
 
-    margin-bottom:
+    margin-top:
         12px;
+
+    margin-bottom:
+        0;
 
     padding:
         16px 16px 16px 18px;
@@ -13010,7 +13247,7 @@ a:focus-visible {
         var(--pis-border);
 
     border-radius:
-        14px;
+        12px;
 
     box-shadow:
         0 4px 14px
@@ -13059,7 +13296,6 @@ a:focus-visible {
         0 4px 4px 0;
 
 }
-
 
 /* ========================================
    PAYMENT SUMMARY SERVICE NAME
@@ -14128,20 +14364,103 @@ a:focus-visible {
     }
 
 
-    /* ========================================
-       MOBILE SERVICE CARD
-    ======================================== */
-
-    .payment-summary-service {
-
-        padding:
-            14px 14px 14px 17px;
-
-        border-radius:
-            12px;
-
-    }
-
+   /* ========================================
+      MOBILE DATE GROUP
+   ======================================== */
+   
+   .payment-summary-date-group {
+   
+       margin-bottom:
+           10px;
+   
+       border-radius:
+           12px;
+   
+   }
+   
+   
+   /* ========================================
+      MOBILE DATE HEADER
+   ======================================== */
+   
+   .payment-summary-date-header {
+   
+       gap:
+           12px;
+   
+       padding:
+           13px 14px;
+   
+   }
+   
+   
+   /* ========================================
+      MOBILE DATE TITLE
+   ======================================== */
+   
+   .payment-summary-date-title {
+   
+       font-size:
+           14px;
+   
+   }
+   
+   
+   /* ========================================
+      MOBILE DATE META
+   ======================================== */
+   
+   .payment-summary-date-meta {
+   
+       font-size:
+           11px;
+   
+   }
+   
+   
+   /* ========================================
+      MOBILE DATE ARROW
+   ======================================== */
+   
+   .payment-summary-date-arrow {
+   
+       width:
+           26px;
+   
+       height:
+           26px;
+   
+       font-size:
+           16px;
+   
+   }
+   
+   
+   /* ========================================
+      MOBILE DATE CONTENT
+   ======================================== */
+   
+   .payment-summary-date-content {
+   
+       padding:
+           0 10px 10px;
+   
+   }
+   
+   
+   /* ========================================
+      MOBILE SERVICE CARD
+   ======================================== */
+   
+   .payment-summary-service {
+   
+       padding:
+           14px 14px 14px 17px;
+   
+       border-radius:
+           12px;
+   
+   }
 
     /* ========================================
        MOBILE TOTAL
