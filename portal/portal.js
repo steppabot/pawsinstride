@@ -4992,7 +4992,7 @@ removePetButton
 
             const confirmed =
                 window.confirm(
-                    `Remove ${petName} from your household?\n\nThis will remove ${petName} from Your Pets and future booking selections. Past booking history will remain available.`
+                    `Remove ${petName} from your household?\n\n${petName} will be removed from Your Pets and future booking options. Any upcoming services scheduled only for ${petName} will also be cancelled. If ${petName} is part of a multi-pet booking, the other pets will remain scheduled. Past service history will be kept.`
                 );
 
 
@@ -5030,20 +5030,16 @@ removePetButton
             try {
 
                 const {
+                    data,
                     error
                 } =
                     await supabaseClient
-                        .from("pets")
-                        .update({
-                            active: false
-                        })
-                        .eq(
-                            "id",
-                            editingPet.id
-                        )
-                        .eq(
-                            "client_id",
-                            currentUser.id
+                        .rpc(
+                            "remove_pet_from_household",
+                            {
+                                p_pet_id:
+                                    editingPet.id
+                            }
                         );
 
 
@@ -5056,10 +5052,29 @@ removePetButton
                 }
 
 
+                const result =
+                    Array.isArray(data)
+                        ? data[0]
+                        : data;
+
+
+                console.log(
+                    "Pet removal result:",
+                    result
+                );
+
+
                 closePetForm();
 
 
                 await refreshPets();
+
+
+                // ========================================
+                // REFRESH UPCOMING SERVICES
+                // ========================================
+
+                await loadDashboard();
 
             }
             catch (error) {
