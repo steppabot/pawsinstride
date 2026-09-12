@@ -588,6 +588,47 @@ async function applyAccountCreditToCheckout() {
 }
 
 // ========================================
+// LOAD ACCOUNT CREDIT BALANCE
+// ========================================
+
+async function loadAccountCreditBalance() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "get_account_credit_balance"
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Account credit balance error:",
+            error
+        );
+
+
+        throw new Error(
+            error.message ||
+            "We couldn't load your account credit."
+        );
+
+    }
+
+
+    checkoutData.available_credit_cents =
+        Number(
+            data ||
+            0
+        );
+
+}
+
+
+// ========================================
 // LOAD CHECKOUT VISITS
 // ========================================
 
@@ -650,8 +691,6 @@ async function loadCheckoutVisits() {
         [];
 
 }
-
-
 // ========================================
 // LOAD CHECKOUT PETS
 // ========================================
@@ -1422,7 +1461,7 @@ function renderCheckoutSummary() {
         );
     
     }
-
+    
     // ========================================
     // CHECKOUT TOTALS
     // ========================================
@@ -1445,6 +1484,13 @@ function renderCheckoutSummary() {
         Number(
             checkoutData.amount_due_cents ??
             originalTotalCents
+        );
+    
+    
+    const availableCreditCents =
+        Number(
+            checkoutData.available_credit_cents ||
+            0
         );
     
     
@@ -1503,12 +1549,202 @@ function renderCheckoutSummary() {
     
     
     // ========================================
-    // ACCOUNT CREDIT
+    // AVAILABLE ACCOUNT CREDIT
     // ========================================
     
     if (
-        creditAppliedCents >
-        0
+        availableCreditCents > 0 &&
+        creditAppliedCents === 0
+    ) {
+    
+        const creditAvailableRow =
+            document.createElement(
+                "div"
+            );
+    
+    
+        creditAvailableRow.className =
+            "payment-summary-credit-available";
+    
+    
+        const creditAvailableInfo =
+            document.createElement(
+                "div"
+            );
+    
+    
+        const creditAvailableLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        creditAvailableLabel.textContent =
+            "Account Credit Available";
+    
+    
+        const creditAvailableAmount =
+            document.createElement(
+                "strong"
+            );
+    
+    
+        creditAvailableAmount.textContent =
+            formatMoney(
+                availableCreditCents,
+                checkoutData.currency
+            );
+    
+    
+        creditAvailableInfo.appendChild(
+            creditAvailableLabel
+        );
+    
+    
+        creditAvailableInfo.appendChild(
+            creditAvailableAmount
+        );
+    
+    
+        const applyCreditButton =
+            document.createElement(
+                "button"
+            );
+    
+    
+        applyCreditButton.type =
+            "button";
+    
+    
+        applyCreditButton.className =
+            "payment-apply-credit-button";
+    
+    
+        applyCreditButton.textContent =
+            "APPLY";
+    
+    
+        applyCreditButton.addEventListener(
+            "click",
+            async () => {
+    
+                try {
+    
+                    applyCreditButton.disabled =
+                        true;
+    
+    
+                    applyCreditButton.textContent =
+                        "APPLYING...";
+    
+    
+                    setPaymentMessage(
+                        "Applying account credit..."
+                    );
+    
+    
+                    const result =
+                        await applyAccountCreditToCheckout();
+    
+    
+                    checkoutData.available_credit_cents =
+                        Number(
+                            result.remaining_credit_cents ||
+                            0
+                        );
+    
+    
+                    renderCheckoutSummary();
+    
+    
+                    const updatedAmountDueCents =
+                        Number(
+                            checkoutData.amount_due_cents ??
+                            checkoutData.total_cents ??
+                            0
+                        );
+    
+    
+                    if (
+                        updatedAmountDueCents === 0
+                    ) {
+    
+                        hidePaymentMethods();
+    
+    
+                        setPaymentMessage(
+                            "Your account credit covers the full booking.",
+                            "success"
+                        );
+    
+                    }
+                    else {
+    
+                        setPaymentMessage(
+                            `Account credit applied. ${formatMoney(
+                                updatedAmountDueCents,
+                                checkoutData.currency
+                            )} remains due.`,
+                            "success"
+                        );
+    
+                    }
+    
+                }
+                catch (
+                    error
+                ) {
+    
+                    console.error(
+                        "Apply account credit error:",
+                        error
+                    );
+    
+    
+                    applyCreditButton.disabled =
+                        false;
+    
+    
+                    applyCreditButton.textContent =
+                        "APPLY";
+    
+    
+                    setPaymentMessage(
+                        error instanceof Error
+                            ? error.message
+                            : "We couldn't apply your account credit.",
+                        "error"
+                    );
+    
+                }
+    
+            }
+        );
+    
+    
+        creditAvailableRow.appendChild(
+            creditAvailableInfo
+        );
+    
+    
+        creditAvailableRow.appendChild(
+            applyCreditButton
+        );
+    
+    
+        paymentSummaryContent.appendChild(
+            creditAvailableRow
+        );
+    
+    }
+    
+    
+    // ========================================
+    // APPLIED ACCOUNT CREDIT
+    // ========================================
+    
+    if (
+        creditAppliedCents > 0
     ) {
     
         const creditRow =
@@ -1610,8 +1846,115 @@ function renderCheckoutSummary() {
             amountDueRow
         );
     
-    }
+    
+        // ========================================
+        // FULL CREDIT CONFIRMATION
+        // ========================================
+    
+        if (
+            amountDueCents === 0
+        ) {
+    
+            const completeCreditButton =
+                document.createElement(
+                    "button"
+                );
+    
+    
+            completeCreditButton.type =
+                "button";
+    
+    
+            completeCreditButton.className =
+                "payment-complete-credit-button";
+    
+    
+            completeCreditButton.textContent =
+                "Complete Booking with Credit";
+    
+    
+            completeCreditButton.addEventListener(
+                "click",
+                async () => {
+    
+                    try {
+    
+                        if (
+                            checkoutExpired
+                        ) {
+    
+                            throw new Error(
+                                "This checkout has expired."
+                            );
+    
+                        }
+    
+    
+                        completeCreditButton.disabled =
+                            true;
+    
+    
+                        completeCreditButton.textContent =
+                            "CONFIRMING...";
+    
+    
+                        setPaymentMessage(
+                            "Confirming your booking..."
+                        );
+    
+    
+                        const result =
+                            await completeCheckoutWithAccountCredit();
+    
+    
+                        checkoutData.status =
+                            "completed";
+    
+    
+                        handlePaymentSuccess(
+                            result
+                        );
+    
+                    }
+                    catch (
+                        error
+                    ) {
+    
+                        console.error(
+                            "Complete credit booking error:",
+                            error
+                        );
+    
+    
+                        completeCreditButton.disabled =
+                            false;
+    
+    
+                        completeCreditButton.textContent =
+                            "Complete Booking with Credit";
+    
+    
+                        setPaymentMessage(
+                            error instanceof Error
+                                ? error.message
+                                : "We couldn't complete your booking.",
+                            "error"
+                        );
+    
+                    }
+    
+                }
+            );
+    
+    
+            paymentSummaryContent.appendChild(
+                completeCreditButton
+            );
+    
+        }
 
+}
+    
     // ========================================
     // EXPIRATION
     // ========================================
@@ -4208,15 +4551,15 @@ async function initializeCheckoutPage() {
         // ========================================
         // EXPIRED CHECKOUT
         // ========================================
-        
+
         const checkoutExpiresAt =
             checkoutData.expires_at
                 ? new Date(
                     checkoutData.expires_at
                 ).getTime()
                 : null;
-        
-        
+
+
         const checkoutIsExpired =
             checkoutData.status ===
                 "expired" ||
@@ -4226,75 +4569,76 @@ async function initializeCheckoutPage() {
                 checkoutExpiresAt <=
                     Date.now()
             );
-        
-        
+
+
         if (
             checkoutIsExpired
         ) {
-        
+
             checkoutExpired =
                 true;
-        
-        
+
+
             hidePaymentMethods();
-        
-        
+
+
             try {
-        
+
                 const releasedCreditCents =
                     await releaseExpiredCheckoutCredit();
-        
-        
+
+
                 if (
                     releasedCreditCents >
                     0
                 ) {
-        
+
                     checkoutData.credit_applied_cents =
                         0;
-        
-        
+
+
                     checkoutData.amount_due_cents =
                         Number(
                             checkoutData.total_cents ||
                             0
                         );
-        
-        
+
+
                     checkoutData.credit_applied_at =
                         null;
-        
+
                 }
-        
-        
+
+
                 checkoutData.status =
                     "expired";
-        
+
             }
             catch (
                 releaseError
             ) {
-        
+
                 console.error(
                     "Expired checkout credit release error:",
                     releaseError
                 );
-        
+
             }
-        
-        
+
+
             renderCheckoutSummary();
-        
-        
+
+
             setPaymentMessage(
                 "This checkout has expired. Please return to the portal and select your services again.",
                 "error"
             );
-        
-        
+
+
             return;
-        
+
         }
+
 
         // ========================================
         // VALID CHECKOUT STATUS
@@ -4325,94 +4669,102 @@ async function initializeCheckoutPage() {
 
 
         // ========================================
-        // APPLY ACCOUNT CREDIT
+        // LOAD ACCOUNT CREDIT
         // ========================================
 
-        await applyAccountCreditToCheckout();
+        await loadAccountCreditBalance();
 
+
+        // ========================================
+        // RENDER CHECKOUT
+        // ========================================
 
         renderCheckoutSummary();
 
 
         // ========================================
-        // FULLY COVERED BY ACCOUNT CREDIT
+        // CURRENT AMOUNT DUE
         // ========================================
-
+        
         const amountDueCents =
             Number(
                 checkoutData.amount_due_cents ??
                 checkoutData.total_cents ??
                 0
             );
-
-
+        
+        
+        // ========================================
+        // START EXPIRATION TIMER
+        // ========================================
+        
+        startExpirationTimer();
+        
+        
+        pageLoaded =
+            true;
+        
+        
+        // ========================================
+        // FULLY COVERED BY ACCOUNT CREDIT
+        // ========================================
+        
         if (
-            amountDueCents ===
-            0
+            amountDueCents === 0 &&
+            Number(
+                checkoutData.credit_applied_cents ||
+                0
+            ) > 0
         ) {
-
+        
             hidePaymentMethods();
-
-
-            const result =
-                await completeCheckoutWithAccountCredit();
-
-
-            checkoutData.status =
-                "completed";
-
-
-            handlePaymentSuccess(
-                result
+        
+        
+            setPaymentMessage(
+                "Your account credit covers the full booking.",
+                "success"
             );
-
-
+        
+        
             return;
-
+        
         }
-
-
+        
+        
         // ========================================
         // PAYMENT REQUIRED
         // ========================================
-
-        startExpirationTimer();
-
-
-        pageLoaded =
-            true;
-
-
+        
         await initializePaymentMethods();
-
-    }
-    catch (
-        error
-    ) {
-
-        console.error(
-            "Checkout page error:",
-            error
-        );
-
-
-        hidePaymentMethods();
-
-
-        paymentSummaryContent.textContent =
-            "Checkout unavailable.";
-
-
-        setPaymentMessage(
-            error instanceof Error
-                ? error.message
-                : "We couldn't load this checkout.",
-            "error"
-        );
-
-    }
-
-}
+        
+            }
+            catch (
+                error
+            ) {
+        
+                console.error(
+                    "Checkout page error:",
+                    error
+                );
+        
+        
+                hidePaymentMethods();
+        
+        
+                paymentSummaryContent.textContent =
+                    "Checkout unavailable.";
+        
+        
+                setPaymentMessage(
+                    error instanceof Error
+                        ? error.message
+                        : "We couldn't load this checkout.",
+                    "error"
+                );
+        
+            }
+        
+        }
 
 // ========================================
 // START PAGE
