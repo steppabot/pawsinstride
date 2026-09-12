@@ -1711,7 +1711,6 @@ function renderCheckoutSummary() {
         totalRow
     );
     
-    
     // ========================================
     // AVAILABLE ACCOUNT CREDIT
     // ========================================
@@ -1818,7 +1817,37 @@ function renderCheckoutSummary() {
                         );
     
     
+                    // ========================================
+                    // RESET EXPIRATION TIMER BEFORE RERENDER
+                    // ========================================
+    
+                    if (
+                        expirationTimer
+                    ) {
+    
+                        clearInterval(
+                            expirationTimer
+                        );
+    
+    
+                        expirationTimer =
+                            null;
+    
+                    }
+    
+    
+                    // ========================================
+                    // RERENDER CHECKOUT SUMMARY
+                    // ========================================
+    
                     renderCheckoutSummary();
+    
+    
+                    // ========================================
+                    // RESTART TIMER ON NEW EXPIRATION ELEMENT
+                    // ========================================
+    
+                    startExpirationTimer();
     
     
                     const updatedAmountDueCents =
@@ -1901,7 +1930,6 @@ function renderCheckoutSummary() {
         );
     
     }
-    
     
     // ========================================
     // APPLIED ACCOUNT CREDIT
