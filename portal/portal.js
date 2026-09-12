@@ -11986,7 +11986,6 @@ document
         }
     );
 
-
 // ========================================
 // CLIENT CANCELLATION MODAL
 // ========================================
@@ -12127,7 +12126,10 @@ function openClientCancellationModal(
                 </div>
 
 
-                <p class="client-cancellation-note">
+                <p
+                    id="client-cancellation-message"
+                    class="client-cancellation-note"
+                >
                     Your exact credit will be calculated when you
                     confirm the cancellation.
                 </p>
@@ -12167,8 +12169,12 @@ function openClientCancellationModal(
 
     overlay.addEventListener(
         "click",
-        event => {
+        async event => {
 
+
+            // ========================================
+            // CLICK OUTSIDE MODAL
+            // ========================================
 
             if (
                 event.target ===
@@ -12182,6 +12188,10 @@ function openClientCancellationModal(
             }
 
 
+            // ========================================
+            // CLOSE / KEEP SERVICE
+            // ========================================
+
             if (
                 event.target.closest(
                     "[data-client-cancellation-close]"
@@ -12189,6 +12199,228 @@ function openClientCancellationModal(
             ) {
 
                 closeClientCancellationModal();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // CONFIRM CANCELLATION
+            // ========================================
+
+            const confirmButton =
+                event.target.closest(
+                    "[data-client-cancellation-confirm]"
+                );
+
+
+            if (
+                !confirmButton
+            ) {
+                return;
+            }
+
+
+            const visitId =
+                Number(
+                    confirmButton.dataset
+                        .clientCancellationConfirm
+                );
+
+
+            if (
+                !visitId
+            ) {
+                return;
+            }
+
+
+            const message =
+                overlay.querySelector(
+                    "#client-cancellation-message"
+                );
+
+
+            confirmButton.disabled =
+                true;
+
+
+            confirmButton.textContent =
+                "Cancelling...";
+
+
+            if (
+                message
+            ) {
+
+                message.textContent =
+                    "Processing your cancellation...";
+
+            }
+
+
+            try {
+
+                // ========================================
+                // SERVER-SIDE CANCELLATION
+                // ========================================
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.rpc(
+                        "cancel_my_visit",
+                        {
+                            p_visit_id:
+                                visitId
+                        }
+                    );
+
+
+                if (
+                    error
+                ) {
+                    throw error;
+                }
+
+
+                const result =
+                    Array.isArray(
+                        data
+                    )
+                        ? data[0]
+                        : data;
+
+
+                if (
+                    !result
+                ) {
+
+                    throw new Error(
+                        "Cancellation result was not returned."
+                    );
+
+                }
+
+
+                const creditAmount =
+                    Number(
+                        result.credit_amount || 0
+                    );
+
+
+                const creditPercent =
+                    Number(
+                        result.credit_percent || 0
+                    );
+
+
+                const newCreditBalance =
+                    Number(
+                        result.new_credit_balance || 0
+                    );
+
+
+                console.log(
+                    "Service cancelled:",
+                    {
+                        visitId,
+                        creditAmount,
+                        creditPercent,
+                        newCreditBalance
+                    }
+                );
+
+
+                // ========================================
+                // UPDATE LOCAL VISIT STATE
+                // ========================================
+
+                currentVisits =
+                    currentVisits.map(
+                        item => {
+
+                            if (
+                                Number(
+                                    item.id
+                                ) !==
+                                visitId
+                            ) {
+                                return item;
+                            }
+
+
+                            return {
+                                ...item,
+
+                                status:
+                                    "cancelled",
+
+                                refund_status:
+                                    "not_required",
+
+                                cancellation_reason:
+                                    creditPercent ===
+                                        100
+                                        ? "Client cancelled 24 or more hours before scheduled service"
+                                        : "Client cancelled less than 24 hours before scheduled service"
+                            };
+
+                        }
+                    );
+
+
+                // ========================================
+                // CLOSE MODAL
+                // ========================================
+
+                closeClientCancellationModal();
+
+
+                // ========================================
+                // REFRESH UPCOMING SERVICES
+                // ========================================
+
+                renderUpcomingCalendar();
+
+
+                renderSelectedUpcomingServices();
+
+
+                // ========================================
+                // REFRESH ACCOUNT CREDIT
+                // ========================================
+
+                await renderAccountCredit();
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Service cancellation error:",
+                    error
+                );
+
+
+                if (
+                    message
+                ) {
+
+                    message.textContent =
+                        error?.message ||
+                        "We couldn't cancel this service. Please try again.";
+
+                }
+
+
+                confirmButton.disabled =
+                    false;
+
+
+                confirmButton.textContent =
+                    "Confirm Cancellation";
 
             }
 
@@ -12205,6 +12437,26 @@ function openClientCancellationModal(
 
 // ========================================
 // CLOSE CLIENT CANCELLATION MODAL
+// ========================================
+
+function closeClientCancellationModal() {
+
+    document
+        .getElementById(
+            "client-cancellation-modal"
+        )
+        ?.remove();
+
+
+    document.body.classList.remove(
+        "client-modal-open"
+    );
+
+}
+
+
+// ========================================
+// CLIENT VISIT REPORT LIGHTBOX
 // ========================================
 
 function closeClientCancellationModal() {
