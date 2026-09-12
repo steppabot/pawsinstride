@@ -11095,14 +11095,13 @@ function renderSelectedUpcomingServices() {
                         selectedUpcomingDate &&
                     String(
                         visit.status || ""
-                    )
-                        .trim()
-                        .toLowerCase() !==
+                    ).toLowerCase() !==
                         "cancelled"
             )
             .sort(
                 compareClientVisits
             );
+
 
     if (
         services.length === 0
@@ -11163,6 +11162,13 @@ function renderSelectedUpcomingServices() {
                                 "checked_in"
                                 ? "upcoming-service-card-in-progress"
                                 : "";
+
+
+                    const canCancel =
+                        progress.state !==
+                            "completed" &&
+                        progress.state !==
+                            "checked_in";
 
 
                     return `
@@ -11269,6 +11275,27 @@ function renderSelectedUpcomingServices() {
                                 progress
                             )}
 
+
+                            ${
+                                canCancel
+                                    ? `
+                                        <div class="upcoming-service-actions">
+
+                                            <button
+                                                type="button"
+                                                class="client-cancel-service-button"
+                                                data-client-cancel-visit="${Number(
+                                                    visit.id
+                                                )}"
+                                            >
+                                                Cancel Service
+                                            </button>
+
+                                        </div>
+                                    `
+                                    : ""
+                            }
+
                         </div>
                     `;
 
@@ -11277,6 +11304,7 @@ function renderSelectedUpcomingServices() {
             .join("");
 
 }
+
 
 // ========================================
 // CLIENT SERVICE SORTING
