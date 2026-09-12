@@ -777,187 +777,481 @@ function renderCheckoutSummary() {
 
 
     // ========================================
-    // SERVICE ROWS
+    // SERVICE ROWS GROUPED BY DATE
     // ========================================
-
+    
     if (
         checkoutVisits.length >
         0
     ) {
-
+    
+        // ========================================
+        // GROUP VISITS BY DATE
+        // ========================================
+    
+        const visitsByDate =
+            new Map();
+    
+    
         checkoutVisits.forEach(
             visit => {
-
-                const row =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                row.className =
-                    "payment-summary-service";
-
-
-                // ========================================
-                // SERVICE NAME
-                // ========================================
-
-                const serviceName =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                serviceName.className =
-                    "payment-summary-service-name";
-
-
-                serviceName.textContent =
-                    visit.service_name ||
-                    visit.service_type ||
-                    "Pet Care Service";
-
-
-                // ========================================
-                // PET CHIPS
-                // ========================================
-
-                const petList =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                petList.className =
-                    "payment-summary-pets";
-
-
+    
+                const visitDate =
+                    visit.visit_date;
+    
+    
                 if (
-                    petNames.length >
-                    0
-                ) {
-
-                    petNames.forEach(
-                        petName => {
-
-                            const petChip =
-                                document.createElement(
-                                    "span"
-                                );
-
-
-                            petChip.className =
-                                "payment-summary-pet-chip";
-
-
-                            petChip.textContent =
-                                petName;
-
-
-                            petList.appendChild(
-                                petChip
-                            );
-
-                        }
-                    );
-
-                }
-
-
-                // ========================================
-                // SERVICE DETAILS
-                // ========================================
-
-                const serviceDetails =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                serviceDetails.className =
-                    "payment-summary-service-details";
-
-
-                const details = [
-                    formatDate(
-                        visit.visit_date
-                    ),
-
-                    visit.time_window
-                ]
-                    .filter(
-                        Boolean
+                    !visitsByDate.has(
+                        visitDate
                     )
-                    .join(
-                        " • "
-                    );
-
-
-                serviceDetails.textContent =
-                    details;
-
-
-                // ========================================
-                // SERVICE PRICE
-                // ========================================
-
-                const servicePrice =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                servicePrice.className =
-                    "payment-summary-service-price";
-
-
-                servicePrice.textContent =
-                    formatMoney(
-                        visit.total_price_cents,
-                        checkoutData.currency
-                    );
-
-
-                // ========================================
-                // ADD SERVICE ROW
-                // ========================================
-
-                row.appendChild(
-                    serviceName
-                );
-
-
-                if (
-                    petNames.length >
-                    0
                 ) {
-
-                    row.appendChild(
-                        petList
+    
+                    visitsByDate.set(
+                        visitDate,
+                        []
                     );
-
+    
                 }
-
-
-                row.appendChild(
-                    serviceDetails
-                );
-
-
-                row.appendChild(
-                    servicePrice
-                );
-
-
-                paymentSummaryContent.appendChild(
-                    row
-                );
-
+    
+    
+                visitsByDate
+                    .get(
+                        visitDate
+                    )
+                    .push(
+                        visit
+                    );
+    
             }
         );
-
+    
+    
+        // ========================================
+        // PET NAME SUMMARY
+        // ========================================
+    
+        const petNameSummary =
+            petNames.join(
+                " + "
+            );
+    
+    
+        // ========================================
+        // BUILD DATE GROUPS
+        // ========================================
+    
+        let dateGroupIndex =
+            0;
+    
+    
+        visitsByDate.forEach(
+            (
+                visits,
+                visitDate
+            ) => {
+    
+                const dateGroup =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateGroup.className =
+                    "payment-summary-date-group";
+    
+    
+                // ========================================
+                // DATE GROUP HEADER
+                // ========================================
+    
+                const dateHeader =
+                    document.createElement(
+                        "button"
+                    );
+    
+    
+                dateHeader.type =
+                    "button";
+    
+    
+                dateHeader.className =
+                    "payment-summary-date-header";
+    
+    
+                dateHeader.setAttribute(
+                    "aria-expanded",
+                    dateGroupIndex === 0
+                        ? "true"
+                        : "false"
+                );
+    
+    
+                // ========================================
+                // DATE HEADER TEXT
+                // ========================================
+    
+                const dateHeaderText =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateHeaderText.className =
+                    "payment-summary-date-header-text";
+    
+    
+                const dateTitle =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateTitle.className =
+                    "payment-summary-date-title";
+    
+    
+                dateTitle.textContent =
+                    formatDate(
+                        visitDate
+                    );
+    
+    
+                const dateMeta =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateMeta.className =
+                    "payment-summary-date-meta";
+    
+    
+                const serviceCount =
+                    visits.length;
+    
+    
+                const serviceLabel =
+                    serviceCount === 1
+                        ? "service"
+                        : "services";
+    
+    
+                dateMeta.textContent =
+                    [
+                        petNameSummary,
+                        `${serviceCount} ${serviceLabel}`
+                    ]
+                        .filter(
+                            Boolean
+                        )
+                        .join(
+                            " • "
+                        );
+    
+    
+                dateHeaderText.appendChild(
+                    dateTitle
+                );
+    
+    
+                dateHeaderText.appendChild(
+                    dateMeta
+                );
+    
+    
+                // ========================================
+                // DATE HEADER ARROW
+                // ========================================
+    
+                const dateArrow =
+                    document.createElement(
+                        "span"
+                    );
+    
+    
+                dateArrow.className =
+                    "payment-summary-date-arrow";
+    
+    
+                dateArrow.textContent =
+                    dateGroupIndex === 0
+                        ? "▴"
+                        : "▾";
+    
+    
+                dateHeader.appendChild(
+                    dateHeaderText
+                );
+    
+    
+                dateHeader.appendChild(
+                    dateArrow
+                );
+    
+    
+                // ========================================
+                // DATE GROUP CONTENT
+                // ========================================
+    
+                const dateContent =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateContent.className =
+                    "payment-summary-date-content";
+    
+    
+                dateContent.hidden =
+                    dateGroupIndex !== 0;
+    
+    
+                // ========================================
+                // SORT VISITS WITHIN DATE
+                // ========================================
+    
+                visits.sort(
+                    (
+                        firstVisit,
+                        secondVisit
+                    ) => {
+    
+                        return String(
+                            firstVisit.time_window ||
+                            ""
+                        ).localeCompare(
+                            String(
+                                secondVisit.time_window ||
+                                ""
+                            )
+                        );
+    
+                    }
+                );
+    
+    
+                // ========================================
+                // BUILD SERVICE ROWS
+                // ========================================
+    
+                visits.forEach(
+                    visit => {
+    
+                        const row =
+                            document.createElement(
+                                "div"
+                            );
+    
+    
+                        row.className =
+                            "payment-summary-service";
+    
+    
+                        // ========================================
+                        // SERVICE NAME
+                        // ========================================
+    
+                        const serviceName =
+                            document.createElement(
+                                "div"
+                            );
+    
+    
+                        serviceName.className =
+                            "payment-summary-service-name";
+    
+    
+                        serviceName.textContent =
+                            visit.service_name ||
+                            visit.service_type ||
+                            "Pet Care Service";
+    
+    
+                        // ========================================
+                        // PET CHIPS
+                        // ========================================
+    
+                        const petList =
+                            document.createElement(
+                                "div"
+                            );
+    
+    
+                        petList.className =
+                            "payment-summary-pets";
+    
+    
+                        if (
+                            petNames.length >
+                            0
+                        ) {
+    
+                            petNames.forEach(
+                                petName => {
+    
+                                    const petChip =
+                                        document.createElement(
+                                            "span"
+                                        );
+    
+    
+                                    petChip.className =
+                                        "payment-summary-pet-chip";
+    
+    
+                                    petChip.textContent =
+                                        petName;
+    
+    
+                                    petList.appendChild(
+                                        petChip
+                                    );
+    
+                                }
+                            );
+    
+                        }
+    
+    
+                        // ========================================
+                        // SERVICE DETAILS
+                        // ========================================
+    
+                        const serviceDetails =
+                            document.createElement(
+                                "div"
+                            );
+    
+    
+                        serviceDetails.className =
+                            "payment-summary-service-details";
+    
+    
+                        serviceDetails.textContent =
+                            visit.time_window ||
+                            "";
+    
+    
+                        // ========================================
+                        // SERVICE PRICE
+                        // ========================================
+    
+                        const servicePrice =
+                            document.createElement(
+                                "div"
+                            );
+    
+    
+                        servicePrice.className =
+                            "payment-summary-service-price";
+    
+    
+                        servicePrice.textContent =
+                            formatMoney(
+                                visit.total_price_cents,
+                                checkoutData.currency
+                            );
+    
+    
+                        // ========================================
+                        // ADD SERVICE ROW
+                        // ========================================
+    
+                        row.appendChild(
+                            serviceName
+                        );
+    
+    
+                        if (
+                            petNames.length >
+                            0
+                        ) {
+    
+                            row.appendChild(
+                                petList
+                            );
+    
+                        }
+    
+    
+                        row.appendChild(
+                            serviceDetails
+                        );
+    
+    
+                        row.appendChild(
+                            servicePrice
+                        );
+    
+    
+                        dateContent.appendChild(
+                            row
+                        );
+    
+                    }
+                );
+    
+    
+                // ========================================
+                // TOGGLE DATE GROUP
+                // ========================================
+    
+                dateHeader.addEventListener(
+                    "click",
+                    () => {
+    
+                        const willOpen =
+                            dateContent.hidden;
+    
+    
+                        dateContent.hidden =
+                            !willOpen;
+    
+    
+                        dateHeader.setAttribute(
+                            "aria-expanded",
+                            willOpen
+                                ? "true"
+                                : "false"
+                        );
+    
+    
+                        dateArrow.textContent =
+                            willOpen
+                                ? "▴"
+                                : "▾";
+    
+                    }
+                );
+    
+    
+                // ========================================
+                // ADD DATE GROUP
+                // ========================================
+    
+                dateGroup.appendChild(
+                    dateHeader
+                );
+    
+    
+                dateGroup.appendChild(
+                    dateContent
+                );
+    
+    
+                paymentSummaryContent.appendChild(
+                    dateGroup
+                );
+    
+    
+                dateGroupIndex +=
+                    1;
+    
+            }
+        );
+    
     }
-
 
     // ========================================
     // TOTAL
