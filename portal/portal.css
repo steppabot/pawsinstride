@@ -1860,11 +1860,62 @@ section h3 {
     line-height: 1.45;
 }
 
+
+/* ========================================
+   PET FORM ACTIONS
+======================================== */
+
 .pet-form-actions {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.pet-form-actions-right {
+    display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 10px;
 }
+
+
+/* ========================================
+   REMOVE PET BUTTON
+======================================== */
+
+.pet-remove-button {
+    width: auto;
+    padding: 11px 16px;
+    background: #fff;
+    color: #b42318;
+    border: 1px solid #d92d20;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.pet-remove-button:hover {
+    background: #fff1f0;
+    border-color: #b42318;
+}
+
+.pet-remove-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+
+/* ========================================
+   PET FORM MESSAGE
+======================================== */
 
 #pet-form-message {
     margin-bottom: 0;
