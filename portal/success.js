@@ -739,41 +739,29 @@ function buildServiceCard(
 
 
     // ========================================
-    // DATE / TIME
+    // TIME
     // ========================================
-
+    
     const details =
         document.createElement(
             "div"
         );
-
-
+    
+    
     details.className =
         "booking-success-service-details";
-
-
-    const detailParts =
-        [
-            formatDate(
-                visit.visit_date
-            ),
-
-            visit.time_window
-        ]
-            .filter(Boolean);
-
-
+    
+    
     details.textContent =
-        detailParts.join(
-            " • "
-        );
-
-
+        visit.time_window ||
+        "";
+    
+    
     card.appendChild(
         details
     );
-
-
+    
+    
     // ========================================
     // OPTION
     // ========================================
@@ -847,22 +835,439 @@ function renderConfirmation() {
 
 
     // ========================================
-    // SERVICES
+    // SERVICES GROUPED BY DATE
     // ========================================
-
-    checkoutVisits.forEach(
-        visit => {
-
-            successDetails.appendChild(
-                buildServiceCard(
-                    visit
+    
+    if (
+        checkoutVisits.length >
+        0
+    ) {
+    
+        // ========================================
+        // GROUP VISITS BY DATE
+        // ========================================
+    
+        const visitsByDate =
+            new Map();
+    
+    
+        checkoutVisits.forEach(
+            visit => {
+    
+                const visitDate =
+                    visit.visit_date;
+    
+    
+                if (
+                    !visitsByDate.has(
+                        visitDate
+                    )
+                ) {
+    
+                    visitsByDate.set(
+                        visitDate,
+                        []
+                    );
+    
+                }
+    
+    
+                visitsByDate
+                    .get(
+                        visitDate
+                    )
+                    .push(
+                        visit
+                    );
+    
+            }
+        );
+    
+    
+        // ========================================
+        // PET NAME SUMMARY
+        // ========================================
+    
+        const petNameSummary =
+            checkoutPets
+                .map(
+                    pet =>
+                        pet.name
                 )
-            );
-
+                .filter(
+                    Boolean
+                )
+                .join(
+                    " + "
+                );
+    
+    
+        // ========================================
+        // TIME WINDOW START MINUTES
+        // ========================================
+    
+        function getTimeWindowStartMinutes(
+            timeWindow
+        ) {
+    
+            const startTime =
+                String(
+                    timeWindow ||
+                    ""
+                )
+                    .split(
+                        "-"
+                    )[0]
+                    .trim();
+    
+    
+            const match =
+                startTime.match(
+                    /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i
+                );
+    
+    
+            if (
+                !match
+            ) {
+    
+                return 9999;
+    
+            }
+    
+    
+            let hours =
+                Number(
+                    match[1]
+                );
+    
+    
+            const minutes =
+                Number(
+                    match[2]
+                );
+    
+    
+            const period =
+                match[3]
+                    .toUpperCase();
+    
+    
+            if (
+                period ===
+                "AM" &&
+                hours ===
+                12
+            ) {
+    
+                hours =
+                    0;
+    
+            }
+    
+    
+            if (
+                period ===
+                "PM" &&
+                hours !==
+                12
+            ) {
+    
+                hours +=
+                    12;
+    
+            }
+    
+    
+            return (
+                hours *
+                60
+            ) +
+            minutes;
+    
         }
-    );
-
-
+    
+    
+        // ========================================
+        // BUILD DATE GROUPS
+        // ========================================
+    
+        let dateGroupIndex =
+            0;
+    
+    
+        visitsByDate.forEach(
+            (
+                visits,
+                visitDate
+            ) => {
+    
+                // ========================================
+                // SORT VISITS WITHIN DATE
+                // ========================================
+    
+                visits.sort(
+                    (
+                        firstVisit,
+                        secondVisit
+                    ) => {
+    
+                        return (
+                            getTimeWindowStartMinutes(
+                                firstVisit.time_window
+                            ) -
+                            getTimeWindowStartMinutes(
+                                secondVisit.time_window
+                            )
+                        );
+    
+                    }
+                );
+    
+    
+                // ========================================
+                // DATE GROUP
+                // ========================================
+    
+                const dateGroup =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateGroup.className =
+                    "booking-success-date-group";
+    
+    
+                // ========================================
+                // DATE GROUP HEADER
+                // ========================================
+    
+                const dateHeader =
+                    document.createElement(
+                        "button"
+                    );
+    
+    
+                dateHeader.type =
+                    "button";
+    
+    
+                dateHeader.className =
+                    "booking-success-date-header";
+    
+    
+                dateHeader.setAttribute(
+                    "aria-expanded",
+                    dateGroupIndex ===
+                    0
+                        ? "true"
+                        : "false"
+                );
+    
+    
+                // ========================================
+                // DATE HEADER TEXT
+                // ========================================
+    
+                const dateHeaderText =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateHeaderText.className =
+                    "booking-success-date-header-text";
+    
+    
+                const dateTitle =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateTitle.className =
+                    "booking-success-date-title";
+    
+    
+                dateTitle.textContent =
+                    formatDate(
+                        visitDate
+                    );
+    
+    
+                const dateMeta =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateMeta.className =
+                    "booking-success-date-meta";
+    
+    
+                const serviceCount =
+                    visits.length;
+    
+    
+                const serviceLabel =
+                    serviceCount ===
+                    1
+                        ? "service"
+                        : "services";
+    
+    
+                dateMeta.textContent =
+                    [
+                        petNameSummary,
+                        `${serviceCount} ${serviceLabel}`
+                    ]
+                        .filter(
+                            Boolean
+                        )
+                        .join(
+                            " • "
+                        );
+    
+    
+                dateHeaderText.appendChild(
+                    dateTitle
+                );
+    
+    
+                dateHeaderText.appendChild(
+                    dateMeta
+                );
+    
+    
+                // ========================================
+                // DATE HEADER ARROW
+                // ========================================
+    
+                const dateArrow =
+                    document.createElement(
+                        "span"
+                    );
+    
+    
+                dateArrow.className =
+                    "booking-success-date-arrow";
+    
+    
+                dateArrow.textContent =
+                    dateGroupIndex ===
+                    0
+                        ? "▴"
+                        : "▾";
+    
+    
+                dateHeader.appendChild(
+                    dateHeaderText
+                );
+    
+    
+                dateHeader.appendChild(
+                    dateArrow
+                );
+    
+    
+                // ========================================
+                // DATE GROUP CONTENT
+                // ========================================
+    
+                const dateContent =
+                    document.createElement(
+                        "div"
+                    );
+    
+    
+                dateContent.className =
+                    "booking-success-date-content";
+    
+    
+                dateContent.hidden =
+                    dateGroupIndex !==
+                    0;
+    
+    
+                // ========================================
+                // BUILD SERVICE ROWS
+                // ========================================
+    
+                visits.forEach(
+                    visit => {
+    
+                        dateContent.appendChild(
+                            buildServiceCard(
+                                visit
+                            )
+                        );
+    
+                    }
+                );
+    
+    
+                // ========================================
+                // TOGGLE DATE GROUP
+                // ========================================
+    
+                dateHeader.addEventListener(
+                    "click",
+                    () => {
+    
+                        const willOpen =
+                            dateContent.hidden;
+    
+    
+                        dateContent.hidden =
+                            !willOpen;
+    
+    
+                        dateHeader.setAttribute(
+                            "aria-expanded",
+                            willOpen
+                                ? "true"
+                                : "false"
+                        );
+    
+    
+                        dateArrow.textContent =
+                            willOpen
+                                ? "▴"
+                                : "▾";
+    
+                    }
+                );
+    
+    
+                // ========================================
+                // ADD DATE GROUP
+                // ========================================
+    
+                dateGroup.appendChild(
+                    dateHeader
+                );
+    
+    
+                dateGroup.appendChild(
+                    dateContent
+                );
+    
+    
+                successDetails.appendChild(
+                    dateGroup
+                );
+    
+    
+                dateGroupIndex +=
+                    1;
+    
+            }
+        );
+    
+    }
+    
+    
     // ========================================
     // FALLBACK
     // ========================================
