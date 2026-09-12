@@ -4208,32 +4208,93 @@ async function initializeCheckoutPage() {
         // ========================================
         // EXPIRED CHECKOUT
         // ========================================
-
-        if (
+        
+        const checkoutExpiresAt =
+            checkoutData.expires_at
+                ? new Date(
+                    checkoutData.expires_at
+                ).getTime()
+                : null;
+        
+        
+        const checkoutIsExpired =
             checkoutData.status ===
-            "expired"
+                "expired" ||
+            (
+                checkoutExpiresAt !==
+                    null &&
+                checkoutExpiresAt <=
+                    Date.now()
+            );
+        
+        
+        if (
+            checkoutIsExpired
         ) {
-
-            renderCheckoutSummary();
-
-
+        
             checkoutExpired =
                 true;
-
-
+        
+        
             hidePaymentMethods();
-
-
+        
+        
+            try {
+        
+                const releasedCreditCents =
+                    await releaseExpiredCheckoutCredit();
+        
+        
+                if (
+                    releasedCreditCents >
+                    0
+                ) {
+        
+                    checkoutData.credit_applied_cents =
+                        0;
+        
+        
+                    checkoutData.amount_due_cents =
+                        Number(
+                            checkoutData.total_cents ||
+                            0
+                        );
+        
+        
+                    checkoutData.credit_applied_at =
+                        null;
+        
+                }
+        
+        
+                checkoutData.status =
+                    "expired";
+        
+            }
+            catch (
+                releaseError
+            ) {
+        
+                console.error(
+                    "Expired checkout credit release error:",
+                    releaseError
+                );
+        
+            }
+        
+        
+            renderCheckoutSummary();
+        
+        
             setPaymentMessage(
                 "This checkout has expired. Please return to the portal and select your services again.",
                 "error"
             );
-
-
+        
+        
             return;
-
+        
         }
-
 
         // ========================================
         // VALID CHECKOUT STATUS
