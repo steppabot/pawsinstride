@@ -379,6 +379,26 @@ function hidePaymentMethods() {
 function showExpiredCheckoutState() {
 
     // ========================================
+    // HIDE EXPIRATION TIMER
+    // ========================================
+
+    const expirationElement =
+        document.getElementById(
+            "checkout-expiration"
+        );
+
+
+    if (
+        expirationElement
+    ) {
+
+        expirationElement.hidden =
+            true;
+
+    }
+
+
+    // ========================================
     // HIDE ENTIRE PAYMENT CARD
     // ========================================
 
