@@ -350,10 +350,9 @@ function hidePaymentMethods() {
 
         cardWrapper.hidden =
             true;
-        
 
     }
-    
+
 
     if (googlePayWrapper) {
 
@@ -364,15 +363,160 @@ function hidePaymentMethods() {
 
 
     if (applePayWrapper) {
-    
+
         applePayWrapper.hidden =
             true;
-    
+
     }
 
 }
 
 
+// ========================================
+// SHOW EXPIRED CHECKOUT STATE
+// ========================================
+
+function showExpiredCheckoutState() {
+
+    // ========================================
+    // HIDE ENTIRE PAYMENT CARD
+    // ========================================
+
+    const paymentMethodsSection =
+        document.getElementById(
+            "payment-methods"
+        );
+
+
+    if (
+        paymentMethodsSection
+    ) {
+
+        paymentMethodsSection.hidden =
+            true;
+
+    }
+
+
+    // ========================================
+    // PREVENT DUPLICATE EXPIRED STATE
+    // ========================================
+
+    const existingExpiredState =
+        document.getElementById(
+            "checkout-expired-state"
+        );
+
+
+    if (
+        existingExpiredState
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // EXPIRED STATE
+    // ========================================
+
+    const expiredState =
+        document.createElement(
+            "div"
+        );
+
+
+    expiredState.id =
+        "checkout-expired-state";
+
+
+    expiredState.className =
+        "payment-expired-state";
+
+
+    // ========================================
+    // TITLE
+    // ========================================
+
+    const expiredTitle =
+        document.createElement(
+            "strong"
+        );
+
+
+    expiredTitle.className =
+        "payment-expired-title";
+
+
+    expiredTitle.textContent =
+        "Checkout Expired";
+
+
+    // ========================================
+    // MESSAGE
+    // ========================================
+
+    const expiredMessage =
+        document.createElement(
+            "p"
+        );
+
+
+    expiredMessage.className =
+        "payment-expired-message";
+
+
+    expiredMessage.textContent =
+        "This checkout has expired. Please return to the portal and select your services again.";
+
+
+    // ========================================
+    // BACK TO PORTAL BUTTON
+    // ========================================
+
+    const backToPortalButton =
+        document.createElement(
+            "a"
+        );
+
+
+    backToPortalButton.href =
+        "./dashboard.html";
+
+
+    backToPortalButton.className =
+        "payment-expired-button";
+
+
+    backToPortalButton.textContent =
+        "Back to Portal";
+
+
+    // ========================================
+    // BUILD STATE
+    // ========================================
+
+    expiredState.appendChild(
+        expiredTitle
+    );
+
+
+    expiredState.appendChild(
+        expiredMessage
+    );
+
+
+    expiredState.appendChild(
+        backToPortalButton
+    );
+
+
+    paymentSummaryContent.appendChild(
+        expiredState
+    );
+
+}
 // ========================================
 // GET CHECKOUT ID
 // ========================================
@@ -2106,16 +2250,15 @@ function startExpirationTimer() {
 
 
             disablePaymentMethods();
-
-
+            
+            
             hidePaymentMethods();
-
-
+            
+            
             setPaymentMessage(
                 "This checkout expired. Please return to the portal and select your services again.",
                 "error"
             );
-
 
             try {
 
@@ -2144,12 +2287,14 @@ function startExpirationTimer() {
 
                 }
 
-
                 checkoutData.status =
                     "expired";
-
-
+                
+                
                 renderCheckoutSummary();
+                
+                
+                showExpiredCheckoutState();
 
             }
             catch (
@@ -4547,19 +4692,18 @@ async function initializeCheckoutPage() {
 
         }
 
-
         // ========================================
         // EXPIRED CHECKOUT
         // ========================================
-
+        
         const checkoutExpiresAt =
             checkoutData.expires_at
                 ? new Date(
                     checkoutData.expires_at
                 ).getTime()
                 : null;
-
-
+        
+        
         const checkoutIsExpired =
             checkoutData.status ===
                 "expired" ||
@@ -4569,76 +4713,81 @@ async function initializeCheckoutPage() {
                 checkoutExpiresAt <=
                     Date.now()
             );
-
-
+        
+        
         if (
             checkoutIsExpired
         ) {
-
+        
             checkoutExpired =
                 true;
-
-
+        
+        
+            disablePaymentMethods();
+        
+        
             hidePaymentMethods();
-
-
+        
+        
             try {
-
+        
                 const releasedCreditCents =
                     await releaseExpiredCheckoutCredit();
-
-
+        
+        
                 if (
                     releasedCreditCents >
                     0
                 ) {
-
+        
                     checkoutData.credit_applied_cents =
                         0;
-
-
+        
+        
                     checkoutData.amount_due_cents =
                         Number(
                             checkoutData.total_cents ||
                             0
                         );
-
-
+        
+        
                     checkoutData.credit_applied_at =
                         null;
-
+        
                 }
-
-
+        
+        
                 checkoutData.status =
                     "expired";
-
+        
             }
             catch (
                 releaseError
             ) {
-
+        
                 console.error(
                     "Expired checkout credit release error:",
                     releaseError
                 );
-
+        
             }
-
-
+        
+        
             renderCheckoutSummary();
-
-
+        
+        
+            showExpiredCheckoutState();
+        
+        
             setPaymentMessage(
                 "This checkout has expired. Please return to the portal and select your services again.",
                 "error"
             );
-
-
+        
+        
             return;
-
+        
         }
-
 
         // ========================================
         // VALID CHECKOUT STATUS
