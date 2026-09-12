@@ -2036,7 +2036,7 @@ async function loadDashboard() {
 
 
     // PETS
-
+    
     const {
         data: pets,
         error: petsError
@@ -2048,28 +2048,32 @@ async function loadDashboard() {
                 "client_id",
                 currentUser.id
             )
+            .eq(
+                "active",
+                true
+            )
             .order(
                 "created_at",
                 {
                     ascending: true
                 }
             );
-
-
+    
+    
     if (petsError) {
-
+    
         console.error(
             "Pets error:",
             petsError
         );
-
+    
     }
-
-
+    
+    
     currentPets =
         pets || [];
-
-
+    
+    
     // UPCOMING VISITS
 
     const today =
@@ -5343,6 +5347,10 @@ async function refreshPets() {
                 "client_id",
                 currentUser.id
             )
+            .eq(
+                "active",
+                true
+            )
             .order(
                 "created_at",
                 {
@@ -5377,7 +5385,6 @@ async function refreshPets() {
     renderAdditionalPets();
 
 }
-
 
 // ========================================
 // BOOKING PETS
