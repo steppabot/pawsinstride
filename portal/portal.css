@@ -13964,6 +13964,358 @@ a:focus-visible {
 
 }
 
+/* ========================================
+   PAYMENT SUMMARY ACCOUNT CREDIT
+======================================== */
+
+.payment-summary-credit-available,
+.payment-summary-credit {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    margin-top:
+        12px;
+
+    padding:
+        14px 16px;
+
+    background:
+        rgba(
+            40,
+            144,
+            223,
+            0.06
+        );
+
+    border:
+        1px solid
+        rgba(
+            40,
+            144,
+            223,
+            0.18
+        );
+
+    border-radius:
+        12px;
+
+    color:
+        var(--pis-ink);
+
+}
+
+
+/* ========================================
+   AVAILABLE CREDIT INFO
+======================================== */
+
+.payment-summary-credit-available > div {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        6px 10px;
+
+}
+
+
+.payment-summary-credit-available span {
+
+    color:
+        var(--pis-muted);
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+}
+
+
+.payment-summary-credit-available strong {
+
+    color:
+        var(--pis-blue);
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* ========================================
+   APPLY CREDIT BUTTON
+======================================== */
+
+.payment-apply-credit-button {
+
+    width:
+        auto;
+
+    flex:
+        0 0 auto;
+
+    padding:
+        9px 16px;
+
+    background:
+        var(--pis-blue);
+
+    color:
+        #ffffff;
+
+    border:
+        none;
+
+    border-radius:
+        9px;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.04em;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        opacity 0.2s ease;
+
+}
+
+
+.payment-apply-credit-button:hover {
+
+    opacity:
+        0.9;
+
+}
+
+
+.payment-apply-credit-button:active {
+
+    transform:
+        scale(
+            0.98
+        );
+
+}
+
+
+.payment-apply-credit-button:disabled {
+
+    opacity:
+        0.55;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+/* ========================================
+   APPLIED ACCOUNT CREDIT
+======================================== */
+
+.payment-summary-credit {
+
+    color:
+        #067647;
+
+    background:
+        #f0fdf4;
+
+    border-color:
+        rgba(
+            6,
+            118,
+            71,
+            0.18
+        );
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+}
+
+
+.payment-summary-credit span:last-child {
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ========================================
+   COMPLETE BOOKING WITH CREDIT
+======================================== */
+
+.payment-complete-credit-button {
+
+    width:
+        100%;
+
+    margin-top:
+        14px;
+
+    padding:
+        14px 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f5ab40,
+            #f3b94f
+        );
+
+    color:
+        #ffffff;
+
+    border:
+        none;
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        0 8px 20px
+        rgba(
+            245,
+            171,
+            64,
+            0.22
+        );
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.payment-complete-credit-button:hover {
+
+    transform:
+        translateY(
+            -1px
+        );
+
+    box-shadow:
+        0 10px 24px
+        rgba(
+            245,
+            171,
+            64,
+            0.28
+        );
+
+}
+
+
+.payment-complete-credit-button:active {
+
+    transform:
+        scale(
+            0.99
+        );
+
+}
+
+
+.payment-complete-credit-button:disabled {
+
+    opacity:
+        0.60;
+
+    cursor:
+        not-allowed;
+
+    transform:
+        none;
+
+}
+
+
+/* ========================================
+   ACCOUNT CREDIT MOBILE
+======================================== */
+
+@media (
+    max-width:
+        600px
+) {
+
+    .payment-summary-credit-available {
+
+        align-items:
+            stretch;
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .payment-summary-credit-available > div {
+
+        justify-content:
+            space-between;
+
+    }
+
+
+    .payment-apply-credit-button {
+
+        width:
+            100%;
+
+    }
+
+}
 
 /* ========================================
    PAYMENT SUMMARY EXPIRATION
