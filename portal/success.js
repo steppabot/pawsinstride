@@ -320,6 +320,9 @@ async function loadCheckout() {
                 subtotal_cents,
                 surcharge_cents,
                 total_cents,
+                credit_applied_cents,
+                amount_due_cents,
+                credit_applied_at,
                 paypal_order_id,
                 paypal_capture_id,
                 payment_confirmed_at,
@@ -1297,57 +1300,272 @@ function renderConfirmation() {
 
     }
 
-
     // ========================================
-    // TOTAL PAID
+    // PAYMENT SUMMARY
     // ========================================
-
-    const total =
-        document.createElement(
-            "div"
+    
+    const paymentProvider =
+        String(
+            checkoutData.payment_provider ||
+            ""
+        ).toLowerCase();
+    
+    
+    const isAccountCreditPayment =
+        paymentProvider ===
+        "account_credit";
+    
+    
+    if (
+        isAccountCreditPayment
+    ) {
+    
+        // ========================================
+        // SERVICE TOTAL
+        // ========================================
+    
+        const serviceTotal =
+            document.createElement(
+                "div"
+            );
+    
+    
+        serviceTotal.className =
+            "booking-success-total";
+    
+    
+        const serviceTotalLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        serviceTotalLabel.textContent =
+            "Service Total";
+    
+    
+        const serviceTotalAmount =
+            document.createElement(
+                "span"
+            );
+    
+    
+        serviceTotalAmount.textContent =
+            formatMoney(
+                checkoutData.total_cents,
+                checkoutData.currency
+            );
+    
+    
+        serviceTotal.appendChild(
+            serviceTotalLabel
         );
-
-
-    total.className =
-        "booking-success-total";
-
-
-    const totalLabel =
-        document.createElement(
-            "span"
+    
+    
+        serviceTotal.appendChild(
+            serviceTotalAmount
         );
-
-
-    totalLabel.textContent =
-        "Total Paid";
-
-
-    const totalAmount =
-        document.createElement(
-            "span"
+    
+    
+        successDetails.appendChild(
+            serviceTotal
         );
-
-
-    totalAmount.textContent =
-        formatMoney(
-            checkoutData.total_cents,
-            checkoutData.currency
+    
+    
+        // ========================================
+        // ACCOUNT CREDIT
+        // ========================================
+    
+        const creditTotal =
+            document.createElement(
+                "div"
+            );
+    
+    
+        creditTotal.className =
+            "booking-success-total";
+    
+    
+        const creditTotalLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        creditTotalLabel.textContent =
+            "Account Credit";
+    
+    
+        const creditTotalAmount =
+            document.createElement(
+                "span"
+            );
+    
+    
+        creditTotalAmount.textContent =
+            `-${formatMoney(
+                checkoutData.credit_applied_cents,
+                checkoutData.currency
+            )}`;
+    
+    
+        creditTotal.appendChild(
+            creditTotalLabel
         );
-
-
-    total.appendChild(
-        totalLabel
-    );
-
-
-    total.appendChild(
-        totalAmount
-    );
-
-
-    successDetails.appendChild(
-        total
-    );
+    
+    
+        creditTotal.appendChild(
+            creditTotalAmount
+        );
+    
+    
+        successDetails.appendChild(
+            creditTotal
+        );
+    
+    
+        // ========================================
+        // AMOUNT CHARGED
+        // ========================================
+    
+        const amountCharged =
+            document.createElement(
+                "div"
+            );
+    
+    
+        amountCharged.className =
+            "booking-success-total";
+    
+    
+        const amountChargedLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        amountChargedLabel.textContent =
+            "Amount Charged";
+    
+    
+        const amountChargedAmount =
+            document.createElement(
+                "span"
+            );
+    
+    
+        amountChargedAmount.textContent =
+            formatMoney(
+                checkoutData.amount_due_cents,
+                checkoutData.currency
+            );
+    
+    
+        amountCharged.appendChild(
+            amountChargedLabel
+        );
+    
+    
+        amountCharged.appendChild(
+            amountChargedAmount
+        );
+    
+    
+        successDetails.appendChild(
+            amountCharged
+        );
+    
+    
+        // ========================================
+        // ACCOUNT CREDIT SUCCESS WORDING
+        // ========================================
+    
+        const successMessage =
+            document.getElementById(
+                "booking-success-message"
+            );
+    
+    
+        const successStatusText =
+            document.getElementById(
+                "booking-success-payment-status-text"
+            );
+    
+    
+        if (
+            successMessage
+        ) {
+    
+            successMessage.textContent =
+                "Your account credit was applied and your pet care service has been confirmed.";
+    
+        }
+    
+    
+        if (
+            successStatusText
+        ) {
+    
+            successStatusText.textContent =
+                "Booked with Account Credit";
+    
+        }
+    
+    }
+    else {
+    
+        // ========================================
+        // TOTAL PAID
+        // ========================================
+    
+        const total =
+            document.createElement(
+                "div"
+            );
+    
+    
+        total.className =
+            "booking-success-total";
+    
+    
+        const totalLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        totalLabel.textContent =
+            "Total Paid";
+    
+    
+        const totalAmount =
+            document.createElement(
+                "span"
+            );
+    
+    
+        totalAmount.textContent =
+            formatMoney(
+                checkoutData.total_cents,
+                checkoutData.currency
+            );
+    
+    
+        total.appendChild(
+            totalLabel
+        );
+    
+    
+        total.appendChild(
+            totalAmount
+        );
+    
+    
+        successDetails.appendChild(
+            total
+        );
+    
+    }
 
 
     // ========================================
