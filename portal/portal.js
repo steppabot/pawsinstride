@@ -94,7 +94,30 @@ let currentVisitPets = [];
 let activeClientVisitReportId =
     null;
 
+
+// ========================================
+// BOOKING SELECTION STATE
+// ========================================
+//
+// selectedVisits is the NEW source of truth.
+//
+// Each entry will look like:
+//
+// {
+//     date: "2026-09-15",
+//     timeWindow: "7:00 AM - 10:00 AM"
+// }
+//
+// selectedDates is temporarily retained because
+// some existing pricing, capacity, and weekly
+// validation code still expects an array of dates.
+// We will keep it synchronized while migrating.
+// ========================================
+
+let selectedVisits = [];
+
 let selectedDates = [];
+
 
 let selectedUpcomingDate = null;
 
@@ -131,6 +154,11 @@ let upcomingCalendarYear =
 
 let upcomingCalendarMonth =
     now.getMonth();
+
+
+// ========================================
+// SERVICE CONFIG
+// ========================================
 
 
 // ========================================
@@ -6178,11 +6206,33 @@ function handleServiceTypeChange() {
         );
 
 
+    // ========================================
+    // RESET SELECTED VISITS
+    // ========================================
+
+    selectedVisits =
+        [];
+
+
     selectedDates =
         [];
 
 
+    selectedDateCapacityConflicts.clear();
+
+
+    lastSelectedTimeWindow =
+        "";
+
+
+    clearTimeWindowConflictError();
+
+    clearTimeWindowCapacityHelp();
+
+
     renderSelectedDates();
+
+    renderBookingCalendar();
 
 
     optionWrapper.style.display =
@@ -6227,7 +6277,6 @@ function handleServiceTypeChange() {
         return;
 
     }
-
 
     // ========================================
     // DOG BOARDING
@@ -6515,20 +6564,23 @@ let preferredTimeAvailabilityRequestId =
 // SELECTED VISIT CAPACITY STATE
 // ========================================
 //
-// lastSelectedTimeWindow remembers the time
-// window the client selected even if we must
-// temporarily clear the actual dropdown
-// because one newly-added date conflicts.
+// Capacity conflicts are now tracked by the
+// exact DATE + TIME WINDOW pair.
 //
-// When that happens:
+// Example key:
 //
-// - conflicting visit stays red
-// - Preferred Time Window turns red
-// - invalid select value is cleared
-// - remembered window stays in the summary
+// 2026-09-15|7:00 AM - 10:00 AM
 //
-// Removing the conflicting date restores the
-// original window when it becomes valid again.
+// This allows:
+//
+// Monday 7:00 AM - 10:00 AM = available
+//
+// while:
+//
+// Monday 6:00 PM - 8:00 PM = full
+//
+// without incorrectly marking the entire
+// date unavailable.
 // ========================================
 
 let selectedDateCapacityConflicts =
@@ -6537,6 +6589,39 @@ let selectedDateCapacityConflicts =
 
 let lastSelectedTimeWindow =
     "";
+
+
+// ========================================
+// BUILD VISIT CAPACITY KEY
+// ========================================
+
+function getSelectedVisitCapacityKey(
+    date,
+    timeWindow
+) {
+
+    return `${date}|${timeWindow}`;
+
+}
+
+
+// ========================================
+// CHECK VISIT CAPACITY CONFLICT
+// ========================================
+
+function hasSelectedVisitCapacityConflict(
+    date,
+    timeWindow
+) {
+
+    return selectedDateCapacityConflicts.has(
+        getSelectedVisitCapacityKey(
+            date,
+            timeWindow
+        )
+    );
+
+}
 
 
 // ========================================
@@ -6810,6 +6895,11 @@ async function refreshPreferredTimeWindowAvailability() {
         serviceTypeSelect?.value;
 
 
+    // ========================================
+    // CAPACITY ONLY APPLIES TO WALKING
+    // AND DROP-IN SERVICES
+    // ========================================
+
     if (
         serviceType !==
             "Dog Walking" &&
@@ -6819,15 +6909,11 @@ async function refreshPreferredTimeWindowAvailability() {
 
         selectedDateCapacityConflicts.clear();
 
-
         clearTimeWindowConflictError();
-
 
         clearTimeWindowCapacityHelp();
 
-
         renderSelectedDates();
-
 
         return;
 
@@ -6838,30 +6924,21 @@ async function refreshPreferredTimeWindowAvailability() {
         getRequestedServiceMinutes();
 
 
-    if (!requestedMinutes) {
+    if (
+        !requestedMinutes
+    ) {
 
         selectedDateCapacityConflicts.clear();
 
-
         clearTimeWindowConflictError();
-
 
         clearTimeWindowCapacityHelp();
 
-
         renderSelectedDates();
-
 
         return;
 
     }
-
-
-    const pricing =
-        getServicePrice(
-            serviceType,
-            serviceOptionSelect.value
-        );
 
 
     const currentRequestId =
@@ -6869,105 +6946,34 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
     // ========================================
-    // TRACK CLIENT'S INTENDED WINDOW
+    // REMEMBER CURRENT DROPDOWN WINDOW
     // ========================================
 
-    const currentSelectedWindow =
-        bookingTime.value;
-
-
     if (
-        currentSelectedWindow
+        bookingTime?.value
     ) {
 
         lastSelectedTimeWindow =
-            currentSelectedWindow;
+            bookingTime.value;
 
     }
 
 
-    const trackedTimeWindow =
-        currentSelectedWindow ||
-        lastSelectedTimeWindow ||
-        "";
-
-
     // ========================================
-    // NO DATES YET
+    // NO SELECTED VISITS YET
     // ========================================
 
     if (
-        selectedDates.length === 0
+        selectedVisits.length === 0
     ) {
 
         selectedDateCapacityConflicts.clear();
 
-
         clearTimeWindowConflictError();
-
 
         clearTimeWindowCapacityHelp();
 
-
-        Array.from(
-            bookingTime.options
-        ).forEach(
-            option => {
-
-                if (!option.value) {
-                    return;
-                }
-
-
-                const window =
-                    TIME_WINDOWS.find(
-                        item =>
-                            item.value ===
-                            option.value
-                    );
-
-
-                if (!window) {
-                    return;
-                }
-
-
-                const display =
-                    getPreferredTimeWindowLabel(
-                        window,
-                        pricing
-                    );
-
-
-                option.disabled =
-                    false;
-
-
-                option.textContent =
-                    display.label;
-
-
-                option.dataset.surcharge =
-                    String(
-                        display.surcharge
-                    );
-
-
-                option.removeAttribute(
-                    "data-capacity-full"
-                );
-
-
-                option.removeAttribute(
-                    "data-capacity-partial"
-                );
-
-            }
-        );
-
-
         renderSelectedDates();
-
 
         return;
 
@@ -6975,128 +6981,117 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
     // ========================================
-    // CHECK EVERY WINDOW AGAINST EVERY DATE
+    // CHECK EACH SAVED DATE + TIME VISIT
     // ========================================
 
-    const availabilityChecks =
-        TIME_WINDOWS.map(
-            async window => {
-
-                const dateChecks =
-                    await Promise.all(
-                        selectedDates.map(
-                            async date => {
-
-                                const {
-                                    data,
-                                    error
-                                } =
-                                    await supabaseClient
-                                        .rpc(
-                                            "get_service_window_availability",
-                                            {
-
-                                                p_visit_date:
-                                                    date,
-
-                                                p_time_window:
-                                                    window.value,
-
-                                                p_requested_minutes:
-                                                    requestedMinutes
-
-                                            }
-                                        );
-
-
-                                if (error) {
-
-                                    console.error(
-                                        "Service window availability error:",
-                                        {
-                                            date,
-                                            timeWindow:
-                                                window.value,
-                                            error
-                                        }
-                                    );
-
-
-                                    throw error;
-
-                                }
-
-
-                                const availability =
-                                    Array.isArray(
-                                        data
-                                    )
-                                        ? data[0]
-                                        : data;
-
-
-                                return {
-
-                                    date,
-
-                                    available:
-                                        Boolean(
-                                            availability
-                                                ?.available
-                                        ),
-
-                                    capacityMinutes:
-                                        Number(
-                                            availability
-                                                ?.capacity_minutes ||
-                                            0
-                                        ),
-
-                                    bookedMinutes:
-                                        Number(
-                                            availability
-                                                ?.booked_minutes ||
-                                            0
-                                        ),
-
-                                    remainingMinutes:
-                                        Number(
-                                            availability
-                                                ?.remaining_minutes ||
-                                            0
-                                        )
-
-                                };
-
-                            }
-                        )
-                    );
-
-
-                return {
-
-                    window,
-
-                    dateChecks
-
-                };
-
-            }
-        );
-
-
-    let results;
+    let availabilityChecks;
 
 
     try {
 
-        results =
+        availabilityChecks =
             await Promise.all(
-                availabilityChecks
+                selectedVisits.map(
+                    async visit => {
+
+                        const {
+                            data,
+                            error
+                        } =
+                            await supabaseClient
+                                .rpc(
+                                    "get_service_window_availability",
+                                    {
+
+                                        p_visit_date:
+                                            visit.date,
+
+                                        p_time_window:
+                                            visit.timeWindow,
+
+                                        p_requested_minutes:
+                                            requestedMinutes
+
+                                    }
+                                );
+
+
+                        if (
+                            error
+                        ) {
+
+                            console.error(
+                                "Service window availability error:",
+                                {
+                                    date:
+                                        visit.date,
+
+                                    timeWindow:
+                                        visit.timeWindow,
+
+                                    error
+                                }
+                            );
+
+
+                            throw error;
+
+                        }
+
+
+                        const availability =
+                            Array.isArray(
+                                data
+                            )
+                                ? data[0]
+                                : data;
+
+
+                        return {
+
+                            date:
+                                visit.date,
+
+                            timeWindow:
+                                visit.timeWindow,
+
+                            available:
+                                Boolean(
+                                    availability
+                                        ?.available
+                                ),
+
+                            capacityMinutes:
+                                Number(
+                                    availability
+                                        ?.capacity_minutes ||
+                                    0
+                                ),
+
+                            bookedMinutes:
+                                Number(
+                                    availability
+                                        ?.booked_minutes ||
+                                    0
+                                ),
+
+                            remainingMinutes:
+                                Number(
+                                    availability
+                                        ?.remaining_minutes ||
+                                    0
+                                )
+
+                        };
+
+                    }
+                )
             );
 
     }
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "Preferred time availability refresh failed:",
@@ -7105,7 +7100,6 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
         clearTimeWindowCapacityHelp();
-
 
         return;
 
@@ -7120,178 +7114,47 @@ async function refreshPreferredTimeWindowAvailability() {
         currentRequestId !==
         preferredTimeAvailabilityRequestId
     ) {
+
         return;
+
     }
 
 
-    let hasPartialAvailability =
-        false;
-
-
     // ========================================
-    // APPLY AVAILABILITY STATES
+    // REBUILD EXACT VISIT CONFLICTS
     // ========================================
 
-    results.forEach(
-        result => {
-
-            const option =
-                Array.from(
-                    bookingTime.options
-                ).find(
-                    item =>
-                        item.value ===
-                        result.window.value
-                );
+    selectedDateCapacityConflicts.clear();
 
 
-            if (!option) {
-                return;
-            }
-
-
-            const display =
-                getPreferredTimeWindowLabel(
-                    result.window,
-                    pricing
-                );
-
-
-            const unavailableDates =
-                result.dateChecks.filter(
-                    check =>
-                        !check.available
-                );
-
-
-            const availableDates =
-                result.dateChecks.filter(
-                    check =>
-                        check.available
-                );
-
-
-            // ========================================
-            // ALL SELECTED DATES AVAILABLE
-            // ========================================
+    availabilityChecks.forEach(
+        check => {
 
             if (
-                unavailableDates.length === 0
+                !check.available
             ) {
 
-                option.disabled =
-                    false;
-
-
-                option.textContent =
-                    display.label;
-
-
-                option.dataset.surcharge =
-                    String(
-                        display.surcharge
-                    );
-
-
-                option.removeAttribute(
-                    "data-capacity-full"
+                selectedDateCapacityConflicts.add(
+                    getSelectedVisitCapacityKey(
+                        check.date,
+                        check.timeWindow
+                    )
                 );
-
-
-                option.removeAttribute(
-                    "data-capacity-partial"
-                );
-
-
-                return;
 
             }
-
-
-            // ========================================
-            // EVERY SELECTED DATE UNAVAILABLE
-            // ========================================
-
-            if (
-                availableDates.length === 0
-            ) {
-
-                option.disabled =
-                    true;
-
-
-                option.dataset.capacityFull =
-                    "true";
-
-
-                option.removeAttribute(
-                    "data-capacity-partial"
-                );
-
-
-                option.textContent =
-                    `${display.label} — FULL`;
-
-
-                return;
-
-            }
-
-
-            // ========================================
-            // ONLY SOME DATES UNAVAILABLE
-            // ========================================
-
-            hasPartialAvailability =
-                true;
-
-
-            option.disabled =
-                true;
-
-
-            option.dataset.capacityPartial =
-                "true";
-
-
-            option.removeAttribute(
-                "data-capacity-full"
-            );
-
-
-            const firstUnavailableDate =
-                formatCapacityDate(
-                    unavailableDates[0]
-                        .date
-                );
-
-
-            let unavailableLabel =
-                `${display.label} — Unavailable ${firstUnavailableDate}`;
-
-
-            if (
-                unavailableDates.length > 1
-            ) {
-
-                unavailableLabel +=
-                    ` +${unavailableDates.length - 1} more`;
-
-            }
-
-
-            option.textContent =
-                unavailableLabel;
 
         }
     );
 
 
     // ========================================
-    // EXPLAIN PARTIAL AVAILABILITY
+    // SHOW CAPACITY MESSAGE IF NEEDED
     // ========================================
 
-    if (hasPartialAvailability) {
+    if (
+        selectedDateCapacityConflicts.size >
+        0
+    ) {
 
         showTimeWindowCapacityHelp();
 
@@ -7303,124 +7166,23 @@ async function refreshPreferredTimeWindowAvailability() {
 
 
     // ========================================
-    // RECHECK TRACKED TIME WINDOW
+    // CURRENT DROPDOWN REMAINS AVAILABLE
+    // FOR ADDING OTHER DATES
+    // ========================================
+    //
+    // A saved Monday evening visit being full
+    // must not disable that same evening window
+    // for Tuesday, Wednesday, etc.
+    //
+    // Capacity is now evaluated per visit.
     // ========================================
 
-    selectedDateCapacityConflicts.clear();
-
-
-    if (
-        trackedTimeWindow
-    ) {
-
-        const trackedResult =
-            results.find(
-                result =>
-                    result.window.value ===
-                    trackedTimeWindow
-            );
-
-
-        const trackedOption =
-            Array.from(
-                bookingTime.options
-            ).find(
-                option =>
-                    option.value ===
-                    trackedTimeWindow
-            );
-
-
-        const conflictingDates =
-            trackedResult
-                ?.dateChecks
-                ?.filter(
-                    check =>
-                        !check.available
-                ) || [];
-
-
-        // ========================================
-        // TRACKED WINDOW HAS A CONFLICT
-        // ========================================
-
-        if (
-            conflictingDates.length > 0 ||
-            trackedOption?.disabled
-        ) {
-
-            lastSelectedTimeWindow =
-                trackedTimeWindow;
-
-
-            conflictingDates.forEach(
-                check => {
-
-                    selectedDateCapacityConflicts.add(
-                        check.date
-                    );
-
-                }
-            );
-
-
-            // The invalid time cannot remain
-            // selected because it must never be
-            // submitted to the booking RPC.
-
-            bookingTime.value =
-                "";
-
-
-            // Make the empty dropdown visually
-            // obvious so the client knows where
-            // they need to make a new choice.
-
-            showTimeWindowConflictError();
-
-
-            updateBookingTotal();
-
-        }
-
-        // ========================================
-        // TRACKED WINDOW IS VALID AGAIN
-        // ========================================
-
-        else if (
-            trackedOption &&
-            !trackedOption.disabled
-        ) {
-
-            bookingTime.value =
-                trackedTimeWindow;
-
-
-            lastSelectedTimeWindow =
-                trackedTimeWindow;
-
-
-            clearTimeWindowConflictError();
-
-
-            updateBookingTotal();
-
-        }
-
-    } else {
-
-        // No remembered selection means there
-        // is no capacity conflict to display.
-
-        clearTimeWindowConflictError();
-
-    }
+    clearTimeWindowConflictError();
 
 
     renderSelectedDates();
 
 }
-
 
 // ========================================
 // POPULATE PREFERRED TIME WINDOWS
@@ -7529,6 +7291,18 @@ async function populatePreferredTimeWindows() {
 // ========================================
 // UPDATE SELECTED VISITS WHEN TIME CHANGES
 // ========================================
+//
+// Changing the dropdown does NOT modify any
+// visits that are already selected.
+//
+// It only changes the active time window used
+// when the customer clicks another calendar
+// date.
+//
+// The calendar must redraw so selected dates
+// are highlighted for the currently active
+// time window.
+// ========================================
 
 bookingTime
     ?.addEventListener(
@@ -7536,7 +7310,7 @@ bookingTime
         () => {
 
             // ========================================
-            // CLIENT SELECTED A REAL WINDOW
+            // CLIENT SELECTED A TIME WINDOW
             // ========================================
 
             if (
@@ -7547,13 +7321,14 @@ bookingTime
                     bookingTime.value;
 
 
-                selectedDateCapacityConflicts.clear();
-
-
                 clearTimeWindowConflictError();
 
 
                 renderSelectedDates();
+
+                renderBookingCalendar();
+
+                updateBookingTotal();
 
 
                 return;
@@ -7562,24 +7337,21 @@ bookingTime
 
 
             // ========================================
-            // CLIENT MANUALLY CLEARED WINDOW
+            // CLIENT CLEARED TIME WINDOW
             // ========================================
 
-            if (
-                selectedDateCapacityConflicts.size ===
-                0
-            ) {
-
-                lastSelectedTimeWindow =
-                    "";
+            lastSelectedTimeWindow =
+                "";
 
 
-                clearTimeWindowConflictError();
-
-            }
+            clearTimeWindowConflictError();
 
 
             renderSelectedDates();
+
+            renderBookingCalendar();
+
+            updateBookingTotal();
 
         }
     );
@@ -7970,120 +7742,152 @@ function renderBookingCalendar() {
         // ========================================
         // HOLIDAY INDICATOR
         // ========================================
-
+        
         if (
             holidayName
         ) {
-
+        
             button.classList.add(
                 "calendar-day-holiday"
             );
-
-
+        
+        
             const holidayStar =
                 document.createElement(
                     "span"
                 );
-
-
+        
+        
             holidayStar.className =
                 "calendar-holiday-star";
-
-
+        
+        
             holidayStar.textContent =
                 "✦";
-
-
+        
+        
             holidayStar.setAttribute(
                 "aria-hidden",
                 "true"
             );
-
-
+        
+        
             button.appendChild(
                 holidayStar
             );
-
-
+        
+        
             button.title =
                 `${holidayName} — holiday pricing applies`;
-
-
+        
+        
             button.setAttribute(
                 "aria-label",
                 `${day}, ${holidayName}. Holiday pricing applies.`
             );
-
+        
         } else {
-
+        
             button.setAttribute(
                 "aria-label",
                 String(day)
             );
-
+        
         }
-
-
+        
+        
+        // ========================================
+        // PAST DATE
+        // ========================================
+        
         if (
             date < today
         ) {
-
+        
             button.disabled =
                 true;
-
-
+        
+        
             button.classList.add(
                 "calendar-day-past"
             );
-
+        
         }
-
-
+        
+        
+        // ========================================
+        // TODAY
+        // ========================================
+        
         if (
             date === today
         ) {
-
+        
             button.classList.add(
                 "calendar-day-today"
             );
-
+        
         }
-
-
+        
+        
+        // ========================================
+        // SELECTED DATE FOR ACTIVE TIME WINDOW
+        // ========================================
+        
+        const activeTimeWindow =
+            bookingTime?.value ||
+            lastSelectedTimeWindow ||
+            "";
+        
+        
+        const isSelectedForActiveWindow =
+            Boolean(
+                activeTimeWindow
+            ) &&
+            selectedVisits.some(
+                visit =>
+                    visit.date ===
+                        date
+                    &&
+                    visit.timeWindow ===
+                        activeTimeWindow
+            );
+        
+        
         if (
-            selectedDates.includes(
-                date
-            )
+            isSelectedForActiveWindow
         ) {
-
+        
             button.classList.add(
                 "calendar-day-selected"
             );
-
+        
         }
-
-
+        
+        
+        // ========================================
+        // CALENDAR DAY CLICK
+        // ========================================
+        
         button.addEventListener(
             "click",
             () => {
-
+        
                 toggleSelectedDate(
                     date
                 );
-
+        
             }
         );
-
-
+        
+        
         grid.appendChild(
             button
         );
-
-    }
-
-}
-
-
+        
+        }
+        
+        
 // ========================================
 // TOGGLE SELECTED DATE
 // ========================================
@@ -8092,37 +7896,140 @@ function toggleSelectedDate(
     date
 ) {
 
+    const selectedTimeWindow =
+        bookingTime?.value ||
+        lastSelectedTimeWindow ||
+        "";
+
+
+    // ========================================
+    // REQUIRE A TIME WINDOW FIRST
+    // ========================================
+
     if (
-        selectedDates.includes(
-            date
-        )
+        !selectedTimeWindow
     ) {
 
-        selectedDates =
-            selectedDates.filter(
-                item =>
-                    item !== date
-            );
+        if (
+            bookingTime
+        ) {
+
+            bookingTime.focus();
+
+        }
 
 
-        selectedDateCapacityConflicts.delete(
-            date
-        );
-
-    } else {
-
-        selectedDates.push(
-            date
-        );
+        return;
 
     }
 
 
-    selectedDates.sort();
+    // ========================================
+    // FIND EXACT DATE + TIME MATCH
+    // ========================================
+
+    const existingVisitIndex =
+        selectedVisits.findIndex(
+            visit =>
+                visit.date ===
+                    date
+                &&
+                visit.timeWindow ===
+                    selectedTimeWindow
+        );
+
+
+    // ========================================
+    // REMOVE EXACT VISIT
+    // ========================================
+
+    if (
+        existingVisitIndex !==
+        -1
+    ) {
+
+        const removedVisit =
+            selectedVisits[
+                existingVisitIndex
+            ];
+
+
+        selectedVisits.splice(
+            existingVisitIndex,
+            1
+        );
+
+
+        selectedDateCapacityConflicts.delete(
+            getSelectedVisitCapacityKey(
+                removedVisit.date,
+                removedVisit.timeWindow
+            )
+        );
+
+    } else {
+
+        // ========================================
+        // ADD NEW DATE + TIME VISIT
+        // ========================================
+
+        selectedVisits.push({
+            date:
+                date,
+
+            timeWindow:
+                selectedTimeWindow
+        });
+
+    }
+
+
+    // ========================================
+    // SORT SELECTED VISITS
+    // ========================================
+
+    selectedVisits.sort(
+        (
+            firstVisit,
+            secondVisit
+        ) => {
+
+            if (
+                firstVisit.date !==
+                secondVisit.date
+            ) {
+
+                return firstVisit.date.localeCompare(
+                    secondVisit.date
+                );
+
+            }
+
+
+            return firstVisit.timeWindow.localeCompare(
+                secondVisit.timeWindow
+            );
+
+        }
+    );
+
+
+    // ========================================
+    // KEEP LEGACY DATE ARRAY SYNCHRONIZED
+    // ========================================
+
+    selectedDates =
+        [
+            ...new Set(
+                selectedVisits.map(
+                    visit =>
+                        visit.date
+                )
+            )
+        ].sort();
 
 
     renderSelectedDates();
-
 
     renderBookingCalendar();
 
@@ -8155,22 +8062,16 @@ function renderSelectedDates() {
     }
 
 
+    // ========================================
+    // VISIT COUNT
+    // ========================================
+
     count.textContent =
-        `${selectedDates.length} ${
-            selectedDates.length === 1
+        `${selectedVisits.length} ${
+            selectedVisits.length === 1
                 ? "visit"
                 : "visits"
         }`;
-
-
-    // ========================================
-    // TIME WINDOW SHOWN IN SUMMARY
-    // ========================================
-
-    const summaryTimeWindow =
-        bookingTime?.value ||
-        lastSelectedTimeWindow ||
-        "";
 
 
     // ========================================
@@ -8178,7 +8079,7 @@ function renderSelectedDates() {
     // ========================================
 
     if (
-        selectedDates.length === 0
+        selectedVisits.length === 0
     ) {
 
         list.innerHTML =
@@ -8190,22 +8091,23 @@ function renderSelectedDates() {
 
     } else {
 
+        // ========================================
+        // RENDER EACH DATE + TIME VISIT
+        // ========================================
+
         list.innerHTML =
-            selectedDates
+            selectedVisits
                 .map(
-                    date => {
+                    (
+                        visit,
+                        index
+                    ) => {
 
                         const hasConflict =
-                            selectedDateCapacityConflicts.has(
-                                date
+                            hasSelectedVisitCapacityConflict(
+                                visit.date,
+                                visit.timeWindow
                             );
-
-
-                        const timeText =
-                            summaryTimeWindow
-                                ? summaryTimeWindow
-                                : "Time window not selected";
-
 
                         return `
                             <div
@@ -8222,7 +8124,9 @@ function renderSelectedDates() {
                                 <div class="selected-visit-summary">
 
                                     <strong class="selected-visit-date">
-                                        ${formatDate(date)}
+                                        ${formatDate(
+                                            visit.date
+                                        )}
                                     </strong>
 
                                     <div class="selected-visit-time-row">
@@ -8237,7 +8141,7 @@ function renderSelectedDates() {
                                                 }
                                             "
                                         >
-                                            ${timeText}
+                                            ${visit.timeWindow}
                                         </span>
 
                                         ${
@@ -8254,10 +8158,11 @@ function renderSelectedDates() {
 
                                 </div>
 
+
                                 <button
                                     type="button"
                                     class="remove-date-button"
-                                    data-date="${date}"
+                                    data-visit-index="${index}"
                                 >
                                     Remove
                                 </button>
@@ -8270,35 +8175,74 @@ function renderSelectedDates() {
                 .join("");
 
 
-        list
-            .querySelectorAll(
-                ".remove-date-button"
-            )
-            .forEach(
-                button => {
-
-                    button.addEventListener(
-                        "click",
-                        () => {
-
-                            const date =
-                                button.dataset.date;
-
+    // ========================================
+    // REMOVE SELECTED VISIT
+    // ========================================
+    
+    list
+        .querySelectorAll(
+            ".remove-date-button"
+        )
+        .forEach(
+            button => {
+    
+                button.addEventListener(
+                    "click",
+                    () => {
+    
+                        const visitIndex =
+                            Number(
+                                button.dataset.visitIndex
+                            );
+    
+    
+                        const removedVisit =
+                            selectedVisits[
+                                visitIndex
+                            ];
+    
+    
+                        if (
+                            !removedVisit
+                        ) {
+                            return;
+                        }
+    
+    
+                        selectedVisits.splice(
+                            visitIndex,
+                            1
+                        );
+    
+    
+                        // ========================================
+                        // CLEAR EXACT VISIT CAPACITY CONFLICT
+                        // ========================================
+    
+                        selectedDateCapacityConflicts.delete(
+                            getSelectedVisitCapacityKey(
+                                removedVisit.date,
+                                removedVisit.timeWindow
+                            )
+                        );
+    
+    
+                        // ========================================
+                        // REBUILD LEGACY DATE ARRAY
+                        // ========================================
 
                             selectedDates =
-                                selectedDates.filter(
-                                    item =>
-                                        item !== date
-                                );
-
-
-                            selectedDateCapacityConflicts.delete(
-                                date
-                            );
+                                [
+                                    ...new Set(
+                                        selectedVisits.map(
+                                            visit =>
+                                                visit.date
+                                        )
+                                    )
+                                ].sort();
 
 
                             renderSelectedDates();
-
 
                             renderBookingCalendar();
 
@@ -8718,35 +8662,14 @@ function updateBookingTotal() {
         ) || 0;
 
 
-    let surcharge =
-        0;
-
-
-    if (
-        serviceType ===
-            "Dog Walking" ||
-        serviceType ===
-            "Drop-In Visit"
-    ) {
-
-        surcharge =
-            Number(
-                bookingTime.options[
-                    bookingTime.selectedIndex
-                ]?.dataset.surcharge
-            ) || 0;
-
-    }
-
-
-    let additionalPetFee =
-        0;
-
-
     const perAdditionalPetFee =
         Number(
             pricing?.additional_pet_fee
         ) || 0;
+
+
+    let additionalPetFee =
+        0;
 
 
     if (
@@ -8763,47 +8686,113 @@ function updateBookingTotal() {
     }
 
 
-    const perVisit =
-        basePrice +
-        surcharge +
-        additionalPetFee;
+    // ========================================
+    // CALCULATE EACH SELECTED VISIT
+    // ========================================
+
+    const pricedVisits =
+        selectedVisits.map(
+            visit => {
+
+                let surcharge =
+                    0;
 
 
-    const holidayDates =
-        selectedDates
-            .map(
-                date => ({
-                    date,
-                    holidayName:
-                        getServiceHolidayName(
-                            date
-                        )
-                })
-            )
-            .filter(
-                item =>
-                    Boolean(
-                        item.holidayName
-                    )
-            );
+                if (
+                    serviceType ===
+                        "Dog Walking" ||
+                    serviceType ===
+                        "Drop-In Visit"
+                ) {
+
+                    const timeWindowConfig =
+                        TIME_WINDOWS.find(
+                            window =>
+                                window.value ===
+                                visit.timeWindow
+                        );
 
 
-    const holidayTotal =
-        holidayDates.length *
-        holidayFee;
+                    if (
+                        timeWindowConfig
+                    ) {
 
+                        const timeWindowDisplay =
+                            getPreferredTimeWindowLabel(
+                                timeWindowConfig,
+                                pricing
+                            );
+
+
+                        surcharge =
+                            Number(
+                                timeWindowDisplay
+                                    ?.surcharge
+                            ) || 0;
+
+                    }
+
+                }
+
+
+                const holidayName =
+                    getServiceHolidayName(
+                        visit.date
+                    );
+
+
+                const visitHolidayFee =
+                    holidayName
+                        ? holidayFee
+                        : 0;
+
+
+                const visitTotal =
+                    basePrice +
+                    additionalPetFee +
+                    surcharge +
+                    visitHolidayFee;
+
+
+                return {
+
+                    ...visit,
+
+                    surcharge,
+
+                    holidayName,
+
+                    holidayFee:
+                        visitHolidayFee,
+
+                    total:
+                        visitTotal
+
+                };
+
+            }
+        );
+
+
+    // ========================================
+    // TOTAL PRICE
+    // ========================================
 
     const total =
-        (
-            perVisit *
-            selectedDates.length
-        ) +
-        holidayTotal;
+        pricedVisits.reduce(
+            (
+                sum,
+                visit
+            ) =>
+                sum +
+                visit.total,
+            0
+        );
 
 
     countDisplay.textContent =
-        `${selectedDates.length} ${
-            selectedDates.length === 1
+        `${selectedVisits.length} ${
+            selectedVisits.length === 1
                 ? "service"
                 : "services"
         }`;
@@ -8817,92 +8806,161 @@ function updateBookingTotal() {
         [];
 
 
+    // ========================================
+    // BASE SERVICE PRICE
+    // ========================================
+
     if (
-        selectedDates.length &&
+        selectedVisits.length &&
         basePrice
     ) {
 
         pieces.push(
-            `${selectedDates.length} × $${formatServicePrice(
+            `${selectedVisits.length} × $${formatServicePrice(
                 basePrice
             )}`
         );
 
+    }
+
+
+    // ========================================
+    // ADDITIONAL PET PRICE
+    // ========================================
+
+    if (
+        selectedVisits.length &&
+        additionalPetFee > 0
+    ) {
+
+        pieces.push(
+            `${additionalPetCount} additional ${
+                additionalPetCount === 1
+                    ? "pet"
+                    : "pets"
+            } × $${formatServicePrice(
+                perAdditionalPetFee
+            )} per visit`
+        );
+
+    }
+
+
+    // ========================================
+    // PET SITTING INCLUDED PETS
+    // ========================================
+
+    if (
+        selectedVisits.length &&
+        serviceType ===
+            "Pet Sitting" &&
+        additionalPetCount > 0
+    ) {
+
+        pieces.push(
+            `${additionalPetCount} additional ${
+                additionalPetCount === 1
+                    ? "pet"
+                    : "pets"
+            } included`
+        );
+
+    }
+
+
+    // ========================================
+    // EVENING SURCHARGES
+    // ========================================
+
+    const eveningSurchargeTotal =
+        pricedVisits.reduce(
+            (
+                sum,
+                visit
+            ) =>
+                sum +
+                visit.surcharge,
+            0
+        );
+
+
+    const eveningSurchargeVisitCount =
+        pricedVisits.filter(
+            visit =>
+                visit.surcharge > 0
+        ).length;
+
+
+    if (
+        eveningSurchargeTotal > 0
+    ) {
 
         if (
-            additionalPetFee > 0
+            eveningSurchargeVisitCount === 1
         ) {
 
             pieces.push(
-                `${additionalPetCount} additional ${
-                    additionalPetCount === 1
-                        ? "pet"
-                        : "pets"
-                } × $${formatServicePrice(
-                    perAdditionalPetFee
-                )} per visit`
-            );
-
-        }
-
-
-        if (
-            serviceType ===
-                "Pet Sitting" &&
-            additionalPetCount > 0
-        ) {
-
-            pieces.push(
-                `${additionalPetCount} additional ${
-                    additionalPetCount === 1
-                        ? "pet"
-                        : "pets"
-                } included`
-            );
-
-        }
-
-
-        if (
-            surcharge > 0
-        ) {
-
-            pieces.push(
-                `$${formatServicePrice(
-                    surcharge
-                )} evening fee per visit`
-            );
-
-        }
-
-
-        // ========================================
-        // HOLIDAY PRICE BREAKDOWN
-        // ========================================
-
-        if (
-            holidayDates.length === 1 &&
-            holidayFee > 0
-        ) {
-
-            pieces.push(
-                `${holidayDates[0].holidayName} +$${formatServicePrice(
-                    holidayFee
+                `Evening fee +$${formatServicePrice(
+                    eveningSurchargeTotal
                 )}`
             );
 
-        } else if (
-            holidayDates.length > 1 &&
-            holidayFee > 0
-        ) {
+        } else {
 
             pieces.push(
-                `${holidayDates.length} holiday services × $${formatServicePrice(
-                    holidayFee
+                `${eveningSurchargeVisitCount} evening fees +$${formatServicePrice(
+                    eveningSurchargeTotal
                 )}`
             );
 
         }
+
+    }
+
+
+    // ========================================
+    // HOLIDAY PRICE BREAKDOWN
+    // ========================================
+
+    const holidayVisits =
+        pricedVisits.filter(
+            visit =>
+                visit.holidayName &&
+                visit.holidayFee > 0
+        );
+
+
+    const holidayTotal =
+        holidayVisits.reduce(
+            (
+                sum,
+                visit
+            ) =>
+                sum +
+                visit.holidayFee,
+            0
+        );
+
+
+    if (
+        holidayVisits.length === 1
+    ) {
+
+        pieces.push(
+            `${holidayVisits[0].holidayName} +$${formatServicePrice(
+                holidayTotal
+            )}`
+        );
+
+    } else if (
+        holidayVisits.length > 1
+    ) {
+
+        pieces.push(
+            `${holidayVisits.length} holiday services +$${formatServicePrice(
+                holidayTotal
+            )}`
+        );
 
     }
 
@@ -9553,40 +9611,41 @@ if (bookingForm) {
             // DATE VALIDATION
             // ========================================
             //
-            // Keep the friendly browser-side
-            // validation for immediate feedback.
+            // Dog Walking and Drop-In Visit keep the
+            // existing 3 SERVICE DATES per week rule.
             //
-            // Supabase ALSO validates the weekly
-            // minimum inside create_service_booking.
+            // Multiple visits on the same date still
+            // count as only ONE service date toward
+            // that weekly minimum.
             // ========================================
-
+            
             if (
                 serviceType ===
                     "Dog Walking" ||
                 serviceType ===
                     "Drop-In Visit"
             ) {
-
+            
                 const validation =
                     await validateThreePerWeek(
                         serviceType
                     );
-
-
+            
+            
                 if (
                     !validation.valid
                 ) {
-
+            
                     message.textContent =
                         validation.message;
-
-
+            
+            
                     const calendar =
                         document.getElementById(
                             "multi-date-booking"
                         );
-
-
+            
+            
                     calendar?.scrollIntoView({
                         behavior:
                             window.matchMedia(
@@ -9594,32 +9653,31 @@ if (bookingForm) {
                             ).matches
                                 ? "auto"
                                 : "smooth",
-
+            
                         block:
                             "center"
                     });
-
-
+            
+            
                     return;
-
+            
                 }
-
-            }
-            else if (
-                selectedDates.length <
+            
+            } else if (
+                selectedVisits.length <
                 1
             ) {
-
+            
                 message.textContent =
-                    "Please select at least one date.";
-
-
+                    "Please select at least one visit.";
+            
+            
                 const calendar =
                     document.getElementById(
                         "multi-date-booking"
                     );
-
-
+            
+            
                 calendar?.scrollIntoView({
                     behavior:
                         window.matchMedia(
@@ -9627,16 +9685,95 @@ if (bookingForm) {
                         ).matches
                             ? "auto"
                             : "smooth",
-
+            
                     block:
                         "center"
                 });
-
-
+            
+            
                 return;
-
+            
             }
-
+            
+            
+            // ========================================
+            // REFRESH CAPACITY BEFORE CHECKOUT
+            // ========================================
+            //
+            // Capacity is checked against each exact
+            // DATE + TIME WINDOW pair.
+            //
+            // Example:
+            //
+            // Monday 7:00 AM - 10:00 AM
+            //
+            // is independent from:
+            //
+            // Monday 6:00 PM - 8:00 PM
+            //
+            // The database will still perform the final
+            // authoritative capacity validation.
+            // ========================================
+            
+            if (
+                serviceType ===
+                    "Dog Walking" ||
+                serviceType ===
+                    "Drop-In Visit"
+            ) {
+            
+                await refreshPreferredTimeWindowAvailability();
+            
+            
+                const conflictingVisit =
+                    selectedVisits.find(
+                        visit =>
+                            hasSelectedVisitCapacityConflict(
+                                visit.date,
+                                visit.timeWindow
+                            )
+                    );
+            
+            
+                if (
+                    conflictingVisit
+                ) {
+            
+                    message.textContent =
+                        "One or more selected visits are no longer available. Please remove the unavailable visit or choose another time window.";
+            
+            
+                    renderSelectedDates();
+            
+            
+                    const selectedVisitsSection =
+                        document.getElementById(
+                            "selected-dates"
+                        ) ||
+                        document.getElementById(
+                            "multi-date-booking"
+                        );
+            
+            
+                    selectedVisitsSection
+                        ?.scrollIntoView({
+                            behavior:
+                                window.matchMedia(
+                                    "(prefers-reduced-motion: reduce)"
+                                ).matches
+                                    ? "auto"
+                                    : "smooth",
+            
+                            block:
+                                "center"
+                        });
+            
+            
+                    return;
+            
+                }
+            
+            }
 
             // ========================================
             // SUBMIT THROUGH SECURE DATABASE RPC
@@ -9654,18 +9791,37 @@ if (bookingForm) {
             // - booking group ID
             //
             // Supabase determines all of those.
+            //
+            // Each selected visit now sends its own
+            // date + time window.
             // ========================================
-
+            
             button.disabled =
                 true;
-
-
+            
+            
             button.textContent =
                 "Preparing Checkout...";
-
-
+            
+            
             try {
-
+            
+                // ========================================
+                // BUILD PER-VISIT CHECKOUT PAYLOAD
+                // ========================================
+            
+                const checkoutVisits =
+                    selectedVisits.map(
+                        visit => ({
+                            date:
+                                visit.date,
+            
+                            time_window:
+                                visit.timeWindow
+                        })
+                    );
+            
+            
                 const {
                     data,
                     error
@@ -9674,51 +9830,39 @@ if (bookingForm) {
                         .rpc(
                             "create_booking_checkout",
                             {
-
+            
                                 p_service_type:
                                     serviceType,
-
+            
                                 p_service_option:
                                     serviceOption,
-
-                                p_dates:
-                                    selectedDates,
-
-                                p_time_window:
-                                    timeWindow,
-
+            
+                                p_visits:
+                                    checkoutVisits,
+            
                                 p_primary_pet_id:
                                     primaryPetId,
-
+            
                                 p_additional_pet_ids:
-                                    additionalPetIds,
-
-                                p_boarding_dropoff:
-                                    null,
-
-                                p_boarding_pickup:
-                                    null,
-
-                                p_boarding_pickup_window:
-                                    null
-
+                                    additionalPetIds
+            
                             }
                         );
-
-
+            
+            
                 if (error) {
-
+            
                     throw error;
-
+            
                 }
-
-
+            
+            
                 console.log(
                     "Secure booking created:",
                     data
                 );
-
-
+            
+            
                 // ========================================
                 // CHECKOUT CREATED
                 // ========================================
@@ -10088,9 +10232,33 @@ async function submitBoardingBooking(
 
 function resetBookingForm() {
 
+    // ========================================
+    // CLEAR BOOKING SELECTION STATE
+    // ========================================
+
+    selectedVisits =
+        [];
+
+
     selectedDates =
         [];
 
+
+    selectedDateCapacityConflicts.clear();
+
+
+    lastSelectedTimeWindow =
+        "";
+
+
+    clearTimeWindowConflictError();
+
+    clearTimeWindowCapacityHelp();
+
+
+    // ========================================
+    // RESET FORM CONTROLS
+    // ========================================
 
     bookingForm.reset();
 
@@ -10125,6 +10293,10 @@ function resetBookingForm() {
         "none";
 
 
+    // ========================================
+    // REFRESH BOOKING UI
+    // ========================================
+
     renderSelectedDates();
 
     renderBookingCalendar();
@@ -10132,7 +10304,6 @@ function resetBookingForm() {
     updateBookingTotal();
 
 }
-
 
 // ========================================
 // REFRESH UPCOMING
