@@ -2653,6 +2653,54 @@ async function getProfilePhotoUrl(
 
 }
 
+// ========================================
+// PROPERTY ACCESS COLLAPSE TOGGLE
+// ========================================
+
+const propertyAccessToggle =
+    document.getElementById(
+        "property-access-toggle"
+    );
+
+
+const propertyAccessContent =
+    document.getElementById(
+        "property-access-content"
+    );
+
+
+if (
+    propertyAccessToggle &&
+    propertyAccessContent
+) {
+
+    propertyAccessToggle.addEventListener(
+        "click",
+        () => {
+
+            const isExpanded =
+                propertyAccessToggle
+                    .getAttribute(
+                        "aria-expanded"
+                    ) ===
+                    "true";
+
+
+            propertyAccessToggle.setAttribute(
+                "aria-expanded",
+                String(
+                    !isExpanded
+                )
+            );
+
+
+            propertyAccessContent.hidden =
+                isExpanded;
+
+        }
+    );
+
+}
 
 // ========================================
 // HOUSEHOLD EDIT FORM
