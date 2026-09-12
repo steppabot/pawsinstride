@@ -3034,6 +3034,28 @@ async function setupApplePay(
 }
 
 // ========================================
+// DETECT INSTALLED PWA
+// ========================================
+
+function isRunningAsPwa() {
+
+    const standaloneDisplayMode =
+        window.matchMedia(
+            "(display-mode: standalone)"
+        ).matches;
+
+    const iosStandalone =
+        window.navigator.standalone ===
+        true;
+
+    return (
+        standaloneDisplayMode ||
+        iosStandalone
+    );
+
+}
+
+// ========================================
 // INITIALIZE PAYMENT METHODS
 // ========================================
 
@@ -3120,25 +3142,35 @@ async function initializePaymentMethods() {
 
         }
 
-
+        
         // ========================================
         // VENMO ELIGIBILITY
         // ========================================
-
+        //
+        // Venmo is intentionally hidden inside
+        // the installed PWA because the Venmo
+        // mobile app-switch can return the user
+        // to Safari instead of the PWA.
+        //
+        // Venmo remains available in normal
+        // mobile and desktop browsers.
+        // ========================================
+        
         if (
+            !isRunningAsPwa() &&
             walletEligibleMethods.isEligible(
                 "venmo"
             )
         ) {
-
+        
             methodFound =
                 true;
-
-
+        
+        
             await setupVenmo(
                 walletSdkInstance
             );
-
+        
         }
 
         // ========================================
