@@ -4674,7 +4674,6 @@ async function getPetDisplayUrl(
 
 }
 
-
 // ========================================
 // ADD / EDIT PET FORM
 // ========================================
@@ -4694,6 +4693,12 @@ const petFormPanel =
 const petForm =
     document.getElementById(
         "pet-form"
+    );
+
+
+const removePetButton =
+    document.getElementById(
+        "remove-pet-button"
     );
 
 
@@ -4753,6 +4758,16 @@ function openAddPetForm() {
         "save-pet-button"
     ).textContent =
         "Add Pet";
+
+
+    if (
+        removePetButton
+    ) {
+
+        removePetButton.style.display =
+            "none";
+
+    }
 
 
     document.getElementById(
@@ -4821,6 +4836,16 @@ async function openEditPetForm(
         "save-pet-button"
     ).textContent =
         "Save Changes";
+
+
+    if (
+        removePetButton
+    ) {
+
+        removePetButton.style.display =
+            "";
+
+    }
 
 
     document.getElementById(
@@ -4896,7 +4921,6 @@ async function openEditPetForm(
 
 }
 
-
 // ========================================
 // CLOSE PET
 // ========================================
@@ -4918,6 +4942,22 @@ function closePetForm() {
 
 
     if (
+        removePetButton
+    ) {
+
+        removePetButton.style.display =
+            "none";
+
+        removePetButton.disabled =
+            false;
+
+        removePetButton.textContent =
+            "Remove Pet";
+
+    }
+
+
+    if (
         petFormPanel
     ) {
 
@@ -4927,6 +4967,130 @@ function closePetForm() {
     }
 
 }
+
+
+// ========================================
+// REMOVE PET
+// ========================================
+
+removePetButton
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                !editingPet
+            ) {
+                return;
+            }
+
+
+            const petName =
+                editingPet.name ||
+                "this pet";
+
+
+            const confirmed =
+                window.confirm(
+                    `Remove ${petName} from your household?\n\nThis will remove ${petName} from Your Pets and future booking selections. Past booking history will remain available.`
+                );
+
+
+            if (
+                !confirmed
+            ) {
+                return;
+            }
+
+
+            const message =
+                document.getElementById(
+                    "pet-form-message"
+                );
+
+
+            removePetButton.disabled =
+                true;
+
+
+            removePetButton.textContent =
+                "Removing...";
+
+
+            if (
+                message
+            ) {
+
+                message.textContent =
+                    "";
+
+            }
+
+
+            try {
+
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .from("pets")
+                        .update({
+                            active: false
+                        })
+                        .eq(
+                            "id",
+                            editingPet.id
+                        )
+                        .eq(
+                            "client_id",
+                            currentUser.id
+                        );
+
+
+                if (
+                    error
+                ) {
+
+                    throw error;
+
+                }
+
+
+                closePetForm();
+
+
+                await refreshPets();
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Remove pet error:",
+                    error
+                );
+
+
+                if (
+                    message
+                ) {
+
+                    message.textContent =
+                        "We couldn't remove this pet. Please try again.";
+
+                }
+
+
+                removePetButton.disabled =
+                    false;
+
+
+                removePetButton.textContent =
+                    "Remove Pet";
+
+            }
+
+        }
+    );
 
 
 // ========================================
