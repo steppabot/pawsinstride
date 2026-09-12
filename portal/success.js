@@ -1304,20 +1304,36 @@ function renderConfirmation() {
     // PAYMENT SUMMARY
     // ========================================
     
-    const paymentProvider =
-        String(
-            checkoutData.payment_provider ||
-            ""
-        ).toLowerCase();
+    const creditAppliedCents =
+        Number(
+            checkoutData.credit_applied_cents ||
+            0
+        );
     
     
-    const isAccountCreditPayment =
-        paymentProvider ===
-        "account_credit";
+    const amountDueCents =
+        Number(
+            checkoutData.amount_due_cents ??
+            checkoutData.total_cents ??
+            0
+        );
     
+    
+    const usedAccountCredit =
+        creditAppliedCents > 0;
+    
+    
+    const fullyCoveredByCredit =
+        usedAccountCredit &&
+        amountDueCents === 0;
+    
+    
+    // ========================================
+    // CREDIT WAS USED
+    // ========================================
     
     if (
-        isAccountCreditPayment
+        usedAccountCredit
     ) {
     
         // ========================================
@@ -1404,7 +1420,7 @@ function renderConfirmation() {
     
         creditTotalAmount.textContent =
             `-${formatMoney(
-                checkoutData.credit_applied_cents,
+                creditAppliedCents,
                 checkoutData.currency
             )}`;
     
@@ -1456,7 +1472,7 @@ function renderConfirmation() {
     
         amountChargedAmount.textContent =
             formatMoney(
-                checkoutData.amount_due_cents,
+                amountDueCents,
                 checkoutData.currency
             );
     
@@ -1497,7 +1513,9 @@ function renderConfirmation() {
         ) {
     
             successMessage.textContent =
-                "Your account credit was applied and your pet care service has been confirmed.";
+                fullyCoveredByCredit
+                    ? "Your account credit was applied and your pet care service has been confirmed."
+                    : "Your account credit was applied and your remaining payment was received. Your pet care service has been confirmed.";
     
         }
     
@@ -1507,16 +1525,20 @@ function renderConfirmation() {
         ) {
     
             successStatusText.textContent =
-                "Booked with Account Credit";
+                fullyCoveredByCredit
+                    ? "Booked with Account Credit"
+                    : "Payment Confirmed";
     
         }
     
     }
-    else {
     
-        // ========================================
-        // TOTAL PAID
-        // ========================================
+    
+    // ========================================
+    // NO ACCOUNT CREDIT USED
+    // ========================================
+    
+    else {
     
         const total =
             document.createElement(
@@ -1566,7 +1588,6 @@ function renderConfirmation() {
         );
     
     }
-
 
     // ========================================
     // REFERENCE
