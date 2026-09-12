@@ -1310,101 +1310,136 @@
 
 
 
-                            <!-- ACCESS -->
-
+                            <!-- ========================================
+                                 PROPERTY ACCESS - COLLAPSIBLE DISPLAY
+                                 ======================================== -->
+                            
                             <div class="household-detail-card household-detail-card-full access-detail-card">
-
-                                <span class="household-detail-label">
-                                    Property Access
-                                </span>
-
-
-                                <div class="access-detail-grid">
-
-
-                                    <div class="access-detail-item">
-
-                                        <span>
-                                            Gate Code
+                            
+                                <button
+                                    type="button"
+                                    id="property-access-toggle"
+                                    class="detail-collapse-toggle"
+                                    aria-expanded="false"
+                                    aria-controls="property-access-content"
+                                >
+                            
+                                    <span class="detail-collapse-heading">
+                            
+                                        <span class="household-detail-label">
+                                            Property Access
                                         </span>
-
-                                        <strong id="display-gate-code">
-                                            Not added
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="access-detail-item">
-
-                                        <span>
-                                            Door / Entry Code
+                            
+                                        <span class="detail-collapse-status">
+                                            Saved access information
                                         </span>
-
-                                        <strong id="display-door-code">
-                                            Not added
-                                        </strong>
-
+                            
+                                    </span>
+                            
+                                    <span
+                                        class="detail-collapse-chevron"
+                                        aria-hidden="true"
+                                    >
+                                        ›
+                                    </span>
+                            
+                                </button>
+                            
+                            
+                                <div
+                                    id="property-access-content"
+                                    class="detail-collapse-content"
+                                    hidden
+                                >
+                            
+                                    <div class="access-detail-grid">
+                            
+                            
+                                        <div class="access-detail-item">
+                            
+                                            <span>
+                                                Gate Code
+                                            </span>
+                            
+                                            <strong id="display-gate-code">
+                                                Not added
+                                            </strong>
+                            
+                                        </div>
+                            
+                            
+                                        <div class="access-detail-item">
+                            
+                                            <span>
+                                                Door / Entry Code
+                                            </span>
+                            
+                                            <strong id="display-door-code">
+                                                Not added
+                                            </strong>
+                            
+                                        </div>
+                            
+                            
+                                        <div class="access-detail-item">
+                            
+                                            <span>
+                                                Key Instructions
+                                            </span>
+                            
+                                            <strong id="display-key-instructions">
+                                                Not added
+                                            </strong>
+                            
+                                        </div>
+                            
+                            
+                                        <div class="access-detail-item">
+                            
+                                            <span>
+                                                Alarm Instructions
+                                            </span>
+                            
+                                            <strong id="display-alarm-instructions">
+                                                Not added
+                                            </strong>
+                            
+                                        </div>
+                            
+                            
+                                        <div class="access-detail-item">
+                            
+                                            <span>
+                                                Parking Instructions
+                                            </span>
+                            
+                                            <strong id="display-parking-instructions">
+                                                Not added
+                                            </strong>
+                            
+                                        </div>
+                            
+                            
+                                        <div class="access-detail-item">
+                            
+                                            <span>
+                                                Other Access Notes
+                                            </span>
+                            
+                                            <strong id="display-other-access-notes">
+                                                Not added
+                                            </strong>
+                            
+                                        </div>
+                            
+                            
                                     </div>
-
-
-                                    <div class="access-detail-item">
-
-                                        <span>
-                                            Key Instructions
-                                        </span>
-
-                                        <strong id="display-key-instructions">
-                                            Not added
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="access-detail-item">
-
-                                        <span>
-                                            Alarm Instructions
-                                        </span>
-
-                                        <strong id="display-alarm-instructions">
-                                            Not added
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="access-detail-item">
-
-                                        <span>
-                                            Parking Instructions
-                                        </span>
-
-                                        <strong id="display-parking-instructions">
-                                            Not added
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="access-detail-item">
-
-                                        <span>
-                                            Other Access Notes
-                                        </span>
-
-                                        <strong id="display-other-access-notes">
-                                            Not added
-                                        </strong>
-
-                                    </div>
-
+                            
                                 </div>
-
+                            
                             </div>
-
-
-
+                            
+                            
                             <!-- HOME NOTES -->
 
                             <div class="household-detail-card household-detail-card-full">
