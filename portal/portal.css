@@ -7288,59 +7288,98 @@ body.client-navigation-open {
 
 
     /* ========================================
-       HOME SECTION
+       HOME SECTIONS
     ======================================== */
 
     .mobile-home-section {
-        margin:
-            0
-            0
-            24px;
 
-        padding: 0;
+        margin-top:
+            22px;
 
-        background: transparent;
-        border-radius: 0;
+        padding:
+            18px
+            16px
+            16px;
+
+        border:
+            1px solid
+            rgba(
+                41,
+                91,
+                121,
+                0.14
+            );
+
+        border-radius:
+            22px;
+
+        background:
+            rgba(
+                255,
+                255,
+                255,
+                0.72
+            );
+
     }
 
 
     .mobile-home-section-heading {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
 
-        gap: 14px;
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            space-between;
+
+        gap:
+            12px;
 
         margin:
             0
-            2px
-            11px;
+            0
+            14px;
+
     }
 
 
     .mobile-home-section-heading h3 {
-        margin: 0;
+
+        margin:
+            0;
 
         color:
-            var(
-                --pis-navy,
-                #243746
-            );
+            #183447;
 
-        font-size: 17px;
-        font-weight: 800;
-        line-height: 1.25;
+        font-size:
+            20px;
+
+        font-weight:
+            800;
+
+        line-height:
+            1.15;
+
     }
 
 
     .mobile-home-section-link {
-        width: auto;
+
+        flex:
+            0 0 auto;
 
         padding:
-            6px
-            4px;
+            4px
+            2px;
 
-        background: transparent;
+        border:
+            0;
+
+        background:
+            transparent;
 
         color:
             var(
@@ -7348,13 +7387,23 @@ body.client-navigation-open {
                 #2890df
             );
 
-        border: 0;
+        font:
+            inherit;
 
-        font-size: 12px;
-        font-weight: 800;
+        font-size:
+            14px;
 
-        cursor: pointer;
+        font-weight:
+            800;
+
+        cursor:
+            pointer;
+
+        -webkit-tap-highlight-color:
+            transparent;
+
     }
+
 
 
     /* ========================================
@@ -7604,7 +7653,7 @@ body.client-navigation-open {
     }
 
     /* ========================================
-       QUICK ACTIONS
+          QUICK ACTIONS
     ======================================== */
 
     .mobile-home-quick-actions {
@@ -7624,8 +7673,8 @@ body.client-navigation-open {
         gap:
             8px;
 
-        margin-top:
-            8px;
+        margin:
+            0;
 
     }
 
@@ -7819,6 +7868,7 @@ body.client-navigation-open {
             round;
 
     }
+
 
     /* ========================================
        UPCOMING SNAPSHOT
