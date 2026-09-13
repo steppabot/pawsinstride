@@ -2113,7 +2113,9 @@ async function loadDashboard() {
         visits || [];
 
 
+    // ========================================
     // VISIT PET RELATIONSHIPS
+    // ========================================
 
     currentVisitPets =
         [];
@@ -2187,61 +2189,61 @@ async function loadDashboard() {
     if (
         !selectedUpcomingDate
     ) {
-    
+
         const visitsToday =
             currentVisits.filter(
                 visit =>
                     visit.visit_date ===
                     today
             );
-    
-    
+
+
         const firstFutureVisit =
             currentVisits.find(
                 visit =>
                     visit.visit_date >
                     today
             );
-    
-    
+
+
         let startingDate =
             today;
-    
-    
+
+
         if (
             visitsToday.length > 0
         ) {
-    
+
             startingDate =
                 today;
-    
+
         } else if (
             firstFutureVisit
         ) {
-    
+
             startingDate =
                 firstFutureVisit.visit_date;
-    
+
         }
-    
-    
+
+
         const startDate =
             parseLocalDate(
                 startingDate
             );
-    
-    
+
+
         upcomingCalendarYear =
             startDate.getFullYear();
-    
-    
+
+
         upcomingCalendarMonth =
             startDate.getMonth();
-    
-    
+
+
         selectedUpcomingDate =
             startingDate;
-    
+
     }
 
 
@@ -2259,8 +2261,32 @@ async function loadDashboard() {
     dashboardContent.style.display =
         "block";
 
-}
 
+    // ========================================
+    // INITIAL MOBILE APP HOME
+    // ========================================
+
+    if (
+        window.matchMedia(
+            "(max-width: 700px)"
+        ).matches
+    ) {
+
+        renderMobileHomeDashboard();
+
+
+        setMobileAppScreen(
+            "home"
+        );
+
+
+        setActiveMobileAppTab(
+            "home"
+        );
+
+    }
+
+}
 
 // ========================================
 // HOUSEHOLD DISPLAY
@@ -10796,16 +10822,11 @@ function resetBookingForm() {
     updateBookingTotal();
 
 }
-
 // ========================================
 // REFRESH UPCOMING
 // ========================================
 
 async function refreshUpcomingVisits() {
-
-    const today =
-        getLocalDateString();
-
 
     const {
         data,
@@ -10845,20 +10866,19 @@ async function refreshUpcomingVisits() {
         [];
 
 
-    const ids =
+    const visitIds =
         currentVisits.map(
-            visit =>
-                visit.id
+            visit => visit.id
         );
 
 
     if (
-        ids.length > 0
+        visitIds.length > 0
     ) {
 
         const {
-            data: relationData,
-            error: relationError
+            data: visitPets,
+            error: visitPetsError
         } =
             await supabaseClient
                 .from("visit_pets")
@@ -10867,14 +10887,21 @@ async function refreshUpcomingVisits() {
                 )
                 .in(
                     "visit_id",
-                    ids
+                    visitIds
                 );
 
 
-        if (!relationError) {
+        if (visitPetsError) {
+
+            console.error(
+                "Visit pets refresh error:",
+                visitPetsError
+            );
+
+        } else {
 
             currentVisitPets =
-                relationData || [];
+                visitPets || [];
 
         }
 
@@ -10884,6 +10911,8 @@ async function refreshUpcomingVisits() {
     renderUpcomingCalendar();
 
     renderSelectedUpcomingServices();
+
+    renderMobileHomeDashboard();
 
 }
 
@@ -15897,6 +15926,584 @@ function scrollToMobileAppSection(
 
 
 // ========================================
+// MOBILE HOME DASHBOARD
+// ========================================
+
+function renderMobileHomeDashboard() {
+
+    const greeting =
+        document.getElementById(
+            "mobile-home-greeting"
+        );
+
+    const nextVisitDate =
+        document.getElementById(
+            "mobile-home-next-visit-date"
+        );
+
+    const nextVisitPets =
+        document.getElementById(
+            "mobile-home-next-visit-pets"
+        );
+
+    const nextVisitService =
+        document.getElementById(
+            "mobile-home-next-visit-service"
+        );
+
+    const nextVisitStatus =
+        document.getElementById(
+            "mobile-home-next-visit-status"
+        );
+
+    const nextVisitButton =
+        document.getElementById(
+            "mobile-home-next-visit-button"
+        );
+
+    const upcomingList =
+        document.getElementById(
+            "mobile-home-upcoming-list"
+        );
+
+
+    if (
+        !greeting ||
+        !nextVisitDate ||
+        !nextVisitPets ||
+        !nextVisitService ||
+        !nextVisitStatus ||
+        !nextVisitButton ||
+        !upcomingList
+    ) {
+        return;
+    }
+
+
+    // ========================================
+    // DYNAMIC GREETING
+    // ========================================
+
+    const currentHour =
+        new Date().getHours();
+
+
+    let greetingText =
+        "Good morning";
+
+
+    if (
+        currentHour >= 12 &&
+        currentHour < 18
+    ) {
+
+        greetingText =
+            "Good afternoon";
+
+    } else if (
+        currentHour >= 18
+    ) {
+
+        greetingText =
+            "Good evening";
+
+    }
+
+
+    const fullName =
+        String(
+            currentProfile?.full_name ||
+            "Client"
+        )
+            .trim();
+
+
+    const firstName =
+        fullName
+            .split(/\s+/)
+            .filter(Boolean)[0] ||
+        "there";
+
+
+    greeting.textContent =
+        `${greetingText}, ${firstName} 👋`;
+
+
+    // ========================================
+    // UPCOMING VISITS
+    // ========================================
+
+    const today =
+        getLocalDateString();
+
+
+    const upcomingVisits =
+        currentVisits
+            .filter(
+                visit => {
+
+                    const status =
+                        String(
+                            visit.status || ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    return (
+                        visit.visit_date >=
+                            today &&
+                        status !==
+                            "cancelled"
+                    );
+
+                }
+            )
+            .sort(
+                (a, b) => {
+
+                    if (
+                        a.visit_date !==
+                        b.visit_date
+                    ) {
+
+                        return String(
+                            a.visit_date
+                        ).localeCompare(
+                            String(
+                                b.visit_date
+                            )
+                        );
+
+                    }
+
+
+                    return compareClientVisits(
+                        a,
+                        b
+                    );
+
+                }
+            );
+
+
+    // ========================================
+    // NEXT VISIT
+    // ========================================
+
+    const nextVisit =
+        upcomingVisits[0] ||
+        null;
+
+
+    if (!nextVisit) {
+
+        nextVisitDate.textContent =
+            "No upcoming visit";
+
+        nextVisitPets.textContent =
+            "You're all caught up";
+
+        nextVisitService.textContent =
+            "Your next scheduled service will appear here.";
+
+        nextVisitStatus.style.display =
+            "none";
+
+        nextVisitButton.style.display =
+            "none";
+
+    } else {
+
+        const visitDate =
+            parseLocalDate(
+                nextVisit.visit_date
+            );
+
+
+        const dateText =
+            visitDate
+                .toLocaleDateString(
+                    "en-US",
+                    {
+                        weekday:
+                            "long",
+
+                        month:
+                            "short",
+
+                        day:
+                            "numeric"
+                    }
+                );
+
+
+        const pets =
+            getPetsForVisit(
+                nextVisit
+            );
+
+
+        const petNames =
+            pets.length
+
+                ? pets
+                    .map(
+                        pet =>
+                            pet.name ||
+                            "Pet"
+                    )
+                    .join(", ")
+
+                : "Your Pet";
+
+
+        const serviceName =
+            nextVisit.service_name ||
+            nextVisit.service_type ||
+            "Service";
+
+
+        const timeWindow =
+            nextVisit.time_window ||
+            "";
+
+
+        const progress =
+            getClientVisitProgressInfo(
+                nextVisit
+            );
+
+
+        const statusLabel =
+            getClientVisitStatusLabel(
+                nextVisit,
+                progress
+            );
+
+
+        nextVisitDate.textContent =
+            timeWindow
+
+                ? `${dateText} · ${timeWindow}`
+
+                : dateText;
+
+
+        nextVisitPets.textContent =
+            petNames;
+
+
+        nextVisitService.textContent =
+            serviceName;
+
+
+        nextVisitStatus.textContent =
+            statusLabel;
+
+
+        nextVisitStatus.style.display =
+            "inline-flex";
+
+
+        nextVisitButton.style.display =
+            "flex";
+
+
+        nextVisitButton.onclick =
+            () => {
+
+                selectedUpcomingDate =
+                    nextVisit.visit_date;
+
+
+                const selectedDate =
+                    parseLocalDate(
+                        nextVisit.visit_date
+                    );
+
+
+                upcomingCalendarYear =
+                    selectedDate
+                        .getFullYear();
+
+
+                upcomingCalendarMonth =
+                    selectedDate
+                        .getMonth();
+
+
+                renderUpcomingCalendar();
+
+                renderSelectedUpcomingServices();
+
+
+                handleMobileAppTab(
+                    "services"
+                );
+
+            };
+
+    }
+
+
+    // ========================================
+    // UPCOMING SNAPSHOT
+    // ========================================
+
+    upcomingList.innerHTML =
+        "";
+
+
+    const snapshotVisits =
+        upcomingVisits.slice(
+            0,
+            3
+        );
+
+
+    if (
+        snapshotVisits.length ===
+        0
+    ) {
+
+        upcomingList.innerHTML =
+            `
+                <div class="mobile-home-empty-state">
+                    <span>
+                        Upcoming services will appear here.
+                    </span>
+                </div>
+            `;
+
+        return;
+    }
+
+
+    snapshotVisits.forEach(
+        visit => {
+
+            const date =
+                parseLocalDate(
+                    visit.visit_date
+                );
+
+
+            const month =
+                date
+                    .toLocaleDateString(
+                        "en-US",
+                        {
+                            month:
+                                "short"
+                        }
+                    );
+
+
+            const day =
+                date.getDate();
+
+
+            const pets =
+                getPetsForVisit(
+                    visit
+                );
+
+
+            const petNames =
+                pets.length
+
+                    ? pets
+                        .map(
+                            pet =>
+                                pet.name ||
+                                "Pet"
+                        )
+                        .join(", ")
+
+                    : "Your Pet";
+
+
+            const serviceName =
+                visit.service_name ||
+                visit.service_type ||
+                "Service";
+
+
+            const timeWindow =
+                visit.time_window ||
+                "";
+
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.type =
+                "button";
+
+
+            button.className =
+                "mobile-home-upcoming-item";
+
+
+            button.innerHTML =
+                `
+                    <span class="mobile-home-upcoming-date">
+
+                        <span class="mobile-home-upcoming-month">
+                            ${escapeHtml(
+                                month
+                            )}
+                        </span>
+
+                        <span class="mobile-home-upcoming-day">
+                            ${day}
+                        </span>
+
+                    </span>
+
+
+                    <span class="mobile-home-upcoming-info">
+
+                        <strong>
+                            ${escapeHtml(
+                                `${petNames} · ${serviceName}`
+                            )}
+                        </strong>
+
+                        <span>
+                            ${
+                                timeWindow
+
+                                    ? escapeHtml(
+                                        timeWindow
+                                    )
+
+                                    : "Scheduled visit"
+                            }
+                        </span>
+
+                    </span>
+
+
+                    <span
+                        class="mobile-home-upcoming-chevron"
+                        aria-hidden="true"
+                    >
+                        ›
+                    </span>
+                `;
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    selectedUpcomingDate =
+                        visit.visit_date;
+
+
+                    upcomingCalendarYear =
+                        date.getFullYear();
+
+
+                    upcomingCalendarMonth =
+                        date.getMonth();
+
+
+                    renderUpcomingCalendar();
+
+                    renderSelectedUpcomingServices();
+
+
+                    handleMobileAppTab(
+                        "services"
+                    );
+
+                }
+            );
+
+
+            upcomingList.appendChild(
+                button
+            );
+
+        }
+    );
+
+}
+
+
+// ========================================
+// MOBILE HOME QUICK ACTIONS
+// ========================================
+
+document
+    .getElementById(
+        "mobile-home-book-service-button"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await handleMobileAppTab(
+                "services"
+            );
+
+
+            window.setTimeout(
+                () => {
+
+                    document
+                        .getElementById(
+                            "request-walk-button"
+                        )
+                        ?.click();
+
+                },
+                100
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "mobile-home-message-button"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            handleMobileAppTab(
+                "messages"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "mobile-home-view-services-button"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            handleMobileAppTab(
+                "services"
+            );
+
+        }
+    );
+
+
+// ========================================
 // SET MOBILE APP SCREEN
 // ========================================
 
@@ -15917,18 +16524,6 @@ function setMobileAppScreen(
 
 
     // ========================================
-    // HOME USES CURRENT DASHBOARD FOR NOW
-    // ========================================
-
-    if (
-        screen ===
-        "home"
-    ) {
-        return;
-    }
-
-
-    // ========================================
     // APPLY REQUESTED MOBILE SCREEN
     // ========================================
 
@@ -15936,8 +16531,21 @@ function setMobileAppScreen(
         `mobile-app-screen-${screen}`
     );
 
-}
 
+    // ========================================
+    // REFRESH HOME WHEN OPENED
+    // ========================================
+
+    if (
+        screen ===
+        "home"
+    ) {
+
+        renderMobileHomeDashboard();
+
+    }
+
+}
 
 // ========================================
 // RESET MOBILE SCREEN SCROLL
