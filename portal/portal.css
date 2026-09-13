@@ -6751,16 +6751,16 @@ body.client-report-lightbox-open {
    
        width: 100%;
    
-       min-height: 70px;
+       min-height: 72px;
    
        padding:
-           9px
+           10px
            max(
                8px,
                env(safe-area-inset-right)
            )
            max(
-               6px,
+               7px,
                env(safe-area-inset-bottom)
            )
            max(
@@ -6773,19 +6773,18 @@ body.client-report-lightbox-open {
                255,
                255,
                255,
-               0.98
+               0.99
            );
    
-       border-top:
-           0;
+       border-top: 0;
    
        box-shadow:
-           0 -10px 32px
+           0 -12px 34px
            rgba(
                25,
                55,
                73,
-               0.14
+               0.18
            );
    
        backdrop-filter:
@@ -6824,13 +6823,22 @@ body.client-report-lightbox-open {
                    --pis-blue,
                    #2890df
                )
-               55%,
+               50%,
    
                var(
                    --pis-orange,
                    #f5ab40
                )
                100%
+           );
+   
+       box-shadow:
+           0 1px 6px
+           rgba(
+               40,
+               144,
+               223,
+               0.18
            );
    }
 
