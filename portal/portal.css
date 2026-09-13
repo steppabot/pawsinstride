@@ -17671,3 +17671,214 @@ body.booking-success-page {
 }
 
 }
+
+/* ========================================
+   MOBILE APP SCREENS
+======================================== */
+/*
+ * Mobile/PWA only.
+ *
+ * Desktop continues using the complete
+ * dashboard layout exactly as before.
+ *
+ * JavaScript adds one of these classes
+ * to <body>:
+ *
+ * mobile-app-screen-home
+ * mobile-app-screen-services
+ * mobile-app-screen-pets
+ * mobile-app-screen-profile
+ *
+ * Messages remain an overlay and do not
+ * require their own dashboard screen.
+ * ======================================== */
+
+@media (max-width: 700px) {
+
+
+    /* ========================================
+       SCREEN TRANSITIONS
+    ======================================== */
+
+    .client-portal-page
+    #household-section,
+
+    .client-portal-page
+    #pets-section,
+
+    .client-portal-page
+    #services-section {
+
+        transition:
+            opacity 0.18s ease,
+            transform 0.18s ease;
+
+    }
+
+
+    /* ========================================
+       SERVICES SCREEN
+    ======================================== */
+
+    .client-portal-page.mobile-app-screen-services
+    #household-section,
+
+    .client-portal-page.mobile-app-screen-services
+    #pets-section,
+
+    .client-portal-page.mobile-app-screen-services
+    #push-notification-card,
+
+    .client-portal-page.mobile-app-screen-services
+    #logout-button {
+
+        display:
+            none !important;
+
+    }
+
+
+    .client-portal-page.mobile-app-screen-services
+    #services-section {
+
+        display:
+            block !important;
+
+        width:
+            100%;
+
+        margin:
+            0;
+
+    }
+
+
+    /* ========================================
+       PETS SCREEN
+    ======================================== */
+
+    .client-portal-page.mobile-app-screen-pets
+    #household-section,
+
+    .client-portal-page.mobile-app-screen-pets
+    #services-section,
+
+    .client-portal-page.mobile-app-screen-pets
+    #push-notification-card,
+
+    .client-portal-page.mobile-app-screen-pets
+    #logout-button {
+
+        display:
+            none !important;
+
+    }
+
+
+    .client-portal-page.mobile-app-screen-pets
+    #pets-section {
+
+        display:
+            block !important;
+
+        width:
+            100%;
+
+        margin:
+            0;
+
+    }
+
+
+    /* ========================================
+       PROFILE SCREEN
+    ======================================== */
+
+    .client-portal-page.mobile-app-screen-profile
+    #pets-section,
+
+    .client-portal-page.mobile-app-screen-profile
+    #services-section,
+
+    .client-portal-page.mobile-app-screen-profile
+    #push-notification-card {
+
+        display:
+            none !important;
+
+    }
+
+
+    .client-portal-page.mobile-app-screen-profile
+    #household-section {
+
+        display:
+            block !important;
+
+        width:
+            100%;
+
+        margin:
+            0;
+
+    }
+
+
+    /* ========================================
+       SINGLE-SCREEN GRID BEHAVIOR
+    ======================================== */
+
+    .client-portal-page.mobile-app-screen-services
+    .client-dashboard-grid,
+
+    .client-portal-page.mobile-app-screen-pets
+    .client-dashboard-grid,
+
+    .client-portal-page.mobile-app-screen-profile
+    .client-dashboard-grid {
+
+        display:
+            block;
+
+        width:
+            100%;
+
+    }
+
+
+    .client-portal-page.mobile-app-screen-services
+    .client-dashboard-column,
+
+    .client-portal-page.mobile-app-screen-pets
+    .client-dashboard-column,
+
+    .client-portal-page.mobile-app-screen-profile
+    .client-dashboard-column {
+
+        width:
+            100%;
+
+        max-width:
+            none;
+
+        margin:
+            0;
+
+    }
+
+
+    /* ========================================
+       KEEP REQUEST SERVICE INDEPENDENT
+    ======================================== */
+    /*
+     * We intentionally do NOT hide
+     * #booking-section here.
+     *
+     * The header's Request Service button
+     * can continue opening the existing
+     * booking experience from any tab.
+     * ======================================== */
+
+
+}
+
