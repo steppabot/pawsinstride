@@ -534,7 +534,6 @@ async function loadAdminDashboard() {
                 }
             );
 
-
     if (
         visitWalksError
     ) {
@@ -556,6 +555,20 @@ async function loadAdminDashboard() {
         allVisitWalks =
             visitWalks ||
             [];
+
+
+        // ========================================
+        // AUTO-SYNC SAVED WALKS ON PAGE LOAD
+        // ========================================
+
+        if (
+            navigator.onLine
+        ) {
+
+
+            await syncAllPendingWalkFinishes();
+
+        }
 
     }
     
@@ -2732,12 +2745,27 @@ adminDayServicesContainer
 
                 } else if (
                     action ===
+                    "sync-walk"
+                ) {
+
+
+                    actionButton.textContent =
+                        "Syncing...";
+
+
+                    await retryPendingWalkSync(
+                        visitId
+                    );
+
+
+                } else if (
+                    action ===
                     "finish-walk"
                 ) {
 
 
                     actionButton.textContent =
-                        "Finishing Walk...";
+                        "Saving Walk...";
 
 
                     await finishVisitWalk(
@@ -4471,6 +4499,678 @@ function stopWalkGpsTracking(
 
 
 // ========================================
+// PENDING WALK FINISH STORAGE KEY
+// ========================================
+
+function getPendingWalkFinishStorageKey(
+    walkId
+) {
+
+
+    return (
+        `paws-in-stride-walk-finish-${walkId}`
+    );
+
+}
+
+
+// ========================================
+// LOAD PENDING WALK FINISH
+// ========================================
+
+function loadPendingWalkFinish(
+    walkId
+) {
+
+
+    try {
+
+
+        const value =
+            localStorage.getItem(
+                getPendingWalkFinishStorageKey(
+                    walkId
+                )
+            );
+
+
+        if (
+            !value
+        ) {
+
+            return null;
+
+        }
+
+
+        return JSON.parse(
+            value
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Unable to load pending walk finish:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+// ========================================
+// SAVE PENDING WALK FINISH
+// ========================================
+
+function savePendingWalkFinish(
+    walkId,
+    finishData
+) {
+
+
+    try {
+
+
+        localStorage.setItem(
+
+            getPendingWalkFinishStorageKey(
+                walkId
+            ),
+
+            JSON.stringify(
+                finishData
+            )
+
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Unable to save pending walk finish:",
+            error
+        );
+
+
+        throw new Error(
+            "We couldn't safely save this walk on the device."
+        );
+
+    }
+
+}
+
+
+// ========================================
+// CLEAR PENDING WALK FINISH
+// ========================================
+
+function clearPendingWalkFinish(
+    walkId
+) {
+
+
+    try {
+
+
+        localStorage.removeItem(
+            getPendingWalkFinishStorageKey(
+                walkId
+            )
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Unable to clear pending walk finish:",
+            error
+        );
+
+    }
+
+}
+
+
+// ========================================
+// NETWORK-LIKE WALK ERROR
+// ========================================
+
+function isWalkNetworkError(
+    error
+) {
+
+
+    const message =
+        String(
+            error?.message ||
+            error ||
+            ""
+        )
+            .toLowerCase();
+
+
+    return (
+
+        error instanceof TypeError ||
+
+        message.includes(
+            "failed to fetch"
+        ) ||
+
+        message.includes(
+            "load failed"
+        ) ||
+
+        message.includes(
+            "network"
+        )
+
+    );
+
+}
+
+
+// ========================================
+// SYNC PENDING WALK FINISH
+// ========================================
+
+async function syncPendingWalkFinish(
+    walkId,
+    shouldRender = true
+) {
+
+
+    const walk =
+        allVisitWalks.find(
+
+            item =>
+
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    walkId
+                )
+
+        );
+
+
+    if (
+        !walk
+    ) {
+
+        return false;
+
+    }
+
+
+    const pendingFinish =
+        loadPendingWalkFinish(
+            walk.id
+        );
+
+
+    if (
+        !pendingFinish
+    ) {
+
+        return true;
+
+    }
+
+
+    const pendingQueue =
+        loadPendingWalkGpsQueue(
+            walk.id
+        );
+
+
+    const tracker = {
+
+        walkId:
+            Number(
+                walk.id
+            ),
+
+        visitId:
+            Number(
+                walk.visit_id
+            ),
+
+        pendingQueue:
+            pendingQueue,
+
+        flushPromise:
+            null,
+
+        distanceMeters:
+            Number(
+                pendingFinish
+                    .distance_meters ||
+                walk.distance_meters ||
+                0
+            ),
+
+        pointCount:
+            Number(
+                pendingFinish
+                    .point_count ||
+                walk.point_count ||
+                0
+            ),
+
+        lastSyncError:
+            null
+
+    };
+
+
+    try {
+
+
+        // ========================================
+        // FIRST SYNC ANY WAITING GPS POINTS
+        // ========================================
+
+        await flushWalkGpsQueue(
+            tracker
+        );
+
+
+        if (
+            tracker.pendingQueue.length >
+            0
+        ) {
+
+
+            console.warn(
+                "Walk finish is waiting for GPS points to sync."
+            );
+
+
+            if (
+                shouldRender
+            ) {
+
+                renderAdminDayServices();
+
+            }
+
+
+            return false;
+
+        }
+
+
+        // ========================================
+        // THEN FINALIZE THE WALK
+        // ========================================
+
+        const {
+
+            data,
+
+            error
+
+        } =
+            await supabaseClient
+                .from(
+                    "visit_walks"
+                )
+                .update({
+
+                    status:
+                        "completed",
+
+                    ended_at:
+                        pendingFinish
+                            .ended_at,
+
+                    duration_seconds:
+                        pendingFinish
+                            .duration_seconds,
+
+                    distance_meters:
+                        pendingFinish
+                            .distance_meters,
+
+                    point_count:
+                        pendingFinish
+                            .point_count,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                })
+                .eq(
+                    "id",
+                    walk.id
+                )
+                .eq(
+                    "status",
+                    "in_progress"
+                )
+                .select("*")
+                .maybeSingle();
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        // ========================================
+        // HANDLE RETRY AFTER SERVER ALREADY FINISHED
+        // ========================================
+
+        let completedWalk =
+            data;
+
+
+        if (
+            !completedWalk
+        ) {
+
+
+            const {
+
+                data: existingWalk,
+
+                error: existingWalkError
+
+            } =
+                await supabaseClient
+                    .from(
+                        "visit_walks"
+                    )
+                    .select("*")
+                    .eq(
+                        "id",
+                        walk.id
+                    )
+                    .single();
+
+
+            if (
+                existingWalkError
+            ) {
+
+                throw existingWalkError;
+
+            }
+
+
+            if (
+                existingWalk.status !==
+                "completed"
+            ) {
+
+                throw new Error(
+                    "The walk could not be finalized."
+                );
+
+            }
+
+
+            completedWalk =
+                existingWalk;
+
+        }
+
+
+        replaceAdminVisitWalk(
+            completedWalk
+        );
+
+
+        clearPendingWalkFinish(
+            walk.id
+        );
+
+
+        savePendingWalkGpsQueue(
+            walk.id,
+            []
+        );
+
+
+        if (
+            shouldRender
+        ) {
+
+            renderAdminDayServices();
+
+        }
+
+
+        console.log(
+            "Pending walk synced successfully:",
+            walk.id
+        );
+
+
+        return true;
+
+
+    } catch (
+        error
+    ) {
+
+
+        if (
+            isWalkNetworkError(
+                error
+            )
+        ) {
+
+
+            console.warn(
+                "Walk saved locally and waiting for connection:",
+                error
+            );
+
+
+            if (
+                shouldRender
+            ) {
+
+                renderAdminDayServices();
+
+            }
+
+
+            return false;
+
+        }
+
+
+        throw error;
+
+    }
+
+}
+
+
+// ========================================
+// SYNC ALL PENDING WALK FINISHES
+// ========================================
+
+async function syncAllPendingWalkFinishes() {
+
+
+    if (
+        !navigator.onLine
+    ) {
+
+        return;
+
+    }
+
+
+    let changed =
+        false;
+
+
+    for (
+        const walk of
+        allVisitWalks
+    ) {
+
+
+        const pendingFinish =
+            loadPendingWalkFinish(
+                walk.id
+            );
+
+
+        if (
+            !pendingFinish
+        ) {
+
+            continue;
+
+        }
+
+
+        try {
+
+
+            const synced =
+                await syncPendingWalkFinish(
+                    walk.id,
+                    false
+                );
+
+
+            if (
+                synced
+            ) {
+
+                changed =
+                    true;
+
+            }
+
+
+        } catch (
+            error
+        ) {
+
+
+            console.error(
+                "Unable to auto-sync pending walk:",
+                error
+            );
+
+        }
+
+    }
+
+
+    if (
+        changed
+    ) {
+
+        renderAdminDayServices();
+
+    }
+
+}
+
+
+// ========================================
+// RETRY PENDING WALK SYNC
+// ========================================
+
+async function retryPendingWalkSync(
+    visitId
+) {
+
+
+    const walk =
+        getVisitWalk(
+            visitId
+        );
+
+
+    if (
+        !walk
+    ) {
+
+        throw new Error(
+            "Walk session not found."
+        );
+
+    }
+
+
+    const pendingFinish =
+        loadPendingWalkFinish(
+            walk.id
+        );
+
+
+    if (
+        !pendingFinish
+    ) {
+
+
+        renderAdminDayServices();
+
+
+        return;
+
+    }
+
+
+    await syncPendingWalkFinish(
+        walk.id
+    );
+
+}
+
+
+// ========================================
+// AUTO-SYNC WHEN CONNECTION RETURNS
+// ========================================
+
+window.addEventListener(
+    "online",
+    () => {
+
+
+        console.log(
+            "Connection restored. Checking pending walks."
+        );
+
+
+        syncAllPendingWalkFinishes();
+
+    }
+);
+
+
+// ========================================
 // START VISIT WALK
 // ========================================
 
@@ -4719,6 +5419,32 @@ async function finishVisitWalk(
     }
 
 
+    // ========================================
+    // ALREADY SAVED LOCALLY
+    // JUST TRY TO SYNC AGAIN
+    // ========================================
+
+    const existingPendingFinish =
+        loadPendingWalkFinish(
+            walk.id
+        );
+
+
+    if (
+        existingPendingFinish
+    ) {
+
+
+        await syncPendingWalkFinish(
+            walk.id
+        );
+
+
+        return;
+
+    }
+
+
     if (
         walk.status !==
         "in_progress"
@@ -4730,6 +5456,10 @@ async function finishVisitWalk(
 
     }
 
+
+    // ========================================
+    // STOP GPS IMMEDIATELY
+    // ========================================
 
     let tracker =
         null;
@@ -4753,6 +5483,10 @@ async function finishVisitWalk(
 
     }
 
+
+    // ========================================
+    // RESTORE ANY WAITING POINTS
+    // ========================================
 
     if (
         !tracker
@@ -4801,30 +5535,19 @@ async function finishVisitWalk(
                         ?.point_count_total ??
                     walk.point_count ??
                     0
-                )
+                ),
+
+            lastSyncError:
+                null
 
         };
 
     }
 
 
-    await flushWalkGpsQueue(
-        tracker
-    );
-
-
-    if (
-        tracker.pendingQueue.length >
-        0
-    ) {
-
-
-        throw new Error(
-            "Some GPS points are still waiting to sync. Keep this page open with data service and try Finish Walk again."
-        );
-
-    }
-
+    // ========================================
+    // BUILD FINAL WALK TOTALS
+    // ========================================
 
     const endedAt =
         new Date();
@@ -4854,253 +5577,81 @@ async function finishVisitWalk(
         );
 
 
-    const {
+    const pendingFinish = {
 
-        data,
+        ended_at:
+            endedAt
+                .toISOString(),
 
-        error
+        duration_seconds:
+            durationSeconds,
 
-    } =
-        await supabaseClient
-            .from(
-                "visit_walks"
+        distance_meters:
+            Number(
+                tracker.distanceMeters ||
+                0
             )
-            .update({
+                .toFixed(
+                    2
+                ),
 
-                status:
-                    "completed",
+        point_count:
+            Number(
+                tracker.pointCount ||
+                0
+            ),
 
-                ended_at:
-                    endedAt
-                        .toISOString(),
+        saved_at:
+            new Date()
+                .toISOString()
 
-                duration_seconds:
-                    durationSeconds,
-
-                distance_meters:
-                    Number(
-                        tracker.distanceMeters ||
-                        0
-                    )
-                        .toFixed(
-                            2
-                        ),
-
-                point_count:
-                    Number(
-                        tracker.pointCount ||
-                        0
-                    ),
-
-                updated_at:
-                    new Date()
-                        .toISOString()
-
-            })
-            .eq(
-                "id",
-                walk.id
-            )
-            .eq(
-                "status",
-                "in_progress"
-            )
-            .select("*")
-            .single();
+    };
 
 
-    if (
-        error
-    ) {
+    // ========================================
+    // SAVE FINAL WALK ON PHONE FIRST
+    // ========================================
 
-        throw error;
-
-    }
-
-
-    replaceAdminVisitWalk(
-        data
-    );
-
-
-    savePendingWalkGpsQueue(
+    savePendingWalkFinish(
         walk.id,
-        []
+        pendingFinish
+    );
+
+
+    // ========================================
+    // UPDATE LOCAL DISPLAY IMMEDIATELY
+    // ========================================
+
+    updateLocalWalkTotals(
+
+        walk.id,
+
+        Number(
+            pendingFinish
+                .distance_meters
+        ),
+
+        Number(
+            pendingFinish
+                .point_count
+        )
+
     );
 
 
     renderAdminDayServices();
 
-}
 
+    // ========================================
+    // ATTEMPT SERVER SYNC
+    // FAILURE IS OKAY -- LOCAL COPY REMAINS
+    // ========================================
 
-// ========================================
-// FINISH VISIT WALK
-// ========================================
-
-async function finishVisitWalk(
-    visitId
-) {
-
-
-    const walk =
-        getVisitWalk(
-            visitId
-        );
-
-
-    if (
-        !walk
-    ) {
-
-        throw new Error(
-            "Active walk not found."
-        );
-
-    }
-
-
-    if (
-        walk.status !==
-        "in_progress"
-    ) {
-
-        throw new Error(
-            "This walk is not currently active."
-        );
-
-    }
-
-
-    const endedAt =
-        new Date();
-
-
-    const startedAt =
-        new Date(
-            walk.started_at
-        );
-
-
-    const durationSeconds =
-        Math.max(
-
-            0,
-
-            Math.round(
-
-                (
-                    endedAt.getTime() -
-                    startedAt.getTime()
-                ) /
-                1000
-
-            )
-
-        );
-
-
-    const {
-
-        data,
-        error
-
-    } =
-        await supabaseClient
-            .from(
-                "visit_walks"
-            )
-            .update({
-
-                status:
-                    "completed",
-
-                ended_at:
-                    endedAt
-                        .toISOString(),
-
-                duration_seconds:
-                    durationSeconds
-
-            })
-            .eq(
-                "id",
-                walk.id
-            )
-            .eq(
-                "status",
-                "in_progress"
-            )
-            .select("*")
-            .single();
-
-
-    if (
-        error
-    ) {
-
-        throw error;
-
-    }
-
-
-    replaceAdminVisitWalk(
-        data
+    await syncPendingWalkFinish(
+        walk.id
     );
 
-
-    renderAdminDayServices();
-
 }
-
-
-// ========================================
-// REPLACE WALK IN LOCAL STATE
-// ========================================
-
-function replaceAdminVisitWalk(
-    updatedWalk
-) {
-
-
-    const existingIndex =
-        allVisitWalks.findIndex(
-
-            walk =>
-
-                Number(
-                    walk.id
-                ) ===
-                Number(
-                    updatedWalk.id
-                )
-
-        );
-
-
-    if (
-        existingIndex ===
-        -1
-    ) {
-
-
-        allVisitWalks.push(
-            updatedWalk
-        );
-
-
-    } else {
-
-
-        allVisitWalks[
-            existingIndex
-        ] =
-            updatedWalk;
-
-    }
-
-}
-
 
 // ========================================
 // FINISH VISIT
@@ -6217,6 +6768,118 @@ function buildAdminVisitProgressSection(
         ) {
 
 
+            // ========================================
+            // WALK SAVED LOCALLY / WAITING TO SYNC
+            // ========================================
+
+            const pendingFinish =
+                loadPendingWalkFinish(
+                    walk.id
+                );
+
+
+            if (
+                pendingFinish
+            ) {
+
+
+                const pendingMiles =
+                    Number(
+                        pendingFinish
+                            .distance_meters ||
+                        0
+                    ) /
+                    1609.344;
+
+
+                const pendingPointCount =
+                    Number(
+                        pendingFinish
+                            .point_count ||
+                        0
+                    );
+
+
+                return `
+
+                    <div class="admin-visit-progress admin-visit-progress-live">
+
+
+                        <div class="admin-visit-progress-copy">
+
+
+                            <strong>
+                                ✓ Walk Saved
+                            </strong>
+
+
+                            <span>
+                                ${escapeHtml(
+                                    formatWalkDuration(
+                                        Number(
+                                            pendingFinish
+                                                .duration_seconds ||
+                                            0
+                                        )
+                                    )
+                                )}
+
+                                •
+
+                                ${pendingMiles.toFixed(
+                                    2
+                                )} mi
+                            </span>
+
+
+                            <span>
+                                ${pendingPointCount}
+                                GPS ${
+                                    pendingPointCount ===
+                                    1
+
+                                        ? "point"
+
+                                        : "points"
+                                }
+                            </span>
+
+
+                            <span>
+                                Saved on this phone • Waiting to sync
+                            </span>
+
+
+                        </div>
+
+
+                        <div class="admin-completed-visit-actions">
+
+
+                            <button
+                                type="button"
+                                class="primary-button admin-visit-action-button"
+                                data-visit-action="sync-walk"
+                                data-visit-id="${visit.id}"
+                            >
+                                Retry Sync
+                            </button>
+
+
+                        </div>
+
+
+                    </div>
+
+                `;
+
+            }
+
+
+            // ========================================
+            // ACTIVE WALK
+            // ========================================
+
             const startedAt =
                 formatVisitTimestamp(
                     walk.started_at
@@ -6385,12 +7048,9 @@ function buildAdminVisitProgressSection(
 
 
                 </div>
-
             `;
 
         }
-
-
 
 
         // ========================================
