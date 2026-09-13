@@ -580,6 +580,308 @@
 
 
         <!-- ========================================
+             MOBILE APP HOME
+             MOBILE / PWA ONLY
+             ======================================== -->
+        
+        <section
+            id="mobile-home-dashboard"
+            class="mobile-home-dashboard"
+            style="display:none;"
+        >
+        
+        
+            <!-- ========================================
+                 HOME GREETING
+                 ======================================== -->
+        
+            <div class="mobile-home-greeting">
+        
+                <h2 id="mobile-home-greeting">
+                    Good morning 👋
+                </h2>
+        
+                <p>
+                    Here's what's happening with your pets.
+                </p>
+        
+            </div>
+        
+        
+            <!-- ========================================
+                 NEXT VISIT
+                 ======================================== -->
+        
+            <section
+                id="mobile-home-next-visit-card"
+                class="mobile-home-next-visit-card"
+            >
+        
+                <div class="mobile-home-card-eyebrow">
+                    Next Visit
+                </div>
+        
+        
+                <div class="mobile-home-next-visit-header">
+        
+                    <div>
+        
+                        <div
+                            id="mobile-home-next-visit-date"
+                            class="mobile-home-next-visit-date"
+                        >
+                            No upcoming visit
+                        </div>
+        
+                        <h3
+                            id="mobile-home-next-visit-pets"
+                            class="mobile-home-next-visit-pets"
+                        >
+                            You're all caught up
+                        </h3>
+        
+                    </div>
+        
+        
+                    <span
+                        id="mobile-home-next-visit-status"
+                        class="mobile-home-status-badge"
+                        style="display:none;"
+                    >
+                        Scheduled
+                    </span>
+        
+                </div>
+        
+        
+                <div
+                    id="mobile-home-next-visit-service"
+                    class="mobile-home-next-visit-service"
+                >
+                    Your next scheduled service will appear here.
+                </div>
+        
+        
+                <button
+                    type="button"
+                    id="mobile-home-next-visit-button"
+                    class="mobile-home-card-link"
+                    style="display:none;"
+                >
+                    View Visit
+        
+                    <span aria-hidden="true">
+                        →
+                    </span>
+                </button>
+        
+            </section>
+        
+        
+            <!-- ========================================
+                 QUICK ACTIONS
+                 ======================================== -->
+        
+            <section class="mobile-home-section">
+        
+                <div class="mobile-home-section-heading">
+        
+                    <h3>
+                        Quick Actions
+                    </h3>
+        
+                </div>
+        
+        
+                <div class="mobile-home-quick-actions">
+        
+                    <button
+                        type="button"
+                        id="mobile-home-book-service-button"
+                        class="mobile-home-quick-action mobile-home-quick-action-primary"
+                    >
+        
+                        <span
+                            class="mobile-home-quick-action-icon"
+                            aria-hidden="true"
+                        >
+                            +
+                        </span>
+        
+                        <span>
+                            Book Service
+                        </span>
+        
+                    </button>
+        
+        
+                    <button
+                        type="button"
+                        id="mobile-home-message-button"
+                        class="mobile-home-quick-action"
+                    >
+        
+                        <span
+                            class="mobile-home-quick-action-icon"
+                            aria-hidden="true"
+                        >
+        
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"
+                                ></path>
+                            </svg>
+        
+                        </span>
+        
+                        <span>
+                            Message Us
+                        </span>
+        
+                    </button>
+        
+                </div>
+        
+            </section>
+        
+        
+            <!-- ========================================
+                 UPCOMING SERVICES SNAPSHOT
+                 ======================================== -->
+        
+            <section class="mobile-home-section">
+        
+                <div class="mobile-home-section-heading">
+        
+                    <h3>
+                        Upcoming
+                    </h3>
+        
+                    <button
+                        type="button"
+                        id="mobile-home-view-services-button"
+                        class="mobile-home-section-link"
+                    >
+                        View All
+                    </button>
+        
+                </div>
+        
+        
+                <div
+                    id="mobile-home-upcoming-list"
+                    class="mobile-home-upcoming-list"
+                >
+        
+                    <div class="mobile-home-empty-state">
+        
+                        <span>
+                            Upcoming services will appear here.
+                        </span>
+        
+                    </div>
+        
+                </div>
+        
+            </section>
+        
+        
+            <!-- ========================================
+                 LATEST UPDATE
+                 ======================================== -->
+        
+            <section class="mobile-home-section">
+        
+                <div class="mobile-home-section-heading">
+        
+                    <h3>
+                        Latest Update
+                    </h3>
+        
+                </div>
+        
+        
+                <article
+                    id="mobile-home-latest-update"
+                    class="mobile-home-latest-update"
+                >
+        
+                    <div
+                        id="mobile-home-latest-update-empty"
+                        class="mobile-home-empty-state"
+                    >
+        
+                        <span>
+                            Your latest completed visit update will appear here.
+                        </span>
+        
+                    </div>
+        
+        
+                    <div
+                        id="mobile-home-latest-update-content"
+                        class="mobile-home-latest-update-content"
+                        style="display:none;"
+                    >
+        
+                        <div class="mobile-home-latest-update-heading">
+        
+                            <div>
+        
+                                <h3
+                                    id="mobile-home-latest-update-title"
+                                >
+                                    Visit Update
+                                </h3>
+        
+                                <p
+                                    id="mobile-home-latest-update-meta"
+                                ></p>
+        
+                            </div>
+        
+                        </div>
+        
+        
+                        <div
+                            id="mobile-home-latest-update-photo"
+                            class="mobile-home-latest-update-photo"
+                            style="display:none;"
+                        ></div>
+        
+        
+                        <p
+                            id="mobile-home-latest-update-note"
+                            class="mobile-home-latest-update-note"
+                        ></p>
+        
+        
+                        <button
+                            type="button"
+                            id="mobile-home-latest-update-button"
+                            class="mobile-home-card-link"
+                        >
+                            View Update
+        
+                            <span aria-hidden="true">
+                                →
+                            </span>
+        
+                        </button>
+        
+                    </div>
+        
+                </article>
+        
+            </section>
+        
+        
+        </section>
+
+        <!-- ========================================
              CLIENT DASHBOARD GRID
              ======================================== -->
 
