@@ -7205,17 +7205,14 @@ body.client-navigation-open {
 
 
     /* ========================================
-       KEEP MESSAGE LAUNCHER ABOVE NAV
+       HIDE MESSAGE LAUNCHER ON MOBILE APP
     ======================================== */
 
     .client-message-launcher {
-        bottom:
-            calc(
-                82px +
-                env(
-                    safe-area-inset-bottom
-                )
-            );
+
+        display:
+            none !important;
+
     }
 
 }
@@ -7607,151 +7604,223 @@ body.client-navigation-open {
     }
 
 
-    /* ========================================
-       QUICK ACTIONS
-    ======================================== */
-
-    .mobile-home-quick-actions {
-        display: grid;
-
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(0, 1fr)
-            );
-
-        gap: 10px;
-    }
-
-
-    .mobile-home-quick-action {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-
-        gap: 10px;
-
-        min-width: 0;
-        min-height: 58px;
-
-        padding:
-            12px
-            13px;
-
-        background: #ffffff;
-
-        color:
-            var(
-                --pis-navy,
-                #243746
-            );
-
-        border:
-            1px solid
-            #e2e9ed;
-
-        border-radius: 16px;
-
-        box-shadow:
-            0 5px 16px
-            rgba(
-                25,
-                55,
-                73,
-                0.05
-            );
-
-        font-size: 13px;
-        font-weight: 800;
-
-        text-align: left;
-
-        -webkit-tap-highlight-color:
-            transparent;
-    }
-
-
-    .mobile-home-quick-action:active {
-        transform: scale(0.98);
-    }
-
-
-    .mobile-home-quick-action-primary {
-        background:
-            linear-gradient(
-                135deg,
-                var(
-                    --pis-blue,
-                    #2890df
-                ),
-                #237fc5
-            );
-
-        color: #ffffff;
-
-        border-color: transparent;
-    }
-
-
-    .mobile-home-quick-action-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        flex: 0 0 auto;
-
-        width: 32px;
-        height: 32px;
-
-        background:
-            rgba(
-                40,
-                144,
-                223,
-                0.10
-            );
-
-        border-radius: 10px;
-
-        color:
-            var(
-                --pis-blue,
-                #2890df
-            );
-
-        font-size: 22px;
-        font-weight: 500;
-        line-height: 1;
-    }
-
-
-    .mobile-home-quick-action-primary
-    .mobile-home-quick-action-icon {
-        background:
-            rgba(
-                255,
-                255,
-                255,
-                0.18
-            );
-
-        color: #ffffff;
-    }
-
-
-    .mobile-home-quick-action-icon svg {
-        width: 18px;
-        height: 18px;
-
-        fill: none;
-
-        stroke: currentColor;
-        stroke-width: 1.8;
-
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-
+       /* ========================================
+          QUICK ACTIONS
+       ======================================== */
+   
+       .mobile-home-quick-actions {
+   
+           display:
+               grid;
+   
+           grid-template-columns:
+               repeat(
+                   2,
+                   minmax(
+                       0,
+                       1fr
+                   )
+               );
+   
+           gap:
+               10px;
+   
+           margin-top:
+               10px;
+   
+       }
+   
+   
+       .mobile-home-quick-action {
+   
+           display:
+               flex;
+   
+           align-items:
+               center;
+   
+           justify-content:
+               flex-start;
+   
+           gap:
+               10px;
+   
+           min-height:
+               72px;
+   
+           padding:
+               12px
+               14px;
+   
+           border:
+               1px solid
+               rgba(
+                   41,
+                   91,
+                   121,
+                   0.16
+               );
+   
+           border-radius:
+               20px;
+   
+           background:
+               #ffffff;
+   
+           color:
+               #183447;
+   
+           box-shadow:
+               0 6px 18px
+               rgba(
+                   38,
+                   79,
+                   104,
+                   0.07
+               );
+   
+           font:
+               inherit;
+   
+           font-size:
+               15px;
+   
+           font-weight:
+               800;
+   
+           text-align:
+               left;
+   
+           cursor:
+               pointer;
+   
+           -webkit-tap-highlight-color:
+               transparent;
+   
+       }
+   
+   
+       .mobile-home-quick-action-primary {
+   
+           border-color:
+               transparent;
+   
+           background:
+               linear-gradient(
+                   135deg,
+                   var(
+                       --pis-blue,
+                       #2890df
+                   ),
+                   #237fc4
+               );
+   
+           color:
+               #ffffff;
+   
+           box-shadow:
+               0 8px 20px
+               rgba(
+                   40,
+                   144,
+                   223,
+                   0.20
+               );
+   
+       }
+   
+   
+       .mobile-home-quick-action-icon {
+   
+           flex:
+               0 0 auto;
+   
+           display:
+               inline-flex;
+   
+           align-items:
+               center;
+   
+           justify-content:
+               center;
+   
+           width:
+               38px;
+   
+           height:
+               38px;
+   
+           border-radius:
+               12px;
+   
+           background:
+               rgba(
+                   40,
+                   144,
+                   223,
+                   0.10
+               );
+   
+           color:
+               var(
+                   --pis-blue,
+                   #2890df
+               );
+   
+           font-size:
+               24px;
+   
+           font-weight:
+               500;
+   
+           line-height:
+               1;
+   
+       }
+   
+   
+       .mobile-home-quick-action-primary
+       .mobile-home-quick-action-icon {
+   
+           background:
+               rgba(
+                   255,
+                   255,
+                   255,
+                   0.17
+               );
+   
+           color:
+               #ffffff;
+   
+       }
+   
+   
+       .mobile-home-quick-action-icon svg {
+   
+           width:
+               21px;
+   
+           height:
+               21px;
+   
+           fill:
+               none;
+   
+           stroke:
+               currentColor;
+   
+           stroke-width:
+               1.9;
+   
+           stroke-linecap:
+               round;
+   
+           stroke-linejoin:
+               round;
+   
+       }
+   
 
     /* ========================================
        UPCOMING SNAPSHOT
