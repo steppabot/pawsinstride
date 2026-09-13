@@ -15924,6 +15924,9 @@ async function handleMobileAppTab(
         "home"
     ) {
 
+        closeClientMessaging();
+
+
         setActiveMobileAppTab(
             "home"
         );
@@ -15949,6 +15952,9 @@ async function handleMobileAppTab(
         "services"
     ) {
 
+        closeClientMessaging();
+
+
         setActiveMobileAppTab(
             "services"
         );
@@ -15972,6 +15978,9 @@ async function handleMobileAppTab(
         tab ===
         "pets"
     ) {
+
+        closeClientMessaging();
+
 
         setActiveMobileAppTab(
             "pets"
@@ -16019,6 +16028,9 @@ async function handleMobileAppTab(
         "profile"
     ) {
 
+        closeClientMessaging();
+
+
         setActiveMobileAppTab(
             "profile"
         );
@@ -16031,7 +16043,6 @@ async function handleMobileAppTab(
     }
 
 }
-
 
 // ========================================
 // MOBILE APP NAVIGATION EVENTS
