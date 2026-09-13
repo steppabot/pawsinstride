@@ -84,6 +84,8 @@ let allHouseholds =
 let allVisitReports =
     [];
 
+let allVisitWalks =
+    [];
 
 let activeVisitReportVisitId =
     null;
@@ -485,6 +487,55 @@ async function loadAdminDashboard() {
         [];
 
 
+    // ========================================
+    // LOAD WALK TRACKING SESSIONS
+    // ========================================
+
+    const {
+
+        data: visitWalks,
+
+        error: visitWalksError
+
+    } =
+        await supabaseClient
+            .from(
+                "visit_walks"
+            )
+            .select("*")
+            .order(
+                "started_at",
+                {
+                    ascending:
+                        true
+                }
+            );
+
+
+    if (
+        visitWalksError
+    ) {
+
+
+        console.error(
+            "Admin visit walks error:",
+            visitWalksError
+        );
+
+
+        allVisitWalks =
+            [];
+
+
+    } else {
+
+
+        allVisitWalks =
+            visitWalks ||
+            [];
+
+    }
+    
     // ========================================
     // LOAD PETS ATTACHED TO VISITS
     // ========================================
@@ -2546,7 +2597,9 @@ adminDayServicesContainer
                 );
 
 
-            if (!actionButton) {
+            if (
+                !actionButton
+            ) {
 
                 return;
 
@@ -2555,12 +2608,14 @@ adminDayServicesContainer
 
             const visitId =
                 Number(
-                    actionButton.dataset.visitId
+                    actionButton.dataset
+                        .visitId
                 );
 
 
             const action =
-                actionButton.dataset.visitAction;
+                actionButton.dataset
+                    .visitAction;
 
 
             if (
@@ -2595,6 +2650,36 @@ adminDayServicesContainer
 
 
                     await checkInVisit(
+                        visitId
+                    );
+
+
+                } else if (
+                    action ===
+                    "start-walk"
+                ) {
+
+
+                    actionButton.textContent =
+                        "Starting Walk...";
+
+
+                    await startVisitWalk(
+                        visitId
+                    );
+
+
+                } else if (
+                    action ===
+                    "finish-walk"
+                ) {
+
+
+                    actionButton.textContent =
+                        "Finishing Walk...";
+
+
+                    await finishVisitWalk(
                         visitId
                     );
 
@@ -2643,6 +2728,7 @@ adminDayServicesContainer
 
 
                 alert(
+                    error?.message ||
                     "We couldn't update this visit. Please try again."
                 );
 
@@ -2658,6 +2744,7 @@ adminDayServicesContainer
 
         }
     );
+
 
 
 // ========================================
@@ -2909,6 +2996,292 @@ async function checkInVisit(
 
 }
 
+
+// ========================================
+// START VISIT WALK
+// ========================================
+
+async function startVisitWalk(
+    visitId
+) {
+
+
+    const visit =
+        allVisits.find(
+
+            item =>
+
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    visitId
+                )
+
+        );
+
+
+    if (
+        !visit
+    ) {
+
+        throw new Error(
+            "Visit not found."
+        );
+
+    }
+
+
+    if (
+        !isWalkingService(
+            visit
+        )
+    ) {
+
+        throw new Error(
+            "Walk tracking is only available for walking services."
+        );
+
+    }
+
+
+    const existingWalk =
+        getVisitWalk(
+            visitId
+        );
+
+
+    if (
+        existingWalk?.status ===
+        "in_progress"
+    ) {
+
+
+        renderAdminDayServices();
+
+
+        return;
+
+    }
+
+
+    if (
+        existingWalk?.status ===
+        "completed"
+    ) {
+
+        throw new Error(
+            "This walk has already been completed."
+        );
+
+    }
+
+
+    const {
+
+        data,
+        error
+
+    } =
+        await supabaseClient
+            .from(
+                "visit_walks"
+            )
+            .insert({
+
+                visit_id:
+                    visitId
+
+            })
+            .select("*")
+            .single();
+
+
+    if (
+        error
+    ) {
+
+        throw error;
+
+    }
+
+
+    replaceAdminVisitWalk(
+        data
+    );
+
+
+    renderAdminDayServices();
+
+}
+
+
+// ========================================
+// FINISH VISIT WALK
+// ========================================
+
+async function finishVisitWalk(
+    visitId
+) {
+
+
+    const walk =
+        getVisitWalk(
+            visitId
+        );
+
+
+    if (
+        !walk
+    ) {
+
+        throw new Error(
+            "Active walk not found."
+        );
+
+    }
+
+
+    if (
+        walk.status !==
+        "in_progress"
+    ) {
+
+        throw new Error(
+            "This walk is not currently active."
+        );
+
+    }
+
+
+    const endedAt =
+        new Date();
+
+
+    const startedAt =
+        new Date(
+            walk.started_at
+        );
+
+
+    const durationSeconds =
+        Math.max(
+
+            0,
+
+            Math.round(
+
+                (
+                    endedAt.getTime() -
+                    startedAt.getTime()
+                ) /
+                1000
+
+            )
+
+        );
+
+
+    const {
+
+        data,
+        error
+
+    } =
+        await supabaseClient
+            .from(
+                "visit_walks"
+            )
+            .update({
+
+                status:
+                    "completed",
+
+                ended_at:
+                    endedAt
+                        .toISOString(),
+
+                duration_seconds:
+                    durationSeconds
+
+            })
+            .eq(
+                "id",
+                walk.id
+            )
+            .eq(
+                "status",
+                "in_progress"
+            )
+            .select("*")
+            .single();
+
+
+    if (
+        error
+    ) {
+
+        throw error;
+
+    }
+
+
+    replaceAdminVisitWalk(
+        data
+    );
+
+
+    renderAdminDayServices();
+
+}
+
+
+// ========================================
+// REPLACE WALK IN LOCAL STATE
+// ========================================
+
+function replaceAdminVisitWalk(
+    updatedWalk
+) {
+
+
+    const existingIndex =
+        allVisitWalks.findIndex(
+
+            walk =>
+
+                Number(
+                    walk.id
+                ) ===
+                Number(
+                    updatedWalk.id
+                )
+
+        );
+
+
+    if (
+        existingIndex ===
+        -1
+    ) {
+
+
+        allVisitWalks.push(
+            updatedWalk
+        );
+
+
+    } else {
+
+
+        allVisitWalks[
+            existingIndex
+        ] =
+            updatedWalk;
+
+    }
+
+}
 
 
 // ========================================
@@ -3709,6 +4082,142 @@ function buildVisitProgressIcon(
 }
 
 // ========================================
+// WALK SERVICE CHECK
+// ========================================
+
+function isWalkingService(
+    visit
+) {
+
+
+    const serviceName =
+        String(
+
+            visit?.service_name ||
+            visit?.service_type ||
+            ""
+
+        )
+            .trim()
+            .toLowerCase();
+
+
+    return (
+
+        serviceName.includes(
+            "walk"
+        ) ||
+
+        serviceName.includes(
+            "walking"
+        )
+
+    );
+
+}
+
+
+// ========================================
+// GET VISIT WALK
+// ========================================
+
+function getVisitWalk(
+    visitId
+) {
+
+
+    return (
+
+        allVisitWalks.find(
+
+            walk =>
+
+                Number(
+                    walk.visit_id
+                ) ===
+                Number(
+                    visitId
+                )
+
+        ) ||
+        null
+
+    );
+
+}
+
+
+// ========================================
+// FORMAT WALK DURATION
+// ========================================
+
+function formatWalkDuration(
+    seconds
+) {
+
+
+    const safeSeconds =
+        Math.max(
+
+            0,
+
+            Number(
+                seconds ||
+                0
+            )
+
+        );
+
+
+    const hours =
+        Math.floor(
+            safeSeconds /
+            3600
+        );
+
+
+    const minutes =
+        Math.floor(
+            (
+                safeSeconds %
+                3600
+            ) /
+            60
+        );
+
+
+    const remainingSeconds =
+        Math.floor(
+            safeSeconds %
+            60
+        );
+
+
+    return [
+
+        hours,
+        minutes,
+        remainingSeconds
+
+    ]
+        .map(
+
+            value =>
+                String(
+                    value
+                )
+                    .padStart(
+                        2,
+                        "0"
+                    )
+
+        )
+        .join(":");
+
+}
+
+
+// ========================================
 // ADMIN VISIT PROGRESS SECTION
 // ========================================
 
@@ -3717,6 +4226,26 @@ function buildAdminVisitProgressSection(
     progress
 ) {
 
+
+    const walkingService =
+        isWalkingService(
+            visit
+        );
+
+
+    const walk =
+        walkingService
+
+            ? getVisitWalk(
+                visit.id
+            )
+
+            : null;
+
+
+    // ========================================
+    // COMPLETED VISIT
+    // ========================================
 
     if (
         progress.state ===
@@ -3736,7 +4265,6 @@ function buildAdminVisitProgressSection(
             );
 
 
-
         const durationText =
             progress.minutes !==
             null
@@ -3753,18 +4281,19 @@ function buildAdminVisitProgressSection(
                 : "Duration unavailable";
 
 
-
         const existingReport =
             allVisitReports.find(
+
                 report =>
+
                     Number(
                         report.visit_id
                     ) ===
                     Number(
                         visit.id
                     )
-            );
 
+            );
 
 
         return `
@@ -3843,6 +4372,9 @@ function buildAdminVisitProgressSection(
     }
 
 
+    // ========================================
+    // CHECKED IN
+    // ========================================
 
     if (
         progress.state ===
@@ -3856,6 +4388,265 @@ function buildAdminVisitProgressSection(
             );
 
 
+        // ========================================
+        // WALK CURRENTLY RUNNING
+        // ========================================
+
+        if (
+            walkingService &&
+            walk?.status ===
+            "in_progress"
+        ) {
+
+
+            const startedAt =
+                formatVisitTimestamp(
+                    walk.started_at
+                );
+
+
+            const elapsedSeconds =
+                Math.max(
+
+                    0,
+
+                    Math.floor(
+
+                        (
+                            Date.now() -
+                            new Date(
+                                walk.started_at
+                            ).getTime()
+                        ) /
+                        1000
+
+                    )
+
+                );
+
+
+            return `
+
+                <div class="admin-visit-progress admin-visit-progress-live">
+
+
+                    <div class="admin-visit-progress-copy">
+
+
+                        <strong>
+                            🐾 Walk In Progress
+                        </strong>
+
+
+                        <span>
+                            ${
+                                startedAt
+
+                                    ? `Started at ${escapeHtml(
+                                        startedAt
+                                    )}`
+
+                                    : "Walk tracking active"
+                            }
+                        </span>
+
+
+                        <span>
+                            ${escapeHtml(
+                                formatWalkDuration(
+                                    elapsedSeconds
+                                )
+                            )}
+                            •
+                            ${(
+                                Number(
+                                    walk.distance_meters ||
+                                    0
+                                ) /
+                                1609.344
+                            ).toFixed(2)}
+                            mi
+                        </span>
+
+
+                    </div>
+
+
+                    <div class="admin-completed-visit-actions">
+
+
+                        <button
+                            type="button"
+                            class="primary-button admin-visit-action-button"
+                            data-visit-action="finish-walk"
+                            data-visit-id="${visit.id}"
+                        >
+                            Finish Walk
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+            `;
+
+        }
+
+
+        // ========================================
+        // WALK FINISHED / VISIT STILL OPEN
+        // ========================================
+
+        if (
+            walkingService &&
+            walk?.status ===
+            "completed"
+        ) {
+
+
+            const miles =
+                (
+                    Number(
+                        walk.distance_meters ||
+                        0
+                    ) /
+                    1609.344
+                )
+                    .toFixed(
+                        2
+                    );
+
+
+            return `
+
+                <div class="admin-visit-progress admin-visit-progress-live">
+
+
+                    <div class="admin-visit-progress-copy">
+
+
+                        <strong>
+                            ✓ Walk Complete
+                        </strong>
+
+
+                        <span>
+                            ${escapeHtml(
+                                formatWalkDuration(
+                                    walk.duration_seconds
+                                )
+                            )}
+                            •
+                            ${miles}
+                            mi
+                        </span>
+
+
+                        <span>
+                            Visit is still in progress.
+                        </span>
+
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="primary-button admin-visit-action-button admin-finish-visit-button"
+                        data-visit-action="finish"
+                        data-visit-id="${visit.id}"
+                    >
+                        Finish Visit
+                    </button>
+
+
+                </div>
+
+            `;
+
+        }
+
+
+        // ========================================
+        // CHECKED-IN WALK NOT STARTED
+        // ========================================
+
+        if (
+            walkingService
+        ) {
+
+
+            return `
+
+                <div class="admin-visit-progress admin-visit-progress-live">
+
+
+                    <div class="admin-visit-progress-copy">
+
+
+                        <strong>
+                            Visit In Progress
+                        </strong>
+
+
+                        <span>
+
+                            Checked in${
+
+                                checkedIn
+
+                                    ? ` at ${escapeHtml(
+                                        checkedIn
+                                    )}`
+
+                                    : ""
+
+                            }
+
+                        </span>
+
+
+                    </div>
+
+
+                    <div class="admin-completed-visit-actions">
+
+
+                        <button
+                            type="button"
+                            class="primary-button admin-visit-action-button"
+                            data-visit-action="start-walk"
+                            data-visit-id="${visit.id}"
+                        >
+                            Start Walk
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="secondary-button admin-visit-action-button admin-finish-visit-button"
+                            data-visit-action="finish"
+                            data-visit-id="${visit.id}"
+                        >
+                            Finish Visit
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+            `;
+
+        }
+
+
+        // ========================================
+        // NORMAL NON-WALK SERVICE
+        // ========================================
 
         return `
 
@@ -3907,6 +4698,9 @@ function buildAdminVisitProgressSection(
     }
 
 
+    // ========================================
+    // NOT STARTED
+    // ========================================
 
     return `
 
