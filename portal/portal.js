@@ -15730,7 +15730,7 @@ document
 
 
 // ========================================
-// SYNC MESSAGE UNREAD BADGE TO MENU
+// SYNC MESSAGE UNREAD BADGE TO NAVIGATION
 // ========================================
 
 function syncClientNavigationMessageBadge() {
@@ -15740,16 +15740,20 @@ function syncClientNavigationMessageBadge() {
             "client-message-unread-badge"
         );
 
-    const navigationBadge =
+
+    const desktopNavigationBadge =
         document.getElementById(
             "client-navigation-message-badge"
         );
 
 
-    if (
-        !messageBadge ||
-        !navigationBadge
-    ) {
+    const mobileNavigationBadge =
+        document.getElementById(
+            "client-bottom-message-badge"
+        );
+
+
+    if (!messageBadge) {
         return;
     }
 
@@ -15765,16 +15769,327 @@ function syncClientNavigationMessageBadge() {
         "none";
 
 
-    navigationBadge.textContent =
-        unreadCount;
+    if (desktopNavigationBadge) {
+
+        desktopNavigationBadge.textContent =
+            unreadCount;
 
 
-    navigationBadge.style.display =
-        messageBadgeVisible
-            ? "flex"
-            : "none";
+        desktopNavigationBadge.style.display =
+            messageBadgeVisible
+                ? "flex"
+                : "none";
+
+    }
+
+
+    if (mobileNavigationBadge) {
+
+        mobileNavigationBadge.textContent =
+            unreadCount;
+
+
+        mobileNavigationBadge.style.display =
+            messageBadgeVisible
+                ? "flex"
+                : "none";
+
+    }
 
 }
+
+
+// ========================================
+// MOBILE APP NAVIGATION
+// ========================================
+
+const mobileAppNavigation =
+    document.getElementById(
+        "client-bottom-navigation"
+    );
+
+
+const mobileAppNavigationQuery =
+    window.matchMedia(
+        "(max-width: 700px)"
+    );
+
+
+// ========================================
+// SET ACTIVE MOBILE TAB
+// ========================================
+
+function setActiveMobileAppTab(
+    activeTab
+) {
+
+    const buttons =
+        document.querySelectorAll(
+            "[data-client-app-tab]"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            const tab =
+                button.dataset
+                    .clientAppTab;
+
+
+            const isActive =
+                tab ===
+                activeTab;
+
+
+            button.classList.toggle(
+                "client-bottom-nav-item-active",
+                isActive
+            );
+
+
+            if (isActive) {
+
+                button.setAttribute(
+                    "aria-current",
+                    "page"
+                );
+
+            } else {
+
+                button.removeAttribute(
+                    "aria-current"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SCROLL TO MOBILE APP SECTION
+// ========================================
+
+function scrollToMobileAppSection(
+    sectionId
+) {
+
+    const section =
+        document.getElementById(
+            sectionId
+        );
+
+
+    if (!section) {
+        return;
+    }
+
+
+    section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+}
+
+
+// ========================================
+// HANDLE MOBILE APP TAB
+// ========================================
+
+async function handleMobileAppTab(
+    tab
+) {
+
+    // ========================================
+    // MOBILE ONLY
+    // ========================================
+
+    if (
+        !mobileAppNavigationQuery.matches
+    ) {
+        return;
+    }
+
+
+    // ========================================
+    // HOME
+    // ========================================
+
+    if (
+        tab ===
+        "home"
+    ) {
+
+        setActiveMobileAppTab(
+            "home"
+        );
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // SERVICES
+    // ========================================
+
+    if (
+        tab ===
+        "services"
+    ) {
+
+        setActiveMobileAppTab(
+            "services"
+        );
+
+
+        scrollToMobileAppSection(
+            "services-section"
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // PETS
+    // ========================================
+
+    if (
+        tab ===
+        "pets"
+    ) {
+
+        setActiveMobileAppTab(
+            "pets"
+        );
+
+
+        scrollToMobileAppSection(
+            "pets-section"
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // MESSAGES
+    // ========================================
+
+    if (
+        tab ===
+        "messages"
+    ) {
+
+        setActiveMobileAppTab(
+            "messages"
+        );
+
+
+        await openClientMessaging();
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // PROFILE
+    // ========================================
+
+    if (
+        tab ===
+        "profile"
+    ) {
+
+        setActiveMobileAppTab(
+            "profile"
+        );
+
+
+        scrollToMobileAppSection(
+            "household-section"
+        );
+
+    }
+
+}
+
+
+// ========================================
+// MOBILE APP NAVIGATION EVENTS
+// ========================================
+
+mobileAppNavigation
+    ?.addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    "[data-client-app-tab]"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            const tab =
+                button.dataset
+                    .clientAppTab;
+
+
+            handleMobileAppTab(
+                tab
+            );
+
+        }
+    );
+
+
+// ========================================
+// RESET MOBILE TAB WHEN MESSAGE DRAWER CLOSES
+// ========================================
+
+document
+    .getElementById(
+        "client-message-close"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            if (
+                mobileAppNavigationQuery.matches
+            ) {
+
+                setActiveMobileAppTab(
+                    "home"
+                );
+
+            }
+
+        }
+    );
 
 // ========================================
 // PUSH NOTIFICATIONS
