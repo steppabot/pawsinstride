@@ -7249,15 +7249,21 @@ body.client-navigation-open {
     ======================================== */
 
     .mobile-home-greeting {
+
         margin:
             4px
-            2px
+            18px
             22px;
+
     }
 
 
     .mobile-home-greeting h2 {
-        margin: 0 0 5px;
+
+        margin:
+            0
+            0
+            5px;
 
         color:
             var(
@@ -7265,16 +7271,25 @@ body.client-navigation-open {
                 #243746
             );
 
-        font-size: 26px;
-        font-weight: 800;
-        line-height: 1.15;
+        font-size:
+            26px;
 
-        letter-spacing: -0.025em;
+        font-weight:
+            800;
+
+        line-height:
+            1.15;
+
+        letter-spacing:
+            -0.025em;
+
     }
 
 
     .mobile-home-greeting p {
-        margin: 0;
+
+        margin:
+            0;
 
         color:
             var(
@@ -7282,24 +7297,47 @@ body.client-navigation-open {
                 #667784
             );
 
-        font-size: 14px;
-        line-height: 1.45;
+        font-size:
+            14px;
+
+        line-height:
+            1.45;
+
     }
 
 
+
+
     /* ========================================
-       HOME SECTIONS
+       HOME SECTION
     ======================================== */
 
     .mobile-home-section {
 
-        margin-top:
-            22px;
+        width:
+            100%;
+
+        max-width:
+            100%;
+
+        min-width:
+            0;
+
+        margin:
+            0
+            0
+            24px;
 
         padding:
-            18px
-            16px
-            16px;
+            18px;
+
+        background:
+            rgba(
+                255,
+                255,
+                255,
+                0.72
+            );
 
         border:
             1px solid
@@ -7312,14 +7350,6 @@ body.client-navigation-open {
 
         border-radius:
             22px;
-
-        background:
-            rgba(
-                255,
-                255,
-                255,
-                0.72
-            );
 
     }
 
@@ -7335,8 +7365,14 @@ body.client-navigation-open {
         justify-content:
             space-between;
 
+        width:
+            100%;
+
+        min-width:
+            0;
+
         gap:
-            12px;
+            14px;
 
         margin:
             0
@@ -7352,7 +7388,10 @@ body.client-navigation-open {
             0;
 
         color:
-            #183447;
+            var(
+                --pis-navy,
+                #243746
+            );
 
         font-size:
             20px;
@@ -7361,7 +7400,7 @@ body.client-navigation-open {
             800;
 
         line-height:
-            1.15;
+            1.2;
 
     }
 
@@ -7369,13 +7408,18 @@ body.client-navigation-open {
     .mobile-home-section-link {
 
         flex:
-            0 0 auto;
+            0
+            0
+            auto;
+
+        width:
+            auto;
+
+        margin-left:
+            auto;
 
         padding:
             4px
-            2px;
-
-        border:
             0;
 
         background:
@@ -7387,6 +7431,9 @@ body.client-navigation-open {
                 #2890df
             );
 
+        border:
+            0;
+
         font:
             inherit;
 
@@ -7395,6 +7442,9 @@ body.client-navigation-open {
 
         font-weight:
             800;
+
+        text-align:
+            right;
 
         cursor:
             pointer;
@@ -8218,24 +8268,61 @@ body.client-navigation-open {
    CLIENT APP PAGE
 ======================================== */
 
+html:has(body.client-portal-page) {
+
+    width:
+        100%;
+
+    max-width:
+        100%;
+
+    overflow-x:
+        hidden;
+
+}
+
+
 body.client-portal-page {
 
-    min-height: 100vh;
+    width:
+        100%;
+
+    max-width:
+        100%;
+
+    min-height:
+        100vh;
+
+    margin:
+        0;
+
+    overflow-x:
+        hidden;
 
     background:
         radial-gradient(
             circle at top left,
-            rgba(71, 206, 230, 0.10),
+            rgba(
+                71,
+                206,
+                230,
+                0.10
+            ),
             transparent 34%
         ),
         linear-gradient(
             180deg,
             #f8fcfe 0%,
-            var(--pis-app-bg) 45%,
+            var(
+                --pis-app-bg
+            ) 45%,
             #eef6fa 100%
         );
 
-    color: var(--pis-ink);
+    color:
+        var(
+            --pis-ink
+        );
 
     font-family:
         "Roboto",
@@ -8245,6 +8332,47 @@ body.client-portal-page {
 
 }
 
+
+/* ========================================
+   MOBILE WIDTH SAFETY
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.client-portal-page,
+    .client-dashboard-container,
+    #dashboard-content,
+    .mobile-home-dashboard,
+    .mobile-home-section,
+    .mobile-home-next-visit-card,
+    .mobile-home-upcoming-list,
+    .mobile-home-latest-update {
+
+        max-width:
+            100%;
+
+        min-width:
+            0;
+
+    }
+
+
+    body.client-portal-page {
+
+        overflow-x:
+            hidden;
+
+        touch-action:
+            pan-y;
+
+    }
+
+}
+
+
+/* ========================================
+   CLIENT DASHBOARD WIDTH
+======================================== */
 
 /* ========================================
    CLIENT DASHBOARD WIDTH
