@@ -18512,6 +18512,33 @@ body.booking-success-page {
 
 
     /* ========================================
+       HOME SCREEN
+    ======================================== */
+
+    body.mobile-app-screen-home
+    #mobile-home-dashboard {
+
+        display:
+            block !important;
+
+    }
+
+
+    body.mobile-app-screen-home
+    .client-dashboard-grid,
+
+    body.mobile-app-screen-home
+    #push-notification-card,
+
+    body.mobile-app-screen-home
+    #logout-button {
+
+        display:
+            none !important;
+
+    }
+
+    /* ========================================
        SERVICES SCREEN
     ======================================== */
 
