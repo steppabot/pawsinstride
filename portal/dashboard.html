@@ -1896,6 +1896,209 @@
      CLIENT APP NAVIGATION
      ======================================== -->
 
+
+<!-- ========================================
+     DESKTOP NAVIGATION BACKDROP
+     ======================================== -->
+
+<div
+    id="client-navigation-backdrop"
+    class="client-navigation-backdrop"
+></div>
+
+
+<!-- ========================================
+     DESKTOP NAVIGATION DRAWER
+     ======================================== -->
+
+<aside
+    id="client-navigation-drawer"
+    class="client-navigation-drawer"
+    aria-hidden="true"
+>
+
+
+    <!-- ========================================
+         NAVIGATION HEADER
+         ======================================== -->
+
+    <div class="client-navigation-header">
+
+        <div class="client-navigation-brand">
+
+            <img
+                src="/pawsnstridelogo1.png"
+                alt="Paws in Stride"
+                class="client-navigation-logo"
+            >
+
+            <span>
+                Client Portal
+            </span>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="client-navigation-close"
+            class="client-navigation-close"
+            aria-label="Close dashboard menu"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <!-- ========================================
+         NAVIGATION LINKS
+         ======================================== -->
+
+    <nav
+        class="client-navigation-links"
+        aria-label="Client dashboard"
+    >
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-action="home"
+        >
+
+            <span class="client-navigation-link-icon">
+                ⌂
+            </span>
+
+            <span>
+                Home
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="household-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ♙
+            </span>
+
+            <span>
+                Household
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="pets-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ♡
+            </span>
+
+            <span>
+                Pets
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="services-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ◫
+            </span>
+
+            <span>
+                Services
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-action="messages"
+        >
+
+            <span class="client-navigation-link-icon">
+                ◌
+            </span>
+
+            <span>
+                Messages
+            </span>
+
+
+            <span
+                id="client-navigation-message-badge"
+                class="client-navigation-message-badge"
+                style="display:none;"
+            >
+                0
+            </span>
+
+        </button>
+
+
+    </nav>
+
+
+    <!-- ========================================
+         NAVIGATION PRIMARY ACTION
+         ======================================== -->
+
+    <div class="client-navigation-primary">
+
+        <button
+            type="button"
+            class="primary-button client-navigation-request"
+            data-client-navigation-action="request"
+        >
+            + Request Service
+        </button>
+
+    </div>
+
+
+    <!-- ========================================
+         NAVIGATION FOOTER
+         ======================================== -->
+
+    <div class="client-navigation-footer">
+
+        <button
+            type="button"
+            class="client-navigation-logout"
+            data-client-navigation-action="logout"
+        >
+            Log Out
+        </button>
+
+    </div>
+
+
+</aside>
+
+
+<!-- ========================================
+     MOBILE BOTTOM NAVIGATION
+     ======================================== -->
+
 <nav
     id="client-bottom-navigation"
     class="client-bottom-navigation"
