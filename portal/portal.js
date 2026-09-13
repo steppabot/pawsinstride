@@ -15897,6 +15897,74 @@ function scrollToMobileAppSection(
 
 
 // ========================================
+// SET MOBILE APP SCREEN
+// ========================================
+
+function setMobileAppScreen(
+    screen
+) {
+
+    const page =
+        document.querySelector(
+            ".client-portal-page"
+        );
+
+
+    if (!page) {
+        return;
+    }
+
+
+    // ========================================
+    // REMOVE EXISTING MOBILE SCREEN STATE
+    // ========================================
+
+    page.classList.remove(
+        "mobile-app-screen-home",
+        "mobile-app-screen-services",
+        "mobile-app-screen-pets",
+        "mobile-app-screen-profile"
+    );
+
+
+    // ========================================
+    // HOME USES CURRENT DASHBOARD FOR NOW
+    // ========================================
+
+    if (
+        screen ===
+        "home"
+    ) {
+        return;
+    }
+
+
+    // ========================================
+    // APPLY REQUESTED MOBILE SCREEN
+    // ========================================
+
+    page.classList.add(
+        `mobile-app-screen-${screen}`
+    );
+
+}
+
+
+// ========================================
+// RESET MOBILE SCREEN SCROLL
+// ========================================
+
+function resetMobileAppScroll() {
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+// ========================================
 // HANDLE MOBILE APP TAB
 // ========================================
 
@@ -15927,15 +15995,17 @@ async function handleMobileAppTab(
         closeClientMessaging();
 
 
+        setMobileAppScreen(
+            "home"
+        );
+
+
         setActiveMobileAppTab(
             "home"
         );
 
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+        resetMobileAppScroll();
 
 
         return;
@@ -15955,14 +16025,17 @@ async function handleMobileAppTab(
         closeClientMessaging();
 
 
+        setMobileAppScreen(
+            "services"
+        );
+
+
         setActiveMobileAppTab(
             "services"
         );
 
 
-        scrollToMobileAppSection(
-            "services-section"
-        );
+        resetMobileAppScroll();
 
 
         return;
@@ -15982,14 +16055,17 @@ async function handleMobileAppTab(
         closeClientMessaging();
 
 
+        setMobileAppScreen(
+            "pets"
+        );
+
+
         setActiveMobileAppTab(
             "pets"
         );
 
 
-        scrollToMobileAppSection(
-            "pets-section"
-        );
+        resetMobileAppScroll();
 
 
         return;
@@ -16031,19 +16107,21 @@ async function handleMobileAppTab(
         closeClientMessaging();
 
 
+        setMobileAppScreen(
+            "profile"
+        );
+
+
         setActiveMobileAppTab(
             "profile"
         );
 
 
-        scrollToMobileAppSection(
-            "household-section"
-        );
+        resetMobileAppScroll();
 
     }
 
 }
-
 // ========================================
 // MOBILE APP NAVIGATION EVENTS
 // ========================================
