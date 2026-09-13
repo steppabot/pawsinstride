@@ -15904,22 +15904,11 @@ function setMobileAppScreen(
     screen
 ) {
 
-    const page =
-        document.querySelector(
-            ".client-portal-page"
-        );
-
-
-    if (!page) {
-        return;
-    }
-
-
     // ========================================
     // REMOVE EXISTING MOBILE SCREEN STATE
     // ========================================
 
-    page.classList.remove(
+    document.body.classList.remove(
         "mobile-app-screen-home",
         "mobile-app-screen-services",
         "mobile-app-screen-pets",
@@ -15943,7 +15932,7 @@ function setMobileAppScreen(
     // APPLY REQUESTED MOBILE SCREEN
     // ========================================
 
-    page.classList.add(
+    document.body.classList.add(
         `mobile-app-screen-${screen}`
     );
 
