@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Client Dashboard | Paws in Stride
+    </title>
+
+
+    <!-- ========================================
+         PAWS IN STRIDE APP FONT
+         ======================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ========================================
+         PORTAL STYLES
+         ======================================== -->
+
+    <link
+        rel="stylesheet"
+        href="portal.css"
+    >
+
+    <!-- ========================================
+         PWA / HOME SCREEN APP
+    ======================================== -->
+    
+    <link
+        rel="manifest"
+        href="/portal/manifest.webmanifest"
+    >
+    
+    <meta
+        name="theme-color"
+        content="#2890df"
+    >
+    
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    >
+    
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="default"
+    >
+    
+    <meta
+        name="apple-mobile-web-app-title"
+        content="Paws in Stride"
+    >
+    
+    <link
+        rel="apple-touch-icon"
+        href="/portal/assets/apple-touch-icon.png"
+    >
+
+</head>
+
+<body class="client-portal-page">
+
+<main class="dashboard-container client-dashboard-container">
+
+    <!-- ========================================
+         DASHBOARD HEADER
+         ======================================== -->
+    
+    <div class="dashboard-header client-dashboard-header">
+    
+    
+        <!-- ========================================
+             CLIENT BRAND / WELCOME
+             ======================================== -->
+    
+        <div class="client-dashboard-brand">
+    
+            <img
+                src="/pawsnstridelogo1.png"
+                alt="Paws in Stride"
+                class="client-dashboard-logo"
+            >
+    
+            <div class="client-dashboard-welcome">
+    
+                <span class="client-portal-label">
+                    Client Portal
+                </span>
+    
+                <h2 id="welcome-name"></h2>
+    
+            </div>
+    
+        </div>
+    
+    
+        <!-- ========================================
+             HEADER ACTIONS
+             ======================================== -->
+    
+        <div class="client-dashboard-header-actions">
+    
+    
+            <button
+                id="request-walk-button"
+                class="primary-button client-header-request-button"
+            >
+                + Request Service
+            </button>
+    
+    
+            <button
+                type="button"
+                id="client-menu-button"
+                class="client-menu-button"
+                aria-label="Open dashboard menu"
+                aria-expanded="false"
+                aria-controls="client-navigation-drawer"
+            >
+    
+                <span></span>
+                <span></span>
+                <span></span>
+    
+            </button>
+    
+    
+        </div>
+    
+    </div>
+    
+    
+    <div id="loading">
+        Loading your account...
+    </div>
+    
+    
+    <div
+        id="dashboard-content"
+        style="display:none;"
+    >
+
+        <!-- ========================================
+             PUSH NOTIFICATIONS
+             ======================================== -->
+        
+        <section
+            id="push-notification-card"
+            class="push-notification-card"
+            style="display:none;"
+        >
+        
+            <div class="push-notification-icon">
+                🔔
+            </div>
+        
+        
+            <div class="push-notification-copy">
+        
+                <h3>
+                    Never Miss a Pet Care Update
+                </h3>
+        
+                <p>
+                    Get notifications when your sitter checks in,
+                    completes a visit, sends a message, or posts
+                    your visit report.
+                </p>
+        
+            </div>
+        
+        
+            <button
+                type="button"
+                id="enable-push-notifications"
+                class="enable-push-notifications-button"
+            >
+                Enable Notifications
+            </button>
+        
+        
+            <p
+                id="push-notification-status"
+                class="push-notification-status"
+            ></p>
+        
+        </section>
+
+        <!-- ========================================
+             REQUEST SERVICE
+             ======================================== -->
+
+        <section
+            id="booking-section"
+            class="booking-section"
+            style="display:none;"
+        >
+
+            <div class="section-header">
+
+                <h3>
+                    Request Service
+                </h3>
+
+                <button
+                    type="button"
+                    id="close-booking-button"
+                    class="close-button"
+                    aria-label="Close booking form"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="booking-form">
+
+
+                <!-- PRIMARY PET -->
+
+                <label for="booking-pet">
+                    Primary Pet
+                </label>
+
+                <select
+                    id="booking-pet"
+                    required
+                >
+
+                    <option value="">
+                        Select your pet
+                    </option>
+
+                </select>
+
+
+                <!-- ADDITIONAL PETS -->
+
+                <div
+                    id="additional-pets-wrapper"
+                    class="additional-pets-wrapper"
+                    style="display:none;"
+                >
+
+                    <label>
+                        Additional Pets
+                    </label>
+
+
+                    <div
+                        id="additional-pets-list"
+                        class="additional-pets-list"
+                    ></div>
+
+
+                    <p
+                        id="additional-pets-help"
+                        class="booking-help additional-pets-help"
+                    ></p>
+
+                </div>
+
+
+                <!-- SERVICE TYPE -->
+
+                <label for="service-type">
+                    Service Type
+                </label>
+
+                <select
+                    id="service-type"
+                    required
+                >
+
+                    <option value="">
+                        Select a service
+                    </option>
+
+                    <option value="Dog Walking">
+                        Dog Walking
+                    </option>
+
+                    <option value="Drop-In Visit">
+                        Drop-In Visit / Potty Break
+                    </option>
+
+                    <option value="Pet Sitting">
+                        Pet Sitting
+                    </option>
+
+                    <option value="Dog Boarding">
+                        Dog Boarding
+                    </option>
+
+                </select>
+
+
+                <!-- SERVICE OPTION -->
+
+                <div
+                    id="service-option-wrapper"
+                    style="display:none;"
+                >
+
+                    <label
+                        id="service-option-label"
+                        for="service-option"
+                    >
+                        Duration
+                    </label>
+
+                    <select id="service-option">
+
+                        <option value="">
+                            Select an option
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TIME -->
+
+                <div
+                    id="time-window-wrapper"
+                    style="display:none;"
+                >
+
+                    <label
+                        id="time-window-label"
+                        for="booking-time"
+                    >
+                        Preferred Time Window
+                    </label>
+
+                    <select id="booking-time">
+
+                        <option value="">
+                            Select a time
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- MULTI DATE BOOKING -->
+
+                <div
+                    id="multi-date-booking"
+                    style="display:none;"
+                >
+
+                    <label>
+                        Dates
+                    </label>
+
+                    <p
+                        id="booking-date-help"
+                        class="booking-help"
+                    >
+                        Select your service dates.
+                    </p>
+
+
+                    <div class="booking-calendar">
+
+                        <div class="calendar-header">
+
+                            <button
+                                type="button"
+                                id="calendar-prev"
+                                class="calendar-nav-button"
+                                aria-label="Previous month"
+                            >
+                                ‹
+                            </button>
+
+                            <strong id="calendar-month-label"></strong>
+
+                            <button
+                                type="button"
+                                id="calendar-next"
+                                class="calendar-nav-button"
+                                aria-label="Next month"
+                            >
+                                ›
+                            </button>
+
+                        </div>
+
+
+                        <div class="calendar-weekdays">
+
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                            <span>Sun</span>
+
+                        </div>
+
+
+                        <div
+                            id="booking-calendar-grid"
+                            class="calendar-grid"
+                        ></div>
+
+                    </div>
+
+
+                    <div id="selected-dates-container">
+
+                        <div class="selected-dates-header">
+
+                            <strong>
+                                Selected Dates
+                            </strong>
+
+                            <span id="selected-date-count">
+                                0 visits
+                            </span>
+
+                        </div>
+
+
+                        <div id="selected-dates-list">
+
+                            <p class="empty-dates-message">
+                                No dates selected yet.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BOARDING -->
+                
+                <div
+                    id="boarding-booking"
+                    style="display:none;"
+                >
+                
+                    <div class="boarding-policy">
+                
+                        <strong id="boarding-policy-price">
+                            VIP Overnight Boarding
+                        </strong>
+                
+                        <p>
+                            Drop-off is available beginning at 8:00 AM.
+                            Pickup is required by 12:00 PM on the
+                            scheduled departure day.
+                        </p>
+                
+                    </div>
+                
+                
+                    <label for="boarding-dropoff">
+                        Drop-Off Date
+                    </label>
+                
+                    <input
+                        type="date"
+                        id="boarding-dropoff"
+                    >
+                
+                
+                    <label for="boarding-pickup">
+                        Pick-Up Date
+                    </label>
+                
+                    <input
+                        type="date"
+                        id="boarding-pickup"
+                    >
+                
+                
+                    <label for="boarding-pickup-window">
+                        Pick-Up Time
+                    </label>
+                
+                    <select id="boarding-pickup-window">
+                
+                        <option value="">
+                            Select pickup time
+                        </option>
+                
+                        <option
+                            value="By 12:00 PM"
+                            data-fee="0"
+                        >
+                            By 12:00 PM
+                        </option>
+                
+                        <option
+                            value="12:00 PM - 3:00 PM"
+                            data-fee="50"
+                        >
+                            12:00 PM – 3:00 PM (+$50)
+                        </option>
+                
+                    </select>
+                
+                
+                    <p class="booking-help">
+                        Care needed after 3:00 PM requires booking
+                        through the following day.
+                    </p>
+                
+                </div>
+
+
+                <!-- TOTAL -->
+
+                <div class="booking-total">
+
+                    <span id="booking-count">
+                        0 services
+                    </span>
+
+                    <strong id="booking-price">
+                        $0.00
+                    </strong>
+
+                </div>
+
+
+                <div
+                    id="booking-price-details"
+                    class="booking-price-details"
+                ></div>
+
+
+                <button
+                    type="submit"
+                    id="booking-submit-button"
+                    class="primary-button"
+                >
+                    Continue
+                </button>
+
+
+                <p id="booking-message"></p>
+
+            </form>
+
+        </section>
+
+
+
+        <!-- ========================================
+             CLIENT DASHBOARD GRID
+             ======================================== -->
+
+        <div class="client-dashboard-grid">
+
+
+            <!-- ========================================
+                 LEFT DASHBOARD COLUMN
+                 ======================================== -->
+
+            <div class="client-dashboard-column client-dashboard-column-left">
+
+
+                <!-- ========================================
+                     YOUR HOUSEHOLD
+                     ======================================== -->
+
+                <section
+                    id="household-section"
+                    class="household-section"
+                >
+
+                    <div class="household-section-header">
+
+                        <div>
+
+                            <h3>
+                                Your Household
+                            </h3>
+
+                            <p class="household-section-help">
+                                Keep your contact, home, and property access information up to date.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            id="edit-household-button"
+                            class="primary-button household-edit-button"
+                        >
+                            Edit Profile
+                        </button>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         HOUSEHOLD EDIT FORM
+                         ======================================== -->
+
+                    <div
+                        id="household-form-panel"
+                        class="household-form-panel"
+                        style="display:none;"
+                    >
+
+                        <div class="household-form-header">
+
+                            <div>
+
+                                <h4>
+                                    Edit Household
+                                </h4>
+
+                                <p>
+                                    Update your contact, address, and access information.
+                                </p>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                id="close-household-form-button"
+                                class="close-button"
+                                aria-label="Close household form"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+
+                        <form
+                            id="household-form"
+                            novalidate
+                        >
+
+
+                            <!-- ========================================
+                                 PROFILE PHOTO
+                                 ======================================== -->
+
+                            <div class="client-photo-editor">
+
+
+                                <div
+                                    id="client-photo-preview-wrapper"
+                                    class="client-photo-preview-wrapper"
+                                >
+
+                                    <img
+                                        id="client-photo-preview"
+                                        class="client-photo-preview"
+                                        alt="Client profile preview"
+                                        style="display:none;"
+                                    >
+
+                                    <span
+                                        id="client-photo-preview-initials"
+                                        class="client-photo-preview-initials"
+                                    >
+                                        ?
+                                    </span>
+
+                                </div>
+
+
+                                <div class="client-photo-controls">
+
+                                    <label
+                                        for="client-photo-input"
+                                        class="client-photo-upload-button"
+                                    >
+                                        Choose Profile Photo
+                                    </label>
+
+                                    <input
+                                        type="file"
+                                        id="client-photo-input"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        hidden
+                                    >
+
+                                    <p class="client-photo-help">
+                                        Optional. JPG, PNG or WebP. Maximum 5 MB.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- ========================================
+                                 CLIENT INFORMATION
+                                 ======================================== -->
+
+                            <div class="household-form-section">
+
+                                <h5>
+                                    Client Information
+                                </h5>
+
+
+                                <div class="household-form-grid">
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="household-full-name">
+                                            Full Name
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="household-full-name"
+                                            maxlength="150"
+                                            autocomplete="name"
+                                            required
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="household-phone">
+                                            Phone Number
+                                        </label>
+
+                                        <input
+                                            type="tel"
+                                            id="household-phone"
+                                            maxlength="12"
+                                            inputmode="tel"
+                                            autocomplete="tel"
+                                            placeholder="555-555-5555"
+                                            required
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field household-form-field-full">
+
+                                        <label for="household-email">
+                                            Email
+                                        </label>
+
+                                        <input
+                                            type="email"
+                                            id="household-email"
+                                            readonly
+                                            disabled
+                                        >
+
+                                        <span class="field-help">
+                                            Your login email cannot be changed here.
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ========================================
+                                 HOME ADDRESS
+                                 ======================================== -->
+
+                            <div class="household-form-section">
+
+                                <h5>
+                                    Home Address
+                                </h5>
+
+
+                                <div class="household-form-grid">
+
+
+                                    <div class="household-form-field household-form-field-full">
+
+                                        <label for="household-street-address">
+                                            Street Address
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="household-street-address"
+                                            maxlength="250"
+                                            autocomplete="street-address"
+                                            required
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field household-form-field-full">
+
+                                        <label for="household-address-line-2">
+                                            Apartment, Unit, Building, etc.
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="household-address-line-2"
+                                            maxlength="150"
+                                            autocomplete="address-line2"
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="household-city">
+                                            City
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="household-city"
+                                            maxlength="100"
+                                            autocomplete="address-level2"
+                                            required
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="household-state">
+                                            State
+                                        </label>
+
+                                        <select
+                                            id="household-state"
+                                            autocomplete="address-level1"
+                                            required
+                                        >
+
+                                            <option value="">
+                                                Select state
+                                            </option>
+
+                                            <option value="AL">Alabama</option>
+                                            <option value="AK">Alaska</option>
+                                            <option value="AZ">Arizona</option>
+                                            <option value="AR">Arkansas</option>
+                                            <option value="CA">California</option>
+                                            <option value="CO">Colorado</option>
+                                            <option value="CT">Connecticut</option>
+                                            <option value="DE">Delaware</option>
+                                            <option value="DC">District of Columbia</option>
+                                            <option value="FL">Florida</option>
+                                            <option value="GA">Georgia</option>
+                                            <option value="HI">Hawaii</option>
+                                            <option value="ID">Idaho</option>
+                                            <option value="IL">Illinois</option>
+                                            <option value="IN">Indiana</option>
+                                            <option value="IA">Iowa</option>
+                                            <option value="KS">Kansas</option>
+                                            <option value="KY">Kentucky</option>
+                                            <option value="LA">Louisiana</option>
+                                            <option value="ME">Maine</option>
+                                            <option value="MD">Maryland</option>
+                                            <option value="MA">Massachusetts</option>
+                                            <option value="MI">Michigan</option>
+                                            <option value="MN">Minnesota</option>
+                                            <option value="MS">Mississippi</option>
+                                            <option value="MO">Missouri</option>
+                                            <option value="MT">Montana</option>
+                                            <option value="NE">Nebraska</option>
+                                            <option value="NV">Nevada</option>
+                                            <option value="NH">New Hampshire</option>
+                                            <option value="NJ">New Jersey</option>
+                                            <option value="NM">New Mexico</option>
+                                            <option value="NY">New York</option>
+                                            <option value="NC">North Carolina</option>
+                                            <option value="ND">North Dakota</option>
+                                            <option value="OH">Ohio</option>
+                                            <option value="OK">Oklahoma</option>
+                                            <option value="OR">Oregon</option>
+                                            <option value="PA">Pennsylvania</option>
+                                            <option value="RI">Rhode Island</option>
+                                            <option value="SC">South Carolina</option>
+                                            <option value="SD">South Dakota</option>
+                                            <option value="TN">Tennessee</option>
+                                            <option value="TX">Texas</option>
+                                            <option value="UT">Utah</option>
+                                            <option value="VT">Vermont</option>
+                                            <option value="VA">Virginia</option>
+                                            <option value="WA">Washington</option>
+                                            <option value="WV">West Virginia</option>
+                                            <option value="WI">Wisconsin</option>
+                                            <option value="WY">Wyoming</option>
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="household-zip">
+                                            ZIP Code
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="household-zip"
+                                            maxlength="5"
+                                            inputmode="numeric"
+                                            autocomplete="postal-code"
+                                            required
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="household-preferred-contact">
+                                            Preferred Contact Method
+                                        </label>
+
+                                        <select id="household-preferred-contact">
+
+                                            <option value="">
+                                                Select preference
+                                            </option>
+
+                                            <option value="Text Message">
+                                                Text Message
+                                            </option>
+
+                                            <option value="Phone Call">
+                                                Phone Call
+                                            </option>
+
+                                            <option value="Email">
+                                                Email
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ========================================
+                                 EMERGENCY CONTACT
+                                 ======================================== -->
+
+                            <div class="household-form-section">
+
+                                <h5>
+                                    Emergency Contact
+                                </h5>
+
+
+                                <div class="household-form-grid">
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="emergency-contact-name">
+                                            Contact Name
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="emergency-contact-name"
+                                            maxlength="150"
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="emergency-contact-phone">
+                                            Contact Phone
+                                        </label>
+
+                                        <input
+                                            type="tel"
+                                            id="emergency-contact-phone"
+                                            maxlength="50"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ========================================
+                                 PROPERTY ACCESS
+                                 ======================================== -->
+
+                            <div class="household-form-section access-form-section">
+
+                                <div class="access-form-heading">
+
+                                    <div>
+
+                                        <h5>
+                                            Property Access
+                                        </h5>
+
+                                        <p>
+                                            Information used to safely access your property during scheduled services.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="household-form-grid">
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="access-gate-code">
+                                            Gate Code
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="access-gate-code"
+                                            maxlength="100"
+                                            autocomplete="off"
+                                            placeholder="Example: #1234"
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field">
+
+                                        <label for="access-door-code">
+                                            Door / Entry Code
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="access-door-code"
+                                            maxlength="100"
+                                            autocomplete="off"
+                                        >
+
+                                    </div>
+
+
+                                    <div class="household-form-field household-form-field-full">
+
+                                        <label for="access-key-instructions">
+                                            Key Instructions
+                                        </label>
+
+                                        <textarea
+                                            id="access-key-instructions"
+                                            rows="3"
+                                            maxlength="2000"
+                                            placeholder="Example: Lockbox is attached to the left side of the garage."
+                                        ></textarea>
+
+                                    </div>
+
+
+                                    <div class="household-form-field household-form-field-full">
+
+                                        <label for="access-alarm-instructions">
+                                            Alarm Instructions
+                                        </label>
+
+                                        <textarea
+                                            id="access-alarm-instructions"
+                                            rows="3"
+                                            maxlength="2000"
+                                            placeholder="Alarm panel location, arming/disarming instructions, etc."
+                                        ></textarea>
+
+                                    </div>
+
+
+                                    <div class="household-form-field household-form-field-full">
+
+                                        <label for="access-parking-instructions">
+                                            Parking Instructions
+                                        </label>
+
+                                        <textarea
+                                            id="access-parking-instructions"
+                                            rows="3"
+                                            maxlength="2000"
+                                        ></textarea>
+
+                                    </div>
+
+
+                                    <div class="household-form-field household-form-field-full">
+
+                                        <label for="access-other-notes">
+                                            Other Access Notes
+                                        </label>
+
+                                        <textarea
+                                            id="access-other-notes"
+                                            rows="3"
+                                            maxlength="3000"
+                                        ></textarea>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ========================================
+                                 HOME NOTES
+                                 ======================================== -->
+
+                            <div class="household-form-section">
+
+                                <h5>
+                                    Home Notes
+                                </h5>
+
+
+                                <div class="household-form-field">
+
+                                    <label for="household-home-notes">
+                                        Anything Else We Should Know?
+                                    </label>
+
+                                    <textarea
+                                        id="household-home-notes"
+                                        rows="4"
+                                        maxlength="3000"
+                                        placeholder="Example: Please don't ring the doorbell. Baby may be sleeping."
+                                    ></textarea>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ========================================
+                                 HOUSEHOLD FORM ACTIONS
+                                 ======================================== -->
+
+                            <div class="household-form-actions">
+
+                                <button
+                                    type="button"
+                                    id="cancel-household-button"
+                                    class="secondary-button"
+                                >
+                                    Cancel
+                                </button>
+
+
+                                <button
+                                    type="submit"
+                                    id="save-household-button"
+                                    class="primary-button"
+                                >
+                                    Save Profile
+                                </button>
+
+                            </div>
+
+
+                            <p id="household-form-message"></p>
+
+                        </form>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         HOUSEHOLD DISPLAY
+                         ======================================== -->
+
+                    <div id="household-profile">
+
+                        <div class="household-profile-top">
+
+
+                            <div
+                                id="client-profile-avatar"
+                                class="client-profile-avatar"
+                            >
+
+                                <img
+                                    id="client-profile-image"
+                                    alt="Client profile photo"
+                                    style="display:none;"
+                                >
+
+                                <span
+                                    id="client-profile-initials"
+                                    class="client-profile-initials"
+                                >
+                                    ?
+                                </span>
+
+                            </div>
+
+
+                            <div class="household-profile-summary">
+
+                                <h4 id="household-display-name">
+                                    Client
+                                </h4>
+
+                                <p id="household-display-email">
+                                    —
+                                </p>
+
+                                <p id="household-display-phone">
+                                    Phone not added
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="household-profile-grid">
+
+
+                            <!-- ========================================
+                                 ADDRESS
+                                 ======================================== -->
+
+                            <div class="household-detail-card">
+
+                                <span class="household-detail-label">
+                                    Home Address
+                                </span>
+
+                                <div
+                                    id="household-display-address"
+                                    class="household-detail-value"
+                                >
+                                    Not added
+                                </div>
+
+                            </div>
+
+
+                            <!-- ========================================
+                                 PREFERRED CONTACT
+                                 ======================================== -->
+
+                            <div class="household-detail-card">
+
+                                <span class="household-detail-label">
+                                    Preferred Contact
+                                </span>
+
+                                <div
+                                    id="household-display-contact-method"
+                                    class="household-detail-value"
+                                >
+                                    Not added
+                                </div>
+
+                            </div>
+
+
+                            <!-- ========================================
+                                 EMERGENCY CONTACT
+                                 ======================================== -->
+                            
+                            <div class="household-detail-card">
+                            
+                                <span class="household-detail-label">
+                                    Emergency Contact
+                                </span>
+                            
+                                <div
+                                    id="household-display-emergency"
+                                    class="household-detail-value"
+                                >
+                                    Not added
+                                </div>
+                            
+                            </div>
+                            
+                            <!-- ========================================
+                                 ACCOUNT CREDIT
+                                 ======================================== -->
+                            
+                            <div
+                                id="household-credit-card"
+                                class="household-detail-card"
+                                style="display:none;"
+                            >
+                            
+                                <span class="household-detail-label">
+                                    Account Credit
+                                </span>
+                            
+                                <div
+                                    id="household-display-credit"
+                                    class="household-detail-value household-credit-value"
+                                >
+                                    $0.00
+                                </div>
+                            
+                            </div>
+                            
+                            
+                            <!-- ========================================
+                                 HOME NOTES
+                                 ======================================== -->
+                            
+                            <div class="household-detail-card household-detail-card-full">
+                            
+                                <span class="household-detail-label">
+                                    Home Notes
+                                </span>
+                            
+                                <div
+                                    id="household-display-home-notes"
+                                    class="household-detail-value household-notes-value"
+                                >
+                                    No home notes added.
+                                </div>
+                            
+                            </div>
+                            
+                            
+                            <!-- ========================================
+                                 PROPERTY ACCESS - COLLAPSIBLE DISPLAY
+                                 ======================================== -->
+                            <div class="household-detail-card household-detail-card-full access-detail-card">
+
+                                <button
+                                    type="button"
+                                    id="property-access-toggle"
+                                    class="detail-collapse-toggle"
+                                    aria-expanded="false"
+                                    aria-controls="property-access-content"
+                                >
+
+                                    <span class="detail-collapse-heading">
+
+                                        <span class="household-detail-label">
+                                            Property Access
+                                        </span>
+
+                                        <span class="detail-collapse-status">
+                                            Saved access information
+                                        </span>
+
+                                    </span>
+
+
+                                    <span
+                                        class="detail-collapse-chevron"
+                                        aria-hidden="true"
+                                    >
+                                        ›
+                                    </span>
+
+                                </button>
+
+
+                                <div
+                                    id="property-access-content"
+                                    class="detail-collapse-content"
+                                    hidden
+                                >
+
+                                    <div class="access-detail-grid">
+
+
+                                        <div class="access-detail-item">
+
+                                            <span>
+                                                Gate Code
+                                            </span>
+
+                                            <strong id="display-gate-code">
+                                                Not added
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="access-detail-item">
+
+                                            <span>
+                                                Door / Entry Code
+                                            </span>
+
+                                            <strong id="display-door-code">
+                                                Not added
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="access-detail-item">
+
+                                            <span>
+                                                Key Instructions
+                                            </span>
+
+                                            <strong id="display-key-instructions">
+                                                Not added
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="access-detail-item">
+
+                                            <span>
+                                                Alarm Instructions
+                                            </span>
+
+                                            <strong id="display-alarm-instructions">
+                                                Not added
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="access-detail-item">
+
+                                            <span>
+                                                Parking Instructions
+                                            </span>
+
+                                            <strong id="display-parking-instructions">
+                                                Not added
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="access-detail-item">
+
+                                            <span>
+                                                Other Access Notes
+                                            </span>
+
+                                            <strong id="display-other-access-notes">
+                                                Not added
+                                            </strong>
+
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </section>
+                            
+                <!-- ========================================
+                     YOUR PETS
+                     ======================================== -->
+
+                <section
+                    id="pets-section"
+                    class="pets-section">
+
+                    <div class="pets-section-header">
+
+                        <div>
+
+                            <h3>
+                                Your Pets
+                            </h3>
+
+                            <p class="pets-section-help">
+                                Keep your pet's care information up to date.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            id="add-pet-button"
+                            class="primary-button pet-add-button"
+                        >
+                            + Add Pet
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="pet-form-panel"
+                        class="pet-form-panel"
+                        style="display:none;"
+                    >
+
+                        <div class="pet-form-header">
+
+                            <h4 id="pet-form-title">
+                                Add Pet
+                            </h4>
+
+                            <button
+                                type="button"
+                                id="close-pet-form-button"
+                                class="close-button"
+                                aria-label="Close pet form"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+
+                        <form id="pet-form">
+
+                            <input
+                                type="hidden"
+                                id="pet-id"
+                            >
+
+
+                            <div class="pet-photo-editor">
+
+                                <img
+                                    id="pet-photo-preview"
+                                    class="pet-photo-preview"
+                                    src="./assets/default-pet-avatar.webp"
+                                    alt="Pet profile preview"
+                                >
+
+
+                                <div class="pet-photo-controls">
+
+                                    <label
+                                        for="pet-photo-input"
+                                        class="pet-photo-upload-button"
+                                    >
+                                        Choose Photo
+                                    </label>
+
+                                    <input
+                                        type="file"
+                                        id="pet-photo-input"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        hidden
+                                    >
+
+                                    <p class="pet-photo-help">
+                                        JPG, PNG or WebP. Maximum 5 MB.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="pet-form-grid">
+
+                                <div class="pet-form-field">
+
+                                    <label for="pet-name">
+                                        Name
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="pet-name"
+                                        maxlength="100"
+                                        required
+                                        placeholder="Pet's name"
+                                    >
+
+                                </div>
+
+
+                                <div class="pet-form-field">
+
+                                    <label for="pet-breed">
+                                        Breed
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="pet-breed"
+                                        maxlength="150"
+                                        placeholder="Golden Retriever"
+                                    >
+
+                                </div>
+
+
+                                <div class="pet-form-field">
+
+                                    <label for="pet-gender">
+                                        Gender
+                                    </label>
+
+                                    <select id="pet-gender">
+
+                                        <option value="">
+                                            Select gender
+                                        </option>
+
+                                        <option value="Male">
+                                            Male
+                                        </option>
+
+                                        <option value="Female">
+                                            Female
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div class="pet-form-field">
+
+                                    <label for="pet-birthday">
+                                        Birthday
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        id="pet-birthday"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="pet-form-field">
+
+                                <label for="pet-feeding-notes">
+                                    Feeding Notes
+                                </label>
+
+                                <textarea
+                                    id="pet-feeding-notes"
+                                    rows="4"
+                                    maxlength="2000"
+                                    placeholder="Example: 2 cups in the morning and 2 cups in the evening."
+                                ></textarea>
+
+                            </div>
+
+
+                            <div class="pet-form-field">
+
+                                <label for="pet-care-notes">
+                                    Care Notes
+                                </label>
+
+                                <textarea
+                                    id="pet-care-notes"
+                                    rows="4"
+                                    maxlength="3000"
+                                    placeholder="Medications, behavior notes, routines, preferences, or anything else we should know."
+                                ></textarea>
+
+                            </div>
+
+                            <!-- ========================================
+                                 PET FORM ACTIONS
+                                 ======================================== -->
+                            
+                            <div class="pet-form-actions">
+                            
+                                <button
+                                    type="button"
+                                    id="remove-pet-button"
+                                    class="pet-remove-button"
+                                    style="display:none;"
+                                >
+                                    Remove Pet
+                                </button>
+                            
+                            
+                                <div class="pet-form-actions-right">
+                            
+                                    <button
+                                        type="button"
+                                        id="cancel-pet-button"
+                                        class="secondary-button"
+                                    >
+                                        Cancel
+                                    </button>
+                            
+                            
+                                    <button
+                                        type="submit"
+                                        id="save-pet-button"
+                                        class="primary-button"
+                                    >
+                                        Save Pet
+                                    </button>
+                            
+                                </div>
+                            
+                            </div>
+                            
+                            
+                            <p id="pet-form-message"></p>
+
+                        </form>
+
+                    </div>
+
+
+                    <div id="pet-info"></div>
+
+                </section>
+
+
+            </div>
+
+
+            <!-- ========================================
+                 RIGHT DASHBOARD COLUMN
+                 ======================================== -->
+
+            <div class="client-dashboard-column client-dashboard-column-right">
+
+
+                <!-- ========================================
+                     UPCOMING SERVICES
+                     ======================================== -->
+
+                <section
+                    id="services-section"
+                    class="upcoming-services-section">
+
+                    <div class="upcoming-services-header">
+
+                        <h3>
+                            Upcoming Services
+                        </h3>
+
+                        <p class="upcoming-calendar-help">
+                            Select a date to view scheduled services.
+                        </p>
+
+                    </div>
+
+
+                    <div class="upcoming-calendar">
+
+                        <div class="upcoming-calendar-header">
+
+                            <button
+                                type="button"
+                                id="upcoming-calendar-prev"
+                                class="calendar-nav-button"
+                            >
+                                ‹
+                            </button>
+
+                            <strong id="upcoming-calendar-month-label"></strong>
+
+                            <button
+                                type="button"
+                                id="upcoming-calendar-next"
+                                class="calendar-nav-button"
+                            >
+                                ›
+                            </button>
+
+                        </div>
+
+
+                        <div class="upcoming-calendar-weekdays">
+
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                            <span>Sun</span>
+
+                        </div>
+
+
+                        <div
+                            id="upcoming-calendar-grid"
+                            class="upcoming-calendar-grid"
+                        ></div>
+
+                    </div>
+
+
+                    <div
+                        id="selected-upcoming-day"
+                        class="selected-upcoming-day"
+                    >
+
+                        <div class="selected-upcoming-header">
+
+                            <strong id="selected-upcoming-date">
+                                Select a date
+                            </strong>
+
+                        </div>
+
+
+                        <div id="selected-upcoming-services">
+
+                            <p class="empty-upcoming-message">
+                                Select a booked date on the calendar.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+            </div>
+
+
+        </div>
+
+
+        <button id="logout-button">
+            Log Out
+        </button>
+
+    </div>
+
+</main>
+
+<!-- ========================================
+     CLIENT APP NAVIGATION
+     ======================================== -->
+
+<div
+    id="client-navigation-backdrop"
+    class="client-navigation-backdrop"
+></div>
+
+
+<aside
+    id="client-navigation-drawer"
+    class="client-navigation-drawer"
+    aria-hidden="true"
+>
+
+
+    <!-- ========================================
+         NAVIGATION HEADER
+         ======================================== -->
+    
+    <div class="client-navigation-header">
+    
+        <div class="client-navigation-brand">
+    
+            <img
+                src="/pawsnstridelogo1.png"
+                alt="Paws in Stride"
+                class="client-navigation-logo"
+            >
+    
+            <span>
+                Client Portal
+            </span>
+    
+        </div>
+    
+    
+        <button
+            type="button"
+            id="client-navigation-close"
+            class="client-navigation-close"
+            aria-label="Close dashboard menu"
+        >
+            ×
+        </button>
+    
+    </div>
+
+
+    <!-- ========================================
+         NAVIGATION LINKS
+         ======================================== -->
+
+    <nav
+        class="client-navigation-links"
+        aria-label="Client dashboard"
+    >
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-action="home"
+        >
+
+            <span class="client-navigation-link-icon">
+               ⌂
+            </span>
+
+            <span>
+                Home
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="household-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ♙
+            </span>
+
+            <span>
+                Household
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="pets-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ♡
+            </span>
+
+            <span>
+                Pets
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-target="services-section"
+        >
+
+            <span class="client-navigation-link-icon">
+                ◫
+            </span>
+
+            <span>
+                Services
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="client-navigation-link"
+            data-client-navigation-action="messages"
+        >
+
+            <span class="client-navigation-link-icon">
+                ◌
+            </span>
+
+            <span>
+                Messages
+            </span>
+
+
+            <span
+                id="client-navigation-message-badge"
+                class="client-navigation-message-badge"
+                style="display:none;"
+            >
+                0
+            </span>
+
+        </button>
+
+
+    </nav>
+
+
+    <!-- ========================================
+         NAVIGATION PRIMARY ACTION
+         ======================================== -->
+
+    <div class="client-navigation-primary">
+
+        <button
+            type="button"
+            class="primary-button client-navigation-request"
+            data-client-navigation-action="request"
+        >
+            + Request Service
+        </button>
+
+    </div>
+
+
+    <!-- ========================================
+         NAVIGATION FOOTER
+         ======================================== -->
+
+    <div class="client-navigation-footer">
+
+        <button
+            type="button"
+            class="client-navigation-logout"
+            data-client-navigation-action="logout"
+        >
+            Log Out
+        </button>
+
+    </div>
+
+
+</aside>
+
+    
+<!-- ========================================
+     CLIENT MESSAGING
+     ======================================== -->
+
+<div
+    id="client-message-backdrop"
+    class="client-message-backdrop"
+></div>
+
+
+<button
+    type="button"
+    id="client-message-launcher"
+    class="client-message-launcher"
+    aria-label="Open messages"
+    aria-expanded="false"
+>
+
+    <span class="client-message-launcher-icon">
+
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+        >
+            <path
+                d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"
+            ></path>
+        </svg>
+
+    </span>
+
+    <span class="client-message-launcher-label">
+        Messages
+    </span>
+
+    <span
+        id="client-message-unread-badge"
+        class="client-message-unread-badge"
+        style="display:none;"
+    >
+        0
+    </span>
+
+</button>
+
+
+<aside
+    id="client-message-drawer"
+    class="client-message-drawer"
+    aria-hidden="true"
+>
+
+    <div class="client-message-header">
+
+        <div>
+
+            <h3>
+                Messages
+            </h3>
+
+            <p>
+                Paws in Stride
+            </p>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="client-message-close"
+            class="client-message-close"
+            aria-label="Close messages"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div
+        id="client-message-list"
+        class="client-message-list"
+    >
+
+        <div class="client-message-loading">
+            Loading messages...
+        </div>
+
+    </div>
+
+
+    <form
+        id="client-message-form"
+        class="client-message-form"
+    >
+
+        <textarea
+            id="client-message-input"
+            rows="1"
+            maxlength="5000"
+            placeholder="Type a message..."
+            aria-label="Type a message"
+        ></textarea>
+
+
+        <button
+            type="submit"
+            id="client-message-send"
+            class="client-message-send"
+            aria-label="Send message"
+        >
+
+            <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path
+                    d="M22 2 11 13"
+                ></path>
+
+                <path
+                    d="m22 2-7 20-4-9-9-4Z"
+                ></path>
+            </svg>
+
+        </button>
+
+    </form>
+
+
+    <div
+        id="client-message-error"
+        class="client-message-error"
+    ></div>
+
+</aside>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="portal.js"></script>
+
+</body>
+</html>
