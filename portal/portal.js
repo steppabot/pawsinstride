@@ -5074,31 +5074,206 @@ function closePetForm() {
 // REMOVE PET
 // ========================================
 
-removePetButton
-    ?.addEventListener(
+function closeRemovePetModal() {
+
+    document
+        .getElementById(
+            "remove-pet-modal"
+        )
+        ?.remove();
+
+
+    document.body.classList.remove(
+        "client-modal-open"
+    );
+
+}
+
+
+function openRemovePetModal() {
+
+    if (
+        !editingPet
+    ) {
+        return;
+    }
+
+
+    closeRemovePetModal();
+
+
+    const petName =
+        editingPet.name ||
+        "this pet";
+
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+
+    overlay.id =
+        "remove-pet-modal";
+
+
+    overlay.className =
+        "remove-pet-modal";
+
+
+    overlay.innerHTML =
+        `
+            <div
+                class="remove-pet-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="remove-pet-title"
+            >
+
+                <div class="remove-pet-header">
+
+                    <div>
+
+                        <span class="remove-pet-eyebrow">
+                            Remove Pet
+                        </span>
+
+                        <h3 id="remove-pet-title">
+                            Remove ${escapeHtml(
+                                petName
+                            )}?
+                        </h3>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="remove-pet-close"
+                        data-remove-pet-close
+                        aria-label="Close remove pet window"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div class="remove-pet-summary">
+
+                    <strong>
+                        ${escapeHtml(
+                            petName
+                        )}
+                    </strong>
+
+                    <span>
+                        This pet will be removed from your household
+                        and future booking options.
+                    </span>
+
+                </div>
+
+
+                <div class="remove-pet-warning">
+
+                    <strong>
+                        What happens next
+                    </strong>
+
+                    <p>
+                        Any upcoming services scheduled only for
+                        ${escapeHtml(
+                            petName
+                        )} will also be cancelled.
+                    </p>
+
+                    <p>
+                        If ${escapeHtml(
+                            petName
+                        )} is part of a multi-pet booking,
+                        the other pets will remain scheduled.
+                    </p>
+
+                    <p>
+                        Past service history will be kept.
+                    </p>
+
+                </div>
+
+
+                <p class="remove-pet-note">
+                    This removes the pet from your active household.
+                </p>
+
+
+                <div class="remove-pet-actions">
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        data-remove-pet-close
+                    >
+                        Keep Pet
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="remove-pet-confirm"
+                        data-remove-pet-confirm
+                    >
+                        Remove Pet
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    overlay.addEventListener(
         "click",
-        async () => {
+        async event => {
 
             if (
-                !editingPet
+                event.target ===
+                overlay
             ) {
+
+                closeRemovePetModal();
+
                 return;
+
             }
 
 
-            const petName =
-                editingPet.name ||
-                "this pet";
+            if (
+                event.target.closest(
+                    "[data-remove-pet-close]"
+                )
+            ) {
+
+                closeRemovePetModal();
+
+                return;
+
+            }
 
 
-            const confirmed =
-                window.confirm(
-                    `Remove ${petName} from your household?\n\n${petName} will be removed from Your Pets and future booking options. Any upcoming services scheduled only for ${petName} will also be cancelled. If ${petName} is part of a multi-pet booking, the other pets will remain scheduled. Past service history will be kept.`
+            const confirmButton =
+                event.target.closest(
+                    "[data-remove-pet-confirm]"
                 );
 
 
             if (
-                !confirmed
+                !confirmButton
             ) {
                 return;
             }
@@ -5110,11 +5285,11 @@ removePetButton
                 );
 
 
-            removePetButton.disabled =
+            confirmButton.disabled =
                 true;
 
 
-            removePetButton.textContent =
+            confirmButton.textContent =
                 "Removing...";
 
 
@@ -5165,6 +5340,9 @@ removePetButton
                 );
 
 
+                closeRemovePetModal();
+
+
                 closePetForm();
 
 
@@ -5196,11 +5374,11 @@ removePetButton
                 }
 
 
-                removePetButton.disabled =
+                confirmButton.disabled =
                     false;
 
 
-                removePetButton.textContent =
+                confirmButton.textContent =
                     "Remove Pet";
 
             }
@@ -5208,6 +5386,30 @@ removePetButton
         }
     );
 
+
+    document.body.classList.add(
+        "client-modal-open"
+    );
+
+
+    overlay
+        .querySelector(
+            "[data-remove-pet-confirm]"
+        )
+        ?.focus();
+
+}
+
+
+removePetButton
+    ?.addEventListener(
+        "click",
+        () => {
+
+            openRemovePetModal();
+
+        }
+    );
 
 // ========================================
 // PET PHOTO INPUT
