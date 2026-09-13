@@ -7219,6 +7219,840 @@ body.client-navigation-open {
     }
 
 }
+
+
+/* ========================================
+   MOBILE APP HOME
+======================================== */
+
+.mobile-home-dashboard {
+    display: none;
+}
+
+
+/* ========================================
+   MOBILE APP HOME - MOBILE ONLY
+======================================== */
+
+@media (max-width: 700px) {
+
+    .mobile-home-dashboard {
+        width: 100%;
+
+        margin: 0;
+        padding: 0;
+
+        background: transparent;
+        border-radius: 0;
+    }
+
+
+    /* ========================================
+       HOME GREETING
+    ======================================== */
+
+    .mobile-home-greeting {
+        margin:
+            4px
+            2px
+            22px;
+    }
+
+
+    .mobile-home-greeting h2 {
+        margin: 0 0 5px;
+
+        color:
+            var(
+                --pis-navy,
+                #243746
+            );
+
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1.15;
+
+        letter-spacing: -0.025em;
+    }
+
+
+    .mobile-home-greeting p {
+        margin: 0;
+
+        color:
+            var(
+                --pis-muted,
+                #667784
+            );
+
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+
+    /* ========================================
+       HOME SECTION
+    ======================================== */
+
+    .mobile-home-section {
+        margin:
+            0
+            0
+            24px;
+
+        padding: 0;
+
+        background: transparent;
+        border-radius: 0;
+    }
+
+
+    .mobile-home-section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 14px;
+
+        margin:
+            0
+            2px
+            11px;
+    }
+
+
+    .mobile-home-section-heading h3 {
+        margin: 0;
+
+        color:
+            var(
+                --pis-navy,
+                #243746
+            );
+
+        font-size: 17px;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+
+
+    .mobile-home-section-link {
+        width: auto;
+
+        padding:
+            6px
+            4px;
+
+        background: transparent;
+
+        color:
+            var(
+                --pis-blue,
+                #2890df
+            );
+
+        border: 0;
+
+        font-size: 12px;
+        font-weight: 800;
+
+        cursor: pointer;
+    }
+
+
+    /* ========================================
+       NEXT VISIT HERO CARD
+    ======================================== */
+
+    .mobile-home-next-visit-card {
+        position: relative;
+
+        overflow: hidden;
+
+        margin:
+            0
+            0
+            24px;
+
+        padding: 20px;
+
+        background:
+            linear-gradient(
+                145deg,
+                #ffffff 0%,
+                #f5fbff 100%
+            );
+
+        border:
+            1px solid
+            rgba(
+                40,
+                144,
+                223,
+                0.18
+            );
+
+        border-radius: 20px;
+
+        box-shadow:
+            0 10px 28px
+            rgba(
+                25,
+                55,
+                73,
+                0.08
+            );
+    }
+
+
+    .mobile-home-next-visit-card::before {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 4px;
+
+        background:
+            linear-gradient(
+                90deg,
+                var(
+                    --pis-cyan,
+                    #47cee6
+                ),
+                var(
+                    --pis-blue,
+                    #2890df
+                )
+            );
+    }
+
+
+    .mobile-home-card-eyebrow {
+        margin-bottom: 13px;
+
+        color:
+            var(
+                --pis-blue,
+                #2890df
+            );
+
+        font-size: 10px;
+        font-weight: 900;
+
+        letter-spacing: 0.09em;
+
+        text-transform: uppercase;
+    }
+
+
+    .mobile-home-next-visit-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 14px;
+    }
+
+
+    .mobile-home-next-visit-header > div {
+        min-width: 0;
+    }
+
+
+    .mobile-home-next-visit-date {
+        margin-bottom: 5px;
+
+        color:
+            var(
+                --pis-muted,
+                #667784
+            );
+
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+
+    .mobile-home-next-visit-pets {
+        margin: 0;
+
+        color:
+            var(
+                --pis-navy,
+                #243746
+            );
+
+        font-size: 22px;
+        font-weight: 850;
+        line-height: 1.2;
+
+        letter-spacing: -0.02em;
+    }
+
+
+    .mobile-home-next-visit-service {
+        margin-top: 8px;
+
+        color:
+            var(
+                --pis-muted,
+                #667784
+            );
+
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.45;
+    }
+
+
+    /* ========================================
+       HOME STATUS BADGE
+    ======================================== */
+
+    .mobile-home-status-badge {
+        flex: 0 0 auto;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding:
+            6px
+            9px;
+
+        background:
+            rgba(
+                40,
+                144,
+                223,
+                0.10
+            );
+
+        color:
+            var(
+                --pis-blue,
+                #2890df
+            );
+
+        border:
+            1px solid
+            rgba(
+                40,
+                144,
+                223,
+                0.16
+            );
+
+        border-radius: 999px;
+
+        font-size: 10px;
+        font-weight: 850;
+
+        white-space: nowrap;
+    }
+
+
+    /* ========================================
+       HOME CARD LINK
+    ======================================== */
+
+    .mobile-home-card-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 10px;
+
+        width: 100%;
+
+        margin-top: 17px;
+        padding:
+            13px
+            0
+            0;
+
+        background: transparent;
+
+        color:
+            var(
+                --pis-blue,
+                #2890df
+            );
+
+        border: 0;
+        border-top:
+            1px solid
+            rgba(
+                40,
+                144,
+                223,
+                0.12
+            );
+
+        font-size: 13px;
+        font-weight: 800;
+
+        text-align: left;
+    }
+
+
+    .mobile-home-card-link span {
+        font-size: 18px;
+        line-height: 1;
+    }
+
+
+    /* ========================================
+       QUICK ACTIONS
+    ======================================== */
+
+    .mobile-home-quick-actions {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 10px;
+    }
+
+
+    .mobile-home-quick-action {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+
+        gap: 10px;
+
+        min-width: 0;
+        min-height: 58px;
+
+        padding:
+            12px
+            13px;
+
+        background: #ffffff;
+
+        color:
+            var(
+                --pis-navy,
+                #243746
+            );
+
+        border:
+            1px solid
+            #e2e9ed;
+
+        border-radius: 16px;
+
+        box-shadow:
+            0 5px 16px
+            rgba(
+                25,
+                55,
+                73,
+                0.05
+            );
+
+        font-size: 13px;
+        font-weight: 800;
+
+        text-align: left;
+
+        -webkit-tap-highlight-color:
+            transparent;
+    }
+
+
+    .mobile-home-quick-action:active {
+        transform: scale(0.98);
+    }
+
+
+    .mobile-home-quick-action-primary {
+        background:
+            linear-gradient(
+                135deg,
+                var(
+                    --pis-blue,
+                    #2890df
+                ),
+                #237fc5
+            );
+
+        color: #ffffff;
+
+        border-color: transparent;
+    }
+
+
+    .mobile-home-quick-action-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex: 0 0 auto;
+
+        width: 32px;
+        height: 32px;
+
+        background:
+            rgba(
+                40,
+                144,
+                223,
+                0.10
+            );
+
+        border-radius: 10px;
+
+        color:
+            var(
+                --pis-blue,
+                #2890df
+            );
+
+        font-size: 22px;
+        font-weight: 500;
+        line-height: 1;
+    }
+
+
+    .mobile-home-quick-action-primary
+    .mobile-home-quick-action-icon {
+        background:
+            rgba(
+                255,
+                255,
+                255,
+                0.18
+            );
+
+        color: #ffffff;
+    }
+
+
+    .mobile-home-quick-action-icon svg {
+        width: 18px;
+        height: 18px;
+
+        fill: none;
+
+        stroke: currentColor;
+        stroke-width: 1.8;
+
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+
+    /* ========================================
+       UPCOMING SNAPSHOT
+    ======================================== */
+
+    .mobile-home-upcoming-list {
+        overflow: hidden;
+
+        background: #ffffff;
+
+        border:
+            1px solid
+            #e2e9ed;
+
+        border-radius: 18px;
+
+        box-shadow:
+            0 6px 20px
+            rgba(
+                25,
+                55,
+                73,
+                0.05
+            );
+    }
+
+
+    .mobile-home-upcoming-item {
+        display: grid;
+
+        grid-template-columns:
+            48px
+            minmax(0, 1fr)
+            auto;
+
+        align-items: center;
+
+        gap: 12px;
+
+        width: 100%;
+
+        padding:
+            13px
+            14px;
+
+        background: #ffffff;
+
+        border: 0;
+        border-bottom:
+            1px solid
+            #edf1f3;
+
+        text-align: left;
+    }
+
+
+    .mobile-home-upcoming-item:last-child {
+        border-bottom: 0;
+    }
+
+
+    .mobile-home-upcoming-date {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        min-height: 44px;
+
+        padding:
+            5px
+            4px;
+
+        background:
+            #f2f8fc;
+
+        border-radius: 12px;
+    }
+
+
+    .mobile-home-upcoming-month {
+        color:
+            var(
+                --pis-blue,
+                #2890df
+            );
+
+        font-size: 9px;
+        font-weight: 900;
+
+        letter-spacing: 0.06em;
+
+        text-transform: uppercase;
+    }
+
+
+    .mobile-home-upcoming-day {
+        margin-top: 1px;
+
+        color:
+            var(
+                --pis-navy,
+                #243746
+            );
+
+        font-size: 18px;
+        font-weight: 850;
+        line-height: 1;
+    }
+
+
+    .mobile-home-upcoming-info {
+        min-width: 0;
+    }
+
+
+    .mobile-home-upcoming-info strong {
+        display: block;
+
+        overflow: hidden;
+
+        color:
+            var(
+                --pis-navy,
+                #243746
+            );
+
+        font-size: 13px;
+        font-weight: 800;
+
+        line-height: 1.35;
+
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+    .mobile-home-upcoming-info span {
+        display: block;
+
+        overflow: hidden;
+
+        margin-top: 3px;
+
+        color:
+            var(
+                --pis-muted,
+                #667784
+            );
+
+        font-size: 11px;
+        font-weight: 600;
+
+        line-height: 1.35;
+
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+    .mobile-home-upcoming-chevron {
+        color: #a1adb5;
+
+        font-size: 21px;
+        font-weight: 400;
+    }
+
+
+    /* ========================================
+       LATEST UPDATE
+    ======================================== */
+
+    .mobile-home-latest-update {
+        overflow: hidden;
+
+        margin: 0;
+        padding: 0;
+
+        background: #ffffff;
+
+        border:
+            1px solid
+            #e2e9ed;
+
+        border-radius: 18px;
+
+        box-shadow:
+            0 6px 20px
+            rgba(
+                25,
+                55,
+                73,
+                0.05
+            );
+    }
+
+
+    .mobile-home-latest-update-content {
+        padding: 17px;
+    }
+
+
+    .mobile-home-latest-update-heading h3 {
+        margin: 0;
+
+        color:
+            var(
+                --pis-navy,
+                #243746
+            );
+
+        font-size: 17px;
+        font-weight: 850;
+    }
+
+
+    .mobile-home-latest-update-heading p {
+        margin:
+            4px
+            0
+            0;
+
+        color:
+            var(
+                --pis-muted,
+                #667784
+            );
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+
+    .mobile-home-latest-update-photo {
+        overflow: hidden;
+
+        width: 100%;
+
+        margin-top: 14px;
+
+        aspect-ratio:
+            16 / 9;
+
+        background:
+            #edf2f5;
+
+        border-radius: 14px;
+    }
+
+
+    .mobile-home-latest-update-photo img {
+        display: block;
+
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+    }
+
+
+    .mobile-home-latest-update-note {
+        margin:
+            14px
+            0
+            0;
+
+        color:
+            var(
+                --pis-navy,
+                #243746
+            );
+
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+
+    /* ========================================
+       HOME EMPTY STATE
+    ======================================== */
+
+    .mobile-home-empty-state {
+        padding:
+            20px
+            17px;
+
+        color:
+            var(
+                --pis-muted,
+                #667784
+            );
+
+        font-size: 13px;
+        line-height: 1.5;
+
+        text-align: center;
+    }
+
+}
+
+
 /* ========================================
    PAWS IN STRIDE CLIENT APP THEME
 ======================================== */
