@@ -87,6 +87,29 @@ let allVisitReports =
 let allVisitWalks =
     [];
 
+// ========================================
+// WALK GPS TRACKING STATE
+// ========================================
+
+let activeWalkGpsTracker =
+    null;
+
+
+let activeWalkUiTimer =
+    null;
+
+
+const WALK_GPS_MAX_ACCURACY_METERS =
+    50;
+
+
+const WALK_GPS_MIN_SEGMENT_METERS =
+    3;
+
+
+const WALK_GPS_MAX_SPEED_MPS =
+    5.5;
+
 let activeVisitReportVisitId =
     null;
 
@@ -2671,6 +2694,44 @@ adminDayServicesContainer
 
                 } else if (
                     action ===
+                    "resume-walk-gps"
+                ) {
+
+
+                    actionButton.textContent =
+                        "Starting GPS...";
+
+
+                    const walk =
+                        getVisitWalk(
+                            visitId
+                        );
+
+
+                    if (
+                        !walk
+                    ) {
+
+                        throw new Error(
+                            "Walk session not found."
+                        );
+
+                    }
+
+
+                    await startWalkGpsTracking(
+                        walk
+                    );
+
+
+                    renderAdminDayServices();
+
+
+                    startWalkUiTimer();
+
+
+                } else if (
+                    action ===
                     "finish-walk"
                 ) {
 
@@ -2744,7 +2805,6 @@ adminDayServicesContainer
 
         }
     );
-
 
 
 // ========================================
@@ -2998,6 +3058,1419 @@ async function checkInVisit(
 
 
 // ========================================
+// WALK GPS DISTANCE
+// ========================================
+
+function getGpsDistanceMeters(
+    firstPoint,
+    secondPoint
+) {
+
+
+    const earthRadius =
+        6371000;
+
+
+    const toRadians =
+        degrees =>
+            degrees *
+            (
+                Math.PI /
+                180
+            );
+
+
+    const latitude1 =
+        toRadians(
+            firstPoint.latitude
+        );
+
+
+    const latitude2 =
+        toRadians(
+            secondPoint.latitude
+        );
+
+
+    const deltaLatitude =
+        toRadians(
+            secondPoint.latitude -
+            firstPoint.latitude
+        );
+
+
+    const deltaLongitude =
+        toRadians(
+            secondPoint.longitude -
+            firstPoint.longitude
+        );
+
+
+    const a =
+        Math.sin(
+            deltaLatitude /
+            2
+        ) ** 2 +
+        Math.cos(
+            latitude1
+        ) *
+        Math.cos(
+            latitude2
+        ) *
+        Math.sin(
+            deltaLongitude /
+            2
+        ) ** 2;
+
+
+    return (
+        earthRadius *
+        2 *
+        Math.atan2(
+            Math.sqrt(
+                a
+            ),
+            Math.sqrt(
+                1 -
+                a
+            )
+        )
+    );
+
+}
+
+
+// ========================================
+// WALK GPS QUEUE STORAGE KEY
+// ========================================
+
+function getWalkGpsQueueStorageKey(
+    walkId
+) {
+
+
+    return (
+        `paws-in-stride-walk-gps-${walkId}`
+    );
+
+}
+
+
+// ========================================
+// LOAD WALK GPS QUEUE
+// ========================================
+
+function loadPendingWalkGpsQueue(
+    walkId
+) {
+
+
+    try {
+
+
+        const value =
+            localStorage.getItem(
+                getWalkGpsQueueStorageKey(
+                    walkId
+                )
+            );
+
+
+        if (
+            !value
+        ) {
+
+            return [];
+
+        }
+
+
+        const parsed =
+            JSON.parse(
+                value
+            );
+
+
+        return Array.isArray(
+            parsed
+        )
+
+            ? parsed
+
+            : [];
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Unable to load pending GPS queue:",
+            error
+        );
+
+
+        return [];
+
+    }
+
+}
+
+
+// ========================================
+// SAVE WALK GPS QUEUE
+// ========================================
+
+function savePendingWalkGpsQueue(
+    walkId,
+    queue
+) {
+
+
+    try {
+
+
+        const key =
+            getWalkGpsQueueStorageKey(
+                walkId
+            );
+
+
+        if (
+            queue.length ===
+            0
+        ) {
+
+
+            localStorage.removeItem(
+                key
+            );
+
+
+            return;
+
+        }
+
+
+        localStorage.setItem(
+
+            key,
+
+            JSON.stringify(
+                queue
+            )
+
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Unable to save pending GPS queue:",
+            error
+        );
+
+    }
+
+}
+
+
+// ========================================
+// UPDATE WALK IN LOCAL STATE
+// ========================================
+
+function replaceAdminVisitWalk(
+    updatedWalk
+) {
+
+
+    const existingIndex =
+        allVisitWalks.findIndex(
+
+            walk =>
+
+                Number(
+                    walk.id
+                ) ===
+                Number(
+                    updatedWalk.id
+                )
+
+        );
+
+
+    if (
+        existingIndex ===
+        -1
+    ) {
+
+
+        allVisitWalks.push(
+            updatedWalk
+        );
+
+
+    } else {
+
+
+        allVisitWalks[
+            existingIndex
+        ] =
+            updatedWalk;
+
+    }
+
+}
+
+
+// ========================================
+// UPDATE LOCAL WALK TOTALS
+// ========================================
+
+function updateLocalWalkTotals(
+    walkId,
+    distanceMeters,
+    pointCount
+) {
+
+
+    const walk =
+        allVisitWalks.find(
+
+            item =>
+
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    walkId
+                )
+
+        );
+
+
+    if (
+        !walk
+    ) {
+
+        return;
+
+    }
+
+
+    walk.distance_meters =
+        distanceMeters;
+
+
+    walk.point_count =
+        pointCount;
+
+}
+
+
+// ========================================
+// IS WALK GPS ACTIVE
+// ========================================
+
+function isWalkGpsTracking(
+    walkId
+) {
+
+
+    return Boolean(
+
+        activeWalkGpsTracker &&
+
+        Number(
+            activeWalkGpsTracker.walkId
+        ) ===
+        Number(
+            walkId
+        ) &&
+
+        activeWalkGpsTracker.watchId !==
+        null
+
+    );
+
+}
+
+
+// ========================================
+// UPDATE WALK LIVE UI
+// ========================================
+
+function updateWalkLiveUi() {
+
+
+    const tracker =
+        activeWalkGpsTracker;
+
+
+    if (
+        !tracker
+    ) {
+
+        return;
+
+    }
+
+
+    const durationElement =
+        document.getElementById(
+            `admin-walk-duration-${tracker.visitId}`
+        );
+
+
+    const distanceElement =
+        document.getElementById(
+            `admin-walk-distance-${tracker.visitId}`
+        );
+
+
+    const pointsElement =
+        document.getElementById(
+            `admin-walk-points-${tracker.visitId}`
+        );
+
+
+    const elapsedSeconds =
+        Math.max(
+
+            0,
+
+            Math.floor(
+
+                (
+                    Date.now() -
+                    tracker.startedAt
+                ) /
+                1000
+
+            )
+
+        );
+
+
+    if (
+        durationElement
+    ) {
+
+
+        durationElement.textContent =
+            formatWalkDuration(
+                elapsedSeconds
+            );
+
+    }
+
+
+    if (
+        distanceElement
+    ) {
+
+
+        distanceElement.textContent =
+            `${
+                (
+                    tracker.distanceMeters /
+                    1609.344
+                ).toFixed(
+                    2
+                )
+            } mi`;
+
+    }
+
+
+    if (
+        pointsElement
+    ) {
+
+
+        pointsElement.textContent =
+            `${tracker.pointCount} GPS ${
+                tracker.pointCount ===
+                1
+
+                    ? "point"
+
+                    : "points"
+            }`;
+
+    }
+
+}
+
+
+// ========================================
+// WALK UI TIMER
+// ========================================
+
+function startWalkUiTimer() {
+
+
+    if (
+        activeWalkUiTimer
+    ) {
+
+
+        clearInterval(
+            activeWalkUiTimer
+        );
+
+    }
+
+
+    updateWalkLiveUi();
+
+
+    activeWalkUiTimer =
+        setInterval(
+
+            updateWalkLiveUi,
+
+            1000
+
+        );
+
+}
+
+
+// ========================================
+// STOP WALK UI TIMER
+// ========================================
+
+function stopWalkUiTimer() {
+
+
+    if (
+        !activeWalkUiTimer
+    ) {
+
+        return;
+
+    }
+
+
+    clearInterval(
+        activeWalkUiTimer
+    );
+
+
+    activeWalkUiTimer =
+        null;
+
+}
+
+
+// ========================================
+// PERSIST WALK GPS POINT
+// ========================================
+
+async function persistWalkGpsPoint(
+    tracker,
+    queuedPoint
+) {
+
+
+    const {
+
+        distance_meters_total,
+        point_count_total,
+        ...pointPayload
+
+    } =
+        queuedPoint;
+
+
+    const {
+
+        error: pointError
+
+    } =
+        await supabaseClient
+            .from(
+                "visit_walk_points"
+            )
+            .insert(
+                pointPayload
+            );
+
+
+    if (
+        pointError &&
+        pointError.code !==
+        "23505"
+    ) {
+
+        throw pointError;
+
+    }
+
+
+    const {
+
+        data: updatedWalk,
+
+        error: walkUpdateError
+
+    } =
+        await supabaseClient
+            .from(
+                "visit_walks"
+            )
+            .update({
+
+                distance_meters:
+                    distance_meters_total,
+
+                point_count:
+                    point_count_total,
+
+                updated_at:
+                    new Date()
+                        .toISOString()
+
+            })
+            .eq(
+                "id",
+                tracker.walkId
+            )
+            .select("*")
+            .single();
+
+
+    if (
+        walkUpdateError
+    ) {
+
+        throw walkUpdateError;
+
+    }
+
+
+    replaceAdminVisitWalk(
+        updatedWalk
+    );
+
+}
+
+
+// ========================================
+// FLUSH WALK GPS QUEUE
+// ========================================
+
+async function flushWalkGpsQueue(
+    tracker
+) {
+
+
+    if (
+        tracker.flushPromise
+    ) {
+
+        return tracker.flushPromise;
+
+    }
+
+
+    tracker.flushPromise =
+        (
+
+            async () => {
+
+
+                while (
+                    tracker.pendingQueue.length >
+                    0
+                ) {
+
+
+                    const queuedPoint =
+                        tracker.pendingQueue[0];
+
+
+                    try {
+
+
+                        await persistWalkGpsPoint(
+                            tracker,
+                            queuedPoint
+                        );
+
+
+                        tracker.pendingQueue.shift();
+
+
+                        savePendingWalkGpsQueue(
+                            tracker.walkId,
+                            tracker.pendingQueue
+                        );
+
+
+                        tracker.lastSyncError =
+                            null;
+
+
+                    } catch (
+                        error
+                    ) {
+
+
+                        tracker.lastSyncError =
+                            error;
+
+
+                        console.warn(
+                            "GPS point waiting to sync:",
+                            error
+                        );
+
+
+                        break;
+
+                    }
+
+                }
+
+            }
+
+        )();
+
+
+    try {
+
+
+        await tracker.flushPromise;
+
+
+    } finally {
+
+
+        tracker.flushPromise =
+            null;
+
+    }
+
+}
+
+
+// ========================================
+// HANDLE GPS POSITION
+// ========================================
+
+function handleWalkGpsPosition(
+    position,
+    tracker
+) {
+
+
+    if (
+        activeWalkGpsTracker !==
+        tracker
+    ) {
+
+        return;
+
+    }
+
+
+    const accuracy =
+        Number(
+            position.coords
+                .accuracy
+        );
+
+
+    if (
+        !Number.isFinite(
+            accuracy
+        ) ||
+        accuracy >
+        WALK_GPS_MAX_ACCURACY_METERS
+    ) {
+
+
+        console.log(
+            "GPS point ignored for low accuracy:",
+            accuracy
+        );
+
+
+        return;
+
+    }
+
+
+    const point = {
+
+        latitude:
+            Number(
+                position.coords
+                    .latitude
+            ),
+
+        longitude:
+            Number(
+                position.coords
+                    .longitude
+            ),
+
+        accuracy:
+            accuracy,
+
+        altitude:
+            Number.isFinite(
+                position.coords
+                    .altitude
+            )
+
+                ? Number(
+                    position.coords
+                        .altitude
+                )
+
+                : null,
+
+        speed:
+            Number.isFinite(
+                position.coords
+                    .speed
+            )
+
+                ? Number(
+                    position.coords
+                        .speed
+                )
+
+                : null,
+
+        heading:
+            Number.isFinite(
+                position.coords
+                    .heading
+            )
+
+                ? Number(
+                    position.coords
+                        .heading
+                )
+
+                : null,
+
+        timestamp:
+            Number(
+                position.timestamp ||
+                Date.now()
+            )
+
+    };
+
+
+    let segmentMeters =
+        0;
+
+
+    if (
+        tracker.lastAcceptedPoint
+    ) {
+
+
+        segmentMeters =
+            getGpsDistanceMeters(
+                tracker.lastAcceptedPoint,
+                point
+            );
+
+
+        const elapsedSeconds =
+            Math.max(
+
+                0.001,
+
+                (
+                    point.timestamp -
+                    tracker.lastAcceptedPoint
+                        .timestamp
+                ) /
+                1000
+
+            );
+
+
+        const calculatedSpeed =
+            segmentMeters /
+            elapsedSeconds;
+
+
+        const dynamicMinimumDistance =
+            Math.max(
+
+                WALK_GPS_MIN_SEGMENT_METERS,
+
+                Math.min(
+
+                    8,
+
+                    Math.max(
+                        accuracy,
+                        tracker.lastAcceptedPoint
+                            .accuracy ||
+                        0
+                    ) *
+                    0.35
+
+                )
+
+            );
+
+
+        if (
+            segmentMeters <
+            dynamicMinimumDistance
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            calculatedSpeed >
+            WALK_GPS_MAX_SPEED_MPS
+        ) {
+
+
+            console.log(
+                "GPS point ignored for unrealistic walking speed:",
+                calculatedSpeed
+            );
+
+
+            return;
+
+        }
+
+    }
+
+
+    const nextDistance =
+        tracker.distanceMeters +
+        segmentMeters;
+
+
+    const nextPointCount =
+        tracker.pointCount +
+        1;
+
+
+    const sequenceNumber =
+        tracker.nextSequence;
+
+
+    tracker.nextSequence++;
+
+
+    tracker.distanceMeters =
+        nextDistance;
+
+
+    tracker.pointCount =
+        nextPointCount;
+
+
+    tracker.lastAcceptedPoint =
+        point;
+
+
+    const queuedPoint = {
+
+        walk_id:
+            tracker.walkId,
+
+        sequence_number:
+            sequenceNumber,
+
+        recorded_at:
+            new Date(
+                point.timestamp
+            )
+                .toISOString(),
+
+        latitude:
+            point.latitude,
+
+        longitude:
+            point.longitude,
+
+        accuracy_meters:
+            point.accuracy,
+
+        altitude_meters:
+            point.altitude,
+
+        speed_mps:
+            point.speed,
+
+        heading_degrees:
+            point.heading,
+
+        distance_meters_total:
+            Number(
+                nextDistance.toFixed(
+                    2
+                )
+            ),
+
+        point_count_total:
+            nextPointCount
+
+    };
+
+
+    tracker.pendingQueue.push(
+        queuedPoint
+    );
+
+
+    savePendingWalkGpsQueue(
+        tracker.walkId,
+        tracker.pendingQueue
+    );
+
+
+    updateLocalWalkTotals(
+        tracker.walkId,
+        nextDistance,
+        nextPointCount
+    );
+
+
+    updateWalkLiveUi();
+
+
+    flushWalkGpsQueue(
+        tracker
+    );
+
+}
+
+
+// ========================================
+// WALK GPS ERROR
+// ========================================
+
+function handleWalkGpsError(
+    error,
+    tracker
+) {
+
+
+    console.warn(
+        "Walk GPS error:",
+        error
+    );
+
+
+    if (
+        error?.code ===
+        1 &&
+        !tracker.permissionErrorShown
+    ) {
+
+
+        tracker.permissionErrorShown =
+            true;
+
+
+        alert(
+            "Location permission is required to track this walk. Please allow precise location access for Paws in Stride."
+        );
+
+    }
+
+}
+
+
+// ========================================
+// START WALK GPS TRACKING
+// ========================================
+
+async function startWalkGpsTracking(
+    walk
+) {
+
+
+    if (
+        !navigator.geolocation
+    ) {
+
+        throw new Error(
+            "This device does not support GPS location tracking."
+        );
+
+    }
+
+
+    if (
+        activeWalkGpsTracker &&
+        Number(
+            activeWalkGpsTracker.walkId
+        ) !==
+        Number(
+            walk.id
+        )
+    ) {
+
+        throw new Error(
+            "Another walk is already being tracked on this device."
+        );
+
+    }
+
+
+    if (
+        isWalkGpsTracking(
+            walk.id
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const {
+
+        data: latestPoints,
+
+        error: latestPointError
+
+    } =
+        await supabaseClient
+            .from(
+                "visit_walk_points"
+            )
+            .select(
+                "sequence_number, recorded_at, latitude, longitude, accuracy_meters"
+            )
+            .eq(
+                "walk_id",
+                walk.id
+            )
+            .order(
+                "sequence_number",
+                {
+                    ascending:
+                        false
+                }
+            )
+            .limit(
+                1
+            );
+
+
+    if (
+        latestPointError
+    ) {
+
+        throw latestPointError;
+
+    }
+
+
+    const latestSavedPoint =
+        latestPoints?.[0] ||
+        null;
+
+
+    const pendingQueue =
+        loadPendingWalkGpsQueue(
+            walk.id
+        );
+
+
+    const latestPendingPoint =
+        pendingQueue.length >
+        0
+
+            ? pendingQueue[
+                pendingQueue.length -
+                1
+            ]
+
+            : null;
+
+
+    const lastAcceptedPoint =
+        latestPendingPoint
+
+            ? {
+
+                latitude:
+                    Number(
+                        latestPendingPoint
+                            .latitude
+                    ),
+
+                longitude:
+                    Number(
+                        latestPendingPoint
+                            .longitude
+                    ),
+
+                accuracy:
+                    Number(
+                        latestPendingPoint
+                            .accuracy_meters ||
+                        0
+                    ),
+
+                timestamp:
+                    new Date(
+                        latestPendingPoint
+                            .recorded_at
+                    )
+                        .getTime()
+
+            }
+
+            : latestSavedPoint
+
+                ? {
+
+                    latitude:
+                        Number(
+                            latestSavedPoint
+                                .latitude
+                        ),
+
+                    longitude:
+                        Number(
+                            latestSavedPoint
+                                .longitude
+                        ),
+
+                    accuracy:
+                        Number(
+                            latestSavedPoint
+                                .accuracy_meters ||
+                            0
+                        ),
+
+                    timestamp:
+                        new Date(
+                            latestSavedPoint
+                                .recorded_at
+                        )
+                            .getTime()
+
+                }
+
+                : null;
+
+
+    const highestSequence =
+        Math.max(
+
+            Number(
+                latestSavedPoint
+                    ?.sequence_number ??
+                -1
+            ),
+
+            Number(
+                latestPendingPoint
+                    ?.sequence_number ??
+                -1
+            )
+
+        );
+
+
+    const pendingDistance =
+        latestPendingPoint
+            ?.distance_meters_total;
+
+
+    const pendingPointCount =
+        latestPendingPoint
+            ?.point_count_total;
+
+
+    const tracker = {
+
+        walkId:
+            Number(
+                walk.id
+            ),
+
+        visitId:
+            Number(
+                walk.visit_id
+            ),
+
+        startedAt:
+            new Date(
+                walk.started_at
+            )
+                .getTime(),
+
+        watchId:
+            null,
+
+        nextSequence:
+            highestSequence +
+            1,
+
+        distanceMeters:
+            Number(
+                pendingDistance ??
+                walk.distance_meters ??
+                0
+            ),
+
+        pointCount:
+            Number(
+                pendingPointCount ??
+                walk.point_count ??
+                0
+            ),
+
+        lastAcceptedPoint:
+            lastAcceptedPoint,
+
+        pendingQueue:
+            pendingQueue,
+
+        flushPromise:
+            null,
+
+        lastSyncError:
+            null,
+
+        permissionErrorShown:
+            false
+
+    };
+
+
+    activeWalkGpsTracker =
+        tracker;
+
+
+    tracker.watchId =
+        navigator.geolocation
+            .watchPosition(
+
+                position => {
+
+                    handleWalkGpsPosition(
+                        position,
+                        tracker
+                    );
+
+                },
+
+                error => {
+
+                    handleWalkGpsError(
+                        error,
+                        tracker
+                    );
+
+                },
+
+                {
+
+                    enableHighAccuracy:
+                        true,
+
+                    maximumAge:
+                        0,
+
+                    timeout:
+                        15000
+
+                }
+
+            );
+
+
+    startWalkUiTimer();
+
+
+    flushWalkGpsQueue(
+        tracker
+    );
+
+}
+
+
+// ========================================
+// STOP WALK GPS TRACKING
+// ========================================
+
+function stopWalkGpsTracking(
+    walkId
+) {
+
+
+    const tracker =
+        activeWalkGpsTracker;
+
+
+    if (
+        !tracker ||
+        Number(
+            tracker.walkId
+        ) !==
+        Number(
+            walkId
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        tracker.watchId !==
+        null
+    ) {
+
+
+        navigator.geolocation
+            .clearWatch(
+                tracker.watchId
+            );
+
+    }
+
+
+    tracker.watchId =
+        null;
+
+
+    stopWalkUiTimer();
+
+
+    activeWalkGpsTracker =
+        null;
+
+
+    return tracker;
+
+}
+
+
+// ========================================
 // START VISIT WALK
 // ========================================
 
@@ -3045,28 +4518,65 @@ async function startVisitWalk(
     }
 
 
-    const existingWalk =
+    let walk =
         getVisitWalk(
             visitId
         );
 
 
     if (
-        existingWalk?.status ===
-        "in_progress"
+        !walk
     ) {
 
 
-        renderAdminDayServices();
+        const {
+
+            data: existingWalk,
+
+            error: existingWalkError
+
+        } =
+            await supabaseClient
+                .from(
+                    "visit_walks"
+                )
+                .select("*")
+                .eq(
+                    "visit_id",
+                    visitId
+                )
+                .maybeSingle();
 
 
-        return;
+        if (
+            existingWalkError
+        ) {
+
+            throw existingWalkError;
+
+        }
+
+
+        if (
+            existingWalk
+        ) {
+
+
+            replaceAdminVisitWalk(
+                existingWalk
+            );
+
+
+            walk =
+                existingWalk;
+
+        }
 
     }
 
 
     if (
-        existingWalk?.status ===
+        walk?.status ===
         "completed"
     ) {
 
@@ -3077,9 +4587,277 @@ async function startVisitWalk(
     }
 
 
+    if (
+        !walk
+    ) {
+
+
+        const {
+
+            data,
+
+            error
+
+        } =
+            await supabaseClient
+                .from(
+                    "visit_walks"
+                )
+                .insert({
+
+                    visit_id:
+                        visitId
+
+                })
+                .select("*")
+                .single();
+
+
+        if (
+            error
+        ) {
+
+
+            if (
+                error.code ===
+                "23505"
+            ) {
+
+
+                const {
+
+                    data: recoveredWalk,
+
+                    error: recoveryError
+
+                } =
+                    await supabaseClient
+                        .from(
+                            "visit_walks"
+                        )
+                        .select("*")
+                        .eq(
+                            "visit_id",
+                            visitId
+                        )
+                        .single();
+
+
+                if (
+                    recoveryError
+                ) {
+
+                    throw recoveryError;
+
+                }
+
+
+                walk =
+                    recoveredWalk;
+
+
+            } else {
+
+
+                throw error;
+
+            }
+
+
+        } else {
+
+
+            walk =
+                data;
+
+        }
+
+
+        replaceAdminVisitWalk(
+            walk
+        );
+
+    }
+
+
+    await startWalkGpsTracking(
+        walk
+    );
+
+
+    renderAdminDayServices();
+
+
+    startWalkUiTimer();
+
+}
+
+
+// ========================================
+// FINISH VISIT WALK
+// ========================================
+
+async function finishVisitWalk(
+    visitId
+) {
+
+
+    const walk =
+        getVisitWalk(
+            visitId
+        );
+
+
+    if (
+        !walk
+    ) {
+
+        throw new Error(
+            "Active walk not found."
+        );
+
+    }
+
+
+    if (
+        walk.status !==
+        "in_progress"
+    ) {
+
+        throw new Error(
+            "This walk is not currently active."
+        );
+
+    }
+
+
+    let tracker =
+        null;
+
+
+    if (
+        activeWalkGpsTracker &&
+        Number(
+            activeWalkGpsTracker.walkId
+        ) ===
+        Number(
+            walk.id
+        )
+    ) {
+
+
+        tracker =
+            stopWalkGpsTracking(
+                walk.id
+            );
+
+    }
+
+
+    if (
+        !tracker
+    ) {
+
+
+        const pendingQueue =
+            loadPendingWalkGpsQueue(
+                walk.id
+            );
+
+
+        tracker = {
+
+            walkId:
+                Number(
+                    walk.id
+                ),
+
+            visitId:
+                Number(
+                    walk.visit_id
+                ),
+
+            pendingQueue:
+                pendingQueue,
+
+            flushPromise:
+                null,
+
+            distanceMeters:
+                Number(
+                    pendingQueue.at(
+                        -1
+                    )
+                        ?.distance_meters_total ??
+                    walk.distance_meters ??
+                    0
+                ),
+
+            pointCount:
+                Number(
+                    pendingQueue.at(
+                        -1
+                    )
+                        ?.point_count_total ??
+                    walk.point_count ??
+                    0
+                )
+
+        };
+
+    }
+
+
+    await flushWalkGpsQueue(
+        tracker
+    );
+
+
+    if (
+        tracker.pendingQueue.length >
+        0
+    ) {
+
+
+        throw new Error(
+            "Some GPS points are still waiting to sync. Keep this page open with data service and try Finish Walk again."
+        );
+
+    }
+
+
+    const endedAt =
+        new Date();
+
+
+    const startedAt =
+        new Date(
+            walk.started_at
+        );
+
+
+    const durationSeconds =
+        Math.max(
+
+            0,
+
+            Math.round(
+
+                (
+                    endedAt.getTime() -
+                    startedAt.getTime()
+                ) /
+                1000
+
+            )
+
+        );
+
+
     const {
 
         data,
+
         error
 
     } =
@@ -3087,12 +4865,46 @@ async function startVisitWalk(
             .from(
                 "visit_walks"
             )
-            .insert({
+            .update({
 
-                visit_id:
-                    visitId
+                status:
+                    "completed",
+
+                ended_at:
+                    endedAt
+                        .toISOString(),
+
+                duration_seconds:
+                    durationSeconds,
+
+                distance_meters:
+                    Number(
+                        tracker.distanceMeters ||
+                        0
+                    )
+                        .toFixed(
+                            2
+                        ),
+
+                point_count:
+                    Number(
+                        tracker.pointCount ||
+                        0
+                    ),
+
+                updated_at:
+                    new Date()
+                        .toISOString()
 
             })
+            .eq(
+                "id",
+                walk.id
+            )
+            .eq(
+                "status",
+                "in_progress"
+            )
             .select("*")
             .single();
 
@@ -3108,6 +4920,12 @@ async function startVisitWalk(
 
     replaceAdminVisitWalk(
         data
+    );
+
+
+    savePendingWalkGpsQueue(
+        walk.id,
+        []
     );
 
 
@@ -4425,6 +6243,12 @@ function buildAdminVisitProgressSection(
                 );
 
 
+            const gpsActive =
+                isWalkGpsTracking(
+                    walk.id
+                );
+
+
             return `
 
                 <div class="admin-visit-progress admin-visit-progress-live">
@@ -4452,21 +6276,71 @@ function buildAdminVisitProgressSection(
 
 
                         <span>
-                            ${escapeHtml(
-                                formatWalkDuration(
-                                    elapsedSeconds
-                                )
-                            )}
+
+                            <span
+                                id="admin-walk-duration-${visit.id}"
+                            >
+                                ${escapeHtml(
+                                    formatWalkDuration(
+                                        elapsedSeconds
+                                    )
+                                )}
+                            </span>
+
                             •
-                            ${(
-                                Number(
-                                    walk.distance_meters ||
-                                    0
-                                ) /
-                                1609.344
-                            ).toFixed(2)}
-                            mi
+
+                            <span
+                                id="admin-walk-distance-${visit.id}"
+                            >
+                                ${(
+                                    Number(
+                                        walk.distance_meters ||
+                                        0
+                                    ) /
+                                    1609.344
+                                ).toFixed(2)}
+                                mi
+                            </span>
+
                         </span>
+
+
+                        <span
+                            id="admin-walk-points-${visit.id}"
+                        >
+                            ${Number(
+                                walk.point_count ||
+                                0
+                            )}
+                            GPS ${
+                                Number(
+                                    walk.point_count ||
+                                    0
+                                ) ===
+                                1
+
+                                    ? "point"
+
+                                    : "points"
+                            }
+                        </span>
+
+
+                        ${
+                            gpsActive
+
+                                ? `
+                                    <span>
+                                        GPS tracking active
+                                    </span>
+                                `
+
+                                : `
+                                    <span>
+                                        GPS tracking paused on this device
+                                    </span>
+                                `
+                        }
 
 
                     </div>
@@ -4475,9 +6349,31 @@ function buildAdminVisitProgressSection(
                     <div class="admin-completed-visit-actions">
 
 
+                        ${
+                            !gpsActive
+
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="primary-button admin-visit-action-button"
+                                        data-visit-action="resume-walk-gps"
+                                        data-visit-id="${visit.id}"
+                                    >
+                                        Resume GPS
+                                    </button>
+                                `
+
+                                : ""
+                        }
+
+
                         <button
                             type="button"
-                            class="primary-button admin-visit-action-button"
+                            class="${
+                                gpsActive
+                                    ? "primary-button"
+                                    : "secondary-button"
+                            } admin-visit-action-button"
                             data-visit-action="finish-walk"
                             data-visit-id="${visit.id}"
                         >
@@ -4493,6 +6389,8 @@ function buildAdminVisitProgressSection(
             `;
 
         }
+
+
 
 
         // ========================================
