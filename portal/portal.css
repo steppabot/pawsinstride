@@ -10497,6 +10497,10 @@ a:focus-visible {
 }
 
 
+/* ========================================
+   ACTIVE / UPCOMING VISIT COUNT
+======================================== */
+
 .client-portal-page
 .upcoming-service-count {
 
@@ -10508,6 +10512,21 @@ a:focus-visible {
 
 }
 
+
+/* ========================================
+   COMPLETED VISIT COUNT
+======================================== */
+
+.client-portal-page
+.upcoming-service-count-completed {
+
+    background:
+        #22a447;
+
+    color:
+        #fff;
+
+}
 
 /* ========================================
    SELECTED UPCOMING DAY
