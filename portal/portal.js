@@ -11532,19 +11532,11 @@ function renderUpcomingCalendar() {
 
 
         // ========================================
-        // COMPLETED PAST DATE
-        // ========================================
-        //
-        // The marker becomes green only when:
-        //
-        // - the date is before today
-        // - there is at least one visit
-        // - every non-cancelled visit was completed
-        //
+        // COMPLETED DATE
         // ========================================
 
-        const completedPastDate =
-            date < today &&
+        const completedDate =
+            date <= today &&
             serviceCount > 0 &&
             visitsForDate.every(
                 visit => {
@@ -11596,7 +11588,7 @@ function renderUpcomingCalendar() {
 
 
         if (
-            completedPastDate
+            completedDate
         ) {
 
             button.classList.add(
@@ -11643,7 +11635,7 @@ function renderUpcomingCalendar() {
                                 class="
                                     upcoming-service-count
                                     ${
-                                        completedPastDate
+                                        completedDate
                                             ? "upcoming-service-count-completed"
                                             : ""
                                     }
