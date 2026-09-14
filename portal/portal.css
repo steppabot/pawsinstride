@@ -5151,15 +5151,6 @@ body.client-modal-open {
                 1.1fr
             );
 
-        grid-template-rows:
-            auto
-            auto
-            auto
-            auto
-            1fr;
-
-        align-items: start;
-
         overflow: hidden;
 
         border-radius: 18px;
@@ -5186,7 +5177,8 @@ body.client-modal-open {
         grid-column:
             1 / -1;
 
-        grid-row: 1;
+        grid-row:
+            1;
 
         padding:
             22px 24px;
@@ -5298,7 +5290,7 @@ body.client-modal-open {
         grid-column: 2;
 
         grid-row:
-            2 / 6;
+            2 / 5;
 
         min-width: 0;
 
@@ -5308,7 +5300,7 @@ body.client-modal-open {
 
         display: flex;
 
-        align-self: stretch;
+        align-items: stretch;
 
     }
 
@@ -5375,7 +5367,8 @@ body.client-modal-open {
 
         gap: 10px;
 
-        padding: 16px;
+        padding:
+            16px;
 
     }
 
@@ -5410,6 +5403,8 @@ body.client-modal-open {
             );
 
         height: 420px;
+
+        flex: 1;
 
         min-height: 360px;
 
