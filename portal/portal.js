@@ -15818,31 +15818,251 @@ function clearClientPhotoPreviewUrl() {
 }
 
 // ========================================
+// MOBILE PORTAL INTRO
+// ========================================
+
+function startMobilePortalIntro() {
+
+    const intro =
+        document.getElementById("mobile-portal-intro");
+
+    const video =
+        document.getElementById("mobile-portal-intro-video");
+
+    const inactiveIntro = {
+        dashboardFinished() {}
+    };
+
+    if (!intro || !video) {
+        return inactiveIntro;
+    }
+
+    const isMobile =
+        window.matchMedia("(max-width: 700px)").matches;
+
+    const isInstalled =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true;
+
+    const reducedMotion =
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+    if ((!isMobile && !isInstalled) || reducedMotion) {
+        intro.remove();
+        return inactiveIntro;
+    }
+
+    let dismissed = false;
+    let dashboardFinished = false;
+    let videoFinished = false;
+    let safetyTimer;
+
+    function dismissIntro() {
+
+        if (dismissed) {
+            return;
+        }
+
+        dismissed = true;
+
+        window.clearTimeout(safetyTimer);
+
+        document.removeEventListener(
+            "visibilitychange",
+            handleVisibilityChange
+        );
+
+        window.removeEventListener(
+            "pagehide",
+            dismissIntro
+        );
+
+        document.body.classList.remove(
+            "portal-intro-open"
+        );
+
+        intro.classList.add("is-leaving");
+
+        window.setTimeout(() => {
+
+            video.pause();
+            intro.remove();
+
+        }, 400);
+
+    }
+
+    function finishWhenReady() {
+
+        if (dashboardFinished && videoFinished) {
+            dismissIntro();
+        }
+
+    }
+
+    function handleVisibilityChange() {
+
+        if (document.hidden) {
+            dismissIntro();
+        }
+
+    }
+
+    video.addEventListener(
+        "ended",
+        () => {
+
+            videoFinished = true;
+            finishWhenReady();
+
+        },
+        { once: true }
+    );
+
+    video.addEventListener(
+        "error",
+        dismissIntro,
+        { once: true }
+    );
+
+    video.querySelector("source")
+        ?.addEventListener(
+            "error",
+            dismissIntro,
+            { once: true }
+        );
+
+    document.addEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+    );
+
+    window.addEventListener(
+        "pagehide",
+        dismissIntro,
+        { once: true }
+    );
+
+    safetyTimer =
+        window.setTimeout(dismissIntro, 15000);
+
+    video.muted = true;
+    video.defaultMuted = true;
+
+    intro.classList.add("is-active");
+
+    document.body.classList.add(
+        "portal-intro-open"
+    );
+
+    try {
+
+        const playback =
+            video.play();
+
+        if (playback && typeof playback.catch === "function") {
+            playback.catch(dismissIntro);
+        }
+
+    } catch (error) {
+
+        dismissIntro();
+
+    }
+
+    return {
+
+        dashboardFinished(success) {
+
+            dashboardFinished = true;
+
+            if (!success) {
+                dismissIntro();
+                return;
+            }
+
+            finishWhenReady();
+
+        }
+
+    };
+
+}
+
+
+// ========================================
 // LOAD
 // ========================================
 
 (async function initializeClientPortal() {
 
-    await loadDashboard();
+    const portalIntro =
+        startMobilePortalIntro();
 
+    let dashboardReady = false;
+
+    try {
+
+        await loadDashboard();
+
+        const dashboardContent =
+            document.getElementById("dashboard-content");
+
+        dashboardReady =
+            dashboardContent?.style.display === "block";
+
+    } catch (error) {
+
+        console.error(
+            "Client dashboard initialization failed:",
+            error
+        );
+
+        const loading =
+            document.getElementById("loading");
+
+        if (loading) {
+
+            loading.textContent =
+                "We couldn't load your portal. Please refresh to try again.";
+
+        }
+
+    } finally {
+
+        portalIntro.dashboardFinished(
+            dashboardReady
+        );
+
+    }
 
     if (
+        dashboardReady &&
         currentUser &&
         currentProfile &&
-        String(
-            currentProfile.role || ""
-        )
+        String(currentProfile.role || "")
             .trim()
-            .toLowerCase() !==
-            "admin"
+            .toLowerCase() !== "admin"
     ) {
 
-        await initializeClientMessaging();
+        try {
+
+            await initializeClientMessaging();
+
+        } catch (error) {
+
+            console.error(
+                "Client messaging initialization failed:",
+                error
+            );
+
+        }
 
     }
 
 })();
-
 
 // ========================================
 // LOGOUT
