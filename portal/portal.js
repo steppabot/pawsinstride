@@ -15263,39 +15263,81 @@ function clearClientPhotoPreviewUrl() {
 // LOGOUT
 // ========================================
 
-document.getElementById(
-    "admin-logout-button"
-)?.addEventListener(
-    "click",
-    async () => {
+document
+    .getElementById(
+        "logout-button"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
 
-        // ========================================
-        // CLEAR OFFLINE ADMIN DEVICE FLAG
-        // ========================================
+            try {
 
-        window.localStorage.removeItem(
-            "paws-in-stride-admin-device"
-        );
+                // ========================================
+                // SIGN OUT
+                // ========================================
 
-
-        // ========================================
-        // SIGN OUT
-        // ========================================
-
-        await supabaseClient
-            .auth
-            .signOut();
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .auth
+                        .signOut();
 
 
-        // ========================================
-        // RETURN TO LOGIN
-        // ========================================
+                if (error) {
 
-        window.location.href =
-            "./login.html";
+                    throw error;
 
-    }
-);
+                }
+
+
+                // ========================================
+                // CLEAR LOCAL CLIENT STATE
+                // ========================================
+
+                currentUser =
+                    null;
+
+                currentProfile =
+                    null;
+
+                currentHousehold =
+                    null;
+
+                currentPropertyAccess =
+                    null;
+
+                currentPets =
+                    [];
+
+                currentVisits =
+                    [];
+
+                currentVisitPets =
+                    [];
+
+
+                // ========================================
+                // RETURN TO LOGIN
+                // ========================================
+
+                window.location.replace(
+                    "./login.html"
+                );
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+            }
+
+        }
+    );
 
 // ========================================
 // CLIENT MESSAGING
