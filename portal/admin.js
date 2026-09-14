@@ -761,6 +761,76 @@ async function loadAdminDashboard() {
     }
 
     // ========================================
+    // RESTORE PENDING LOCAL VISIT STATES
+    // ========================================
+    //
+    // The cached business-data snapshot may still
+    // contain an older server state such as
+    // "scheduled". Re-apply any unsynced actions
+    // saved on this device before rendering.
+    // ========================================
+    
+    for (
+        const visit of
+        allVisits
+    ) {
+    
+        // ========================================
+        // PENDING CHECK IN
+        // ========================================
+    
+        const pendingCheckIn =
+            loadPendingVisitCheckIn(
+                visit.id
+            );
+    
+    
+        if (
+            pendingCheckIn
+        ) {
+    
+            visit.status =
+                "checked_in";
+    
+    
+            visit.checked_in_at =
+                pendingCheckIn
+                    .checked_in_at;
+    
+    
+            visit.completed_at =
+                null;
+    
+        }
+    
+    
+        // ========================================
+        // PENDING VISIT FINISH
+        // ========================================
+    
+        const pendingVisitFinish =
+            loadPendingVisitFinish(
+                visit.id
+            );
+    
+    
+        if (
+            pendingVisitFinish
+        ) {
+    
+            visit.status =
+                "completed";
+    
+    
+            visit.completed_at =
+                pendingVisitFinish
+                    .completed_at;
+    
+        }
+    
+    }
+
+    // ========================================
     // LOAD WALK TRACKING SESSIONS
     // ========================================
     
@@ -4174,8 +4244,29 @@ function updateLocalWalkTotals(
     walk.point_count =
         pointCount;
 
-}
 
+    // ========================================
+    // PERSIST LOCAL WALK PROGRESS
+    // ========================================
+    //
+    // Local-only walks must keep their latest
+    // distance and GPS point totals on disk so
+    // a PWA kill/reload can restore the walk
+    // exactly where it left off.
+    // ========================================
+
+    if (
+        walk.local_only ===
+        true
+    ) {
+
+        saveLocalVisitWalk(
+            walk
+        );
+
+    }
+
+}
 
 // ========================================
 // IS WALK GPS ACTIVE
