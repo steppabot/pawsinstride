@@ -4456,151 +4456,249 @@ body.client-modal-open {
     margin-top: 12px;
 }
 
+
 .client-view-visit-report-button {
     width: auto;
     padding: 10px 14px;
+
     background: #18843d;
     color: #fff;
+
     border: none;
     border-radius: 8px;
+
     font-size: 12px;
     font-weight: 700;
 }
+
 
 .client-view-visit-report-button:hover {
     opacity: 0.9;
 }
 
+
 .client-visit-report-mount:empty {
     display: none;
 }
+
 
 .client-visit-report-mount {
     margin-top: 14px;
 }
 
+
 .client-visit-report {
     overflow: hidden;
+
     background: #fff;
+
     border: 1px solid #cce8d4;
-    border-radius: 12px;
+    border-radius: 14px;
+
+    box-shadow:
+        0 8px 24px
+        rgba(24, 70, 95, 0.06);
 }
+
 
 .client-visit-report-header {
     padding: 18px;
-    background: #f4fbf6;
-    border-bottom: 1px solid #cce8d4;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f4fbf6,
+            #f7fcff
+        );
+
+    border-bottom:
+        1px solid #cce8d4;
 }
+
 
 .client-visit-report-eyebrow {
     display: block;
+
     margin-bottom: 5px;
+
     color: #18843d;
+
     font-size: 10px;
     font-weight: 800;
+
     letter-spacing: 0.08em;
+
+    text-transform: uppercase;
 }
+
 
 .client-visit-report-header h5 {
     margin: 0 0 4px;
+
     color: #111;
+
     font-size: 19px;
 }
 
+
 .client-visit-report-header p {
     margin: 0;
+
     color: #666;
+
     font-size: 12px;
     line-height: 1.45;
 }
 
+
 .client-visit-report-section {
     padding: 18px;
-    border-top: 1px solid #eee;
+
+    border-top:
+        1px solid #eee;
 }
+
 
 .client-visit-report-section:first-of-type {
     border-top: none;
 }
 
+
 .client-visit-report-label {
     display: block;
+
     margin-bottom: 11px;
+
     color: #555;
+
     font-size: 11px;
     font-weight: 800;
+
     letter-spacing: 0.05em;
+
     text-transform: uppercase;
 }
+
+
+/* ========================================
+   CLIENT VISIT REPORT CARE
+======================================== */
 
 .client-visit-report-care-grid {
     display: flex;
     flex-wrap: wrap;
+
     gap: 8px;
 }
+
 
 .client-visit-report-care-item {
     display: inline-flex;
     align-items: center;
+
     gap: 7px;
+
     padding: 8px 11px;
+
     background: #f4fbf6;
     color: #244b31;
-    border: 1px solid #cce8d4;
+
+    border:
+        1px solid #cce8d4;
+
     border-radius: 999px;
+
     font-size: 12px;
     font-weight: 700;
 }
+
 
 .client-visit-report-care-check {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     width: 17px;
     height: 17px;
+
     flex-shrink: 0;
+
     background: #18843d;
     color: #fff;
+
     border-radius: 50%;
+
     font-size: 10px;
     font-weight: 800;
 }
 
+
+/* ========================================
+   CLIENT VISIT REPORT NOTES
+======================================== */
+
 .client-visit-report-notes {
     margin: 0;
+
     padding: 13px 14px;
+
     background: #fafafa;
     color: #333;
-    border: 1px solid #e2e2e2;
+
+    border:
+        1px solid #e2e2e2;
+
     border-radius: 9px;
+
     font-size: 13px;
     line-height: 1.6;
 }
 
+
 .client-visit-report-muted {
     margin: 0;
+
     color: #777;
+
     font-size: 12px;
     line-height: 1.5;
 }
 
+
+/* ========================================
+   CLIENT VISIT REPORT PHOTOS
+======================================== */
+
 .client-visit-report-photo-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
     gap: 9px;
 }
+
 
 .client-visit-report-photo-button {
     position: relative;
 
     width: 100%;
+
     padding: 0;
 
     overflow: hidden;
 
     background: #eee;
 
-    border: 1px solid #ddd;
+    border:
+        1px solid #ddd;
+
     border-radius: 10px;
 
     aspect-ratio: 1 / 1;
@@ -4613,14 +4711,25 @@ body.client-modal-open {
         box-shadow 0.2s ease;
 }
 
+
 .client-visit-report-photo-button:hover {
     border-color: #aaa;
 
     box-shadow:
-        0 3px 10px rgba(0, 0, 0, 0.08);
+        0 3px 10px
+        rgba(
+            0,
+            0,
+            0,
+            0.08
+        );
 
-    transform: translateY(-1px);
+    transform:
+        translateY(
+            -1px
+        );
 }
+
 
 .client-visit-report-photo {
     display: block;
@@ -4634,30 +4743,365 @@ body.client-modal-open {
         transform 0.2s ease;
 }
 
+
 .client-visit-report-photo-button:hover
 .client-visit-report-photo {
-    transform: scale(1.02);
+    transform:
+        scale(
+            1.02
+        );
 }
+
+
+/* ========================================
+   CLIENT WALK SUMMARY
+======================================== */
+
+.client-walk-summary-card {
+    overflow: hidden;
+
+    background: #f8fbfd;
+
+    border:
+        1px solid #dbe8ef;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 5px 18px
+        rgba(
+            24,
+            70,
+            95,
+            0.05
+        );
+}
+
+
+/* ========================================
+   CLIENT WALK SUMMARY HEADING
+======================================== */
+
+.client-walk-summary-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 16px 16px 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(
+                40,
+                144,
+                223,
+                0.08
+            ),
+            rgba(
+                71,
+                206,
+                230,
+                0.05
+            )
+        );
+
+    border-bottom:
+        1px solid #dbe8ef;
+}
+
+
+.client-walk-summary-heading strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #243746;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.client-walk-summary-heading span {
+    display: block;
+
+    color: #667784;
+
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+
+/* ========================================
+   CLIENT WALK SUMMARY STATS
+======================================== */
+
+.client-walk-summary-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 10px;
+
+    padding: 14px;
+}
+
+
+.client-walk-summary-stat {
+    min-width: 0;
+
+    padding: 12px 10px;
+
+    background: #fff;
+
+    border:
+        1px solid #e2ebf0;
+
+    border-radius: 10px;
+
+    text-align: center;
+}
+
+
+.client-walk-summary-stat-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #7a8994;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
+}
+
+
+.client-walk-summary-stat strong {
+    display: block;
+
+    color: #243746;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    line-height: 1.35;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* ========================================
+   CLIENT WALK ROUTE MAP
+======================================== */
+
+.client-walk-route-map {
+    width: calc(
+        100% - 28px
+    );
+
+    height: 340px;
+
+    margin:
+        0 14px 14px;
+
+    overflow: hidden;
+
+    background: #eef3f5;
+
+    border:
+        1px solid #d7e2e8;
+
+    border-radius: 12px;
+}
+
+
+.client-walk-route-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 120px;
+
+    margin:
+        0 14px 14px;
+
+    padding: 18px;
+
+    background: #fff;
+
+    color: #77858f;
+
+    border:
+        1px dashed #cbd8de;
+
+    border-radius: 12px;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+
+/* ========================================
+   CLIENT WALK SUMMARY BRANDING
+======================================== */
+
+.client-walk-summary-branding {
+    padding:
+        0 16px 15px;
+
+    color: #667784;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-align: right;
+}
+
+
+/* ========================================
+   CLIENT WALK SUMMARY EMPTY
+======================================== */
+
+.client-walk-summary-empty {
+    padding: 16px;
+
+    background: #fafafa;
+
+    color: #777;
+
+    border:
+        1px dashed #d5d5d5;
+
+    border-radius: 10px;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ========================================
+   CLIENT VISIT REPORT STATES
+======================================== */
 
 .client-visit-report-loading,
 .client-visit-report-empty,
 .client-visit-report-error {
     padding: 16px;
+
     background: #fafafa;
-    border: 1px solid #ddd;
+
+    border:
+        1px solid #ddd;
+
     border-radius: 10px;
+
     color: #666;
+
     font-size: 13px;
 }
 
+
 .client-visit-report-empty strong {
     display: block;
+
     margin-bottom: 5px;
+
     color: #111;
 }
 
+
 .client-visit-report-empty p {
     margin: 0;
+}
+
+
+/* ========================================
+   CLIENT WALK SUMMARY - MOBILE
+======================================== */
+
+@media (
+    max-width: 700px
+) {
+
+    .client-visit-report-section {
+        padding: 15px;
+    }
+
+
+    .client-walk-summary-stats {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap: 8px;
+
+        padding: 12px;
+    }
+
+
+    .client-walk-summary-stat {
+        padding:
+            11px 8px;
+    }
+
+
+    .client-walk-route-map {
+        width:
+            calc(
+                100% - 24px
+            );
+
+        height: 280px;
+
+        margin:
+            0 12px 12px;
+    }
+
+
+    .client-walk-route-empty {
+        margin:
+            0 12px 12px;
+    }
+
+
+    .client-walk-summary-branding {
+        padding:
+            0 14px 14px;
+
+        text-align: left;
+    }
+
+
+    .client-visit-report-photo-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
 }
 
 /* ========================================
