@@ -4882,7 +4882,7 @@ async function startWalkGpsTracking(
             );
 
 
-    updateWalkTrackingUi();
+    updateWalkLiveUi();
 
 
     if (
