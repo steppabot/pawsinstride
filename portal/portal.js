@@ -18264,10 +18264,18 @@ async function renderMobileHomeDashboard() {
 
 
                 // ========================================
-                // OPEN SERVICES SCREEN
+                // OPEN SERVICES SCREEN WITHOUT TOP SCROLL
                 // ========================================
 
-                await handleMobileAppTab(
+                closeClientMessaging();
+
+
+                setMobileAppScreen(
+                    "services"
+                );
+
+
+                setActiveMobileAppTab(
                     "services"
                 );
 
@@ -18305,7 +18313,7 @@ async function renderMobileHomeDashboard() {
 
 
                         // ========================================
-                        // SCROLL TO EXACT REPORT
+                        // SCROLL DIRECTLY TO EXACT REPORT
                         // ========================================
 
                         window.setTimeout(
