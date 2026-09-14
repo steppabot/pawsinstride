@@ -2605,7 +2605,6 @@ document.getElementById(
 );
 
 
-
 // ========================================
 // RENDER ADMIN CALENDAR
 // ========================================
@@ -2625,17 +2624,14 @@ function renderAdminCalendar() {
         );
 
 
-
     if (
         !grid ||
         !label
     ) {
 
-
         return;
 
     }
-
 
 
     label.textContent =
@@ -2663,7 +2659,6 @@ function renderAdminCalendar() {
             );
 
 
-
     const monthPrefix =
         `${adminCalendarYear}-${String(
 
@@ -2678,21 +2673,32 @@ function renderAdminCalendar() {
         )}-`;
 
 
-
     const monthVisits =
         allVisits.filter(
+            visit => {
 
-            visit =>
-
-                String(
-                    visit.visit_date
-                )
-                    .startsWith(
-                        monthPrefix
+                const status =
+                    String(
+                        visit.status ||
+                        ""
                     )
+                        .trim()
+                        .toLowerCase();
 
+
+                return (
+                    String(
+                        visit.visit_date
+                    )
+                        .startsWith(
+                            monthPrefix
+                        ) &&
+                    status !==
+                        "cancelled"
+                );
+
+            }
         );
-
 
 
     document.getElementById(
@@ -2701,10 +2707,8 @@ function renderAdminCalendar() {
         monthVisits.length;
 
 
-
     grid.innerHTML =
         "";
-
 
 
     const firstDay =
@@ -2717,11 +2721,9 @@ function renderAdminCalendar() {
         );
 
 
-
     let blanks =
         firstDay.getDay() -
         1;
-
 
 
     if (
@@ -2734,7 +2736,6 @@ function renderAdminCalendar() {
             6;
 
     }
-
 
 
     for (
@@ -2761,7 +2762,6 @@ function renderAdminCalendar() {
     }
 
 
-
     const days =
         new Date(
 
@@ -2773,10 +2773,8 @@ function renderAdminCalendar() {
             .getDate();
 
 
-
     const today =
         getLocalDateString();
-
 
 
     for (
@@ -2796,17 +2794,67 @@ function renderAdminCalendar() {
             );
 
 
+        // ========================================
+        // VISITS FOR THIS DATE
+        // ========================================
+
+        const visitsForDate =
+            allVisits.filter(
+                visit => {
+
+                    const status =
+                        String(
+                            visit.status ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    return (
+                        visit.visit_date ===
+                            date &&
+                        status !==
+                            "cancelled"
+                    );
+
+                }
+            );
+
 
         const serviceCount =
-            allVisits.filter(
+            visitsForDate.length;
 
-                visit =>
 
-                    visit.visit_date ===
-                    date
+        // ========================================
+        // COMPLETED DATE
+        // ========================================
 
-            ).length;
+        const completedDate =
+            date <= today &&
+            serviceCount > 0 &&
+            visitsForDate.every(
+                visit => {
 
+                    const status =
+                        String(
+                            visit.status ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    return (
+                        status ===
+                            "completed" ||
+                        Boolean(
+                            visit.completed_at
+                        )
+                    );
+
+                }
+            );
 
 
         const button =
@@ -2815,14 +2863,12 @@ function renderAdminCalendar() {
             );
 
 
-
         button.type =
             "button";
 
 
         button.className =
             "upcoming-calendar-day admin-calendar-day";
-
 
 
         if (
@@ -2838,6 +2884,17 @@ function renderAdminCalendar() {
         }
 
 
+        if (
+            completedDate
+        ) {
+
+
+            button.classList.add(
+                "upcoming-calendar-completed"
+            );
+
+        }
+
 
         if (
             date ===
@@ -2850,7 +2907,6 @@ function renderAdminCalendar() {
             );
 
         }
-
 
 
         if (
@@ -2866,7 +2922,6 @@ function renderAdminCalendar() {
         }
 
 
-
         button.innerHTML =
             `
 
@@ -2879,7 +2934,16 @@ function renderAdminCalendar() {
 
                         ? `
 
-                            <span class="upcoming-service-count">
+                            <span
+                                class="
+                                    upcoming-service-count
+                                    ${
+                                        completedDate
+                                            ? "upcoming-service-count-completed"
+                                            : ""
+                                    }
+                                "
+                            >
                                 ${serviceCount}
                             </span>
 
@@ -2889,7 +2953,6 @@ function renderAdminCalendar() {
                 }
 
             `;
-
 
 
         button.addEventListener(
@@ -2913,7 +2976,6 @@ function renderAdminCalendar() {
         );
 
 
-
         grid.appendChild(
             button
         );
@@ -2921,7 +2983,6 @@ function renderAdminCalendar() {
     }
 
 }
-
 
 
 // ========================================
