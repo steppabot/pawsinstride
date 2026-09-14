@@ -1683,6 +1683,7 @@
                             <!-- ========================================
                                  PROPERTY ACCESS - COLLAPSIBLE DISPLAY
                                  ======================================== -->
+
                             <div class="household-detail-card household-detail-card-full access-detail-card">
 
                                 <button
@@ -1810,142 +1811,152 @@
                             </div>
 
 
-                        </div>
+                            <!-- ========================================
+                                 ACCOUNT SECURITY - COLLAPSIBLE DISPLAY
+                                 ======================================== -->
 
-                    </div>
-
-                </section>
-
-
-                <!-- ========================================
-                     ACCOUNT SECURITY
-                     ======================================== -->
-
-                <section
-                    id="account-security-section"
-                    class="account-security-section"
-                >
-
-                    <div class="account-security-header">
-
-                        <div>
-
-                            <h3>
-                                Account Security
-                            </h3>
-
-                            <p class="account-security-help">
-                                Manage the password used to sign in to your Paws in Stride account.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="account-security-card">
-
-                        <div class="account-security-card-heading">
-
-                            <div>
-
-                                <h4>
-                                    Change Password
-                                </h4>
-
-                                <p>
-                                    Choose a new password for your account.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <form
-                            id="change-password-form"
-                            class="change-password-form"
-                            novalidate
-                        >
-
-                            <div class="change-password-grid">
-
-
-                                <div class="change-password-field">
-
-                                    <label for="new-password">
-                                        New Password
-                                    </label>
-
-                                    <input
-                                        type="password"
-                                        id="new-password"
-                                        minlength="8"
-                                        maxlength="128"
-                                        autocomplete="new-password"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <div class="change-password-field">
-
-                                    <label for="confirm-new-password">
-                                        Confirm New Password
-                                    </label>
-
-                                    <input
-                                        type="password"
-                                        id="confirm-new-password"
-                                        minlength="8"
-                                        maxlength="128"
-                                        autocomplete="new-password"
-                                        required
-                                    >
-
-                                </div>
-
-
-                            </div>
-
-
-                            <div class="change-password-requirements">
-
-                                <span>
-                                    Use at least 8 characters.
-                                </span>
-
-                            </div>
-
-
-                            <div class="change-password-actions">
+                            <div class="household-detail-card household-detail-card-full account-security-detail-card">
 
                                 <button
-                                    type="submit"
-                                    id="change-password-button"
-                                    class="primary-button"
+                                    type="button"
+                                    id="account-security-toggle"
+                                    class="detail-collapse-toggle"
+                                    aria-expanded="false"
+                                    aria-controls="account-security-content"
                                 >
-                                    Update Password
+
+                                    <span class="detail-collapse-heading">
+
+                                        <span class="household-detail-label">
+                                            Account Security
+                                        </span>
+
+                                        <span class="detail-collapse-status">
+                                            Manage your login password
+                                        </span>
+
+                                    </span>
+
+
+                                    <span
+                                        class="detail-collapse-chevron"
+                                        aria-hidden="true"
+                                    >
+                                        ›
+                                    </span>
+
                                 </button>
+
+
+                                <div
+                                    id="account-security-content"
+                                    class="detail-collapse-content"
+                                    hidden
+                                >
+
+                                    <form
+                                        id="change-password-form"
+                                        class="change-password-form"
+                                        novalidate
+                                    >
+
+                                        <div class="account-security-form-heading">
+
+                                            <h4>
+                                                Change Password
+                                            </h4>
+
+                                            <p>
+                                                Choose a new password for your account.
+                                            </p>
+
+                                        </div>
+
+
+                                        <div class="change-password-grid">
+
+
+                                            <div class="change-password-field">
+
+                                                <label for="new-password">
+                                                    New Password
+                                                </label>
+
+                                                <input
+                                                    type="password"
+                                                    id="new-password"
+                                                    minlength="8"
+                                                    maxlength="128"
+                                                    autocomplete="new-password"
+                                                    required
+                                                >
+
+                                            </div>
+
+
+                                            <div class="change-password-field">
+
+                                                <label for="confirm-new-password">
+                                                    Confirm New Password
+                                                </label>
+
+                                                <input
+                                                    type="password"
+                                                    id="confirm-new-password"
+                                                    minlength="8"
+                                                    maxlength="128"
+                                                    autocomplete="new-password"
+                                                    required
+                                                >
+
+                                            </div>
+
+
+                                        </div>
+
+
+                                        <div class="change-password-requirements">
+
+                                            <span>
+                                                Use at least 8 characters.
+                                            </span>
+
+                                        </div>
+
+
+                                        <div class="change-password-actions">
+
+                                            <button
+                                                type="submit"
+                                                id="change-password-button"
+                                                class="primary-button"
+                                            >
+                                                Update Password
+                                            </button>
+
+                                        </div>
+
+
+                                        <p
+                                            id="change-password-message"
+                                            class="change-password-message"
+                                            role="status"
+                                            aria-live="polite"
+                                        ></p>
+
+                                    </form>
+
+                                </div>
 
                             </div>
 
 
-                            <p
-                                id="change-password-message"
-                                class="change-password-message"
-                                role="status"
-                                aria-live="polite"
-                            ></p>
-
-                        </form>
+                        </div>
 
                     </div>
 
                 </section>
 
-                            
                 <!-- ========================================
                      YOUR PETS
                      ======================================== -->
