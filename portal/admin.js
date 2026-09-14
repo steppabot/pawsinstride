@@ -243,76 +243,148 @@ async function loadAdminDashboard() {
     // ========================================
     // CURRENT PROFILE
     // ========================================
-
-    const {
-
-        data: profile,
-
-        error: profileError
-
-    } =
-        await supabaseClient
-            .from("profiles")
-            .select("*")
-            .eq(
-                "id",
-                currentUser.id
-            )
-            .single();
-
-
-
-    if (profileError) {
-
-
-        console.error(
-            "Admin profile error:",
-            profileError
-        );
-
-
-        loading.textContent =
-            "We couldn't load your account profile.";
-
-
-        return;
-
-    }
-
-
-
+    
+    let profile =
+        null;
+    
+    
     // ========================================
-    // ADMIN SECURITY CHECK
+    // OFFLINE ADMIN PROFILE
     // ========================================
-
+    
+    const isOfflineAdminDevice =
+        navigator.onLine === false &&
+        window.localStorage.getItem(
+            "paws-in-stride-admin-device"
+        ) ===
+            "true";
+    
+    
     if (
-        String(
-            profile.role ||
-            ""
-        )
-            .trim()
-            .toLowerCase() !==
-        "admin"
+        isOfflineAdminDevice
     ) {
-
-
-        window.location.href =
-            "./dashboard.html";
-
-
-        return;
-
+    
+        console.log(
+            "Offline admin device detected. Skipping remote profile lookup."
+        );
+    
+    
+        profile = {
+            id:
+                currentUser.id,
+            role:
+                "admin",
+            full_name:
+                "Admin",
+            email:
+                currentUser.email ||
+                null,
+            phone:
+                null,
+            profile_photo_path:
+                null
+        };
+    
     }
-
-
-
+    
+    
+    // ========================================
+    // ONLINE ADMIN PROFILE
+    // ========================================
+    
+    else {
+    
+        const {
+    
+            data: profileData,
+    
+            error: profileError
+    
+        } =
+            await supabaseClient
+                .from("profiles")
+                .select("*")
+                .eq(
+                    "id",
+                    currentUser.id
+                )
+                .single();
+    
+    
+        if (
+            profileError
+        ) {
+    
+            console.error(
+                "Admin profile error:",
+                profileError
+            );
+    
+    
+            loading.textContent =
+                "We couldn't load your account profile.";
+    
+    
+            return;
+    
+        }
+    
+    
+        profile =
+            profileData;
+    
+    
+        // ========================================
+        // ADMIN SECURITY CHECK
+        // ========================================
+    
+        if (
+            String(
+                profile.role ||
+                ""
+            )
+                .trim()
+                .toLowerCase() !==
+            "admin"
+        ) {
+    
+            window.localStorage.removeItem(
+                "paws-in-stride-admin-device"
+            );
+    
+    
+            window.location.href =
+                "./dashboard.html";
+    
+    
+            return;
+    
+        }
+    
+    
+        // ========================================
+        // REMEMBER VERIFIED ADMIN DEVICE
+        // ========================================
+    
+        window.localStorage.setItem(
+            "paws-in-stride-admin-device",
+            "true"
+        );
+    
+    
+        await ensureAdminPushSubscription();
+    
+    }
+    
+    
+    // ========================================
+    // SET CURRENT PROFILE
+    // ========================================
+    
     currentProfile =
         profile;
 
-    await ensureAdminPushSubscription();
-
-
-
+    
     // ========================================
     // ADMIN HOUSEHOLD
     // ========================================
