@@ -13559,6 +13559,22 @@ body.admin-page {
 
 
 /* ========================================
+   COMPLETED VISIT COUNT
+======================================== */
+
+.admin-page
+.upcoming-service-count-completed {
+
+    color:
+        #fff;
+
+    background:
+        #22a447;
+
+}
+
+
+/* ========================================
    SELECTED ADMIN DAY
 ======================================== */
 
