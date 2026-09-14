@@ -559,13 +559,18 @@ async function loadAdminDashboard() {
     
     
         // ========================================
-        // AUTO-SYNC SAVED WALKS AND VISITS
-        // ON PAGE LOAD
+        // AUTO-SYNC SAVED CHECK-INS,
+        // WALKS, AND VISITS ON PAGE LOAD
         // ========================================
     
         if (
             navigator.onLine
         ) {
+    
+    
+            await syncAllPendingVisitCheckIns(
+                false
+            );
     
     
             await syncAllPendingWalkFinishes();
@@ -3044,9 +3049,406 @@ adminDayServicesContainer
 // CHECK IN VISIT
 // ========================================
 
+function getPendingVisitCheckInStorageKey(
+    visitId
+) {
+
+    return `paws-in-stride-visit-check-in-${visitId}`;
+
+}
+
+
+function loadPendingVisitCheckIn(
+    visitId
+) {
+
+
+    try {
+
+
+        const stored =
+            localStorage.getItem(
+                getPendingVisitCheckInStorageKey(
+                    visitId
+                )
+            );
+
+
+        if (
+            !stored
+        ) {
+
+            return null;
+
+        }
+
+
+        return JSON.parse(
+            stored
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Could not load pending visit check-in:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+function savePendingVisitCheckIn(
+    visitId,
+    checkInData
+) {
+
+
+    try {
+
+
+        localStorage.setItem(
+            getPendingVisitCheckInStorageKey(
+                visitId
+            ),
+            JSON.stringify(
+                checkInData
+            )
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Could not save pending visit check-in:",
+            error
+        );
+
+    }
+
+}
+
+
+function clearPendingVisitCheckIn(
+    visitId
+) {
+
+
+    try {
+
+
+        localStorage.removeItem(
+            getPendingVisitCheckInStorageKey(
+                visitId
+            )
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Could not clear pending visit check-in:",
+            error
+        );
+
+    }
+
+}
+
+
+async function syncPendingVisitCheckIn(
+    visitId,
+    shouldRender = true
+) {
+
+
+    const pendingCheckIn =
+        loadPendingVisitCheckIn(
+            visitId
+        );
+
+
+    if (
+        !pendingCheckIn
+    ) {
+
+        return false;
+
+    }
+
+
+    try {
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "visits"
+                )
+                .update({
+
+                    status:
+                        "checked_in",
+
+                    checked_in_at:
+                        pendingCheckIn
+                            .checked_in_at,
+
+                    completed_at:
+                        null
+
+                })
+                .eq(
+                    "id",
+                    visitId
+                )
+                .select("*")
+                .single();
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        replaceAdminVisit(
+            data
+        );
+
+
+        clearPendingVisitCheckIn(
+            visitId
+        );
+
+
+        if (
+            shouldRender
+        ) {
+
+
+            renderAdminCalendar();
+
+
+            renderAdminDayServices();
+
+        }
+
+
+        return true;
+
+
+    } catch (
+        error
+    ) {
+
+
+        if (
+            isWalkNetworkError(
+                error
+            )
+        ) {
+
+
+            console.log(
+                "Visit check-in saved locally and is waiting to sync."
+            );
+
+
+            if (
+                shouldRender
+            ) {
+
+                renderAdminDayServices();
+
+            }
+
+
+            return false;
+
+        }
+
+
+        throw error;
+
+    }
+
+}
+
+
+async function syncAllPendingVisitCheckIns(
+    shouldRender = true
+) {
+
+
+    if (
+        !navigator.onLine
+    ) {
+
+        return;
+
+    }
+
+
+    let changed =
+        false;
+
+
+    for (
+        const visit
+        of
+        allVisits
+    ) {
+
+
+        const pendingCheckIn =
+            loadPendingVisitCheckIn(
+                visit.id
+            );
+
+
+        if (
+            !pendingCheckIn
+        ) {
+
+            continue;
+
+        }
+
+
+        const synced =
+            await syncPendingVisitCheckIn(
+                visit.id,
+                false
+            );
+
+
+        if (
+            synced
+        ) {
+
+            changed =
+                true;
+
+        }
+
+    }
+
+
+    if (
+        changed &&
+        shouldRender
+    ) {
+
+
+        renderAdminCalendar();
+
+
+        renderAdminDayServices();
+
+    }
+
+}
+
+
+async function retryPendingVisitCheckInSync(
+    visitId
+) {
+
+
+    const pendingCheckIn =
+        loadPendingVisitCheckIn(
+            visitId
+        );
+
+
+    if (
+        !pendingCheckIn
+    ) {
+
+
+        renderAdminDayServices();
+
+
+        return;
+
+    }
+
+
+    await syncPendingVisitCheckIn(
+        visitId
+    );
+
+}
+
+
 async function checkInVisit(
     visitId
 ) {
+
+
+    const visit =
+        allVisits.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    visitId
+                )
+        );
+
+
+    if (
+        !visit
+    ) {
+
+        throw new Error(
+            "Visit not found."
+        );
+
+    }
+
+
+    const existingPendingCheckIn =
+        loadPendingVisitCheckIn(
+            visitId
+        );
+
+
+    if (
+        existingPendingCheckIn
+    ) {
+
+
+        await retryPendingVisitCheckInSync(
+            visitId
+        );
+
+
+        return;
+
+    }
 
 
     const checkedInAt =
@@ -3054,46 +3456,38 @@ async function checkInVisit(
             .toISOString();
 
 
-    const {
+    const pendingCheckIn = {
 
-        data,
-        error
+        checked_in_at:
+            checkedInAt,
 
-    } =
-        await supabaseClient
-            .from("visits")
-            .update({
+        saved_at:
+            new Date()
+                .toISOString()
 
-                status:
-                    "checked_in",
-
-                checked_in_at:
-                    checkedInAt,
-
-                completed_at:
-                    null
-
-            })
-            .eq(
-                "id",
-                visitId
-            )
-            .select("*")
-            .single();
+    };
 
 
-
-    if (error) {
-
-        throw error;
-
-    }
-
-
-
-    replaceAdminVisit(
-        data
+    savePendingVisitCheckIn(
+        visitId,
+        pendingCheckIn
     );
+
+
+    replaceAdminVisit({
+
+        ...visit,
+
+        status:
+            "checked_in",
+
+        checked_in_at:
+            checkedInAt,
+
+        completed_at:
+            null
+
+    });
 
 
     renderAdminCalendar();
@@ -3101,8 +3495,12 @@ async function checkInVisit(
 
     renderAdminDayServices();
 
-}
 
+    await syncPendingVisitCheckIn(
+        visitId
+    );
+
+}
 
 // ========================================
 // WALK GPS DISTANCE
@@ -5177,10 +5575,17 @@ window.addEventListener(
     "online",
     async () => {
 
-    
+
         console.log(
-            "Connection restored. Checking pending walks and visits."
+            "Connection restored. Checking pending check-ins, walks, and visits."
         );
+
+
+        // ========================================
+        // SYNC PENDING VISIT CHECK-INS
+        // ========================================
+
+        await syncAllPendingVisitCheckIns();
 
 
         // ========================================
