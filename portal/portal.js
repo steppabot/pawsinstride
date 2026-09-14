@@ -17112,12 +17112,11 @@ function scrollToMobileAppSection(
 
 }
 
-
 // ========================================
 // MOBILE HOME DASHBOARD
 // ========================================
 
-function renderMobileHomeDashboard() {
+async function renderMobileHomeDashboard() {
 
     const greeting =
         document.getElementById(
@@ -17152,6 +17151,46 @@ function renderMobileHomeDashboard() {
     const upcomingList =
         document.getElementById(
             "mobile-home-upcoming-list"
+        );
+
+
+    // ========================================
+    // LATEST UPDATE ELEMENTS
+    // ========================================
+
+    const latestUpdateEmpty =
+        document.getElementById(
+            "mobile-home-latest-update-empty"
+        );
+
+    const latestUpdateContent =
+        document.getElementById(
+            "mobile-home-latest-update-content"
+        );
+
+    const latestUpdateTitle =
+        document.getElementById(
+            "mobile-home-latest-update-title"
+        );
+
+    const latestUpdateMeta =
+        document.getElementById(
+            "mobile-home-latest-update-meta"
+        );
+
+    const latestUpdatePhoto =
+        document.getElementById(
+            "mobile-home-latest-update-photo"
+        );
+
+    const latestUpdateNote =
+        document.getElementById(
+            "mobile-home-latest-update-note"
+        );
+
+    const latestUpdateButton =
+        document.getElementById(
+            "mobile-home-latest-update-button"
         );
 
 
@@ -17242,7 +17281,9 @@ function renderMobileHomeDashboard() {
                         visit.visit_date >=
                             today &&
                         status !==
-                            "cancelled"
+                            "cancelled" &&
+                        status !==
+                            "completed"
                     );
 
                 }
@@ -17464,166 +17505,770 @@ function renderMobileHomeDashboard() {
                 </div>
             `;
 
+    } else {
+
+        snapshotVisits.forEach(
+            visit => {
+
+                const date =
+                    parseLocalDate(
+                        visit.visit_date
+                    );
+
+
+                const month =
+                    date
+                        .toLocaleDateString(
+                            "en-US",
+                            {
+                                month:
+                                    "short"
+                            }
+                        );
+
+
+                const day =
+                    date.getDate();
+
+
+                const pets =
+                    getPetsForVisit(
+                        visit
+                    );
+
+
+                const petNames =
+                    pets.length
+
+                        ? pets
+                            .map(
+                                pet =>
+                                    pet.name ||
+                                    "Pet"
+                            )
+                            .join(", ")
+
+                        : "Your Pet";
+
+
+                const serviceName =
+                    visit.service_name ||
+                    visit.service_type ||
+                    "Service";
+
+
+                const timeWindow =
+                    visit.time_window ||
+                    "";
+
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "mobile-home-upcoming-item";
+
+
+                button.innerHTML =
+                    `
+                        <span class="mobile-home-upcoming-date">
+
+                            <span class="mobile-home-upcoming-month">
+                                ${escapeHtml(
+                                    month
+                                )}
+                            </span>
+
+                            <span class="mobile-home-upcoming-day">
+                                ${day}
+                            </span>
+
+                        </span>
+
+
+                        <span class="mobile-home-upcoming-info">
+
+                            <strong>
+                                ${escapeHtml(
+                                    `${petNames} · ${serviceName}`
+                                )}
+                            </strong>
+
+                            <span>
+                                ${
+                                    timeWindow
+
+                                        ? escapeHtml(
+                                            timeWindow
+                                        )
+
+                                        : "Scheduled visit"
+                                }
+                            </span>
+
+                        </span>
+
+
+                        <span
+                            class="mobile-home-upcoming-chevron"
+                            aria-hidden="true"
+                        >
+                            ›
+                        </span>
+                    `;
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        selectedUpcomingDate =
+                            visit.visit_date;
+
+
+                        upcomingCalendarYear =
+                            date.getFullYear();
+
+
+                        upcomingCalendarMonth =
+                            date.getMonth();
+
+
+                        renderUpcomingCalendar();
+
+                        renderSelectedUpcomingServices();
+
+
+                        handleMobileAppTab(
+                            "services"
+                        );
+
+                    }
+                );
+
+
+                upcomingList.appendChild(
+                    button
+                );
+
+            }
+        );
+
+    }
+
+
+    // ========================================
+    // LATEST COMPLETED VISIT
+    // ========================================
+
+    if (
+        !latestUpdateEmpty ||
+        !latestUpdateContent ||
+        !latestUpdateTitle ||
+        !latestUpdateMeta ||
+        !latestUpdatePhoto ||
+        !latestUpdateNote ||
+        !latestUpdateButton
+    ) {
         return;
     }
 
 
-    snapshotVisits.forEach(
-        visit => {
+    latestUpdateEmpty.style.display =
+        "block";
 
-            const date =
-                parseLocalDate(
-                    visit.visit_date
-                );
+    latestUpdateContent.style.display =
+        "none";
+
+    latestUpdatePhoto.style.display =
+        "none";
+
+    latestUpdatePhoto.innerHTML =
+        "";
+
+    latestUpdateNote.textContent =
+        "";
+
+    latestUpdateButton.onclick =
+        null;
 
 
-            const month =
-                date
-                    .toLocaleDateString(
-                        "en-US",
-                        {
-                            month:
-                                "short"
-                        }
+    const completedVisits =
+        currentVisits
+            .filter(
+                visit => {
+
+                    const status =
+                        String(
+                            visit.status || ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    return (
+                        status ===
+                            "completed" ||
+                        Boolean(
+                            visit.completed_at
+                        )
                     );
 
+                }
+            )
+            .sort(
+                (a, b) => {
 
-            const day =
-                date.getDate();
-
-
-            const pets =
-                getPetsForVisit(
-                    visit
-                );
-
-
-            const petNames =
-                pets.length
-
-                    ? pets
-                        .map(
-                            pet =>
-                                pet.name ||
-                                "Pet"
-                        )
-                        .join(", ")
-
-                    : "Your Pet";
+                    const aTime =
+                        new Date(
+                            a.completed_at ||
+                            `${a.visit_date}T00:00:00`
+                        ).getTime();
 
 
-            const serviceName =
-                visit.service_name ||
-                visit.service_type ||
-                "Service";
+                    const bTime =
+                        new Date(
+                            b.completed_at ||
+                            `${b.visit_date}T00:00:00`
+                        ).getTime();
 
 
-            const timeWindow =
-                visit.time_window ||
-                "";
-
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-
-            button.type =
-                "button";
-
-
-            button.className =
-                "mobile-home-upcoming-item";
-
-
-            button.innerHTML =
-                `
-                    <span class="mobile-home-upcoming-date">
-
-                        <span class="mobile-home-upcoming-month">
-                            ${escapeHtml(
-                                month
-                            )}
-                        </span>
-
-                        <span class="mobile-home-upcoming-day">
-                            ${day}
-                        </span>
-
-                    </span>
-
-
-                    <span class="mobile-home-upcoming-info">
-
-                        <strong>
-                            ${escapeHtml(
-                                `${petNames} · ${serviceName}`
-                            )}
-                        </strong>
-
-                        <span>
-                            ${
-                                timeWindow
-
-                                    ? escapeHtml(
-                                        timeWindow
-                                    )
-
-                                    : "Scheduled visit"
-                            }
-                        </span>
-
-                    </span>
-
-
-                    <span
-                        class="mobile-home-upcoming-chevron"
-                        aria-hidden="true"
-                    >
-                        ›
-                    </span>
-                `;
-
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    selectedUpcomingDate =
-                        visit.visit_date;
-
-
-                    upcomingCalendarYear =
-                        date.getFullYear();
-
-
-                    upcomingCalendarMonth =
-                        date.getMonth();
-
-
-                    renderUpcomingCalendar();
-
-                    renderSelectedUpcomingServices();
-
-
-                    handleMobileAppTab(
-                        "services"
+                    return (
+                        bTime -
+                        aTime
                     );
 
                 }
             );
 
 
-            upcomingList.appendChild(
-                button
+    if (
+        completedVisits.length ===
+        0
+    ) {
+
+        latestUpdateEmpty.innerHTML =
+            `
+                <span>
+                    Your latest completed visit update will appear here.
+                </span>
+            `;
+
+        return;
+    }
+
+
+    try {
+
+        // ========================================
+        // FIND MOST RECENT VISIT WITH REPORT
+        // ========================================
+
+        const completedVisitIds =
+            completedVisits.map(
+                visit =>
+                    visit.id
+            );
+
+
+        const {
+            data:
+                reportRows,
+            error:
+                reportRowsError
+        } =
+            await supabaseClient
+                .from(
+                    "visit_reports"
+                )
+                .select(
+                    "id, visit_id, notes, fed, fresh_water, pee, poop, created_at, updated_at"
+                )
+                .in(
+                    "visit_id",
+                    completedVisitIds
+                );
+
+
+        if (
+            reportRowsError
+        ) {
+
+            throw reportRowsError;
+
+        }
+
+
+        const reportsByVisitId =
+            new Map(
+                (
+                    reportRows ||
+                    []
+                ).map(
+                    report => [
+                        Number(
+                            report.visit_id
+                        ),
+                        report
+                    ]
+                )
+            );
+
+
+        const latestVisit =
+            completedVisits.find(
+                visit =>
+                    reportsByVisitId.has(
+                        Number(
+                            visit.id
+                        )
+                    )
+            ) ||
+            null;
+
+
+        if (
+            !latestVisit
+        ) {
+
+            latestUpdateEmpty.innerHTML =
+                `
+                    <span>
+                        Your latest completed visit update will appear here.
+                    </span>
+                `;
+
+            return;
+
+        }
+
+
+        const latestReport =
+            reportsByVisitId.get(
+                Number(
+                    latestVisit.id
+                )
+            );
+
+
+        // ========================================
+        // LOAD LATEST WALK + FIRST PHOTO
+        // ========================================
+
+        const [
+            walkResult,
+            photoResult
+        ] =
+            await Promise.all([
+
+                supabaseClient
+                    .from(
+                        "visit_walks"
+                    )
+                    .select(
+                        "id, visit_id, status, started_at, ended_at, duration_seconds, distance_meters"
+                    )
+                    .eq(
+                        "visit_id",
+                        latestVisit.id
+                    )
+                    .eq(
+                        "status",
+                        "completed"
+                    )
+                    .maybeSingle(),
+
+
+                supabaseClient
+                    .from(
+                        "visit_photos"
+                    )
+                    .select(
+                        "id, storage_path, photo_type, sort_order, created_at"
+                    )
+                    .eq(
+                        "visit_id",
+                        latestVisit.id
+                    )
+                    .eq(
+                        "photo_type",
+                        "visit"
+                    )
+                    .order(
+                        "sort_order",
+                        {
+                            ascending:
+                                true
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending:
+                                true
+                        }
+                    )
+                    .limit(
+                        1
+                    )
+                    .maybeSingle()
+
+            ]);
+
+
+        if (
+            walkResult.error
+        ) {
+
+            throw walkResult.error;
+
+        }
+
+
+        if (
+            photoResult.error
+        ) {
+
+            throw photoResult.error;
+
+        }
+
+
+        const completedWalk =
+            walkResult.data ||
+            null;
+
+
+        const firstPhoto =
+            photoResult.data ||
+            null;
+
+
+        // ========================================
+        // PET + SERVICE INFORMATION
+        // ========================================
+
+        const pets =
+            getPetsForVisit(
+                latestVisit
+            );
+
+
+        const petNames =
+            pets.length
+
+                ? pets
+                    .map(
+                        pet =>
+                            pet.name ||
+                            "Pet"
+                    )
+                    .join(", ")
+
+                : "Your Pet";
+
+
+        const serviceName =
+            latestVisit.service_name ||
+            latestVisit.service_type ||
+            "Visit";
+
+
+        // ========================================
+        // UPDATE DATE / TIME
+        // ========================================
+
+        const visitDate =
+            parseLocalDate(
+                latestVisit.visit_date
+            );
+
+
+        const dateText =
+            visitDate
+                .toLocaleDateString(
+                    "en-US",
+                    {
+                        weekday:
+                            "long",
+
+                        month:
+                            "short",
+
+                        day:
+                            "numeric"
+                    }
+                );
+
+
+        const completedTime =
+            latestVisit.completed_at
+
+                ? new Date(
+                    latestVisit.completed_at
+                )
+                    .toLocaleTimeString(
+                        "en-US",
+                        {
+                            hour:
+                                "numeric",
+
+                            minute:
+                                "2-digit"
+                        }
+                    )
+
+                : "";
+
+
+        // ========================================
+        // WALK SUMMARY
+        // ========================================
+
+        let walkSummary =
+            "";
+
+
+        if (
+            completedWalk
+        ) {
+
+            const walkDuration =
+                formatClientWalkDuration(
+                    completedWalk
+                        .duration_seconds
+                );
+
+
+            const distanceMiles =
+                (
+                    Number(
+                        completedWalk
+                            .distance_meters ||
+                        0
+                    ) /
+                    1609.344
+                ).toFixed(
+                    2
+                );
+
+
+            walkSummary =
+                `🐾 Walk recorded · ${distanceMiles} mi · ${walkDuration}`;
+
+        }
+
+
+        // ========================================
+        // RENDER LATEST UPDATE
+        // ========================================
+
+        latestUpdateTitle.textContent =
+            `${petNames} · ${serviceName}`;
+
+
+        latestUpdateMeta.textContent =
+            completedTime
+
+                ? `${dateText} · Completed ${completedTime}`
+
+                : `${dateText} · Visit Complete`;
+
+
+        const noteParts =
+            [];
+
+
+        if (
+            latestReport?.notes
+        ) {
+
+            noteParts.push(
+                latestReport.notes
             );
 
         }
-    );
+
+
+        if (
+            walkSummary
+        ) {
+
+            noteParts.push(
+                walkSummary
+            );
+
+        }
+
+
+        latestUpdateNote.textContent =
+            noteParts.length
+
+                ? noteParts.join(
+                    "\n\n"
+                )
+
+                : "Your visit report is ready to view.";
+
+
+        latestUpdateNote.style.whiteSpace =
+            "pre-line";
+
+
+        // ========================================
+        // LATEST VISIT PHOTO
+        // ========================================
+
+        if (
+            firstPhoto?.storage_path
+        ) {
+
+            const {
+                data:
+                    signedPhotoData,
+                error:
+                    signedPhotoError
+            } =
+                await supabaseClient
+                    .storage
+                    .from(
+                        VISIT_MEDIA_BUCKET
+                    )
+                    .createSignedUrl(
+                        firstPhoto
+                            .storage_path,
+                        3600
+                    );
+
+
+            if (
+                !signedPhotoError &&
+                signedPhotoData
+                    ?.signedUrl
+            ) {
+
+                latestUpdatePhoto.innerHTML =
+                    `
+                        <img
+                            src="${escapeHtml(
+                                signedPhotoData
+                                    .signedUrl
+                            )}"
+                            alt="${escapeHtml(
+                                `${petNames} visit update`
+                            )}"
+                        >
+                    `;
+
+
+                latestUpdatePhoto.style.display =
+                    "block";
+
+            }
+
+        }
+
+
+        // ========================================
+        // SHOW LATEST UPDATE
+        // ========================================
+
+        latestUpdateEmpty.style.display =
+            "none";
+
+        latestUpdateContent.style.display =
+            "block";
+
+
+        // ========================================
+        // OPEN EXACT VISIT REPORT
+        // ========================================
+
+        latestUpdateButton.onclick =
+            async () => {
+
+                selectedUpcomingDate =
+                    latestVisit.visit_date;
+
+
+                const selectedDate =
+                    parseLocalDate(
+                        latestVisit.visit_date
+                    );
+
+
+                upcomingCalendarYear =
+                    selectedDate
+                        .getFullYear();
+
+
+                upcomingCalendarMonth =
+                    selectedDate
+                        .getMonth();
+
+
+                renderUpcomingCalendar();
+
+                renderSelectedUpcomingServices();
+
+
+                await handleMobileAppTab(
+                    "services"
+                );
+
+
+                window.setTimeout(
+                    () => {
+
+                        const reportButton =
+                            document.querySelector(
+                                `[data-client-visit-report-open="${latestVisit.id}"]`
+                            );
+
+
+                        reportButton
+                            ?.click();
+
+                    },
+                    150
+                );
+
+            };
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Mobile latest update error:",
+            error
+        );
+
+
+        latestUpdateEmpty.style.display =
+            "block";
+
+        latestUpdateContent.style.display =
+            "none";
+
+        latestUpdateEmpty.innerHTML =
+            `
+                <span>
+                    Your latest completed visit update is temporarily unavailable.
+                </span>
+            `;
+
+    }
 
 }
-
 
 // ========================================
 // MOBILE HOME QUICK ACTIONS
