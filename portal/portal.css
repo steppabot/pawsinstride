@@ -20482,3 +20482,147 @@ body.booking-success-page {
 
 
 }
+
+/* ========================================
+   MOBILE PORTAL INTRO
+   ======================================== */
+
+.mobile-portal-intro {
+
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: none;
+
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+
+    overflow: hidden;
+
+    background: var(
+        --portal-intro-background,
+        #f7941d
+    );
+
+    opacity: 1;
+
+    transition: opacity 350ms ease;
+
+}
+
+
+.mobile-portal-intro.is-active {
+
+    display: block;
+
+}
+
+
+.mobile-portal-intro.is-leaving {
+
+    opacity: 0;
+    pointer-events: none;
+
+}
+
+
+.mobile-portal-intro-video {
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    object-position: center;
+
+}
+
+
+.mobile-portal-intro-loading {
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    bottom: calc(
+        32px + env(safe-area-inset-bottom, 0px)
+    );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    padding: 0 20px;
+
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+}
+
+
+.mobile-portal-intro-spinner {
+
+    width: 18px;
+    height: 18px;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+    border: 2px solid rgba(
+        255,
+        255,
+        255,
+        0.35
+    );
+
+    border-top-color: #ffffff;
+    border-radius: 50%;
+
+    animation: portal-intro-spin 800ms linear infinite;
+
+}
+
+
+body.portal-intro-open {
+
+    overflow: hidden;
+
+}
+
+
+@keyframes portal-intro-spin {
+
+    to {
+
+        transform: rotate(360deg);
+
+    }
+
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .mobile-portal-intro {
+
+        transition: none;
+
+    }
+
+
+    .mobile-portal-intro-spinner {
+
+        animation: none;
+
+    }
+
+}
