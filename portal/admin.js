@@ -9689,7 +9689,6 @@ async function openAdminVisitReport(
 
         closeAdminVisitReport();
 
-
         return;
 
     }
@@ -9740,7 +9739,9 @@ async function openAdminVisitReport(
         error: mediaError
     } =
         await supabaseClient
-            .from("visit_photos")
+            .from(
+                "visit_photos"
+            )
             .select(
                 "id, visit_id, storage_path, photo_type, caption, sort_order, created_at"
             )
@@ -9751,13 +9752,15 @@ async function openAdminVisitReport(
             .order(
                 "sort_order",
                 {
-                    ascending: true
+                    ascending:
+                        true
                 }
             )
             .order(
                 "created_at",
                 {
-                    ascending: true
+                    ascending:
+                        true
                 }
             );
 
@@ -9840,6 +9843,15 @@ async function openAdminVisitReport(
         existingReport
     );
 
+
+    // ========================================
+    // LOAD AUTOMATIC WALK ROUTE
+    // ========================================
+
+    await loadAdminWalkRouteMap(
+        visit.id
+    );
+
 }
 
 
@@ -9865,7 +9877,6 @@ function closeAdminVisitReport() {
             mount
         ) {
 
-
             mount.innerHTML =
                 "";
 
@@ -9888,6 +9899,416 @@ function closeAdminVisitReport() {
 
     activeVisitReportMedia =
         [];
+
+}
+
+
+// ========================================
+// LOAD WALK ROUTE MAP
+// ========================================
+
+async function loadAdminWalkRouteMap(
+    visitId
+) {
+
+
+    const walk =
+        getVisitWalk(
+            visitId
+        );
+
+
+    if (
+        !walk ||
+        walk.status !==
+        "completed"
+    ) {
+
+        return;
+
+    }
+
+
+    const mapElement =
+        document.getElementById(
+            `admin-walk-route-map-${visitId}`
+        );
+
+
+    if (
+        !mapElement
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+
+        // ========================================
+        // LOAD RECORDED GPS POINTS
+        // ========================================
+
+        const {
+            data: walkPoints,
+            error: walkPointsError
+        } =
+            await supabaseClient
+                .from(
+                    "visit_walk_points"
+                )
+                .select(
+                    "sequence_number, latitude, longitude, recorded_at"
+                )
+                .eq(
+                    "walk_id",
+                    walk.id
+                )
+                .order(
+                    "sequence_number",
+                    {
+                        ascending:
+                            true
+                    }
+                );
+
+
+        if (
+            walkPointsError
+        ) {
+
+            throw walkPointsError;
+
+        }
+
+
+        if (
+            !walkPoints ||
+            walkPoints.length <
+            2
+        ) {
+
+            mapElement.innerHTML =
+                `
+
+                    <div class="admin-walk-route-map-empty">
+
+                        <strong>
+                            Walk Route
+                        </strong>
+
+                        <span>
+                            Not enough GPS data was recorded to draw this route.
+                        </span>
+
+                    </div>
+
+                `;
+
+
+            return;
+
+        }
+
+
+        // ========================================
+        // GOOGLE MAPS AVAILABLE
+        // ========================================
+
+        if (
+            window.google &&
+            google.maps
+        ) {
+
+            renderAdminGoogleWalkRoute(
+                mapElement,
+                walkPoints
+            );
+
+
+            return;
+
+        }
+
+
+        // ========================================
+        // GOOGLE MAPS NOT LOADED
+        // ========================================
+
+        mapElement.innerHTML =
+            `
+
+                <div class="admin-walk-route-map-empty">
+
+                    <strong>
+                        Walk Route
+                    </strong>
+
+                    <span>
+                        Google Maps is not loaded yet.
+                    </span>
+
+                </div>
+
+            `;
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Walk route map error:",
+            error
+        );
+
+
+        mapElement.innerHTML =
+            `
+
+                <div class="admin-walk-route-map-empty">
+
+                    <strong>
+                        Walk Route
+                    </strong>
+
+                    <span>
+                        We couldn't load the recorded route.
+                    </span>
+
+                </div>
+
+            `;
+
+    }
+
+}
+
+
+// ========================================
+// RENDER GOOGLE WALK ROUTE
+// ========================================
+
+function renderAdminGoogleWalkRoute(
+    mapElement,
+    walkPoints
+) {
+
+
+    const path =
+        walkPoints.map(
+            point => ({
+
+                lat:
+                    Number(
+                        point.latitude
+                    ),
+
+                lng:
+                    Number(
+                        point.longitude
+                    )
+
+            })
+        );
+
+
+    const firstPoint =
+        path[0];
+
+
+    const lastPoint =
+        path[
+            path.length -
+            1
+        ];
+
+
+    // ========================================
+    // CREATE MAP
+    // ========================================
+
+    const map =
+        new google.maps.Map(
+            mapElement,
+            {
+
+                center:
+                    firstPoint,
+
+                zoom:
+                    17,
+
+                mapTypeControl:
+                    false,
+
+                streetViewControl:
+                    false,
+
+                fullscreenControl:
+                    true,
+
+                gestureHandling:
+                    "cooperative"
+
+            }
+        );
+
+
+    // ========================================
+    // DRAW EXACT RECORDED GPS ROUTE
+    // ========================================
+
+    const routeLine =
+        new google.maps.Polyline({
+
+            path:
+                path,
+
+            geodesic:
+                true,
+
+            strokeColor:
+                "#2890df",
+
+            strokeOpacity:
+                1,
+
+            strokeWeight:
+                5
+
+        });
+
+
+    routeLine.setMap(
+        map
+    );
+
+
+    // ========================================
+    // START MARKER
+    // ========================================
+
+    new google.maps.Marker({
+
+        position:
+            firstPoint,
+
+        map:
+            map,
+
+        title:
+            "Walk Started",
+
+        label: {
+            text:
+                "S",
+            color:
+                "#ffffff",
+            fontWeight:
+                "700"
+        },
+
+        icon: {
+
+            path:
+                google.maps.SymbolPath.CIRCLE,
+
+            scale:
+                10,
+
+            fillColor:
+                "#22a06b",
+
+            fillOpacity:
+                1,
+
+            strokeColor:
+                "#ffffff",
+
+            strokeWeight:
+                2
+
+        }
+
+    });
+
+
+    // ========================================
+    // FINISH MARKER
+    // ========================================
+
+    new google.maps.Marker({
+
+        position:
+            lastPoint,
+
+        map:
+            map,
+
+        title:
+            "Walk Finished",
+
+        label: {
+            text:
+                "F",
+            color:
+                "#ffffff",
+            fontWeight:
+                "700"
+        },
+
+        icon: {
+
+            path:
+                google.maps.SymbolPath.CIRCLE,
+
+            scale:
+                10,
+
+            fillColor:
+                "#d94a4a",
+
+            fillOpacity:
+                1,
+
+            strokeColor:
+                "#ffffff",
+
+            strokeWeight:
+                2
+
+        }
+
+    });
+
+
+    // ========================================
+    // FIT MAP TO ENTIRE RECORDED ROUTE
+    // ========================================
+
+    const bounds =
+        new google.maps.LatLngBounds();
+
+
+    path.forEach(
+        point => {
+
+            bounds.extend(
+                point
+            );
+
+        }
+    );
+
+
+    map.fitBounds(
+        bounds,
+        40
+    );
 
 }
 
@@ -9944,12 +10365,88 @@ function renderAdminVisitReportForm(
         );
 
 
-    const existingRoutes =
-        activeVisitReportMedia.filter(
-            item =>
-                item.photo_type ===
-                "route"
+    // ========================================
+    // AUTOMATIC WALK SUMMARY
+    // ========================================
+
+    const completedWalk =
+        getVisitWalk(
+            visit.id
         );
+
+
+    const hasCompletedWalk =
+        completedWalk?.status ===
+        "completed";
+
+
+    const walkDuration =
+        hasCompletedWalk
+
+            ? formatWalkDuration(
+                Number(
+                    completedWalk
+                        .duration_seconds ||
+                    0
+                )
+            )
+
+            : null;
+
+
+    const walkMiles =
+        hasCompletedWalk
+
+            ? (
+                Number(
+                    completedWalk
+                        .distance_meters ||
+                    0
+                ) /
+                1609.344
+            ).toFixed(
+                2
+            )
+
+            : null;
+
+
+    const walkStartedAt =
+        hasCompletedWalk &&
+        completedWalk.started_at
+
+            ? new Date(
+                completedWalk.started_at
+            ).toLocaleTimeString(
+                "en-US",
+                {
+                    hour:
+                        "numeric",
+                    minute:
+                        "2-digit"
+                }
+            )
+
+            : null;
+
+
+    const walkEndedAt =
+        hasCompletedWalk &&
+        completedWalk.ended_at
+
+            ? new Date(
+                completedWalk.ended_at
+            ).toLocaleTimeString(
+                "en-US",
+                {
+                    hour:
+                        "numeric",
+                    minute:
+                        "2-digit"
+                }
+            )
+
+            : null;
 
 
     mount.innerHTML =
@@ -9980,7 +10477,7 @@ function renderAdminVisitReportForm(
 
 
                         <p>
-                            Add care updates, photos, notes, and optional walk summary screenshots.
+                            Add care updates, photos, notes, and your recorded walk summary.
                         </p>
 
                     </div>
@@ -10146,7 +10643,6 @@ function renderAdminVisitReportForm(
                                                     data-saved-visit-media="${item.id}"
                                                 >
 
-
                                                     ${
                                                         item.signed_url
 
@@ -10220,104 +10716,157 @@ function renderAdminVisitReportForm(
                 </div>
 
 
-                <div class="admin-visit-report-section">
+                <div class="admin-visit-report-section admin-walk-summary-section">
 
 
-                    <span class="admin-visit-report-label">
-                        Walk Summary
-                    </span>
+                    <div class="admin-walk-summary-heading">
 
+                        <div>
 
-                    <p class="admin-visit-report-help">
-                        Add your GPS route, walk time, distance, or other activity screenshots.
-                    </p>
+                            <span class="admin-visit-report-label">
+                                Walk Summary
+                            </span>
+
+                            <p class="admin-visit-report-help">
+                                Automatically recorded by Paws in Stride.
+                            </p>
+
+                        </div>
+
+                    </div>
 
 
                     ${
-                        existingRoutes.length
+                        hasCompletedWalk
 
                             ? `
 
-                                <div class="admin-visit-existing-media">
-
-                                    ${existingRoutes
-                                        .map(
-                                            item => `
-
-                                                <div
-                                                    class="admin-visit-media-preview admin-visit-saved-media"
-                                                    data-saved-visit-media="${item.id}"
-                                                >
+                                <div class="admin-walk-summary-card">
 
 
-                                                    ${
-                                                        item.signed_url
-
-                                                            ? `
-
-                                                                <img
-                                                                    src="${escapeHtml(
-                                                                        item.signed_url
-                                                                    )}"
-                                                                    alt="Walk summary screenshot"
-                                                                >
-
-                                                            `
-
-                                                            : `
-
-                                                                <div class="admin-visit-media-missing">
-                                                                    Walk Summary
-                                                                </div>
-
-                                                            `
-                                                    }
+                                    <div class="admin-walk-summary-stats">
 
 
-                                                    <button
-                                                        type="button"
-                                                        class="admin-visit-media-delete"
-                                                        data-delete-visit-report-media="${item.id}"
-                                                        aria-label="Delete walk summary photo"
-                                                        title="Delete photo"
-                                                    >
-                                                        ×
-                                                    </button>
+                                        <div class="admin-walk-summary-stat">
+
+                                            <span class="admin-walk-summary-stat-label">
+                                                Walk Time
+                                            </span>
+
+                                            <strong>
+                                                ${escapeHtml(
+                                                    walkDuration
+                                                )}
+                                            </strong>
+
+                                        </div>
 
 
-                                                </div>
+                                        <div class="admin-walk-summary-stat">
 
-                                            `
-                                        )
-                                        .join("")}
+                                            <span class="admin-walk-summary-stat-label">
+                                                Distance
+                                            </span>
+
+                                            <strong>
+                                                ${escapeHtml(
+                                                    walkMiles
+                                                )} mi
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="admin-walk-summary-stat">
+
+                                            <span class="admin-walk-summary-stat-label">
+                                                Started
+                                            </span>
+
+                                            <strong>
+                                                ${escapeHtml(
+                                                    walkStartedAt ||
+                                                    "—"
+                                                )}
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="admin-walk-summary-stat">
+
+                                            <span class="admin-walk-summary-stat-label">
+                                                Finished
+                                            </span>
+
+                                            <strong>
+                                                ${escapeHtml(
+                                                    walkEndedAt ||
+                                                    "—"
+                                                )}
+                                            </strong>
+
+                                        </div>
+
+
+                                    </div>
+
+
+                                    <div
+                                        class="admin-walk-route-map"
+                                        id="admin-walk-route-map-${visit.id}"
+                                        data-walk-route-map
+                                        data-walk-id="${completedWalk.id}"
+                                    >
+
+                                        <div class="admin-walk-route-map-loading">
+
+                                            <strong>
+                                                🐾 Walk Route
+                                            </strong>
+
+                                            <span>
+                                                Route map loading...
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="admin-walk-summary-branding">
+
+                                        <span>
+                                            🐾
+                                        </span>
+
+                                        <span>
+                                            Recorded by Paws in Stride
+                                        </span>
+
+                                    </div>
+
 
                                 </div>
 
                             `
 
-                            : ""
+                            : `
+
+                                <div class="admin-walk-summary-empty">
+
+                                    <strong>
+                                        No recorded walk
+                                    </strong>
+
+                                    <span>
+                                        A completed GPS-tracked walk will automatically appear here.
+                                    </span>
+
+                                </div>
+
+                            `
                     }
-
-
-                    <label class="admin-visit-media-upload-button admin-route-upload-button">
-
-                        + Add Walk Summary Photos
-
-                        <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            multiple
-                            hidden
-                            data-visit-report-route
-                        >
-
-                    </label>
-
-
-                    <div
-                        class="admin-visit-pending-route"
-                        data-pending-route
-                    ></div>
 
 
                 </div>
@@ -10354,10 +10903,8 @@ function renderAdminVisitReportForm(
 
     renderPendingVisitPhotos();
 
-
-    renderPendingRoutePhoto();
-
 }
+
 
 // ========================================
 // DELETE SAVED VISIT REPORT MEDIA
