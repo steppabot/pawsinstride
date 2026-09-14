@@ -4499,9 +4499,19 @@ function handleWalkGpsPosition(
     updateWalkLiveUi();
 
 
-    flushWalkGpsQueue(
-        tracker
-    );
+    // ========================================
+    // ONLY UPLOAD SERVER-BACKED WALKS
+    // ========================================
+
+    if (
+        !tracker.localOnly
+    ) {
+
+        flushWalkGpsQueue(
+            tracker
+        );
+
+    }
 
 }
 
@@ -4590,48 +4600,70 @@ async function startWalkGpsTracking(
     }
 
 
-    const {
+    // ========================================
+    // LOCAL / OFFLINE WALK
+    // ========================================
 
-        data: latestPoints,
+    const isLocalWalk =
+        walk.local_only ===
+        true;
 
-        error: latestPointError
 
-    } =
-        await supabaseClient
-            .from(
-                "visit_walk_points"
-            )
-            .select(
-                "sequence_number, recorded_at, latitude, longitude, accuracy_meters"
-            )
-            .eq(
-                "walk_id",
-                walk.id
-            )
-            .order(
-                "sequence_number",
-                {
-                    ascending:
-                        false
-                }
-            )
-            .limit(
-                1
-            );
+    let latestSavedPoint =
+        null;
 
+
+    // ========================================
+    // LOAD LAST SAVED SERVER POINT
+    // ONLY FOR SERVER-BACKED WALKS
+    // ========================================
 
     if (
-        latestPointError
+        !isLocalWalk
     ) {
 
-        throw latestPointError;
+
+        const {
+            data: latestPoints,
+            error: latestPointError
+        } =
+            await supabaseClient
+                .from(
+                    "visit_walk_points"
+                )
+                .select(
+                    "sequence_number, recorded_at, latitude, longitude, accuracy_meters"
+                )
+                .eq(
+                    "walk_id",
+                    walk.id
+                )
+                .order(
+                    "sequence_number",
+                    {
+                        ascending:
+                            false
+                    }
+                )
+                .limit(
+                    1
+                );
+
+
+        if (
+            latestPointError
+        ) {
+
+            throw latestPointError;
+
+        }
+
+
+        latestSavedPoint =
+            latestPoints?.[0] ||
+            null;
 
     }
-
-
-    const latestSavedPoint =
-        latestPoints?.[0] ||
-        null;
 
 
     const pendingQueue =
@@ -4800,7 +4832,10 @@ async function startWalkGpsTracking(
             null,
 
         permissionErrorShown:
-            false
+            false,
+
+        localOnly:
+            isLocalWalk
 
     };
 
@@ -4847,15 +4882,20 @@ async function startWalkGpsTracking(
             );
 
 
-    startWalkUiTimer();
+    updateWalkTrackingUi();
 
 
-    flushWalkGpsQueue(
-        tracker
-    );
+    if (
+        !isLocalWalk
+    ) {
+
+        flushWalkGpsQueue(
+            tracker
+        );
+
+    }
 
 }
-
 
 // ========================================
 // STOP WALK GPS TRACKING
@@ -5103,6 +5143,267 @@ function isWalkNetworkError(
 
 
 // ========================================
+// CONVERT LOCAL WALK TO SERVER WALK
+// ========================================
+
+async function convertLocalWalkToServerWalk(
+    localWalk
+) {
+
+
+    if (
+        !localWalk ||
+        localWalk.local_only !==
+        true
+    ) {
+
+        return localWalk;
+
+    }
+
+
+    const localWalkId =
+        localWalk.id;
+
+
+    // ========================================
+    // CREATE REAL SERVER WALK
+    // ========================================
+
+    let serverWalk =
+        null;
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from(
+                "visit_walks"
+            )
+            .insert({
+
+                visit_id:
+                    localWalk.visit_id,
+
+                tracking_session_id:
+                    localWalk.tracking_session_id,
+
+                status:
+                    "in_progress",
+
+                started_at:
+                    localWalk.started_at,
+
+                distance_meters:
+                    Number(
+                        localWalk.distance_meters ||
+                        0
+                    ),
+
+                point_count:
+                    Number(
+                        localWalk.point_count ||
+                        0
+                    )
+
+            })
+            .select("*")
+            .single();
+
+
+    if (
+        error
+    ) {
+
+
+        // ========================================
+        // WALK MAY ALREADY EXIST FROM AN
+        // EARLIER SYNC ATTEMPT
+        // ========================================
+
+        if (
+            error.code ===
+            "23505"
+        ) {
+
+
+            const {
+                data: existingWalk,
+                error: existingWalkError
+            } =
+                await supabaseClient
+                    .from(
+                        "visit_walks"
+                    )
+                    .select("*")
+                    .eq(
+                        "visit_id",
+                        localWalk.visit_id
+                    )
+                    .single();
+
+
+            if (
+                existingWalkError
+            ) {
+
+                throw existingWalkError;
+
+            }
+
+
+            serverWalk =
+                existingWalk;
+
+
+        } else {
+
+
+            throw error;
+
+        }
+
+
+    } else {
+
+
+        serverWalk =
+            data;
+
+    }
+
+
+    if (
+        !serverWalk
+    ) {
+
+        throw new Error(
+            "The offline walk could not be created on the server."
+        );
+
+    }
+
+
+    // ========================================
+    // MOVE LOCAL GPS QUEUE TO SERVER WALK ID
+    // ========================================
+
+    const localQueue =
+        loadPendingWalkGpsQueue(
+            localWalkId
+        );
+
+
+    const serverQueue =
+        localQueue.map(
+            point => ({
+
+                ...point,
+
+                walk_id:
+                    serverWalk.id
+
+            })
+        );
+
+
+    savePendingWalkGpsQueue(
+        serverWalk.id,
+        serverQueue
+    );
+
+
+    savePendingWalkGpsQueue(
+        localWalkId,
+        []
+    );
+
+
+    // ========================================
+    // MOVE PENDING FINISH TO SERVER WALK ID
+    // ========================================
+
+    const pendingFinish =
+        loadPendingWalkFinish(
+            localWalkId
+        );
+
+
+    if (
+        pendingFinish
+    ) {
+
+
+        savePendingWalkFinish(
+            serverWalk.id,
+            pendingFinish
+        );
+
+
+        clearPendingWalkFinish(
+            localWalkId
+        );
+
+    }
+
+
+    // ========================================
+    // REPLACE TEMPORARY WALK IN LOCAL STATE
+    // ========================================
+
+    const localWalkIndex =
+        allVisitWalks.findIndex(
+
+            walk =>
+
+                Number(
+                    walk.id
+                ) ===
+                Number(
+                    localWalkId
+                )
+
+        );
+
+
+    if (
+        localWalkIndex !==
+        -1
+    ) {
+
+
+        allVisitWalks[
+            localWalkIndex
+        ] =
+            serverWalk;
+
+
+    } else {
+
+
+        replaceAdminVisitWalk(
+            serverWalk
+        );
+
+    }
+
+
+    console.log(
+        "Offline walk converted to server walk:",
+        localWalkId,
+        "→",
+        serverWalk.id
+    );
+
+
+    return serverWalk;
+
+}
+
+
+// ========================================
 // SYNC PENDING WALK FINISH
 // ========================================
 
@@ -5112,7 +5413,7 @@ async function syncPendingWalkFinish(
 ) {
 
 
-    const walk =
+    let walk =
         allVisitWalks.find(
 
             item =>
@@ -5136,7 +5437,7 @@ async function syncPendingWalkFinish(
     }
 
 
-    const pendingFinish =
+    let pendingFinish =
         loadPendingWalkFinish(
             walk.id
         );
@@ -5151,53 +5452,99 @@ async function syncPendingWalkFinish(
     }
 
 
-    const pendingQueue =
-        loadPendingWalkGpsQueue(
-            walk.id
-        );
-
-
-    const tracker = {
-
-        walkId:
-            Number(
-                walk.id
-            ),
-
-        visitId:
-            Number(
-                walk.visit_id
-            ),
-
-        pendingQueue:
-            pendingQueue,
-
-        flushPromise:
-            null,
-
-        distanceMeters:
-            Number(
-                pendingFinish
-                    .distance_meters ||
-                walk.distance_meters ||
-                0
-            ),
-
-        pointCount:
-            Number(
-                pendingFinish
-                    .point_count ||
-                walk.point_count ||
-                0
-            ),
-
-        lastSyncError:
-            null
-
-    };
-
-
     try {
+
+
+        // ========================================
+        // CONVERT OFFLINE WALK TO REAL SERVER WALK
+        // ========================================
+
+        if (
+            walk.local_only ===
+            true
+        ) {
+
+
+            walk =
+                await convertLocalWalkToServerWalk(
+                    walk
+                );
+
+
+            walkId =
+                walk.id;
+
+
+            pendingFinish =
+                loadPendingWalkFinish(
+                    walk.id
+                );
+
+
+            if (
+                !pendingFinish
+            ) {
+
+                throw new Error(
+                    "The saved walk finish could not be recovered after syncing."
+                );
+
+            }
+
+        }
+
+
+        // ========================================
+        // LOAD WAITING GPS POINTS
+        // ========================================
+
+        const pendingQueue =
+            loadPendingWalkGpsQueue(
+                walk.id
+            );
+
+
+        const tracker = {
+
+            walkId:
+                Number(
+                    walk.id
+                ),
+
+            visitId:
+                Number(
+                    walk.visit_id
+                ),
+
+            pendingQueue:
+                pendingQueue,
+
+            flushPromise:
+                null,
+
+            distanceMeters:
+                Number(
+                    pendingFinish
+                        .distance_meters ||
+                    walk.distance_meters ||
+                    0
+                ),
+
+            pointCount:
+                Number(
+                    pendingFinish
+                        .point_count ||
+                    walk.point_count ||
+                    0
+                ),
+
+            lastSyncError:
+                null,
+
+            localOnly:
+                false
+
+        };
 
 
         // ========================================
@@ -5239,11 +5586,8 @@ async function syncPendingWalkFinish(
         // ========================================
 
         const {
-
             data,
-
             error
-
         } =
             await supabaseClient
                 .from(
@@ -5297,7 +5641,8 @@ async function syncPendingWalkFinish(
 
 
         // ========================================
-        // HANDLE RETRY AFTER SERVER ALREADY FINISHED
+        // HANDLE RETRY AFTER SERVER
+        // ALREADY FINISHED
         // ========================================
 
         let completedWalk =
@@ -5310,11 +5655,8 @@ async function syncPendingWalkFinish(
 
 
             const {
-
                 data: existingWalk,
-
                 error: existingWalkError
-
             } =
                 await supabaseClient
                     .from(
@@ -5608,6 +5950,80 @@ window.addEventListener(
 // START VISIT WALK
 // ========================================
 
+function createLocalVisitWalk(
+    visitId
+) {
+
+
+    const startedAt =
+        new Date()
+            .toISOString();
+
+
+    const temporaryWalkId =
+        -Math.abs(
+            Date.now()
+        );
+
+
+    const trackingSessionId =
+        (
+            window.crypto &&
+            typeof window.crypto.randomUUID ===
+            "function"
+        )
+
+            ? window.crypto.randomUUID()
+
+            : (
+                `local-${Date.now()}-${Math.random()
+                    .toString(16)
+                    .slice(2)}`
+            );
+
+
+    return {
+
+        id:
+            temporaryWalkId,
+
+        visit_id:
+            Number(
+                visitId
+            ),
+
+        tracking_session_id:
+            trackingSessionId,
+
+        status:
+            "in_progress",
+
+        started_at:
+            startedAt,
+
+        ended_at:
+            null,
+
+        duration_seconds:
+            0,
+
+        distance_meters:
+            0,
+
+        point_count:
+            0,
+
+        encoded_polyline:
+            null,
+
+        local_only:
+            true
+
+    };
+
+}
+
+
 async function startVisitWalk(
     visitId
 ) {
@@ -5658,56 +6074,9 @@ async function startVisitWalk(
         );
 
 
-    if (
-        !walk
-    ) {
-
-
-        const {
-
-            data: existingWalk,
-
-            error: existingWalkError
-
-        } =
-            await supabaseClient
-                .from(
-                    "visit_walks"
-                )
-                .select("*")
-                .eq(
-                    "visit_id",
-                    visitId
-                )
-                .maybeSingle();
-
-
-        if (
-            existingWalkError
-        ) {
-
-            throw existingWalkError;
-
-        }
-
-
-        if (
-            existingWalk
-        ) {
-
-
-            replaceAdminVisitWalk(
-                existingWalk
-            );
-
-
-            walk =
-                existingWalk;
-
-        }
-
-    }
-
+    // ========================================
+    // EXISTING COMPLETED WALK
+    // ========================================
 
     if (
         walk?.status ===
@@ -5721,79 +6090,257 @@ async function startVisitWalk(
     }
 
 
+    // ========================================
+    // EXISTING LOCAL WALK
+    // ========================================
+
     if (
-        !walk
+        walk?.local_only ===
+        true
     ) {
 
 
-        const {
+        await startWalkGpsTracking(
+            walk
+        );
 
-            data,
 
-            error
+        renderAdminDayServices();
 
-        } =
-            await supabaseClient
-                .from(
-                    "visit_walks"
-                )
-                .insert({
 
-                    visit_id:
-                        visitId
+        startWalkUiTimer();
 
-                })
-                .select("*")
-                .single();
+
+        return;
+
+    }
+
+
+    // ========================================
+    // OFFLINE START
+    // ========================================
+
+    if (
+        !navigator.onLine
+    ) {
 
 
         if (
-            error
+            !walk
         ) {
 
 
+            walk =
+                createLocalVisitWalk(
+                    visitId
+                );
+
+
+            replaceAdminVisitWalk(
+                walk
+            );
+
+        }
+
+
+        await startWalkGpsTracking(
+            walk
+        );
+
+
+        renderAdminDayServices();
+
+
+        startWalkUiTimer();
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // ONLINE EXISTING WALK LOOKUP
+    // ========================================
+
+    try {
+
+
+        if (
+            !walk
+        ) {
+
+
+            const {
+                data: existingWalk,
+                error: existingWalkError
+            } =
+                await supabaseClient
+                    .from(
+                        "visit_walks"
+                    )
+                    .select("*")
+                    .eq(
+                        "visit_id",
+                        visitId
+                    )
+                    .maybeSingle();
+
+
             if (
-                error.code ===
-                "23505"
+                existingWalkError
+            ) {
+
+                throw existingWalkError;
+
+            }
+
+
+            if (
+                existingWalk
             ) {
 
 
-                const {
-
-                    data: recoveredWalk,
-
-                    error: recoveryError
-
-                } =
-                    await supabaseClient
-                        .from(
-                            "visit_walks"
-                        )
-                        .select("*")
-                        .eq(
-                            "visit_id",
-                            visitId
-                        )
-                        .single();
-
-
-                if (
-                    recoveryError
-                ) {
-
-                    throw recoveryError;
-
-                }
+                replaceAdminVisitWalk(
+                    existingWalk
+                );
 
 
                 walk =
-                    recoveredWalk;
+                    existingWalk;
+
+            }
+
+        }
+
+
+        // ========================================
+        // CREATE SERVER WALK
+        // ========================================
+
+        if (
+            !walk
+        ) {
+
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from(
+                        "visit_walks"
+                    )
+                    .insert({
+
+                        visit_id:
+                            visitId
+
+                    })
+                    .select("*")
+                    .single();
+
+
+            if (
+                error
+            ) {
+
+
+                if (
+                    error.code ===
+                    "23505"
+                ) {
+
+
+                    const {
+                        data: recoveredWalk,
+                        error: recoveryError
+                    } =
+                        await supabaseClient
+                            .from(
+                                "visit_walks"
+                            )
+                            .select("*")
+                            .eq(
+                                "visit_id",
+                                visitId
+                            )
+                            .single();
+
+
+                    if (
+                        recoveryError
+                    ) {
+
+                        throw recoveryError;
+
+                    }
+
+
+                    walk =
+                        recoveredWalk;
+
+
+                } else {
+
+
+                    throw error;
+
+                }
 
 
             } else {
 
 
-                throw error;
+                walk =
+                    data;
+
+            }
+
+
+            replaceAdminVisitWalk(
+                walk
+            );
+
+        }
+
+
+    } catch (
+        error
+    ) {
+
+
+        // ========================================
+        // NETWORK DROPPED DURING START
+        // ========================================
+
+        if (
+            isWalkNetworkError(
+                error
+            )
+        ) {
+
+
+            walk =
+                getVisitWalk(
+                    visitId
+                );
+
+
+            if (
+                !walk
+            ) {
+
+
+                walk =
+                    createLocalVisitWalk(
+                        visitId
+                    );
+
+
+                replaceAdminVisitWalk(
+                    walk
+                );
 
             }
 
@@ -5801,18 +6348,16 @@ async function startVisitWalk(
         } else {
 
 
-            walk =
-                data;
+            throw error;
 
         }
 
-
-        replaceAdminVisitWalk(
-            walk
-        );
-
     }
 
+
+    // ========================================
+    // START GPS
+    // ========================================
 
     await startWalkGpsTracking(
         walk
@@ -5825,7 +6370,6 @@ async function startVisitWalk(
     startWalkUiTimer();
 
 }
-
 
 // ========================================
 // FINISH VISIT WALK
