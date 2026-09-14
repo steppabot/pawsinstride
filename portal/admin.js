@@ -8325,18 +8325,18 @@ function buildAdminVisitProgressSection(
             // ========================================
             // WALK SAVED LOCALLY / WAITING TO SYNC
             // ========================================
-
+            
             const pendingFinish =
                 loadPendingWalkFinish(
                     walk.id
                 );
-
-
+            
+            
             if (
                 pendingFinish
             ) {
-
-
+            
+            
                 const pendingMiles =
                     Number(
                         pendingFinish
@@ -8344,29 +8344,29 @@ function buildAdminVisitProgressSection(
                         0
                     ) /
                     1609.344;
-
-
+            
+            
                 const pendingPointCount =
                     Number(
                         pendingFinish
                             .point_count ||
                         0
                     );
-
-
+            
+            
                 return `
-
+            
                     <div class="admin-visit-progress admin-visit-progress-live">
-
-
+            
+            
                         <div class="admin-visit-progress-copy">
-
-
+            
+            
                             <strong>
                                 ✓ Walk Saved
                             </strong>
-
-
+            
+            
                             <span>
                                 ${escapeHtml(
                                     formatWalkDuration(
@@ -8377,56 +8377,66 @@ function buildAdminVisitProgressSection(
                                         )
                                     )
                                 )}
-
+            
                                 •
-
+            
                                 ${pendingMiles.toFixed(
                                     2
                                 )} mi
                             </span>
-
-
+            
+            
                             <span>
                                 ${pendingPointCount}
                                 GPS ${
                                     pendingPointCount ===
                                     1
-
+            
                                         ? "point"
-
+            
                                         : "points"
                                 }
                             </span>
-
-
+            
+            
                             <span>
                                 Saved on this phone • Waiting to sync
                             </span>
-
-
+            
+            
                         </div>
-
-
+            
+            
                         <div class="admin-completed-visit-actions">
-
-
+            
+            
                             <button
                                 type="button"
                                 class="primary-button admin-visit-action-button"
+                                data-visit-action="finish"
+                                data-visit-id="${visit.id}"
+                            >
+                                Finish Visit
+                            </button>
+            
+            
+                            <button
+                                type="button"
+                                class="secondary-button admin-visit-action-button"
                                 data-visit-action="sync-walk"
                                 data-visit-id="${visit.id}"
                             >
                                 Retry Sync
                             </button>
-
-
+            
+            
                         </div>
-
-
+            
+            
                     </div>
-
+            
                 `;
-
+            
             }
 
 
