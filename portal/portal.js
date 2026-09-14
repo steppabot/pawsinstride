@@ -13057,10 +13057,15 @@ async function toggleClientVisitReport(
 
         const [
             reportResult,
-            mediaResult
+            mediaResult,
+            walkResult
         ] =
             await Promise.all([
 
+
+                // ========================================
+                // VISIT REPORT
+                // ========================================
 
                 supabaseClient
                     .from(
@@ -13075,6 +13080,10 @@ async function toggleClientVisitReport(
                     )
                     .maybeSingle(),
 
+
+                // ========================================
+                // VISIT PHOTOS
+                // ========================================
 
                 supabaseClient
                     .from(
@@ -13100,11 +13109,37 @@ async function toggleClientVisitReport(
                             ascending:
                                 true
                         }
+                    ),
+
+
+                // ========================================
+                // COMPLETED WALK
+                // ========================================
+
+                supabaseClient
+                    .from(
+                        "visit_walks"
                     )
+                    .select(
+                        "id, visit_id, status, started_at, ended_at, duration_seconds, distance_meters"
+                    )
+                    .eq(
+                        "visit_id",
+                        visitId
+                    )
+                    .eq(
+                        "status",
+                        "completed"
+                    )
+                    .maybeSingle()
 
 
             ]);
 
+
+        // ========================================
+        // CHECK VISIT REPORT
+        // ========================================
 
         if (
             reportResult.error
@@ -13115,11 +13150,28 @@ async function toggleClientVisitReport(
         }
 
 
+        // ========================================
+        // CHECK VISIT PHOTOS
+        // ========================================
+
         if (
             mediaResult.error
         ) {
 
             throw mediaResult.error;
+
+        }
+
+
+        // ========================================
+        // CHECK WALK
+        // ========================================
+
+        if (
+            walkResult.error
+        ) {
+
+            throw walkResult.error;
 
         }
 
@@ -13156,6 +13208,68 @@ async function toggleClientVisitReport(
 
         }
 
+
+        const completedWalk =
+            walkResult.data ||
+            null;
+
+
+        // ========================================
+        // LOAD WALK GPS POINTS
+        // ========================================
+
+        let walkPoints =
+            [];
+
+
+        if (
+            completedWalk
+        ) {
+
+
+            const {
+                data: walkPointData,
+                error: walkPointError
+            } =
+                await supabaseClient
+                    .from(
+                        "visit_walk_points"
+                    )
+                    .select(
+                        "sequence_number, latitude, longitude, recorded_at"
+                    )
+                    .eq(
+                        "walk_id",
+                        completedWalk.id
+                    )
+                    .order(
+                        "sequence_number",
+                        {
+                            ascending:
+                                true
+                        }
+                    );
+
+
+            if (
+                walkPointError
+            ) {
+
+                throw walkPointError;
+
+            }
+
+
+            walkPoints =
+                walkPointData ||
+                [];
+
+        }
+
+
+        // ========================================
+        // CREATE SIGNED VISIT PHOTO URLS
+        // ========================================
 
         const media =
             mediaResult.data ||
@@ -13205,11 +13319,35 @@ async function toggleClientVisitReport(
             );
 
 
+        // ========================================
+        // RENDER VISIT REPORT
+        // ========================================
+
         renderClientVisitReport(
             mount,
             report,
-            mediaWithUrls
+            mediaWithUrls,
+            completedWalk,
+            walkPoints
         );
+
+
+        // ========================================
+        // LOAD AUTOMATIC WALK ROUTE
+        // ========================================
+
+        if (
+            completedWalk &&
+            walkPoints.length >=
+            2
+        ) {
+
+            renderClientGoogleWalkRoute(
+                visitId,
+                walkPoints
+            );
+
+        }
 
 
     } catch (
@@ -13300,7 +13438,9 @@ function closeOpenClientVisitReport() {
 function renderClientVisitReport(
     mount,
     report,
-    media
+    media,
+    completedWalk,
+    walkPoints
 ) {
 
 
@@ -13309,14 +13449,6 @@ function renderClientVisitReport(
             item =>
                 item.photo_type ===
                 "visit"
-        );
-
-
-    const routePhotos =
-        media.filter(
-            item =>
-                item.photo_type ===
-                "route"
         );
 
 
@@ -13368,6 +13500,10 @@ function renderClientVisitReport(
     }
 
 
+    // ========================================
+    // CARE UPDATES
+    // ========================================
+
     const careHtml =
         careItems.length
 
@@ -13399,6 +13535,10 @@ function renderClientVisitReport(
 
             `;
 
+
+    // ========================================
+    // VISIT PHOTOS
+    // ========================================
 
     const photosHtml =
         visitPhotos.length
@@ -13452,6 +13592,10 @@ function renderClientVisitReport(
             `;
 
 
+    // ========================================
+    // NOTES
+    // ========================================
+
     const notesHtml =
         report.notes
 
@@ -13474,57 +13618,198 @@ function renderClientVisitReport(
             `;
 
 
-    const routeHtml =
-        routePhotos.length
+    // ========================================
+    // AUTOMATIC WALK SUMMARY
+    // ========================================
 
-            ? routePhotos
-                .map(
-                    photo => {
+    let walkSummaryHtml =
+        `
+
+            <div class="client-walk-summary-empty">
+
+                No walk was recorded for this visit.
+
+            </div>
+
+        `;
 
 
-                        if (
-                            !photo.signed_url
-                        ) {
-
-                            return "";
-
-                        }
+    if (
+        completedWalk
+    ) {
 
 
-                        return `
+        const duration =
+            formatClientWalkDuration(
+                completedWalk.duration_seconds
+            );
 
-                            <button
-                                type="button"
-                                class="client-visit-report-photo-button"
-                                data-client-report-image="${escapeHtml(
-                                    photo.signed_url
-                                )}"
-                            >
 
-                                <img
-                                    src="${escapeHtml(
-                                        photo.signed_url
-                                    )}"
-                                    alt="Walk summary"
-                                    class="client-visit-report-photo"
-                                >
+        const distanceMiles =
+            (
+                Number(
+                    completedWalk.distance_meters ||
+                    0
+                ) /
+                1609.344
+            ).toFixed(
+                2
+            );
 
-                            </button>
 
-                        `;
+        const startedAt =
+            formatClientVisitTimestamp(
+                completedWalk.started_at
+            );
 
+
+        const finishedAt =
+            formatClientVisitTimestamp(
+                completedWalk.ended_at
+            );
+
+
+        const hasRoute =
+            Array.isArray(
+                walkPoints
+            ) &&
+            walkPoints.length >=
+            2;
+
+
+        walkSummaryHtml =
+            `
+
+                <div class="client-walk-summary-card">
+
+
+                    <div class="client-walk-summary-heading">
+
+                        <div>
+
+                            <strong>
+                                Walk Summary
+                            </strong>
+
+                            <span>
+                                Automatically recorded by Paws in Stride.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="client-walk-summary-stats">
+
+
+                        <div class="client-walk-summary-stat">
+
+                            <span class="client-walk-summary-stat-label">
+                                Walk Time
+                            </span>
+
+                            <strong>
+                                ${escapeHtml(
+                                    duration
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="client-walk-summary-stat">
+
+                            <span class="client-walk-summary-stat-label">
+                                Distance
+                            </span>
+
+                            <strong>
+                                ${escapeHtml(
+                                    distanceMiles
+                                )} mi
+                            </strong>
+
+                        </div>
+
+
+                        <div class="client-walk-summary-stat">
+
+                            <span class="client-walk-summary-stat-label">
+                                Started
+                            </span>
+
+                            <strong>
+                                ${escapeHtml(
+                                    startedAt ||
+                                    "—"
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="client-walk-summary-stat">
+
+                            <span class="client-walk-summary-stat-label">
+                                Finished
+                            </span>
+
+                            <strong>
+                                ${escapeHtml(
+                                    finishedAt ||
+                                    "—"
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                    ${
+                        hasRoute
+
+                            ? `
+
+                                <div
+                                    id="client-walk-route-map-${report.visit_id}"
+                                    class="client-walk-route-map"
+                                    aria-label="Recorded dog walk route"
+                                ></div>
+
+                            `
+
+                            : `
+
+                                <div class="client-walk-route-empty">
+
+                                    Route map unavailable for this walk.
+
+                                </div>
+
+                            `
                     }
-                )
-                .join("")
 
-            : `
 
-                <p class="client-visit-report-muted">
-                    No walk summary was added.
-                </p>
+                    <div class="client-walk-summary-branding">
+
+                        🐾 Recorded by Paws in Stride
+
+                    </div>
+
+
+                </div>
 
             `;
 
+    }
+
+
+    // ========================================
+    // RENDER REPORT
+    // ========================================
 
     mount.innerHTML =
         `
@@ -13598,16 +13883,7 @@ function renderClientVisitReport(
 
                 <div class="client-visit-report-section">
 
-                    <span class="client-visit-report-label">
-                        Walk Summary
-                    </span>
-
-
-                    <div class="client-visit-report-photo-grid">
-
-                        ${routeHtml}
-
-                    </div>
+                    ${walkSummaryHtml}
 
                 </div>
 
@@ -13615,6 +13891,320 @@ function renderClientVisitReport(
             </div>
 
         `;
+
+}
+
+
+// ========================================
+// CLIENT WALK DURATION
+// ========================================
+
+function formatClientWalkDuration(
+    durationSeconds
+) {
+
+
+    const totalSeconds =
+        Math.max(
+            0,
+            Math.round(
+                Number(
+                    durationSeconds ||
+                    0
+                )
+            )
+        );
+
+
+    const hours =
+        Math.floor(
+            totalSeconds /
+            3600
+        );
+
+
+    const minutes =
+        Math.floor(
+            (
+                totalSeconds %
+                3600
+            ) /
+            60
+        );
+
+
+    const seconds =
+        totalSeconds %
+        60;
+
+
+    return [
+        hours,
+        minutes,
+        seconds
+    ]
+        .map(
+            value =>
+                String(
+                    value
+                ).padStart(
+                    2,
+                    "0"
+                )
+        )
+        .join(
+            ":"
+        );
+
+}
+
+
+// ========================================
+// RENDER CLIENT WALK ROUTE MAP
+// ========================================
+
+function renderClientGoogleWalkRoute(
+    visitId,
+    walkPoints
+) {
+
+
+    const mapElement =
+        document.getElementById(
+            `client-walk-route-map-${visitId}`
+        );
+
+
+    if (
+        !mapElement
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !Array.isArray(
+            walkPoints
+        ) ||
+        walkPoints.length <
+        2
+    ) {
+
+
+        mapElement.innerHTML =
+            `
+
+                <div class="client-walk-route-empty">
+                    Route map unavailable.
+                </div>
+
+            `;
+
+
+        return;
+
+    }
+
+
+    if (
+        !window.google?.maps
+    ) {
+
+
+        mapElement.innerHTML =
+            `
+
+                <div class="client-walk-route-empty">
+                    Route map couldn't be loaded.
+                </div>
+
+            `;
+
+
+        return;
+
+    }
+
+
+    const path =
+        walkPoints
+            .map(
+                point => ({
+                    lat:
+                        Number(
+                            point.latitude
+                        ),
+
+                    lng:
+                        Number(
+                            point.longitude
+                        )
+                })
+            )
+            .filter(
+                point =>
+                    Number.isFinite(
+                        point.lat
+                    ) &&
+                    Number.isFinite(
+                        point.lng
+                    )
+            );
+
+
+    if (
+        path.length <
+        2
+    ) {
+
+
+        mapElement.innerHTML =
+            `
+
+                <div class="client-walk-route-empty">
+                    Route map unavailable.
+                </div>
+
+            `;
+
+
+        return;
+
+    }
+
+
+    const map =
+        new google.maps.Map(
+            mapElement,
+            {
+
+                center:
+                    path[0],
+
+                zoom:
+                    16,
+
+                mapTypeControl:
+                    false,
+
+                streetViewControl:
+                    false,
+
+                fullscreenControl:
+                    true
+
+            }
+        );
+
+
+    const routeLine =
+        new google.maps.Polyline({
+
+            path,
+
+            geodesic:
+                true,
+
+            strokeColor:
+                "#2890df",
+
+            strokeOpacity:
+                1,
+
+            strokeWeight:
+                5
+
+        });
+
+
+    routeLine.setMap(
+        map
+    );
+
+
+    // ========================================
+    // START MARKER
+    // ========================================
+
+    new google.maps.Marker({
+
+        position:
+            path[0],
+
+        map,
+
+        label: {
+            text:
+                "S",
+
+            color:
+                "#ffffff",
+
+            fontWeight:
+                "700"
+        },
+
+        title:
+            "Walk started"
+
+    });
+
+
+    // ========================================
+    // FINISH MARKER
+    // ========================================
+
+    new google.maps.Marker({
+
+        position:
+            path[
+                path.length -
+                1
+            ],
+
+        map,
+
+        label: {
+            text:
+                "F",
+
+            color:
+                "#ffffff",
+
+            fontWeight:
+                "700"
+        },
+
+        title:
+            "Walk finished"
+
+    });
+
+
+    // ========================================
+    // FIT ENTIRE ROUTE
+    // ========================================
+
+    const bounds =
+        new google.maps.LatLngBounds();
+
+
+    path.forEach(
+        point => {
+
+            bounds.extend(
+                point
+            );
+
+        }
+    );
+
+
+    map.fitBounds(
+        bounds
+    );
 
 }
 
