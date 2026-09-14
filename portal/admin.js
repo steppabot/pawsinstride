@@ -44,8 +44,6 @@ const ALLOWED_PHOTO_TYPES = [
 
 ];
 
-
-
 // ========================================
 // STATE
 // ========================================
@@ -81,8 +79,10 @@ let allVisitPets =
 let allHouseholds =
     [];
 
+
 let allVisitReports =
     [];
+
 
 let allVisitWalks =
     [];
@@ -3419,24 +3419,6 @@ adminDayServicesContainer
 
 
                 return;
-
-            }
-
-
-            const routeInput =
-                event.target.closest(
-                    "[data-visit-report-route]"
-                );
-
-
-            if (
-                routeInput
-            ) {
-
-
-                handleVisitRoutePhoto(
-                    routeInput
-                );
 
             }
 
@@ -9705,10 +9687,6 @@ async function openAdminVisitReport(
         [];
 
 
-    pendingVisitRouteFiles =
-        [];
-
-
     activeVisitReportMedia =
         [];
 
@@ -9890,10 +9868,6 @@ function closeAdminVisitReport() {
 
 
     pendingVisitReportPhotos =
-        [];
-
-
-    pendingVisitRouteFiles =
         [];
 
 
@@ -11327,301 +11301,18 @@ function renderPendingVisitPhotos() {
 
 
 // ========================================
-// HANDLE WALK SUMMARY PHOTOS
+// AUTOMATIC WALK SUMMARY
+// ========================================
+//
+// Walk statistics and route data now come
+// directly from visit_walks and
+// visit_walk_points.
+//
+// Manual Walk Summary photo uploads are
+// no longer used.
 // ========================================
 
-function handleVisitRoutePhoto(
-    input
-) {
 
-
-    const files =
-        Array.from(
-            input.files ||
-            []
-        );
-
-
-    if (
-        files.length ===
-        0
-    ) {
-
-        return;
-
-    }
-
-
-    const validFiles =
-        [];
-
-
-    for (
-        const file of files
-    ) {
-
-
-        if (
-            !ALLOWED_PHOTO_TYPES.includes(
-                file.type
-            )
-        ) {
-
-
-            alert(
-                "Walk summary photos must be JPG, PNG, or WebP images."
-            );
-
-
-            continue;
-
-        }
-
-
-        if (
-            file.size >
-            MAX_VISIT_MEDIA_SIZE
-        ) {
-
-
-            alert(
-                "Each walk summary photo must be 10 MB or smaller."
-            );
-
-
-            continue;
-
-        }
-
-
-        validFiles.push(
-            file
-        );
-
-    }
-
-
-    pendingVisitRouteFiles.push(
-        ...validFiles
-    );
-
-
-    input.value =
-        "";
-
-
-    renderPendingRoutePhoto();
-
-}
-
-
-// ========================================
-// PENDING WALK SUMMARY PREVIEWS
-// ========================================
-
-function renderPendingRoutePhoto() {
-
-
-    const container =
-        document.querySelector(
-            "[data-pending-route]"
-        );
-
-
-    if (
-        !container
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        pendingVisitRouteFiles.length ===
-        0
-    ) {
-
-
-        container.innerHTML =
-            "";
-
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        pendingVisitRouteFiles
-            .map(
-                (
-                    file,
-                    index
-                ) => `
-
-                    <div class="admin-pending-media-item">
-
-                        <span>
-                            ${escapeHtml(
-                                file.name
-                            )}
-                        </span>
-
-                        <button
-                            type="button"
-                            class="admin-pending-media-remove"
-                            data-remove-pending-route="${index}"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-                `
-            )
-            .join("");
-
-
-    container
-        .querySelectorAll(
-            "[data-remove-pending-route]"
-        )
-        .forEach(
-            button => {
-
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-
-                        const index =
-                            Number(
-                                button.dataset
-                                    .removePendingRoute
-                            );
-
-
-                        pendingVisitRouteFiles.splice(
-                            index,
-                            1
-                        );
-
-
-                        renderPendingRoutePhoto();
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-// ========================================
-// PENDING WALK SUMMARY PREVIEWS
-// ========================================
-
-function renderPendingRoutePhoto() {
-
-
-    const container =
-        document.querySelector(
-            "[data-pending-route]"
-        );
-
-
-    if (
-        !container
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        pendingVisitRouteFiles.length ===
-        0
-    ) {
-
-
-        container.innerHTML =
-            "";
-
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        pendingVisitRouteFiles
-            .map(
-                (
-                    file,
-                    index
-                ) => `
-
-                    <div class="admin-pending-media-item">
-
-                        <span>
-                            ${escapeHtml(
-                                file.name
-                            )}
-                        </span>
-
-                        <button
-                            type="button"
-                            class="admin-pending-media-remove"
-                            data-remove-pending-route="${index}"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-                `
-            )
-            .join("");
-
-
-    container
-        .querySelectorAll(
-            "[data-remove-pending-route]"
-        )
-        .forEach(
-            button => {
-
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-
-                        const index =
-                            Number(
-                                button.dataset
-                                    .removePendingRoute
-                            );
-
-
-                        pendingVisitRouteFiles.splice(
-                            index,
-                            1
-                        );
-
-
-                        renderPendingRoutePhoto();
-
-                    }
-                );
-
-            }
-        );
-
-}
 
 // ========================================
 // SAVE VISIT REPORT
@@ -11722,7 +11413,9 @@ async function saveAdminVisitReport(
             error: reportError
         } =
             await supabaseClient
-                .from("visit_reports")
+                .from(
+                    "visit_reports"
+                )
                 .upsert(
                     payload,
                     {
@@ -11742,6 +11435,10 @@ async function saveAdminVisitReport(
 
         }
 
+
+        // ========================================
+        // UPLOAD NORMAL VISIT PHOTOS
+        // ========================================
 
         for (
             let index = 0;
@@ -11767,38 +11464,9 @@ async function saveAdminVisitReport(
         }
 
 
-        const existingRouteCount =
-            activeVisitReportMedia.filter(
-                item =>
-                    item.photo_type ===
-                    "route"
-            ).length;
-        
-        
-        for (
-            let index = 0;
-            index <
-            pendingVisitRouteFiles.length;
-            index++
-        ) {
-        
-        
-            const file =
-                pendingVisitRouteFiles[
-                    index
-                ];
-        
-        
-            await uploadVisitReportMedia(
-                visitId,
-                file,
-                "route",
-                existingRouteCount +
-                index
-            );
-        
-        }
-
+        // ========================================
+        // UPDATE LOCAL VISIT REPORT STATE
+        // ========================================
 
         const existingIndex =
             allVisitReports.findIndex(
@@ -11835,10 +11503,6 @@ async function saveAdminVisitReport(
 
 
         pendingVisitReportPhotos =
-            [];
-
-
-        pendingVisitRouteFiles =
             [];
 
 
