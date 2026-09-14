@@ -11406,6 +11406,24 @@ function renderUpcomingCalendar() {
     }
 
 
+    label.textContent =
+        new Date(
+            upcomingCalendarYear,
+            upcomingCalendarMonth,
+            1
+        )
+            .toLocaleDateString(
+                "en-US",
+                {
+                    month:
+                        "long",
+
+                    year:
+                        "numeric"
+                }
+            );
+
+
     grid.innerHTML =
         "";
 
@@ -11418,61 +11436,58 @@ function renderUpcomingCalendar() {
         );
 
 
-    const lastDay =
-        new Date(
-            upcomingCalendarYear,
-            upcomingCalendarMonth + 1,
-            0
-        );
+    let blanks =
+        firstDay.getDay() - 1;
 
 
-    label.textContent =
-        firstDay.toLocaleDateString(
-            "en-US",
-            {
-                month:
-                    "long",
-
-                year:
-                    "numeric"
-            }
-        );
-
-
-    const firstWeekday =
-        (
-            firstDay.getDay() +
-            6
-        ) %
-        7;
-
-
-    for (
-        let index = 0;
-        index < firstWeekday;
-        index++
+    if (
+        blanks < 0
     ) {
 
-        const spacer =
-            document.createElement(
-                "div"
-            );
-
-
-        spacer.className =
-            "upcoming-calendar-day upcoming-calendar-day-empty";
-
-
-        grid.appendChild(
-            spacer
-        );
+        blanks =
+            6;
 
     }
 
 
     for (
+        let i = 0;
+        i < blanks;
+        i++
+    ) {
+
+        const blank =
+            document.createElement(
+                "div"
+            );
+
+
+        blank.className =
+            "upcoming-calendar-empty";
+
+
+        grid.appendChild(
+            blank
+        );
+
+    }
+
+
+    const days =
+        new Date(
+            upcomingCalendarYear,
+            upcomingCalendarMonth + 1,
+            0
+        ).getDate();
+
+
+    const today =
+        getLocalDateString();
+
+
+    for (
         let day = 1;
-        day <= lastDay.getDate();
+        day <= days;
         day++
     ) {
 
@@ -11483,6 +11498,10 @@ function renderUpcomingCalendar() {
                 day
             );
 
+
+        // ========================================
+        // VISITS FOR THIS DATE
+        // ========================================
 
         const visitsForDate =
             currentVisits.filter(
@@ -11512,6 +11531,45 @@ function renderUpcomingCalendar() {
             visitsForDate.length;
 
 
+        // ========================================
+        // COMPLETED PAST DATE
+        // ========================================
+        //
+        // The marker becomes green only when:
+        //
+        // - the date is before today
+        // - there is at least one visit
+        // - every non-cancelled visit was completed
+        //
+        // ========================================
+
+        const completedPastDate =
+            date < today &&
+            serviceCount > 0 &&
+            visitsForDate.every(
+                visit => {
+
+                    const status =
+                        String(
+                            visit.status ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    return (
+                        status ===
+                            "completed" ||
+                        Boolean(
+                            visit.completed_at
+                        )
+                    );
+
+                }
+            );
+
+
         const button =
             document.createElement(
                 "button"
@@ -11527,23 +11585,46 @@ function renderUpcomingCalendar() {
 
 
         if (
-            date ===
-            selectedUpcomingDate
+            serviceCount
         ) {
 
             button.classList.add(
-                "selected"
+                "upcoming-calendar-booked"
             );
 
         }
 
 
         if (
-            serviceCount > 0
+            completedPastDate
         ) {
 
             button.classList.add(
-                "has-service"
+                "upcoming-calendar-completed"
+            );
+
+        }
+
+
+        if (
+            date ===
+            today
+        ) {
+
+            button.classList.add(
+                "upcoming-calendar-today"
+            );
+
+        }
+
+
+        if (
+            date ===
+            selectedUpcomingDate
+        ) {
+
+            button.classList.add(
+                "upcoming-calendar-selected"
             );
 
         }
@@ -11551,14 +11632,23 @@ function renderUpcomingCalendar() {
 
         button.innerHTML =
             `
-                <span class="upcoming-calendar-day-number">
+                <span class="upcoming-day-number">
                     ${day}
                 </span>
 
                 ${
                     serviceCount
                         ? `
-                            <span class="upcoming-service-count">
+                            <span
+                                class="
+                                    upcoming-service-count
+                                    ${
+                                        completedPastDate
+                                            ? "upcoming-service-count-completed"
+                                            : ""
+                                    }
+                                "
+                            >
                                 ${serviceCount}
                             </span>
                         `
