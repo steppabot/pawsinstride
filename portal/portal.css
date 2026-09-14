@@ -3701,176 +3701,597 @@ body.client-modal-open {
     flex-shrink: 0;
 }
 
+
 .admin-visit-report-button {
     width: auto;
     padding: 10px 14px;
+
     background: #18843d;
     color: #fff;
+
+    border: none;
     border-radius: 8px;
+
     font-size: 12px;
+    font-weight: 700;
 }
+
 
 .admin-visit-report-button:hover {
     opacity: 0.9;
 }
 
+
 .admin-visit-report-mount:empty {
     display: none;
 }
+
 
 .admin-visit-report-mount {
     margin-top: 14px;
 }
 
+
 .admin-visit-report-form {
-    padding: 18px;
+    padding: 20px;
+
     background: #fafafa;
+
     border: 1px solid #d8d8d8;
-    border-radius: 12px;
+    border-radius: 14px;
+
+    box-shadow:
+        0 8px 24px
+        rgba(0, 0, 0, 0.04);
 }
+
+
+/* ========================================
+   ADMIN VISIT REPORT HEADER
+======================================== */
 
 .admin-visit-report-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+
     gap: 18px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #ddd;
+
+    padding-bottom: 17px;
+
+    border-bottom:
+        1px solid #e1e1e1;
 }
+
 
 .admin-visit-report-eyebrow {
     display: block;
+
     margin-bottom: 5px;
+
     color: #777;
+
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.08em;
 }
 
+
 .admin-visit-report-header h5 {
     margin: 0 0 4px;
-    font-size: 18px;
+
+    font-size: 19px;
 }
+
 
 .admin-visit-report-header p {
     margin: 0;
+
     color: #666;
+
     font-size: 12px;
     line-height: 1.45;
 }
 
+
 .admin-visit-report-close {
     width: 34px;
     height: 34px;
+
     flex-shrink: 0;
+
     padding: 0;
+
     background: transparent;
+
     border: none;
+    border-radius: 50%;
+
     font-size: 26px;
     line-height: 1;
+
+    transition:
+        background 0.18s ease;
 }
+
+
+.admin-visit-report-close:hover {
+    background: #eeeeee;
+}
+
+
+/* ========================================
+   ADMIN VISIT REPORT SECTIONS
+======================================== */
 
 .admin-visit-report-section {
     margin-top: 18px;
     padding-top: 18px;
-    border-top: 1px solid #e4e4e4;
+
+    border-top:
+        1px solid #e4e4e4;
 }
+
 
 .admin-visit-report-section:first-of-type {
     border-top: none;
 }
 
+
 .admin-visit-report-label {
     display: block;
+
     margin-bottom: 9px;
+
     color: #555;
+
     font-size: 11px;
     font-weight: 800;
+
     letter-spacing: 0.05em;
+
     text-transform: uppercase;
 }
 
+
 .admin-visit-report-help {
-    margin: -3px 0 10px;
+    margin:
+        -3px 0 10px;
+
     color: #777;
+
     font-size: 12px;
+    line-height: 1.45;
 }
+
+
+/* ========================================
+   ADMIN VISIT CARE GRID
+======================================== */
 
 .admin-visit-care-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
     gap: 8px;
 }
+
 
 .admin-visit-care-option {
     display: flex;
     align-items: center;
+
     gap: 8px;
+
     padding: 11px 12px;
+
     background: #fff;
-    border: 1px solid #ddd;
+
+    border:
+        1px solid #ddd;
+
     border-radius: 9px;
+
     font-size: 13px;
     font-weight: 600;
+
     cursor: pointer;
 }
+
 
 .admin-visit-care-option input {
     width: 17px;
     height: 17px;
+
     margin: 0;
 }
 
+
+/* ========================================
+   ADMIN VISIT NOTES
+======================================== */
+
 .admin-visit-report-notes {
     width: 100%;
+
     min-height: 110px;
+
     padding: 12px;
+
     background: #fff;
-    border: 1px solid #ccc;
+
+    border:
+        1px solid #ccc;
+
     border-radius: 9px;
+
     font-size: 14px;
     line-height: 1.5;
+
     resize: vertical;
 }
 
+
+/* ========================================
+   ADMIN VISIT PHOTO UPLOAD
+======================================== */
+
 .admin-visit-media-upload-button {
     display: inline-block;
+
     width: auto;
+
     padding: 10px 14px;
+
     background: #111;
     color: #fff;
+
     border-radius: 8px;
+
     font-size: 12px;
     font-weight: 700;
+
     cursor: pointer;
 }
+
 
 .admin-route-upload-button {
     background: #fff;
     color: #111;
-    border: 1px solid #111;
+
+    border:
+        1px solid #111;
 }
+
 
 .admin-visit-existing-media {
     display: flex;
     flex-wrap: wrap;
+
     gap: 8px;
+
     margin-bottom: 12px;
 }
+
 
 .admin-visit-media-preview {
     width: 92px;
     height: 92px;
+
     overflow: hidden;
+
     background: #eee;
-    border: 1px solid #ddd;
+
+    border:
+        1px solid #ddd;
+
     border-radius: 9px;
 }
+
 
 .admin-visit-media-preview img {
     width: 100%;
     height: 100%;
+
     object-fit: cover;
+}
+
+
+/* ========================================
+   AUTOMATIC WALK SUMMARY
+======================================== */
+
+.admin-walk-summary-section {
+    position: relative;
+}
+
+
+.admin-walk-summary-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 14px;
+}
+
+
+.admin-walk-summary-card {
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border:
+        1px solid #dfe5ea;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 6px 18px
+        rgba(
+            24,
+            70,
+            95,
+            0.06
+        );
+}
+
+
+/* ========================================
+   WALK SUMMARY STATS
+======================================== */
+
+.admin-walk-summary-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(
+                40,
+                144,
+                223,
+                0.08
+            ),
+            rgba(
+                71,
+                206,
+                230,
+                0.06
+            )
+        );
+
+    border-bottom:
+        1px solid #e2e8ec;
+}
+
+
+.admin-walk-summary-stat {
+    min-width: 0;
+
+    padding: 16px 14px;
+
+    text-align: center;
+
+    border-right:
+        1px solid #e2e8ec;
+}
+
+
+.admin-walk-summary-stat:last-child {
+    border-right: none;
+}
+
+
+.admin-walk-summary-stat-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #71808b;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+}
+
+
+.admin-walk-summary-stat strong {
+    display: block;
+
+    color: #243746;
+
+    font-size: 15px;
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* ========================================
+   WALK ROUTE MAP
+======================================== */
+
+.admin-walk-route-map {
+    position: relative;
+
+    width: 100%;
+    height: 340px;
+
+    background: #edf1f3;
+}
+
+
+.admin-walk-route-map-loading,
+.admin-walk-route-map-empty {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 24px;
+
+    color: #596b78;
+
+    text-align: center;
+}
+
+
+.admin-walk-route-map-loading strong,
+.admin-walk-route-map-empty strong {
+    color: #243746;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.admin-walk-route-map-loading span,
+.admin-walk-route-map-empty span {
+    max-width: 360px;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+
+/* ========================================
+   WALK SUMMARY BRANDING
+======================================== */
+
+.admin-walk-summary-branding {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 10px 12px;
+
+    background: #ffffff;
+
+    border-top:
+        1px solid #e6eaed;
+
+    color: #7b8993;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* ========================================
+   WALK SUMMARY EMPTY STATE
+======================================== */
+
+.admin-walk-summary-empty {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+
+    padding: 20px;
+
+    background: #f6f8f9;
+
+    border:
+        1px dashed #cbd3d8;
+
+    border-radius: 12px;
+}
+
+
+.admin-walk-summary-empty strong {
+    color: #344a59;
+
+    font-size: 13px;
+}
+
+
+.admin-walk-summary-empty span {
+    color: #71808b;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+
+/* ========================================
+   ADMIN WALK SUMMARY MOBILE
+======================================== */
+
+@media (
+    max-width:
+        700px
+) {
+
+    .admin-walk-summary-stats {
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+
+    .admin-walk-summary-stat:nth-child(
+        2
+    ) {
+        border-right:
+            none;
+    }
+
+
+    .admin-walk-summary-stat:nth-child(
+        1
+    ),
+    .admin-walk-summary-stat:nth-child(
+        2
+    ) {
+        border-bottom:
+            1px solid #e2e8ec;
+    }
+
+
+    .admin-walk-summary-stat:nth-child(
+        3
+    ) {
+        border-right:
+            1px solid #e2e8ec;
+    }
+
+
+    .admin-walk-route-map {
+        height: 280px;
+    }
+
 }
 
 /* ========================================
