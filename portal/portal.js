@@ -74,6 +74,252 @@ const ALLOWED_PHOTO_TYPES = [
 
 
 // ========================================
+// USER INPUT FORMATTING
+// ========================================
+
+function normalizeInputSpacing(
+    value
+) {
+
+    return String(
+        value || ""
+    )
+        .trim()
+        .replace(
+            /\s+/g,
+            " "
+        );
+
+}
+
+
+// ========================================
+// CAPITALIZE NAME WORD
+// ========================================
+
+function capitalizeNameWord(
+    word
+) {
+
+    const lowerWord =
+        String(
+            word || ""
+        ).toLowerCase();
+
+
+    if (!lowerWord) {
+
+        return "";
+
+    }
+
+
+    return lowerWord
+        .split("-")
+        .map(
+            hyphenPart =>
+                hyphenPart
+                    .split("'")
+                    .map(
+                        apostrophePart => {
+
+                            if (
+                                !apostrophePart
+                            ) {
+
+                                return "";
+
+                            }
+
+
+                            let formatted =
+                                apostrophePart
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                apostrophePart
+                                    .slice(1);
+
+
+                            // ========================================
+                            // COMMON MC NAME FORMATTING
+                            // ========================================
+
+                            if (
+                                /^Mc[a-z]/.test(
+                                    formatted
+                                )
+                            ) {
+
+                                formatted =
+                                    formatted.slice(
+                                        0,
+                                        2
+                                    ) +
+                                    formatted
+                                        .charAt(2)
+                                        .toUpperCase() +
+                                    formatted.slice(
+                                        3
+                                    );
+
+                            }
+
+
+                            return formatted;
+
+                        }
+                    )
+                    .join("'")
+        )
+        .join("-");
+
+}
+
+
+// ========================================
+// FORMAT PERSON / PET NAME
+// ========================================
+
+function formatProperName(
+    value
+) {
+
+    const cleaned =
+        normalizeInputSpacing(
+            value
+        );
+
+
+    if (!cleaned) {
+
+        return "";
+
+    }
+
+
+    return cleaned
+        .split(" ")
+        .map(
+            capitalizeNameWord
+        )
+        .join(" ");
+
+}
+
+
+// ========================================
+// FORMAT CITY
+// ========================================
+
+function formatCityName(
+    value
+) {
+
+    return formatProperName(
+        value
+    );
+
+}
+
+
+// ========================================
+// FORMAT STATE
+// ========================================
+
+function formatStateAbbreviation(
+    value
+) {
+
+    return normalizeInputSpacing(
+        value
+    ).toUpperCase();
+
+}
+
+
+// ========================================
+// FORMAT STREET ADDRESS
+// ========================================
+
+function formatStreetAddress(
+    value
+) {
+
+    const cleaned =
+        normalizeInputSpacing(
+            value
+        );
+
+
+    if (!cleaned) {
+
+        return "";
+
+    }
+
+
+    const uppercaseTokens =
+        new Set([
+            "N",
+            "S",
+            "E",
+            "W",
+            "NE",
+            "NW",
+            "SE",
+            "SW",
+            "FM",
+            "RR",
+            "US"
+        ]);
+
+
+    return cleaned
+        .split(" ")
+        .map(
+            word => {
+
+                const upperWord =
+                    word.toUpperCase();
+
+
+                if (
+                    uppercaseTokens.has(
+                        upperWord
+                    )
+                ) {
+
+                    return upperWord;
+
+                }
+
+
+                return capitalizeNameWord(
+                    word
+                );
+
+            }
+        )
+        .join(" ");
+
+}
+
+
+// ========================================
+// FORMAT ADDRESS LINE 2
+// ========================================
+
+function formatAddressLine2(
+    value
+) {
+
+    return formatStreetAddress(
+        value
+    );
+
+}
+
+// ========================================
 // STATE
 // ========================================
 
@@ -3823,6 +4069,13 @@ if (householdForm) {
                 );
 
 
+            clearHouseholdFieldErrors();
+
+
+            // ========================================
+            // GET FORM FIELDS
+            // ========================================
+
             const fullNameField =
                 document.getElementById(
                     "household-full-name"
@@ -3838,6 +4091,12 @@ if (householdForm) {
             const streetAddressField =
                 document.getElementById(
                     "household-street-address"
+                );
+
+
+            const addressLine2Field =
+                document.getElementById(
+                    "household-address-line-2"
                 );
 
 
@@ -3859,29 +4118,26 @@ if (householdForm) {
                 );
 
 
+            const emergencyContactNameField =
+                document.getElementById(
+                    "emergency-contact-name"
+                );
+
+
             const emergencyPhoneField =
                 document.getElementById(
                     "emergency-contact-phone"
                 );
 
 
-            if (message) {
-
-                message.textContent =
-                    "";
-
-            }
-
-
-            clearHouseholdFieldErrors();
-
+            // ========================================
+            // NORMALIZE FORM VALUES
+            // ========================================
 
             const fullName =
-                String(
-                    fullNameField?.value ||
-                    ""
-                )
-                    .trim();
+                formatProperName(
+                    fullNameField?.value
+                );
 
 
             const phone =
@@ -3893,27 +4149,27 @@ if (householdForm) {
 
 
             const streetAddress =
-                String(
-                    streetAddressField?.value ||
-                    ""
-                )
-                    .trim();
+                formatStreetAddress(
+                    streetAddressField?.value
+                );
+
+
+            const addressLine2 =
+                formatAddressLine2(
+                    addressLine2Field?.value
+                );
 
 
             const city =
-                String(
-                    cityField?.value ||
-                    ""
-                )
-                    .trim();
+                formatCityName(
+                    cityField?.value
+                );
 
 
             const state =
-                String(
-                    stateField?.value ||
-                    ""
-                )
-                    .trim();
+                formatStateAbbreviation(
+                    stateField?.value
+                );
 
 
             const zip =
@@ -3924,12 +4180,74 @@ if (householdForm) {
                     .trim();
 
 
+            const emergencyContactName =
+                formatProperName(
+                    emergencyContactNameField
+                        ?.value
+                );
+
+
             const emergencyPhone =
                 String(
                     emergencyPhoneField?.value ||
                     ""
                 )
                     .trim();
+
+
+            // ========================================
+            // PUT NORMALIZED VALUES BACK IN FORM
+            // ========================================
+
+            if (fullNameField) {
+
+                fullNameField.value =
+                    fullName;
+
+            }
+
+
+            if (streetAddressField) {
+
+                streetAddressField.value =
+                    streetAddress;
+
+            }
+
+
+            if (addressLine2Field) {
+
+                addressLine2Field.value =
+                    addressLine2;
+
+            }
+
+
+            if (cityField) {
+
+                cityField.value =
+                    city;
+
+            }
+
+
+            if (stateField) {
+
+                stateField.value =
+                    state;
+
+            }
+
+
+            if (
+                emergencyContactNameField
+            ) {
+
+                emergencyContactNameField
+                    .value =
+                    emergencyContactName;
+
+            }
 
 
             // ========================================
@@ -4123,24 +4441,20 @@ if (householdForm) {
                         currentUser.id,
 
                     street_address:
-                        valueOrNull(
-                            "household-street-address"
-                        ),
+                        streetAddress ||
+                        null,
 
                     address_line_2:
-                        valueOrNull(
-                            "household-address-line-2"
-                        ),
+                        addressLine2 ||
+                        null,
 
                     city:
-                        valueOrNull(
-                            "household-city"
-                        ),
+                        city ||
+                        null,
 
                     state:
-                        valueOrNull(
-                            "household-state"
-                        ),
+                        state ||
+                        null,
 
                     zip_code:
                         valueOrNull(
@@ -4153,9 +4467,8 @@ if (householdForm) {
                         ),
 
                     emergency_contact_name:
-                        valueOrNull(
-                            "emergency-contact-name"
-                        ),
+                        emergencyContactName ||
+                        null,
 
                     emergency_contact_phone:
                         valueOrNull(
@@ -4165,17 +4478,13 @@ if (householdForm) {
                     home_notes:
                         valueOrNull(
                             "household-home-notes"
-                        ),
-
-                    updated_at:
-                        new Date()
-                            .toISOString()
+                        )
 
                 };
 
 
                 const {
-                    error: householdSaveError
+                    error: householdError
                 } =
                     await supabaseClient
                         .from("households")
@@ -4189,10 +4498,10 @@ if (householdForm) {
 
 
                 if (
-                    householdSaveError
+                    householdError
                 ) {
 
-                    throw householdSaveError;
+                    throw householdError;
 
                 }
 
@@ -4201,7 +4510,7 @@ if (householdForm) {
                 // SAVE PROPERTY ACCESS
                 // ========================================
 
-                const accessPayload = {
+                const propertyAccessPayload = {
 
                     client_id:
                         currentUser.id,
@@ -4234,24 +4543,18 @@ if (householdForm) {
                     other_access_notes:
                         valueOrNull(
                             "access-other-notes"
-                        ),
-
-                    updated_at:
-                        new Date()
-                            .toISOString()
+                        )
 
                 };
 
 
                 const {
-                    error: accessSaveError
+                    error: propertyAccessError
                 } =
                     await supabaseClient
-                        .from(
-                            "property_access"
-                        )
+                        .from("property_access")
                         .upsert(
-                            accessPayload,
+                            propertyAccessPayload,
                             {
                                 onConflict:
                                     "client_id"
@@ -4260,10 +4563,10 @@ if (householdForm) {
 
 
                 if (
-                    accessSaveError
+                    propertyAccessError
                 ) {
 
-                    throw accessSaveError;
+                    throw propertyAccessError;
 
                 }
 
@@ -5577,7 +5880,6 @@ if (petPhotoInput) {
 
 }
 
-
 // ========================================
 // SAVE PET
 // ========================================
@@ -5603,13 +5905,54 @@ if (petForm) {
                 );
 
 
+            const nameField =
+                document.getElementById(
+                    "pet-name"
+                );
+
+
+            const breedField =
+                document.getElementById(
+                    "pet-breed"
+                );
+
+
+            // ========================================
+            // NORMALIZE PET VALUES
+            // ========================================
+
             const name =
-                document
-                    .getElementById(
-                        "pet-name"
+                formatProperName(
+                    nameField?.value
+                );
+
+
+            const breed =
+                breedField?.value
+                    ? formatProperName(
+                        breedField.value
                     )
-                    .value
-                    .trim();
+                    : null;
+
+
+            // ========================================
+            // PUT CLEAN VALUES BACK IN FORM
+            // ========================================
+
+            if (nameField) {
+
+                nameField.value =
+                    name;
+
+            }
+
+
+            if (breedField) {
+
+                breedField.value =
+                    breed || "";
+
+            }
 
 
             if (!name) {
@@ -5626,10 +5969,7 @@ if (petForm) {
 
                 name,
 
-                breed:
-                    valueOrNull(
-                        "pet-breed"
-                    ),
+                breed,
 
                 gender:
                     valueOrNull(
@@ -5800,7 +6140,6 @@ if (petForm) {
 
 
                 closePetForm();
-
 
             } catch (
                 error
