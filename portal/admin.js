@@ -11209,6 +11209,124 @@ function handleVisitReportPhotos(
 
 
 // ========================================
+// RENDER PENDING VISIT PHOTOS
+// ========================================
+
+function renderPendingVisitPhotos() {
+
+
+    const container =
+        document.querySelector(
+            "[data-pending-visit-photos]"
+        );
+
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        pendingVisitReportPhotos.length ===
+        0
+    ) {
+
+
+        container.innerHTML =
+            "";
+
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        pendingVisitReportPhotos
+            .map(
+                (
+                    file,
+                    index
+                ) => `
+
+                    <div class="admin-pending-media-item">
+
+                        <span>
+                            ${escapeHtml(
+                                file.name
+                            )}
+                        </span>
+
+                        <button
+                            type="button"
+                            class="admin-pending-media-remove"
+                            data-remove-pending-visit-photo="${index}"
+                            aria-label="Remove pending visit photo"
+                            title="Remove photo"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                `
+            )
+            .join("");
+
+
+    container
+        .querySelectorAll(
+            "[data-remove-pending-visit-photo]"
+        )
+        .forEach(
+            button => {
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+
+                        const index =
+                            Number(
+                                button.dataset
+                                    .removePendingVisitPhoto
+                            );
+
+
+                        if (
+                            Number.isNaN(
+                                index
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        pendingVisitReportPhotos.splice(
+                            index,
+                            1
+                        );
+
+
+                        renderPendingVisitPhotos();
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+// ========================================
 // HANDLE WALK SUMMARY PHOTOS
 // ========================================
 
