@@ -352,11 +352,111 @@ async function loadAdminDashboard() {
         null;
 
 
-
     // ========================================
     // LOAD BUSINESS DATA
     // ========================================
-
+    
+    const ADMIN_OFFLINE_DATA_KEY =
+        "paws-in-stride-admin-offline-data";
+    
+    
+    function loadAdminOfflineData() {
+    
+        try {
+    
+    
+            const savedData =
+                localStorage.getItem(
+                    ADMIN_OFFLINE_DATA_KEY
+                );
+    
+    
+            if (
+                !savedData
+            ) {
+    
+                return null;
+    
+            }
+    
+    
+            return JSON.parse(
+                savedData
+            );
+    
+    
+        } catch (
+            error
+        ) {
+    
+    
+            console.error(
+                "Unable to load offline admin data:",
+                error
+            );
+    
+    
+            return null;
+    
+        }
+    
+    }
+    
+    
+    function saveAdminOfflineData() {
+    
+        try {
+    
+    
+            localStorage.setItem(
+    
+                ADMIN_OFFLINE_DATA_KEY,
+    
+                JSON.stringify({
+    
+                    profiles:
+                        allProfiles,
+    
+                    pets:
+                        allPets,
+    
+                    visits:
+                        allVisits,
+    
+                    households:
+                        allHouseholds,
+    
+                    visitReports:
+                        allVisitReports,
+    
+                    saved_at:
+                        new Date()
+                            .toISOString()
+    
+                })
+    
+            );
+    
+    
+        } catch (
+            error
+        ) {
+    
+    
+            console.error(
+                "Unable to save offline admin data:",
+                error
+            );
+    
+        }
+    
+    }
+    
+    
+    let businessDataLoadedFromServer =
+        false;
+    
+    
     const [
     
         profilesResult,
@@ -367,148 +467,226 @@ async function loadAdminDashboard() {
     
     ] =
         await Promise.all([
-        
-        
+    
+    
             supabaseClient
                 .from("profiles")
                 .select(
                     "id, full_name, email, phone, role"
                 ),
-        
-        
+    
+    
             supabaseClient
                 .from("pets")
                 .select(
                     "id, client_id, name, breed, gender"
                 ),
-        
-        
+    
+    
             supabaseClient
                 .from("visits")
                 .select("*")
                 .order(
                     "visit_date",
                     {
-                        ascending: true
+                        ascending:
+                            true
                     }
                 ),
-        
-        
+    
+    
             supabaseClient
                 .from("households")
                 .select(
                     "client_id, street_address, address_line_2, city, state, zip_code"
                 ),
-        
-        
+    
+    
             supabaseClient
                 .from("visit_reports")
                 .select(
                     "id, visit_id, created_by, notes, fed, fresh_water, pee, poop, created_at, updated_at"
                 )
-        
-        
+    
+    
         ]);
-
-
+    
+    
+    // ========================================
+    // SERVER VISITS AVAILABLE
+    // ========================================
+    
     if (
-        profilesResult.error
+        !visitsResult.error
     ) {
-
-
-        console.error(
-            "Admin profiles error:",
+    
+    
+        if (
             profilesResult.error
-        );
-
-    }
-
-
-
-    if (
-        petsResult.error
-    ) {
-
-
-        console.error(
-            "Admin pets error:",
+        ) {
+    
+    
+            console.error(
+                "Admin profiles error:",
+                profilesResult.error
+            );
+    
+        }
+    
+    
+        if (
             petsResult.error
-        );
-
-    }
-
-
-
-    if (
-        visitsResult.error
-    ) {
-
-
-        console.error(
-            "Admin visits error:",
+        ) {
+    
+    
+            console.error(
+                "Admin pets error:",
+                petsResult.error
+            );
+    
+        }
+    
+    
+        if (
+            householdsResult.error
+        ) {
+    
+    
+            console.error(
+                "Admin households error:",
+                householdsResult.error
+            );
+    
+        }
+    
+    
+        if (
+            visitReportsResult.error
+        ) {
+    
+    
+            console.error(
+                "Admin visit reports error:",
+                visitReportsResult.error
+            );
+    
+        }
+    
+    
+        allProfiles =
+            profilesResult.data ||
+            [];
+    
+    
+        allPets =
+            petsResult.data ||
+            [];
+    
+    
+        allVisits =
+            visitsResult.data ||
+            [];
+    
+    
+        allHouseholds =
+            householdsResult.data ||
+            [];
+    
+    
+        allVisitReports =
+            visitReportsResult.data ||
+            [];
+    
+    
+        businessDataLoadedFromServer =
+            true;
+    
+    
+        // ========================================
+        // SAVE CURRENT SERVER DATA FOR OFFLINE USE
+        // ========================================
+    
+        saveAdminOfflineData();
+    
+    
+    } else {
+    
+    
+        console.warn(
+            "Admin business data could not be loaded from the server. Trying offline copy.",
             visitsResult.error
         );
-
-
-        loading.textContent =
-            "We couldn't load the service calendar.";
-
-
-        return;
-
-    }
-
-
-
-    allProfiles =
-        profilesResult.data ||
-        [];
-
-
-    allPets =
-        petsResult.data ||
-        [];
-
-
-    allVisits =
-        visitsResult.data ||
-        [];
-
-    if (
-        householdsResult.error
-    ) {
     
     
-        console.error(
-            "Admin households error:",
-            householdsResult.error
+        // ========================================
+        // SERVER UNAVAILABLE
+        // RESTORE LAST SAVED DEVICE COPY
+        // ========================================
+    
+        const offlineData =
+            loadAdminOfflineData();
+    
+    
+        if (
+            !offlineData ||
+            !Array.isArray(
+                offlineData.visits
+            )
+        ) {
+    
+    
+            loading.textContent =
+                "We couldn't load the service calendar.";
+    
+    
+            return;
+    
+        }
+    
+    
+        allProfiles =
+            Array.isArray(
+                offlineData.profiles
+            )
+                ? offlineData.profiles
+                : [];
+    
+    
+        allPets =
+            Array.isArray(
+                offlineData.pets
+            )
+                ? offlineData.pets
+                : [];
+    
+    
+        allVisits =
+            offlineData.visits;
+    
+    
+        allHouseholds =
+            Array.isArray(
+                offlineData.households
+            )
+                ? offlineData.households
+                : [];
+    
+    
+        allVisitReports =
+            Array.isArray(
+                offlineData.visitReports
+            )
+                ? offlineData.visitReports
+                : [];
+    
+    
+        console.log(
+            "Admin dashboard restored from offline device data:",
+            offlineData.saved_at ||
+            "unknown save time"
         );
     
     }
-    
-    
-    allHouseholds =
-        householdsResult.data ||
-        [];
-    
-    
-    if (
-        visitReportsResult.error
-    ) {
-    
-    
-        console.error(
-            "Admin visit reports error:",
-            visitReportsResult.error
-        );
-    
-    }
-    
-    
-    allVisitReports =
-        visitReportsResult.data ||
-        [];
-
 
     // ========================================
     // LOAD WALK TRACKING SESSIONS
@@ -535,6 +713,10 @@ async function loadAdminDashboard() {
             );
     
     
+    // ========================================
+    // START WITH SERVER WALKS WHEN AVAILABLE
+    // ========================================
+    
     if (
         visitWalksError
     ) {
@@ -557,28 +739,134 @@ async function loadAdminDashboard() {
             visitWalks ||
             [];
     
-    
-        // ========================================
-        // AUTO-SYNC SAVED CHECK-INS,
-        // WALKS, AND VISITS ON PAGE LOAD
-        // ========================================
-    
-        if (
-            navigator.onLine
-        ) {
+    }
     
     
-            await syncAllPendingVisitCheckIns(
-                false
+    // ========================================
+    // RESTORE LOCAL WALKS FROM THIS DEVICE
+    // ========================================
+    
+    for (
+        const visit of
+        allVisits
+    ) {
+    
+    
+        const localWalk =
+            loadLocalVisitWalk(
+                visit.id
             );
     
     
-            await syncAllPendingWalkFinishes();
+        if (
+            !localWalk
+        ) {
     
-    
-            await syncAllPendingVisitFinishes();
+            continue;
     
         }
+    
+    
+        const serverWalk =
+            allVisitWalks.find(
+    
+                item =>
+    
+                    Number(
+                        item.visit_id
+                    ) ===
+                    Number(
+                        visit.id
+                    )
+    
+            );
+    
+    
+        // ========================================
+        // SERVER ALREADY HAS COMPLETED WALK
+        // LOCAL COPY IS STALE
+        // ========================================
+    
+        if (
+            serverWalk?.status ===
+            "completed"
+        ) {
+    
+    
+            clearLocalVisitWalk(
+                visit.id
+            );
+    
+    
+            continue;
+    
+        }
+    
+    
+        // ========================================
+        // PENDING LOCAL FINISH MUST WIN
+        // UNTIL IT HAS BEEN SYNCED
+        // ========================================
+    
+        const pendingLocalFinish =
+            loadPendingWalkFinish(
+                localWalk.id
+            );
+    
+    
+        if (
+            pendingLocalFinish
+        ) {
+    
+    
+            replaceAdminVisitWalk(
+                localWalk
+            );
+    
+    
+            continue;
+    
+        }
+    
+    
+        // ========================================
+        // RESTORE ACTIVE LOCAL WALK
+        // ========================================
+    
+        if (
+            localWalk.status ===
+            "in_progress"
+        ) {
+    
+    
+            replaceAdminVisitWalk(
+                localWalk
+            );
+    
+        }
+    
+    }
+    
+    
+    // ========================================
+    // AUTO-SYNC SAVED CHECK-INS,
+    // WALKS, AND VISITS ON PAGE LOAD
+    // ========================================
+    
+    if (
+        navigator.onLine
+    ) {
+    
+    
+        await syncAllPendingVisitCheckIns(
+            false
+        );
+    
+    
+        await syncAllPendingWalkFinishes();
+    
+    
+        await syncAllPendingVisitFinishes();
     
     }
     
@@ -5390,6 +5678,16 @@ async function convertLocalWalkToServerWalk(
     }
 
 
+    // ========================================
+    // SERVER NOW OWNS THIS WALK
+    // REMOVE THE TEMPORARY DEVICE COPY
+    // ========================================
+
+    clearLocalVisitWalk(
+        localWalk.visit_id
+    );
+
+
     console.log(
         "Offline walk converted to server walk:",
         localWalkId,
@@ -5950,6 +6248,204 @@ window.addEventListener(
 // START VISIT WALK
 // ========================================
 
+function getLocalVisitWalkStorageKey(
+    visitId
+) {
+
+    return `paws-in-stride-local-walk-${visitId}`;
+
+}
+
+
+function loadLocalVisitWalk(
+    visitId
+) {
+
+    try {
+
+
+        const savedWalk =
+            localStorage.getItem(
+                getLocalVisitWalkStorageKey(
+                    visitId
+                )
+            );
+
+
+        if (
+            !savedWalk
+        ) {
+
+            return null;
+
+        }
+
+
+        const parsedWalk =
+            JSON.parse(
+                savedWalk
+            );
+
+
+        if (
+            !parsedWalk ||
+            parsedWalk.local_only !==
+            true
+        ) {
+
+            return null;
+
+        }
+
+
+        return parsedWalk;
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Unable to load local walk:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+function saveLocalVisitWalk(
+    walk
+) {
+
+    if (
+        !walk ||
+        walk.local_only !==
+        true
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+
+        localStorage.setItem(
+
+            getLocalVisitWalkStorageKey(
+                walk.visit_id
+            ),
+
+            JSON.stringify(
+                walk
+            )
+
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Unable to save local walk:",
+            error
+        );
+
+    }
+
+}
+
+
+function clearLocalVisitWalk(
+    visitId
+) {
+
+    try {
+
+
+        localStorage.removeItem(
+            getLocalVisitWalkStorageKey(
+                visitId
+            )
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Unable to clear local walk:",
+            error
+        );
+
+    }
+
+}
+
+
+function createWalkTrackingSessionId() {
+
+    if (
+        window.crypto &&
+        typeof window.crypto.randomUUID ===
+        "function"
+    ) {
+
+        return window.crypto.randomUUID();
+
+    }
+
+
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+        .replace(
+
+            /[xy]/g,
+
+            character => {
+
+
+                const randomValue =
+                    Math.floor(
+                        Math.random() *
+                        16
+                    );
+
+
+                const value =
+                    character ===
+                    "x"
+
+                        ? randomValue
+
+                        : (
+                            randomValue &
+                            0x3 |
+                            0x8
+                        );
+
+
+                return value.toString(
+                    16
+                );
+
+            }
+
+        );
+
+}
+
+
 function createLocalVisitWalk(
     visitId
 ) {
@@ -5967,22 +6463,10 @@ function createLocalVisitWalk(
 
 
     const trackingSessionId =
-        (
-            window.crypto &&
-            typeof window.crypto.randomUUID ===
-            "function"
-        )
-
-            ? window.crypto.randomUUID()
-
-            : (
-                `local-${Date.now()}-${Math.random()
-                    .toString(16)
-                    .slice(2)}`
-            );
+        createWalkTrackingSessionId();
 
 
-    return {
+    const walk = {
 
         id:
             temporaryWalkId,
@@ -6020,6 +6504,18 @@ function createLocalVisitWalk(
             true
 
     };
+
+
+    // ========================================
+    // SAVE LOCAL WALK IMMEDIATELY
+    // ========================================
+
+    saveLocalVisitWalk(
+        walk
+    );
+
+
+    return walk;
 
 }
 
@@ -6100,6 +6596,11 @@ async function startVisitWalk(
     ) {
 
 
+        saveLocalVisitWalk(
+            walk
+        );
+
+
         await startWalkGpsTracking(
             walk
         );
@@ -6137,6 +6638,18 @@ async function startVisitWalk(
 
 
             replaceAdminVisitWalk(
+                walk
+            );
+
+        }
+
+
+        if (
+            walk.local_only ===
+            true
+        ) {
+
+            saveLocalVisitWalk(
                 walk
             );
 
@@ -6339,6 +6852,18 @@ async function startVisitWalk(
 
 
                 replaceAdminVisitWalk(
+                    walk
+                );
+
+            }
+
+
+            if (
+                walk.local_only ===
+                true
+            ) {
+
+                saveLocalVisitWalk(
                     walk
                 );
 
