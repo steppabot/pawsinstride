@@ -5151,12 +5151,6 @@ body.client-modal-open {
                 1.1fr
             );
 
-        grid-template-rows:
-            auto
-            auto
-            auto
-            auto;
-
         overflow: hidden;
 
         border-radius: 18px;
@@ -5183,6 +5177,9 @@ body.client-modal-open {
         grid-column:
             1 / -1;
 
+        grid-row:
+            1;
+
         padding:
             22px 24px;
 
@@ -5207,33 +5204,69 @@ body.client-modal-open {
 
     /* ========================================
        LEFT COLUMN
-       CARE / NOTES / PHOTOS
+       CARE UPDATES
     ======================================== */
 
     .client-desktop-visit-report-mount
-    .client-visit-report-section {
+    .client-visit-report-section:nth-child(
+        2
+    ) {
+
+        grid-column: 1;
+
+        grid-row: 2;
 
         min-width: 0;
+
+        padding:
+            22px 24px;
+
+        border-right:
+            1px solid #e3ebef;
 
     }
 
 
-    .client-desktop-visit-report-mount
-    .client-visit-report-section:nth-of-type(
-        1
-    ),
+    /* ========================================
+       LEFT COLUMN
+       NOTES
+    ======================================== */
 
     .client-desktop-visit-report-mount
-    .client-visit-report-section:nth-of-type(
-        2
-    ),
-
-    .client-desktop-visit-report-mount
-    .client-visit-report-section:nth-of-type(
+    .client-visit-report-section:nth-child(
         3
     ) {
 
         grid-column: 1;
+
+        grid-row: 3;
+
+        min-width: 0;
+
+        padding:
+            22px 24px;
+
+        border-right:
+            1px solid #e3ebef;
+
+    }
+
+
+    /* ========================================
+       LEFT COLUMN
+       PHOTOS
+    ======================================== */
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-section:nth-child(
+        4
+    ) {
+
+        grid-column: 1;
+
+        grid-row: 4;
+
+        min-width: 0;
 
         padding:
             22px 24px;
@@ -5250,14 +5283,16 @@ body.client-modal-open {
     ======================================== */
 
     .client-desktop-visit-report-mount
-    .client-visit-report-section:nth-of-type(
-        4
+    .client-visit-report-section:nth-child(
+        5
     ) {
 
         grid-column: 2;
 
         grid-row:
             2 / 5;
+
+        min-width: 0;
 
         padding: 22px;
 
@@ -5271,8 +5306,8 @@ body.client-modal-open {
 
 
     .client-desktop-visit-report-mount
-    .client-visit-report-section:nth-of-type(
-        4
+    .client-visit-report-section:nth-child(
+        5
     )
     .client-walk-summary-card {
 
@@ -5286,7 +5321,7 @@ body.client-modal-open {
 
 
     /* ========================================
-       DESKTOP WALK SUMMARY HEADER
+       WALK SUMMARY HEADER
     ======================================== */
 
     .client-desktop-visit-report-mount
@@ -5315,7 +5350,7 @@ body.client-modal-open {
 
 
     /* ========================================
-       DESKTOP WALK STATS
+       WALK STATS
     ======================================== */
 
     .client-desktop-visit-report-mount
@@ -5391,7 +5426,7 @@ body.client-modal-open {
 
 
     /* ========================================
-       DESKTOP BRANDING
+       BRANDING
     ======================================== */
 
     .client-desktop-visit-report-mount
@@ -5404,7 +5439,7 @@ body.client-modal-open {
 
 
     /* ========================================
-       DESKTOP PHOTOS
+       PHOTOS
     ======================================== */
 
     .client-desktop-visit-report-mount
