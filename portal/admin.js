@@ -513,13 +513,13 @@ async function loadAdminDashboard() {
     // ========================================
     // LOAD WALK TRACKING SESSIONS
     // ========================================
-
+    
     const {
-
+    
         data: visitWalks,
-
+    
         error: visitWalksError
-
+    
     } =
         await supabaseClient
             .from(
@@ -533,43 +533,48 @@ async function loadAdminDashboard() {
                         true
                 }
             );
-
+    
+    
     if (
         visitWalksError
     ) {
-
-
+    
+    
         console.error(
             "Admin visit walks error:",
             visitWalksError
         );
-
-
+    
+    
         allVisitWalks =
             [];
-
-
+    
+    
     } else {
-
-
+    
+    
         allVisitWalks =
             visitWalks ||
             [];
-
-
+    
+    
         // ========================================
-        // AUTO-SYNC SAVED WALKS ON PAGE LOAD
+        // AUTO-SYNC SAVED WALKS AND VISITS
+        // ON PAGE LOAD
         // ========================================
-
+    
         if (
             navigator.onLine
         ) {
-
-
+    
+    
             await syncAllPendingWalkFinishes();
-
+    
+    
+            await syncAllPendingVisitFinishes();
+    
         }
-
+    
     }
     
     // ========================================
@@ -2780,10 +2785,25 @@ adminDayServicesContainer
 
 
                     actionButton.textContent =
-                        "Finishing...";
+                        "Saving Visit...";
 
 
                     await finishVisit(
+                        visitId
+                    );
+
+
+                } else if (
+                    action ===
+                    "sync-visit"
+                ) {
+
+
+                    actionButton.textContent =
+                        "Syncing...";
+
+
+                    await retryPendingVisitSync(
                         visitId
                     );
 
@@ -2833,7 +2853,6 @@ adminDayServicesContainer
 
         }
     );
-
 
 // ========================================
 // VISIT REPORT ACTIONS
@@ -5156,19 +5175,29 @@ async function retryPendingWalkSync(
 
 window.addEventListener(
     "online",
-    () => {
+    async () => {
 
-
+    
         console.log(
-            "Connection restored. Checking pending walks."
+            "Connection restored. Checking pending walks and visits."
         );
 
 
-        syncAllPendingWalkFinishes();
+        // ========================================
+        // SYNC PENDING WALK FINISHES
+        // ========================================
+
+        await syncAllPendingWalkFinishes();
+
+
+        // ========================================
+        // SYNC PENDING VISIT FINISHES
+        // ========================================
+
+        await syncAllPendingVisitFinishes();
 
     }
 );
-
 
 // ========================================
 // START VISIT WALK
@@ -5654,6 +5683,442 @@ async function finishVisitWalk(
 }
 
 // ========================================
+// VISIT FINISH STORAGE KEY
+// ========================================
+
+function getPendingVisitFinishStorageKey(
+    visitId
+) {
+
+
+    return (
+        `paws-in-stride-visit-finish-${visitId}`
+    );
+
+}
+
+
+// ========================================
+// LOAD PENDING VISIT FINISH
+// ========================================
+
+function loadPendingVisitFinish(
+    visitId
+) {
+
+
+    try {
+
+
+        const value =
+            localStorage.getItem(
+                getPendingVisitFinishStorageKey(
+                    visitId
+                )
+            );
+
+
+        if (
+            !value
+        ) {
+
+            return null;
+
+        }
+
+
+        return JSON.parse(
+            value
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Unable to load pending visit finish:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+// ========================================
+// SAVE PENDING VISIT FINISH
+// ========================================
+
+function savePendingVisitFinish(
+    visitId,
+    finishData
+) {
+
+
+    try {
+
+
+        localStorage.setItem(
+
+            getPendingVisitFinishStorageKey(
+                visitId
+            ),
+
+            JSON.stringify(
+                finishData
+            )
+
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Unable to save pending visit finish:",
+            error
+        );
+
+    }
+
+}
+
+
+// ========================================
+// CLEAR PENDING VISIT FINISH
+// ========================================
+
+function clearPendingVisitFinish(
+    visitId
+) {
+
+
+    try {
+
+
+        localStorage.removeItem(
+            getPendingVisitFinishStorageKey(
+                visitId
+            )
+        );
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Unable to clear pending visit finish:",
+            error
+        );
+
+    }
+
+}
+
+
+// ========================================
+// SYNC PENDING VISIT FINISH
+// ========================================
+
+async function syncPendingVisitFinish(
+    visitId,
+    shouldRender = true
+) {
+
+
+    const visit =
+        allVisits.find(
+
+            item =>
+
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    visitId
+                )
+
+        );
+
+
+    if (
+        !visit
+    ) {
+
+        return false;
+
+    }
+
+
+    const pendingFinish =
+        loadPendingVisitFinish(
+            visit.id
+        );
+
+
+    if (
+        !pendingFinish
+    ) {
+
+        return true;
+
+    }
+
+
+    try {
+
+
+        const {
+
+            data,
+            error
+
+        } =
+            await supabaseClient
+                .from(
+                    "visits"
+                )
+                .update({
+
+                    status:
+                        "completed",
+
+                    checked_in_at:
+                        pendingFinish
+                            .checked_in_at,
+
+                    completed_at:
+                        pendingFinish
+                            .completed_at
+
+                })
+                .eq(
+                    "id",
+                    visit.id
+                )
+                .select("*")
+                .single();
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        replaceAdminVisit(
+            data
+        );
+
+
+        clearPendingVisitFinish(
+            visit.id
+        );
+
+
+        if (
+            shouldRender
+        ) {
+
+
+            renderAdminCalendar();
+
+
+            renderAdminDayServices();
+
+        }
+
+
+        console.log(
+            "Pending visit synced successfully:",
+            visit.id
+        );
+
+
+        return true;
+
+
+    } catch (
+        error
+    ) {
+
+
+        if (
+            isWalkNetworkError(
+                error
+            )
+        ) {
+
+
+            console.warn(
+                "Visit saved locally and waiting for connection:",
+                error
+            );
+
+
+            if (
+                shouldRender
+            ) {
+
+                renderAdminDayServices();
+
+            }
+
+
+            return false;
+
+        }
+
+
+        throw error;
+
+    }
+
+}
+
+
+// ========================================
+// SYNC ALL PENDING VISIT FINISHES
+// ========================================
+
+async function syncAllPendingVisitFinishes(
+    shouldRender = true
+) {
+
+
+    if (
+        !navigator.onLine
+    ) {
+
+        return;
+
+    }
+
+
+    let changed =
+        false;
+
+
+    for (
+        const visit of
+        allVisits
+    ) {
+
+
+        const pendingFinish =
+            loadPendingVisitFinish(
+                visit.id
+            );
+
+
+        if (
+            !pendingFinish
+        ) {
+
+            continue;
+
+        }
+
+
+        try {
+
+
+            const synced =
+                await syncPendingVisitFinish(
+                    visit.id,
+                    false
+                );
+
+
+            if (
+                synced
+            ) {
+
+                changed =
+                    true;
+
+            }
+
+
+        } catch (
+            error
+        ) {
+
+
+            console.error(
+                "Unable to auto-sync pending visit:",
+                error
+            );
+
+        }
+
+    }
+
+
+    if (
+        changed &&
+        shouldRender
+    ) {
+
+
+        renderAdminCalendar();
+
+
+        renderAdminDayServices();
+
+    }
+
+}
+
+
+// ========================================
+// RETRY PENDING VISIT SYNC
+// ========================================
+
+async function retryPendingVisitSync(
+    visitId
+) {
+
+
+    const pendingFinish =
+        loadPendingVisitFinish(
+            visitId
+        );
+
+
+    if (
+        !pendingFinish
+    ) {
+
+
+        renderAdminDayServices();
+
+
+        return;
+
+    }
+
+
+    await syncPendingVisitFinish(
+        visitId
+    );
+
+}
+
+
+// ========================================
 // FINISH VISIT
 // ========================================
 
@@ -5677,9 +6142,9 @@ async function finishVisit(
         );
 
 
-
-    if (!visit) {
-
+    if (
+        !visit
+    ) {
 
         throw new Error(
             "Visit not found."
@@ -5688,6 +6153,35 @@ async function finishVisit(
     }
 
 
+    // ========================================
+    // ALREADY SAVED LOCALLY
+    // JUST TRY TO SYNC AGAIN
+    // ========================================
+
+    const existingPendingFinish =
+        loadPendingVisitFinish(
+            visit.id
+        );
+
+
+    if (
+        existingPendingFinish
+    ) {
+
+
+        await syncPendingVisitFinish(
+            visit.id
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // BUILD FINAL VISIT TIMES
+    // ========================================
 
     const completedAt =
         new Date()
@@ -5699,57 +6193,48 @@ async function finishVisit(
         completedAt;
 
 
+    const pendingFinish = {
 
-    const {
+        checked_in_at:
+            checkedInAt,
 
-        data,
-        error
+        completed_at:
+            completedAt,
 
-    } =
-        await supabaseClient
-            .from("visits")
-            .update({
+        saved_at:
+            new Date()
+                .toISOString()
 
-                status:
-                    "completed",
-
-                checked_in_at:
-                    checkedInAt,
-
-                completed_at:
-                    completedAt
-
-            })
-            .eq(
-                "id",
-                visitId
-            )
-            .select("*")
-            .single();
+    };
 
 
+    // ========================================
+    // SAVE VISIT ON PHONE FIRST
+    // ========================================
 
-    if (error) {
-
-        throw error;
-
-    }
-
-
-
-    replaceAdminVisit(
-        data
+    savePendingVisitFinish(
+        visit.id,
+        pendingFinish
     );
 
 
-    renderAdminCalendar();
-
+    // ========================================
+    // UPDATE UI IMMEDIATELY
+    // ========================================
 
     renderAdminDayServices();
 
+
+    // ========================================
+    // ATTEMPT SERVER SYNC
+    // FAILURE IS OKAY -- LOCAL COPY REMAINS
+    // ========================================
+
+    await syncPendingVisitFinish(
+        visit.id
+    );
+
 }
-
-
 
 // ========================================
 // REOPEN VISIT
@@ -6744,17 +7229,137 @@ function buildAdminVisitProgressSection(
     // ========================================
     // CHECKED IN
     // ========================================
-
+    
     if (
         progress.state ===
         "checked_in"
     ) {
-
-
+    
+    
         const checkedIn =
             formatVisitTimestamp(
                 progress.checkedInAt
             );
+    
+    
+        // ========================================
+        // VISIT SAVED LOCALLY / WAITING TO SYNC
+        // ========================================
+    
+        const pendingVisitFinish =
+            loadPendingVisitFinish(
+                visit.id
+            );
+    
+    
+        if (
+            pendingVisitFinish
+        ) {
+    
+    
+            const pendingCompleted =
+                formatVisitTimestamp(
+                    pendingVisitFinish
+                        .completed_at
+                );
+    
+    
+            const pendingCheckedIn =
+                formatVisitTimestamp(
+                    pendingVisitFinish
+                        .checked_in_at
+                );
+    
+    
+            const pendingDurationMinutes =
+                Math.max(
+    
+                    0,
+    
+                    Math.round(
+    
+                        (
+                            new Date(
+                                pendingVisitFinish
+                                    .completed_at
+                            ).getTime() -
+    
+                            new Date(
+                                pendingVisitFinish
+                                    .checked_in_at
+                            ).getTime()
+                        ) /
+    
+                        60000
+    
+                    )
+    
+                );
+    
+    
+            return `
+    
+                <div class="admin-visit-progress admin-visit-progress-live">
+    
+    
+                    <div class="admin-visit-progress-copy">
+    
+    
+                        <strong>
+                            ✓ Visit Saved
+                        </strong>
+    
+    
+                        <span>
+                            ${escapeHtml(
+    
+                                pendingCheckedIn &&
+                                pendingCompleted
+    
+                                    ? `${pendingCheckedIn} – ${pendingCompleted} • ${pendingDurationMinutes} total ${
+                                        pendingDurationMinutes ===
+                                        1
+    
+                                            ? "minute"
+    
+                                            : "minutes"
+                                    }`
+    
+                                    : "Visit completion saved"
+    
+                            )}
+                        </span>
+    
+    
+                        <span>
+                            Saved on this phone • Waiting to sync
+                        </span>
+    
+    
+                    </div>
+    
+    
+                    <div class="admin-completed-visit-actions">
+    
+    
+                        <button
+                            type="button"
+                            class="primary-button admin-visit-action-button"
+                            data-visit-action="sync-visit"
+                            data-visit-id="${visit.id}"
+                        >
+                            Retry Sync
+                        </button>
+    
+    
+                    </div>
+    
+    
+                </div>
+    
+            `;
+    
+        }
 
 
         // ========================================
