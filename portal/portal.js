@@ -4711,6 +4711,407 @@ if (householdForm) {
 
 }
 
+
+// ========================================
+// CHANGE ACCOUNT PASSWORD
+// ========================================
+
+const changePasswordForm =
+    document.getElementById(
+        "change-password-form"
+    );
+
+
+if (
+    changePasswordForm
+) {
+
+    changePasswordForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const newPasswordField =
+                document.getElementById(
+                    "new-password"
+                );
+
+
+            const confirmPasswordField =
+                document.getElementById(
+                    "confirm-new-password"
+                );
+
+
+            const changePasswordButton =
+                document.getElementById(
+                    "change-password-button"
+                );
+
+
+            const message =
+                document.getElementById(
+                    "change-password-message"
+                );
+
+
+            if (
+                !newPasswordField ||
+                !confirmPasswordField ||
+                !changePasswordButton
+            ) {
+
+                return;
+
+            }
+
+
+            const newPassword =
+                String(
+                    newPasswordField.value ||
+                    ""
+                );
+
+
+            const confirmPassword =
+                String(
+                    confirmPasswordField.value ||
+                    ""
+                );
+
+
+            // ========================================
+            // RESET VALIDATION STATE
+            // ========================================
+
+            newPasswordField.classList.remove(
+                "change-password-field-error"
+            );
+
+
+            confirmPasswordField.classList.remove(
+                "change-password-field-error"
+            );
+
+
+            if (
+                message
+            ) {
+
+                message.textContent =
+                    "";
+
+                message.classList.remove(
+                    "is-success",
+                    "is-error"
+                );
+
+            }
+
+
+            // ========================================
+            // PASSWORD LENGTH VALIDATION
+            // ========================================
+
+            if (
+                newPassword.length <
+                8
+            ) {
+
+                newPasswordField.classList.add(
+                    "change-password-field-error"
+                );
+
+
+                if (
+                    message
+                ) {
+
+                    message.textContent =
+                        "Your new password must be at least 8 characters.";
+
+                    message.classList.add(
+                        "is-error"
+                    );
+
+                }
+
+
+                newPasswordField.focus();
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // CONFIRM PASSWORD VALIDATION
+            // ========================================
+
+            if (
+                newPassword !==
+                confirmPassword
+            ) {
+
+                confirmPasswordField.classList.add(
+                    "change-password-field-error"
+                );
+
+
+                if (
+                    message
+                ) {
+
+                    message.textContent =
+                        "Your passwords do not match.";
+
+                    message.classList.add(
+                        "is-error"
+                    );
+
+                }
+
+
+                confirmPasswordField.focus();
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // UPDATE BUTTON STATE
+            // ========================================
+
+            changePasswordButton.disabled =
+                true;
+
+
+            changePasswordButton.textContent =
+                "Updating...";
+
+
+            try {
+
+
+                // ========================================
+                // UPDATE SUPABASE AUTH PASSWORD
+                // ========================================
+
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .auth
+                        .updateUser({
+
+                            password:
+                                newPassword
+
+                        });
+
+
+                if (
+                    error
+                ) {
+
+                    throw error;
+
+                }
+
+
+                // ========================================
+                // CLEAR PASSWORD FIELDS
+                // ========================================
+
+                newPasswordField.value =
+                    "";
+
+
+                confirmPasswordField.value =
+                    "";
+
+
+                newPasswordField.classList.remove(
+                    "change-password-field-error"
+                );
+
+
+                confirmPasswordField.classList.remove(
+                    "change-password-field-error"
+                );
+
+
+                // ========================================
+                // SUCCESS MESSAGE
+                // ========================================
+
+                if (
+                    message
+                ) {
+
+                    message.textContent =
+                        "Password updated successfully.";
+
+                    message.classList.remove(
+                        "is-error"
+                    );
+
+
+                    message.classList.add(
+                        "is-success"
+                    );
+
+                }
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "Password update error:",
+                    error
+                );
+
+
+                if (
+                    message
+                ) {
+
+                    let errorMessage =
+                        "We couldn't update your password. Please try again.";
+
+
+                    const errorText =
+                        String(
+                            error?.message ||
+                            ""
+                        )
+                            .toLowerCase();
+
+
+                    if (
+                        errorText.includes(
+                            "same password"
+                        ) ||
+                        errorText.includes(
+                            "different from the old password"
+                        )
+                    ) {
+
+                        errorMessage =
+                            "Your new password must be different from your current password.";
+
+                    }
+
+
+                    if (
+                        errorText.includes(
+                            "password should be at least"
+                        ) ||
+                        errorText.includes(
+                            "password must be at least"
+                        )
+                    ) {
+
+                        errorMessage =
+                            "Your new password does not meet the password requirements.";
+
+                    }
+
+
+                    message.textContent =
+                        errorMessage;
+
+
+                    message.classList.remove(
+                        "is-success"
+                    );
+
+
+                    message.classList.add(
+                        "is-error"
+                    );
+
+                }
+
+            }
+            finally {
+
+                changePasswordButton.disabled =
+                    false;
+
+
+                changePasswordButton.textContent =
+                    "Update Password";
+
+            }
+
+        }
+    );
+
+
+    // ========================================
+    // CLEAR PASSWORD ERRORS WHILE TYPING
+    // ========================================
+
+    [
+        "new-password",
+        "confirm-new-password"
+    ]
+        .forEach(
+            id => {
+
+                const field =
+                    document.getElementById(
+                        id
+                    );
+
+
+                field?.addEventListener(
+                    "input",
+                    () => {
+
+                        field.classList.remove(
+                            "change-password-field-error"
+                        );
+
+
+                        const message =
+                            document.getElementById(
+                                "change-password-message"
+                            );
+
+
+                        if (
+                            message
+                        ) {
+
+                            message.textContent =
+                                "";
+
+
+                            message.classList.remove(
+                                "is-success",
+                                "is-error"
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
 // ========================================
 // UPLOAD CLIENT PHOTO
 // ========================================
