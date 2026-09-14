@@ -17700,6 +17700,10 @@ async function renderMobileHomeDashboard() {
         null;
 
 
+    // ========================================
+    // ONLY COMPLETED VISITS THROUGH TODAY
+    // ========================================
+
     const completedVisits =
         currentVisits
             .filter(
@@ -17713,12 +17717,25 @@ async function renderMobileHomeDashboard() {
                             .toLowerCase();
 
 
-                    return (
+                    const isCompleted =
                         status ===
                             "completed" ||
                         Boolean(
                             visit.completed_at
-                        )
+                        );
+
+
+                    const isTodayOrEarlier =
+                        String(
+                            visit.visit_date ||
+                            ""
+                        ) <=
+                        today;
+
+
+                    return (
+                        isCompleted &&
+                        isTodayOrEarlier
                     );
 
                 }
@@ -17726,23 +17743,49 @@ async function renderMobileHomeDashboard() {
             .sort(
                 (a, b) => {
 
-                    const aTime =
-                        new Date(
-                            a.completed_at ||
-                            `${a.visit_date}T00:00:00`
-                        ).getTime();
+                    // ========================================
+                    // NEWEST SERVICE DATE FIRST
+                    // ========================================
+
+                    if (
+                        a.visit_date !==
+                        b.visit_date
+                    ) {
+
+                        return String(
+                            b.visit_date
+                        ).localeCompare(
+                            String(
+                                a.visit_date
+                            )
+                        );
+
+                    }
 
 
-                    const bTime =
-                        new Date(
-                            b.completed_at ||
-                            `${b.visit_date}T00:00:00`
-                        ).getTime();
+                    // ========================================
+                    // SAME DATE = MOST RECENT COMPLETION FIRST
+                    // ========================================
+
+                    const aCompleted =
+                        a.completed_at
+                            ? new Date(
+                                a.completed_at
+                            ).getTime()
+                            : 0;
+
+
+                    const bCompleted =
+                        b.completed_at
+                            ? new Date(
+                                b.completed_at
+                            ).getTime()
+                            : 0;
 
 
                     return (
-                        bTime -
-                        aTime
+                        bCompleted -
+                        aCompleted
                     );
 
                 }
@@ -17766,6 +17809,7 @@ async function renderMobileHomeDashboard() {
 
 
     try {
+
 
         // ========================================
         // FIND MOST RECENT VISIT WITH REPORT
@@ -18219,13 +18263,21 @@ async function renderMobileHomeDashboard() {
                 renderSelectedUpcomingServices();
 
 
+                // ========================================
+                // OPEN SERVICES SCREEN
+                // ========================================
+
                 await handleMobileAppTab(
                     "services"
                 );
 
 
+                // ========================================
+                // FIND EXACT VISIT REPORT BUTTON
+                // ========================================
+
                 window.setTimeout(
-                    () => {
+                    async () => {
 
                         const reportButton =
                             document.querySelector(
@@ -18233,8 +18285,58 @@ async function renderMobileHomeDashboard() {
                             );
 
 
-                        reportButton
-                            ?.click();
+                        if (
+                            !reportButton
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        // ========================================
+                        // OPEN EXACT REPORT
+                        // ========================================
+
+                        await toggleClientVisitReport(
+                            latestVisit.id,
+                            reportButton
+                        );
+
+
+                        // ========================================
+                        // SCROLL TO EXACT REPORT
+                        // ========================================
+
+                        window.setTimeout(
+                            () => {
+
+                                const reportMount =
+                                    getClientVisitReportMount(
+                                        latestVisit.id
+                                    );
+
+
+                                if (
+                                    !reportMount
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                reportMount.scrollIntoView({
+                                    behavior:
+                                        "smooth",
+
+                                    block:
+                                        "start"
+                                });
+
+                            },
+                            100
+                        );
 
                     },
                     150
