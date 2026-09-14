@@ -8049,91 +8049,177 @@ function buildAdminVisitProgressSection(
     // ========================================
     // COMPLETED VISIT
     // ========================================
-
+    
     if (
         progress.state ===
         "completed"
     ) {
-
-
+    
+    
         const checkedIn =
             formatVisitTimestamp(
                 progress.checkedInAt
             );
-
-
+    
+    
         const completed =
             formatVisitTimestamp(
                 progress.completedAt
             );
-
-
+    
+    
         const durationText =
             progress.minutes !==
             null
-
+    
                 ? `${progress.minutes} total ${
                     progress.minutes ===
                     1
-
+    
                         ? "minute"
-
+    
                         : "minutes"
                 }`
-
+    
                 : "Duration unavailable";
-
-
+    
+    
         const existingReport =
             allVisitReports.find(
-
+    
                 report =>
-
+    
                     Number(
                         report.visit_id
                     ) ===
                     Number(
                         visit.id
                     )
-
+    
             );
-
-
-        return `
-
-            <div class="admin-visit-progress admin-visit-progress-finished">
-
-
+    
+    
+        // ========================================
+        // COMPLETED WALK STATS
+        // ========================================
+    
+        let completedWalkStats =
+            "";
+    
+    
+        if (
+            walkingService &&
+            walk?.status ===
+            "completed"
+        ) {
+    
+    
+            const walkDuration =
+                formatWalkDuration(
+                    Number(
+                        walk.duration_seconds ||
+                        0
+                    )
+                );
+    
+    
+            const walkMiles =
+                (
+                    Number(
+                        walk.distance_meters ||
+                        0
+                    ) /
+                    1609.344
+                ).toFixed(
+                    2
+                );
+    
+    
+            const walkPointCount =
+                Number(
+                    walk.point_count ||
+                    0
+                );
+    
+    
+            completedWalkStats = `
+    
                 <div class="admin-visit-progress-copy">
-
-
+    
+    
+                    <strong>
+                        🐾 Walk Complete
+                    </strong>
+    
+    
+                    <span>
+                        ${escapeHtml(
+                            walkDuration
+                        )}
+    
+                        •
+    
+                        ${walkMiles} mi
+    
+                        •
+    
+                        ${walkPointCount}
+                        GPS ${
+                            walkPointCount ===
+                            1
+    
+                                ? "point"
+    
+                                : "points"
+                        }
+                    </span>
+    
+    
+                </div>
+    
+            `;
+    
+        }
+    
+    
+        return `
+    
+            <div class="admin-visit-progress admin-visit-progress-finished">
+    
+    
+                <div class="admin-visit-progress-copy">
+    
+    
                     <strong>
                         ✓ Visit Complete
                     </strong>
-
-
+    
+    
                     <span>
-
+    
                         ${escapeHtml(
-
+    
                             checkedIn &&
                             completed
-
+    
                                 ? `${checkedIn} – ${completed} • ${durationText}`
-
+    
                                 : durationText
-
+    
                         )}
-
+    
                     </span>
-
-
+    
+    
                 </div>
-
-
+    
+    
+                ${completedWalkStats}
+    
+    
                 <div class="admin-completed-visit-actions">
-
-
+    
+    
                     <button
                         type="button"
                         class="primary-button admin-visit-report-button"
@@ -8141,14 +8227,14 @@ function buildAdminVisitProgressSection(
                     >
                         ${
                             existingReport
-
+    
                                 ? "Edit Visit Report"
-
+    
                                 : "Add Visit Report"
                         }
                     </button>
-
-
+    
+    
                     <button
                         type="button"
                         class="secondary-button admin-reopen-visit-button"
@@ -8157,21 +8243,21 @@ function buildAdminVisitProgressSection(
                     >
                         Reopen Visit
                     </button>
-
-
+    
+    
                 </div>
-
-
+    
+    
             </div>
-
-
+    
+    
             <div
                 id="admin-visit-report-${visit.id}"
                 class="admin-visit-report-mount"
             ></div>
-
+    
         `;
-
+    
     }
 
 
