@@ -1029,20 +1029,35 @@ if (loginForm) {
             // ========================================
             // ADMIN ROUTING
             // ========================================
-
+            
             if (
                 role ===
                 "admin"
             ) {
-
+            
+                // ========================================
+                // REMEMBER ADMIN DEVICE
+                // ========================================
+                //
+                // Allows the installed PWA to recognize
+                // this device as an admin device even
+                // when it later launches without internet.
+                // ========================================
+            
+                window.localStorage.setItem(
+                    "paws-in-stride-admin-device",
+                    "true"
+                );
+            
+            
                 window.location.replace(
                     "./admin.html"
                 );
-
+            
+            
                 return;
-
+            
             }
-
 
             // ========================================
             // CLIENT ROUTING
@@ -1855,6 +1870,37 @@ if (resetPasswordForm) {
 
 async function loadDashboard() {
 
+    // ========================================
+    // OFFLINE ADMIN DEVICE ROUTING
+    // ========================================
+
+    const isOfflineAdminDevice =
+        
+        navigator.onLine === false &&
+        window.localStorage.getItem(
+            "paws-in-stride-admin-device"
+        ) ===
+            "true";
+
+
+    if (
+        isOfflineAdminDevice
+    ) {
+
+        console.log(
+            "Offline admin device detected. Opening cached admin portal."
+        );
+
+
+        window.location.replace(
+            "./admin.html"
+        );
+
+
+        return;
+
+    }
+    
     const dashboardContent =
         document.getElementById(
             "dashboard-content"
@@ -14132,24 +14178,39 @@ function clearClientPhotoPreviewUrl() {
 // LOGOUT
 // ========================================
 
-document
-    .getElementById(
-        "logout-button"
-    )
-    ?.addEventListener(
-        "click",
-        async () => {
+document.getElementById(
+    "admin-logout-button"
+)?.addEventListener(
+    "click",
+    async () => {
 
-            await supabaseClient
-                .auth
-                .signOut();
+        // ========================================
+        // CLEAR OFFLINE ADMIN DEVICE FLAG
+        // ========================================
+
+        window.localStorage.removeItem(
+            "paws-in-stride-admin-device"
+        );
 
 
-            window.location.href =
-                "./login.html";
+        // ========================================
+        // SIGN OUT
+        // ========================================
 
-        }
-    );
+        await supabaseClient
+            .auth
+            .signOut();
+
+
+        // ========================================
+        // RETURN TO LOGIN
+        // ========================================
+
+        window.location.href =
+            "./login.html";
+
+    }
+);
 
 // ========================================
 // CLIENT MESSAGING
