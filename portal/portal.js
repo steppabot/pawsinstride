@@ -12981,6 +12981,99 @@ document.addEventListener(
 );
 
 // ========================================
+// GET CLIENT VISIT REPORT MOUNT
+// ========================================
+
+function getClientVisitReportMount(
+    visitId
+) {
+
+
+    const mobileMount =
+        document.getElementById(
+            `client-visit-report-${visitId}`
+        );
+
+
+    // ========================================
+    // MOBILE / PWA
+    // KEEP EXISTING SERVICE CARD REPORT
+    // ========================================
+
+    if (
+        window.matchMedia(
+            "(max-width: 700px)"
+        ).matches
+    ) {
+
+        return mobileMount;
+
+    }
+
+
+    // ========================================
+    // DESKTOP
+    // USE FULL-WIDTH REPORT BELOW DASHBOARD GRID
+    // ========================================
+
+    const dashboardGrid =
+        document.querySelector(
+            ".client-dashboard-grid"
+        );
+
+
+    if (
+        !dashboardGrid
+    ) {
+
+        return mobileMount;
+
+    }
+
+
+    let desktopMount =
+        document.getElementById(
+            "client-desktop-visit-report"
+        );
+
+
+    if (
+        !desktopMount
+    ) {
+
+        desktopMount =
+            document.createElement(
+                "div"
+            );
+
+
+        desktopMount.id =
+            "client-desktop-visit-report";
+
+
+        desktopMount.className =
+            "client-desktop-visit-report-mount";
+
+
+        dashboardGrid.insertAdjacentElement(
+            "afterend",
+            desktopMount
+        );
+
+    }
+
+
+    desktopMount.dataset.visitId =
+        String(
+            visitId
+        );
+
+
+    return desktopMount;
+
+}
+
+// ========================================
 // TOGGLE CLIENT VISIT REPORT
 // ========================================
 
@@ -12991,8 +13084,8 @@ async function toggleClientVisitReport(
 
 
     const mount =
-        document.getElementById(
-            `client-visit-report-${visitId}`
+        getClientVisitReportMount(
+            visitId
         );
 
 
@@ -13004,6 +13097,10 @@ async function toggleClientVisitReport(
 
     }
 
+
+    // ========================================
+    // CLOSE CURRENT REPORT
+    // ========================================
 
     if (
         activeClientVisitReportId ===
@@ -13028,6 +13125,10 @@ async function toggleClientVisitReport(
 
     }
 
+
+    // ========================================
+    // CLOSE ANY OTHER OPEN REPORT
+    // ========================================
 
     closeOpenClientVisitReport();
 
@@ -13055,6 +13156,10 @@ async function toggleClientVisitReport(
     try {
 
 
+        // ========================================
+        // LOAD REPORT + PHOTOS + WALK
+        // ========================================
+
         const [
             reportResult,
             mediaResult,
@@ -13062,10 +13167,6 @@ async function toggleClientVisitReport(
         ] =
             await Promise.all([
 
-
-                // ========================================
-                // VISIT REPORT
-                // ========================================
 
                 supabaseClient
                     .from(
@@ -13080,10 +13181,6 @@ async function toggleClientVisitReport(
                     )
                     .maybeSingle(),
 
-
-                // ========================================
-                // VISIT PHOTOS
-                // ========================================
 
                 supabaseClient
                     .from(
@@ -13112,10 +13209,6 @@ async function toggleClientVisitReport(
                     ),
 
 
-                // ========================================
-                // COMPLETED WALK
-                // ========================================
-
                 supabaseClient
                     .from(
                         "visit_walks"
@@ -13138,7 +13231,7 @@ async function toggleClientVisitReport(
 
 
         // ========================================
-        // CHECK VISIT REPORT
+        // CHECK REPORT ERROR
         // ========================================
 
         if (
@@ -13151,7 +13244,7 @@ async function toggleClientVisitReport(
 
 
         // ========================================
-        // CHECK VISIT PHOTOS
+        // CHECK MEDIA ERROR
         // ========================================
 
         if (
@@ -13164,7 +13257,7 @@ async function toggleClientVisitReport(
 
 
         // ========================================
-        // CHECK WALK
+        // CHECK WALK ERROR
         // ========================================
 
         if (
@@ -13180,6 +13273,15 @@ async function toggleClientVisitReport(
             reportResult.data ||
             null;
 
+
+        const completedWalk =
+            walkResult.data ||
+            null;
+
+
+        // ========================================
+        // REPORT NOT YET ADDED
+        // ========================================
 
         if (
             !report
@@ -13209,13 +13311,8 @@ async function toggleClientVisitReport(
         }
 
 
-        const completedWalk =
-            walkResult.data ||
-            null;
-
-
         // ========================================
-        // LOAD WALK GPS POINTS
+        // LOAD WALK POINTS
         // ========================================
 
         let walkPoints =
@@ -13228,8 +13325,10 @@ async function toggleClientVisitReport(
 
 
             const {
-                data: walkPointData,
-                error: walkPointError
+                data:
+                    walkPointData,
+                error:
+                    walkPointError
             } =
                 await supabaseClient
                     .from(
@@ -13268,7 +13367,7 @@ async function toggleClientVisitReport(
 
 
         // ========================================
-        // CREATE SIGNED VISIT PHOTO URLS
+        // CREATE SIGNED PHOTO URLS
         // ========================================
 
         const media =
@@ -13333,7 +13432,7 @@ async function toggleClientVisitReport(
 
 
         // ========================================
-        // LOAD AUTOMATIC WALK ROUTE
+        // RENDER WALK ROUTE
         // ========================================
 
         if (
@@ -13350,7 +13449,30 @@ async function toggleClientVisitReport(
         }
 
 
-    } catch (
+        // ========================================
+        // DESKTOP REPORT POSITION
+        // ========================================
+
+        if (
+            !window.matchMedia(
+                "(max-width: 700px)"
+            ).matches
+        ) {
+
+
+            mount.scrollIntoView({
+                behavior:
+                    "smooth",
+
+                block:
+                    "start"
+            });
+
+        }
+
+
+    }
+    catch (
         error
     ) {
 
@@ -13376,7 +13498,6 @@ async function toggleClientVisitReport(
 
 }
 
-
 // ========================================
 // CLOSE OPEN CLIENT VISIT REPORT
 // ========================================
@@ -13393,25 +13514,61 @@ function closeOpenClientVisitReport() {
     }
 
 
-    const oldMount =
+    const visitId =
+        activeClientVisitReportId;
+
+
+    // ========================================
+    // CLEAR MOBILE / SERVICE CARD REPORT
+    // ========================================
+
+    const mobileMount =
         document.getElementById(
-            `client-visit-report-${activeClientVisitReportId}`
+            `client-visit-report-${visitId}`
         );
 
 
     if (
-        oldMount
+        mobileMount
     ) {
 
-        oldMount.innerHTML =
+        mobileMount.innerHTML =
             "";
 
     }
 
 
+    // ========================================
+    // CLEAR DESKTOP FULL-WIDTH REPORT
+    // ========================================
+
+    const desktopMount =
+        document.getElementById(
+            "client-desktop-visit-report"
+        );
+
+
+    if (
+        desktopMount
+    ) {
+
+        desktopMount.innerHTML =
+            "";
+
+
+        delete desktopMount.dataset
+            .visitId;
+
+    }
+
+
+    // ========================================
+    // RESET REPORT BUTTON
+    // ========================================
+
     const oldButton =
         document.querySelector(
-            `[data-client-visit-report-open="${activeClientVisitReportId}"]`
+            `[data-client-visit-report-open="${visitId}"]`
         );
 
 
@@ -13429,7 +13586,6 @@ function closeOpenClientVisitReport() {
         null;
 
 }
-
 
 // ========================================
 // RENDER CLIENT VISIT REPORT
