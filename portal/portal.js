@@ -3105,7 +3105,7 @@ async function getProfilePhotoUrl(
 }
 
 // ========================================
-// PROPERTY ACCESS COLLAPSE TOGGLE
+// PROFILE DETAIL COLLAPSE TOGGLES
 // ========================================
 
 const propertyAccessToggle =
@@ -3119,6 +3119,22 @@ const propertyAccessContent =
         "property-access-content"
     );
 
+
+const accountSecurityToggle =
+    document.getElementById(
+        "account-security-toggle"
+    );
+
+
+const accountSecurityContent =
+    document.getElementById(
+        "account-security-content"
+    );
+
+
+// ========================================
+// PROPERTY ACCESS TOGGLE
+// ========================================
 
 if (
     propertyAccessToggle &&
@@ -3153,6 +3169,43 @@ if (
 
 }
 
+
+// ========================================
+// ACCOUNT SECURITY TOGGLE
+// ========================================
+
+if (
+    accountSecurityToggle &&
+    accountSecurityContent
+) {
+
+    accountSecurityToggle.addEventListener(
+        "click",
+        () => {
+
+            const isExpanded =
+                accountSecurityToggle
+                    .getAttribute(
+                        "aria-expanded"
+                    ) ===
+                    "true";
+
+
+            accountSecurityToggle.setAttribute(
+                "aria-expanded",
+                String(
+                    !isExpanded
+                )
+            );
+
+
+            accountSecurityContent.hidden =
+                isExpanded;
+
+        }
+    );
+
+}
 // ========================================
 // HOUSEHOLD EDIT FORM
 // ========================================
