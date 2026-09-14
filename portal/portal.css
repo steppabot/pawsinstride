@@ -1612,65 +1612,19 @@ section h3 {
    ACCOUNT SECURITY
 ======================================== */
 
-.account-security-section {
-
-    margin-top:
-        22px;
-
-}
-
-
-.account-security-header {
-
-    margin-bottom:
-        14px;
-
-}
-
-
-.account-security-header h3 {
-
-    margin:
-        0 0 4px;
-
-}
-
-
-.account-security-help {
-
-    margin:
-        0;
-
-    color:
-        #666;
-
-    font-size:
-        14px;
-
-    line-height:
-        1.5;
-
-}
-
-
-.account-security-card {
-
-    padding:
-        20px;
+.account-security-detail-card {
 
     background:
-        #fafafa;
-
-    border:
-        1px solid #e3e3e3;
-
-    border-radius:
-        14px;
+        #f7f7f7;
 
 }
 
 
-.account-security-card-heading {
+/* ========================================
+   ACCOUNT SECURITY FORM
+======================================== */
+
+.account-security-form-heading {
 
     margin-bottom:
         18px;
@@ -1678,18 +1632,24 @@ section h3 {
 }
 
 
-.account-security-card-heading h4 {
+.account-security-form-heading h4 {
 
     margin:
         0 0 5px;
 
+    color:
+        #222;
+
     font-size:
-        18px;
+        16px;
+
+    font-weight:
+        700;
 
 }
 
 
-.account-security-card-heading p {
+.account-security-form-heading p {
 
     margin:
         0;
@@ -1706,9 +1666,13 @@ section h3 {
 }
 
 
-/* ========================================
-   CHANGE PASSWORD FORM
-======================================== */
+.change-password-form {
+
+    padding-top:
+        10px;
+
+}
+
 
 .change-password-grid {
 
@@ -1744,7 +1708,7 @@ section h3 {
         #222;
 
     font-size:
-        14px;
+        13px;
 
     font-weight:
         600;
@@ -1756,6 +1720,9 @@ section h3 {
 
     width:
         100%;
+
+    box-sizing:
+        border-box;
 
     padding:
         12px;
@@ -1777,9 +1744,6 @@ section h3 {
 
     font-size:
         16px;
-
-    box-sizing:
-        border-box;
 
 }
 
@@ -1825,7 +1789,7 @@ section h3 {
 .change-password-requirements {
 
     margin-top:
-        10px;
+        9px;
 
     color:
         #777;
@@ -1856,7 +1820,7 @@ section h3 {
 .change-password-message {
 
     min-height:
-        20px;
+        0;
 
     margin:
         12px 0 0;
@@ -1869,6 +1833,14 @@ section h3 {
 
     text-align:
         center;
+
+}
+
+
+.change-password-message:empty {
+
+    display:
+        none;
 
 }
 
@@ -1895,25 +1867,6 @@ section h3 {
 
 @media (max-width: 700px) {
 
-    .account-security-section {
-
-        width:
-            100%;
-
-        margin:
-            18px 0 0;
-
-    }
-
-
-    .account-security-card {
-
-        padding:
-            18px;
-
-    }
-
-
     .change-password-grid {
 
         grid-template-columns:
@@ -1938,38 +1891,6 @@ section h3 {
 
         width:
             100%;
-
-    }
-
-
-    /* ========================================
-       HIDE SECURITY OUTSIDE PROFILE SCREEN
-    ======================================== */
-
-    body.mobile-app-screen-home
-    #account-security-section,
-
-    body.mobile-app-screen-services
-    #account-security-section,
-
-    body.mobile-app-screen-pets
-    #account-security-section {
-
-        display:
-            none !important;
-
-    }
-
-
-    /* ========================================
-       SHOW SECURITY ON PROFILE SCREEN
-    ======================================== */
-
-    body.mobile-app-screen-profile
-    #account-security-section {
-
-        display:
-            block !important;
 
     }
 
