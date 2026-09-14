@@ -14631,7 +14631,30 @@ function renderClientGoogleWalkRoute(
 
         map,
 
+        icon: {
+
+            path:
+                google.maps.SymbolPath.CIRCLE,
+
+            scale:
+                14,
+
+            fillColor:
+                "#22a447",
+
+            fillOpacity:
+                1,
+
+            strokeColor:
+                "#ffffff",
+
+            strokeWeight:
+                2
+
+        },
+
         label: {
+
             text:
                 "S",
 
@@ -14640,6 +14663,7 @@ function renderClientGoogleWalkRoute(
 
             fontWeight:
                 "700"
+
         },
 
         title:
@@ -14662,7 +14686,30 @@ function renderClientGoogleWalkRoute(
 
         map,
 
+        icon: {
+
+            path:
+                google.maps.SymbolPath.CIRCLE,
+
+            scale:
+                14,
+
+            fillColor:
+                "#dc3545",
+
+            fillOpacity:
+                1,
+
+            strokeColor:
+                "#ffffff",
+
+            strokeWeight:
+                2
+
+        },
+
         label: {
+
             text:
                 "F",
 
@@ -14671,6 +14718,7 @@ function renderClientGoogleWalkRoute(
 
             fontWeight:
                 "700"
+
         },
 
         title:
