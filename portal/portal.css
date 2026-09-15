@@ -952,16 +952,17 @@ select.booking-field-error {
     }
 
 
+    /* ========================================
+       ALL REQUEST SERVICE DROPDOWNS
+    ======================================== */
+
     body.mobile-app-screen-services
     .booking-section
     #booking-form
-    > select {
+    select {
 
         min-height:
             48px;
-
-        margin-bottom:
-            18px;
 
         padding:
             11px
@@ -995,7 +996,7 @@ select.booking-field-error {
     body.mobile-app-screen-services
     .booking-section
     #booking-form
-    > select:focus {
+    select:focus {
 
         outline:
             none;
@@ -1018,7 +1019,6 @@ select.booking-field-error {
     }
 
 }
-
 
 /* ========================================
    ADDITIONAL PETS
