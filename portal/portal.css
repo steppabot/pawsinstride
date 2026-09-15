@@ -21208,26 +21208,20 @@ body.booking-success-page {
     body.client-portal-page
     .mobile-home-quick-action-primary {
 
-        background:
-            linear-gradient(
-                135deg,
-                #f5b54e 0%,
-                #f3a333 100%
-            );
-
-        color: #183447;
+        background: #f5ab40;
+        color: #ffffff;
 
         border: 0;
 
         box-shadow:
             0
-            3px
-            9px
+            4px
+            12px
             rgba(
-                7,
-                42,
-                63,
-                0.10
+                111,
+                69,
+                12,
+                0.18
             );
 
     }
@@ -21266,13 +21260,13 @@ body.booking-success-page {
 
         background:
             rgba(
-                24,
-                52,
-                71,
-                0.10
+                255,
+                255,
+                255,
+                0.18
             );
 
-        color: #183447;
+        color: #ffffff;
 
     }
 
