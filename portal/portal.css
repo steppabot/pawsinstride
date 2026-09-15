@@ -20483,6 +20483,100 @@ body.booking-success-page {
 
 }
 
+
+/* ========================================
+   STATIC DASHBOARD LOADING
+   ======================================== */
+
+.portal-static-loading-logo,
+.portal-static-loading-indicator {
+
+    display: none;
+
+}
+
+
+/* ========================================
+   REDUCED MOTION — MOBILE / INSTALLED PWA
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    @media (max-width: 700px), (display-mode: standalone) {
+
+        body.client-portal-page #loading {
+
+            position: fixed;
+            inset: 0;
+
+            z-index: 99998;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 18px;
+
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+
+            margin: 0;
+            padding: 24px;
+
+            box-sizing: border-box;
+
+            background: #f5ab40;
+            color: #ffffff;
+
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+
+            text-align: center;
+
+        }
+
+
+        .portal-static-loading-logo {
+
+            display: block;
+
+            width: min(300px, 72vw);
+            height: auto;
+
+        }
+
+
+        .portal-static-loading-indicator {
+
+            display: block;
+
+            width: 38px;
+            height: 38px;
+
+            box-sizing: border-box;
+            flex-shrink: 0;
+
+            border: 4px solid rgba(
+                255,
+                255,
+                255,
+                0.35
+            );
+
+            border-top-color: #ffffff;
+            border-radius: 50%;
+
+        }
+
+    }
+
+}
+
+
 /* ========================================
    MOBILE PORTAL INTRO
    ======================================== */
