@@ -4090,22 +4090,59 @@ body.client-modal-open {
 ======================================== */
 
 .client-visit-progress-live {
-    margin-right: -14px;
-    margin-bottom: -14px;
-    margin-left: -14px;
 
-    padding: 14px;
+    margin-right: -16px;
+    margin-bottom: -16px;
+    margin-left: -16px;
 
-    background: #fffaf0;
+    padding:
+        15px
+        16px
+        16px;
 
-    border-top: 1px solid #ead69a;
+    background:
+        linear-gradient(
+            135deg,
+            #fffaf0 0%,
+            #fff6df 100%
+        );
+
+    border-top:
+        1px solid
+        #ead69a;
+
 }
 
 
-.client-visit-progress-live strong {
+.client-visit-progress-live
+.client-visit-progress-heading {
+
+    margin-bottom: 6px;
+
+}
+
+
+.client-visit-progress-live
+.client-visit-progress-heading strong {
+
     color: #8a6100;
+
+    font-size: 14px;
+    font-weight: 800;
+
 }
 
+
+.client-visit-progress-live p {
+
+    color: #6f6450;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    line-height: 1.45;
+
+}
 
 /* ========================================
    LIVE DOT
@@ -4131,22 +4168,59 @@ body.client-modal-open {
 ======================================== */
 
 .client-visit-progress-finished {
-    margin-right: -14px;
-    margin-bottom: -14px;
-    margin-left: -14px;
 
-    padding: 14px;
+    margin-right: -16px;
+    margin-bottom: -16px;
+    margin-left: -16px;
 
-    background: #f4fbf6;
+    padding:
+        15px
+        16px
+        16px;
 
-    border-top: 1px solid #cce8d4;
+    background:
+        linear-gradient(
+            135deg,
+            #f4fbf6 0%,
+            #ecf8ef 100%
+        );
+
+    border-top:
+        1px solid
+        #cce8d4;
+
 }
 
 
-.client-visit-progress-finished strong {
+.client-visit-progress-finished
+.client-visit-progress-heading {
+
+    margin-bottom: 6px;
+
+}
+
+
+.client-visit-progress-finished
+.client-visit-progress-heading strong {
+
     color: #18843d;
+
+    font-size: 14px;
+    font-weight: 800;
+
 }
 
+
+.client-visit-progress-finished p {
+
+    color: #5d6f63;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    line-height: 1.45;
+
+}
 
 /* ========================================
    INLINE COMPLETE CHECK
