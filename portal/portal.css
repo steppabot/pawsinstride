@@ -14517,6 +14517,87 @@ a:focus-visible {
 
 
 /* ========================================
+   SELECTED DATES — MOBILE REDESIGN
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    #selected-dates-container {
+
+        margin:
+            24px
+            0
+            0;
+
+        padding:
+            0;
+
+        background:
+            transparent;
+
+        border:
+            0;
+
+        border-radius:
+            0;
+
+        box-shadow:
+            none;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-dates-header {
+
+        margin:
+            0
+            2px
+            12px;
+
+        padding:
+            0;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-dates-header
+    strong {
+
+        color:
+            #183447;
+
+        font-size:
+            16px;
+
+        font-weight:
+            800;
+
+        letter-spacing:
+            -0.01em;
+
+    }
+
+
+    body.mobile-app-screen-services
+    #selected-date-count {
+
+        color:
+            #1f7bc2;
+
+        font-size:
+            12px;
+
+        font-weight:
+            800;
+
+    }
+
+}
+
+/* ========================================
    CALENDAR CONTAINERS
 ======================================== */
 
