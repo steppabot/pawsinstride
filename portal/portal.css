@@ -21086,7 +21086,7 @@ body.booking-success-page {
 @media (max-width: 700px) {
 
     /* ========================================
-       QUICK ACTIONS CONTAINER
+       COMPACT QUICK ACTIONS
        ======================================== */
 
     body.client-portal-page
@@ -21095,13 +21095,17 @@ body.booking-success-page {
         .mobile-home-quick-actions
     ) {
 
-        padding: 19px;
+        margin-bottom: 25px;
+        padding:
+            14px
+            14px
+            15px;
 
         background:
             linear-gradient(
                 135deg,
                 #174b68 0%,
-                #1d6f98 55%,
+                #1d6f98 58%,
                 #268db2 100%
             );
 
@@ -21111,20 +21115,20 @@ body.booking-success-page {
                 255,
                 255,
                 255,
-                0.16
+                0.14
             );
 
-        border-radius: 20px;
+        border-radius: 18px;
 
         box-shadow:
             0
-            9px
-            22px
+            7px
+            18px
             rgba(
                 23,
                 75,
                 104,
-                0.14
+                0.12
             );
 
     }
@@ -21136,7 +21140,7 @@ body.booking-success-page {
     )
     .mobile-home-section-heading {
 
-        margin-bottom: 14px;
+        margin-bottom: 10px;
 
     }
 
@@ -21149,33 +21153,137 @@ body.booking-success-page {
 
         color: #ffffff;
 
+        font-size: 17px;
+        font-weight: 800;
+
+        letter-spacing: -0.01em;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-quick-actions {
+
+        gap: 8px;
+
     }
 
 
     body.client-portal-page
     .mobile-home-quick-action {
 
-        border-color:
-            rgba(
-                255,
-                255,
-                255,
-                0.55
-            );
+        min-width: 0;
+        min-height: 50px;
+
+        padding:
+            8px
+            10px;
+
+        gap: 8px;
+
+        background: #ffffff;
+        color: #183447;
+
+        border: 0;
+        border-radius: 12px;
 
         box-shadow:
             0
-            5px
-            14px
+            3px
+            9px
             rgba(
                 7,
                 42,
                 63,
-                0.14
+                0.10
+            );
+
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.2;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-quick-action-primary {
+
+        background:
+            linear-gradient(
+                135deg,
+                #f5b54e 0%,
+                #f3a333 100%
+            );
+
+        color: #183447;
+
+        border: 0;
+
+        box-shadow:
+            0
+            3px
+            9px
+            rgba(
+                7,
+                42,
+                63,
+                0.10
             );
 
     }
 
+
+    body.client-portal-page
+    .mobile-home-quick-action-icon {
+
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 30px;
+        height: 30px;
+
+        flex:
+            0
+            0
+            30px;
+
+        padding: 6px;
+
+        background: #eaf5fa;
+        color: #1f7bc2;
+
+        border: 0;
+        border-radius: 9px;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-quick-action-primary
+    .mobile-home-quick-action-icon {
+
+        background:
+            rgba(
+                24,
+                52,
+                71,
+                0.10
+            );
+
+        color: #183447;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-quick-action-icon svg {
+
+        width: 18px;
+        height: 18px;
+
+    }
 
     /* ========================================
        UPCOMING CARD ACCENT
