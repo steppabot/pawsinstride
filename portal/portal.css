@@ -13709,12 +13709,12 @@ a:focus-visible {
     > .section-header {
 
         align-items:
-            flex-start;
+            center;
 
         margin:
             0
             0
-            18px;
+            14px;
 
         padding:
             0
@@ -13824,15 +13824,86 @@ a:focus-visible {
 
 
     /* ========================================
-       REQUEST SERVICE FORM
+       REQUEST SERVICE FORM CARD
     ======================================== */
 
     body.mobile-app-screen-services
     .booking-section
     #booking-form {
 
-        margin-top:
+        position:
+            relative;
+
+        overflow:
+            hidden;
+
+        margin:
             0;
+
+        padding:
+            24px
+            18px
+            20px;
+
+        background:
+            #ffffff;
+
+        border:
+            1px solid
+            #d6e4eb;
+
+        border-radius:
+            18px;
+
+        box-shadow:
+            0
+            7px
+            18px
+            rgba(
+                24,
+                52,
+                71,
+                0.07
+            );
+
+    }
+
+
+    /* ========================================
+       REQUEST SERVICE FORM ACCENT
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-section
+    #booking-form::before {
+
+        content:
+            "";
+
+        position:
+            absolute;
+
+        top:
+            0;
+
+        left:
+            0;
+
+        right:
+            0;
+
+        height:
+            5px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        pointer-events:
+            none;
 
     }
 
