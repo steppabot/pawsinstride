@@ -7563,75 +7563,130 @@ function handleServiceTypeChange() {
     // ========================================
     // RESET SELECTED VISITS
     // ========================================
-
+    
     selectedVisits =
         [];
-
-
+    
+    
     selectedDates =
         [];
-
-
+    
+    
     selectedDateCapacityConflicts.clear();
-
-
+    
+    
     lastSelectedTimeWindow =
         "";
-
-
+    
+    
     clearTimeWindowConflictError();
-
+    
     clearTimeWindowCapacityHelp();
-
-
+    
+    
+    // ========================================
+    // RESET MULTI-TIME ROWS
+    // ========================================
+    
+    document
+        .querySelectorAll(
+            ".booking-time-row-additional"
+        )
+        .forEach(
+            row => {
+    
+                row.remove();
+    
+            }
+        );
+    
+    
+    const addBookingTimeButton =
+        document.getElementById(
+            "add-booking-time-button"
+        );
+    
+    
+    const bookingTimeHelp =
+        document.getElementById(
+            "booking-time-help"
+        );
+    
+    
+    if (addBookingTimeButton) {
+    
+        addBookingTimeButton.style.display =
+            "none";
+    
+        addBookingTimeButton.disabled =
+            true;
+    
+    }
+    
+    
+    if (bookingTimeHelp) {
+    
+        bookingTimeHelp.style.display =
+            "none";
+    
+    }
+    
+    
+    // ========================================
+    // RESET BOOKING UI
+    // ========================================
+    
     renderSelectedDates();
-
+    
     renderBookingCalendar();
-
-
+    
+    
     optionWrapper.style.display =
         "none";
-
-
+    
+    
     timeWrapper.style.display =
         "none";
-
-
+    
+    
     multiDate.style.display =
         "none";
-
-
+    
+    
     boarding.style.display =
         "none";
-
-
+    
+    
     serviceOptionSelect.innerHTML =
         `
             <option value="">
                 Select an option
             </option>
         `;
-
-
+    
+    
     bookingTime.innerHTML =
         `
             <option value="">
                 Select a time
             </option>
         `;
-
-
+    
+    
+    bookingTime.dataset.previousValue =
+        "";
+    
+    
     renderAdditionalPets();
-
-
+    
+    
     if (!serviceType) {
-
+    
         updateBookingTotal();
-
+    
         return;
-
+    
     }
-
     // ========================================
     // DOG BOARDING
     // ========================================
