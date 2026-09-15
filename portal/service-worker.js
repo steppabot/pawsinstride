@@ -543,7 +543,28 @@ self.addEventListener(
 
         }
 
+        // ========================================
+        // VIDEO / AUDIO / RANGE REQUESTS
+        // ========================================
+        // Let the browser handle media directly.
+        // Partial video responses cannot be stored
+        // using our normal cache.put() handler.
+        // ========================================
 
+        if (
+            request.headers.has("range") ||
+            request.destination === "video" ||
+            request.destination === "audio" ||
+            /\.(mp4|m4v|mov|webm|mp3|m4a|wav|ogg)$/i.test(
+                requestUrl.pathname
+            )
+        ) {
+
+            return;
+
+        }
+        
+        
         // ========================================
         // SAME-ORIGIN PORTAL STATIC FILES
         // ========================================
