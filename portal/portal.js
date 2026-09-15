@@ -7342,6 +7342,7 @@ document
         "click",
         async () => {
 
+
             const message =
                 document.getElementById(
                     "booking-message"
@@ -7350,10 +7351,42 @@ document
 
             try {
 
+
+                // ========================================
+                // FORCE MOBILE REQUEST SERVICE
+                // INTO SERVICES SCREEN
+                // ========================================
+
+                if (
+                    mobileAppNavigationQuery.matches
+                ) {
+
+
+                    closeClientMessaging();
+
+
+                    setMobileAppScreen(
+                        "services"
+                    );
+
+
+                    setActiveMobileAppTab(
+                        "services"
+                    );
+
+                }
+
+
+                // ========================================
+                // LOAD CURRENT PRICING
+                // ========================================
+
                 if (
                     currentServicePrices
-                        .length === 0
+                        .length ===
+                    0
                 ) {
+
 
                     if (message) {
 
@@ -7376,6 +7409,10 @@ document
                 }
 
 
+                // ========================================
+                // OPEN REQUEST SERVICE
+                // ========================================
+
                 bookingSection.style.display =
                     "block";
 
@@ -7396,21 +7433,27 @@ document
                 window.requestAnimationFrame(
                     () => {
 
+
                         window.requestAnimationFrame(
                             () => {
+
 
                                 scrollBookingFieldIntoView(
                                     bookingPetSelect
                                 );
 
+
                             }
                         );
+
 
                     }
                 );
 
+
             }
             catch (error) {
+
 
                 console.error(
                     "Unable to open booking pricing:",
@@ -7425,7 +7468,9 @@ document
 
                 }
 
+
             }
+
 
         }
     );
@@ -7439,8 +7484,10 @@ document
         "click",
         () => {
 
+
             bookingSection.style.display =
                 "none";
+
 
         }
     );
