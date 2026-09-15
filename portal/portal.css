@@ -2226,14 +2226,19 @@ section h3 {
 
 .upcoming-calendar-day {
     position: relative;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 100%;
     aspect-ratio: 1 / 1;
+
     padding: 0;
+
     background: #fff;
     color: #111;
+
     border: 1px solid #e2e2e2;
     border-radius: 9px;
 }
@@ -2263,24 +2268,357 @@ section h3 {
 
 .upcoming-service-count {
     position: absolute;
+
     top: 4px;
     right: 4px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     min-width: 18px;
     height: 18px;
+
     padding: 0 5px;
+
     background: #111;
     color: #fff;
+
     border-radius: 20px;
+
     font-size: 10px;
     font-weight: 700;
 }
 
-.upcoming-calendar-selected .upcoming-service-count {
+.upcoming-calendar-selected
+.upcoming-service-count {
     background: #fff;
     color: #111;
+}
+
+
+/* ========================================
+   SERVICES TAB — MOBILE REDESIGN
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .upcoming-services-section {
+
+        position: relative;
+
+        padding:
+            18px
+            14px
+            16px;
+
+        background:
+            linear-gradient(
+                145deg,
+                #f5ab40 0%,
+                #ef9332 55%,
+                #e77c28 100%
+            );
+
+        border: 0;
+        border-radius: 20px;
+
+        box-shadow:
+            0
+            8px
+            22px
+            rgba(
+                145,
+                78,
+                16,
+                0.14
+            );
+
+        overflow: hidden;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-services-header {
+
+        padding:
+            1px
+            4px
+            14px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-services-header h3 {
+
+        margin: 0 0 4px;
+
+        color: #ffffff;
+
+        font-size: 21px;
+        font-weight: 800;
+
+        letter-spacing: -0.025em;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-help {
+
+        margin: 0;
+
+        color:
+            rgba(
+                255,
+                255,
+                255,
+                0.88
+            );
+
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar {
+
+        margin: 0;
+
+        padding:
+            14px
+            12px
+            13px;
+
+        background: #ffffff;
+
+        border: 0;
+        border-radius: 16px;
+
+        box-shadow:
+            0
+            5px
+            15px
+            rgba(
+                111,
+                62,
+                12,
+                0.13
+            );
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-header {
+
+        margin-bottom: 13px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-header strong {
+
+        color: #183447;
+
+        font-size: 16px;
+        font-weight: 800;
+
+        letter-spacing: -0.01em;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar
+    .calendar-nav-button {
+
+        width: 34px;
+        height: 34px;
+
+        padding: 0;
+
+        background: #fff4e6;
+        color: #d9771d;
+
+        border: 0;
+        border-radius: 10px;
+
+        box-shadow: none;
+
+        font-size: 22px;
+        font-weight: 700;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-weekdays {
+
+        margin-bottom: 5px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-weekdays span {
+
+        padding: 3px 0;
+
+        color: #82909a;
+
+        font-size: 10px;
+        font-weight: 800;
+
+        letter-spacing: 0.03em;
+
+        text-transform: uppercase;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-grid {
+
+        gap: 5px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-day {
+
+        background: #f8fafb;
+        color: #263d4c;
+
+        border:
+            1px solid
+            #edf1f3;
+
+        border-radius: 10px;
+
+        box-shadow: none;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-day:active {
+
+        transform: scale(0.96);
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-day-number {
+
+        font-size: 12px;
+        font-weight: 700;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-booked {
+
+        background: #fff6e9;
+
+        border:
+            1px solid
+            #f2bd72;
+
+        color: #b96615;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-today:not(
+        .upcoming-calendar-selected
+    ) {
+
+        background: #ffffff;
+
+        border:
+            2px solid
+            #f5ab40;
+
+        color: #c56b15;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-selected {
+
+        background:
+            linear-gradient(
+                145deg,
+                #f5ab40 0%,
+                #eb872c 100%
+            );
+
+        color: #ffffff;
+
+        border-color: transparent;
+
+        box-shadow:
+            0
+            4px
+            10px
+            rgba(
+                201,
+                111,
+                25,
+                0.23
+            );
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-count {
+
+        top: 3px;
+        right: 3px;
+
+        min-width: 15px;
+        height: 15px;
+
+        padding: 0 4px;
+
+        background: #e8892e;
+        color: #ffffff;
+
+        border:
+            2px solid
+            #ffffff;
+
+        font-size: 8px;
+        font-weight: 800;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-selected
+    .upcoming-service-count {
+
+        background: #ffffff;
+        color: #d87519;
+
+        border-color: #ffffff;
+
+    }
+
 }
 
 /* ========================================
