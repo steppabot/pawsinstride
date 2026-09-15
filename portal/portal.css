@@ -2296,7 +2296,6 @@ section h3 {
     color: #111;
 }
 
-
 /* ========================================
    SERVICES TAB — MOBILE REDESIGN
 ======================================== */
@@ -2308,34 +2307,56 @@ section h3 {
 
         position: relative;
 
+        overflow: hidden;
+
+        margin-bottom: 24px;
+
         padding:
+            22px
             18px
-            14px
-            16px;
+            20px;
 
-        background:
-            linear-gradient(
-                145deg,
-                #f5ab40 0%,
-                #ef9332 55%,
-                #e77c28 100%
-            );
+        background: #ffffff;
 
-        border: 0;
-        border-radius: 20px;
+        border:
+            1px solid
+            #d6e4eb;
+
+        border-radius: 18px;
 
         box-shadow:
             0
-            8px
-            22px
+            7px
+            18px
             rgba(
-                145,
-                78,
-                16,
-                0.14
+                24,
+                52,
+                71,
+                0.07
             );
 
-        overflow: hidden;
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-services-section::before {
+
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 5px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
 
     }
 
@@ -2344,9 +2365,9 @@ section h3 {
     .upcoming-services-header {
 
         padding:
-            1px
             4px
-            14px;
+            2px
+            16px;
 
     }
 
@@ -2354,11 +2375,11 @@ section h3 {
     body.mobile-app-screen-services
     .upcoming-services-header h3 {
 
-        margin: 0 0 4px;
+        margin: 0 0 5px;
 
-        color: #ffffff;
+        color: #245b78;
 
-        font-size: 21px;
+        font-size: 22px;
         font-weight: 800;
 
         letter-spacing: -0.025em;
@@ -2371,17 +2392,11 @@ section h3 {
 
         margin: 0;
 
-        color:
-            rgba(
-                255,
-                255,
-                255,
-                0.88
-            );
+        color: #6b7785;
 
         font-size: 13px;
         font-weight: 500;
-        line-height: 1.4;
+        line-height: 1.45;
 
     }
 
@@ -2396,21 +2411,15 @@ section h3 {
             12px
             13px;
 
-        background: #ffffff;
+        background: #f9fbfc;
 
-        border: 0;
+        border:
+            1px solid
+            #e2ebef;
+
         border-radius: 16px;
 
-        box-shadow:
-            0
-            5px
-            15px
-            rgba(
-                111,
-                62,
-                12,
-                0.13
-            );
+        box-shadow: none;
 
     }
 
@@ -2495,12 +2504,12 @@ section h3 {
     body.mobile-app-screen-services
     .upcoming-calendar-day {
 
-        background: #f8fafb;
+        background: #ffffff;
         color: #263d4c;
 
         border:
             1px solid
-            #edf1f3;
+            #e6ecef;
 
         border-radius: 10px;
 
