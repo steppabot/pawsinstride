@@ -3070,15 +3070,30 @@ section h3 {
     }
 
 
+    /* ========================================
+       PET ROW
+       ======================================== */
+
     body.mobile-app-screen-services
     .upcoming-service-pets {
 
-        margin-bottom: 4px;
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 16px;
+
+        min-height: 39px;
+
+        margin:
+            18px
+            0
+            0;
 
         padding:
-            11px
-            0
-            14px;
+            9px
+            1px;
 
         border-bottom:
             1px solid
@@ -3090,14 +3105,14 @@ section h3 {
     body.mobile-app-screen-services
     .upcoming-service-pets-label {
 
-        margin-bottom: 8px;
+        margin: 0;
 
         color: #82909a;
 
-        font-size: 10px;
-        font-weight: 800;
+        font-size: 11px;
+        font-weight: 700;
 
-        letter-spacing: 0.05em;
+        letter-spacing: 0.025em;
 
         text-transform: uppercase;
 
@@ -3107,7 +3122,13 @@ section h3 {
     body.mobile-app-screen-services
     .service-pet-chips {
 
+        display: flex;
+
+        justify-content: flex-end;
+
         gap: 6px;
+
+        margin-left: auto;
 
     }
 
@@ -3127,6 +3148,16 @@ section h3 {
 
         font-size: 12px;
         font-weight: 800;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .service-pet-chip-missing {
+
+        color: #6b7785;
+
+        font-weight: 700;
 
     }
 
