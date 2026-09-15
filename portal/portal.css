@@ -821,26 +821,24 @@ select.booking-field-error {
 .booking-time-help {
 
     margin:
-        4px
-        0
+        6px
+        2px
         18px;
 
     padding:
-        10px
-        12px;
+        0;
 
     background:
-        #f4f9fc;
+        transparent;
 
     color:
-        #567487;
+        #6b7785;
 
     border:
-        1px solid
-        #d7e7f0;
+        0;
 
     border-radius:
-        10px;
+        0;
 
     font-size:
         12px;
@@ -850,6 +848,53 @@ select.booking-field-error {
 
     line-height:
         1.45;
+
+}
+
+
+/* ========================================
+   MULTI-TIME HELPER — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .booking-section
+    .booking-time-help {
+
+        margin:
+            6px
+            2px
+            20px;
+
+        padding:
+            0;
+
+        background:
+            transparent;
+
+        color:
+            #6b7785;
+
+        border:
+            0;
+
+        border-radius:
+            0;
+
+        box-shadow:
+            none;
+
+        font-size:
+            11px;
+
+        font-weight:
+            600;
+
+        line-height:
+            1.45;
+
+    }
 
 }
 
