@@ -2307,33 +2307,18 @@ section h3 {
 
         position: relative;
 
-        overflow: hidden;
+        overflow: visible;
 
         margin-bottom: 24px;
 
-        padding:
-            22px
-            18px
-            20px;
+        padding: 0;
 
-        background: #ffffff;
+        background: transparent;
 
-        border:
-            1px solid
-            #d6e4eb;
+        border: 0;
+        border-radius: 0;
 
-        border-radius: 18px;
-
-        box-shadow:
-            0
-            7px
-            18px
-            rgba(
-                24,
-                52,
-                71,
-                0.07
-            );
+        box-shadow: none;
 
     }
 
@@ -2341,22 +2326,7 @@ section h3 {
     body.mobile-app-screen-services
     .upcoming-services-section::before {
 
-        content: "";
-
-        position: absolute;
-
-        top: 0;
-        left: 0;
-        right: 0;
-
-        height: 5px;
-
-        background:
-            linear-gradient(
-                90deg,
-                #f5ab40 0%,
-                #ef602c 100%
-            );
+        display: none;
 
     }
 
@@ -2365,9 +2335,9 @@ section h3 {
     .upcoming-services-header {
 
         padding:
-            4px
+            0
             2px
-            16px;
+            14px;
 
     }
 
@@ -2377,7 +2347,7 @@ section h3 {
 
         margin: 0 0 5px;
 
-        color: #245b78;
+        color: #183447;
 
         font-size: 22px;
         font-weight: 800;
@@ -2404,22 +2374,58 @@ section h3 {
     body.mobile-app-screen-services
     .upcoming-calendar {
 
+        position: relative;
+
+        overflow: hidden;
+
         margin: 0;
 
         padding:
+            18px
             14px
-            12px
-            13px;
+            14px;
 
-        background: #f9fbfc;
+        background: #ffffff;
 
         border:
             1px solid
-            #e2ebef;
+            #d6e4eb;
 
-        border-radius: 16px;
+        border-radius: 18px;
 
-        box-shadow: none;
+        box-shadow:
+            0
+            7px
+            18px
+            rgba(
+                24,
+                52,
+                71,
+                0.07
+            );
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar::before {
+
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 5px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
 
     }
 
@@ -2454,10 +2460,13 @@ section h3 {
 
         padding: 0;
 
-        background: #fff4e6;
-        color: #d9771d;
+        background: #f4f8fb;
+        color: #1f7bc2;
 
-        border: 0;
+        border:
+            1px solid
+            #d9e7ef;
+
         border-radius: 10px;
 
         box-shadow: none;
@@ -2535,36 +2544,18 @@ section h3 {
     }
 
 
-   body.mobile-app-screen-services
-   .upcoming-calendar-booked {
-   
-       background: #eef7fd;
-   
-       border:
-           1px solid
-           #9ed2f2;
-   
-       color: #1f7bc2;
-   
-   }
+    body.mobile-app-screen-services
+    .upcoming-calendar-booked {
 
+        background: #eef7fd;
 
-   body.mobile-app-screen-services
-   #services-section::before {
-   
-       left: 18px;
-       right: 18px;
-   
-       height: 5px;
-   
-       background:
-           linear-gradient(
-               90deg,
-               #f5ab40 0%,
-               #ef602c 100%
-           );
-   
-   }
+        border:
+            1px solid
+            #9ed2f2;
+
+        color: #1f7bc2;
+
+    }
 
 
     body.mobile-app-screen-services
@@ -2576,9 +2567,9 @@ section h3 {
 
         border:
             2px solid
-            #f5ab40;
+            #1f9aeb;
 
-        color: #c56b15;
+        color: #1f7bc2;
 
     }
 
@@ -2622,7 +2613,7 @@ section h3 {
 
         padding: 0 4px;
 
-        background: #e8892e;
+        background: #1f9aeb;
         color: #ffffff;
 
         border:
