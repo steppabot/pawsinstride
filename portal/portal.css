@@ -515,8 +515,11 @@ section h3 {
    BOOKING FIELD VALIDATION
 ======================================== */
 
-.booking-section input.booking-field-error,
-.booking-section select.booking-field-error {
+.booking-section
+input.booking-field-error,
+
+.booking-section
+select.booking-field-error {
 
     border-color:
         #dc3545 !important;
@@ -531,6 +534,323 @@ section h3 {
             69,
             0.14
         ) !important;
+
+}
+
+
+/* ========================================
+   BOOKING VISIT TIME WINDOWS
+======================================== */
+
+.booking-time-windows {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        10px;
+
+    margin-bottom:
+        10px;
+
+}
+
+
+.booking-time-row {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    width:
+        100%;
+
+}
+
+
+.booking-section
+.booking-time-row
+.booking-time-select {
+
+    flex:
+        1 1 auto;
+
+    min-width:
+        0;
+
+    margin-bottom:
+        0;
+
+}
+
+
+/* ========================================
+   REMOVE VISIT TIME
+======================================== */
+
+.booking-section
+.remove-booking-time-button {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex:
+        0 0 44px;
+
+    width:
+        44px;
+
+    height:
+        44px;
+
+    padding:
+        0;
+
+    background:
+        #ffffff;
+
+    color:
+        #788794;
+
+    border:
+        1px solid
+        #c8dce8;
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        none;
+
+    font-size:
+        21px;
+
+    font-weight:
+        500;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+
+}
+
+
+.booking-section
+.remove-booking-time-button:hover {
+
+    background:
+        #fff5f4;
+
+    color:
+        #c0392b;
+
+    border-color:
+        #e6b9b4;
+
+}
+
+
+.booking-section
+.remove-booking-time-button:active {
+
+    transform:
+        scale(0.96);
+
+}
+
+
+/* ========================================
+   ADD ANOTHER VISIT TIME
+======================================== */
+
+.booking-section
+.add-booking-time-button {
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        7px;
+
+    width:
+        100%;
+
+    min-height:
+        44px;
+
+    margin:
+        0
+        0
+        8px;
+
+    padding:
+        10px
+        14px;
+
+    background:
+        #f4f9fc;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid
+        #c8dce8;
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        none;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.01em;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+
+}
+
+
+.booking-section
+.add-booking-time-button span {
+
+    font-size:
+        18px;
+
+    font-weight:
+        600;
+
+    line-height:
+        1;
+
+}
+
+
+.booking-section
+.add-booking-time-button:hover:not(
+    :disabled
+) {
+
+    background:
+        #eaf5fb;
+
+    color:
+        #176aa9;
+
+    border-color:
+        #9fc7dd;
+
+}
+
+
+.booking-section
+.add-booking-time-button:active:not(
+    :disabled
+) {
+
+    transform:
+        scale(0.985);
+
+}
+
+
+.booking-section
+.add-booking-time-button:disabled {
+
+    background:
+        #f3f5f6;
+
+    color:
+        #9ba7af;
+
+    border-color:
+        #dde4e8;
+
+    cursor:
+        not-allowed;
+
+    opacity:
+        0.72;
+
+}
+
+
+/* ========================================
+   MULTI-TIME HELPER
+======================================== */
+
+.booking-section
+.booking-time-help {
+
+    margin:
+        4px
+        0
+        18px;
+
+    padding:
+        10px
+        12px;
+
+    background:
+        #f4f9fc;
+
+    color:
+        #567487;
+
+    border:
+        1px solid
+        #d7e7f0;
+
+    border-radius:
+        10px;
+
+    font-size:
+        12px;
+
+    font-weight:
+        600;
+
+    line-height:
+        1.45;
+
 }
 
 
