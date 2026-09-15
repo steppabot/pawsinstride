@@ -46,6 +46,59 @@
     >
 
     <!-- ========================================
+         INSTALLED PWA — EDGE-TO-EDGE VIEWPORT
+    ======================================== -->
+
+    <script>
+
+        (() => {
+
+            const isInstalledPWA =
+                window.matchMedia(
+                    "(display-mode: standalone)"
+                ).matches ||
+                window.navigator.standalone === true;
+
+            if (!isInstalledPWA) {
+                return;
+            }
+
+            const viewport =
+                document.querySelector(
+                    'meta[name="viewport"]'
+                );
+
+            if (!viewport) {
+                return;
+            }
+
+            const currentContent =
+                viewport.getAttribute("content") || "";
+
+            const viewportSettings =
+                currentContent
+                    .split(",")
+                    .map(setting => setting.trim())
+                    .filter(
+                        setting =>
+                            setting &&
+                            !/^viewport-fit\s*=/i.test(setting)
+                    );
+
+            viewportSettings.push(
+                "viewport-fit=cover"
+            );
+
+            viewport.setAttribute(
+                "content",
+                viewportSettings.join(", ")
+            );
+
+        })();
+
+    </script>
+
+    <!-- ========================================
          PWA / HOME SCREEN APP
     ======================================== -->
     
