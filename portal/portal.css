@@ -1906,8 +1906,8 @@ section h3 {
 .pet-detail-block {
     min-width: 0;
     padding: 13px 14px;
-    background: #f8fbfd;
-    border: 1px solid #e2ebf0;
+    background: #ffffff;
+    border: 1px solid #dbe7ed;
     border-radius: 12px;
 }
 
@@ -1927,7 +1927,6 @@ section h3 {
     font-size: 13px;
     line-height: 1.45;
 }
-
 /* ========================================
    PET PROFILE DETAILS — MOBILE
 ======================================== */
@@ -5428,33 +5427,88 @@ body.client-report-lightbox-open {
         letter-spacing: 0.01em;
     }
 
-    /* ========================================
-       PET PROFILE CARD
-    ======================================== */
+/* ========================================
+   PET PROFILE CARD
+======================================== */
 
-    body.mobile-app-screen-pets .pet-profile-card {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-        box-sizing: border-box;
-        margin-top: 0;
-        padding: 22px 16px 18px;
-        background: #ffffff;
-        border: 1px solid #d6e4eb;
-        border-radius: 18px;
-        box-shadow: 0 7px 18px rgba(24,52,71,0.07);
-    }
+body.mobile-app-screen-pets
+.pet-profile-card {
 
-    body.mobile-app-screen-pets .pet-profile-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg,#f5ab40 0%,#ef602c 100%);
-    }
+    position:
+        relative;
 
+    overflow:
+        hidden;
+
+    width:
+        100%;
+
+    box-sizing:
+        border-box;
+
+    margin:
+        0
+        0
+        16px;
+
+    padding:
+        22px
+        16px
+        18px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        18px;
+
+    box-shadow:
+        0
+        7px
+        18px
+        rgba(
+            24,
+            52,
+            71,
+            0.07
+        );
+
+}
+
+
+body.mobile-app-screen-pets
+.pet-profile-card::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    height:
+        5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #f5ab40 0%,
+            #ef602c 100%
+        );
+
+}
     /* ========================================
        PET PROFILE LAYOUT
     ======================================== */
