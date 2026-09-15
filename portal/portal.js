@@ -8544,10 +8544,28 @@ async function refreshPreferredTimeWindowAvailability() {
 
 async function populatePreferredTimeWindows() {
 
+
     const wrapper =
         document.getElementById(
             "time-window-wrapper"
         );
+
+
+    const container =
+        document.getElementById(
+            "booking-time-windows"
+        );
+
+
+    if (
+        !wrapper ||
+        !container ||
+        !bookingTime
+    ) {
+
+        return;
+
+    }
 
 
     wrapper.style.display =
@@ -8560,25 +8578,118 @@ async function populatePreferredTimeWindows() {
         "Preferred Time Window";
 
 
-    bookingTime.innerHTML =
-        `
-            <option value="">
-                Select a time window
-            </option>
-        `;
+    // ========================================
+    // PRESERVE CURRENT TIME SELECTIONS
+    // ========================================
+    //
+    // This is useful when the client changes
+    // the service duration after already
+    // choosing one or more visit times.
+    //
+    // If the primary time is blank, this is
+    // treated as a fresh service selection.
+    // ========================================
+
+    const preservedTimeWindows =
+        bookingTime.value
+            ? getSelectedBookingTimeWindows()
+            : [];
+
+
+    // ========================================
+    // RESET EXTRA TIME ROWS
+    // ========================================
+
+    container
+        .querySelectorAll(
+            ".booking-time-row-additional"
+        )
+        .forEach(
+            row => {
+
+                row.remove();
+
+            }
+        );
+
+
+    // ========================================
+    // POPULATE PRIMARY TIME SELECT
+    // ========================================
+
+    populateBookingTimeSelect(
+        bookingTime,
+        preservedTimeWindows[0] || ""
+    );
+
+
+    bookingTime.dataset.previousValue =
+        bookingTime.value || "";
+
+
+    // ========================================
+    // RESTORE ADDITIONAL TIME SELECTS
+    // ========================================
+
+    preservedTimeWindows
+        .slice(1)
+        .forEach(
+            timeWindow => {
+
+                createAdditionalBookingTimeRow(
+                    timeWindow
+                );
+
+            }
+        );
 
 
     selectedDateCapacityConflicts.clear();
 
 
     lastSelectedTimeWindow =
-        "";
+        bookingTime.value || "";
 
 
     clearTimeWindowConflictError();
 
-
     clearTimeWindowCapacityHelp();
+
+
+    syncBookingTimeWindowControls();
+
+
+    renderSelectedDates();
+
+
+    await refreshPreferredTimeWindowAvailability();
+
+}
+
+
+// ========================================
+// POPULATE ONE BOOKING TIME SELECT
+// ========================================
+
+function populateBookingTimeSelect(
+    select,
+    selectedValue = ""
+) {
+
+
+    if (!select) {
+
+        return;
+
+    }
+
+
+    select.innerHTML =
+        `
+            <option value="">
+                Select a time window
+            </option>
+        `;
 
 
     const serviceType =
@@ -8598,6 +8709,7 @@ async function populatePreferredTimeWindows() {
 
     TIME_WINDOWS.forEach(
         window => {
+
 
             const option =
                 document.createElement(
@@ -8626,7 +8738,7 @@ async function populatePreferredTimeWindows() {
                 );
 
 
-            bookingTime.appendChild(
+            select.appendChild(
                 option
             );
 
@@ -8634,7 +8746,569 @@ async function populatePreferredTimeWindows() {
     );
 
 
+    if (
+        selectedValue &&
+        TIME_WINDOWS.some(
+            window =>
+                window.value ===
+                selectedValue
+        )
+    ) {
+
+        select.value =
+            selectedValue;
+
+    }
+
+}
+
+
+// ========================================
+// GET ALL BOOKING TIME SELECTS
+// ========================================
+
+function getBookingTimeWindowSelects() {
+
+
+    const container =
+        document.getElementById(
+            "booking-time-windows"
+        );
+
+
+    if (!container) {
+
+        return [];
+
+    }
+
+
+    return Array.from(
+        container.querySelectorAll(
+            ".booking-time-select"
+        )
+    );
+
+}
+
+
+// ========================================
+// GET SELECTED BOOKING TIME WINDOWS
+// ========================================
+
+function getSelectedBookingTimeWindows() {
+
+
+    return [
+        ...new Set(
+            getBookingTimeWindowSelects()
+                .map(
+                    select =>
+                        select.value
+                )
+                .filter(Boolean)
+        )
+    ];
+
+}
+
+
+// ========================================
+// CREATE ADDITIONAL TIME ROW
+// ========================================
+
+function createAdditionalBookingTimeRow(
+    selectedValue = ""
+) {
+
+
+    const container =
+        document.getElementById(
+            "booking-time-windows"
+        );
+
+
+    if (!container) {
+
+        return null;
+
+    }
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "booking-time-row booking-time-row-additional";
+
+
+    row.setAttribute(
+        "data-booking-time-row",
+        ""
+    );
+
+
+    const select =
+        document.createElement(
+            "select"
+        );
+
+
+    select.className =
+        "booking-time-select booking-time-select-additional";
+
+
+    populateBookingTimeSelect(
+        select,
+        selectedValue
+    );
+
+
+    select.dataset.previousValue =
+        select.value || "";
+
+
+    const removeButton =
+        document.createElement(
+            "button"
+        );
+
+
+    removeButton.type =
+        "button";
+
+
+    removeButton.className =
+        "remove-booking-time-button";
+
+
+    removeButton.setAttribute(
+        "aria-label",
+        "Remove visit time"
+    );
+
+
+    removeButton.textContent =
+        "×";
+
+
+    row.appendChild(
+        select
+    );
+
+
+    row.appendChild(
+        removeButton
+    );
+
+
+    container.appendChild(
+        row
+    );
+
+
+    syncBookingTimeWindowControls();
+
+
+    return select;
+
+}
+
+
+// ========================================
+// REBUILD SELECTED DATE ARRAY
+// ========================================
+
+function rebuildSelectedDatesFromVisits() {
+
+
+    selectedDates =
+        [
+            ...new Set(
+                selectedVisits.map(
+                    visit =>
+                        visit.date
+                )
+            )
+        ].sort();
+
+}
+
+
+// ========================================
+// SORT SELECTED VISITS
+// ========================================
+
+function sortSelectedBookingVisits() {
+
+
+    selectedVisits.sort(
+        (
+            firstVisit,
+            secondVisit
+        ) => {
+
+
+            if (
+                firstVisit.date !==
+                secondVisit.date
+            ) {
+
+                return firstVisit.date.localeCompare(
+                    secondVisit.date
+                );
+
+            }
+
+
+            return firstVisit.timeWindow.localeCompare(
+                secondVisit.timeWindow
+            );
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SYNC MULTI-TIME CONTROLS
+// ========================================
+
+function syncBookingTimeWindowControls() {
+
+
+    const addButton =
+        document.getElementById(
+            "add-booking-time-button"
+        );
+
+
+    const help =
+        document.getElementById(
+            "booking-time-help"
+        );
+
+
+    const serviceType =
+        serviceTypeSelect?.value;
+
+
+    const supportsMultipleTimes =
+        serviceType ===
+            "Dog Walking" ||
+        serviceType ===
+            "Drop-In Visit";
+
+
+    if (!supportsMultipleTimes) {
+
+
+        if (addButton) {
+
+            addButton.style.display =
+                "none";
+
+        }
+
+
+        if (help) {
+
+            help.style.display =
+                "none";
+
+        }
+
+
+        return;
+
+    }
+
+
+    const selects =
+        getBookingTimeWindowSelects();
+
+
+    const selectedTimeWindows =
+        getSelectedBookingTimeWindows();
+
+
+    // ========================================
+    // DISABLE DUPLICATE TIME WINDOWS
+    // ========================================
+
+    selects.forEach(
+        select => {
+
+
+            const ownValue =
+                select.value;
+
+
+            Array.from(
+                select.options
+            )
+                .forEach(
+                    option => {
+
+
+                        if (!option.value) {
+
+                            option.disabled =
+                                false;
+
+                            return;
+
+                        }
+
+
+                        option.disabled =
+                            option.value !==
+                                ownValue &&
+                            selectedTimeWindows.includes(
+                                option.value
+                            );
+
+                    }
+                );
+
+        }
+    );
+
+
+    // ========================================
+    // ADD ANOTHER VISIT BUTTON
+    // ========================================
+
+    if (addButton) {
+
+
+        addButton.style.display =
+            "inline-flex";
+
+
+        addButton.disabled =
+            !bookingTime?.value ||
+            selects.length >=
+                TIME_WINDOWS.length;
+
+    }
+
+
+    // ========================================
+    // MULTI-TIME HELPER TEXT
+    // ========================================
+
+    if (help) {
+
+
+        help.style.display =
+            selectedTimeWindows.length >
+                1
+                ? "block"
+                : "none";
+
+    }
+
+}
+
+
+// ========================================
+// HANDLE TIME WINDOW CHANGE
+// ========================================
+
+async function handleBookingTimeWindowChange(
+    select
+) {
+
+
+    if (!select) {
+
+        return;
+
+    }
+
+
+    const previousValue =
+        select.dataset.previousValue ||
+        "";
+
+
+    const nextValue =
+        select.value ||
+        "";
+
+
+    // ========================================
+    // PRIMARY TIME WAS CLEARED
+    // ========================================
+
+    if (
+        select ===
+            bookingTime &&
+        !nextValue
+    ) {
+
+
+        selectedVisits =
+            [];
+
+
+        selectedDates =
+            [];
+
+
+        selectedDateCapacityConflicts.clear();
+
+
+        lastSelectedTimeWindow =
+            "";
+
+
+        document
+            .querySelectorAll(
+                ".booking-time-row-additional"
+            )
+            .forEach(
+                row => {
+
+                    row.remove();
+
+                }
+            );
+
+
+        select.dataset.previousValue =
+            "";
+
+
+        clearTimeWindowConflictError();
+
+        clearTimeWindowCapacityHelp();
+
+
+        syncBookingTimeWindowControls();
+
+        renderSelectedDates();
+
+        renderBookingCalendar();
+
+        updateBookingTotal();
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // KEEP CURRENT DATES
+    // ========================================
+    //
+    // If the client changes one of their visit
+    // times AFTER selecting dates, the dates
+    // remain selected and the new visit time is
+    // applied to those same dates.
+    // ========================================
+
+    const datesToKeep =
+        selectedDates.slice();
+
+
+    // ========================================
+    // REMOVE OLD TIME FROM SAVED VISITS
+    // ========================================
+
+    if (
+        previousValue &&
+        previousValue !==
+            nextValue
+    ) {
+
+
+        selectedVisits =
+            selectedVisits.filter(
+                visit =>
+                    visit.timeWindow !==
+                    previousValue
+            );
+
+    }
+
+
+    // ========================================
+    // APPLY NEW TIME TO EXISTING DATES
+    // ========================================
+
+    if (nextValue) {
+
+
+        datesToKeep.forEach(
+            date => {
+
+
+                const alreadyExists =
+                    selectedVisits.some(
+                        visit =>
+                            visit.date ===
+                                date &&
+                            visit.timeWindow ===
+                                nextValue
+                    );
+
+
+                if (!alreadyExists) {
+
+
+                    selectedVisits.push({
+                        date:
+                            date,
+
+                        timeWindow:
+                            nextValue
+                    });
+
+                }
+
+            }
+        );
+
+    }
+
+
+    select.dataset.previousValue =
+        nextValue;
+
+
+    sortSelectedBookingVisits();
+
+    rebuildSelectedDatesFromVisits();
+
+
+    selectedDateCapacityConflicts.clear();
+
+
+    lastSelectedTimeWindow =
+        bookingTime?.value ||
+        nextValue ||
+        "";
+
+
+    clearTimeWindowConflictError();
+
+    clearTimeWindowCapacityHelp();
+
+
+    syncBookingTimeWindowControls();
+
     renderSelectedDates();
+
+    renderBookingCalendar();
+
+    updateBookingTotal();
 
 
     await refreshPreferredTimeWindowAvailability();
@@ -8643,46 +9317,58 @@ async function populatePreferredTimeWindows() {
 
 
 // ========================================
-// UPDATE SELECTED VISITS WHEN TIME CHANGES
-// ========================================
-//
-// Changing the dropdown does NOT modify any
-// visits that are already selected.
-//
-// It only changes the active time window used
-// when the customer clicks another calendar
-// date.
-//
-// The calendar must redraw so selected dates
-// are highlighted for the currently active
-// time window.
+// TIME WINDOW SELECT CHANGE
 // ========================================
 
-bookingTime
+document
+    .getElementById(
+        "booking-time-windows"
+    )
     ?.addEventListener(
         "change",
+        event => {
+
+
+            const select =
+                event.target.closest(
+                    ".booking-time-select"
+                );
+
+
+            if (!select) {
+
+                return;
+
+            }
+
+
+            handleBookingTimeWindowChange(
+                select
+            );
+
+        }
+    );
+
+
+// ========================================
+// ADD ANOTHER VISIT TIME
+// ========================================
+
+document
+    .getElementById(
+        "add-booking-time-button"
+    )
+    ?.addEventListener(
+        "click",
         () => {
 
-            // ========================================
-            // CLIENT SELECTED A TIME WINDOW
-            // ========================================
 
             if (
-                bookingTime.value
+                !bookingTime?.value
             ) {
 
-                lastSelectedTimeWindow =
-                    bookingTime.value;
 
-
-                clearTimeWindowConflictError();
-
-
-                renderSelectedDates();
-
-                renderBookingCalendar();
-
-                updateBookingTotal();
+                bookingTime?.focus();
 
 
                 return;
@@ -8690,16 +9376,88 @@ bookingTime
             }
 
 
-            // ========================================
-            // CLIENT CLEARED TIME WINDOW
-            // ========================================
+            const select =
+                createAdditionalBookingTimeRow();
 
-            lastSelectedTimeWindow =
+
+            syncBookingTimeWindowControls();
+
+
+            select?.focus();
+
+        }
+    );
+
+
+// ========================================
+// REMOVE ADDITIONAL VISIT TIME
+// ========================================
+
+document
+    .getElementById(
+        "booking-time-windows"
+    )
+    ?.addEventListener(
+        "click",
+        event => {
+
+
+            const removeButton =
+                event.target.closest(
+                    ".remove-booking-time-button"
+                );
+
+
+            if (!removeButton) {
+
+                return;
+
+            }
+
+
+            const row =
+                removeButton.closest(
+                    ".booking-time-row-additional"
+                );
+
+
+            const select =
+                row?.querySelector(
+                    ".booking-time-select"
+                );
+
+
+            const removedTimeWindow =
+                select?.value ||
                 "";
 
 
-            clearTimeWindowConflictError();
+            if (removedTimeWindow) {
 
+
+                selectedVisits =
+                    selectedVisits.filter(
+                        visit =>
+                            visit.timeWindow !==
+                            removedTimeWindow
+                    );
+
+
+                selectedDateCapacityConflicts.clear();
+
+
+                rebuildSelectedDatesFromVisits();
+
+            }
+
+
+            row?.remove();
+
+
+            sortSelectedBookingVisits();
+
+
+            syncBookingTimeWindowControls();
 
             renderSelectedDates();
 
@@ -8707,9 +9465,11 @@ bookingTime
 
             updateBookingTotal();
 
+
+            refreshPreferredTimeWindowAvailability();
+
         }
     );
-
 
 // ========================================
 // REFRESH CAPACITY WHEN DATES CHANGE
