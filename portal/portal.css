@@ -2885,7 +2885,6 @@ section h3 {
 
 }
 
-
 /* ========================================
    UPCOMING SERVICE DETAILS — MOBILE
 ======================================== */
@@ -3074,7 +3073,7 @@ section h3 {
     body.mobile-app-screen-services
     .upcoming-service-pets {
 
-        margin-bottom: 9px;
+        margin-bottom: 4px;
 
         padding:
             11px
@@ -3132,20 +3131,44 @@ section h3 {
     }
 
 
+    /* ========================================
+       SERVICE DATA ROWS
+       ======================================== */
+
     body.mobile-app-screen-services
     .upcoming-service-row {
 
-        align-items: flex-start;
+        display: flex;
 
-        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
 
-        margin-top: 9px;
+        gap: 16px;
 
-        color: #263d4c;
+        min-height: 39px;
+
+        margin: 0;
+
+        padding:
+            9px
+            1px;
+
+        color: #183447;
 
         font-size: 13px;
 
-        line-height: 1.4;
+        line-height: 1.35;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-row
+    + .upcoming-service-row {
+
+        border-top:
+            1px solid
+            #edf1f3;
 
     }
 
@@ -3153,7 +3176,36 @@ section h3 {
     body.mobile-app-screen-services
     .upcoming-service-row span {
 
-        color: #6b7785;
+        flex:
+            0
+            0
+            auto;
+
+        color: #82909a;
+
+        font-size: 11px;
+        font-weight: 700;
+
+        letter-spacing: 0.025em;
+
+        text-transform: uppercase;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-row strong {
+
+        min-width: 0;
+
+        color: #183447;
+
+        font-size: 13px;
+        font-weight: 800;
+
+        line-height: 1.35;
+
+        text-align: right;
 
     }
 
@@ -3164,45 +3216,75 @@ section h3 {
 ======================================== */
 
 .upcoming-service-actions {
-    margin-top: 14px;
+
+    margin-top: 16px;
+
     padding-top: 14px;
-    border-top: 1px solid #eee;
+
+    border-top:
+        1px solid
+        #e8eef2;
+
 }
 
 
 .client-cancel-service-button {
+
     width: 100%;
 
-    padding: 11px 14px;
+    min-height: 44px;
 
-    background: #ffffff;
-    color: #b42318;
+    padding:
+        10px
+        14px;
 
-    border: 1px solid #d92d20;
-    border-radius: 9px;
+    background:
+        #fff7f6;
 
-    font-size: 13px;
-    font-weight: 700;
+    color:
+        #b42318;
+
+    border:
+        1px solid
+        #efb5af;
+
+    border-radius:
+        11px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing:
+        0.01em;
 
     cursor: pointer;
 
     transition:
         background 0.2s ease,
         color 0.2s ease,
-        border-color 0.2s ease;
+        border-color 0.2s ease,
+        transform 0.2s ease;
+
 }
 
 
 .client-cancel-service-button:hover {
-    background: #fff1f0;
-    border-color: #b42318;
+
+    background:
+        #fff0ee;
+
+    border-color:
+        #d92d20;
+
 }
 
 
 .client-cancel-service-button:active {
-    transform: scale(0.99);
-}
 
+    transform:
+        scale(0.985);
+
+}
 
 /* ========================================
    LOCK PAGE WHILE MODAL IS OPEN
@@ -5571,72 +5653,149 @@ body.client-modal-open {
 ======================================== */
 
 .client-visit-report-actions {
+
     display: flex;
-    justify-content: flex-end;
-    margin-top: 12px;
+
+    justify-content: stretch;
+
+    margin-top: 14px;
+
 }
 
 
 .client-view-visit-report-button {
-    width: auto;
-    padding: 10px 14px;
 
-    background: #18843d;
-    color: #fff;
+    width: 100%;
 
-    border: none;
-    border-radius: 8px;
+    min-height: 44px;
+
+    padding:
+        11px
+        14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #22a447 0%,
+            #18843d 100%
+        );
+
+    color: #ffffff;
+
+    border: 0;
+
+    border-radius: 11px;
+
+    box-shadow:
+        0
+        6px
+        14px
+        rgba(
+            24,
+            132,
+            61,
+            0.16
+        );
 
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
+
+    letter-spacing: 0.01em;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+
 }
 
 
 .client-view-visit-report-button:hover {
-    opacity: 0.9;
+
+    box-shadow:
+        0
+        8px
+        18px
+        rgba(
+            24,
+            132,
+            61,
+            0.20
+        );
+
+}
+
+
+.client-view-visit-report-button:active {
+
+    transform:
+        scale(0.985);
+
 }
 
 
 .client-visit-report-mount:empty {
+
     display: none;
+
 }
 
 
 .client-visit-report-mount {
+
     margin-top: 14px;
+
 }
 
 
 .client-visit-report {
+
     overflow: hidden;
 
-    background: #fff;
+    background: #ffffff;
 
-    border: 1px solid #cce8d4;
+    border:
+        1px solid
+        #cce8d4;
+
     border-radius: 14px;
 
     box-shadow:
-        0 8px 24px
-        rgba(24, 70, 95, 0.06);
+        0
+        8px
+        24px
+        rgba(
+            24,
+            70,
+            95,
+            0.06
+        );
+
 }
 
 
 .client-visit-report-header {
+
     padding: 18px;
 
     background:
         linear-gradient(
             135deg,
-            #f4fbf6,
-            #f7fcff
+            #f4fbf6 0%,
+            #edf8f1 100%
         );
 
     border-bottom:
-        1px solid #cce8d4;
+        1px solid
+        #cce8d4;
+
 }
 
 
 .client-visit-report-eyebrow {
+
     display: block;
 
     margin-bottom: 5px;
@@ -5649,56 +5808,72 @@ body.client-modal-open {
     letter-spacing: 0.08em;
 
     text-transform: uppercase;
+
 }
 
 
 .client-visit-report-header h5 {
-    margin: 0 0 4px;
 
-    color: #111;
+    margin:
+        0
+        0
+        4px;
 
-    font-size: 19px;
+    color: #183447;
+
+    font-size: 18px;
+    font-weight: 800;
+
 }
 
 
 .client-visit-report-header p {
+
     margin: 0;
 
-    color: #666;
+    color: #667784;
 
     font-size: 12px;
+
     line-height: 1.45;
+
 }
 
 
 .client-visit-report-section {
+
     padding: 18px;
 
     border-top:
-        1px solid #eee;
+        1px solid
+        #e7efea;
+
 }
 
 
 .client-visit-report-section:first-of-type {
-    border-top: none;
+
+    border-top: 0;
+
 }
 
 
 .client-visit-report-label {
+
     display: block;
 
     margin-bottom: 11px;
 
-    color: #555;
+    color: #667784;
 
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
 
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
 
     text-transform: uppercase;
-}
 
+}
 
 /* ========================================
    CLIENT VISIT REPORT CARE
