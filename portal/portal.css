@@ -877,62 +877,394 @@ select.booking-field-error {
 }
 
 /* ========================================
+   REQUEST SERVICE FORM CONTROLS — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .booking-section
+    #booking-form
+    > label {
+
+        margin:
+            0
+            0
+            7px;
+
+        color:
+            #183447;
+
+        font-size:
+            13px;
+
+        font-weight:
+            800;
+
+        line-height:
+            1.3;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-section
+    #booking-form
+    > select {
+
+        min-height:
+            48px;
+
+        margin-bottom:
+            18px;
+
+        padding:
+            11px
+            13px;
+
+        background:
+            #ffffff;
+
+        color:
+            #263d4c;
+
+        border:
+            1px solid
+            #c8dce8;
+
+        border-radius:
+            11px;
+
+        box-shadow:
+            none;
+
+        font-size:
+            14px;
+
+        font-weight:
+            600;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-section
+    #booking-form
+    > select:focus {
+
+        outline:
+            none;
+
+        border-color:
+            #1f9aeb;
+
+        box-shadow:
+            0
+            0
+            0
+            3px
+            rgba(
+                31,
+                154,
+                235,
+                0.10
+            );
+
+    }
+
+}
+
+
+/* ========================================
    ADDITIONAL PETS
 ======================================== */
 
 .additional-pets-wrapper {
-    margin-bottom: 18px;
+
+    margin-bottom:
+        18px;
+
 }
+
 
 .additional-pets-list {
-    overflow: hidden;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
+
+    overflow:
+        hidden;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #ddd;
+
+    border-radius:
+        10px;
+
 }
+
 
 .additional-pet-option {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin: 0 !important;
-    padding: 13px 14px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
+
+    display:
+        flex !important;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        14px;
+
+    margin:
+        0 !important;
+
+    padding:
+        13px
+        14px;
+
+    border-bottom:
+        1px solid
+        #eee;
+
+    cursor:
+        pointer;
+
 }
+
 
 .additional-pet-option:last-child {
-    border-bottom: none;
+
+    border-bottom:
+        none;
+
 }
+
 
 .additional-pet-option:hover {
-    background: #fafafa;
+
+    background:
+        #fafafa;
+
 }
+
 
 .additional-pet-main {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    font-weight:
+        600;
+
 }
+
 
 .additional-pet-main input {
-    width: 18px !important;
-    height: 18px;
-    margin: 0 !important;
+
+    width:
+        18px !important;
+
+    height:
+        18px;
+
+    margin:
+        0 !important;
+
 }
+
 
 .additional-pet-fee {
-    color: #666;
-    font-size: 13px;
-    font-weight: 600;
+
+    color:
+        #666;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
 }
 
+
 .additional-pets-help {
-    margin: 8px 2px 0;
-    color: #666;
-    font-size: 13px;
+
+    margin:
+        8px
+        2px
+        0;
+
+    color:
+        #666;
+
+    font-size:
+        13px;
+
+}
+
+
+/* ========================================
+   ADDITIONAL PETS — MOBILE REDESIGN
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .additional-pets-wrapper {
+
+        margin-bottom:
+            20px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .additional-pets-wrapper
+    > label {
+
+        margin:
+            0
+            0
+            7px;
+
+        color:
+            #183447;
+
+        font-size:
+            13px;
+
+        font-weight:
+            800;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .additional-pets-list {
+
+        background:
+            #f4f9fc;
+
+        border:
+            1px solid
+            #d3e4ed;
+
+        border-radius:
+            11px;
+
+        box-shadow:
+            none;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .additional-pet-option {
+
+        min-height:
+            48px;
+
+        padding:
+            11px
+            13px;
+
+        background:
+            transparent;
+
+        border-bottom:
+            1px solid
+            #dce9f0;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .additional-pet-option:hover {
+
+        background:
+            #edf6fb;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .additional-pet-main {
+
+        color:
+            #263d4c;
+
+        font-size:
+            14px;
+
+        font-weight:
+            700;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .additional-pet-main
+    input {
+
+        width:
+            20px !important;
+
+        height:
+            20px;
+
+        accent-color:
+            #1f9aeb;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .additional-pet-fee {
+
+        color:
+            #567487;
+
+        font-size:
+            11px;
+
+        font-weight:
+            800;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .additional-pets-help {
+
+        margin:
+            7px
+            2px
+            0;
+
+        color:
+            #6b7785;
+
+        font-size:
+            11px;
+
+        font-weight:
+            500;
+
+        line-height:
+            1.4;
+
+    }
+
 }
 
 /* ========================================
@@ -13917,7 +14249,8 @@ a:focus-visible {
 .booking-total {
 
     border-top:
-        1px solid var(--pis-border);
+        1px solid
+        var(--pis-border);
 
 }
 
@@ -13925,7 +14258,197 @@ a:focus-visible {
 .client-portal-page
 #booking-price {
 
-    color: var(--pis-blue);
+    color:
+        var(--pis-blue);
+
+}
+
+
+/* ========================================
+   REQUEST SERVICE TOTAL — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .booking-total {
+
+        display:
+            flex;
+
+        align-items:
+            flex-end;
+
+        justify-content:
+            space-between;
+
+        gap:
+            16px;
+
+        margin:
+            24px
+            0
+            8px;
+
+        padding:
+            18px
+            0
+            0;
+
+        border-top:
+            1px solid
+            #d6e4eb;
+
+    }
+
+
+    body.mobile-app-screen-services
+    #booking-count {
+
+        color:
+            #183447;
+
+        font-size:
+            17px;
+
+        font-weight:
+            800;
+
+        line-height:
+            1.2;
+
+    }
+
+
+    body.mobile-app-screen-services
+    #booking-price {
+
+        color:
+            #1f9aeb;
+
+        font-size:
+            24px;
+
+        font-weight:
+            800;
+
+        line-height:
+            1;
+
+        letter-spacing:
+            -0.025em;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-price-details {
+
+        margin:
+            0
+            0
+            18px;
+
+        color:
+            #6b7785;
+
+        font-size:
+            11px;
+
+        font-weight:
+            600;
+
+        line-height:
+            1.45;
+
+        text-align:
+            right;
+
+    }
+
+
+    /* ========================================
+       CONTINUE BUTTON
+    ======================================== */
+
+    body.mobile-app-screen-services
+    #booking-submit-button {
+
+        width:
+            100%;
+
+        min-height:
+            48px;
+
+        padding:
+            12px
+            18px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        color:
+            #ffffff;
+
+        border:
+            0;
+
+        border-radius:
+            11px !important;
+
+        box-shadow:
+            0
+            6px
+            16px
+            rgba(
+                239,
+                96,
+                44,
+                0.20
+            );
+
+        font-size:
+            14px;
+
+        font-weight:
+            800;
+
+        line-height:
+            1.2;
+
+        letter-spacing:
+            0.01em;
+
+    }
+
+
+    body.mobile-app-screen-services
+    #booking-submit-button:hover {
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        transform:
+            none;
+
+    }
+
+
+    body.mobile-app-screen-services
+    #booking-submit-button:active {
+
+        transform:
+            scale(0.985);
+
+    }
 
 }
 
@@ -14007,9 +14530,11 @@ a:focus-visible {
         var(--pis-app-bg-soft);
 
     border:
-        1px solid var(--pis-border);
+        1px solid
+        var(--pis-border);
 
-    border-radius: 14px;
+    border-radius:
+        14px;
 
 }
 
@@ -14025,12 +14550,14 @@ a:focus-visible {
         var(--pis-blue);
 
     background:
-        #fff;
+        #ffffff;
 
     border:
-        1px solid var(--pis-border);
+        1px solid
+        var(--pis-border);
 
-    border-radius: 50%;
+    border-radius:
+        50%;
 
 }
 
@@ -14039,7 +14566,7 @@ a:focus-visible {
 .calendar-nav-button:hover {
 
     color:
-        #fff;
+        #ffffff;
 
     background:
         var(--pis-blue);
@@ -14050,6 +14577,185 @@ a:focus-visible {
 }
 
 
+/* ========================================
+   REQUEST SERVICE CALENDAR — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .booking-calendar {
+
+        margin:
+            4px
+            0
+            18px;
+
+        padding:
+            16px
+            14px
+            14px;
+
+        background:
+            #f7fbfd;
+
+        border:
+            1px solid
+            #d8e7ef;
+
+        border-radius:
+            14px;
+
+        box-shadow:
+            none;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-calendar-header {
+
+        margin-bottom:
+            12px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-calendar-header
+    strong {
+
+        color:
+            #183447;
+
+        font-size:
+            16px;
+
+        font-weight:
+            800;
+
+        letter-spacing:
+            -0.01em;
+
+    }
+
+
+    /* ========================================
+       CALENDAR NAV BUTTONS
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-nav-button {
+
+        width:
+            34px;
+
+        height:
+            34px;
+
+        padding:
+            0;
+
+        background:
+            #ffffff;
+
+        color:
+            #1f7bc2;
+
+        border:
+            1px solid
+            #d2e3ec;
+
+        border-radius:
+            10px;
+
+        box-shadow:
+            none;
+
+        font-size:
+            21px;
+
+        font-weight:
+            700;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-nav-button:hover {
+
+        background:
+            #eef7fc;
+
+        color:
+            #176aa9;
+
+        border-color:
+            #a9cfe3;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-nav-button:active {
+
+        transform:
+            scale(0.95);
+
+    }
+
+
+    /* ========================================
+       CALENDAR WEEKDAYS
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-calendar-weekdays {
+
+        margin-bottom:
+            5px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-calendar-weekdays
+    span {
+
+        padding:
+            3px
+            0;
+
+        color:
+            #82909a;
+
+        font-size:
+            10px;
+
+        font-weight:
+            800;
+
+        letter-spacing:
+            0.03em;
+
+        text-transform:
+            uppercase;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-calendar-grid {
+
+        gap:
+            5px;
+
+    }
+
+}
 /* ========================================
    BOOKING CALENDAR DAYS
 ======================================== */
@@ -14113,6 +14819,152 @@ a:focus-visible {
 
 }
 
+
+/* ========================================
+   REQUEST SERVICE CALENDAR DAYS — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-day {
+
+        background:
+            #ffffff;
+
+        color:
+            #263d4c;
+
+        border:
+            1px solid
+            #e3ebef;
+
+        border-radius:
+            10px;
+
+        box-shadow:
+            none;
+
+        font-size:
+            12px;
+
+        font-weight:
+            700;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-day:hover:not(:disabled) {
+
+        background:
+            #eef7fd;
+
+        color:
+            #1f7bc2;
+
+        border-color:
+            #9ed2f2;
+
+    }
+
+
+    /* ========================================
+       SELECTED DATE
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-day-selected {
+
+        background:
+            linear-gradient(
+                145deg,
+                #f5ab40 0%,
+                #eb872c 100%
+            );
+
+        color:
+            #ffffff;
+
+        border-color:
+            transparent;
+
+        box-shadow:
+            0
+            4px
+            10px
+            rgba(
+                201,
+                111,
+                25,
+                0.23
+            );
+
+    }
+
+
+    /* ========================================
+       TODAY
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-day-today:not(
+        .calendar-day-selected
+    ) {
+
+        background:
+            #ffffff;
+
+        color:
+            #1f7bc2;
+
+        border:
+            2px solid
+            #1f9aeb;
+
+    }
+
+
+    /* ========================================
+       DISABLED / PAST DAYS
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-day:disabled {
+
+        background:
+            #f5f7f8;
+
+        color:
+            #bdc5ca;
+
+        border-color:
+            #edf1f3;
+
+        box-shadow:
+            none;
+
+        opacity:
+            1;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-calendar
+    .calendar-day:active:not(:disabled) {
+
+        transform:
+            scale(0.96);
+
+    }
+
+}
 
 /* ========================================
    UPCOMING CALENDAR
