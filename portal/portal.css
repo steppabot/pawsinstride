@@ -7400,71 +7400,232 @@ body.client-report-lightbox-open {
     }
 
 
-    /* HOUSEHOLD */
-
-    .household-section-header {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .household-edit-button {
-        width: 100%;
-    }
-
-    .household-profile-top {
-        align-items: center;
-    }
-
-    .client-profile-avatar {
-        width: 74px;
-        height: 74px;
-    }
-
-    .client-profile-initials {
-        font-size: 23px;
-    }
-
-    .household-profile-summary h4 {
-        font-size: 20px;
-    }
-
-    .household-profile-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .household-detail-card-full {
-        grid-column: auto;
-    }
-
-    .access-detail-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .access-detail-item:nth-child(2) {
-        border-top: 1px solid #e5e5e5;
-    }
-
-    .household-form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .household-form-field-full {
-        grid-column: auto;
-    }
-
-    .client-photo-editor {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .household-form-actions {
-        flex-direction: column-reverse;
-    }
-
-    .household-form-actions button {
-        width: 100%;
-    }
-
+   /* ========================================
+      HOUSEHOLD — MOBILE
+   ======================================== */
+   
+   .household-section-header {
+   
+       align-items: stretch;
+   
+       flex-direction: column;
+   
+   }
+   
+   
+   .household-edit-button {
+   
+       width: 100%;
+   
+   }
+   
+   
+   .household-profile-top {
+   
+       align-items: center;
+   
+   }
+   
+   
+   .client-profile-avatar {
+   
+       width: 74px;
+       height: 74px;
+   
+   }
+   
+   
+   .client-profile-initials {
+   
+       font-size: 23px;
+   
+   }
+   
+   
+   .household-profile-summary h4 {
+   
+       font-size: 20px;
+   
+   }
+   
+   
+   .household-profile-grid {
+   
+       grid-template-columns: 1fr;
+   
+   }
+   
+   
+   .household-detail-card-full {
+   
+       grid-column: auto;
+   
+   }
+   
+   
+   .access-detail-grid {
+   
+       grid-template-columns: 1fr;
+   
+   }
+   
+   
+   .access-detail-item:nth-child(2) {
+   
+       border-top:
+           1px solid
+           #e5e5e5;
+   
+   }
+   
+   
+   .household-form-grid {
+   
+       grid-template-columns: 1fr;
+   
+   }
+   
+   
+   .household-form-field-full {
+   
+       grid-column: auto;
+   
+   }
+   
+   
+   .client-photo-editor {
+   
+       flex-direction: column;
+   
+       text-align: center;
+   
+   }
+   
+   
+   /* ========================================
+      PROFILE FORM ACTIONS
+   ======================================== */
+   
+   .household-form-actions {
+   
+       display: flex;
+   
+       flex-direction: column;
+   
+       gap: 10px;
+   
+       margin-top: 18px;
+   
+   }
+   
+   
+   .household-form-actions button {
+   
+       width: 100%;
+   
+       min-height: 46px;
+   
+       padding:
+           11px
+           16px;
+   
+       border-radius: 11px;
+   
+       font-size: 13px;
+   
+       font-weight: 800;
+   
+       letter-spacing: 0.01em;
+   
+       white-space: nowrap;
+   
+   }
+   
+   
+   /* ========================================
+      SAVE PROFILE
+   ======================================== */
+   
+   .household-form-actions
+   .primary-button {
+   
+       background:
+           linear-gradient(
+               90deg,
+               #f5ab40 0%,
+               #ef602c 100%
+           );
+   
+       color: #ffffff;
+   
+       border: 0;
+   
+       border-radius: 11px;
+   
+       box-shadow:
+           0
+           5px
+           14px
+           rgba(
+               239,
+               96,
+               44,
+               0.18
+           );
+   
+   }
+   
+   
+   .household-form-actions
+   .primary-button:active {
+   
+       transform:
+           scale(0.985);
+   
+   }
+   
+   
+   /* ========================================
+      CANCEL PROFILE EDIT
+   ======================================== */
+   
+   .household-form-actions
+   .secondary-button {
+   
+       background: #ffffff;
+   
+       color: #1f7bc2;
+   
+       border:
+           1px solid
+           #c8dce8;
+   
+       border-radius: 11px;
+   
+       box-shadow: none;
+   
+   }
+   
+   
+   .household-form-actions
+   .secondary-button:hover {
+   
+       background: #f4f9fc;
+   
+       color: #176aa9;
+   
+       border-color: #9fc7dd;
+   
+   }
+   
+   
+   .household-form-actions
+   .secondary-button:active {
+   
+       transform:
+           scale(0.985);
+   
+   }
 
 /* ========================================
    PETS TAB — MOBILE REDESIGN
