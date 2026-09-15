@@ -20586,12 +20586,22 @@ body.booking-success-page {
 @media (max-width: 700px) {
 
     /* ========================================
-       SOFT BLUE HOME BACKGROUND
+       MAIN WEBSITE GRADIENT
        ======================================== */
 
     body.client-portal-page.mobile-app-screen-home {
 
-        background: #eaf4f8;
+        background-color: #2890df;
+
+        background-image:
+            linear-gradient(
+                135deg,
+                #47cee6 0%,
+                #2890df 100%
+            );
+
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
 
     }
 
@@ -20600,10 +20610,11 @@ body.booking-success-page {
        REMOVE OUTER HOME CARD
        ======================================== */
 
-    body.client-portal-page #mobile-home-dashboard {
+    body.client-portal-page
+    #mobile-home-dashboard {
 
-        padding: 0;
         margin: 0;
+        padding: 0;
 
         background: transparent;
 
@@ -20616,48 +20627,89 @@ body.booking-success-page {
 
 
     /* ========================================
-       GREETING DIRECTLY ON PAGE
+       GREETING
        ======================================== */
 
-    body.client-portal-page .mobile-home-greeting {
+    body.client-portal-page
+    .mobile-home-greeting {
 
-        margin: 8px 2px 22px;
+        margin:
+            10px
+            2px
+            24px;
 
     }
 
 
-    body.client-portal-page .mobile-home-greeting h2 {
+    body.client-portal-page
+    .mobile-home-greeting h2 {
 
-        color: #183447;
+        margin:
+            0
+            0
+            7px;
 
-        font-size: clamp(23px, 6vw, 28px);
-        line-height: 1.2;
+        color: #ffffff;
+
+        font-size:
+            clamp(
+                24px,
+                6vw,
+                29px
+            );
+
+        font-weight: 800;
+        line-height: 1.18;
 
         letter-spacing: -0.025em;
 
+        text-shadow:
+            0
+            2px
+            8px
+            rgba(
+                13,
+                72,
+                111,
+                0.20
+            );
+
     }
 
 
-    body.client-portal-page .mobile-home-greeting p {
+    body.client-portal-page
+    .mobile-home-greeting p {
 
-        margin-top: 8px;
+        margin: 0;
 
-        color: #536b7a;
+        color:
+            rgba(
+                255,
+                255,
+                255,
+                0.90
+            );
 
         font-size: 14px;
+        font-weight: 500;
         line-height: 1.5;
 
     }
 
 
     /* ========================================
-       SECTION HEADINGS WITHOUT OUTER CARDS
+       REMOVE HOME SECTION SHELLS
        ======================================== */
 
     body.client-portal-page
-    #mobile-home-dashboard > .mobile-home-section {
+    #mobile-home-dashboard
+    > .mobile-home-section {
 
-        margin: 0 0 26px;
+        margin:
+            0
+            0
+            26px;
+
         padding: 0;
 
         background: transparent;
@@ -20670,69 +20722,139 @@ body.booking-success-page {
     }
 
 
-    body.client-portal-page .mobile-home-section-heading {
+    /* ========================================
+       WHITE SECTION HEADINGS
+       ======================================== */
 
-        margin-bottom: 12px;
+    body.client-portal-page
+    .mobile-home-section-heading {
+
+        margin:
+            0
+            0
+            12px;
+
         gap: 12px;
 
     }
 
 
-    body.client-portal-page .mobile-home-section-heading h3 {
+    body.client-portal-page
+    .mobile-home-section-heading h3 {
 
-        color: #183447;
+        color: #ffffff;
 
-        font-size: 19px;
+        font-size: 20px;
         font-weight: 800;
+        line-height: 1.2;
 
         letter-spacing: -0.02em;
+
+        text-shadow:
+            0
+            2px
+            7px
+            rgba(
+                13,
+                72,
+                111,
+                0.18
+            );
 
     }
 
 
-    body.client-portal-page .mobile-home-section-link {
+    body.client-portal-page
+    .mobile-home-section-link {
 
-        color: #176aa6;
+        color: #ffffff;
 
         font-size: 13px;
-        font-weight: 700;
+        font-weight: 800;
+
+        text-shadow:
+            0
+            1px
+            5px
+            rgba(
+                13,
+                72,
+                111,
+                0.20
+            );
 
     }
 
 
     /* ========================================
-       NEXT VISIT — PRIMARY WHITE CARD
+       NEXT VISIT
        ======================================== */
 
     body.client-portal-page
-    #mobile-home-dashboard > .mobile-home-next-visit-card {
+    #mobile-home-dashboard
+    > .mobile-home-next-visit-card {
 
-        margin: 0 0 24px;
+        margin:
+            0
+            0
+            26px;
+
         padding: 20px;
 
         background: #ffffff;
 
-        border: 1px solid #d5e5ed;
+        border:
+            1px solid
+            rgba(
+                255,
+                255,
+                255,
+                0.65
+            );
+
         border-radius: 18px;
 
-        box-shadow: 0 6px 18px rgba(24, 52, 71, 0.06);
+        box-shadow:
+            0
+            10px
+            24px
+            rgba(
+                12,
+                72,
+                112,
+                0.16
+            );
 
     }
 
 
-    body.client-portal-page .mobile-home-card-eyebrow {
+    body.client-portal-page
+    .mobile-home-next-visit-card::before {
 
-        color: #176aa6;
+        height: 5px;
 
-        font-size: 11px;
-        font-weight: 800;
-
-        letter-spacing: 0.1em;
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40,
+                #ef602c
+            );
 
     }
 
 
-    body.client-portal-page .mobile-home-next-visit-pets {
+    body.client-portal-page
+    .mobile-home-card-eyebrow {
+
+        color: #1f7bc2;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-next-visit-pets {
+
+        color: #202a33;
 
         font-size: 25px;
         line-height: 1.2;
@@ -20741,66 +20863,75 @@ body.booking-success-page {
 
 
     /* ========================================
-       QUICK ACTIONS — BRAND COLOR SECTION
+       QUICK ACTIONS
        ======================================== */
 
     body.client-portal-page
-    #mobile-home-dashboard > .mobile-home-section:has(
+    #mobile-home-dashboard
+    > .mobile-home-section:has(
         .mobile-home-quick-actions
     ) {
 
-        padding: 20px;
+        margin-bottom: 28px;
+        padding: 0;
 
-        background: linear-gradient(
-            120deg,
-            #126cb2 0%,
-            #1685bd 60%,
-            #21a6bf 100%
-        );
+        background: transparent;
 
         border: 0;
-        border-radius: 18px;
+        border-radius: 0;
 
-        box-shadow: 0 8px 20px rgba(18, 108, 178, 0.14);
+        box-shadow: none;
 
     }
 
 
     body.client-portal-page
-    .mobile-home-section:has(.mobile-home-quick-actions)
-    .mobile-home-section-heading h3 {
-
-        color: #ffffff;
-
-    }
-
-
-    body.client-portal-page .mobile-home-quick-actions {
+    .mobile-home-quick-actions {
 
         gap: 10px;
 
     }
 
 
-    body.client-portal-page .mobile-home-quick-action {
+    body.client-portal-page
+    .mobile-home-quick-action {
 
         min-width: 0;
-        min-height: 62px;
+        min-height: 64px;
 
-        padding: 12px 10px;
+        padding:
+            12px
+            11px;
+
         gap: 8px;
 
         background: #ffffff;
         color: #183447;
 
-        border: 0;
-        border-radius: 14px;
+        border:
+            1px solid
+            rgba(
+                255,
+                255,
+                255,
+                0.70
+            );
 
-        box-shadow: none;
+        border-radius: 16px;
+
+        box-shadow:
+            0
+            8px
+            18px
+            rgba(
+                12,
+                72,
+                112,
+                0.15
+            );
 
         font-size: 13px;
         font-weight: 800;
-
         line-height: 1.3;
 
     }
@@ -20812,15 +20943,19 @@ body.booking-success-page {
         background: #f5ab40;
         color: #183447;
 
-        box-shadow: none;
+        border-color: #f5ab40;
 
     }
 
 
-    body.client-portal-page .mobile-home-quick-action-icon {
+    body.client-portal-page
+    .mobile-home-quick-action-icon,
+    body.client-portal-page
+    .mobile-home-quick-action-primary
+    .mobile-home-quick-action-icon {
 
-        width: 26px;
-        height: 26px;
+        width: 27px;
+        height: 27px;
 
         padding: 0;
 
@@ -20833,71 +20968,143 @@ body.booking-success-page {
     }
 
 
-    body.client-portal-page
-    .mobile-home-quick-action-primary
-    .mobile-home-quick-action-icon {
+    /* ========================================
+       UPCOMING
+       ======================================== */
 
-        background: transparent;
-        color: inherit;
+    body.client-portal-page
+    .mobile-home-upcoming-list {
+
+        overflow: hidden;
+
+        background: #ffffff;
+
+        border:
+            1px solid
+            rgba(
+                255,
+                255,
+                255,
+                0.65
+            );
+
+        border-radius: 18px;
+
+        box-shadow:
+            0
+            10px
+            24px
+            rgba(
+                12,
+                72,
+                112,
+                0.15
+            );
 
     }
 
 
     body.client-portal-page
-    .mobile-home-quick-action:focus-visible {
+    .mobile-home-upcoming-item {
 
-        outline: 3px solid #183447;
-        outline-offset: 3px;
+        padding:
+            16px
+            14px;
+
+        background: #ffffff;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-upcoming-date {
+
+        background: #eaf6fc;
+        color: #1f7bc2;
+
+        border-radius: 11px;
 
     }
 
 
     /* ========================================
-       UPCOMING / LATEST UPDATE — ONE CARD
+       LATEST UPDATE
        ======================================== */
 
-    body.client-portal-page .mobile-home-upcoming-list,
-    body.client-portal-page .mobile-home-latest-update {
+    body.client-portal-page
+    .mobile-home-latest-update {
+
+        overflow: hidden;
 
         background: #ffffff;
 
-        border: 1px solid #d5e5ed;
+        border:
+            1px solid
+            rgba(
+                255,
+                255,
+                255,
+                0.65
+            );
+
         border-radius: 18px;
 
-        box-shadow: 0 4px 14px rgba(24, 52, 71, 0.04);
+        box-shadow:
+            0
+            10px
+            24px
+            rgba(
+                12,
+                72,
+                112,
+                0.15
+            );
 
     }
 
 
-    body.client-portal-page .mobile-home-upcoming-date {
+    /* ========================================
+       EMPTY STATES
+       ======================================== */
 
-        background: #eaf4f8;
-        color: #176aa6;
+    body.client-portal-page
+    .mobile-home-empty-state {
 
-        border-radius: 10px;
+        padding:
+            20px
+            16px;
 
-    }
-
-
-    body.client-portal-page .mobile-home-upcoming-item {
-
-        padding: 16px 14px;
-
-    }
-
-
-    body.client-portal-page .mobile-home-empty-state {
-
-        padding: 20px 16px;
-
-        background: #f4f9fb;
-
-        border: 1px dashed #bed5e2;
-        border-radius: 14px;
-
-        box-shadow: none;
+        background:
+            rgba(
+                255,
+                255,
+                255,
+                0.92
+            );
 
         color: #536b7a;
+
+        border:
+            1px dashed
+            rgba(
+                255,
+                255,
+                255,
+                0.75
+            );
+
+        border-radius: 16px;
+
+        box-shadow:
+            0
+            8px
+            18px
+            rgba(
+                12,
+                72,
+                112,
+                0.12
+            );
 
     }
 
