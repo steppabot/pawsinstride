@@ -2682,116 +2682,468 @@ section h3 {
 ======================================== */
 
 .selected-upcoming-day {
+
     margin-top: 18px;
+
     padding: 16px;
-    border: 1px solid #ddd;
+
+    border:
+        1px solid #ddd;
+
     border-radius: 12px;
+
 }
+
 
 .selected-upcoming-header {
+
     margin-bottom: 12px;
+
 }
+
 
 .selected-upcoming-header strong {
+
     font-size: 17px;
+
 }
+
 
 .empty-upcoming-message {
+
     margin: 0;
+
     color: #777;
+
 }
 
+
 .upcoming-service-card {
+
     position: relative;
+
     overflow: hidden;
 
     margin-top: 12px;
+
     padding: 14px;
 
     background: #fff;
 
-    border: 1px solid #ddd;
+    border:
+        1px solid #ddd;
+
     border-radius: 12px;
 
     transition:
         border-color 0.2s ease,
         box-shadow 0.2s ease,
         background 0.2s ease;
+
 }
+
 
 .upcoming-service-card:first-child {
+
     margin-top: 0;
+
 }
+
 
 .upcoming-service-card:last-child {
+
     padding-bottom: 14px;
+
 }
+
 
 .upcoming-service-card-header {
+
     display: flex;
+
     align-items: center;
     justify-content: space-between;
+
     gap: 15px;
+
     margin-bottom: 12px;
+
 }
+
 
 .service-status {
+
     display: inline-flex;
+
     align-items: center;
-    padding: 5px 9px;
+
+    padding:
+        5px
+        9px;
+
     background: #f1f1f1;
+
     border-radius: 20px;
+
     font-size: 11px;
     font-weight: 700;
+
     white-space: nowrap;
+
 }
+
 
 .upcoming-service-pets {
+
     margin-bottom: 6px;
-    padding: 10px 0 13px;
-    border-bottom: 1px solid #eee;
+
+    padding:
+        10px
+        0
+        13px;
+
+    border-bottom:
+        1px solid #eee;
+
 }
+
 
 .upcoming-service-pets-label {
+
     display: block;
+
     margin-bottom: 7px;
+
     color: #777;
+
     font-size: 11px;
     font-weight: 700;
+
     letter-spacing: 0.04em;
+
 }
+
 
 .service-pet-chips {
+
     display: flex;
+
     flex-wrap: wrap;
+
     gap: 7px;
+
 }
+
 
 .service-pet-chip {
+
     display: inline-flex;
+
     align-items: center;
-    padding: 6px 10px;
+
+    padding:
+        6px
+        10px;
+
     background: #f1f1f1;
+
     border-radius: 20px;
+
     font-size: 13px;
     font-weight: 700;
+
 }
+
 
 .service-pet-chip-missing {
+
     color: #777;
+
     font-weight: 500;
+
 }
+
 
 .upcoming-service-row {
+
     display: flex;
+
     justify-content: space-between;
+
     gap: 15px;
+
     margin-top: 6px;
+
     font-size: 14px;
+
 }
 
+
 .upcoming-service-row span {
+
     color: #666;
+
+}
+
+
+/* ========================================
+   UPCOMING SERVICE DETAILS — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .selected-upcoming-day {
+
+        margin-top: 22px;
+
+        padding: 0;
+
+        background: transparent;
+
+        border: 0;
+        border-radius: 0;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-upcoming-header {
+
+        margin:
+            0
+            2px
+            12px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-upcoming-header strong {
+
+        display: block;
+
+        color: #183447;
+
+        font-size: 18px;
+        font-weight: 800;
+
+        letter-spacing: -0.02em;
+
+        line-height: 1.3;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .empty-upcoming-message {
+
+        margin:
+            0
+            2px;
+
+        color: #6b7785;
+
+        font-size: 13px;
+
+        line-height: 1.45;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-card {
+
+        position: relative;
+
+        overflow: hidden;
+
+        margin-top: 12px;
+
+        padding:
+            20px
+            16px
+            16px;
+
+        background: #ffffff;
+
+        border:
+            1px solid
+            #d6e4eb;
+
+        border-radius: 18px;
+
+        box-shadow:
+            0
+            7px
+            18px
+            rgba(
+                24,
+                52,
+                71,
+                0.07
+            );
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-card::before {
+
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 5px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-card:first-child {
+
+        margin-top: 0;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-card-header {
+
+        margin-bottom: 14px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-card-header strong {
+
+        color: #183447;
+
+        font-size: 16px;
+        font-weight: 800;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .service-status {
+
+        padding:
+            5px
+            9px;
+
+        background: #eef7fd;
+
+        color: #1f7bc2;
+
+        border-radius: 999px;
+
+        font-size: 10px;
+        font-weight: 800;
+
+        letter-spacing: 0.02em;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-pets {
+
+        margin-bottom: 9px;
+
+        padding:
+            11px
+            0
+            14px;
+
+        border-bottom:
+            1px solid
+            #e8eef2;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-pets-label {
+
+        margin-bottom: 8px;
+
+        color: #82909a;
+
+        font-size: 10px;
+        font-weight: 800;
+
+        letter-spacing: 0.05em;
+
+        text-transform: uppercase;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .service-pet-chips {
+
+        gap: 6px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .service-pet-chip {
+
+        padding:
+            6px
+            10px;
+
+        background: #eef7fd;
+
+        color: #245b78;
+
+        border-radius: 999px;
+
+        font-size: 12px;
+        font-weight: 800;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-row {
+
+        align-items: flex-start;
+
+        gap: 12px;
+
+        margin-top: 9px;
+
+        color: #263d4c;
+
+        font-size: 13px;
+
+        line-height: 1.4;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-service-row span {
+
+        color: #6b7785;
+
+    }
+
 }
 
 /* ========================================
