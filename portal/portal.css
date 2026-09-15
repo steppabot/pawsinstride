@@ -2559,8 +2559,46 @@ section h3 {
 
 
     body.mobile-app-screen-services
+    .upcoming-calendar-day:has(
+        .upcoming-service-count-completed
+    ):not(
+        .upcoming-calendar-selected
+    ) {
+
+        background: #eef9f1;
+
+        border:
+            1px solid
+            #8fd19e;
+
+        color: #21863f;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .upcoming-calendar-day:has(
+        .upcoming-service-count-completed
+    ):not(
+        .upcoming-calendar-selected
+    )
+    .upcoming-service-count {
+
+        background: #22a447;
+        color: #ffffff;
+
+        border-color: #ffffff;
+
+    }
+
+
+    body.mobile-app-screen-services
     .upcoming-calendar-today:not(
         .upcoming-calendar-selected
+    ):not(
+        :has(
+            .upcoming-service-count-completed
+        )
     ) {
 
         background: #ffffff;
@@ -11096,7 +11134,18 @@ a:focus-visible {
 }
 
 
-.client-portal-page
+/*
+ * Keep the original client-calendar interaction
+ * styling everywhere except the redesigned
+ * mobile Services screen.
+ *
+ * Mobile Services now owns these states inside
+ * the SERVICES TAB — MOBILE REDESIGN block.
+ */
+
+body.client-portal-page:not(
+    .mobile-app-screen-services
+)
 .upcoming-calendar-day:hover {
 
     color:
@@ -11111,7 +11160,9 @@ a:focus-visible {
 }
 
 
-.client-portal-page
+body.client-portal-page:not(
+    .mobile-app-screen-services
+)
 .upcoming-calendar-selected {
 
     color: #fff;
@@ -11129,13 +11180,16 @@ a:focus-visible {
 }
 
 
-.client-portal-page
+body.client-portal-page:not(
+    .mobile-app-screen-services
+)
 .upcoming-calendar-today:not(
     .upcoming-calendar-selected
 ) {
 
     border:
-        2px solid var(--pis-orange);
+        2px solid
+        var(--pis-orange);
 
 }
 
@@ -11144,7 +11198,15 @@ a:focus-visible {
    ACTIVE / UPCOMING VISIT COUNT
 ======================================== */
 
-.client-portal-page
+/*
+ * Default client-calendar count styling.
+ * The redesigned mobile Services screen
+ * owns its own active count color.
+ */
+
+body.client-portal-page:not(
+    .mobile-app-screen-services
+)
 .upcoming-service-count {
 
     background:
