@@ -21079,6 +21079,243 @@ body.booking-success-page {
 
 
 
+/* ========================================
+   HOME REDESIGN — COLOR AND HIERARCHY
+   ======================================== */
+
+@media (max-width: 700px) {
+
+    /* ========================================
+       QUICK ACTIONS CONTAINER
+       ======================================== */
+
+    body.client-portal-page
+    #mobile-home-dashboard
+    > .mobile-home-section:has(
+        .mobile-home-quick-actions
+    ) {
+
+        padding: 19px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #174b68 0%,
+                #1d6f98 55%,
+                #268db2 100%
+            );
+
+        border:
+            1px solid
+            rgba(
+                255,
+                255,
+                255,
+                0.16
+            );
+
+        border-radius: 20px;
+
+        box-shadow:
+            0
+            9px
+            22px
+            rgba(
+                23,
+                75,
+                104,
+                0.14
+            );
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-section:has(
+        .mobile-home-quick-actions
+    )
+    .mobile-home-section-heading {
+
+        margin-bottom: 14px;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-section:has(
+        .mobile-home-quick-actions
+    )
+    .mobile-home-section-heading h3 {
+
+        color: #ffffff;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-quick-action {
+
+        border-color:
+            rgba(
+                255,
+                255,
+                255,
+                0.55
+            );
+
+        box-shadow:
+            0
+            5px
+            14px
+            rgba(
+                7,
+                42,
+                63,
+                0.14
+            );
+
+    }
+
+
+    /* ========================================
+       UPCOMING CARD ACCENT
+       ======================================== */
+
+    body.client-portal-page
+    .mobile-home-upcoming-list {
+
+        position: relative;
+
+        border-top:
+            4px solid
+            #f5ab40;
+
+    }
+
+
+    /* ========================================
+       UPCOMING DATE TILES
+       ======================================== */
+
+    body.client-portal-page
+    .mobile-home-upcoming-date {
+
+        background:
+            linear-gradient(
+                145deg,
+                #fff4df 0%,
+                #ffe5bb 100%
+            );
+
+        color: #183447;
+
+        border:
+            1px solid
+            rgba(
+                245,
+                171,
+                64,
+                0.30
+            );
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-upcoming-month {
+
+        color: #d98218;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-upcoming-day {
+
+        color: #183447;
+
+    }
+
+
+    /* ========================================
+       UPCOMING SERVICE TEXT
+       ======================================== */
+
+    body.client-portal-page
+    .mobile-home-upcoming-info strong {
+
+        color: #245b78;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-upcoming-info span {
+
+        color: #6b7785;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-upcoming-chevron {
+
+        color: #e79528;
+
+    }
+
+
+    /* ========================================
+       LATEST UPDATE ACCENT
+       ======================================== */
+
+    body.client-portal-page
+    .mobile-home-latest-update {
+
+        position: relative;
+
+        border-top:
+            4px solid
+            #f5ab40;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-latest-update-heading h3 {
+
+        color: #245b78;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-latest-update-heading p {
+
+        color: #6b7785;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-latest-update-note {
+
+        color: #344b5c;
+
+        line-height: 1.55;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-card-link {
+
+        color: #1f7bc2;
+
+    }
+
+}
+
 
 
 
