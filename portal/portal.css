@@ -2535,18 +2535,36 @@ section h3 {
     }
 
 
-    body.mobile-app-screen-services
-    .upcoming-calendar-booked {
+   body.mobile-app-screen-services
+   .upcoming-calendar-booked {
+   
+       background: #eef7fd;
+   
+       border:
+           1px solid
+           #9ed2f2;
+   
+       color: #1f7bc2;
+   
+   }
 
-        background: #fff6e9;
 
-        border:
-            1px solid
-            #f2bd72;
-
-        color: #b96615;
-
-    }
+   body.mobile-app-screen-services
+   #services-section::before {
+   
+       left: 18px;
+       right: 18px;
+   
+       height: 5px;
+   
+       background:
+           linear-gradient(
+               90deg,
+               #f5ab40 0%,
+               #ef602c 100%
+           );
+   
+   }
 
 
     body.mobile-app-screen-services
