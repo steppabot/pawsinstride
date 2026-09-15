@@ -20577,6 +20577,336 @@ body.booking-success-page {
 }
 
 
+
+
+/* ========================================
+   PAWS IN STRIDE — HOME REDESIGN
+   ======================================== */
+
+@media (max-width: 700px) {
+
+    /* ========================================
+       SOFT BLUE HOME BACKGROUND
+       ======================================== */
+
+    body.client-portal-page.mobile-app-screen-home {
+
+        background: #eaf4f8;
+
+    }
+
+
+    /* ========================================
+       REMOVE OUTER HOME CARD
+       ======================================== */
+
+    body.client-portal-page #mobile-home-dashboard {
+
+        padding: 0;
+        margin: 0;
+
+        background: transparent;
+
+        border: 0;
+        border-radius: 0;
+
+        box-shadow: none;
+
+    }
+
+
+    /* ========================================
+       GREETING DIRECTLY ON PAGE
+       ======================================== */
+
+    body.client-portal-page .mobile-home-greeting {
+
+        margin: 8px 2px 22px;
+
+    }
+
+
+    body.client-portal-page .mobile-home-greeting h2 {
+
+        color: #183447;
+
+        font-size: clamp(23px, 6vw, 28px);
+        line-height: 1.2;
+
+        letter-spacing: -0.025em;
+
+    }
+
+
+    body.client-portal-page .mobile-home-greeting p {
+
+        margin-top: 8px;
+
+        color: #536b7a;
+
+        font-size: 14px;
+        line-height: 1.5;
+
+    }
+
+
+    /* ========================================
+       SECTION HEADINGS WITHOUT OUTER CARDS
+       ======================================== */
+
+    body.client-portal-page
+    #mobile-home-dashboard > .mobile-home-section {
+
+        margin: 0 0 26px;
+        padding: 0;
+
+        background: transparent;
+
+        border: 0;
+        border-radius: 0;
+
+        box-shadow: none;
+
+    }
+
+
+    body.client-portal-page .mobile-home-section-heading {
+
+        margin-bottom: 12px;
+        gap: 12px;
+
+    }
+
+
+    body.client-portal-page .mobile-home-section-heading h3 {
+
+        color: #183447;
+
+        font-size: 19px;
+        font-weight: 800;
+
+        letter-spacing: -0.02em;
+
+    }
+
+
+    body.client-portal-page .mobile-home-section-link {
+
+        color: #176aa6;
+
+        font-size: 13px;
+        font-weight: 700;
+
+    }
+
+
+    /* ========================================
+       NEXT VISIT — PRIMARY WHITE CARD
+       ======================================== */
+
+    body.client-portal-page
+    #mobile-home-dashboard > .mobile-home-next-visit-card {
+
+        margin: 0 0 24px;
+        padding: 20px;
+
+        background: #ffffff;
+
+        border: 1px solid #d5e5ed;
+        border-radius: 18px;
+
+        box-shadow: 0 6px 18px rgba(24, 52, 71, 0.06);
+
+    }
+
+
+    body.client-portal-page .mobile-home-card-eyebrow {
+
+        color: #176aa6;
+
+        font-size: 11px;
+        font-weight: 800;
+
+        letter-spacing: 0.1em;
+
+    }
+
+
+    body.client-portal-page .mobile-home-next-visit-pets {
+
+        font-size: 25px;
+        line-height: 1.2;
+
+    }
+
+
+    /* ========================================
+       QUICK ACTIONS — BRAND COLOR SECTION
+       ======================================== */
+
+    body.client-portal-page
+    #mobile-home-dashboard > .mobile-home-section:has(
+        .mobile-home-quick-actions
+    ) {
+
+        padding: 20px;
+
+        background: linear-gradient(
+            120deg,
+            #126cb2 0%,
+            #1685bd 60%,
+            #21a6bf 100%
+        );
+
+        border: 0;
+        border-radius: 18px;
+
+        box-shadow: 0 8px 20px rgba(18, 108, 178, 0.14);
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-section:has(.mobile-home-quick-actions)
+    .mobile-home-section-heading h3 {
+
+        color: #ffffff;
+
+    }
+
+
+    body.client-portal-page .mobile-home-quick-actions {
+
+        gap: 10px;
+
+    }
+
+
+    body.client-portal-page .mobile-home-quick-action {
+
+        min-width: 0;
+        min-height: 62px;
+
+        padding: 12px 10px;
+        gap: 8px;
+
+        background: #ffffff;
+        color: #183447;
+
+        border: 0;
+        border-radius: 14px;
+
+        box-shadow: none;
+
+        font-size: 13px;
+        font-weight: 800;
+
+        line-height: 1.3;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-quick-action-primary {
+
+        background: #f5ab40;
+        color: #183447;
+
+        box-shadow: none;
+
+    }
+
+
+    body.client-portal-page .mobile-home-quick-action-icon {
+
+        width: 26px;
+        height: 26px;
+
+        padding: 0;
+
+        background: transparent;
+        color: inherit;
+
+        border: 0;
+        border-radius: 0;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-quick-action-primary
+    .mobile-home-quick-action-icon {
+
+        background: transparent;
+        color: inherit;
+
+    }
+
+
+    body.client-portal-page
+    .mobile-home-quick-action:focus-visible {
+
+        outline: 3px solid #183447;
+        outline-offset: 3px;
+
+    }
+
+
+    /* ========================================
+       UPCOMING / LATEST UPDATE — ONE CARD
+       ======================================== */
+
+    body.client-portal-page .mobile-home-upcoming-list,
+    body.client-portal-page .mobile-home-latest-update {
+
+        background: #ffffff;
+
+        border: 1px solid #d5e5ed;
+        border-radius: 18px;
+
+        box-shadow: 0 4px 14px rgba(24, 52, 71, 0.04);
+
+    }
+
+
+    body.client-portal-page .mobile-home-upcoming-date {
+
+        background: #eaf4f8;
+        color: #176aa6;
+
+        border-radius: 10px;
+
+    }
+
+
+    body.client-portal-page .mobile-home-upcoming-item {
+
+        padding: 16px 14px;
+
+    }
+
+
+    body.client-portal-page .mobile-home-empty-state {
+
+        padding: 20px 16px;
+
+        background: #f4f9fb;
+
+        border: 1px dashed #bed5e2;
+        border-radius: 14px;
+
+        box-shadow: none;
+
+        color: #536b7a;
+
+    }
+
+}
+
+
+
+
+
 /* ========================================
    MOBILE PORTAL INTRO
    ======================================== */
