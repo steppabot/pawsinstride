@@ -13600,15 +13600,26 @@ a:focus-visible {
 .client-portal-page
 .booking-section {
 
-    position: relative;
+    position:
+        relative;
 
-    overflow: hidden;
+    overflow:
+        hidden;
 
     border:
-        1px solid var(--pis-border-strong);
+        1px solid
+        var(--pis-border-strong);
 
     box-shadow:
-        0 12px 34px rgba(40, 144, 223, 0.10);
+        0
+        12px
+        34px
+        rgba(
+            40,
+            144,
+            223,
+            0.10
+        );
 
 }
 
@@ -13616,15 +13627,23 @@ a:focus-visible {
 .client-portal-page
 .booking-section::before {
 
-    content: "";
+    content:
+        "";
 
-    position: absolute;
+    position:
+        absolute;
 
-    top: 0;
-    left: 0;
-    right: 0;
+    top:
+        0;
 
-    height: 4px;
+    left:
+        0;
+
+    right:
+        0;
+
+    height:
+        4px;
 
     background:
         linear-gradient(
@@ -13636,6 +13655,188 @@ a:focus-visible {
 
 }
 
+
+/* ========================================
+   REQUEST SERVICE — MOBILE REDESIGN
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-services
+    .booking-section {
+
+        overflow:
+            visible;
+
+        margin:
+            0
+            0
+            26px;
+
+        padding:
+            0;
+
+        background:
+            transparent;
+
+        border:
+            0;
+
+        border-radius:
+            0;
+
+        box-shadow:
+            none;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-section::before {
+
+        display:
+            none;
+
+    }
+
+
+    /* ========================================
+       REQUEST SERVICE HEADER
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-section
+    > .section-header {
+
+        align-items:
+            flex-start;
+
+        margin:
+            0
+            0
+            18px;
+
+        padding:
+            0
+            2px;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-section
+    > .section-header
+    h3 {
+
+        margin:
+            0;
+
+        color:
+            #183447;
+
+        font-size:
+            22px;
+
+        font-weight:
+            800;
+
+        line-height:
+            1.2;
+
+        letter-spacing:
+            -0.025em;
+
+    }
+
+
+    /* ========================================
+       REQUEST SERVICE CLOSE
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-section
+    #close-booking-button {
+
+        display:
+            inline-flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
+
+        flex:
+            0 0 36px;
+
+        width:
+            36px;
+
+        height:
+            36px;
+
+        padding:
+            0;
+
+        background:
+            transparent;
+
+        color:
+            #1f9aeb;
+
+        border:
+            0;
+
+        border-radius:
+            9px;
+
+        box-shadow:
+            none;
+
+        font-size:
+            28px;
+
+        font-weight:
+            500;
+
+        line-height:
+            1;
+
+    }
+
+
+    body.mobile-app-screen-services
+    .booking-section
+    #close-booking-button:active {
+
+        background:
+            rgba(
+                31,
+                154,
+                235,
+                0.08
+            );
+
+        transform:
+            scale(0.96);
+
+    }
+
+
+    /* ========================================
+       REQUEST SERVICE FORM
+    ======================================== */
+
+    body.mobile-app-screen-services
+    .booking-section
+    #booking-form {
+
+        margin-top:
+            0;
+
+    }
+
+}
 
 /* ========================================
    BOOKING TOTAL
