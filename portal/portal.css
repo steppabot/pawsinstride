@@ -12173,13 +12173,86 @@ section h5 {
 .client-portal-page
 .client-header-request-button {
 
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
     min-height: 44px;
 
     padding:
-        12px
+        11px
         18px;
 
+    background:
+        linear-gradient(
+            90deg,
+            #f5ab40 0%,
+            #ef602c 100%
+        );
+
+    color: #ffffff;
+
+    border: 0;
+
+    border-radius: 11px;
+
+    box-shadow:
+        0
+        6px
+        16px
+        rgba(
+            239,
+            96,
+            44,
+            0.22
+        );
+
+    font-weight: 800;
+
+    letter-spacing: 0.01em;
+
     white-space: nowrap;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+
+}
+
+
+.client-portal-page
+.client-header-request-button:hover {
+
+    background:
+        linear-gradient(
+            90deg,
+            #f5ab40 0%,
+            #ef602c 100%
+        );
+
+    box-shadow:
+        0
+        8px
+        20px
+        rgba(
+            239,
+            96,
+            44,
+            0.28
+        );
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+.client-portal-page
+.client-header-request-button:active {
+
+    transform:
+        scale(0.97);
 
 }
 
@@ -12191,14 +12264,18 @@ section h5 {
 .client-portal-page
 .secondary-button {
 
-    color: var(--pis-blue);
+    color:
+        var(--pis-blue);
 
-    background: #fff;
+    background:
+        #ffffff;
 
     border:
-        1px solid var(--pis-border-strong);
+        1px solid
+        var(--pis-border-strong);
 
-    border-radius: 999px;
+    border-radius:
+        11px;
 
 }
 
@@ -12214,6 +12291,173 @@ section h5 {
 
     border-color:
         var(--pis-blue);
+
+}
+
+
+/* ========================================
+   PROFILE FORM BUTTONS — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-profile
+    .household-form-actions {
+
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 10px;
+
+        margin-top: 18px;
+
+    }
+
+
+    body.mobile-app-screen-profile
+    .household-form-actions button {
+
+        width: 100%;
+
+        min-height: 46px;
+
+        padding:
+            11px
+            16px;
+
+        border-radius:
+            11px !important;
+
+        font-size: 13px;
+
+        font-weight: 800;
+
+        letter-spacing:
+            0.01em;
+
+        white-space:
+            nowrap;
+
+    }
+
+
+    /* ========================================
+       SAVE PROFILE
+       ======================================== */
+
+    body.mobile-app-screen-profile
+    .household-form-actions
+    .primary-button {
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        color:
+            #ffffff;
+
+        border:
+            0;
+
+        border-radius:
+            11px !important;
+
+        box-shadow:
+            0
+            5px
+            14px
+            rgba(
+                239,
+                96,
+                44,
+                0.18
+            );
+
+    }
+
+
+    body.mobile-app-screen-profile
+    .household-form-actions
+    .primary-button:hover {
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        transform:
+            none;
+
+    }
+
+
+    body.mobile-app-screen-profile
+    .household-form-actions
+    .primary-button:active {
+
+        transform:
+            scale(0.985);
+
+    }
+
+
+    /* ========================================
+       CANCEL PROFILE EDIT
+       ======================================== */
+
+    body.mobile-app-screen-profile
+    .household-form-actions
+    .secondary-button {
+
+        background:
+            #ffffff;
+
+        color:
+            #1f7bc2;
+
+        border:
+            1px solid
+            #c8dce8;
+
+        border-radius:
+            11px !important;
+
+        box-shadow:
+            none;
+
+    }
+
+
+    body.mobile-app-screen-profile
+    .household-form-actions
+    .secondary-button:hover {
+
+        background:
+            #f4f9fc;
+
+        color:
+            #176aa9;
+
+        border-color:
+            #9fc7dd;
+
+    }
+
+
+    body.mobile-app-screen-profile
+    .household-form-actions
+    .secondary-button:active {
+
+        transform:
+            scale(0.985);
+
+    }
 
 }
 
