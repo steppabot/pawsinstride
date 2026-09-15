@@ -10013,27 +10013,22 @@ function toggleSelectedDate(
     date
 ) {
 
-    const selectedTimeWindow =
-        bookingTime?.value ||
-        lastSelectedTimeWindow ||
-        "";
+
+    const selectedTimeWindows =
+        getSelectedBookingTimeWindows();
 
 
     // ========================================
-    // REQUIRE A TIME WINDOW FIRST
+    // REQUIRE AT LEAST ONE TIME WINDOW
     // ========================================
 
     if (
-        !selectedTimeWindow
+        selectedTimeWindows.length ===
+        0
     ) {
 
-        if (
-            bookingTime
-        ) {
 
-            bookingTime.focus();
-
-        }
+        bookingTime?.focus();
 
 
         return;
@@ -10042,109 +10037,134 @@ function toggleSelectedDate(
 
 
     // ========================================
-    // FIND EXACT DATE + TIME MATCH
+    // CHECK WHETHER THIS DATE ALREADY HAS
+    // EVERY CURRENTLY SELECTED VISIT TIME
+    // ========================================
+    //
+    // Example:
+    //
+    // Selected times:
+    // 10 AM - 12 PM
+    // 4 PM - 6 PM
+    //
+    // If Monday already has BOTH visits,
+    // tapping Monday removes both.
+    //
+    // If Monday has neither, or only one,
+    // tapping Monday fills in every missing
+    // visit time.
     // ========================================
 
-    const existingVisitIndex =
-        selectedVisits.findIndex(
-            visit =>
-                visit.date ===
-                    date
-                &&
-                visit.timeWindow ===
-                    selectedTimeWindow
+    const dateHasEveryTimeWindow =
+        selectedTimeWindows.every(
+            timeWindow =>
+                selectedVisits.some(
+                    visit =>
+                        visit.date ===
+                            date &&
+                        visit.timeWindow ===
+                            timeWindow
+                )
         );
 
 
     // ========================================
-    // REMOVE EXACT VISIT
+    // REMOVE ENTIRE DATE
     // ========================================
 
     if (
-        existingVisitIndex !==
-        -1
+        dateHasEveryTimeWindow
     ) {
 
-        const removedVisit =
-            selectedVisits[
-                existingVisitIndex
-            ];
+
+        selectedTimeWindows.forEach(
+            timeWindow => {
 
 
-        selectedVisits.splice(
-            existingVisitIndex,
-            1
+                selectedDateCapacityConflicts.delete(
+                    getSelectedVisitCapacityKey(
+                        date,
+                        timeWindow
+                    )
+                );
+
+            }
         );
 
 
-        selectedDateCapacityConflicts.delete(
-            getSelectedVisitCapacityKey(
-                removedVisit.date,
-                removedVisit.timeWindow
-            )
-        );
+        selectedVisits =
+            selectedVisits.filter(
+                visit =>
+                    !(
+                        visit.date ===
+                            date &&
+                        selectedTimeWindows.includes(
+                            visit.timeWindow
+                        )
+                    )
+            );
 
     } else {
 
+
         // ========================================
-        // ADD NEW DATE + TIME VISIT
+        // ADD ALL MISSING VISITS FOR THIS DATE
         // ========================================
 
-        selectedVisits.push({
-            date:
-                date,
+        selectedTimeWindows.forEach(
+            timeWindow => {
 
-            timeWindow:
-                selectedTimeWindow
-        });
+
+                const alreadyExists =
+                    selectedVisits.some(
+                        visit =>
+                            visit.date ===
+                                date &&
+                            visit.timeWindow ===
+                                timeWindow
+                    );
+
+
+                if (
+                    alreadyExists
+                ) {
+
+                    return;
+
+                }
+
+
+                selectedVisits.push({
+                    date:
+                        date,
+
+                    timeWindow:
+                        timeWindow
+                });
+
+            }
+        );
 
     }
 
 
     // ========================================
-    // SORT SELECTED VISITS
+    // SORT VISITS
     // ========================================
 
-    selectedVisits.sort(
-        (
-            firstVisit,
-            secondVisit
-        ) => {
-
-            if (
-                firstVisit.date !==
-                secondVisit.date
-            ) {
-
-                return firstVisit.date.localeCompare(
-                    secondVisit.date
-                );
-
-            }
-
-
-            return firstVisit.timeWindow.localeCompare(
-                secondVisit.timeWindow
-            );
-
-        }
-    );
+    sortSelectedBookingVisits();
 
 
     // ========================================
-    // KEEP LEGACY DATE ARRAY SYNCHRONIZED
+    // REBUILD UNIQUE SERVICE DATES
     // ========================================
 
-    selectedDates =
-        [
-            ...new Set(
-                selectedVisits.map(
-                    visit =>
-                        visit.date
-                )
-            )
-        ].sort();
+    rebuildSelectedDatesFromVisits();
 
+
+    // ========================================
+    // REDRAW BOOKING UI
+    // ========================================
 
     renderSelectedDates();
 
