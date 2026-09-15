@@ -10232,7 +10232,12 @@ function toggleSelectedDate(
 // SELECTED VISITS
 // ========================================
 
+let bookingExpandedDateGroups =
+    new Set();
+
+
 function renderSelectedDates() {
+
 
     const list =
         document.getElementById(
@@ -10250,12 +10255,14 @@ function renderSelectedDates() {
         !list ||
         !count
     ) {
+
         return;
+
     }
 
 
     // ========================================
-    // VISIT COUNT
+    // TOTAL VISIT COUNT
     // ========================================
 
     count.textContent =
@@ -10271,8 +10278,13 @@ function renderSelectedDates() {
     // ========================================
 
     if (
-        selectedVisits.length === 0
+        selectedVisits.length ===
+        0
     ) {
+
+
+        bookingExpandedDateGroups.clear();
+
 
         list.innerHTML =
             `
@@ -10281,176 +10293,544 @@ function renderSelectedDates() {
                 </p>
             `;
 
-    } else {
 
-        // ========================================
-        // RENDER EACH DATE + TIME VISIT
-        // ========================================
+        updateBookingTotal();
 
-        list.innerHTML =
-            selectedVisits
-                .map(
-                    (
-                        visit,
-                        index
-                    ) => {
 
-                        const hasConflict =
-                            hasSelectedVisitCapacityConflict(
-                                visit.date,
-                                visit.timeWindow
-                            );
+        return;
 
-                        return `
-                            <div
-                                class="
-                                    selected-date-item
-                                    ${
-                                        hasConflict
-                                            ? "selected-date-item-conflict"
-                                            : ""
-                                    }
-                                "
+    }
+
+
+    // ========================================
+    // GROUP VISITS BY DATE
+    // ========================================
+
+    const visitsByDate =
+        new Map();
+
+
+    selectedVisits.forEach(
+        (
+            visit,
+            index
+        ) => {
+
+
+            if (
+                !visitsByDate.has(
+                    visit.date
+                )
+            ) {
+
+                visitsByDate.set(
+                    visit.date,
+                    []
+                );
+
+            }
+
+
+            visitsByDate
+                .get(
+                    visit.date
+                )
+                .push({
+                    visit,
+                    index
+                });
+
+        }
+    );
+
+
+    // ========================================
+    // REMOVE OLD EXPANDED DATE REFERENCES
+    // ========================================
+
+    const activeDates =
+        new Set(
+            visitsByDate.keys()
+        );
+
+
+    Array.from(
+        bookingExpandedDateGroups
+    )
+        .forEach(
+            date => {
+
+
+                if (
+                    !activeDates.has(
+                        date
+                    )
+                ) {
+
+                    bookingExpandedDateGroups.delete(
+                        date
+                    );
+
+                }
+
+            }
+        );
+
+
+    // ========================================
+    // OPEN FIRST DATE BY DEFAULT
+    // ========================================
+
+    if (
+        bookingExpandedDateGroups.size ===
+        0
+    ) {
+
+
+        const firstDate =
+            visitsByDate
+                .keys()
+                .next()
+                .value;
+
+
+        if (firstDate) {
+
+            bookingExpandedDateGroups.add(
+                firstDate
+            );
+
+        }
+
+    }
+
+
+    // ========================================
+    // RENDER DATE GROUPS
+    // ========================================
+
+    list.innerHTML =
+        Array.from(
+            visitsByDate.entries()
+        )
+            .map(
+                (
+                    [
+                        date,
+                        visits
+                    ]
+                ) => {
+
+
+                    const isExpanded =
+                        bookingExpandedDateGroups.has(
+                            date
+                        );
+
+
+                    const hasGroupConflict =
+                        visits.some(
+                            item =>
+                                hasSelectedVisitCapacityConflict(
+                                    item.visit.date,
+                                    item.visit.timeWindow
+                                )
+                        );
+
+
+                    return `
+                        <section
+                            class="
+                                selected-date-group
+                                ${
+                                    hasGroupConflict
+                                        ? "selected-date-group-conflict"
+                                        : ""
+                                }
+                            "
+                        >
+
+
+                            <button
+                                type="button"
+                                class="selected-date-group-header"
+                                aria-expanded="${
+                                    isExpanded
+                                        ? "true"
+                                        : "false"
+                                }"
                             >
 
-                                <div class="selected-visit-summary">
 
-                                    <strong class="selected-visit-date">
+                                <span class="selected-date-group-header-copy">
+
+                                    <strong class="selected-date-group-title">
                                         ${formatDate(
-                                            visit.date
+                                            date
                                         )}
                                     </strong>
 
-                                    <div class="selected-visit-time-row">
 
-                                        <span
-                                            class="
-                                                selected-visit-time
-                                                ${
-                                                    hasConflict
-                                                        ? "selected-visit-time-conflict"
-                                                        : ""
-                                                }
-                                            "
-                                        >
-                                            ${visit.timeWindow}
-                                        </span>
+                                    <span class="selected-date-group-meta">
+                                        ${visits.length} ${
+                                            visits.length === 1
+                                                ? "visit"
+                                                : "visits"
+                                        }
+                                    </span>
 
+                                </span>
+
+
+                                <span
+                                    class="
+                                        selected-date-group-arrow
                                         ${
-                                            hasConflict
-                                                ? `
-                                                    <span class="selected-visit-unavailable">
-                                                        Unavailable
-                                                    </span>
-                                                `
+                                            isExpanded
+                                                ? "selected-date-group-arrow-open"
                                                 : ""
                                         }
-
-                                    </div>
-
-                                </div>
-
-
-                                <button
-                                    type="button"
-                                    class="remove-date-button"
-                                    data-visit-index="${index}"
+                                    "
+                                    aria-hidden="true"
                                 >
-                                    Remove
-                                </button>
+                                    ▼
+                                </span>
+
+
+                            </button>
+
+
+                            <div
+                                class="selected-date-group-content"
+                                ${
+                                    isExpanded
+                                        ? ""
+                                        : "hidden"
+                                }
+                            >
+
+
+                                ${
+                                    visits
+                                        .map(
+                                            item => {
+
+
+                                                const visit =
+                                                    item.visit;
+
+
+                                                const hasConflict =
+                                                    hasSelectedVisitCapacityConflict(
+                                                        visit.date,
+                                                        visit.timeWindow
+                                                    );
+
+
+                                                return `
+                                                    <div
+                                                        class="
+                                                            selected-date-item
+                                                            selected-date-group-visit
+                                                            ${
+                                                                hasConflict
+                                                                    ? "selected-date-item-conflict"
+                                                                    : ""
+                                                            }
+                                                        "
+                                                    >
+
+
+                                                        <div class="selected-visit-summary">
+
+
+                                                            <div class="selected-visit-time-row">
+
+                                                                <span
+                                                                    class="
+                                                                        selected-visit-time
+                                                                        ${
+                                                                            hasConflict
+                                                                                ? "selected-visit-time-conflict"
+                                                                                : ""
+                                                                        }
+                                                                    "
+                                                                >
+                                                                    ${visit.timeWindow}
+                                                                </span>
+
+
+                                                                ${
+                                                                    hasConflict
+                                                                        ? `
+                                                                            <span class="selected-visit-unavailable">
+                                                                                Unavailable
+                                                                            </span>
+                                                                        `
+                                                                        : ""
+                                                                }
+
+                                                            </div>
+
+
+                                                        </div>
+
+
+                                                        <button
+                                                            type="button"
+                                                            class="remove-date-button"
+                                                            data-visit-index="${item.index}"
+                                                        >
+                                                            Remove
+                                                        </button>
+
+
+                                                    </div>
+                                                `;
+
+                                            }
+                                        )
+                                        .join("")
+                                }
+
 
                             </div>
-                        `;
+
+
+                        </section>
+                    `;
+
+                }
+            )
+            .join("");
+
+
+    // ========================================
+    // DATE GROUP TOGGLE
+    // ========================================
+
+    list
+        .querySelectorAll(
+            ".selected-date-group-header"
+        )
+        .forEach(
+            button => {
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+
+                        const group =
+                            button.closest(
+                                ".selected-date-group"
+                            );
+
+
+                        const content =
+                            group?.querySelector(
+                                ".selected-date-group-content"
+                            );
+
+
+                        const arrow =
+                            group?.querySelector(
+                                ".selected-date-group-arrow"
+                            );
+
+
+                        const title =
+                            group?.querySelector(
+                                ".selected-date-group-title"
+                            );
+
+
+                        if (
+                            !group ||
+                            !content ||
+                            !title
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const dateText =
+                            title.textContent;
+
+
+                        const date =
+                            Array.from(
+                                visitsByDate.keys()
+                            )
+                                .find(
+                                    dateKey =>
+                                        formatDate(
+                                            dateKey
+                                        ) ===
+                                        dateText
+                                            .trim()
+                                );
+
+
+                        if (!date) {
+
+                            return;
+
+                        }
+
+
+                        const isExpanded =
+                            button.getAttribute(
+                                "aria-expanded"
+                            ) ===
+                            "true";
+
+
+                        if (isExpanded) {
+
+
+                            bookingExpandedDateGroups.delete(
+                                date
+                            );
+
+
+                            button.setAttribute(
+                                "aria-expanded",
+                                "false"
+                            );
+
+
+                            content.hidden =
+                                true;
+
+
+                            arrow?.classList.remove(
+                                "selected-date-group-arrow-open"
+                            );
+
+
+                        } else {
+
+
+                            bookingExpandedDateGroups.add(
+                                date
+                            );
+
+
+                            button.setAttribute(
+                                "aria-expanded",
+                                "true"
+                            );
+
+
+                            content.hidden =
+                                false;
+
+
+                            arrow?.classList.add(
+                                "selected-date-group-arrow-open"
+                            );
+
+                        }
 
                     }
-                )
-                .join("");
+                );
+
+            }
+        );
 
 
     // ========================================
-    // REMOVE SELECTED VISIT
+    // REMOVE INDIVIDUAL VISIT
     // ========================================
-    
+
     list
         .querySelectorAll(
             ".remove-date-button"
         )
         .forEach(
             button => {
-    
+
+
                 button.addEventListener(
                     "click",
                     () => {
-    
+
+
                         const visitIndex =
                             Number(
                                 button.dataset.visitIndex
                             );
-    
-    
+
+
                         const removedVisit =
                             selectedVisits[
                                 visitIndex
                             ];
-    
-    
+
+
                         if (
                             !removedVisit
                         ) {
+
                             return;
+
                         }
-    
-    
+
+
                         selectedVisits.splice(
                             visitIndex,
                             1
                         );
-    
-    
-                        // ========================================
-                        // CLEAR EXACT VISIT CAPACITY CONFLICT
-                        // ========================================
-    
+
+
                         selectedDateCapacityConflicts.delete(
                             getSelectedVisitCapacityKey(
                                 removedVisit.date,
                                 removedVisit.timeWindow
                             )
                         );
-    
-    
-                        // ========================================
-                        // REBUILD LEGACY DATE ARRAY
-                        // ========================================
-
-                            selectedDates =
-                                [
-                                    ...new Set(
-                                        selectedVisits.map(
-                                            visit =>
-                                                visit.date
-                                        )
-                                    )
-                                ].sort();
 
 
-                            renderSelectedDates();
+                        rebuildSelectedDatesFromVisits();
 
-                            renderBookingCalendar();
+
+                        const dateStillExists =
+                            selectedVisits.some(
+                                visit =>
+                                    visit.date ===
+                                    removedVisit.date
+                            );
+
+
+                        if (
+                            !dateStillExists
+                        ) {
+
+                            bookingExpandedDateGroups.delete(
+                                removedVisit.date
+                            );
 
                         }
-                    );
 
-                }
-            );
 
-    }
+                        renderSelectedDates();
+
+                        renderBookingCalendar();
+
+                    }
+                );
+
+            }
+        );
 
 
     updateBookingTotal();
 
 }
-
 
 // ========================================
 // BOARDING
