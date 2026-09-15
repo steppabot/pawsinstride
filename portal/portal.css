@@ -3011,6 +3011,19 @@ section h3 {
 
 
     body.mobile-app-screen-services
+    .upcoming-service-card-completed::before {
+
+        background:
+            linear-gradient(
+                90deg,
+                #22a447 0%,
+                #168a3a 100%
+            );
+
+    }
+
+
+    body.mobile-app-screen-services
     .upcoming-service-card:first-child {
 
         margin-top: 0;
