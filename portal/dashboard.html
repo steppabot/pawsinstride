@@ -470,28 +470,86 @@
                 </div>
 
 
-                <!-- TIME -->
-
+                <!-- ========================================
+                     VISIT TIME WINDOWS
+                     ======================================== -->
+                
                 <div
                     id="time-window-wrapper"
                     style="display:none;"
                 >
-
+                
+                
                     <label
                         id="time-window-label"
                         for="booking-time"
                     >
                         Preferred Time Window
                     </label>
-
-                    <select id="booking-time">
-
-                        <option value="">
-                            Select a time
-                        </option>
-
-                    </select>
-
+                
+                
+                    <div
+                        id="booking-time-windows"
+                        class="booking-time-windows"
+                    >
+                
+                
+                        <!-- ========================================
+                             PRIMARY VISIT TIME
+                             ======================================== -->
+                
+                        <div
+                            class="booking-time-row"
+                            data-booking-time-row
+                        >
+                
+                
+                            <select
+                                id="booking-time"
+                                class="booking-time-select"
+                            >
+                
+                                <option value="">
+                                    Select a time
+                                </option>
+                
+                            </select>
+                
+                
+                        </div>
+                
+                
+                    </div>
+                
+                
+                    <!-- ========================================
+                         ADD ANOTHER VISIT TIME
+                         ======================================== -->
+                
+                    <button
+                        type="button"
+                        id="add-booking-time-button"
+                        class="add-booking-time-button"
+                        style="display:none;"
+                    >
+                        <span aria-hidden="true">
+                            +
+                        </span>
+                
+                        Add Another Visit Time
+                    </button>
+                
+                
+                    <p
+                        id="booking-time-help"
+                        class="booking-help booking-time-help"
+                        style="display:none;"
+                    >
+                        Each visit time will be scheduled on every date
+                        you select below.
+                    </p>
+                
+                
                 </div>
 
 
