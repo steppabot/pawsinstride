@@ -19976,58 +19976,102 @@ async function renderMobileHomeDashboard() {
         );
 
 
-    // ========================================
-    // LATEST UPDATE ELEMENTS
-    // ========================================
-
-    const latestUpdateEmpty =
-        document.getElementById(
-            "mobile-home-latest-update-empty"
-        );
-
-    const latestUpdateContent =
-        document.getElementById(
-            "mobile-home-latest-update-content"
-        );
-
-    const latestUpdateTitle =
-        document.getElementById(
-            "mobile-home-latest-update-title"
-        );
-
-    const latestUpdateMeta =
-        document.getElementById(
-            "mobile-home-latest-update-meta"
-        );
-
-    const latestUpdatePhoto =
-        document.getElementById(
-            "mobile-home-latest-update-photo"
-        );
-
-    const latestUpdateNote =
-        document.getElementById(
-            "mobile-home-latest-update-note"
-        );
-
-    const latestUpdateButton =
-        document.getElementById(
-            "mobile-home-latest-update-button"
-        );
+// ========================================
+// LATEST UPDATE ELEMENTS
+// ========================================
 
 
-    if (
-        !greeting ||
-        !nextVisitDate ||
-        !nextVisitPets ||
-        !nextVisitService ||
-        !nextVisitStatus ||
-        !nextVisitButton ||
-        !upcomingList
-    ) {
-        return;
-    }
+// ========================================
+// MOBILE LATEST UPDATE
+// ========================================
 
+const latestUpdateEmpty =
+    document.getElementById(
+        "mobile-home-latest-update-empty"
+    );
+
+const latestUpdateContent =
+    document.getElementById(
+        "mobile-home-latest-update-content"
+    );
+
+const latestUpdateTitle =
+    document.getElementById(
+        "mobile-home-latest-update-title"
+    );
+
+const latestUpdateMeta =
+    document.getElementById(
+        "mobile-home-latest-update-meta"
+    );
+
+const latestUpdatePhoto =
+    document.getElementById(
+        "mobile-home-latest-update-photo"
+    );
+
+const latestUpdateNote =
+    document.getElementById(
+        "mobile-home-latest-update-note"
+    );
+
+const latestUpdateButton =
+    document.getElementById(
+        "mobile-home-latest-update-button"
+    );
+
+
+// ========================================
+// DESKTOP LATEST UPDATE
+// ========================================
+
+const desktopLatestUpdateEmpty =
+    document.getElementById(
+        "desktop-latest-update-empty"
+    );
+
+const desktopLatestUpdateContent =
+    document.getElementById(
+        "desktop-latest-update-content"
+    );
+
+const desktopLatestUpdateTitle =
+    document.getElementById(
+        "desktop-latest-update-title"
+    );
+
+const desktopLatestUpdateMeta =
+    document.getElementById(
+        "desktop-latest-update-meta"
+    );
+
+const desktopLatestUpdatePhoto =
+    document.getElementById(
+        "desktop-latest-update-photo"
+    );
+
+const desktopLatestUpdateNote =
+    document.getElementById(
+        "desktop-latest-update-note"
+    );
+
+const desktopLatestUpdateButton =
+    document.getElementById(
+        "desktop-latest-update-button"
+    );
+
+
+if (
+    !greeting ||
+    !nextVisitDate ||
+    !nextVisitPets ||
+    !nextVisitService ||
+    !nextVisitStatus ||
+    !nextVisitButton ||
+    !upcomingList
+) {
+    return;
+}
 
     // ========================================
     // DYNAMIC GREETING
@@ -20489,38 +20533,69 @@ async function renderMobileHomeDashboard() {
     // ========================================
     // LATEST COMPLETED VISIT
     // ========================================
-
+    
+    const latestUpdateTargets = [
+        {
+            empty: latestUpdateEmpty,
+            content: latestUpdateContent,
+            title: latestUpdateTitle,
+            meta: latestUpdateMeta,
+            photo: latestUpdatePhoto,
+            note: latestUpdateNote,
+            button: latestUpdateButton
+        },
+        {
+            empty: desktopLatestUpdateEmpty,
+            content: desktopLatestUpdateContent,
+            title: desktopLatestUpdateTitle,
+            meta: desktopLatestUpdateMeta,
+            photo: desktopLatestUpdatePhoto,
+            note: desktopLatestUpdateNote,
+            button: desktopLatestUpdateButton
+        }
+    ].filter(
+        target =>
+            target.empty &&
+            target.content &&
+            target.title &&
+            target.meta &&
+            target.photo &&
+            target.note &&
+            target.button
+    );
+    
+    
     if (
-        !latestUpdateEmpty ||
-        !latestUpdateContent ||
-        !latestUpdateTitle ||
-        !latestUpdateMeta ||
-        !latestUpdatePhoto ||
-        !latestUpdateNote ||
-        !latestUpdateButton
+        latestUpdateTargets.length ===
+        0
     ) {
         return;
     }
-
-
-    latestUpdateEmpty.style.display =
-        "block";
-
-    latestUpdateContent.style.display =
-        "none";
-
-    latestUpdatePhoto.style.display =
-        "none";
-
-    latestUpdatePhoto.innerHTML =
-        "";
-
-    latestUpdateNote.textContent =
-        "";
-
-    latestUpdateButton.onclick =
-        null;
-
+    
+    
+    latestUpdateTargets.forEach(
+        target => {
+    
+            target.empty.style.display =
+                "block";
+    
+            target.content.style.display =
+                "none";
+    
+            target.photo.style.display =
+                "none";
+    
+            target.photo.innerHTML =
+                "";
+    
+            target.note.textContent =
+                "";
+    
+            target.button.onclick =
+                null;
+    
+        }
+    );
 
     // ========================================
     // ONLY COMPLETED VISITS THROUGH TODAY
@@ -20935,67 +21010,81 @@ async function renderMobileHomeDashboard() {
         // ========================================
         // RENDER LATEST UPDATE
         // ========================================
-
-        latestUpdateTitle.textContent =
+        
+        const latestUpdateTitleText =
             `${petNames} · ${serviceName}`;
-
-
-        latestUpdateMeta.textContent =
+        
+        
+        const latestUpdateMetaText =
             completedTime
-
+        
                 ? `${dateText} · Completed ${completedTime}`
-
+        
                 : `${dateText} · Visit Complete`;
-
-
+        
+        
         const noteParts =
             [];
-
-
+        
+        
         if (
             latestReport?.notes
         ) {
-
+        
             noteParts.push(
                 latestReport.notes
             );
-
+        
         }
-
-
+        
+        
         if (
             walkSummary
         ) {
-
+        
             noteParts.push(
                 walkSummary
             );
-
+        
         }
-
-
-        latestUpdateNote.textContent =
+        
+        
+        const latestUpdateNoteText =
             noteParts.length
-
+        
                 ? noteParts.join(
                     "\n\n"
                 )
-
+        
                 : "Your visit report is ready to view.";
-
-
-        latestUpdateNote.style.whiteSpace =
-            "pre-line";
-
+        
+        
+        latestUpdateTargets.forEach(
+            target => {
+        
+                target.title.textContent =
+                    latestUpdateTitleText;
+        
+                target.meta.textContent =
+                    latestUpdateMetaText;
+        
+                target.note.textContent =
+                    latestUpdateNoteText;
+        
+                target.note.style.whiteSpace =
+                    "pre-line";
+        
+            }
+        );
 
         // ========================================
         // LATEST VISIT PHOTO
         // ========================================
-
+        
         if (
             firstPhoto?.storage_path
         ) {
-
+        
             const {
                 data:
                     signedPhotoData,
@@ -21012,15 +21101,15 @@ async function renderMobileHomeDashboard() {
                             .storage_path,
                         3600
                     );
-
-
+        
+        
             if (
                 !signedPhotoError &&
                 signedPhotoData
                     ?.signedUrl
             ) {
-
-                latestUpdatePhoto.innerHTML =
+        
+                const latestUpdatePhotoHtml =
                     `
                         <img
                             src="${escapeHtml(
@@ -21032,175 +21121,232 @@ async function renderMobileHomeDashboard() {
                             )}"
                         >
                     `;
-
-
-                latestUpdatePhoto.style.display =
-                    "block";
-
+        
+        
+                latestUpdateTargets.forEach(
+                    target => {
+        
+                        target.photo.innerHTML =
+                            latestUpdatePhotoHtml;
+        
+                        target.photo.style.display =
+                            "block";
+        
+                    }
+                );
+        
             }
-
+        
         }
-
-
+        
+        
         // ========================================
         // SHOW LATEST UPDATE
         // ========================================
-
-        latestUpdateEmpty.style.display =
-            "none";
-
-        latestUpdateContent.style.display =
-            "block";
+        
+        latestUpdateTargets.forEach(
+            target => {
+        
+                target.empty.style.display =
+                    "none";
+        
+                target.content.style.display =
+                    "block";
+        
+            }
+        );
 
 
         // ========================================
         // OPEN EXACT VISIT REPORT
         // ========================================
-
-        latestUpdateButton.onclick =
+        
+        const openLatestUpdateReport =
             async () => {
-
+        
                 selectedUpcomingDate =
                     latestVisit.visit_date;
-
-
+        
+        
                 const selectedDate =
                     parseLocalDate(
                         latestVisit.visit_date
                     );
-
-
+        
+        
                 upcomingCalendarYear =
                     selectedDate
                         .getFullYear();
-
-
+        
+        
                 upcomingCalendarMonth =
                     selectedDate
                         .getMonth();
-
-
+        
+        
                 renderUpcomingCalendar();
-
+        
                 renderSelectedUpcomingServices();
-
-
+        
+        
+                const isMobileLayout =
+                    window.matchMedia(
+                        "(max-width: 700px)"
+                    ).matches;
+        
+        
                 // ========================================
-                // OPEN SERVICES SCREEN WITHOUT TOP SCROLL
+                // OPEN CORRECT SERVICES VIEW
                 // ========================================
-
+        
                 closeClientMessaging();
-
-
-                setMobileAppScreen(
-                    "services"
-                );
-
-
-                setActiveMobileAppTab(
-                    "services"
-                );
-
-
+        
+        
+                if (
+                    isMobileLayout
+                ) {
+        
+                    setMobileAppScreen(
+                        "services"
+                    );
+        
+        
+                    setActiveMobileAppTab(
+                        "services"
+                    );
+        
+                } else {
+        
+                    document
+                        .getElementById(
+                            "services-section"
+                        )
+                        ?.scrollIntoView({
+                            behavior:
+                                "smooth",
+        
+                            block:
+                                "start"
+                        });
+        
+                }
+        
+        
                 // ========================================
                 // FIND EXACT VISIT REPORT BUTTON
                 // ========================================
-
+        
                 window.setTimeout(
                     async () => {
-
+        
                         const reportButton =
                             document.querySelector(
                                 `[data-client-visit-report-open="${latestVisit.id}"]`
                             );
-
-
+        
+        
                         if (
                             !reportButton
                         ) {
-
+        
                             return;
-
+        
                         }
-
-
+        
+        
                         // ========================================
                         // OPEN EXACT REPORT
                         // ========================================
-
+        
                         await toggleClientVisitReport(
                             latestVisit.id,
                             reportButton
                         );
-
-
+        
+        
                         // ========================================
                         // SCROLL DIRECTLY TO EXACT REPORT
                         // ========================================
-
+        
                         window.setTimeout(
                             () => {
-
+        
                                 const reportMount =
                                     getClientVisitReportMount(
                                         latestVisit.id
                                     );
-
-
+        
+        
                                 if (
                                     !reportMount
                                 ) {
-
+        
                                     return;
-
+        
                                 }
-
-
+        
+        
                                 reportMount.scrollIntoView({
                                     behavior:
                                         "smooth",
-
+        
                                     block:
                                         "start"
                                 });
-
+        
                             },
                             100
                         );
-
+        
                     },
                     150
                 );
-
+        
             };
-
-    }
-    catch (
-        error
-    ) {
-
-        console.error(
-            "Mobile latest update error:",
-            error
+        
+        
+        latestUpdateTargets.forEach(
+            target => {
+        
+                target.button.onclick =
+                    openLatestUpdateReport;
+        
+            }
         );
-
-
-        latestUpdateEmpty.style.display =
-            "block";
-
-        latestUpdateContent.style.display =
-            "none";
-
-        latestUpdateEmpty.innerHTML =
-            `
-                <span>
-                    Your latest completed visit update is temporarily unavailable.
-                </span>
-            `;
-
-    }
-
-}
+        
+        }
+        catch (
+            error
+        ) {
+        
+            console.error(
+                "Latest update error:",
+                error
+            );
+        
+        
+            latestUpdateTargets.forEach(
+                target => {
+        
+                    target.empty.style.display =
+                        "block";
+        
+                    target.content.style.display =
+                        "none";
+        
+                    target.empty.innerHTML =
+                        `
+                            <span>
+                                Your latest completed visit update is temporarily unavailable.
+                            </span>
+                        `;
+        
+                }
+            );
+        
+        }
+        
+        }
 
 // ========================================
 // MOBILE HOME QUICK ACTIONS
