@@ -12504,13 +12504,113 @@ if (bookingForm) {
                 
                 
                 // ========================================
+                // SAVE BOOKING DRAFT
+                // ========================================
+                //
+                // Preserve the client's booking selections
+                // before leaving the portal for checkout.
+                //
+                // This lets us safely restore:
+                //
+                // - primary pet
+                // - additional pets
+                // - service type
+                // - duration / package
+                // - every selected visit time
+                // - every selected date
+                // - exact date + time visit pairs
+                //
+                // when the client chooses Edit Booking or
+                // returns with the browser back gesture.
+                // ========================================
+
+                const bookingDraft = {
+
+                    version:
+                        1,
+
+                    checkoutId:
+                        String(
+                            checkout.checkout_id
+                        ),
+
+                    primaryPetId:
+                        primaryPetId,
+
+                    additionalPetIds:
+                        [
+                            ...additionalPetIds
+                        ],
+
+                    serviceType:
+                        serviceType,
+
+                    serviceOption:
+                        serviceOption,
+
+                    timeWindows:
+                        getSelectedBookingTimeWindows(),
+
+                    selectedVisits:
+                        selectedVisits.map(
+                            visit => ({
+
+                                date:
+                                    visit.date,
+
+                                timeWindow:
+                                    visit.timeWindow
+
+                            })
+                        ),
+
+                    selectedDates:
+                        [
+                            ...selectedDates
+                        ],
+
+                    calendarYear:
+                        calendarYear,
+
+                    calendarMonth:
+                        calendarMonth,
+
+                    savedAt:
+                        Date.now()
+
+                };
+
+
+                try {
+
+                    window.sessionStorage.setItem(
+                        "paws-in-stride-booking-draft",
+                        JSON.stringify(
+                            bookingDraft
+                        )
+                    );
+
+                }
+                catch (
+                    draftError
+                ) {
+
+                    console.warn(
+                        "Booking draft could not be saved:",
+                        draftError
+                    );
+
+                }
+
+
+                // ========================================
                 // GO TO PAYMENT PAGE
                 // ========================================
-                
+
                 message.textContent =
                     "Opening secure checkout...";
-                
-                
+
+
                 window.location.href =
                     `./payment.html?checkout=${encodeURIComponent(checkout.checkout_id)}`;
 
@@ -12523,6 +12623,8 @@ if (bookingForm) {
                     "Secure booking error:",
                     error
                 );
+
+
 
 
                 // ========================================
