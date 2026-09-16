@@ -1040,15 +1040,65 @@ section h3 {
     display: flex;
     flex-direction: column;
 
-    gap: 4px;
+    gap: 6px;
 }
 
-.selected-visit-date {
-    color: #111;
-    font-size: 14px;
-    font-weight: 700;
+
+/* ========================================
+   SELECTED VISIT BOOKING DETAILS
+======================================== */
+
+.selected-visit-booking-details {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+
+/* ========================================
+   SELECTED VISIT PET
+======================================== */
+
+.selected-visit-pets {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: fit-content;
+
+    padding: 4px 9px;
+
+    background: #eef7fd;
+    color: #1f7bc2;
+
+    border: 1px solid #9ed2f2;
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.2;
+
+    letter-spacing: 0.01em;
+}
+
+
+/* ========================================
+   SELECTED VISIT SERVICE
+======================================== */
+
+.selected-visit-service {
+    color: #183447;
+
+    font-size: 13px;
+    font-weight: 800;
     line-height: 1.35;
 }
+
+
+/* ========================================
+   SELECTED VISIT TIME ROW
+======================================== */
 
 .selected-visit-time-row {
     display: flex;
@@ -1058,13 +1108,18 @@ section h3 {
     gap: 7px;
 }
 
+
+/* ========================================
+   SELECTED VISIT TIME
+======================================== */
+
 .selected-visit-time {
-    color: #536b7b;
+    color: #667b88;
+
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 650;
     line-height: 1.4;
 }
-
 
 /* ========================================
    DESKTOP SELECTED VISIT POLISH
