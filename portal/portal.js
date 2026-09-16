@@ -20586,7 +20586,25 @@ async function handleMobileAppTab(
     if (
         !mobileAppNavigationQuery.matches
     ) {
+
         return;
+
+    }
+
+
+    // ========================================
+    // CLOSE REQUEST SERVICE
+    // WHEN LEAVING SERVICES
+    // ========================================
+
+    if (
+        tab !==
+        "services"
+    ) {
+
+        bookingSection.style.display =
+            "none";
+
     }
 
 
@@ -20729,6 +20747,8 @@ async function handleMobileAppTab(
     }
 
 }
+
+
 // ========================================
 // MOBILE APP NAVIGATION EVENTS
 // ========================================
