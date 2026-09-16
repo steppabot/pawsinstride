@@ -183,6 +183,34 @@ const applePayButton =
         "apple-pay-button"
     );
 
+
+// ========================================
+// EDIT BOOKING BUTTON
+// ========================================
+
+const editBookingButton =
+    document.getElementById(
+        "edit-booking-button"
+    );
+
+
+editBookingButton
+    ?.addEventListener(
+        "click",
+        () => {
+
+
+            // ========================================
+            // RETURN TO SAVED BOOKING DRAFT
+            // ========================================
+
+            window.location.href =
+                "./dashboard.html?editBooking=1";
+
+
+        }
+    );
+
 // ========================================
 // FORMAT MONEY
 // ========================================
