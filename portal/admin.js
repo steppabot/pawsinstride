@@ -9773,6 +9773,71 @@ async function openAdminVisitReport(
         null;
 
 
+    // ========================================
+    // LOAD EXISTING PET CARE
+    // ========================================
+
+    let existingPetCare =
+        [];
+
+
+    if (
+        existingReport?.id
+    ) {
+
+
+        const {
+            data: petCare,
+            error: petCareError
+        } =
+            await supabaseClient
+                .from(
+                    "visit_report_pet_care"
+                )
+                .select(
+                    "visit_report_id, pet_id, fed, fresh_water, pee, poop, created_at, updated_at"
+                )
+                .eq(
+                    "visit_report_id",
+                    existingReport.id
+                );
+
+
+        if (
+            petCareError
+        ) {
+
+
+            console.error(
+                "Visit report pet care error:",
+                petCareError
+            );
+
+
+            mount.innerHTML =
+                `
+                    <div class="admin-visit-report-error">
+                        We couldn't load this visit report.
+                    </div>
+                `;
+
+
+            return;
+
+        }
+
+
+        existingPetCare =
+            petCare ||
+            [];
+
+    }
+
+
+    // ========================================
+    // LOAD EXISTING VISIT MEDIA
+    // ========================================
+
     const {
         data: media,
         error: mediaError
@@ -9877,9 +9942,14 @@ async function openAdminVisitReport(
         mediaWithUrls;
 
 
+    // ========================================
+    // RENDER VISIT REPORT FORM
+    // ========================================
+
     renderAdminVisitReportForm(
         visit,
-        existingReport
+        existingReport,
+        existingPetCare
     );
 
 
@@ -9892,7 +9962,6 @@ async function openAdminVisitReport(
     );
 
 }
-
 
 // ========================================
 // CLOSE VISIT REPORT
@@ -10354,7 +10423,8 @@ function renderAdminGoogleWalkRoute(
 
 function renderAdminVisitReportForm(
     visit,
-    report
+    report,
+    existingPetCare = []
 ) {
 
 
@@ -10399,6 +10469,200 @@ function renderAdminVisitReportForm(
                 "visit"
         );
 
+
+    // ========================================
+    // PER-PET CARE CARDS
+    // ========================================
+
+    const petCareHtml =
+        pets.length
+
+            ? pets
+                .map(
+                    pet => {
+
+
+                        const savedCare =
+                            existingPetCare.find(
+                                item =>
+                                    Number(
+                                        item.pet_id
+                                    ) ===
+                                    Number(
+                                        pet.id
+                                    )
+                            ) ||
+                            null;
+
+
+                        // ========================================
+                        // LEGACY SINGLE-PET FALLBACK
+                        // ========================================
+
+                        const care =
+                            savedCare ||
+                            (
+                                pets.length ===
+                                1
+
+                                    ? report ||
+                                      {}
+
+                                    : {}
+                            );
+
+
+                        return `
+                            <div
+                                class="admin-visit-pet-care-card"
+                                data-pet-care-card
+                                data-pet-id="${pet.id}"
+                            >
+
+                                <div class="admin-visit-pet-care-header">
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            pet.name ||
+                                            "Pet"
+                                        )}
+                                    </strong>
+
+                                    <span>
+                                        Care Updates
+                                    </span>
+
+                                </div>
+
+
+                                <div class="admin-visit-care-grid">
+
+
+                                    <label class="admin-visit-care-option">
+
+                                        <input
+                                            type="checkbox"
+                                            data-pet-care-field="fed"
+                                            ${
+                                                care.fed
+                                                    ? "checked"
+                                                    : ""
+                                            }
+                                        >
+
+                                        <span>
+                                            Fed
+                                        </span>
+
+                                    </label>
+
+
+                                    <label class="admin-visit-care-option">
+
+                                        <input
+                                            type="checkbox"
+                                            data-pet-care-field="fresh_water"
+                                            ${
+                                                care.fresh_water
+                                                    ? "checked"
+                                                    : ""
+                                            }
+                                        >
+
+                                        <span>
+                                            Fresh Water
+                                        </span>
+
+                                    </label>
+
+
+                                    <label class="admin-visit-care-option">
+
+                                        <input
+                                            type="checkbox"
+                                            data-pet-care-field="pee"
+                                            ${
+                                                care.pee
+                                                    ? "checked"
+                                                    : ""
+                                            }
+                                        >
+
+                                        <span>
+                                            Pee
+                                        </span>
+
+                                    </label>
+
+
+                                    <label class="admin-visit-care-option">
+
+                                        <input
+                                            type="checkbox"
+                                            data-pet-care-field="poop"
+                                            ${
+                                                care.poop
+                                                    ? "checked"
+                                                    : ""
+                                            }
+                                        >
+
+                                        <span>
+                                            Poop
+                                        </span>
+
+                                    </label>
+
+
+                                </div>
+
+                            </div>
+                        `;
+
+                    }
+                )
+                .join("")
+
+            : `
+                <div class="admin-visit-report-help">
+                    No pets are attached to this visit.
+                </div>
+            `;
+
+
+    // ========================================
+    // REPLACE LEGACY SHARED CARE GRID
+    // AFTER FORM HTML IS MOUNTED
+    // ========================================
+
+    queueMicrotask(
+        () => {
+
+
+            const legacyCareGrid =
+                mount.querySelector(
+                    ".admin-visit-care-grid"
+                );
+
+
+            if (
+                !legacyCareGrid
+            ) {
+
+                return;
+
+            }
+
+
+            legacyCareGrid.outerHTML =
+                `
+                    <div class="admin-visit-pet-care-list">
+                        ${petCareHtml}
+                    </div>
+                `;
+
+        }
+    );
 
     // ========================================
     // AUTOMATIC WALK SUMMARY
@@ -11426,6 +11690,118 @@ async function saveAdminVisitReport(
     try {
 
 
+        // ========================================
+        // COLLECT PER-PET CARE
+        // ========================================
+
+        const petCare =
+            Array.from(
+                form.querySelectorAll(
+                    "[data-pet-care-card]"
+                )
+            )
+                .map(
+                    card => {
+
+
+                        const petId =
+                            Number(
+                                card.dataset.petId
+                            );
+
+
+                        if (
+                            !Number.isFinite(
+                                petId
+                            ) ||
+                            petId <=
+                            0
+                        ) {
+
+                            return null;
+
+                        }
+
+
+                        return {
+
+                            pet_id:
+                                petId,
+
+                            fed:
+                                Boolean(
+                                    card.querySelector(
+                                        '[data-pet-care-field="fed"]'
+                                    )?.checked
+                                ),
+
+                            fresh_water:
+                                Boolean(
+                                    card.querySelector(
+                                        '[data-pet-care-field="fresh_water"]'
+                                    )?.checked
+                                ),
+
+                            pee:
+                                Boolean(
+                                    card.querySelector(
+                                        '[data-pet-care-field="pee"]'
+                                    )?.checked
+                                ),
+
+                            poop:
+                                Boolean(
+                                    card.querySelector(
+                                        '[data-pet-care-field="poop"]'
+                                    )?.checked
+                                )
+
+                        };
+
+                    }
+                )
+                .filter(
+                    Boolean
+                );
+
+
+        // ========================================
+        // LEGACY AGGREGATE CARE
+        // TEMPORARY CLIENT COMPATIBILITY
+        // ========================================
+
+        const aggregateFed =
+            petCare.some(
+                item =>
+                    item.fed
+            );
+
+
+        const aggregateFreshWater =
+            petCare.some(
+                item =>
+                    item.fresh_water
+            );
+
+
+        const aggregatePee =
+            petCare.some(
+                item =>
+                    item.pee
+            );
+
+
+        const aggregatePoop =
+            petCare.some(
+                item =>
+                    item.poop
+            );
+
+
+        // ========================================
+        // SAVE OVERALL VISIT REPORT
+        // ========================================
+
         const payload = {
 
             visit_id:
@@ -11443,24 +11819,16 @@ async function saveAdminVisitReport(
                 null,
 
             fed:
-                Boolean(
-                    form.elements.fed?.checked
-                ),
+                aggregateFed,
 
             fresh_water:
-                Boolean(
-                    form.elements.fresh_water?.checked
-                ),
+                aggregateFreshWater,
 
             pee:
-                Boolean(
-                    form.elements.pee?.checked
-                ),
+                aggregatePee,
 
             poop:
-                Boolean(
-                    form.elements.poop?.checked
-                ),
+                aggregatePoop,
 
             updated_at:
                 new Date()
@@ -11493,6 +11861,69 @@ async function saveAdminVisitReport(
         ) {
 
             throw reportError;
+
+        }
+
+
+        // ========================================
+        // SAVE PER-PET CARE
+        // ========================================
+
+        if (
+            petCare.length >
+            0
+        ) {
+
+
+            const petCareRows =
+                petCare.map(
+                    item => ({
+
+                        visit_report_id:
+                            savedReport.id,
+
+                        pet_id:
+                            item.pet_id,
+
+                        fed:
+                            item.fed,
+
+                        fresh_water:
+                            item.fresh_water,
+
+                        pee:
+                            item.pee,
+
+                        poop:
+                            item.poop
+
+                    })
+                );
+
+
+            const {
+                error: petCareError
+            } =
+                await supabaseClient
+                    .from(
+                        "visit_report_pet_care"
+                    )
+                    .upsert(
+                        petCareRows,
+                        {
+                            onConflict:
+                                "visit_report_id,pet_id"
+                        }
+                    );
+
+
+            if (
+                petCareError
+            ) {
+
+                throw petCareError;
+
+            }
 
         }
 
@@ -11551,7 +11982,6 @@ async function saveAdminVisitReport(
                 existingIndex
             ] =
                 savedReport;
-
 
         } else {
 
