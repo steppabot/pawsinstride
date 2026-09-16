@@ -588,7 +588,19 @@ section h3 {
 ======================================== */
 
 @media (max-width:700px) {
-    body.mobile-app-screen-services .booking-section #booking-form>label {
+
+    body.mobile-app-screen-services
+    .booking-section
+    #booking-form > label,
+
+    body.mobile-app-screen-services
+    .booking-section
+    #service-option-wrapper > label,
+
+    body.mobile-app-screen-services
+    .booking-section
+    #time-window-wrapper > label {
+
         margin: 0 0 7px;
         color: #183447;
         font-size: 13px;
@@ -596,11 +608,16 @@ section h3 {
         line-height: 1.3;
     }
 
+
     /* ========================================
        ALL REQUEST SERVICE DROPDOWNS
     ======================================== */
 
-    body.mobile-app-screen-services .booking-section #booking-form select {
+    body.mobile-app-screen-services
+    .booking-section
+    #booking-form
+    select {
+
         min-height: 48px;
         padding: 11px 13px;
         background: #ffffff;
@@ -612,11 +629,17 @@ section h3 {
         font-weight: 600;
     }
 
-    body.mobile-app-screen-services .booking-section #booking-form select:focus {
+
+    body.mobile-app-screen-services
+    .booking-section
+    #booking-form
+    select:focus {
+
         outline: none;
         border-color: #1f9aeb;
         box-shadow: 0 0 0 3px rgba(31,154,235,0.10);
     }
+
 }
 
 /* ========================================
@@ -2418,58 +2441,177 @@ section h3 {
         color: #1f7bc2;
     }
 
-    body.mobile-app-screen-services .upcoming-calendar-selected {
-        background: linear-gradient(145deg,#f5ab40 0%,#eb872c 100%);
-        color: #ffffff;
-        border-color: transparent;
-        box-shadow: 0 4px 10px rgba(201,111,25,0.23);
-    }
-
-    body.mobile-app-screen-services .upcoming-service-count {
-        top: 3px;
-        right: 3px;
-        min-width: 15px;
-        height: 15px;
-        padding: 0 4px;
-        background: #1f9aeb;
-        color: #ffffff;
-        border: 2px solid #ffffff;
-        font-size: 8px;
-        font-weight: 800;
-    }
-
-    body.mobile-app-screen-services .upcoming-calendar-selected .upcoming-service-count {
-        background: #ffffff;
-        color: #d87519;
-        border-color: #ffffff;
-    }
-}
-
+    body.mobile-app-screen-services
+    .upcoming-calendar-selected {
+   
+       background:
+           linear-gradient(
+               145deg,
+               #f5ab40 0%,
+               #eb872c 100%
+           );
+   
+       color:
+           #ffffff;
+   
+       border-color:
+           transparent;
+   
+       box-shadow:
+           0
+           4px
+           10px
+           rgba(
+               201,
+               111,
+               25,
+               0.23
+           );
+   
+   }
+   
+   
+   /* ========================================
+      SELECTED COMPLETED DAY
+   ======================================== */
+   
+    body.mobile-app-screen-services
+    .upcoming-calendar-completed.upcoming-calendar-selected {
+   
+       background:
+           linear-gradient(
+               145deg,
+               #22a447 0%,
+               #168a3a 100%
+           );
+   
+       color:
+           #ffffff;
+   
+       border-color:
+           transparent;
+   
+       box-shadow:
+           0
+           4px
+           10px
+           rgba(
+               22,
+               138,
+               58,
+               0.24
+           );
+   
+   }
+   
+   
+   /* ========================================
+      UPCOMING SERVICE COUNT
+   ======================================== */
+   
+    body.mobile-app-screen-services
+    .upcoming-service-count {
+   
+       top:
+           3px;
+   
+       right:
+           3px;
+   
+       min-width:
+           15px;
+   
+       height:
+           15px;
+   
+       padding:
+           0
+           4px;
+   
+       background:
+           #1f9aeb;
+   
+       color:
+           #ffffff;
+   
+       border:
+           2px solid
+           #ffffff;
+   
+       font-size:
+           8px;
+   
+       font-weight:
+           800;
+   
+   }
+   
+   
+   /* ========================================
+      SELECTED ACTIVE COUNT
+   ======================================== */
+   
+    body.mobile-app-screen-services
+    .upcoming-calendar-selected
+    .upcoming-service-count {
+   
+       background:
+           #ffffff;
+   
+       color:
+           #d87519;
+   
+       border-color:
+           #ffffff;
+   
+   }
+   
+   
+   /* ========================================
+      SELECTED COMPLETED COUNT
+   ======================================== */
+   
+    body.mobile-app-screen-services
+    .upcoming-calendar-completed.upcoming-calendar-selected
+    .upcoming-service-count {
+   
+       background:
+           #ffffff;
+   
+       color:
+           #168a3a;
+   
+       border-color:
+           #ffffff;
+   
+      }
+   
+   }
 /* ========================================
    UPCOMING SERVICE DETAILS
 ======================================== */
 
-.selected-upcoming-day {
+ .selected-upcoming-day {
     margin-top: 18px;
     padding: 16px;
     border: 1px solid #ddd;
     border-radius: 12px;
 }
 
-.selected-upcoming-header {
+ .selected-upcoming-header {
     margin-bottom: 12px;
 }
 
-.selected-upcoming-header strong {
+ .selected-upcoming-header strong {
     font-size: 17px;
 }
 
-.empty-upcoming-message {
+ .empty-upcoming-message {
     margin: 0;
     color: #777;
 }
 
-.upcoming-service-card {
+ .upcoming-service-card {
     margin-top: 12px;
     padding: 14px;
     background: #fff;
@@ -2478,15 +2620,15 @@ section h3 {
     transition: border-color 0.2s ease,box-shadow 0.2s ease,background 0.2s ease;
 }
 
-.upcoming-service-card:first-child {
+ .upcoming-service-card:first-child {
     margin-top: 0;
 }
 
-.upcoming-service-card:last-child {
+ .upcoming-service-card:last-child {
     padding-bottom: 14px;
 }
 
-.upcoming-service-card-header {
+ .upcoming-service-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2494,7 +2636,7 @@ section h3 {
     margin-bottom: 12px;
 }
 
-.service-status {
+ .service-status {
     display: inline-flex;
     align-items: center;
     padding: 5px 9px;
@@ -2505,13 +2647,13 @@ section h3 {
     white-space: nowrap;
 }
 
-.upcoming-service-pets {
+ .upcoming-service-pets {
     margin-bottom: 6px;
     padding: 10px 0 13px;
     border-bottom: 1px solid #eee;
 }
 
-.upcoming-service-pets-label {
+ .upcoming-service-pets-label {
     display: block;
     margin-bottom: 7px;
     color: #777;
@@ -2520,13 +2662,13 @@ section h3 {
     letter-spacing: 0.04em;
 }
 
-.service-pet-chips {
+ .service-pet-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
 }
 
-.service-pet-chip {
+ .service-pet-chip {
     display: inline-flex;
     align-items: center;
     padding: 6px 10px;
@@ -2536,12 +2678,12 @@ section h3 {
     font-weight: 700;
 }
 
-.service-pet-chip-missing {
+ .service-pet-chip-missing {
     color: #777;
     font-weight: 500;
 }
 
-.upcoming-service-row {
+ .upcoming-service-row {
     display: flex;
     justify-content: space-between;
     gap: 15px;
@@ -7342,13 +7484,21 @@ body.client-navigation-open {
         padding: 6px 2px;
     }
 
-    /* ========================================
-       CONTENT CLEARANCE FOR FIXED NAV
-    ======================================== */
-
-    .client-dashboard-container {
-        padding-bottom: calc(92px+env(safe-area-inset-bottom));
-    }
+   /* ========================================
+      CONTENT CLEARANCE FOR FIXED NAV
+   ======================================== */
+   
+   .client-dashboard-container {
+   
+       padding-bottom:
+           calc(
+               150px +
+               env(
+                   safe-area-inset-bottom
+               )
+           );
+   
+   }
 
     /* ========================================
        HIDE MESSAGE LAUNCHER ON MOBILE APP
