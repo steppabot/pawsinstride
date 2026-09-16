@@ -1193,55 +1193,47 @@ section h3 {
     display: flex;
     flex-direction: column;
 
-    gap: 7px;
+    gap: 8px;
 }
 
 
 /* ========================================
-   SELECTED VISIT ROW POLISH
+   SELECTED VISIT CARD
 ======================================== */
 
 .selected-date-item {
     align-items: center;
 
-    margin: 8px 0;
-    padding: 13px 14px;
+    gap: 18px;
 
-    background: #f8fbfd;
+    margin: 9px 0;
+    padding: 15px 16px;
 
-    border: 1px solid #dce9f0;
-    border-radius: 11px;
+    background:
+        linear-gradient(
+            145deg,
+            #fbfdfe 0%,
+            #f6fafc 100%
+        );
+
+    border: 1px solid #d8e6ed;
+    border-radius: 12px;
+
+    box-shadow:
+        0 3px 10px rgba(24,52,71,0.045);
 }
 
 
 .selected-date-group-content
 .selected-date-item:first-child {
-    border-top: 1px solid #dce9f0;
+    border-top:
+        1px solid #d8e6ed;
 }
 
 
 /* ========================================
-   DOGS
+   PET CHIPS
 ======================================== */
-
-.selected-visit-dogs-row {
-    display: flex;
-    align-items: center;
-
-    gap: 6px;
-
-    min-height: 0;
-    padding: 0;
-
-    border: 0;
-}
-
-
-.selected-visit-dogs-row
-.selected-visit-detail-label {
-    display: none;
-}
-
 
 .selected-visit-pet-chips {
     display: flex;
@@ -1249,8 +1241,6 @@ section h3 {
     flex-wrap: wrap;
 
     gap: 6px;
-
-    margin: 0;
 }
 
 
@@ -1267,62 +1257,55 @@ section h3 {
     border: 1px solid #b9dcf1;
     border-radius: 999px;
 
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
     line-height: 1.15;
 }
 
 
+.selected-visit-pet-chip-missing {
+    color: #6b7785;
+}
+
+
 /* ========================================
-   SERVICE + DURATION
+   SERVICE LINE
 ======================================== */
 
-.selected-visit-detail-row:not(.selected-visit-dogs-row) {
-    display: inline-flex;
-    align-items: center;
+.selected-visit-service-line {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
 
-    min-height: 0;
+    gap: 5px;
 
-    padding: 0;
-
-    border: 0;
-}
-
-
-.selected-visit-detail-row:not(.selected-visit-dogs-row)
-.selected-visit-detail-label {
-    display: none;
-}
-
-
-.selected-visit-detail-value {
     color: #183447;
 
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1.35;
-
-    text-align: left;
+    line-height: 1.3;
 }
 
 
-/* PUT SERVICE + DURATION ON ONE VISUAL LINE */
+.selected-visit-service-name {
+    color: #183447;
 
-.selected-visit-detail-row:nth-of-type(2) {
-    margin-bottom: -25px;
+    font-size: 15px;
+    font-weight: 850;
 }
 
 
-.selected-visit-detail-row:nth-of-type(2)
-.selected-visit-detail-value::after {
-    content: " ·";
+.selected-visit-service-separator {
+    color: #9aabb5;
+
+    font-size: 14px;
+    font-weight: 700;
 }
 
 
-.selected-visit-detail-row:nth-of-type(3) {
-    width: fit-content;
+.selected-visit-service-option {
+    color: #405b6c;
 
-    margin-left: max-content;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 
@@ -1335,19 +1318,69 @@ section h3 {
     align-items: center;
     flex-wrap: wrap;
 
-    gap: 7px;
-
-    padding: 0;
+    gap: 8px;
 }
 
 
 .selected-visit-time {
-    color: #667b88;
+    color: #1f7bc2;
 
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     line-height: 1.4;
 }
+
+
+/* ========================================
+   MOBILE SELECTED VISIT SUMMARY
+======================================== */
+
+@media (max-width:700px) {
+
+    body.mobile-app-screen-services
+    .selected-date-item {
+        gap: 12px;
+
+        margin: 8px 0;
+        padding: 13px 12px;
+
+        border-radius: 11px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-summary {
+        gap: 7px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-pet-chip {
+        padding: 4px 9px;
+
+        font-size: 11px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-service-name {
+        font-size: 14px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-service-option {
+        font-size: 13px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-time {
+        font-size: 12px;
+    }
+
+}
+
 /* ========================================
    DESKTOP SELECTED VISIT POLISH
 ======================================== */
