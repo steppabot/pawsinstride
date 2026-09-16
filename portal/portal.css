@@ -16668,32 +16668,198 @@ body.booking-success-page {
         color: #e79528;
     }
 
-    /* ========================================
-       LATEST UPDATE ACCENT
-    ======================================== */
-
-    body.client-portal-page .mobile-home-latest-update {
-        position: relative;
-        border-top: 4px solid #f5ab40;
-    }
-
-    body.client-portal-page .mobile-home-latest-update-heading h3 {
-        color: #245b78;
-    }
-
-    body.client-portal-page .mobile-home-latest-update-heading p {
-        color: #6b7785;
-    }
-
-    body.client-portal-page .mobile-home-latest-update-note {
-        color: #344b5c;
-        line-height: 1.55;
-    }
-
-    body.client-portal-page .mobile-home-card-link {
-        color: #1f7bc2;
-    }
-}
+   /* ========================================
+      LATEST UPDATE ACCENT
+   ======================================== */
+   
+       body.client-portal-page .mobile-home-latest-update {
+           position: relative;
+           border-top: 4px solid #f5ab40;
+       }
+   
+       body.client-portal-page .mobile-home-latest-update-heading h3 {
+           color: #245b78;
+       }
+   
+       body.client-portal-page .mobile-home-latest-update-heading p {
+           color: #6b7785;
+       }
+   
+       body.client-portal-page .mobile-home-latest-update-note {
+           color: #344b5c;
+           line-height: 1.55;
+       }
+   
+       body.client-portal-page .mobile-home-card-link {
+           color: #1f7bc2;
+       }
+   
+   }
+   
+   
+   /* ========================================
+      DESKTOP LATEST UPDATE
+   ======================================== */
+   
+   @media (min-width:701px) {
+   
+       .client-portal-page .desktop-latest-update-section {
+           margin: 0;
+           padding: 0;
+   
+           background: transparent;
+   
+           border: 0;
+           border-radius: 0;
+   
+           box-shadow: none;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-section-heading {
+           margin: 0 2px 12px;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-section-heading h3 {
+           margin: 0;
+   
+           color: #183447;
+   
+           font-size: 22px;
+           font-weight: 800;
+           line-height: 1.2;
+   
+           letter-spacing: -0.02em;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update {
+           position: relative;
+   
+           overflow: hidden;
+   
+           margin: 0;
+           padding: 0;
+   
+           background: #ffffff;
+   
+           border: 1px solid #d6e4eb;
+           border-top: 4px solid #f5ab40;
+           border-radius: 18px;
+   
+           box-shadow:
+               0 6px 16px rgba(24,52,71,0.06);
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-content {
+           padding: 17px;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-heading h3 {
+           margin: 0;
+   
+           color: #245b78;
+   
+           font-size: 17px;
+           font-weight: 850;
+           line-height: 1.3;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-heading p {
+           margin: 4px 0 0;
+   
+           color: #6b7785;
+   
+           font-size: 12px;
+           font-weight: 600;
+           line-height: 1.4;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-photo {
+           overflow: hidden;
+   
+           width: 100%;
+   
+           margin-top: 14px;
+   
+           aspect-ratio: 16 / 9;
+   
+           background: #edf2f5;
+   
+           border-radius: 14px;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-photo img {
+           display: block;
+   
+           width: 100%;
+           height: 100%;
+   
+           object-fit: cover;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-note {
+           margin: 14px 0 0;
+   
+           color: #344b5c;
+   
+           font-size: 13px;
+           line-height: 1.55;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-button {
+           display: flex;
+   
+           align-items: center;
+           justify-content: space-between;
+   
+           gap: 10px;
+   
+           width: 100%;
+   
+           margin-top: 17px;
+           padding: 13px 0 0;
+   
+           background: transparent;
+   
+           color: #1f7bc2;
+   
+           border: 0;
+           border-top: 1px solid rgba(40,144,223,0.12);
+   
+           font-size: 13px;
+           font-weight: 800;
+           text-align: left;
+   
+           cursor: pointer;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-button span {
+           font-size: 18px;
+           line-height: 1;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-empty {
+           padding: 20px 17px;
+   
+           color: #536b7a;
+   
+           font-size: 13px;
+           line-height: 1.5;
+           text-align: center;
+       }
+   
+   }
 
 /* ========================================
    MOBILE PORTAL INTRO
