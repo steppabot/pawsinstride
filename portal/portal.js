@@ -8362,6 +8362,13 @@ document
             updateBookingTotal();
 
 
+            // ========================================
+            // REFRESH SELECTED VISIT PETS
+            // ========================================
+
+            renderSelectedDates();
+
+
             updateRepeatLastWeekBookingState();
 
         }
