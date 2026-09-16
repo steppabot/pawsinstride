@@ -11524,31 +11524,19 @@ function renderBookingCalendar() {
         
         
         // ========================================
-        // SELECTED DATE FOR ACTIVE TIME WINDOW
+        // SELECTED DATE
         // ========================================
         
-        const activeTimeWindow =
-            bookingTime?.value ||
-            lastSelectedTimeWindow ||
-            "";
-        
-        
-        const isSelectedForActiveWindow =
-            Boolean(
-                activeTimeWindow
-            ) &&
+        const hasSelectedVisit =
             selectedVisits.some(
                 visit =>
                     visit.date ===
-                        date
-                    &&
-                    visit.timeWindow ===
-                        activeTimeWindow
+                    date
             );
         
         
         if (
-            isSelectedForActiveWindow
+            hasSelectedVisit
         ) {
         
             button.classList.add(
