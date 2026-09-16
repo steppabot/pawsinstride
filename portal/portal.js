@@ -16961,31 +16961,93 @@ async function toggleClientVisitReport(
 
 
         // ========================================
-        // LOAD REPORT + PHOTOS + WALK
+        // LOAD VISIT REPORT
         // ========================================
-
+        
+        const {
+            data: report,
+            error: reportError
+        } =
+            await supabaseClient
+                .from(
+                    "visit_reports"
+                )
+                .select(
+                    "id, visit_id, notes, fed, fresh_water, pee, poop, created_at, updated_at"
+                )
+                .eq(
+                    "visit_id",
+                    visitId
+                )
+                .maybeSingle();
+        
+        
+        if (
+            reportError
+        ) {
+        
+            throw reportError;
+        
+        }
+        
+        
+        // ========================================
+        // REPORT NOT YET ADDED
+        // ========================================
+        
+        if (
+            !report
+        ) {
+        
+        
+            mount.innerHTML =
+                `
+        
+                    <div class="client-visit-report-empty">
+        
+                        <strong>
+                            Visit Report
+                        </strong>
+        
+                        <p>
+                            A visit report has not been added yet.
+                        </p>
+        
+                    </div>
+        
+                `;
+        
+        
+            return;
+        
+        }
+        
+        
+        // ========================================
+        // LOAD PET CARE + PHOTOS + WALK
+        // ========================================
+        
         const [
-            reportResult,
+            petCareResult,
             mediaResult,
             walkResult
         ] =
             await Promise.all([
-
-
+        
+        
                 supabaseClient
                     .from(
-                        "visit_reports"
+                        "visit_report_pet_care"
                     )
                     .select(
-                        "id, visit_id, notes, fed, fresh_water, pee, poop, created_at, updated_at"
+                        "visit_report_id, pet_id, fed, fresh_water, pee, poop, created_at, updated_at"
                     )
                     .eq(
-                        "visit_id",
-                        visitId
-                    )
-                    .maybeSingle(),
-
-
+                        "visit_report_id",
+                        report.id
+                    ),
+        
+        
                 supabaseClient
                     .from(
                         "visit_photos"
@@ -17011,8 +17073,8 @@ async function toggleClientVisitReport(
                                 true
                         }
                     ),
-
-
+        
+        
                 supabaseClient
                     .from(
                         "visit_walks"
@@ -17029,92 +17091,60 @@ async function toggleClientVisitReport(
                         "completed"
                     )
                     .maybeSingle()
-
-
+        
+        
             ]);
-
-
+        
+        
         // ========================================
-        // CHECK REPORT ERROR
+        // CHECK PET CARE ERROR
         // ========================================
-
+        
         if (
-            reportResult.error
+            petCareResult.error
         ) {
-
-            throw reportResult.error;
-
+        
+            throw petCareResult.error;
+        
         }
-
-
+        
+        
         // ========================================
         // CHECK MEDIA ERROR
         // ========================================
-
+        
         if (
             mediaResult.error
         ) {
-
+        
             throw mediaResult.error;
-
+        
         }
-
-
+        
+        
         // ========================================
         // CHECK WALK ERROR
         // ========================================
-
+        
         if (
             walkResult.error
         ) {
-
+        
             throw walkResult.error;
-
+        
         }
-
-
-        const report =
-            reportResult.data ||
-            null;
-
-
+        
+        
+        const petCareRows =
+            petCareResult.data ||
+            [];
+        
+        
         const completedWalk =
             walkResult.data ||
             null;
-
-
-        // ========================================
-        // REPORT NOT YET ADDED
-        // ========================================
-
-        if (
-            !report
-        ) {
-
-
-            mount.innerHTML =
-                `
-
-                    <div class="client-visit-report-empty">
-
-                        <strong>
-                            Visit Report
-                        </strong>
-
-                        <p>
-                            A visit report has not been added yet.
-                        </p>
-
-                    </div>
-
-                `;
-
-
-            return;
-
-        }
-
-
+        
+        
         // ========================================
         // LOAD WALK POINTS
         // ========================================
@@ -17225,16 +17255,17 @@ async function toggleClientVisitReport(
         // ========================================
         // RENDER VISIT REPORT
         // ========================================
-
+        
         renderClientVisitReport(
             mount,
             report,
+            petCareRows,
             mediaWithUrls,
             completedWalk,
             walkPoints
         );
-
-
+        
+        
         // ========================================
         // RENDER WALK ROUTE
         // ========================================
@@ -17398,6 +17429,7 @@ function closeOpenClientVisitReport() {
 function renderClientVisitReport(
     mount,
     report,
+    petCareRows,
     media,
     completedWalk,
     walkPoints
@@ -17412,89 +17444,291 @@ function renderClientVisitReport(
         );
 
 
-    const careItems =
-        [];
-
-
-    if (
-        report.fed
-    ) {
-
-        careItems.push(
-            "Fed"
-        );
-
-    }
-
-
-    if (
-        report.fresh_water
-    ) {
-
-        careItems.push(
-            "Fresh Water"
-        );
-
-    }
-
-
-    if (
-        report.pee
-    ) {
-
-        careItems.push(
-            "Pee"
-        );
-
-    }
-
-
-    if (
-        report.poop
-    ) {
-
-        careItems.push(
-            "Poop"
-        );
-
-    }
-
-
     // ========================================
-    // CARE UPDATES
+    // VISIT PETS
     // ========================================
 
-    const careHtml =
-        careItems.length
-
-            ? careItems
-                .map(
-                    item => `
-
-                        <span class="client-visit-report-care-item">
-
-                            <span class="client-visit-report-care-check">
-                                ✓
-                            </span>
-
-                            ${escapeHtml(
-                                item
-                            )}
-
-                        </span>
-
-                    `
+    const reportVisit =
+        currentVisits.find(
+            visit =>
+                Number(
+                    visit.id
+                ) ===
+                Number(
+                    report.visit_id
                 )
-                .join("")
+        ) ||
+        null;
 
-            : `
 
-                <span class="client-visit-report-muted">
-                    No care updates were marked.
+    const visitPets =
+        reportVisit
+
+            ? getPetsForVisit(
+                reportVisit
+            )
+
+            : [];
+
+
+    // ========================================
+    // CARE UPDATE CHIP
+    // ========================================
+
+    function buildCareChip(
+        label
+    ) {
+
+
+        return `
+            <span class="client-visit-report-care-item">
+
+                <span class="client-visit-report-care-check">
+                    ✓
                 </span>
 
+                ${escapeHtml(
+                    label
+                )}
+
+            </span>
+        `;
+
+    }
+
+
+    // ========================================
+    // BUILD CARE ITEMS
+    // ========================================
+
+    function buildPetCareItems(
+        care
+    ) {
+
+
+        const items =
+            [];
+
+
+        if (
+            care?.fed
+        ) {
+
+            items.push(
+                "Fed"
+            );
+
+        }
+
+
+        if (
+            care?.fresh_water
+        ) {
+
+            items.push(
+                "Fresh Water"
+            );
+
+        }
+
+
+        if (
+            care?.pee
+        ) {
+
+            items.push(
+                "Pee"
+            );
+
+        }
+
+
+        if (
+            care?.poop
+        ) {
+
+            items.push(
+                "Poop"
+            );
+
+        }
+
+
+        return items;
+
+    }
+
+
+    // ========================================
+    // PER-PET CARE UPDATES
+    // ========================================
+
+    let careHtml =
+        "";
+
+
+    if (
+        Array.isArray(
+            petCareRows
+        ) &&
+        petCareRows.length >
+        0
+    ) {
+
+
+        careHtml =
+            petCareRows
+                .map(
+                    care => {
+
+
+                        const pet =
+                            visitPets.find(
+                                item =>
+                                    Number(
+                                        item.id
+                                    ) ===
+                                    Number(
+                                        care.pet_id
+                                    )
+                            ) ||
+                            currentPets.find(
+                                item =>
+                                    Number(
+                                        item.id
+                                    ) ===
+                                    Number(
+                                        care.pet_id
+                                    )
+                            ) ||
+                            null;
+
+
+                        const petName =
+                            pet?.name ||
+                            "Pet";
+
+
+                        const careItems =
+                            buildPetCareItems(
+                                care
+                            );
+
+
+                        const careItemsHtml =
+                            careItems.length
+
+                                ? careItems
+                                    .map(
+                                        buildCareChip
+                                    )
+                                    .join("")
+
+                                : `
+                                    <span class="client-visit-report-muted">
+                                        No care updates were marked.
+                                    </span>
+                                `;
+
+
+                        return `
+                            <div class="client-visit-report-pet-care-card">
+
+                                <div class="client-visit-report-pet-care-header">
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            petName
+                                        )}
+                                    </strong>
+
+                                    <span>
+                                        Care Updates
+                                    </span>
+
+                                </div>
+
+
+                                <div class="client-visit-report-care-grid">
+
+                                    ${careItemsHtml}
+
+                                </div>
+
+                            </div>
+                        `;
+
+                    }
+                )
+                .join("");
+
+    } else {
+
+
+        // ========================================
+        // LEGACY REPORT FALLBACK
+        // ========================================
+
+        const legacyCareItems =
+            buildPetCareItems(
+                report
+            );
+
+
+        const legacyPetName =
+            visitPets.length ===
+            1
+
+                ? visitPets[0].name
+
+                : "Visit";
+
+
+        const legacyCareItemsHtml =
+            legacyCareItems.length
+
+                ? legacyCareItems
+                    .map(
+                        buildCareChip
+                    )
+                    .join("")
+
+                : `
+                    <span class="client-visit-report-muted">
+                        No care updates were marked.
+                    </span>
+                `;
+
+
+        careHtml =
+            `
+                <div class="client-visit-report-pet-care-card">
+
+                    <div class="client-visit-report-pet-care-header">
+
+                        <strong>
+                            ${escapeHtml(
+                                legacyPetName
+                            )}
+                        </strong>
+
+                        <span>
+                            Care Updates
+                        </span>
+
+                    </div>
+
+
+                    <div class="client-visit-report-care-grid">
+
+                        ${legacyCareItemsHtml}
+
+                    </div>
+
+                </div>
             `;
 
+    }
 
     // ========================================
     // VISIT PHOTOS
@@ -17768,92 +18002,167 @@ function renderClientVisitReport(
 
 
     // ========================================
+    // REPORT PET TITLE
+    // ========================================
+    
+    const visitPetNames =
+        visitPets
+            .map(
+                pet =>
+                    String(
+                        pet.name ||
+                        ""
+                    ).trim()
+            )
+            .filter(
+                Boolean
+            );
+    
+    
+    let visitPetTitle =
+        "Your Pet's Visit";
+    
+    
+    if (
+        visitPetNames.length ===
+        1
+    ) {
+    
+    
+        visitPetTitle =
+            `${visitPetNames[0]}'s Visit`;
+    
+    }
+    
+    
+    if (
+        visitPetNames.length >
+        1
+    ) {
+    
+    
+        const finalPetName =
+            visitPetNames[
+                visitPetNames.length -
+                1
+            ];
+    
+    
+        const leadingPetNames =
+            visitPetNames.slice(
+                0,
+                -1
+            );
+    
+    
+        const combinedPetNames =
+            leadingPetNames.length ===
+            1
+    
+                ? `${leadingPetNames[0]} & ${finalPetName}`
+    
+                : `${leadingPetNames.join(", ")} & ${finalPetName}`;
+    
+    
+        visitPetTitle =
+            `${combinedPetNames}'s Visit`;
+    
+    }
+    
+    
+    // ========================================
     // RENDER REPORT
     // ========================================
-
+    
     mount.innerHTML =
         `
-
+    
             <div class="client-visit-report">
-
-
+    
+    
                 <div class="client-visit-report-header">
-
+    
                     <div>
-
+    
                         <span class="client-visit-report-eyebrow">
                             VISIT REPORT
                         </span>
-
+    
                         <h5>
-                            Your Pet's Visit
+                            ${escapeHtml(
+                                visitPetTitle
+                            )}
                         </h5>
-
+    
                         <p>
                             Here's everything from this completed visit.
                         </p>
-
+    
                     </div>
-
+    
                 </div>
-
-
+    
+    
                 <div class="client-visit-report-section">
-
+    
                     <span class="client-visit-report-label">
                         Care Updates
                     </span>
-
-
-                    <div class="client-visit-report-care-grid">
-
+    
+    
+                    <div class="client-visit-report-pet-care-list">
+    
                         ${careHtml}
-
+    
                     </div>
-
+    
                 </div>
-
-
+    
+    
                 <div class="client-visit-report-section">
-
+    
                     <span class="client-visit-report-label">
                         Notes
                     </span>
-
+    
                     ${notesHtml}
-
+    
                 </div>
-
-
+    
+    
                 <div class="client-visit-report-section">
-
+    
                     <span class="client-visit-report-label">
                         Photos
                     </span>
-
-
+    
+    
                     <div class="client-visit-report-photo-grid">
-
+    
                         ${photosHtml}
-
+    
                     </div>
-
+    
                 </div>
-
-
+    
+    
                 <div class="client-visit-report-section">
-
+    
                     ${walkSummaryHtml}
-
+    
                 </div>
-
-
+    
+    
             </div>
-
+    
         `;
+    
+    }
 
-}
 
+// ========================================
+// CLIENT WALK DURATION
+// ========================================
 
 // ========================================
 // CLIENT WALK DURATION
