@@ -17330,80 +17330,101 @@ function startMobilePortalIntro() {
 // LOGOUT
 // ========================================
 
+async function logoutClient() {
+
+    try {
+
+        // ========================================
+        // SIGN OUT
+        // ========================================
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .auth
+                .signOut();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        // ========================================
+        // CLEAR LOCAL CLIENT STATE
+        // ========================================
+
+        currentUser =
+            null;
+
+        currentProfile =
+            null;
+
+        currentHousehold =
+            null;
+
+        currentPropertyAccess =
+            null;
+
+        currentPets =
+            [];
+
+        currentVisits =
+            [];
+
+        currentVisitPets =
+            [];
+
+
+        // ========================================
+        // RETURN TO LOGIN
+        // ========================================
+
+        window.location.replace(
+            "./login.html"
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ========================================
+// ORIGINAL / HIDDEN LOGOUT BUTTON
+// ========================================
+
 document
     .getElementById(
         "logout-button"
     )
     ?.addEventListener(
         "click",
-        async () => {
-
-            try {
-
-                // ========================================
-                // SIGN OUT
-                // ========================================
-
-                const {
-                    error
-                } =
-                    await supabaseClient
-                        .auth
-                        .signOut();
+        logoutClient
+    );
 
 
-                if (error) {
+// ========================================
+// HEADER LOGOUT BUTTON
+// ========================================
 
-                    throw error;
-
-                }
-
-
-                // ========================================
-                // CLEAR LOCAL CLIENT STATE
-                // ========================================
-
-                currentUser =
-                    null;
-
-                currentProfile =
-                    null;
-
-                currentHousehold =
-                    null;
-
-                currentPropertyAccess =
-                    null;
-
-                currentPets =
-                    [];
-
-                currentVisits =
-                    [];
-
-                currentVisitPets =
-                    [];
-
-
-                // ========================================
-                // RETURN TO LOGIN
-                // ========================================
-
-                window.location.replace(
-                    "./login.html"
-                );
-
-            }
-            catch (error) {
-
-                console.error(
-                    "Logout error:",
-                    error
-                );
-
-            }
-
-        }
+document
+    .querySelector(
+        ".client-header-logout-button"
+    )
+    ?.addEventListener(
+        "click",
+        logoutClient
     );
 
 // ========================================
