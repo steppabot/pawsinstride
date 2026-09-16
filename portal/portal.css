@@ -1481,65 +1481,53 @@ section h3 {
 @media (min-width:701px) {
 
     /* ========================================
-       VISIT CARD LAYOUT
+       VISIT CARD
     ======================================== */
 
     .client-portal-page
     .selected-date-item {
-        display: grid;
-
-        grid-template-columns:
-            minmax(0, 1fr)
-            auto;
-
+        display: flex;
         align-items: center;
 
         gap: 24px;
 
-        min-height: 88px;
+        min-height: 78px;
 
         padding:
+            16px
             18px
-            18px
-            18px
+            16px
             24px;
     }
 
 
     /* ========================================
-       VISIT CONTENT — HORIZONTAL
+       VISIT CONTENT
     ======================================== */
 
     .client-portal-page
     .selected-visit-summary {
-        display: grid;
+        min-width: 0;
+        flex: 1;
 
-        grid-template-columns:
-            minmax(105px, 0.65fr)
-            minmax(200px, 1.35fr)
-            minmax(160px, 0.85fr);
-
+        display: flex;
         align-items: center;
 
-        column-gap: clamp(
-            18px,
-            2.4vw,
-            38px
+        gap: clamp(
+            28px,
+            3.25vw,
+            52px
         );
-
-        row-gap: 8px;
-
-        min-width: 0;
     }
 
 
     /* ========================================
-       PET COLUMN
+       PETS
     ======================================== */
 
     .client-portal-page
     .selected-visit-pet-chips {
-        min-width: 0;
+        flex: 0 1 auto;
 
         display: flex;
         align-items: center;
@@ -1552,14 +1540,14 @@ section h3 {
     .client-portal-page
     .selected-visit-pet-chip {
         padding:
-            6px
-            11px;
+            7px
+            13px;
 
         font-size:
             clamp(
-                11px,
-                0.95vw,
-                13px
+                12px,
+                1vw,
+                14px
             );
 
         font-weight: 800;
@@ -1567,12 +1555,12 @@ section h3 {
 
 
     /* ========================================
-       SERVICE COLUMN
+       SERVICE
     ======================================== */
 
     .client-portal-page
     .selected-visit-service-line {
-        min-width: 0;
+        flex: 0 0 auto;
 
         display: flex;
         align-items: baseline;
@@ -1587,9 +1575,9 @@ section h3 {
     .selected-visit-service-name {
         font-size:
             clamp(
-                16px,
-                1.45vw,
-                20px
+                17px,
+                1.5vw,
+                21px
             );
 
         font-weight: 850;
@@ -1600,9 +1588,9 @@ section h3 {
     .selected-visit-service-separator {
         font-size:
             clamp(
-                14px,
-                1.2vw,
-                17px
+                15px,
+                1.25vw,
+                18px
             );
     }
 
@@ -1611,9 +1599,9 @@ section h3 {
     .selected-visit-service-option {
         font-size:
             clamp(
-                14px,
-                1.2vw,
-                17px
+                15px,
+                1.25vw,
+                18px
             );
 
         font-weight: 750;
@@ -1621,12 +1609,12 @@ section h3 {
 
 
     /* ========================================
-       TIME COLUMN
+       TIME
     ======================================== */
 
     .client-portal-page
     .selected-visit-time-row {
-        min-width: 0;
+        flex: 0 0 auto;
 
         display: flex;
         align-items: center;
@@ -1643,9 +1631,9 @@ section h3 {
 
         font-size:
             clamp(
-                13px,
-                1.15vw,
-                16px
+                14px,
+                1.25vw,
+                17px
             );
 
         font-weight: 800;
@@ -1654,12 +1642,16 @@ section h3 {
 
 
     /* ========================================
-       REMOVE BUTTON
+       REMOVE
     ======================================== */
 
     .client-portal-page
     .remove-date-button {
+        flex: 0 0 auto;
+
         min-height: 38px;
+
+        margin-left: auto;
 
         padding:
             8px
