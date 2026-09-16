@@ -3351,26 +3351,38 @@ async function setupCardFields(
             .createCardFieldsOneTimePaymentSession();
 
 
+    // ========================================
+    // CARD FIELD VISUAL STYLE
+    // ========================================
+
     const fieldStyle = {
+
         input: {
+
             fontSize:
-                "16px",
+                "15px",
 
             lineHeight:
-                "24px",
+                "22px",
 
             padding:
-                "13px 14px",
+                "14px 14px",
 
             color:
-                "#111827"
+                "#263d4c",
+
+            fontWeight:
+                "500"
+
         }
+
     };
 
 
     const numberField =
         session
             .createCardFieldsComponent({
+
                 type:
                     "number",
 
@@ -3379,12 +3391,14 @@ async function setupCardFields(
 
                 style:
                     fieldStyle
+
             });
 
 
     const expiryField =
         session
             .createCardFieldsComponent({
+
                 type:
                     "expiry",
 
@@ -3393,12 +3407,14 @@ async function setupCardFields(
 
                 style:
                     fieldStyle
+
             });
 
 
     const cvvField =
         session
             .createCardFieldsComponent({
+
                 type:
                     "cvv",
 
@@ -3407,6 +3423,7 @@ async function setupCardFields(
 
                 style:
                     fieldStyle
+
             });
 
 
@@ -3573,7 +3590,6 @@ async function setupCardFields(
     );
 
 }
-
 
 // ========================================
 // GOOGLE PAY SESSION
