@@ -16716,24 +16716,6 @@ body.booking-success-page {
        }
    
    
-       .client-portal-page .desktop-latest-update-section-heading {
-           margin: 0 2px 12px;
-       }
-   
-   
-       .client-portal-page .desktop-latest-update-section-heading h3 {
-           margin: 0;
-   
-           color: #183447;
-   
-           font-size: 22px;
-           font-weight: 800;
-           line-height: 1.2;
-   
-           letter-spacing: -0.02em;
-       }
-   
-   
        .client-portal-page .desktop-latest-update {
            position: relative;
    
@@ -16753,8 +16735,41 @@ body.booking-success-page {
        }
    
    
+       /* ========================================
+          SECTION HEADING
+       ======================================== */
+   
+       .client-portal-page .desktop-latest-update-section-heading {
+           margin: 0;
+           padding:
+               20px
+               20px
+               0;
+       }
+   
+   
+       .client-portal-page .desktop-latest-update-section-heading h3 {
+           margin: 0;
+   
+           color: #183447;
+   
+           font-size: 22px;
+           font-weight: 800;
+           line-height: 1.2;
+   
+           letter-spacing: -0.02em;
+       }
+   
+   
+       /* ========================================
+          UPDATE CONTENT
+       ======================================== */
+   
        .client-portal-page .desktop-latest-update-content {
-           padding: 17px;
+           padding:
+               18px
+               20px
+               20px;
        }
    
    
@@ -16779,6 +16794,10 @@ body.booking-success-page {
            line-height: 1.4;
        }
    
+   
+       /* ========================================
+          PHOTO
+       ======================================== */
    
        .client-portal-page .desktop-latest-update-photo {
            overflow: hidden;
@@ -16805,6 +16824,10 @@ body.booking-success-page {
        }
    
    
+       /* ========================================
+          NOTE
+       ======================================== */
+   
        .client-portal-page .desktop-latest-update-note {
            margin: 14px 0 0;
    
@@ -16814,6 +16837,10 @@ body.booking-success-page {
            line-height: 1.55;
        }
    
+   
+       /* ========================================
+          VIEW UPDATE
+       ======================================== */
    
        .client-portal-page .desktop-latest-update-button {
            display: flex;
@@ -16849,14 +16876,21 @@ body.booking-success-page {
        }
    
    
+       /* ========================================
+          EMPTY STATE
+       ======================================== */
+   
        .client-portal-page .desktop-latest-update-empty {
-           padding: 20px 17px;
+           padding:
+               18px
+               20px
+               20px;
    
            color: #536b7a;
    
            font-size: 13px;
            line-height: 1.5;
-           text-align: center;
+           text-align: left;
        }
    
    }
