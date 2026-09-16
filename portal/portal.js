@@ -11962,13 +11962,24 @@ function renderSelectedDates() {
             );
     
     
-    const selectedPetsLabel =
-        selectedPetNames.length >
-        0
-            ? selectedPetNames.join(
-                " + "
-            )
-            : "Selected Pet";
+    const selectedPetChipsHtml =
+        selectedPetNames.length
+            ? selectedPetNames
+                .map(
+                    petName => `
+                        <span class="selected-visit-pet-chip">
+                            ${escapeHtml(
+                                petName
+                            )}
+                        </span>
+                    `
+                )
+                .join("")
+            : `
+                <span class="selected-visit-pet-chip selected-visit-pet-chip-missing">
+                    Selected Pet
+                </span>
+            `;
     
     
     const selectedServiceType =
@@ -11979,12 +11990,6 @@ function renderSelectedDates() {
     const selectedServiceOption =
         serviceOptionSelect?.value ||
         "";
-    
-    
-    const selectedServiceLabel =
-        selectedServiceOption
-            ? `${selectedServiceType} · ${selectedServiceOption}`
-            : selectedServiceType;
     
     
     list.innerHTML =
@@ -12049,7 +12054,8 @@ function renderSelectedDates() {
     
                                     <span class="selected-date-group-meta">
                                         ${visits.length} ${
-                                            visits.length === 1
+                                            visits.length ===
+                                            1
                                                 ? "visit"
                                                 : "visits"
                                         }
@@ -12120,19 +12126,46 @@ function renderSelectedDates() {
                                                         <div class="selected-visit-summary">
     
     
-                                                            <div class="selected-visit-booking-details">
+                                                            <div class="selected-visit-detail-row selected-visit-dogs-row">
     
-                                                                <strong class="selected-visit-pets">
+                                                                <span class="selected-visit-detail-label">
+                                                                    Dogs:
+                                                                </span>
+    
+                                                                <span class="selected-visit-pet-chips">
+                                                                    ${selectedPetChipsHtml}
+                                                                </span>
+    
+                                                            </div>
+    
+    
+                                                            <div class="selected-visit-detail-row">
+    
+                                                                <span class="selected-visit-detail-label">
+                                                                    Service:
+                                                                </span>
+    
+                                                                <strong class="selected-visit-detail-value">
                                                                     ${escapeHtml(
-                                                                        selectedPetsLabel
+                                                                        selectedServiceType
                                                                     )}
                                                                 </strong>
     
-                                                                <span class="selected-visit-service">
-                                                                    ${escapeHtml(
-                                                                        selectedServiceLabel
-                                                                    )}
+                                                            </div>
+    
+    
+                                                            <div class="selected-visit-detail-row">
+    
+                                                                <span class="selected-visit-detail-label">
+                                                                    Duration:
                                                                 </span>
+    
+                                                                <strong class="selected-visit-detail-value">
+                                                                    ${escapeHtml(
+                                                                        selectedServiceOption ||
+                                                                        "—"
+                                                                    )}
+                                                                </strong>
     
                                                             </div>
     
@@ -12199,6 +12232,10 @@ function renderSelectedDates() {
             )
             .join("");
     
+    
+    // ========================================
+    // DATE GROUP TOGGLE
+    // ========================================
 
     // ========================================
     // DATE GROUP TOGGLE
