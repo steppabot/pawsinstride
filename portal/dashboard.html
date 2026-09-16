@@ -554,28 +554,63 @@
 
 
                 <!-- MULTI DATE BOOKING -->
-
+                
                 <div
                     id="multi-date-booking"
                     style="display:none;"
                 >
-
+                
                     <label>
                         Dates
                     </label>
-
+                
                     <p
                         id="booking-date-help"
                         class="booking-help"
                     >
                         Select your service dates.
                     </p>
-
-
+                
+                
+                    <!-- ========================================
+                         REPEAT LAST WEEK
+                         ======================================== -->
+                
+                    <div class="repeat-last-week-booking">
+                
+                        <button
+                            type="button"
+                            id="repeat-last-week-booking-button"
+                            class="repeat-last-week-booking-button"
+                        >
+                
+                            <span
+                                class="repeat-last-week-booking-icon"
+                                aria-hidden="true"
+                            >
+                                ↻
+                            </span>
+                
+                            <span>
+                                Repeat Last Week's Booking
+                            </span>
+                
+                        </button>
+                
+                
+                        <p
+                            id="repeat-last-week-booking-message"
+                            class="booking-help repeat-last-week-booking-message"
+                            style="display:none;"
+                        ></p>
+                
+                    </div>
+                
+                
                     <div class="booking-calendar">
-
+                
                         <div class="calendar-header">
-
+                
                             <button
                                 type="button"
                                 id="calendar-prev"
@@ -584,9 +619,9 @@
                             >
                                 ‹
                             </button>
-
+                
                             <strong id="calendar-month-label"></strong>
-
+                
                             <button
                                 type="button"
                                 id="calendar-next"
@@ -595,12 +630,12 @@
                             >
                                 ›
                             </button>
-
+                
                         </div>
-
-
+                
+                
                         <div class="calendar-weekdays">
-
+                
                             <span>Mon</span>
                             <span>Tue</span>
                             <span>Wed</span>
@@ -608,45 +643,44 @@
                             <span>Fri</span>
                             <span>Sat</span>
                             <span>Sun</span>
-
+                
                         </div>
-
-
+                
+                
                         <div
                             id="booking-calendar-grid"
                             class="calendar-grid"
                         ></div>
-
+                
                     </div>
-
-
+                
+                
                     <div id="selected-dates-container">
-
+                
                         <div class="selected-dates-header">
-
+                
                             <strong>
                                 Selected Dates
                             </strong>
-
+                
                             <span id="selected-date-count">
                                 0 visits
                             </span>
-
+                
                         </div>
-
-
+                
+                
                         <div id="selected-dates-list">
-
+                
                             <p class="empty-dates-message">
                                 No dates selected yet.
                             </p>
-
+                
                         </div>
-
+                
                     </div>
-
+                
                 </div>
-
 
                 <!-- BOARDING -->
                 
