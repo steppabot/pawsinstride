@@ -2008,6 +2008,7 @@ section h3 {
     border-radius: 14px;
 }
 
+
 .pet-form-header {
     display: flex;
     align-items: center;
@@ -2016,10 +2017,12 @@ section h3 {
     margin-bottom: 20px;
 }
 
+
 .pet-form-header h4 {
     margin: 0;
     font-size: 20px;
 }
+
 
 .pet-photo-editor {
     display: flex;
@@ -2029,6 +2032,7 @@ section h3 {
     padding-bottom: 20px;
     border-bottom: 1px solid #ddd;
 }
+
 
 .pet-photo-preview {
     width: 110px;
@@ -2040,22 +2044,17 @@ section h3 {
     border-radius: 50%;
 }
 
+
 .pet-photo-controls {
     flex: 1;
 }
 
+
 .pet-photo-upload-button {
     display: inline-block;
     width: auto;
-    margin: 0;
-    padding: 11px 16px;
-    background: #111;
-    color: #fff;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
 }
+
 
 .pet-photo-help {
     margin: 8px 0 0;
@@ -2063,15 +2062,19 @@ section h3 {
     font-size: 12px;
 }
 
+
 .pet-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0 18px;
 }
 
+
 .pet-form-field {
+    min-width: 0;
     margin-bottom: 18px;
 }
+
 
 .pet-form-field label {
     display: block;
@@ -2079,10 +2082,12 @@ section h3 {
     font-weight: 600;
 }
 
+
 .pet-form-field input,
 .pet-form-field select,
 .pet-form-field textarea {
     width: 100%;
+    box-sizing: border-box;
     padding: 12px;
     background: #fff;
     border: 1px solid #ccc;
@@ -2090,12 +2095,41 @@ section h3 {
     font-size: 16px;
 }
 
+
 .pet-form-field textarea {
     min-height: 100px;
     resize: vertical;
     line-height: 1.45;
 }
 
+
+/* ========================================
+   PET BIRTHDAY DATE FIELD
+======================================== */
+
+#pet-birthday {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+
+    text-align: left;
+
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.25;
+}
+
+
+#pet-birthday::-webkit-date-and-time-value {
+    margin: 0;
+    text-align: left;
+}
+
+
+#pet-birthday::-webkit-datetime-edit {
+    padding: 0;
+    text-align: left;
+}
 /* ========================================
    PET FORM ACTIONS
 ======================================== */
