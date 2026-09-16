@@ -12,13 +12,8 @@
 // the portal JavaScript itself.
 // ========================================
 
-const SERVICE_WORKER_VERSION =
-    "paws-in-stride-pwa-v2";
-
-
 const STATIC_CACHE_NAME =
-    `${SERVICE_WORKER_VERSION}-static`;
-
+    "paws-in-stride-static";
 
 // ========================================
 // APP SHELL FILES
