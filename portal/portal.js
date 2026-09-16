@@ -7493,6 +7493,915 @@ document
     );
 
 // ========================================
+// REPEAT LAST WEEK'S BOOKING
+// ========================================
+
+const repeatLastWeekBookingButton =
+    document.getElementById(
+        "repeat-last-week-booking-button"
+    );
+
+
+const repeatLastWeekBookingMessage =
+    document.getElementById(
+        "repeat-last-week-booking-message"
+    );
+
+
+repeatLastWeekBookingButton
+    ?.addEventListener(
+        "click",
+        async () => {
+
+
+            const serviceType =
+                serviceTypeSelect?.value ||
+                "";
+
+
+            const serviceOption =
+                serviceOptionSelect?.value ||
+                "";
+
+
+            const primaryPetId =
+                Number(
+                    bookingPetSelect?.value
+                );
+
+
+            if (
+                repeatLastWeekBookingMessage
+            ) {
+
+                repeatLastWeekBookingMessage
+                    .textContent =
+                        "";
+
+                repeatLastWeekBookingMessage
+                    .style
+                    .display =
+                        "none";
+
+            }
+
+
+            // ========================================
+            // REQUIRE PET
+            // ========================================
+
+            if (
+                !primaryPetId
+            ) {
+
+                if (
+                    repeatLastWeekBookingMessage
+                ) {
+
+                    repeatLastWeekBookingMessage
+                        .textContent =
+                            "Select your pet first.";
+
+                    repeatLastWeekBookingMessage
+                        .style
+                        .display =
+                            "block";
+
+                }
+
+
+                bookingPetSelect?.focus();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // SUPPORTED SERVICES
+            // ========================================
+
+            if (
+                serviceType !==
+                    "Dog Walking" &&
+                serviceType !==
+                    "Drop-In Visit"
+            ) {
+
+                if (
+                    repeatLastWeekBookingMessage
+                ) {
+
+                    repeatLastWeekBookingMessage
+                        .textContent =
+                            "Repeat Last Week is available for Dog Walking and Drop-In Visit bookings.";
+
+                    repeatLastWeekBookingMessage
+                        .style
+                        .display =
+                            "block";
+
+                }
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // REQUIRE DURATION
+            // ========================================
+
+            if (
+                !serviceOption
+            ) {
+
+                if (
+                    repeatLastWeekBookingMessage
+                ) {
+
+                    repeatLastWeekBookingMessage
+                        .textContent =
+                            "Select the service duration first.";
+
+                    repeatLastWeekBookingMessage
+                        .style
+                        .display =
+                            "block";
+
+                }
+
+
+                serviceOptionSelect?.focus();
+
+                return;
+
+            }
+
+
+            repeatLastWeekBookingButton.disabled =
+                true;
+
+
+            try {
+
+
+                if (
+                    repeatLastWeekBookingMessage
+                ) {
+
+                    repeatLastWeekBookingMessage
+                        .textContent =
+                            "Loading last week's schedule...";
+
+                    repeatLastWeekBookingMessage
+                        .style
+                        .display =
+                            "block";
+
+                }
+
+
+                // ========================================
+                // PREVIOUS CALENDAR WEEK
+                // ========================================
+
+                const today =
+                    getLocalDateString();
+
+
+                const currentWeekStart =
+                    getWeekKey(
+                        today
+                    );
+
+
+                const previousWeekStart =
+                    addDaysToDateString(
+                        currentWeekStart,
+                        -7
+                    );
+
+
+                const previousWeekEnd =
+                    addDaysToDateString(
+                        previousWeekStart,
+                        6
+                    );
+
+
+                const normalizedServiceOption =
+                    serviceOption
+                        .trim()
+                        .toLowerCase();
+
+
+                // ========================================
+                // FIND MATCHING VISITS FROM LAST WEEK
+                // ========================================
+
+                const previousWeekVisits =
+                    currentVisits
+                        .filter(
+                            visit => {
+
+
+                                const status =
+                                    String(
+                                        visit.status ||
+                                        ""
+                                    )
+                                        .trim()
+                                        .toLowerCase();
+
+
+                                if (
+                                    status ===
+                                    "cancelled"
+                                ) {
+
+                                    return false;
+
+                                }
+
+
+                                if (
+                                    visit.visit_date <
+                                        previousWeekStart ||
+                                    visit.visit_date >
+                                        previousWeekEnd
+                                ) {
+
+                                    return false;
+
+                                }
+
+
+                                if (
+                                    visit.service_type !==
+                                    serviceType
+                                ) {
+
+                                    return false;
+
+                                }
+
+
+                                if (
+                                    !visit.time_window
+                                ) {
+
+                                    return false;
+
+                                }
+
+
+                                const serviceName =
+                                    String(
+                                        visit.service_name ||
+                                        ""
+                                    )
+                                        .trim()
+                                        .toLowerCase();
+
+
+                                if (
+                                    !serviceName.includes(
+                                        normalizedServiceOption
+                                    )
+                                ) {
+
+                                    return false;
+
+                                }
+
+
+                                const visitPets =
+                                    getPetsForVisit(
+                                        visit
+                                    );
+
+
+                                return visitPets.some(
+                                    pet =>
+                                        Number(
+                                            pet.id
+                                        ) ===
+                                        primaryPetId
+                                );
+
+                            }
+                        )
+                        .sort(
+                            (
+                                firstVisit,
+                                secondVisit
+                            ) => {
+
+
+                                const dateComparison =
+                                    firstVisit
+                                        .visit_date
+                                        .localeCompare(
+                                            secondVisit
+                                                .visit_date
+                                        );
+
+
+                                if (
+                                    dateComparison !==
+                                    0
+                                ) {
+
+                                    return dateComparison;
+
+                                }
+
+
+                                return compareClientVisits(
+                                    firstVisit,
+                                    secondVisit
+                                );
+
+                            }
+                        );
+
+
+                if (
+                    previousWeekVisits.length ===
+                    0
+                ) {
+
+                    if (
+                        repeatLastWeekBookingMessage
+                    ) {
+
+                        repeatLastWeekBookingMessage
+                            .textContent =
+                                "No matching bookings were found last week.";
+
+                    }
+
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // KEEP VALID TIME WINDOWS
+                // ========================================
+
+                const validTimeWindows =
+                    new Set(
+                        TIME_WINDOWS.map(
+                            window =>
+                                window.value
+                        )
+                    );
+
+
+                const repeatableVisits =
+                    previousWeekVisits.filter(
+                        visit =>
+                            validTimeWindows.has(
+                                visit.time_window
+                            )
+                    );
+
+
+                if (
+                    repeatableVisits.length ===
+                    0
+                ) {
+
+                    if (
+                        repeatLastWeekBookingMessage
+                    ) {
+
+                        repeatLastWeekBookingMessage
+                            .textContent =
+                                "Last week's visits did not contain a reusable time window.";
+
+                    }
+
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // CHOOSE TARGET WEEK
+                // ========================================
+                //
+                // First try the equivalent weekdays in
+                // the current week.
+                //
+                // If ANY repeated visit would already be
+                // in the past, move the entire schedule
+                // forward to next week instead.
+                // ========================================
+
+                let targetWeekStart =
+                    currentWeekStart;
+
+
+                const buildRepeatedVisits =
+                    weekStart =>
+                        repeatableVisits.map(
+                            visit => {
+
+
+                                const sourceDate =
+                                    parseLocalDate(
+                                        visit.visit_date
+                                    );
+
+
+                                const sourceWeekStart =
+                                    parseLocalDate(
+                                        previousWeekStart
+                                    );
+
+
+                                const dayOffset =
+                                    Math.round(
+                                        (
+                                            sourceDate -
+                                            sourceWeekStart
+                                        ) /
+                                        86400000
+                                    );
+
+
+                                return {
+
+                                    date:
+                                        addDaysToDateString(
+                                            weekStart,
+                                            dayOffset
+                                        ),
+
+                                    timeWindow:
+                                        visit.time_window
+
+                                };
+
+                            }
+                        );
+
+
+                let repeatedVisits =
+                    buildRepeatedVisits(
+                        targetWeekStart
+                    );
+
+
+                const containsPastDate =
+                    repeatedVisits.some(
+                        visit =>
+                            visit.date <
+                            today
+                    );
+
+
+                if (
+                    containsPastDate
+                ) {
+
+                    targetWeekStart =
+                        addDaysToDateString(
+                            currentWeekStart,
+                            7
+                        );
+
+
+                    repeatedVisits =
+                        buildRepeatedVisits(
+                            targetWeekStart
+                        );
+
+                }
+
+
+                // ========================================
+                // REMOVE DUPLICATES
+                // ========================================
+
+                const uniqueRepeatedVisits =
+                    [];
+
+
+                const repeatedVisitKeys =
+                    new Set();
+
+
+                repeatedVisits.forEach(
+                    visit => {
+
+
+                        const key =
+                            `${visit.date}|${visit.timeWindow}`;
+
+
+                        if (
+                            repeatedVisitKeys.has(
+                                key
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        repeatedVisitKeys.add(
+                            key
+                        );
+
+
+                        uniqueRepeatedVisits.push(
+                            visit
+                        );
+
+                    }
+                );
+
+
+                // ========================================
+                // SKIP SERVICES ALREADY BOOKED
+                // ========================================
+
+                const alreadyBookedKeys =
+                    new Set(
+                        currentVisits
+                            .filter(
+                                visit => {
+
+
+                                    const status =
+                                        String(
+                                            visit.status ||
+                                            ""
+                                        )
+                                            .trim()
+                                            .toLowerCase();
+
+
+                                    if (
+                                        status ===
+                                        "cancelled"
+                                    ) {
+
+                                        return false;
+
+                                    }
+
+
+                                    if (
+                                        visit.service_type !==
+                                        serviceType ||
+                                        !visit.time_window
+                                    ) {
+
+                                        return false;
+
+                                    }
+
+
+                                    const visitPets =
+                                        getPetsForVisit(
+                                            visit
+                                        );
+
+
+                                    return visitPets.some(
+                                        pet =>
+                                            Number(
+                                                pet.id
+                                            ) ===
+                                            primaryPetId
+                                    );
+
+                                }
+                            )
+                            .map(
+                                visit =>
+                                    `${visit.visit_date}|${visit.time_window}`
+                            )
+                    );
+
+
+                const visitsToRepeat =
+                    uniqueRepeatedVisits.filter(
+                        visit =>
+                            !alreadyBookedKeys.has(
+                                `${visit.date}|${visit.timeWindow}`
+                            )
+                    );
+
+
+                const skippedVisitCount =
+                    uniqueRepeatedVisits.length -
+                    visitsToRepeat.length;
+
+
+                if (
+                    visitsToRepeat.length ===
+                    0
+                ) {
+
+                    if (
+                        repeatLastWeekBookingMessage
+                    ) {
+
+                        repeatLastWeekBookingMessage
+                            .textContent =
+                                "Those repeated visits are already booked.";
+
+                    }
+
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // DISTINCT REPEATED TIME WINDOWS
+                // ========================================
+
+                const repeatedTimeWindows =
+                    [
+                        ...new Set(
+                            visitsToRepeat.map(
+                                visit =>
+                                    visit.timeWindow
+                            )
+                        )
+                    ];
+
+
+                // ========================================
+                // RESET CURRENT BOOKING SELECTION
+                // ========================================
+
+                selectedVisits =
+                    [];
+
+
+                selectedDates =
+                    [];
+
+
+                selectedDateCapacityConflicts
+                    .clear();
+
+
+                bookingExpandedDateGroups
+                    .clear();
+
+
+                clearTimeWindowConflictError();
+
+                clearTimeWindowCapacityHelp();
+
+
+                document
+                    .querySelectorAll(
+                        ".booking-time-row-additional"
+                    )
+                    .forEach(
+                        row => {
+
+                            row.remove();
+
+                        }
+                    );
+
+
+                bookingTime.value =
+                    "";
+
+
+                bookingTime.dataset.previousValue =
+                    "";
+
+
+                // ========================================
+                // LOAD REPEATED TIME CONTROLS
+                // ========================================
+
+                await populatePreferredTimeWindows();
+
+
+                populateBookingTimeSelect(
+                    bookingTime,
+                    repeatedTimeWindows[0] ||
+                        ""
+                );
+
+
+                bookingTime.dataset.previousValue =
+                    bookingTime.value ||
+                    "";
+
+
+                repeatedTimeWindows
+                    .slice(1)
+                    .forEach(
+                        timeWindow => {
+
+                            createAdditionalBookingTimeRow(
+                                timeWindow
+                            );
+
+                        }
+                    );
+
+
+                lastSelectedTimeWindow =
+                    bookingTime.value ||
+                    repeatedTimeWindows[0] ||
+                    "";
+
+
+                // ========================================
+                // LOAD EXACT REPEATED VISITS
+                // ========================================
+
+                selectedVisits =
+                    visitsToRepeat.map(
+                        visit => ({
+
+                            date:
+                                visit.date,
+
+                            timeWindow:
+                                visit.timeWindow
+
+                        })
+                    );
+
+
+                sortSelectedBookingVisits();
+
+                rebuildSelectedDatesFromVisits();
+
+
+                // ========================================
+                // MOVE CALENDAR TO REPEATED WEEK
+                // ========================================
+
+                const firstRepeatedDate =
+                    parseLocalDate(
+                        selectedVisits[0]
+                            .date
+                    );
+
+
+                calendarYear =
+                    firstRepeatedDate
+                        .getFullYear();
+
+
+                calendarMonth =
+                    firstRepeatedDate
+                        .getMonth();
+
+
+                // ========================================
+                // REDRAW BOOKING UI
+                // ========================================
+
+                syncBookingTimeWindowControls();
+
+                renderSelectedDates();
+
+                renderBookingCalendar();
+
+                updateBookingTotal();
+
+
+                // ========================================
+                // CHECK EXACT DATE + TIME AVAILABILITY
+                // ========================================
+
+                await refreshPreferredTimeWindowAvailability();
+
+
+                const unavailableCount =
+                    selectedVisits.filter(
+                        visit =>
+                            hasSelectedVisitCapacityConflict(
+                                visit.date,
+                                visit.timeWindow
+                            )
+                    ).length;
+
+
+                if (
+                    repeatLastWeekBookingMessage
+                ) {
+
+
+                    if (
+                        unavailableCount >
+                        0
+                    ) {
+
+                        repeatLastWeekBookingMessage
+                            .textContent =
+                                `${selectedVisits.length} ${
+                                    selectedVisits.length ===
+                                    1
+                                        ? "visit"
+                                        : "visits"
+                                } repeated. ${unavailableCount} ${
+                                    unavailableCount ===
+                                    1
+                                        ? "time is"
+                                        : "times are"
+                                } unavailable and marked below.`;
+
+                    } else if (
+                        skippedVisitCount >
+                        0
+                    ) {
+
+                        repeatLastWeekBookingMessage
+                            .textContent =
+                                `${selectedVisits.length} ${
+                                    selectedVisits.length ===
+                                    1
+                                        ? "visit"
+                                        : "visits"
+                                } repeated. ${skippedVisitCount} already-booked ${
+                                    skippedVisitCount ===
+                                    1
+                                        ? "visit was"
+                                        : "visits were"
+                                } skipped.`;
+
+                    } else {
+
+                        repeatLastWeekBookingMessage
+                            .textContent =
+                                `${selectedVisits.length} ${
+                                    selectedVisits.length ===
+                                    1
+                                        ? "visit"
+                                        : "visits"
+                                } repeated from last week.`;
+
+                    }
+
+
+                }
+
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "Repeat last week booking error:",
+                    error
+                );
+
+
+                if (
+                    repeatLastWeekBookingMessage
+                ) {
+
+                    repeatLastWeekBookingMessage
+                        .textContent =
+                            "We couldn't repeat last week's booking. Please try again.";
+
+                    repeatLastWeekBookingMessage
+                        .style
+                        .display =
+                            "block";
+
+                }
+
+            }
+            finally {
+
+                repeatLastWeekBookingButton.disabled =
+                    false;
+
+            }
+
+
+        }
+    );
+
+
+// ========================================
 // GUIDE USER TO NEXT BOOKING FIELD
 // ========================================
 
