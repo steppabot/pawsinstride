@@ -413,7 +413,7 @@ body.admin-page {
     body.admin-page {
         padding-bottom:
             calc(
-                78px +
+                86px +
                 env(safe-area-inset-bottom)
             );
     }
@@ -446,20 +446,17 @@ body.admin-page {
         height: auto;
 
         padding:
-            7px
+            9px
             8px
             calc(
-                7px +
+                12px +
                 env(safe-area-inset-bottom)
             );
 
         background:
-            rgba(255,255,255,0.96);
+            rgba(255,255,255,0.97);
 
-        border-top:
-            1px solid
-            #d8e5ec;
-
+        border-top: 0;
         border-right: 0;
 
         box-shadow:
@@ -470,6 +467,36 @@ body.admin-page {
 
         -webkit-backdrop-filter:
             blur(18px);
+    }
+
+
+    /* ========================================
+       MOBILE NAV TOP ACCENT
+    ======================================== */
+
+    .admin-app-nav::before {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        right: 0;
+        left: 0;
+
+        height: 4px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        border-radius:
+            0
+            0
+            999px
+            999px;
     }
 
 
@@ -510,8 +537,16 @@ body.admin-page {
             6px
             3px;
 
-        border-radius:
-            11px;
+        background:
+            transparent;
+
+        color:
+            #7b8b96;
+
+        border: 0;
+        border-radius: 0;
+
+        box-shadow: none;
 
         font-size: 9px;
         font-weight: 750;
@@ -520,9 +555,22 @@ body.admin-page {
     }
 
 
+    .admin-app-nav-item:hover {
+        background:
+            transparent;
+
+        color:
+            #7b8b96;
+    }
+
+
     .admin-app-nav-item svg {
-        width: 20px;
-        height: 20px;
+        width: 21px;
+        height: 21px;
+
+        transition:
+            color 0.18s ease,
+            transform 0.18s ease;
     }
 
 
@@ -531,23 +579,32 @@ body.admin-page {
     ======================================== */
 
     .admin-app-nav-item-active {
-        color:
-            var(--admin-orange-dark);
-
         background:
-            #fff4e7;
+            transparent;
+
+        color:
+            #ef602c;
 
         box-shadow:
-            inset 0 0 0 1px rgba(245,171,64,0.18);
+            none;
     }
 
 
     .admin-app-nav-item-active:hover {
-        color:
-            var(--admin-orange-dark);
-
         background:
-            #fff4e7;
+            transparent;
+
+        color:
+            #ef602c;
+    }
+
+
+    .admin-app-nav-item-active svg {
+        color:
+            #ef602c;
+
+        transform:
+            translateY(-1px);
     }
 
 
@@ -558,7 +615,7 @@ body.admin-page {
     .admin-app-nav-badge {
         position: absolute;
 
-        top: 4px;
+        top: 3px;
         left: calc(50% + 8px);
 
         min-width: 17px;
