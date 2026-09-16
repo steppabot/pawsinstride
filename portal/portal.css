@@ -1193,82 +1193,64 @@ section h3 {
     display: flex;
     flex-direction: column;
 
-    gap: 0;
+    gap: 7px;
 }
 
 
 /* ========================================
-   SELECTED VISIT DETAIL ROW
+   SELECTED VISIT ROW POLISH
 ======================================== */
 
-.selected-visit-detail-row {
-    display: flex;
+.selected-date-item {
     align-items: center;
-    justify-content: flex-start;
 
-    gap: 10px;
+    margin: 8px 0;
+    padding: 13px 14px;
 
-    min-height: 34px;
+    background: #f8fbfd;
 
-    padding: 7px 1px;
+    border: 1px solid #dce9f0;
+    border-radius: 11px;
+}
 
-    border-bottom: 1px solid #edf2f5;
+
+.selected-date-group-content
+.selected-date-item:first-child {
+    border-top: 1px solid #dce9f0;
 }
 
 
 /* ========================================
-   SELECTED VISIT LABEL
-======================================== */
-
-.selected-visit-detail-label {
-    flex: 0 0 72px;
-
-    color: #82909a;
-
-    font-size: 10px;
-    font-weight: 800;
-    line-height: 1.3;
-
-    letter-spacing: 0.035em;
-    text-transform: uppercase;
-}
-
-
-/* ========================================
-   SELECTED VISIT VALUE
-======================================== */
-
-.selected-visit-detail-value {
-    min-width: 0;
-
-    color: #183447;
-
-    font-size: 12px;
-    font-weight: 800;
-    line-height: 1.35;
-
-    text-align: left;
-}
-
-
-/* ========================================
-   SELECTED VISIT DOGS
+   DOGS
 ======================================== */
 
 .selected-visit-dogs-row {
+    display: flex;
     align-items: center;
+
+    gap: 6px;
+
+    min-height: 0;
+    padding: 0;
+
+    border: 0;
+}
+
+
+.selected-visit-dogs-row
+.selected-visit-detail-label {
+    display: none;
 }
 
 
 .selected-visit-pet-chips {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
     flex-wrap: wrap;
 
-    gap: 5px;
+    gap: 6px;
 
-    margin-left: 0;
+    margin: 0;
 }
 
 
@@ -1277,12 +1259,12 @@ section h3 {
     align-items: center;
     justify-content: center;
 
-    padding: 5px 9px;
+    padding: 5px 10px;
 
     background: #eef7fd;
     color: #245b78;
 
-    border: 1px solid #c6e2f3;
+    border: 1px solid #b9dcf1;
     border-radius: 999px;
 
     font-size: 11px;
@@ -1291,9 +1273,58 @@ section h3 {
 }
 
 
-.selected-visit-pet-chip-missing {
-    color: #6b7785;
+/* ========================================
+   SERVICE + DURATION
+======================================== */
+
+.selected-visit-detail-row:not(.selected-visit-dogs-row) {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 0;
+
+    padding: 0;
+
+    border: 0;
 }
+
+
+.selected-visit-detail-row:not(.selected-visit-dogs-row)
+.selected-visit-detail-label {
+    display: none;
+}
+
+
+.selected-visit-detail-value {
+    color: #183447;
+
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.35;
+
+    text-align: left;
+}
+
+
+/* PUT SERVICE + DURATION ON ONE VISUAL LINE */
+
+.selected-visit-detail-row:nth-of-type(2) {
+    margin-bottom: -25px;
+}
+
+
+.selected-visit-detail-row:nth-of-type(2)
+.selected-visit-detail-value::after {
+    content: " ·";
+}
+
+
+.selected-visit-detail-row:nth-of-type(3) {
+    width: fit-content;
+
+    margin-left: max-content;
+}
+
 
 /* ========================================
    SELECTED VISIT TIME
@@ -1306,18 +1337,17 @@ section h3 {
 
     gap: 7px;
 
-    padding: 10px 1px 2px;
+    padding: 0;
 }
 
 
 .selected-visit-time {
-    color: #1f7bc2;
+    color: #667b88;
 
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.4;
 }
-
 /* ========================================
    DESKTOP SELECTED VISIT POLISH
 ======================================== */
