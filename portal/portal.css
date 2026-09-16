@@ -398,6 +398,76 @@ section h3 {
     font-size: 14px;
 }
 
+
+/* ========================================
+   DESKTOP REQUEST SERVICE FORM CONTROLS
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .booking-section label {
+        margin-bottom: 7px;
+
+        color: #183447;
+
+        font-size: 13px;
+        font-weight: 800;
+
+        line-height: 1.3;
+    }
+
+
+    .client-portal-page .booking-section input,
+    .client-portal-page .booking-section select {
+        min-height: 48px;
+
+        margin-bottom: 18px;
+        padding: 11px 13px;
+
+        background: #ffffff;
+        color: #263d4c;
+
+        border: 1px solid #c8dce8;
+        border-radius: 11px;
+
+        box-shadow: none;
+
+        font-size: 14px;
+        font-weight: 600;
+
+        transition:
+            border-color 0.18s ease,
+            box-shadow 0.18s ease,
+            background 0.18s ease;
+    }
+
+
+    .client-portal-page .booking-section input:focus,
+    .client-portal-page .booking-section select:focus {
+        outline: none;
+
+        background: #ffffff;
+
+        border-color: #1f9aeb;
+
+        box-shadow:
+            0 0 0 3px rgba(31,154,235,0.10);
+    }
+
+
+    .client-portal-page .booking-help {
+        margin: -5px 0 14px;
+
+        color: #6b7785;
+
+        font-size: 12px;
+        font-weight: 500;
+
+        line-height: 1.45;
+    }
+
+}
+
 .booking-total {
     display: flex;
     align-items: center;
@@ -947,12 +1017,17 @@ section h3 {
     min-height: 48px;
     padding: 10px 2px;
     border-top: 1px solid #edf2f5;
-    transition: background 0.2s ease,border-color 0.2s ease,box-shadow 0.2s ease;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .selected-date-group-content .selected-date-item:first-child {
     border-top: 0;
 }
+
 
 /* ========================================
    SELECTED VISIT SUMMARY
@@ -961,8 +1036,10 @@ section h3 {
 .selected-visit-summary {
     min-width: 0;
     flex: 1;
+
     display: flex;
     flex-direction: column;
+
     gap: 4px;
 }
 
@@ -977,6 +1054,7 @@ section h3 {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+
     gap: 7px;
 }
 
@@ -985,6 +1063,63 @@ section h3 {
     font-size: 12px;
     font-weight: 700;
     line-height: 1.4;
+}
+
+
+/* ========================================
+   DESKTOP SELECTED VISIT POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .selected-date-item {
+        min-height: 54px;
+
+        padding: 12px 3px;
+    }
+
+
+    .client-portal-page .selected-visit-date {
+        color: #183447;
+
+        font-size: 14px;
+        font-weight: 800;
+
+        line-height: 1.35;
+    }
+
+
+    .client-portal-page .selected-visit-time {
+        color: #667b88;
+
+        font-size: 12px;
+        font-weight: 650;
+
+        line-height: 1.4;
+    }
+
+
+    .client-portal-page .remove-date-button {
+        min-height: 34px;
+        padding: 7px 11px;
+
+        border-radius: 9px;
+
+        font-size: 11px;
+        font-weight: 800;
+
+        transition:
+            background 0.18s ease,
+            color 0.18s ease,
+            border-color 0.18s ease,
+            transform 0.18s ease;
+    }
+
+
+    .client-portal-page .remove-date-button:active {
+        transform: scale(0.96);
+    }
+
 }
 
 /* ========================================
@@ -1323,10 +1458,13 @@ section h3 {
 .client-profile-initials {
     width: 100%;
     height: 100%;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+
+    color: #ffffff;
+
     font-size: 28px;
     font-weight: 700;
 }
@@ -1344,6 +1482,55 @@ section h3 {
     margin: 3px 0;
     color: #555;
     font-size: 14px;
+}
+
+
+/* ========================================
+   DESKTOP HOUSEHOLD PROFILE POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .household-profile-top {
+        gap: 20px;
+
+        padding: 18px;
+
+        background: linear-gradient(
+            145deg,
+            #fbfdfe 0%,
+            #f6fafc 100%
+        );
+
+        border: 1px solid #dbe7ed;
+        border-radius: 16px;
+    }
+
+
+    .client-portal-page .household-profile-summary h4 {
+        margin: 0 0 7px;
+
+        color: #183447;
+
+        font-size: 22px;
+        font-weight: 800;
+
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+
+
+    .client-portal-page .household-profile-summary p {
+        margin: 4px 0;
+
+        color: #6b7785;
+
+        font-size: 13px;
+        font-weight: 500;
+
+        line-height: 1.45;
+    }
+
 }
 
 /* ========================================
@@ -1907,17 +2094,87 @@ section h3 {
     font-size: 14px;
 }
 
+
+/* ========================================
+   DESKTOP PET PROFILE SUMMARY
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .pet-profile-summary h4 {
+        margin: 0 0 6px;
+
+        color: #183447;
+
+        font-size: 22px;
+        font-weight: 800;
+
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+
+
+    .client-portal-page .pet-profile-subtitle {
+        margin: 0 0 7px;
+
+        color: #526875;
+
+        font-size: 13px;
+        font-weight: 650;
+
+        line-height: 1.4;
+    }
+
+
+    .client-portal-page .pet-profile-subtitle span {
+        margin: 0 6px;
+        color: #a6b6bf;
+    }
+
+
+    .client-portal-page .pet-profile-birthday {
+        color: #7a8993;
+
+        font-size: 12px;
+        font-weight: 600;
+
+        line-height: 1.4;
+    }
+
+}
+
 .edit-pet-button {
     width: auto;
+    min-height: 42px;
     padding: 10px 15px;
-    background: #ffffff;
-    border: 1px solid #bbbbbb;
-    border-radius: 8px;
-    font-weight: 600;
+
+    background: #f4f9fc;
+    color: #1f7bc2;
+
+    border: 1px solid #c8dce8;
+    border-radius: 11px;
+
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
 }
 
 .edit-pet-button:hover {
-    border-color: #111111;
+    background: #eaf5fb;
+    color: #176aa9;
+    border-color: #9fc7dd;
+}
+
+.edit-pet-button:active {
+    transform: scale(0.985);
 }
 
 /* ========================================
@@ -2628,112 +2885,283 @@ section h3 {
       }
    
    }
+
 /* ========================================
    UPCOMING SERVICE DETAILS
 ======================================== */
 
- .selected-upcoming-day {
-    margin-top: 18px;
-    padding: 16px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-}
+@media (min-width:701px) {
 
- .selected-upcoming-header {
-    margin-bottom: 12px;
-}
+    .selected-upcoming-day {
+        margin-top: 20px;
+        padding: 18px;
 
- .selected-upcoming-header strong {
-    font-size: 17px;
-}
+        background: #f8fbfd;
 
- .empty-upcoming-message {
-    margin: 0;
-    color: #777;
-}
+        border: 1px solid #d6e4eb;
+        border-radius: 16px;
+    }
 
- .upcoming-service-card {
-    margin-top: 12px;
-    padding: 14px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    transition: border-color 0.2s ease,box-shadow 0.2s ease,background 0.2s ease;
-}
 
- .upcoming-service-card:first-child {
-    margin-top: 0;
-}
+    .selected-upcoming-header {
+        margin: 0 2px 14px;
+    }
 
- .upcoming-service-card:last-child {
-    padding-bottom: 14px;
-}
 
- .upcoming-service-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 12px;
-}
+    .selected-upcoming-header strong {
+        color: #183447;
 
- .service-status {
-    display: inline-flex;
-    align-items: center;
-    padding: 5px 9px;
-    background: #f1f1f1;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-}
+        font-size: 18px;
+        font-weight: 800;
 
- .upcoming-service-pets {
-    margin-bottom: 6px;
-    padding: 10px 0 13px;
-    border-bottom: 1px solid #eee;
-}
+        letter-spacing: -0.015em;
+    }
 
- .upcoming-service-pets-label {
-    display: block;
-    margin-bottom: 7px;
-    color: #777;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-}
 
- .service-pet-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-}
+    .empty-upcoming-message {
+        margin: 0 2px;
 
- .service-pet-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 10px;
-    background: #f1f1f1;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 700;
-}
+        color: #6b7785;
 
- .service-pet-chip-missing {
-    color: #777;
-    font-weight: 500;
-}
+        font-size: 13px;
+        line-height: 1.5;
+    }
 
- .upcoming-service-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-    margin-top: 6px;
-    font-size: 14px;
-}
 
-.upcoming-service-row span {
-    color: #666;
+    /* ========================================
+       SERVICE CARD
+    ======================================== */
+
+    .upcoming-service-card {
+        position: relative;
+
+        overflow: hidden;
+
+        margin-top: 12px;
+        padding: 21px 18px 17px;
+
+        background: #ffffff;
+
+        border: 1px solid #d6e4eb;
+        border-radius: 16px;
+
+        box-shadow:
+            0 6px 18px rgba(24,52,71,0.06);
+
+        transition:
+            border-color 0.18s ease,
+            box-shadow 0.18s ease,
+            transform 0.18s ease;
+    }
+
+
+    .upcoming-service-card::before {
+        content: "";
+
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 4px;
+
+        background: linear-gradient(
+            90deg,
+            #f5ab40 0%,
+            #ef602c 100%
+        );
+    }
+
+
+    .upcoming-service-card-completed::before {
+        background: linear-gradient(
+            90deg,
+            #22a447 0%,
+            #168a3a 100%
+        );
+    }
+
+
+    .upcoming-service-card:first-child {
+        margin-top: 0;
+    }
+
+
+    .upcoming-service-card:hover {
+        border-color: #c7dae4;
+
+        box-shadow:
+            0 9px 24px rgba(24,52,71,0.09);
+
+        transform: translateY(-1px);
+    }
+
+
+    /* ========================================
+       SERVICE CARD HEADER
+    ======================================== */
+
+    .upcoming-service-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 16px;
+
+        margin-bottom: 14px;
+    }
+
+
+    .upcoming-service-card-header strong {
+        color: #183447;
+
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+
+    .service-status {
+        display: inline-flex;
+        align-items: center;
+
+        padding: 5px 9px;
+
+        background: #eef7fd;
+        color: #1f7bc2;
+
+        border-radius: 999px;
+
+        font-size: 10px;
+        font-weight: 800;
+
+        letter-spacing: 0.025em;
+
+        white-space: nowrap;
+    }
+
+
+    .upcoming-service-card-completed .service-status {
+        background: #eef9f1;
+        color: #21863f;
+    }
+
+
+    /* ========================================
+       PET ROW
+    ======================================== */
+
+    .upcoming-service-pets {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 16px;
+
+        margin: 16px 0 0;
+        padding: 10px 1px;
+
+        border-bottom: 1px solid #e8eef2;
+    }
+
+
+    .upcoming-service-pets-label {
+        margin: 0;
+
+        color: #82909a;
+
+        font-size: 11px;
+        font-weight: 700;
+
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
+    }
+
+
+    .service-pet-chips {
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+
+        gap: 6px;
+
+        margin-left: auto;
+    }
+
+
+    .service-pet-chip {
+        display: inline-flex;
+        align-items: center;
+
+        padding: 6px 10px;
+
+        background: #eef7fd;
+        color: #245b78;
+
+        border-radius: 999px;
+
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+
+    .service-pet-chip-missing {
+        color: #6b7785;
+        font-weight: 700;
+    }
+
+
+    /* ========================================
+       SERVICE DATA ROWS
+    ======================================== */
+
+    .upcoming-service-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 18px;
+
+        min-height: 40px;
+
+        margin: 0;
+        padding: 10px 1px;
+
+        color: #183447;
+
+        font-size: 13px;
+        line-height: 1.35;
+    }
+
+
+    .upcoming-service-row + .upcoming-service-row {
+        border-top: 1px solid #edf1f3;
+    }
+
+
+    .upcoming-service-row span {
+        flex: 0 0 auto;
+
+        color: #82909a;
+
+        font-size: 11px;
+        font-weight: 700;
+
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
+    }
+
+
+    .upcoming-service-row strong {
+        min-width: 0;
+
+        color: #183447;
+
+        font-size: 13px;
+        font-weight: 800;
+
+        text-align: right;
+    }
+
 }
 
 /* ========================================
@@ -8216,11 +8644,18 @@ body.client-portal-page {
     content: "";
     position: absolute;
     top: 0;
-    left: 18px;
-    right: 18px;
-    height: 3px;
-    background: linear-gradient(90deg,var(--pis-cyan),var(--pis-blue),var(--pis-orange));
-    border-radius: 0 0 999px 999px;
+    left: 0;
+    right: 0;
+
+    height: 4px;
+
+    background: linear-gradient(
+        90deg,
+        #f5ab40 0%,
+        #ef602c 100%
+    );
+
+    border-radius: 0;
     pointer-events: none;
 }
 
@@ -8242,29 +8677,89 @@ body.client-portal-page {
     color: var(--pis-muted);
 }
 
+
+/* ========================================
+   DESKTOP SECTION HEADING POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .household-section-header h3,
+    .client-portal-page .pets-section-header h3,
+    .client-portal-page .upcoming-services-header h3 {
+        margin: 0 0 5px;
+
+        color: #183447;
+
+        font-size: 22px;
+        font-weight: 800;
+
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+    }
+
+
+    .client-portal-page .household-section-help,
+    .client-portal-page .pets-section-help,
+    .client-portal-page .upcoming-calendar-help {
+        color: #6b7785;
+
+        font-size: 13px;
+        font-weight: 500;
+
+        line-height: 1.45;
+    }
+
+}
+
 /* ========================================
    PRIMARY BUTTONS
 ======================================== */
 
 .client-portal-page .primary-button {
-    background: linear-gradient(135deg,var(--pis-orange),var(--pis-orange-soft));
-    color: #fff;
-    border: none;
-    border-radius: 999px;
-    box-shadow: 0 6px 15px rgba(245,171,64,0.22);
-    font-weight: 700;
-    transition: transform 0.18s ease,box-shadow 0.18s ease,background 0.18s ease;
+    min-height: 44px;
+    padding: 11px 18px;
+
+    background: linear-gradient(
+        90deg,
+        #f5ab40 0%,
+        #ef602c 100%
+    );
+
+    color: #ffffff;
+
+    border: 0;
+    border-radius: 11px;
+
+    box-shadow: 0 5px 14px rgba(239,96,44,0.18);
+
+    font-weight: 800;
+    letter-spacing: 0.01em;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
 .client-portal-page .primary-button:hover {
     opacity: 1;
-    background: var(--pis-orange-hover);
+
+    background: linear-gradient(
+        90deg,
+        #f5ab40 0%,
+        #ef602c 100%
+    );
+
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(239,96,44,0.20);
+
+    box-shadow:
+        0 7px 18px rgba(239,96,44,0.24);
 }
 
 .client-portal-page .primary-button:active {
-    transform: translateY(0);
+    transform: scale(0.985);
 }
 
 /* ========================================
@@ -8433,16 +8928,7 @@ body.mobile-app-screen-pets .edit-pet-button:active {
 ======================================== */
 
 .client-portal-page #logout-button {
-    color: var(--pis-muted);
-    background: rgba(255,255,255,0.78);
-    border: 1px solid var(--pis-border);
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(35,93,125,0.04);
-}
-
-.client-portal-page #logout-button:hover {
-    color: var(--pis-ink);
-    border-color: var(--pis-border-strong);
+    display: none !important;
 }
 
 /* ========================================
@@ -8497,18 +8983,113 @@ body.mobile-app-screen-pets .edit-pet-button:active {
 .client-portal-page .booking-section {
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--pis-border-strong);
-    box-shadow: 0 12px 34px rgba(40,144,223,0.10);
+
+    border: 1px solid #d6e4eb;
+    border-radius: 18px;
+
+    box-shadow:
+        0 7px 18px rgba(24,52,71,0.07);
 }
 
 .client-portal-page .booking-section::before {
     content: "";
+
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
+
     height: 4px;
-    background: linear-gradient(90deg,var(--pis-cyan),var(--pis-blue),var(--pis-orange));
+
+    background: linear-gradient(
+        90deg,
+        #f5ab40 0%,
+        #ef602c 100%
+    );
+
+    pointer-events: none;
+}
+
+
+/* ========================================
+   DESKTOP REQUEST SERVICE HEADER
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page
+    .booking-section > .section-header {
+        align-items: center;
+
+        margin: 0 0 18px;
+        padding-top: 4px;
+    }
+
+
+    .client-portal-page
+    .booking-section > .section-header h3 {
+        margin: 0;
+
+        color: #183447;
+
+        font-size: 22px;
+        font-weight: 800;
+
+        line-height: 1.2;
+        letter-spacing: -0.025em;
+    }
+
+
+    .client-portal-page
+    .booking-section
+    #close-booking-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        flex: 0 0 38px;
+
+        width: 38px;
+        height: 38px;
+        padding: 0;
+
+        background: #f4f9fc;
+        color: #1f7bc2;
+
+        border: 1px solid #c8dce8;
+        border-radius: 10px;
+
+        box-shadow: none;
+
+        font-size: 25px;
+        font-weight: 500;
+        line-height: 1;
+
+        cursor: pointer;
+
+        transition:
+            background 0.18s ease,
+            color 0.18s ease,
+            border-color 0.18s ease,
+            transform 0.18s ease;
+    }
+
+
+    .client-portal-page
+    .booking-section
+    #close-booking-button:hover {
+        background: #eaf5fb;
+        color: #176aa9;
+        border-color: #9fc7dd;
+    }
+
+
+    .client-portal-page
+    .booking-section
+    #close-booking-button:active {
+        transform: scale(0.96);
+    }
+
 }
 
 /* ========================================
@@ -8619,6 +9200,64 @@ body.mobile-app-screen-pets .edit-pet-button:active {
     color: var(--pis-blue);
 }
 
+
+/* ========================================
+   DESKTOP REQUEST SERVICE TOTAL
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .booking-total {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        gap: 18px;
+
+        margin: 24px 0 8px;
+        padding: 18px 0 0;
+
+        border-top: 1px solid #d6e4eb;
+    }
+
+
+    .client-portal-page #booking-count {
+        color: #183447;
+
+        font-size: 17px;
+        font-weight: 800;
+
+        line-height: 1.2;
+    }
+
+
+    .client-portal-page #booking-price {
+        color: #1f9aeb;
+
+        font-size: 26px;
+        font-weight: 800;
+
+        line-height: 1;
+
+        letter-spacing: -0.02em;
+    }
+
+
+    .client-portal-page .booking-price-details {
+        margin: 0 0 18px;
+
+        color: #6b7785;
+
+        font-size: 12px;
+        font-weight: 500;
+
+        line-height: 1.45;
+
+        text-align: right;
+    }
+
+}
+
 /* ========================================
    REQUEST SERVICE TOTAL — MOBILE
 ======================================== */
@@ -8703,6 +9342,95 @@ body.mobile-app-screen-pets .edit-pet-button:active {
     background: var(--pis-blue-soft);
 }
 
+
+/* ========================================
+   DESKTOP ADDITIONAL PETS POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .additional-pets-wrapper {
+        margin-bottom: 20px;
+    }
+
+
+    .client-portal-page .additional-pets-wrapper > label {
+        margin: 0 0 7px;
+
+        color: #183447;
+
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+
+    .client-portal-page .additional-pets-list {
+        overflow: hidden;
+
+        background: #f4f9fc;
+
+        border: 1px solid #d3e4ed;
+        border-radius: 11px;
+
+        box-shadow: none;
+    }
+
+
+    .client-portal-page .additional-pet-option {
+        min-height: 48px;
+        padding: 11px 13px;
+
+        background: transparent;
+
+        border-bottom: 1px solid #dce9f0;
+
+        transition:
+            background 0.18s ease;
+    }
+
+
+    .client-portal-page .additional-pet-option:hover {
+        background: #edf6fb;
+    }
+
+
+    .client-portal-page .additional-pet-main {
+        color: #263d4c;
+
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+
+    .client-portal-page .additional-pet-main input {
+        width: 20px !important;
+        height: 20px;
+
+        accent-color: #1f9aeb;
+    }
+
+
+    .client-portal-page .additional-pet-fee {
+        color: #567487;
+
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+
+    .client-portal-page .additional-pets-help {
+        margin: 8px 2px 0;
+
+        color: #6b7785;
+
+        font-size: 12px;
+        font-weight: 500;
+
+        line-height: 1.45;
+    }
+
+}
+
 /* ========================================
    BOARDING POLICY
 ======================================== */
@@ -8712,6 +9440,44 @@ body.mobile-app-screen-pets .edit-pet-button:active {
     border: 1px solid #f3d7aa;
 }
 
+
+/* ========================================
+   DESKTOP BOARDING POLICY POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .boarding-policy {
+        margin-bottom: 20px;
+        padding: 16px 17px;
+
+        background: linear-gradient(
+            145deg,
+            #fffaf2 0%,
+            #fff4e3 100%
+        );
+
+        border: 1px solid #f1cf99;
+        border-radius: 12px;
+
+        box-shadow:
+            0 3px 10px rgba(201,111,25,0.05);
+    }
+
+
+    .client-portal-page .boarding-policy p {
+        margin: 7px 0 0;
+
+        color: #76532d;
+
+        font-size: 13px;
+        font-weight: 500;
+
+        line-height: 1.5;
+    }
+
+}
+
 /* ========================================
    SELECTED DATES
 ======================================== */
@@ -8719,6 +9485,64 @@ body.mobile-app-screen-pets .edit-pet-button:active {
 .client-portal-page #selected-dates-container {
     background: var(--pis-app-bg-soft);
     border-color: var(--pis-border);
+}
+
+
+/* ========================================
+   DESKTOP SELECTED DATES POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page #selected-dates-container {
+        margin: 24px 0 0;
+        padding: 18px;
+
+        background: #f8fbfd;
+
+        border: 1px solid #d6e4eb;
+        border-radius: 16px;
+
+        box-shadow:
+            0 4px 14px rgba(24,52,71,0.045);
+    }
+
+
+    .client-portal-page .selected-dates-header {
+        margin: 0 2px 14px;
+    }
+
+
+    .client-portal-page .selected-dates-header strong {
+        color: #183447;
+
+        font-size: 16px;
+        font-weight: 800;
+
+        letter-spacing: -0.01em;
+    }
+
+
+    .client-portal-page #selected-date-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        min-height: 26px;
+        padding: 4px 9px;
+
+        background: #eaf5fb;
+        color: #1f7bc2;
+
+        border: 1px solid #c8dce8;
+        border-radius: 999px;
+
+        font-size: 11px;
+        font-weight: 800;
+
+        line-height: 1;
+    }
+
 }
 
 /* ========================================
@@ -8758,11 +9582,80 @@ body.mobile-app-screen-pets .edit-pet-button:active {
    CALENDAR CONTAINERS
 ======================================== */
 
-.client-portal-page .booking-calendar,
-.client-portal-page .upcoming-calendar {
+.client-portal-page .booking-calendar {
     background: var(--pis-app-bg-soft);
     border: 1px solid var(--pis-border);
     border-radius: 14px;
+}
+
+
+/* ========================================
+   DESKTOP CALENDAR POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .booking-calendar {
+        margin: 4px 0 18px;
+        padding: 16px 14px 14px;
+
+        background: #f7fbfd;
+
+        border: 1px solid #d8e7ef;
+        border-radius: 14px;
+
+        box-shadow: none;
+    }
+
+
+    .client-portal-page .booking-calendar-header {
+        margin-bottom: 12px;
+    }
+
+
+    .client-portal-page .booking-calendar-header strong {
+        color: #183447;
+
+        font-size: 16px;
+        font-weight: 800;
+
+        letter-spacing: -0.01em;
+    }
+
+
+    .client-portal-page .booking-calendar-weekdays {
+        margin-bottom: 5px;
+    }
+
+
+    .client-portal-page .booking-calendar-weekdays span {
+        padding: 3px 0;
+
+        color: #82909a;
+
+        font-size: 10px;
+        font-weight: 800;
+
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+
+    .client-portal-page .booking-calendar-grid {
+        gap: 5px;
+    }
+
+
+    .client-portal-page .upcoming-calendar {
+        background: #ffffff;
+
+        border: 1px solid #d6e4eb;
+        border-radius: 18px;
+
+        box-shadow:
+            0 7px 18px rgba(24,52,71,0.07);
+    }
+
 }
 
 /* ========================================
@@ -8770,16 +9663,39 @@ body.mobile-app-screen-pets .edit-pet-button:active {
 ======================================== */
 
 .client-portal-page .calendar-nav-button {
-    color: var(--pis-blue);
-    background: #ffffff;
-    border: 1px solid var(--pis-border);
-    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+
+    background: #f4f8fb;
+    color: #1f7bc2;
+
+    border: 1px solid #d9e7ef;
+    border-radius: 10px;
+
+    box-shadow: none;
+
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
 }
 
 .client-portal-page .calendar-nav-button:hover {
-    color: #ffffff;
-    background: var(--pis-blue);
-    border-color: var(--pis-blue);
+    background: #eaf5fb;
+    color: #176aa9;
+    border-color: #9fc7dd;
+}
+
+.client-portal-page .calendar-nav-button:active {
+    transform: scale(0.96);
 }
 
 /* ========================================
@@ -8872,14 +9788,143 @@ body.mobile-app-screen-pets .edit-pet-button:active {
 }
 
 .client-portal-page .calendar-day-selected {
-    color: #fff;
-    background: linear-gradient(135deg,var(--pis-cyan),var(--pis-blue));
-    border-color: var(--pis-blue);
-    box-shadow: 0 4px 12px rgba(40,144,223,0.20);
+    color: #ffffff;
+
+    background: linear-gradient(
+        145deg,
+        #f5ab40 0%,
+        #eb872c 100%
+    );
+
+    border-color: transparent;
+
+    box-shadow:
+        0 4px 10px rgba(201,111,25,0.23);
 }
 
 .client-portal-page .calendar-day-today:not(.calendar-day-selected) {
-    border: 2px solid var(--pis-orange);
+    border: 2px solid #1f9aeb;
+}
+
+
+/* ========================================
+   DESKTOP REQUEST SERVICE CALENDAR DAYS
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .booking-calendar .calendar-day {
+        background: #ffffff;
+        color: #263d4c;
+
+        border: 1px solid #e3ebef;
+        border-radius: 10px;
+
+        box-shadow: none;
+
+        font-size: 12px;
+        font-weight: 700;
+
+        transition:
+            background 0.18s ease,
+            color 0.18s ease,
+            border-color 0.18s ease,
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
+    }
+
+
+    .client-portal-page
+    .booking-calendar
+    .calendar-day:hover:not(:disabled) {
+        background: #eef7fd;
+        color: #1f7bc2;
+
+        border-color: #9ed2f2;
+
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 3px 8px rgba(24,52,71,0.06);
+    }
+
+
+    /* ========================================
+       SELECTED DATE
+    ======================================== */
+
+    .client-portal-page
+    .booking-calendar
+    .calendar-day-selected {
+        background: linear-gradient(
+            145deg,
+            #f5ab40 0%,
+            #eb872c 100%
+        );
+
+        color: #ffffff;
+
+        border-color: transparent;
+
+        box-shadow:
+            0 4px 10px rgba(201,111,25,0.23);
+    }
+
+
+    /* ========================================
+       TODAY
+    ======================================== */
+
+    .client-portal-page
+    .booking-calendar
+    .calendar-day-today:not(.calendar-day-selected) {
+        background: #ffffff;
+        color: #1f7bc2;
+
+        border: 2px solid #1f9aeb;
+    }
+
+
+    /* ========================================
+       DISABLED / PAST DAYS
+    ======================================== */
+
+    .client-portal-page
+    .booking-calendar
+    .calendar-day:disabled,
+    .client-portal-page
+    .booking-calendar
+    .calendar-day-past {
+        background: #f5f7f8;
+        color: #bdc5ca;
+
+        border-color: #edf1f3;
+
+        box-shadow: none;
+
+        opacity: 1;
+        cursor: not-allowed;
+    }
+
+
+    .client-portal-page
+    .booking-calendar
+    .calendar-day:active:not(:disabled) {
+        transform: scale(0.96);
+    }
+
+
+    /* ========================================
+       HOLIDAY STAR ON SELECTED DATE
+    ======================================== */
+
+    .client-portal-page
+    .booking-calendar
+    .calendar-day-selected
+    .calendar-holiday-star {
+        color: #ffffff;
+    }
+
 }
 
 /* ========================================
@@ -8947,48 +9992,110 @@ body.mobile-app-screen-pets .edit-pet-button:active {
 
 .client-portal-page .upcoming-calendar-day {
     color: var(--pis-ink);
-    border-color: var(--pis-border);
+    background: #ffffff;
+    border: 1px solid var(--pis-border);
 }
 
-/*
- * * Keep the original client-calendar interaction
- * * styling everywhere except the redesigned
- * * mobile Services screen.
- * *
- * * Mobile Services now owns these states inside
- * * the SERVICES TAB — MOBILE REDESIGN block.
- */
 
-body.client-portal-page:not(.mobile-app-screen-services) .upcoming-calendar-day:hover {
-    color: var(--pis-blue);
-    background: var(--pis-blue-soft);
-    border-color: var(--pis-blue);
+/* ========================================
+   DESKTOP UPCOMING VISIT
+======================================== */
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-booked {
+    background: #fff7ea;
+    color: #b86116;
+    border-color: #efc27a;
 }
 
-body.client-portal-page:not(.mobile-app-screen-services) .upcoming-calendar-selected {
-    color: #fff;
-    background: linear-gradient(135deg,var(--pis-cyan),var(--pis-blue));
-    border-color: var(--pis-blue);
+
+/* ========================================
+   DESKTOP COMPLETED VISIT
+======================================== */
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-day:has(.upcoming-service-count-completed) {
+    background: #eef9f1;
+    color: #21863f;
+    border-color: #8fd19e;
 }
 
-body.client-portal-page:not(.mobile-app-screen-services) .upcoming-calendar-today:not(.upcoming-calendar-selected) {
-    border: 2px solid var(--pis-orange);
+
+/* ========================================
+   DESKTOP CALENDAR HOVER
+======================================== */
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-day:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(24,52,71,0.08);
 }
+
+
+/* ========================================
+   TODAY
+======================================== */
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-today:not(.upcoming-calendar-selected):not(:has(.upcoming-service-count-completed)) {
+    background: #ffffff;
+    color: #1f7bc2;
+    border: 2px solid #1f9aeb;
+}
+
+
+/* ========================================
+   SELECTED UPCOMING VISIT
+======================================== */
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-selected:not(:has(.upcoming-service-count-completed)) {
+    color: #ffffff;
+
+    background: linear-gradient(
+        145deg,
+        #f5ab40 0%,
+        #eb872c 100%
+    );
+
+    border-color: transparent;
+
+    box-shadow:
+        0 4px 12px rgba(201,111,25,0.23);
+}
+
+
+/* ========================================
+   SELECTED COMPLETED VISIT
+======================================== */
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-selected:has(.upcoming-service-count-completed) {
+    color: #ffffff;
+
+    background: linear-gradient(
+        145deg,
+        #36b85b 0%,
+        #21863f 100%
+    );
+
+    border-color: transparent;
+
+    box-shadow:
+        0 4px 12px rgba(34,164,71,0.22);
+}
+
 
 /* ========================================
    ACTIVE / UPCOMING VISIT COUNT
 ======================================== */
 
-/*
- * * Default client-calendar count styling.
- * * The redesigned mobile Services screen
- * * owns its own active count color.
- */
-
-body.client-portal-page:not(.mobile-app-screen-services) .upcoming-service-count {
-    background: var(--pis-orange);
-    color: #fff;
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-service-count {
+    background: #ef8f27;
+    color: #ffffff;
 }
+
 
 /* ========================================
    COMPLETED VISIT COUNT
@@ -8996,7 +10103,21 @@ body.client-portal-page:not(.mobile-app-screen-services) .upcoming-service-count
 
 .client-portal-page .upcoming-service-count-completed {
     background: #22a447;
-    color: #fff;
+    color: #ffffff;
+}
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-selected
+.upcoming-service-count {
+    background: #ffffff;
+    color: #b86116;
+}
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-selected
+.upcoming-service-count-completed {
+    background: #ffffff;
+    color: #21863f;
 }
 
 /* ========================================
@@ -9036,16 +10157,147 @@ body.client-portal-page:not(.mobile-app-screen-services) .upcoming-service-count
     color: var(--pis-blue);
 }
 
+
+/* ========================================
+   DESKTOP HOUSEHOLD DETAIL POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .household-detail-card {
+        padding: 16px 17px;
+
+        background: #f8fbfd;
+
+        border: 1px solid #dbe7ed;
+        border-radius: 13px;
+
+        box-shadow:
+            0 3px 10px rgba(24,52,71,0.035);
+    }
+
+
+    .client-portal-page .household-detail-label {
+        margin-bottom: 7px;
+
+        color: #1f7bc2;
+
+        font-size: 10px;
+        font-weight: 800;
+
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+    }
+
+
+    .client-portal-page .household-detail-value {
+        color: #183447;
+
+        font-size: 14px;
+        font-weight: 650;
+
+        line-height: 1.5;
+    }
+
+}
+
 /* ========================================
    PROPERTY ACCESS
 ======================================== */
 
 .client-portal-page .access-detail-card {
-    background: linear-gradient(145deg,#f8fcfe,#eef8fc);
+    background: linear-gradient(
+        145deg,
+        #f8fcfe 0%,
+        #eef8fc 100%
+    );
 }
 
 .client-portal-page .access-detail-item {
     border-top-color: var(--pis-border);
+}
+
+
+/* ========================================
+   DESKTOP PROPERTY ACCESS POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .access-detail-card {
+        position: relative;
+        overflow: hidden;
+
+        background: linear-gradient(
+            145deg,
+            #f8fcfe 0%,
+            #eef8fc 100%
+        );
+
+        border: 1px solid #d2e4ee;
+        border-radius: 13px;
+
+        box-shadow:
+            0 3px 10px rgba(24,52,71,0.04);
+    }
+
+
+    .client-portal-page .detail-collapse-status {
+        color: #6b7785;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+
+    .client-portal-page .detail-collapse-chevron {
+        width: 34px;
+        height: 34px;
+
+        background: #ffffff;
+        color: #1f7bc2;
+
+        border: 1px solid #d6e4eb;
+        border-radius: 10px;
+
+        font-size: 23px;
+
+        box-shadow:
+            0 2px 7px rgba(24,52,71,0.05);
+    }
+
+
+    .client-portal-page
+    .detail-collapse-toggle:hover
+    .detail-collapse-chevron {
+        background: #eaf5fb;
+        color: #176aa9;
+        border-color: #9fc7dd;
+    }
+
+
+    .client-portal-page .detail-collapse-content {
+        border-top-color: #d6e4eb;
+    }
+
+
+    .client-portal-page .access-detail-item span {
+        color: #1f7bc2;
+
+        font-size: 10px;
+        font-weight: 800;
+
+        letter-spacing: 0.05em;
+    }
+
+
+    .client-portal-page .access-detail-item strong {
+        color: #183447;
+
+        font-size: 14px;
+        font-weight: 700;
+    }
+
 }
 
 /* ========================================
@@ -9204,9 +10456,54 @@ body.client-portal-page:not(.mobile-app-screen-services) .upcoming-service-count
     box-shadow: 0 4px 16px rgba(35,93,125,0.05);
 }
 
+
+/* ========================================
+   DESKTOP PET CARD POLISH
+======================================== */
+
+@media (min-width:701px) {
+
+    .client-portal-page .pet-profile-card {
+        position: relative;
+        overflow: hidden;
+
+        padding-top: 22px;
+
+        background: #ffffff;
+
+        border: 1px solid #d6e4eb;
+        border-radius: 18px;
+
+        box-shadow:
+            0 7px 18px rgba(24,52,71,0.07);
+    }
+
+
+    .client-portal-page .pet-profile-card::before {
+        content: "";
+
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 4px;
+
+        background: linear-gradient(
+            90deg,
+            #f5ab40 0%,
+            #ef602c 100%
+        );
+    }
+
+}
+
+
 .client-portal-page .pet-profile-photo {
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 2px rgba(71,206,230,0.30);
+    border: 3px solid #ffffff;
+
+    box-shadow:
+        0 0 0 2px rgba(40,144,223,0.22);
 }
 
 /* ========================================
