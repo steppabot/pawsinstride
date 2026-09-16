@@ -2554,29 +2554,29 @@ async function loadDashboard() {
         "block";
 
 
-    // ========================================
-    // INITIAL MOBILE APP HOME
-    // ========================================
+// ========================================
+// INITIAL LATEST UPDATE / MOBILE APP HOME
+// ========================================
 
-    if (
-        window.matchMedia(
-            "(max-width: 700px)"
-        ).matches
-    ) {
-
-        renderMobileHomeDashboard();
+renderMobileHomeDashboard();
 
 
-        setMobileAppScreen(
-            "home"
-        );
+if (
+    window.matchMedia(
+        "(max-width: 700px)"
+    ).matches
+) {
+
+    setMobileAppScreen(
+        "home"
+    );
 
 
-        setActiveMobileAppTab(
-            "home"
-        );
+    setActiveMobileAppTab(
+        "home"
+    );
 
-    }
+}
 
 }
 
