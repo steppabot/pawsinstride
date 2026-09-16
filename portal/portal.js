@@ -8367,7 +8367,6 @@ document
         }
     );
 
-
 // ========================================
 // INITIAL BUTTON STATE
 // ========================================
@@ -8378,6 +8377,9 @@ if (
 
     repeatLastWeekBookingButton.disabled =
         true;
+
+
+    updateRepeatLastWeekBookingState();
 
 }
 
