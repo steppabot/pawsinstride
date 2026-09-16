@@ -21563,9 +21563,16 @@ async function registerPawsInStrideServiceWorker() {
                     "/portal/service-worker.js",
                     {
                         scope:
-                            "/portal/"
+                            "/portal/",
+
+                        updateViaCache:
+                            "none"
                     }
                 );
+
+
+        await registration
+            .update();
 
 
         console.log(
@@ -21584,7 +21591,6 @@ async function registerPawsInStrideServiceWorker() {
     }
 
 }
-
 
 window.addEventListener(
     "load",
