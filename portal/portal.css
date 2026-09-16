@@ -9040,18 +9040,124 @@ body.client-portal-page:not(.mobile-app-screen-services) .upcoming-service-count
    PHOTO UPLOAD BUTTONS
 ======================================== */
 
-.client-portal-page .client-photo-upload-button,
-.client-portal-page .pet-photo-upload-button {
-    background: var(--pis-blue);
-    color: #fff;
-    border-radius: 999px;
-    transition: background 0.18s ease,transform 0.18s ease;
+.client-portal-page
+.client-photo-upload-button {
+
+    background:
+        var(--pis-blue);
+
+    color:
+        #ffffff;
+
+    border-radius:
+        11px;
+
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease;
+
 }
 
-.client-portal-page .client-photo-upload-button:hover,
-.client-portal-page .pet-photo-upload-button:hover {
-    background: var(--pis-blue-dark);
-    transform: translateY(-1px);
+
+.client-portal-page
+.pet-photo-upload-button {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-width:
+        160px;
+
+    min-height:
+        44px;
+
+    box-sizing:
+        border-box;
+
+    margin:
+        0;
+
+    padding:
+        0
+        18px;
+
+    background:
+        #ffffff;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid
+        #bcd8e8;
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        0
+        3px
+        10px
+        rgba(
+            31,
+            123,
+            194,
+            0.08
+        );
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+    white-space:
+        nowrap;
+
+    cursor:
+        pointer;
+
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        transform 0.18s ease;
+
+}
+
+
+.client-portal-page
+.client-photo-upload-button:hover {
+
+    background:
+        var(--pis-blue-dark);
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+.client-portal-page
+.pet-photo-upload-button:hover {
+
+    background:
+        #f5fbff;
+
+    border-color:
+        #8fc7e8;
+
+    transform:
+        translateY(-1px);
+
 }
 
 /* ========================================
