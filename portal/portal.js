@@ -17357,6 +17357,599 @@ function startMobilePortalIntro() {
 
 
 // ========================================
+// RESTORE SAVED BOOKING DRAFT
+// ========================================
+
+async function restoreSavedBookingDraft(
+    {
+        allowBackNavigation = false
+    } = {}
+) {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const editBookingRequested =
+        params.get(
+            "editBooking"
+        ) ===
+        "1";
+
+
+    // ========================================
+    // ONLY RESTORE WHEN RETURNING
+    // FROM CHECKOUT
+    // ========================================
+
+    if (
+        !editBookingRequested &&
+        !allowBackNavigation
+    ) {
+
+        return false;
+
+    }
+
+
+    // ========================================
+    // LOAD SAVED DRAFT
+    // ========================================
+
+    let rawDraft =
+        null;
+
+
+    try {
+
+        rawDraft =
+            window.sessionStorage
+                .getItem(
+                    "paws-in-stride-booking-draft"
+                );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.warn(
+            "Booking draft storage unavailable:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+
+    if (!rawDraft) {
+
+        return false;
+
+    }
+
+
+    let draft =
+        null;
+
+
+    try {
+
+        draft =
+            JSON.parse(
+                rawDraft
+            );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.warn(
+            "Saved booking draft is invalid:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+
+    if (
+        !draft ||
+        typeof draft !==
+            "object" ||
+        !draft.serviceType
+    ) {
+
+        return false;
+
+    }
+
+
+    try {
+
+        // ========================================
+        // MAKE SURE PRICING IS AVAILABLE
+        // ========================================
+
+        if (
+            currentServicePrices
+                .length ===
+            0
+        ) {
+
+            await loadMyServicePrices();
+
+        }
+
+
+        // ========================================
+        // OPEN SERVICES SCREEN
+        // ========================================
+
+        if (
+            mobileAppNavigationQuery.matches
+        ) {
+
+            closeClientMessaging();
+
+
+            setMobileAppScreen(
+                "services"
+            );
+
+
+            setActiveMobileAppTab(
+                "services"
+            );
+
+        }
+
+
+        bookingSection.style.display =
+            "block";
+
+
+        // ========================================
+        // RESTORE PRIMARY PET
+        // ========================================
+
+        if (
+            bookingPetSelect
+        ) {
+
+            bookingPetSelect.value =
+                draft.primaryPetId
+                    ? String(
+                        draft.primaryPetId
+                    )
+                    : "";
+
+        }
+
+
+        renderAdditionalPets();
+
+
+        // ========================================
+        // RESTORE ADDITIONAL PETS
+        // ========================================
+
+        const additionalPetIds =
+            new Set(
+                Array.isArray(
+                    draft.additionalPetIds
+                )
+                    ? draft.additionalPetIds
+                        .map(
+                            petId =>
+                                Number(
+                                    petId
+                                )
+                        )
+                    : []
+            );
+
+
+        document
+            .querySelectorAll(
+                ".additional-pet-checkbox"
+            )
+            .forEach(
+                checkbox => {
+
+                    checkbox.checked =
+                        additionalPetIds.has(
+                            Number(
+                                checkbox.value
+                            )
+                        );
+
+                }
+            );
+
+
+        updateAdditionalPetsHelp();
+
+
+        // ========================================
+        // RESTORE SERVICE TYPE
+        // ========================================
+
+        serviceTypeSelect.value =
+            draft.serviceType ||
+            "";
+
+
+        handleServiceTypeChange();
+
+
+        // ========================================
+        // RESTORE SERVICE OPTION
+        // ========================================
+
+        serviceOptionSelect.value =
+            draft.serviceOption ||
+            "";
+
+
+        const timeWindows =
+            Array.isArray(
+                draft.timeWindows
+            )
+                ? draft.timeWindows
+                    .filter(
+                        Boolean
+                    )
+                : [];
+
+
+        // ========================================
+        // WALKING / DROP-IN TIMES
+        // ========================================
+
+        if (
+            draft.serviceType ===
+                "Dog Walking" ||
+            draft.serviceType ===
+                "Drop-In Visit"
+        ) {
+
+            await populatePreferredTimeWindows();
+
+
+            document
+                .querySelectorAll(
+                    ".booking-time-row-additional"
+                )
+                .forEach(
+                    row => {
+
+                        row.remove();
+
+                    }
+                );
+
+
+            populateBookingTimeSelect(
+                bookingTime,
+                timeWindows[0] ||
+                    ""
+            );
+
+
+            bookingTime.dataset.previousValue =
+                bookingTime.value ||
+                "";
+
+
+            timeWindows
+                .slice(1)
+                .forEach(
+                    timeWindow => {
+
+                        createAdditionalBookingTimeRow(
+                            timeWindow
+                        );
+
+                    }
+                );
+
+
+            syncBookingTimeWindowControls();
+
+        }
+
+
+        // ========================================
+        // PET SITTING TIME
+        // ========================================
+
+        if (
+            draft.serviceType ===
+            "Pet Sitting"
+        ) {
+
+            populatePetSittingTimeBlocks();
+
+
+            bookingTime.value =
+                timeWindows[0] ||
+                "";
+
+
+            bookingTime.dataset.previousValue =
+                bookingTime.value ||
+                "";
+
+        }
+
+
+        // ========================================
+        // RESTORE EXACT VISITS
+        // ========================================
+
+        selectedVisits =
+            Array.isArray(
+                draft.selectedVisits
+            )
+                ? draft.selectedVisits
+                    .filter(
+                        visit =>
+                            visit &&
+                            visit.date &&
+                            visit.timeWindow
+                    )
+                    .map(
+                        visit => ({
+
+                            date:
+                                visit.date,
+
+                            timeWindow:
+                                visit.timeWindow
+
+                        })
+                    )
+                : [];
+
+
+        // ========================================
+        // RESTORE SELECTED DATES
+        // ========================================
+
+        selectedDates =
+            Array.isArray(
+                draft.selectedDates
+            )
+                ? [
+                    ...new Set(
+                        draft.selectedDates
+                            .filter(
+                                Boolean
+                            )
+                    )
+                ].sort()
+                : [];
+
+
+        if (
+            selectedDates.length ===
+                0 &&
+            selectedVisits.length >
+                0
+        ) {
+
+            rebuildSelectedDatesFromVisits();
+
+        }
+
+
+        sortSelectedBookingVisits();
+
+
+        // ========================================
+        // RESTORE CALENDAR MONTH
+        // ========================================
+
+        if (
+            Number.isInteger(
+                draft.calendarYear
+            )
+        ) {
+
+            calendarYear =
+                draft.calendarYear;
+
+        }
+
+
+        if (
+            Number.isInteger(
+                draft.calendarMonth
+            )
+        ) {
+
+            calendarMonth =
+                draft.calendarMonth;
+
+        }
+
+
+        // ========================================
+        // REBUILD ADDITIONAL PET DISPLAY
+        // ========================================
+
+        renderAdditionalPets();
+
+
+        // ========================================
+        // REFRESH BOOKING UI
+        // ========================================
+
+        renderSelectedDates();
+
+        renderBookingCalendar();
+
+        updateBookingTotal();
+
+
+        if (
+            draft.serviceType ===
+                "Dog Walking" ||
+            draft.serviceType ===
+                "Drop-In Visit"
+        ) {
+
+            await refreshPreferredTimeWindowAvailability();
+
+        }
+
+
+        // ========================================
+        // CLEAR BOOKING MESSAGE
+        // ========================================
+
+        const message =
+            document.getElementById(
+                "booking-message"
+            );
+
+
+        if (message) {
+
+            message.textContent =
+                "";
+
+        }
+
+
+        // ========================================
+        // DRAFT SUCCESSFULLY RESTORED
+        // ========================================
+
+        window.sessionStorage
+            .removeItem(
+                "paws-in-stride-booking-draft"
+            );
+
+
+        // ========================================
+        // CLEAN EDIT FLAG FROM URL
+        // ========================================
+
+        if (
+            editBookingRequested
+        ) {
+
+            const cleanUrl =
+                new URL(
+                    window.location.href
+                );
+
+
+            cleanUrl.searchParams.delete(
+                "editBooking"
+            );
+
+
+            window.history.replaceState(
+                {},
+                "",
+                cleanUrl.pathname +
+                    cleanUrl.search +
+                    cleanUrl.hash
+            );
+
+        }
+
+
+        // ========================================
+        // POSITION RESTORED FORM
+        // ========================================
+
+        window.requestAnimationFrame(
+            () => {
+
+                window.requestAnimationFrame(
+                    () => {
+
+                        bookingSection
+                            ?.scrollIntoView({
+                                behavior:
+                                    "auto",
+
+                                block:
+                                    "start"
+                            });
+
+                    }
+                );
+
+            }
+        );
+
+
+        return true;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Booking draft restoration failed:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+// ========================================
+// SAFARI / IOS BACK SWIPE RESTORE
+// ========================================
+
+window.addEventListener(
+    "pageshow",
+    event => {
+
+        if (
+            !event.persisted
+        ) {
+
+            return;
+
+        }
+
+
+        window.setTimeout(
+            () => {
+
+                restoreSavedBookingDraft({
+                    allowBackNavigation:
+                        true
+                });
+
+            },
+            0
+        );
+
+    }
+);
+
+
+// ========================================
 // LOAD
 // ========================================
 
@@ -17365,27 +17958,57 @@ function startMobilePortalIntro() {
     const portalIntro =
         startMobilePortalIntro();
 
-    let dashboardReady = false;
+
+    let dashboardReady =
+        false;
+
 
     try {
 
         await loadDashboard();
 
+
         const dashboardContent =
-            document.getElementById("dashboard-content");
+            document.getElementById(
+                "dashboard-content"
+            );
+
 
         dashboardReady =
-            dashboardContent?.style.display === "block";
+            dashboardContent
+                ?.style
+                .display ===
+            "block";
 
-    } catch (error) {
+
+        // ========================================
+        // RESTORE CHECKOUT EDIT DRAFT
+        // ========================================
+
+        if (
+            dashboardReady
+        ) {
+
+            await restoreSavedBookingDraft();
+
+        }
+
+    }
+    catch (
+        error
+    ) {
 
         console.error(
             "Client dashboard initialization failed:",
             error
         );
 
+
         const loading =
-            document.getElementById("loading");
+            document.getElementById(
+                "loading"
+            );
+
 
         if (loading) {
 
@@ -17394,7 +18017,8 @@ function startMobilePortalIntro() {
 
         }
 
-    } finally {
+    }
+    finally {
 
         portalIntro.dashboardFinished(
             dashboardReady
@@ -17402,20 +18026,28 @@ function startMobilePortalIntro() {
 
     }
 
+
     if (
         dashboardReady &&
         currentUser &&
         currentProfile &&
-        String(currentProfile.role || "")
+        String(
+            currentProfile.role ||
+            ""
+        )
             .trim()
-            .toLowerCase() !== "admin"
+            .toLowerCase() !==
+            "admin"
     ) {
 
         try {
 
             await initializeClientMessaging();
 
-        } catch (error) {
+        }
+        catch (
+            error
+        ) {
 
             console.error(
                 "Client messaging initialization failed:",
