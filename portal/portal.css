@@ -12554,13 +12554,32 @@ body.admin-page {
 ======================================== */
 
 .payment-methods-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg,var(--pis-blue),var(--pis-orange));
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    height:
+        4px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--pis-cyan),
+            var(--pis-blue)
+        );
+
 }
 
 /* ========================================
@@ -12636,8 +12655,10 @@ body.admin-page {
 
 .payment-edit-booking-button {
 
-    flex-shrink:
-        0;
+    flex:
+        0
+        0
+        auto;
 
     display:
         inline-flex;
@@ -12648,12 +12669,18 @@ body.admin-page {
     justify-content:
         center;
 
+    width:
+        auto;
+
+    min-width:
+        0;
+
     min-height:
         40px;
 
     padding:
         0
-        14px;
+        13px;
 
     color:
         var(--pis-blue);
@@ -12663,7 +12690,12 @@ body.admin-page {
 
     border:
         1px solid
-        #bfd8e6;
+        rgba(
+            40,
+            144,
+            223,
+            0.28
+        );
 
     border-radius:
         11px;
@@ -12673,17 +12705,17 @@ body.admin-page {
         3px
         10px
         rgba(
-            31,
-            123,
-            194,
-            0.07
+            35,
+            93,
+            125,
+            0.06
         );
 
     font-family:
         inherit;
 
     font-size:
-        13px;
+        12px;
 
     font-weight:
         800;
@@ -12709,20 +12741,25 @@ body.admin-page {
 .payment-edit-booking-button:hover {
 
     background:
-        #f4fbff;
+        #f5fbff;
 
     border-color:
-        #8fc7e8;
+        rgba(
+            40,
+            144,
+            223,
+            0.48
+        );
 
     box-shadow:
         0
-        4px
-        12px
+        5px
+        14px
         rgba(
-            31,
-            123,
-            194,
-            0.11
+            35,
+            93,
+            125,
+            0.09
         );
 
     transform:
@@ -12740,20 +12777,35 @@ body.admin-page {
 
 
 /* ========================================
-   EDIT BOOKING BUTTON — MOBILE
+   EDIT BOOKING — MOBILE
 ======================================== */
 
 @media (max-width: 700px) {
 
     .payment-card-heading {
 
+        flex-direction:
+            row;
+
+        align-items:
+            flex-start;
+
+        justify-content:
+            space-between;
+
         gap:
-            10px;
+            12px;
 
     }
 
 
     .payment-edit-booking-button {
+
+        width:
+            auto;
+
+        min-width:
+            0;
 
         min-height:
             38px;
@@ -12763,7 +12815,7 @@ body.admin-page {
             11px;
 
         font-size:
-            12px;
+            11px;
 
     }
 
@@ -13304,80 +13356,234 @@ body.admin-page {
 ======================================== */
 
 .payment-field-label {
-    display: block;
-    margin-bottom: 7px;
-    color: var(--pis-ink);
-    font-size: 12px;
-    font-weight: 700;
+
+    display:
+        block;
+
+    margin-bottom:
+        7px;
+
+    color:
+        var(--pis-ink);
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.3;
+
 }
+
 
 /* ========================================
    CARD FIELD
 ======================================== */
 
 .payment-card-field {
-    min-width: 0;
-    margin-bottom: 14px;
+
+    min-width:
+        0;
+
+    margin-bottom:
+        16px;
+
 }
+
 
 .paypal-card-field-host {
-    width: 100%;
-    height: 52px;
-    overflow: hidden;
-    background: #ffffff;
-    border: 1px solid var(--pis-border-strong);
-    border-radius: 10px;
-    box-shadow: inset 0 1px 2px rgba(35,93,125,0.03);
-    transition: border-color 0.18s ease,box-shadow 0.18s ease;
+
+    width:
+        100%;
+
+    height:
+        52px;
+
+    overflow:
+        hidden;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #c8dce8;
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        none;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+
 }
 
-.paypal-card-field-host:focus-within {
-    border-color: var(--pis-blue);
-    box-shadow: 0 0 0 3px rgba(40,144,223,0.10);
+
+.paypal-card-field-host > iframe {
+
+    display:
+        block;
+
+    width:
+        100% !important;
+
+    height:
+        100% !important;
+
 }
+
+
+.paypal-card-field-host:focus-within {
+
+    border-color:
+        #1f9aeb;
+
+    box-shadow:
+        0
+        0
+        0
+        3px
+        rgba(
+            31,
+            154,
+            235,
+            0.10
+        );
+
+}
+
 
 /* ========================================
    CARD FIELD GRID
 ======================================== */
 
 .payment-card-field-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap:
+        12px;
+
 }
+
 
 /* ========================================
    PAY WITH CARD BUTTON
 ======================================== */
 
 .payment-card-pay-button {
-    width: 100%;
-    min-height: 50px;
-    margin-top: 4px;
-    padding: 14px 18px;
-    color: #ffffff;
-    background: linear-gradient(135deg,var(--pis-orange),#f7b84d);
-    border: 0;
-    border-radius: 999px;
-    font-size: 15px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 7px 20px rgba(245,171,64,0.24);
-    transition: transform 0.18s ease,box-shadow 0.18s ease,opacity 0.18s ease;
+
+    width:
+        100%;
+
+    min-height:
+        50px;
+
+    margin-top:
+        4px;
+
+    padding:
+        12px
+        18px;
+
+    color:
+        #ffffff;
+
+    background:
+        linear-gradient(
+            90deg,
+            #f5ab40 0%,
+            #ef602c 100%
+        );
+
+    border:
+        0;
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        0
+        5px
+        14px
+        rgba(
+            239,
+            96,
+            44,
+            0.18
+        );
+
+    font-family:
+        inherit;
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        opacity 0.18s ease;
+
 }
+
 
 .payment-card-pay-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 9px 24px rgba(245,171,64,0.30);
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0
+        7px
+        18px
+        rgba(
+            239,
+            96,
+            44,
+            0.24
+        );
+
 }
+
 
 .payment-card-pay-button:active:not(:disabled) {
-    transform: translateY(0);
+
+    transform:
+        translateY(0);
+
 }
 
+
 .payment-card-pay-button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
+
+    opacity:
+        0.55;
+
+    cursor:
+        not-allowed;
+
+    transform:
+        none;
+
 }
 
 /* ========================================
