@@ -12078,7 +12078,6 @@ function renderSelectedDates() {
                                     ▼
                                 </span>
     
-    
                             </button>
     
     
@@ -12090,7 +12089,6 @@ function renderSelectedDates() {
                                         : "hidden"
                                 }
                             >
-    
     
                                 ${
                                     visits
@@ -12126,46 +12124,34 @@ function renderSelectedDates() {
                                                         <div class="selected-visit-summary">
     
     
-                                                            <div class="selected-visit-detail-row selected-visit-dogs-row">
-    
-                                                                <span class="selected-visit-detail-label">
-                                                                    Dogs:
-                                                                </span>
-    
-                                                                <span class="selected-visit-pet-chips">
-                                                                    ${selectedPetChipsHtml}
-                                                                </span>
-    
+                                                            <div class="selected-visit-pet-chips">
+                                                                ${selectedPetChipsHtml}
                                                             </div>
     
     
-                                                            <div class="selected-visit-detail-row">
+                                                            <div class="selected-visit-service-line">
     
-                                                                <span class="selected-visit-detail-label">
-                                                                    Service:
-                                                                </span>
-    
-                                                                <strong class="selected-visit-detail-value">
+                                                                <strong class="selected-visit-service-name">
                                                                     ${escapeHtml(
                                                                         selectedServiceType
                                                                     )}
                                                                 </strong>
     
-                                                            </div>
+                                                                ${
+                                                                    selectedServiceOption
+                                                                        ? `
+                                                                            <span class="selected-visit-service-separator">
+                                                                                ·
+                                                                            </span>
     
-    
-                                                            <div class="selected-visit-detail-row">
-    
-                                                                <span class="selected-visit-detail-label">
-                                                                    Duration:
-                                                                </span>
-    
-                                                                <strong class="selected-visit-detail-value">
-                                                                    ${escapeHtml(
-                                                                        selectedServiceOption ||
-                                                                        "—"
-                                                                    )}
-                                                                </strong>
+                                                                            <span class="selected-visit-service-option">
+                                                                                ${escapeHtml(
+                                                                                    selectedServiceOption
+                                                                                )}
+                                                                            </span>
+                                                                        `
+                                                                        : ""
+                                                                }
     
                                                             </div>
     
@@ -12221,9 +12207,7 @@ function renderSelectedDates() {
                                         .join("")
                                 }
     
-    
                             </div>
-    
     
                         </section>
                     `;
@@ -12231,11 +12215,6 @@ function renderSelectedDates() {
                 }
             )
             .join("");
-    
-    
-    // ========================================
-    // DATE GROUP TOGGLE
-    // ========================================
 
     // ========================================
     // DATE GROUP TOGGLE
