@@ -1050,9 +1050,9 @@ section h3 {
 .selected-visit-detail-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
 
-    gap: 16px;
+    gap: 10px;
 
     min-height: 34px;
 
@@ -1067,7 +1067,7 @@ section h3 {
 ======================================== */
 
 .selected-visit-detail-label {
-    flex: 0 0 auto;
+    flex: 0 0 72px;
 
     color: #82909a;
 
@@ -1093,7 +1093,7 @@ section h3 {
     font-weight: 800;
     line-height: 1.35;
 
-    text-align: right;
+    text-align: left;
 }
 
 
@@ -1108,12 +1108,13 @@ section h3 {
 
 .selected-visit-pet-chips {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
 
     gap: 5px;
 
-    margin-left: auto;
+    margin-left: 0;
 }
 
 
@@ -1139,7 +1140,6 @@ section h3 {
 .selected-visit-pet-chip-missing {
     color: #6b7785;
 }
-
 
 /* ========================================
    SELECTED VISIT TIME
