@@ -10426,41 +10426,67 @@ function renderAdminVisitReportForm(
     report,
     existingPetCare = []
 ) {
-
-
     const mount =
         document.getElementById(
             `admin-visit-report-${visit.id}`
         );
 
-
-    if (
-        !mount
-    ) {
-
-        return;
-
-    }
-
+    if (!mount) return;
 
     const pets =
         getAdminPetsForVisit(
             visit
         );
 
+    const petNameList =
+        pets
+            .map(
+                pet =>
+                    String(
+                        pet.name ||
+                        ""
+                    ).trim()
+            )
+            .filter(Boolean);
 
-    const petNames =
-        pets.length
+    let petNames =
+        "Pet";
 
-            ? pets
-                .map(
-                    pet =>
-                        pet.name
-                )
-                .join(", ")
+    if (
+        petNameList.length ===
+        1
+    ) {
 
-            : "Pet";
+        petNames =
+            petNameList[0];
 
+    }
+
+    if (
+        petNameList.length ===
+        2
+    ) {
+
+        petNames =
+            `${petNameList[0]} & ${petNameList[1]}`;
+
+    }
+
+    if (
+        petNameList.length >
+        2
+    ) {
+
+        petNames =
+            `${petNameList
+                .slice(0, -1)
+                .join(", ")} & ${
+                    petNameList[
+                        petNameList.length - 1
+                    ]
+                }`;
+
+    }
 
     const existingVisitPhotos =
         activeVisitReportMedia.filter(
@@ -10468,7 +10494,6 @@ function renderAdminVisitReportForm(
                 item.photo_type ===
                 "visit"
         );
-
 
     // ========================================
     // PER-PET CARE CARDS
