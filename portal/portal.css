@@ -1501,26 +1501,26 @@ section h3 {
     }
 
 
-    /* ========================================
-       VISIT CONTENT — HORIZONTAL
-    ======================================== */
-
-    .client-portal-page
-    .selected-visit-summary {
-        min-width: 0;
-        flex: 1;
-
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-
-        gap: clamp(
-            24px,
-            3vw,
-            44px
-        );
-    }
+   /* ========================================
+      VISIT CONTENT — HORIZONTAL
+   ======================================== */
+   
+   .client-portal-page
+   .selected-visit-summary {
+       min-width: 0;
+       flex: 1;
+   
+       display: flex;
+       flex-direction: row;
+       align-items: center;
+       justify-content: flex-start;
+   
+       gap: clamp(
+           18px,
+           2vw,
+           30px
+       );
+   }
 
 
     /* ========================================
