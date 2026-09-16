@@ -7560,7 +7560,7 @@ body.client-navigation-open {
    
        padding-bottom:
            calc(
-               150px +
+               96px +
                env(
                    safe-area-inset-bottom
                )
