@@ -15050,11 +15050,377 @@ function clearAdminMessageError() {
 
 }
 
+
+// ========================================
+// ADMIN APP NAVIGATION STATE
+// ========================================
+
+let activeAdminScreen =
+    "home";
+
+
+const ADMIN_SCREEN_TITLES = {
+
+    home:
+        "Home",
+
+    schedule:
+        "Schedule",
+
+    clients:
+        "Clients",
+
+    messages:
+        "Messages",
+
+    more:
+        "More"
+
+};
+
+
+// ========================================
+// SETUP ADMIN APP NAVIGATION
+// ========================================
+
+function setupAdminAppNavigation() {
+
+    const navButtons =
+        document.querySelectorAll(
+            "[data-admin-screen]"
+        );
+
+
+    navButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const screenName =
+                        String(
+                            button.dataset.adminScreen ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    if (!screenName) {
+                        return;
+                    }
+
+
+                    // ========================================
+                    // MESSAGES USE EXISTING DRAWER
+                    // ========================================
+
+                    if (
+                        screenName ===
+                        "messages"
+                    ) {
+
+                        setAdminNavigationState(
+                            "messages"
+                        );
+
+
+                        openAdminMessaging();
+
+
+                        return;
+
+                    }
+
+
+                    showAdminAppScreen(
+                        screenName
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    // ========================================
+    // RESTORE NAV AFTER MESSAGE DRAWER CLOSE
+    // ========================================
+
+    const messageCloseButton =
+        document.getElementById(
+            "admin-message-close"
+        );
+
+
+    const messageBackdrop =
+        document.getElementById(
+            "admin-message-backdrop"
+        );
+
+
+    messageCloseButton
+        ?.addEventListener(
+            "click",
+            restoreAdminNavigationState
+        );
+
+
+    messageBackdrop
+        ?.addEventListener(
+            "click",
+            restoreAdminNavigationState
+        );
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                restoreAdminNavigationState();
+
+            }
+
+        }
+    );
+
+
+    // ========================================
+    // FLOATING MESSAGE BUTTON
+    // ========================================
+
+    const messageLauncher =
+        document.getElementById(
+            "admin-message-launcher"
+        );
+
+
+    messageLauncher
+        ?.addEventListener(
+            "click",
+            () => {
+
+                setAdminNavigationState(
+                    "messages"
+                );
+
+            }
+        );
+
+
+    // ========================================
+    // INITIAL SCREEN
+    // ========================================
+
+    showAdminAppScreen(
+        activeAdminScreen
+    );
+
+}
+
+
+// ========================================
+// SHOW ADMIN APP SCREEN
+// ========================================
+
+function showAdminAppScreen(
+    screenName
+) {
+
+    const validScreens =
+        [
+            "home",
+            "schedule",
+            "clients",
+            "more"
+        ];
+
+
+    if (
+        !validScreens.includes(
+            screenName
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // CLOSE MESSAGE DRAWER
+    // ========================================
+
+    closeAdminMessaging();
+
+
+    // ========================================
+    // UPDATE ACTIVE SCREEN
+    // ========================================
+
+    activeAdminScreen =
+        screenName;
+
+
+    const panels =
+        document.querySelectorAll(
+            "[data-admin-screen-panel]"
+        );
+
+
+    panels.forEach(
+        panel => {
+
+            const isActive =
+                panel.dataset.adminScreenPanel ===
+                screenName;
+
+
+            panel.hidden =
+                !isActive;
+
+
+            panel.classList.toggle(
+                "admin-app-screen-active",
+                isActive
+            );
+
+        }
+    );
+
+
+    // ========================================
+    // UPDATE NAVIGATION
+    // ========================================
+
+    setAdminNavigationState(
+        screenName
+    );
+
+
+    // ========================================
+    // REFRESH SCHEDULE
+    // ========================================
+
+    if (
+        screenName ===
+        "schedule"
+    ) {
+
+        renderAdminCalendar();
+
+        renderAdminDayServices();
+
+    }
+
+
+    // ========================================
+    // RETURN TO TOP
+    // ========================================
+
+    window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "auto"
+    });
+
+}
+
+
+// ========================================
+// SET ADMIN NAVIGATION STATE
+// ========================================
+
+function setAdminNavigationState(
+    screenName
+) {
+
+    const navButtons =
+        document.querySelectorAll(
+            "[data-admin-screen]"
+        );
+
+
+    navButtons.forEach(
+        button => {
+
+            const isActive =
+                button.dataset.adminScreen ===
+                screenName;
+
+
+            button.classList.toggle(
+                "admin-app-nav-item-active",
+                isActive
+            );
+
+
+            if (
+                isActive
+            ) {
+
+                button.setAttribute(
+                    "aria-current",
+                    "page"
+                );
+
+            } else {
+
+                button.removeAttribute(
+                    "aria-current"
+                );
+
+            }
+
+        }
+    );
+
+
+    const title =
+        document.getElementById(
+            "admin-screen-title"
+        );
+
+
+    if (title) {
+
+        title.textContent =
+            ADMIN_SCREEN_TITLES[
+                screenName
+            ] ||
+            "Home";
+
+    }
+
+}
+
+
+// ========================================
+// RESTORE ADMIN NAVIGATION STATE
+// ========================================
+
+function restoreAdminNavigationState() {
+
+    setAdminNavigationState(
+        activeAdminScreen
+    );
+
+}
+
+
 // ========================================
 // START
 // ========================================
 
 (async function initializeAdminPortal() {
+
 
     await loadAdminDashboard();
 
@@ -15064,8 +15430,17 @@ function clearAdminMessageError() {
         currentProfile
     ) {
 
+
         await initializeAdminMessaging();
 
     }
+
+
+    // ========================================
+    // ADMIN APP NAVIGATION
+    // ========================================
+
+    setupAdminAppNavigation();
+
 
 })();
