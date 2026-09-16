@@ -8036,17 +8036,88 @@ function updateRepeatLastWeekBookingState() {
     }
 
 
+    const repeatWrapper =
+        repeatLastWeekBookingButton.closest(
+            ".repeat-last-week-booking"
+        );
+
+
+    const primaryPetId =
+        Number(
+            bookingPetSelect?.value
+        );
+
+
     // ========================================
-    // CURRENT DATES ALREADY SELECTED
+    // NO PRIMARY PET
+    // ========================================
+
+    if (
+        !primaryPetId
+    ) {
+
+        repeatLastWeekPattern =
+            null;
+
+
+        repeatLastWeekBookingButton.disabled =
+            true;
+
+
+        if (
+            repeatWrapper
+        ) {
+
+            repeatWrapper.style.display =
+                "none";
+
+        }
+
+
+        if (
+            repeatLastWeekBookingMessage
+        ) {
+
+            repeatLastWeekBookingMessage
+                .textContent =
+                    "";
+
+            repeatLastWeekBookingMessage
+                .style
+                .display =
+                    "none";
+
+        }
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // PRIMARY PET SELECTED
+    // ========================================
+
+    if (
+        repeatWrapper
+    ) {
+
+        repeatWrapper.style.display =
+            "block";
+
+    }
+
+
+    // ========================================
+    // CURRENT VISITS ALREADY SELECTED
     // ========================================
     //
-    // If the client checks another pet after
-    // dates already exist, that pet is simply
-    // added to the current booking.
+    // If the client checks an additional pet
+    // after dates are already loaded, the pet
+    // is simply included on the current booking.
     //
-    // Dates and time windows do NOT need to be
-    // rebuilt because pets are stored separately
-    // from selectedVisits.
+    // Existing dates / times stay untouched.
     // ========================================
 
     if (
@@ -8059,7 +8130,7 @@ function updateRepeatLastWeekBookingState() {
 
 
         repeatLastWeekBookingButton.disabled =
-            false;
+            true;
 
 
         const additionalPetIds =
@@ -8090,12 +8161,7 @@ function updateRepeatLastWeekBookingState() {
 
                 repeatLastWeekBookingMessage
                     .textContent =
-                        `${petNames} ${
-                            additionalPetIds.length ===
-                            1
-                                ? "will be included"
-                                : "will be included"
-                        } on all ${selectedVisits.length} selected ${
+                        `${petNames} will be included on all ${selectedVisits.length} selected ${
                             selectedVisits.length ===
                             1
                                 ? "visit"
@@ -8136,35 +8202,9 @@ function updateRepeatLastWeekBookingState() {
         findRepeatLastWeekPattern();
 
 
-    if (
-        repeatLastWeekPattern.status ===
-        "no_pet"
-    ) {
-
-        repeatLastWeekBookingButton.disabled =
-            true;
-
-
-        if (
-            repeatLastWeekBookingMessage
-        ) {
-
-            repeatLastWeekBookingMessage
-                .textContent =
-                    "";
-
-            repeatLastWeekBookingMessage
-                .style
-                .display =
-                    "none";
-
-        }
-
-
-        return;
-
-    }
-
+    // ========================================
+    // VALID REPEAT PATTERN
+    // ========================================
 
     if (
         repeatLastWeekPattern.status ===
@@ -8223,6 +8263,10 @@ function updateRepeatLastWeekBookingState() {
 
     }
 
+
+    // ========================================
+    // NO VALID REPEAT PATTERN
+    // ========================================
 
     repeatLastWeekBookingButton.disabled =
         true;
