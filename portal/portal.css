@@ -10330,17 +10330,25 @@ body.portal-login-page {
     }
 
     .login-form-panel {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100vh;
-        height: 100svh;
-        height: 100dvh;
-        min-height: 0;
-        padding: max(18px,env(safe-area-inset-top)) 18px max(18px,env(safe-area-inset-bottom));
-        overflow: hidden;
-    }
+       display: flex;
+       align-items: flex-start;
+       justify-content: center;
+   
+       width: 100%;
+   
+       height: 100vh;
+       height: 100svh;
+       height: 100dvh;
+   
+       min-height: 0;
+   
+       padding:
+           max(22px,env(safe-area-inset-top))
+           18px
+           max(18px,env(safe-area-inset-bottom));
+   
+       overflow: hidden;
+   }
 
     .portal-login-page .login-container {
         width: 100%;
