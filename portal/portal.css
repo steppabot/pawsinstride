@@ -7520,20 +7520,28 @@ body.client-navigation-open {
         -webkit-backdrop-filter: blur(18px);
     }
 
-    /* ========================================
-       BOTTOM NAV BRAND ACCENT
-    ======================================== */
-
-    .client-bottom-navigation::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg,var(--pis-cyan,#47cee6) 0%,var(--pis-blue,#2890df) 50%,var(--pis-orange,#f5ab40) 100%);
-        box-shadow: 0 1px 6px rgba(40,144,223,0.18);
-    }
+   /* ========================================
+      BOTTOM NAV BRAND ACCENT
+   ======================================== */
+   
+   .client-bottom-navigation::before {
+       content: "";
+       position: absolute;
+       top: 0;
+       left: 0;
+       right: 0;
+       height: 4px;
+   
+       background: linear-gradient(
+           90deg,
+           #47cee6 0%,
+           #2890df 52%,
+           #1f7bc2 100%
+       );
+   
+       box-shadow:
+           0 1px 6px rgba(40,144,223,0.20);
+   }
 
     /* ========================================
        MOBILE NAV TOUCH TARGET
