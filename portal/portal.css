@@ -5249,29 +5249,167 @@ body.client-modal-open {
    ADMIN VISIT CARE GRID
 ======================================== */
 
+.admin-visit-pet-care-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+
+/* ========================================
+   ADMIN PET CARE CARD
+======================================== */
+
+.admin-visit-pet-care-card {
+    overflow: hidden;
+
+    padding: 15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fbfdfe 0%,
+            #f6fafc 100%
+        );
+
+    border: 1px solid #d8e6ed;
+    border-radius: 13px;
+
+    box-shadow:
+        0 3px 10px rgba(24,52,71,0.045);
+}
+
+
+/* ========================================
+   ADMIN PET CARE HEADER
+======================================== */
+
+.admin-visit-pet-care-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+
+    border-bottom: 1px solid #e2edf3;
+}
+
+
+.admin-visit-pet-care-header strong {
+    color: #183447;
+
+    font-size: 15px;
+    font-weight: 850;
+
+    line-height: 1.2;
+}
+
+
+.admin-visit-pet-care-header span {
+    color: #1f7bc2;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+
+    text-transform: uppercase;
+}
+
+
+/* ========================================
+   ADMIN CARE OPTIONS
+======================================== */
+
 .admin-visit-care-grid {
     display: grid;
-    grid-template-columns: repeat(4,minmax(0,1fr));
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0,1fr)
+        );
+
     gap: 8px;
 }
+
 
 .admin-visit-care-option {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 11px 12px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 9px;
+
+    gap: 9px;
+
+    min-height: 46px;
+
+    padding: 10px 12px;
+
+    background: #ffffff;
+    color: #263d4c;
+
+    border: 1px solid #d6e4eb;
+    border-radius: 10px;
+
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.admin-visit-care-option:hover {
+    background: #f4f9fc;
+
+    border-color: #b6d5e5;
+}
+
+
+.admin-visit-care-option:active {
+    transform: scale(0.985);
+}
+
+
+/* ========================================
+   ADMIN CARE CHECKBOX
+======================================== */
+
+.admin-visit-care-option input {
+    flex-shrink: 0;
+
+    width: 18px;
+    height: 18px;
+
+    margin: 0;
+
+    accent-color: #22a447;
+
     cursor: pointer;
 }
 
-.admin-visit-care-option input {
-    width: 17px;
-    height: 17px;
-    margin: 0;
+
+/* ========================================
+   ADMIN CARE OPTION — CHECKED
+======================================== */
+
+.admin-visit-care-option:has(input:checked) {
+    background: #eef9f1;
+    color: #168a3a;
+
+    border-color: #8fd19e;
+
+    box-shadow:
+        0 2px 8px rgba(34,164,71,0.08);
 }
 
 /* ========================================
