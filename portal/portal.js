@@ -11932,7 +11932,66 @@ function renderSelectedDates() {
     // ========================================
     // RENDER DATE GROUPS
     // ========================================
-
+    
+    const selectedPetIds =
+        [
+            Number(
+                bookingPetSelect?.value
+            ),
+            ...getSelectedAdditionalPetIds()
+        ]
+            .filter(
+                petId =>
+                    Number.isFinite(
+                        petId
+                    ) &&
+                    petId >
+                    0
+            );
+    
+    
+    const selectedPetNames =
+        selectedPetIds
+            .map(
+                petId =>
+                    currentPets.find(
+                        pet =>
+                            Number(
+                                pet.id
+                            ) ===
+                            petId
+                    )?.name
+            )
+            .filter(
+                Boolean
+            );
+    
+    
+    const selectedPetsLabel =
+        selectedPetNames.length >
+        0
+            ? selectedPetNames.join(
+                " + "
+            )
+            : "Selected Pet";
+    
+    
+    const selectedServiceType =
+        serviceTypeSelect?.value ||
+        "Service";
+    
+    
+    const selectedServiceOption =
+        serviceOptionSelect?.value ||
+        "";
+    
+    
+    const selectedServiceLabel =
+        selectedServiceOption
+            ? `${selectedServiceType} · ${selectedServiceOption}`
+            : selectedServiceType;
+    
+    
     list.innerHTML =
         Array.from(
             visitsByDate.entries()
@@ -11944,14 +12003,14 @@ function renderSelectedDates() {
                         visits
                     ]
                 ) => {
-
-
+    
+    
                     const isExpanded =
                         bookingExpandedDateGroups.has(
                             date
                         );
-
-
+    
+    
                     const hasGroupConflict =
                         visits.some(
                             item =>
@@ -11960,8 +12019,8 @@ function renderSelectedDates() {
                                     item.visit.timeWindow
                                 )
                         );
-
-
+    
+    
                     return `
                         <section
                             class="
@@ -11973,8 +12032,8 @@ function renderSelectedDates() {
                                 }
                             "
                         >
-
-
+    
+    
                             <button
                                 type="button"
                                 class="selected-date-group-header"
@@ -11984,17 +12043,15 @@ function renderSelectedDates() {
                                         : "false"
                                 }"
                             >
-
-
+    
                                 <span class="selected-date-group-header-copy">
-
+    
                                     <strong class="selected-date-group-title">
                                         ${formatDate(
                                             date
                                         )}
                                     </strong>
-
-
+    
                                     <span class="selected-date-group-meta">
                                         ${visits.length} ${
                                             visits.length === 1
@@ -12002,10 +12059,10 @@ function renderSelectedDates() {
                                                 : "visits"
                                         }
                                     </span>
-
+    
                                 </span>
-
-
+    
+    
                                 <span
                                     class="
                                         selected-date-group-arrow
@@ -12019,11 +12076,11 @@ function renderSelectedDates() {
                                 >
                                     ▼
                                 </span>
-
-
+    
+    
                             </button>
-
-
+    
+    
                             <div
                                 class="selected-date-group-content"
                                 ${
@@ -12032,25 +12089,25 @@ function renderSelectedDates() {
                                         : "hidden"
                                 }
                             >
-
-
+    
+    
                                 ${
                                     visits
                                         .map(
                                             item => {
-
-
+    
+    
                                                 const visit =
                                                     item.visit;
-
-
+    
+    
                                                 const hasConflict =
                                                     hasSelectedVisitCapacityConflict(
                                                         visit.date,
                                                         visit.timeWindow
                                                     );
-
-
+    
+    
                                                 return `
                                                     <div
                                                         class="
@@ -12063,13 +12120,30 @@ function renderSelectedDates() {
                                                             }
                                                         "
                                                     >
-
-
+    
+    
                                                         <div class="selected-visit-summary">
-
-
+    
+    
+                                                            <div class="selected-visit-booking-details">
+    
+                                                                <strong class="selected-visit-pets">
+                                                                    ${escapeHtml(
+                                                                        selectedPetsLabel
+                                                                    )}
+                                                                </strong>
+    
+                                                                <span class="selected-visit-service">
+                                                                    ${escapeHtml(
+                                                                        selectedServiceLabel
+                                                                    )}
+                                                                </span>
+    
+                                                            </div>
+    
+    
                                                             <div class="selected-visit-time-row">
-
+    
                                                                 <span
                                                                     class="
                                                                         selected-visit-time
@@ -12080,10 +12154,12 @@ function renderSelectedDates() {
                                                                         }
                                                                     "
                                                                 >
-                                                                    ${visit.timeWindow}
+                                                                    ${escapeHtml(
+                                                                        visit.timeWindow
+                                                                    )}
                                                                 </span>
-
-
+    
+    
                                                                 ${
                                                                     hasConflict
                                                                         ? `
@@ -12093,13 +12169,13 @@ function renderSelectedDates() {
                                                                         `
                                                                         : ""
                                                                 }
-
+    
                                                             </div>
-
-
+    
+    
                                                         </div>
-
-
+    
+    
                                                         <button
                                                             type="button"
                                                             class="remove-date-button"
@@ -12107,27 +12183,27 @@ function renderSelectedDates() {
                                                         >
                                                             Remove
                                                         </button>
-
-
+    
+    
                                                     </div>
                                                 `;
-
+    
                                             }
                                         )
                                         .join("")
                                 }
-
-
+    
+    
                             </div>
-
-
+    
+    
                         </section>
                     `;
-
+    
                 }
             )
             .join("");
-
+    
 
     // ========================================
     // DATE GROUP TOGGLE
