@@ -1202,12 +1202,20 @@ section h3 {
 ======================================== */
 
 .selected-date-item {
+    position: relative;
+    overflow: hidden;
+
     align-items: center;
 
     gap: 18px;
 
     margin: 9px 0;
-    padding: 15px 16px;
+
+    padding:
+        15px
+        16px
+        15px
+        22px;
 
     background:
         linear-gradient(
@@ -1221,6 +1229,30 @@ section h3 {
 
     box-shadow:
         0 3px 10px rgba(24,52,71,0.045);
+}
+
+
+/* ========================================
+   SELECTED VISIT GRADIENT BAR
+======================================== */
+
+.selected-date-item::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    width: 5px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #1f9aeb 0%,
+            #47cee6 100%
+        );
 }
 
 
@@ -1342,6 +1374,67 @@ section h3 {
         gap: 12px;
 
         margin: 8px 0;
+
+        padding:
+            13px
+            12px
+            13px
+            19px;
+
+        border-radius: 11px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-date-item::before {
+        width: 5px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-summary {
+        gap: 7px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-pet-chip {
+        padding: 4px 9px;
+
+        font-size: 11px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-service-name {
+        font-size: 14px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-service-option {
+        font-size: 13px;
+    }
+
+
+    body.mobile-app-screen-services
+    .selected-visit-time {
+        font-size: 12px;
+    }
+
+}
+
+/* ========================================
+   MOBILE SELECTED VISIT SUMMARY
+======================================== */
+
+@media (max-width:700px) {
+
+    body.mobile-app-screen-services
+    .selected-date-item {
+        gap: 12px;
+
+        margin: 8px 0;
         padding: 13px 12px;
 
         border-radius: 11px;
@@ -1387,40 +1480,194 @@ section h3 {
 
 @media (min-width:701px) {
 
-    .client-portal-page .selected-date-item {
-        min-height: 54px;
+    /* ========================================
+       VISIT CARD LAYOUT
+    ======================================== */
 
-        padding: 12px 3px;
+    .client-portal-page
+    .selected-date-item {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            auto;
+
+        align-items: center;
+
+        gap: 24px;
+
+        min-height: 88px;
+
+        padding:
+            18px
+            18px
+            18px
+            24px;
     }
 
 
-    .client-portal-page .selected-visit-date {
-        color: #183447;
+    /* ========================================
+       VISIT CONTENT — HORIZONTAL
+    ======================================== */
 
-        font-size: 14px;
+    .client-portal-page
+    .selected-visit-summary {
+        display: grid;
+
+        grid-template-columns:
+            minmax(105px, 0.65fr)
+            minmax(200px, 1.35fr)
+            minmax(160px, 0.85fr);
+
+        align-items: center;
+
+        column-gap: clamp(
+            18px,
+            2.4vw,
+            38px
+        );
+
+        row-gap: 8px;
+
+        min-width: 0;
+    }
+
+
+    /* ========================================
+       PET COLUMN
+    ======================================== */
+
+    .client-portal-page
+    .selected-visit-pet-chips {
+        min-width: 0;
+
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        gap: 7px;
+    }
+
+
+    .client-portal-page
+    .selected-visit-pet-chip {
+        padding:
+            6px
+            11px;
+
+        font-size:
+            clamp(
+                11px,
+                0.95vw,
+                13px
+            );
+
         font-weight: 800;
+    }
 
+
+    /* ========================================
+       SERVICE COLUMN
+    ======================================== */
+
+    .client-portal-page
+    .selected-visit-service-line {
+        min-width: 0;
+
+        display: flex;
+        align-items: baseline;
+
+        gap: 7px;
+
+        white-space: nowrap;
+    }
+
+
+    .client-portal-page
+    .selected-visit-service-name {
+        font-size:
+            clamp(
+                16px,
+                1.45vw,
+                20px
+            );
+
+        font-weight: 850;
+    }
+
+
+    .client-portal-page
+    .selected-visit-service-separator {
+        font-size:
+            clamp(
+                14px,
+                1.2vw,
+                17px
+            );
+    }
+
+
+    .client-portal-page
+    .selected-visit-service-option {
+        font-size:
+            clamp(
+                14px,
+                1.2vw,
+                17px
+            );
+
+        font-weight: 750;
+    }
+
+
+    /* ========================================
+       TIME COLUMN
+    ======================================== */
+
+    .client-portal-page
+    .selected-visit-time-row {
+        min-width: 0;
+
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
+
+        white-space: nowrap;
+    }
+
+
+    .client-portal-page
+    .selected-visit-time {
+        color: #1f7bc2;
+
+        font-size:
+            clamp(
+                13px,
+                1.15vw,
+                16px
+            );
+
+        font-weight: 800;
         line-height: 1.35;
     }
 
 
-    .client-portal-page .selected-visit-time {
-        color: #667b88;
+    /* ========================================
+       REMOVE BUTTON
+    ======================================== */
 
-        font-size: 12px;
-        font-weight: 650;
+    .client-portal-page
+    .remove-date-button {
+        min-height: 38px;
 
-        line-height: 1.4;
-    }
-
-
-    .client-portal-page .remove-date-button {
-        min-height: 34px;
-        padding: 7px 11px;
+        padding:
+            8px
+            13px;
 
         border-radius: 9px;
 
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 800;
 
         transition:
@@ -1431,7 +1678,8 @@ section h3 {
     }
 
 
-    .client-portal-page .remove-date-button:active {
+    .client-portal-page
+    .remove-date-button:active {
         transform: scale(0.96);
     }
 
