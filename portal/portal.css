@@ -9998,14 +9998,14 @@ body.mobile-app-screen-pets .edit-pet-button:active {
 
 
 /* ========================================
-   DESKTOP UPCOMING VISIT
+   DESKTOP BOOKED / ACTIVE VISIT
 ======================================== */
 
 body.client-portal-page:not(.mobile-app-screen-services)
 .upcoming-calendar-booked {
-    background: #fff7ea;
-    color: #b86116;
-    border-color: #efc27a;
+    background: #eef7fd;
+    color: #1f7bc2;
+    border: 1px solid #9ed2f2;
 }
 
 
@@ -10014,10 +10014,10 @@ body.client-portal-page:not(.mobile-app-screen-services)
 ======================================== */
 
 body.client-portal-page:not(.mobile-app-screen-services)
-.upcoming-calendar-day:has(.upcoming-service-count-completed) {
+.upcoming-calendar-day:has(.upcoming-service-count-completed):not(.upcoming-calendar-selected) {
     background: #eef9f1;
     color: #21863f;
-    border-color: #8fd19e;
+    border: 1px solid #8fd19e;
 }
 
 
@@ -10028,7 +10028,9 @@ body.client-portal-page:not(.mobile-app-screen-services)
 body.client-portal-page:not(.mobile-app-screen-services)
 .upcoming-calendar-day:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(24,52,71,0.08);
+
+    box-shadow:
+        0 4px 10px rgba(24,52,71,0.08);
 }
 
 
@@ -10045,19 +10047,18 @@ body.client-portal-page:not(.mobile-app-screen-services)
 
 
 /* ========================================
-   SELECTED UPCOMING VISIT
+   SELECTED ACTIVE / EMPTY DAY
 ======================================== */
 
 body.client-portal-page:not(.mobile-app-screen-services)
 .upcoming-calendar-selected:not(:has(.upcoming-service-count-completed)) {
-    color: #ffffff;
-
     background: linear-gradient(
         145deg,
         #f5ab40 0%,
         #eb872c 100%
     );
 
+    color: #ffffff;
     border-color: transparent;
 
     box-shadow:
@@ -10066,34 +10067,34 @@ body.client-portal-page:not(.mobile-app-screen-services)
 
 
 /* ========================================
-   SELECTED COMPLETED VISIT
+   SELECTED COMPLETED DAY
 ======================================== */
 
 body.client-portal-page:not(.mobile-app-screen-services)
 .upcoming-calendar-selected:has(.upcoming-service-count-completed) {
-    color: #ffffff;
-
     background: linear-gradient(
         145deg,
-        #36b85b 0%,
-        #21863f 100%
+        #22a447 0%,
+        #168a3a 100%
     );
 
+    color: #ffffff;
     border-color: transparent;
 
     box-shadow:
-        0 4px 12px rgba(34,164,71,0.22);
+        0 4px 12px rgba(22,138,58,0.24);
 }
 
 
 /* ========================================
-   ACTIVE / UPCOMING VISIT COUNT
+   BOOKED / ACTIVE VISIT COUNT
 ======================================== */
 
 body.client-portal-page:not(.mobile-app-screen-services)
 .upcoming-service-count {
-    background: #ef8f27;
+    background: #1f9aeb;
     color: #ffffff;
+    border-color: #ffffff;
 }
 
 
@@ -10106,18 +10107,39 @@ body.client-portal-page:not(.mobile-app-screen-services)
     color: #ffffff;
 }
 
-body.client-portal-page:not(.mobile-app-screen-services)
-.upcoming-calendar-selected
-.upcoming-service-count {
-    background: #ffffff;
-    color: #b86116;
-}
 
 body.client-portal-page:not(.mobile-app-screen-services)
-.upcoming-calendar-selected
-.upcoming-service-count-completed {
+.upcoming-calendar-day:has(.upcoming-service-count-completed):not(.upcoming-calendar-selected)
+.upcoming-service-count {
+    background: #22a447;
+    color: #ffffff;
+    border-color: #ffffff;
+}
+
+
+/* ========================================
+   SELECTED ACTIVE COUNT
+======================================== */
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-selected:not(:has(.upcoming-service-count-completed))
+.upcoming-service-count {
     background: #ffffff;
-    color: #21863f;
+    color: #d87519;
+    border-color: #ffffff;
+}
+
+
+/* ========================================
+   SELECTED COMPLETED COUNT
+======================================== */
+
+body.client-portal-page:not(.mobile-app-screen-services)
+.upcoming-calendar-selected:has(.upcoming-service-count-completed)
+.upcoming-service-count {
+    background: #ffffff;
+    color: #168a3a;
+    border-color: #ffffff;
 }
 
 /* ========================================
@@ -10453,7 +10475,16 @@ body.client-portal-page:not(.mobile-app-screen-services)
 .client-portal-page .pet-profile-card {
     border: 1px solid var(--pis-border);
     border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(35,93,125,0.05);
+
+    box-shadow:
+        0 4px 16px rgba(35,93,125,0.05);
+}
+
+.client-portal-page .pet-profile-photo {
+    border: 3px solid #ffffff;
+
+    box-shadow:
+        0 0 0 2px rgba(40,144,223,0.20);
 }
 
 
@@ -10467,43 +10498,41 @@ body.client-portal-page:not(.mobile-app-screen-services)
         position: relative;
         overflow: hidden;
 
-        padding-top: 22px;
+        padding: 18px;
 
-        background: #ffffff;
+        background: linear-gradient(
+            145deg,
+            #fbfdfe 0%,
+            #f7fafc 100%
+        );
 
         border: 1px solid #d6e4eb;
-        border-radius: 18px;
+        border-radius: 16px;
 
         box-shadow:
-            0 7px 18px rgba(24,52,71,0.07);
+            0 4px 14px rgba(24,52,71,0.055);
     }
 
 
     .client-portal-page .pet-profile-card::before {
-        content: "";
-
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-
-        height: 4px;
-
-        background: linear-gradient(
-            90deg,
-            #f5ab40 0%,
-            #ef602c 100%
-        );
+        display: none;
     }
 
-}
+
+    .client-portal-page .pet-profile-details {
+        border-top-color: #dfe9ee;
+    }
 
 
-.client-portal-page .pet-profile-photo {
-    border: 3px solid #ffffff;
+    .client-portal-page .pet-detail-block {
+        background: #ffffff;
 
-    box-shadow:
-        0 0 0 2px rgba(40,144,223,0.22);
+        border: 1px solid #dbe7ed;
+        border-radius: 11px;
+
+        box-shadow: none;
+    }
+
 }
 
 /* ========================================
