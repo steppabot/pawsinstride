@@ -2999,6 +2999,200 @@ p {
 }
 
 /* ========================================
+   ADMIN CALENDAR STATES
+======================================== */
+
+.admin-page
+.upcoming-calendar-day {
+    background:
+        #ffffff;
+
+    color:
+        var(--pis-ink);
+
+    border:
+        1px solid var(--pis-border);
+}
+
+
+/* ========================================
+   SCHEDULED DAY
+======================================== */
+
+.admin-page
+.upcoming-calendar-booked:not(
+    .upcoming-calendar-completed
+):not(
+    .upcoming-calendar-selected
+) {
+    background:
+        #eef7fd;
+
+    color:
+        #1f7bc2;
+
+    border-color:
+        #9ed2f2;
+}
+
+
+/* ========================================
+   COMPLETED DAY
+======================================== */
+
+.admin-page
+.upcoming-calendar-completed:not(
+    .upcoming-calendar-selected
+) {
+    background:
+        #eef9f1;
+
+    color:
+        #21863f;
+
+    border-color:
+        #8fd19e;
+}
+
+
+/* ========================================
+   SELECTED EMPTY DAY
+======================================== */
+
+.admin-page
+.upcoming-calendar-selected:not(
+    .upcoming-calendar-booked
+) {
+    background:
+        linear-gradient(
+            145deg,
+            #f5ab40 0%,
+            #eb872c 100%
+        );
+
+    color:
+        #ffffff;
+
+    border-color:
+        transparent;
+
+    box-shadow:
+        0 4px 10px rgba(201,111,25,0.23);
+}
+
+
+/* ========================================
+   SELECTED SCHEDULED DAY
+======================================== */
+
+.admin-page
+.upcoming-calendar-booked.upcoming-calendar-selected:not(
+    .upcoming-calendar-completed
+) {
+    background:
+        linear-gradient(
+            145deg,
+            #2890df 0%,
+            #1768aa 100%
+        );
+
+    color:
+        #ffffff;
+
+    border-color:
+        transparent;
+
+    box-shadow:
+        0 4px 10px rgba(31,123,194,0.24);
+}
+
+
+/* ========================================
+   SELECTED COMPLETED DAY
+======================================== */
+
+.admin-page
+.upcoming-calendar-completed.upcoming-calendar-selected {
+    background:
+        linear-gradient(
+            145deg,
+            #22a447 0%,
+            #168a3a 100%
+        );
+
+    color:
+        #ffffff;
+
+    border-color:
+        transparent;
+
+    box-shadow:
+        0 4px 10px rgba(22,138,58,0.24);
+}
+
+
+/* ========================================
+   SERVICE COUNT
+======================================== */
+
+.admin-page
+.upcoming-service-count {
+    background:
+        #1f9aeb;
+
+    color:
+        #ffffff;
+}
+
+
+.admin-page
+.upcoming-service-count-completed {
+    background:
+        #22a447;
+
+    color:
+        #ffffff;
+}
+
+
+.admin-page
+.upcoming-calendar-selected
+.upcoming-service-count {
+    background:
+        #ffffff;
+
+    color:
+        #1f7bc2;
+
+    border-color:
+        #ffffff;
+}
+
+
+.admin-page
+.upcoming-calendar-completed.upcoming-calendar-selected
+.upcoming-service-count {
+    color:
+        #168a3a;
+}
+
+
+/* ========================================
+   TODAY
+======================================== */
+
+.admin-page
+.upcoming-calendar-today:not(
+    .upcoming-calendar-selected
+):not(
+    .upcoming-calendar-booked
+) {
+    border:
+        2px solid var(--pis-orange);
+}
+
+
+/* ========================================
    MOBILE ADMIN APP
 ======================================== */
 
