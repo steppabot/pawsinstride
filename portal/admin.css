@@ -1297,6 +1297,657 @@ body.admin-page {
 
 
 /* ========================================
+   BEST VISIT ROUTE
+======================================== */
+
+.admin-best-route {
+    margin-top: 18px;
+
+    padding: 22px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #d6e4eb;
+
+    border-radius:
+        20px;
+
+    box-shadow:
+        0 7px 18px rgba(24,52,71,0.07);
+}
+
+
+/* ========================================
+   ROUTE STATUS
+======================================== */
+
+.admin-route-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 30px;
+
+    padding:
+        0
+        11px;
+
+    background:
+        #eef7fd;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid #9ed2f2;
+
+    border-radius:
+        999px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+}
+
+
+/* ========================================
+   ROUTE SUMMARY
+======================================== */
+
+.admin-route-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 10px;
+
+    margin-bottom: 14px;
+}
+
+
+.admin-route-summary-item {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+
+    min-width: 0;
+
+    padding:
+        12px
+        14px;
+
+    background:
+        #f8fbfd;
+
+    border:
+        1px solid #dce8ee;
+
+    border-radius:
+        13px;
+}
+
+
+.admin-route-summary-item span {
+    color:
+        #6b7785;
+
+    font-size:
+        9px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.02em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.admin-route-summary-item strong {
+    color:
+        #183447;
+
+    font-size:
+        17px;
+
+    font-weight:
+        800;
+}
+
+
+/* ========================================
+   ROUTE WORKSPACE
+======================================== */
+
+.admin-route-workspace {
+    display: grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1.1fr
+        )
+        minmax(
+            280px,
+            0.9fr
+        );
+
+    gap: 12px;
+}
+
+
+/* ========================================
+   ROUTE STOPS PANEL
+======================================== */
+
+.admin-route-stops-panel {
+    min-width: 0;
+
+    padding: 14px;
+
+    background:
+        #f8fbfd;
+
+    border:
+        1px solid #d6e4eb;
+
+    border-radius:
+        15px;
+}
+
+
+.admin-route-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 11px;
+}
+
+
+.admin-route-panel-heading strong {
+    display: block;
+
+    color:
+        #183447;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-route-panel-heading span {
+    display: block;
+
+    margin-top: 2px;
+
+    color:
+        #6b7785;
+
+    font-size:
+        9px;
+}
+
+
+/* ========================================
+   ROUTE STOP LIST
+======================================== */
+
+.admin-route-stop-list {
+    display: grid;
+
+    gap: 8px;
+}
+
+
+.admin-route-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+
+    min-height: 126px;
+
+    padding: 18px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px dashed #c8dce8;
+
+    border-radius:
+        12px;
+}
+
+
+.admin-route-empty strong {
+    margin-bottom: 4px;
+
+    color:
+        #183447;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-route-empty span {
+    max-width: 360px;
+
+    color:
+        #6b7785;
+
+    font-size:
+        9px;
+
+    line-height:
+        1.5;
+}
+
+
+/* ========================================
+   ROUTE STOP
+======================================== */
+
+.admin-route-stop {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding:
+        11px
+        12px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #dce8ee;
+
+    border-radius:
+        12px;
+}
+
+
+.admin-route-stop-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex:
+        0
+        0
+        30px;
+
+    width: 30px;
+    height: 30px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #f5ab40 0%,
+            #ef602c 100%
+        );
+
+    color:
+        #ffffff;
+
+    border-radius:
+        9px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-route-stop-copy {
+    min-width: 0;
+
+    flex:
+        1;
+}
+
+
+.admin-route-stop-copy strong {
+    display: block;
+
+    overflow: hidden;
+
+    color:
+        #183447;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+.admin-route-stop-copy span {
+    display: block;
+
+    overflow: hidden;
+
+    margin-top: 2px;
+
+    color:
+        #6b7785;
+
+    font-size:
+        9px;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+.admin-route-stop-time {
+    flex-shrink: 0;
+
+    color:
+        #1f7bc2;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+}
+
+
+/* ========================================
+   ROUTE MAP
+======================================== */
+
+.admin-route-map {
+    position: relative;
+
+    overflow: hidden;
+
+    min-height: 260px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #eef7fd 0%,
+            #f7fbfd 100%
+        );
+
+    border:
+        1px solid #c8dce8;
+
+    border-radius:
+        15px;
+}
+
+
+.admin-route-map-placeholder {
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    text-align: center;
+}
+
+
+.admin-route-map-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 44px;
+    height: 44px;
+
+    margin-bottom: 10px;
+
+    background:
+        #ffffff;
+
+    color:
+        #2890df;
+
+    border:
+        1px solid #9ed2f2;
+
+    border-radius:
+        13px;
+
+    box-shadow:
+        0 5px 14px rgba(40,144,223,0.09);
+}
+
+
+.admin-route-map-icon svg {
+    width: 21px;
+    height: 21px;
+
+    fill: none;
+
+    stroke: currentColor;
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+.admin-route-map-placeholder strong {
+    color:
+        #183447;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-route-map-placeholder span {
+    max-width: 250px;
+
+    margin-top: 4px;
+
+    color:
+        #6b7785;
+
+    font-size:
+        9px;
+
+    line-height:
+        1.5;
+}
+
+
+/* ========================================
+   ROUTE ACTIONS
+======================================== */
+
+.admin-route-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 9px;
+
+    margin-top: 13px;
+}
+
+
+.admin-route-actions button {
+    min-height: 36px;
+
+    padding:
+        0
+        15px;
+
+    border-radius:
+        10px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-route-actions button:disabled {
+    opacity:
+        0.45;
+
+    cursor:
+        not-allowed;
+
+    transform:
+        none;
+}
+
+
+/* ========================================
+   BEST ROUTE MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-best-route {
+        margin-top: 14px;
+
+        padding: 16px;
+
+        border-radius:
+            18px;
+    }
+
+
+    .admin-route-summary {
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap: 7px;
+    }
+
+
+    .admin-route-summary-item {
+        padding:
+            10px
+            8px;
+
+        text-align:
+            center;
+    }
+
+
+    .admin-route-summary-item span {
+        font-size:
+            8px;
+    }
+
+
+    .admin-route-summary-item strong {
+        font-size:
+            14px;
+    }
+
+
+    .admin-route-workspace {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .admin-route-map {
+        min-height:
+            185px;
+    }
+
+
+    .admin-route-stop {
+        padding:
+            10px;
+    }
+
+
+    .admin-route-stop-number {
+        flex-basis:
+            28px;
+
+        width:
+            28px;
+
+        height:
+            28px;
+    }
+
+
+    .admin-route-actions {
+        display: grid;
+
+        grid-template-columns:
+            1fr
+            1fr;
+    }
+
+
+    .admin-route-actions button {
+        width:
+            100%;
+    }
+
+}
+
+/* ========================================
    MOBILE ADMIN APP
 ======================================== */
 
