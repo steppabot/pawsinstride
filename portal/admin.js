@@ -16204,6 +16204,617 @@ adminNeedsAttentionList
 
 
 // ========================================
+// BEST VISIT ROUTE STATE
+// ========================================
+
+let adminBestRoutePlan =
+    null;
+
+
+let adminBestRouteLoading =
+    false;
+
+
+// ========================================
+// ROUTE START ADDRESS
+// ========================================
+
+const ADMIN_ROUTE_START_ADDRESS =
+    "3420 S Dallas Pkwy, Celina, TX";
+
+
+// ========================================
+// ROUTE SERVICE DURATION
+// ========================================
+
+function getAdminRouteDurationMinutes(
+    visit
+) {
+
+
+    const serviceText =
+        [
+            visit.service_name,
+            visit.service_type,
+            visit.service_option,
+            visit.service_duration
+        ]
+            .filter(
+                Boolean
+            )
+            .join(
+                " "
+            )
+            .toLowerCase();
+
+
+    if (
+        serviceText.includes(
+            "60"
+        )
+    ) {
+
+        return 70;
+
+    }
+
+
+    if (
+        serviceText.includes(
+            "30"
+        )
+    ) {
+
+        return 40;
+
+    }
+
+
+    return 25;
+
+}
+
+
+// ========================================
+// ROUTE CLIENT NAME
+// ========================================
+
+function getAdminRouteClientName(
+    visit
+) {
+
+
+    const client =
+        allProfiles.find(
+            profile =>
+                profile.id ===
+                visit.client_id
+        );
+
+
+    return (
+        client?.full_name ||
+        client?.email ||
+        "Client"
+    );
+
+}
+
+
+// ========================================
+// ROUTE ADDRESS
+// ========================================
+
+function getAdminRouteVisitAddress(
+    visit
+) {
+
+
+    const household =
+        allHouseholds.find(
+            item =>
+                item.client_id ===
+                visit.client_id
+        );
+
+
+    if (
+        !household
+    ) {
+
+        return "";
+
+    }
+
+
+    const addressParts =
+        [];
+
+
+    if (
+        household.street_address
+    ) {
+
+        addressParts.push(
+            household.street_address
+        );
+
+    }
+
+
+    if (
+        household.address_line_2
+    ) {
+
+        addressParts.push(
+            household.address_line_2
+        );
+
+    }
+
+
+    const cityState =
+        [
+            household.city,
+            household.state
+        ]
+            .filter(
+                Boolean
+            )
+            .join(
+                ", "
+            );
+
+
+    const cityStateZip =
+        `${cityState}${
+            household.zip_code
+                ? ` ${household.zip_code}`
+                : ""
+        }`
+            .trim();
+
+
+    if (
+        cityStateZip
+    ) {
+
+        addressParts.push(
+            cityStateZip
+        );
+
+    }
+
+
+    return addressParts.join(
+        ", "
+    );
+
+}
+
+
+// ========================================
+// ROUTE PREFERRED WINDOW
+// ========================================
+
+function getAdminRoutePreferredWindow(
+    visit
+) {
+
+
+    if (
+        visit.preferred_time_window
+    ) {
+
+        return visit.preferred_time_window;
+
+    }
+
+
+    const clientName =
+        getAdminRouteClientName(
+            visit
+        )
+            .trim()
+            .toLowerCase();
+
+
+    if (
+        clientName ===
+            "apollo" &&
+        visit.time_window ===
+            "7:00 AM - 10:00 AM"
+    ) {
+
+        return "9:00 AM - 9:30 AM";
+
+    }
+
+
+    return null;
+
+}
+
+
+// ========================================
+// GET REMAINING ROUTE VISITS
+// ========================================
+
+function getAdminRemainingRouteVisits() {
+
+
+    const today =
+        getLocalDateString();
+
+
+    return allVisits
+        .filter(
+            visit => {
+
+
+                const status =
+                    String(
+                        visit.status ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+
+                if (
+                    visit.visit_date !==
+                        today ||
+                    status ===
+                        "cancelled"
+                ) {
+
+                    return false;
+
+                }
+
+
+                const progress =
+                    getVisitProgressInfo(
+                        visit
+                    );
+
+
+                return (
+                    progress.state ===
+                        "scheduled" ||
+                    progress.state ===
+                        "checked_in"
+                );
+
+            }
+        )
+        .sort(
+            compareAdminVisits
+        );
+
+}
+
+
+// ========================================
+// FORMAT ROUTE DRIVE TIME
+// ========================================
+
+function formatAdminRouteDriveTime(
+    seconds
+) {
+
+
+    const totalMinutes =
+        Math.round(
+            Number(
+                seconds ||
+                0
+            ) /
+            60
+        );
+
+
+    const hours =
+        Math.floor(
+            totalMinutes /
+            60
+        );
+
+
+    const minutes =
+        totalMinutes %
+        60;
+
+
+    if (
+        hours ===
+        0
+    ) {
+
+        return `${minutes} min`;
+
+    }
+
+
+    if (
+        minutes ===
+        0
+    ) {
+
+        return `${hours} hr`;
+
+    }
+
+
+    return `${hours} hr ${minutes} min`;
+
+}
+
+
+// ========================================
+// FORMAT ROUTE TIME
+// ========================================
+
+function formatAdminRouteScheduledTime(
+    isoTime
+) {
+
+
+    if (
+        !isoTime
+    ) {
+
+        return "";
+
+    }
+
+
+    const date =
+        new Date(
+            isoTime
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    return date.toLocaleTimeString(
+        "en-US",
+        {
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit",
+
+            timeZone:
+                "America/Chicago"
+        }
+    );
+
+}
+
+
+// ========================================
+// CALCULATE BEST VISIT ROUTE
+// ========================================
+
+async function calculateAdminBestVisitRoute() {
+
+
+    if (
+        adminBestRouteLoading
+    ) {
+
+        return;
+
+    }
+
+
+    const remainingVisits =
+        getAdminRemainingRouteVisits();
+
+
+    if (
+        remainingVisits.length ===
+        0
+    ) {
+
+        adminBestRoutePlan =
+            null;
+
+
+        renderAdminBestVisitRoute();
+
+
+        return;
+
+    }
+
+
+    const missingAddresses =
+        [];
+
+
+    const routeVisits =
+        remainingVisits
+            .map(
+                visit => {
+
+
+                    const clientName =
+                        getAdminRouteClientName(
+                            visit
+                        );
+
+
+                    const address =
+                        getAdminRouteVisitAddress(
+                            visit
+                        );
+
+
+                    if (
+                        !address
+                    ) {
+
+                        missingAddresses.push(
+                            clientName
+                        );
+
+
+                        return null;
+
+                    }
+
+
+                    return {
+                        id:
+                            visit.id,
+
+                        label:
+                            clientName,
+
+                        address,
+
+                        visit_date:
+                            visit.visit_date,
+
+                        time_window:
+                            visit.time_window,
+
+                        preferred_time_window:
+                            getAdminRoutePreferredWindow(
+                                visit
+                            ),
+
+                        duration_minutes:
+                            getAdminRouteDurationMinutes(
+                                visit
+                            )
+                    };
+
+                }
+            )
+            .filter(
+                Boolean
+            );
+
+
+    if (
+        missingAddresses.length >
+        0
+    ) {
+
+        window.alert(
+            `Missing an address for: ${
+                missingAddresses.join(
+                    ", "
+                )
+            }`
+        );
+
+
+        return;
+
+    }
+
+
+    adminBestRouteLoading =
+        true;
+
+
+    renderAdminBestVisitRoute();
+
+
+    try {
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .functions
+                .invoke(
+                    "route-optimizer",
+                    {
+                        body: {
+                            start_address:
+                                ADMIN_ROUTE_START_ADDRESS,
+
+                            visits:
+                                routeVisits
+                        }
+                    }
+                );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        if (
+            !data?.success
+        ) {
+
+            throw new Error(
+                data?.error ||
+                "Route optimization failed."
+            );
+
+        }
+
+
+        adminBestRoutePlan =
+            data;
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Admin route optimization error:",
+            error
+        );
+
+
+        window.alert(
+            error?.message ||
+            "Unable to calculate the route."
+        );
+
+
+    } finally {
+
+
+        adminBestRouteLoading =
+            false;
+
+
+        renderAdminBestVisitRoute();
+
+    }
+
+}
+
+
+// ========================================
 // RENDER BEST VISIT ROUTE
 // ========================================
 
@@ -16274,59 +16885,8 @@ function renderAdminBestVisitRoute() {
     }
 
 
-    const today =
-        getLocalDateString();
-
-
-    // ========================================
-    // FIND REMAINING VISITS
-    // ========================================
-
     const remainingVisits =
-        allVisits
-            .filter(
-                visit => {
-
-
-                    const status =
-                        String(
-                            visit.status ||
-                            ""
-                        )
-                            .trim()
-                            .toLowerCase();
-
-
-                    if (
-                        visit.visit_date !==
-                            today ||
-                        status ===
-                            "cancelled"
-                    ) {
-
-                        return false;
-
-                    }
-
-
-                    const progress =
-                        getVisitProgressInfo(
-                            visit
-                        );
-
-
-                    return (
-                        progress.state ===
-                            "scheduled" ||
-                        progress.state ===
-                            "checked_in"
-                    );
-
-                }
-            )
-            .sort(
-                compareAdminVisits
-            );
+        getAdminRemainingRouteVisits();
 
 
     // ========================================
@@ -16337,21 +16897,16 @@ function renderAdminBestVisitRoute() {
         remainingVisits.length;
 
 
-    driveTimeElement.textContent =
-        "—";
-
-
-    distanceElement.textContent =
-        "—";
-
-
     recalculateButton.disabled =
-        true;
+        adminBestRouteLoading ||
+        remainingVisits.length ===
+            0;
 
 
     startButton.disabled =
+        adminBestRouteLoading ||
         remainingVisits.length ===
-        0;
+            0;
 
 
     // ========================================
@@ -16362,6 +16917,19 @@ function renderAdminBestVisitRoute() {
         remainingVisits.length ===
         0
     ) {
+
+
+        adminBestRoutePlan =
+            null;
+
+
+        driveTimeElement.textContent =
+            "—";
+
+
+        distanceElement.textContent =
+            "—";
+
 
         statusElement.textContent =
             "Complete";
@@ -16395,11 +16963,195 @@ function renderAdminBestVisitRoute() {
 
 
     // ========================================
-    // SCHEDULE ORDER
+    // OPTIMIZER LOADING
     // ========================================
 
+    if (
+        adminBestRouteLoading
+    ) {
+
+
+        statusElement.textContent =
+            "Optimizing";
+
+
+        subtitleElement.textContent =
+            "Calculating the most efficient route...";
+
+
+        driveTimeElement.textContent =
+            "—";
+
+
+        distanceElement.textContent =
+            "—";
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // OPTIMIZED ROUTE
+    // ========================================
+
+    if (
+        adminBestRoutePlan?.success &&
+        Array.isArray(
+            adminBestRoutePlan.stops
+        ) &&
+        adminBestRoutePlan.stops.length >
+            0
+    ) {
+
+
+        const optimizedStops =
+            adminBestRoutePlan.stops;
+
+
+        stopCountElement.textContent =
+            optimizedStops.length;
+
+
+        driveTimeElement.textContent =
+            formatAdminRouteDriveTime(
+                adminBestRoutePlan
+                    .metrics
+                    ?.travel_seconds
+            );
+
+
+        const miles =
+            Number(
+                adminBestRoutePlan
+                    .metrics
+                    ?.distance_miles ||
+                0
+            );
+
+
+        distanceElement.textContent =
+            `${miles.toFixed(
+                1
+            )} mi`;
+
+
+        statusElement.textContent =
+            "Optimized";
+
+
+        subtitleElement.textContent =
+            `${optimizedStops.length} optimized ${
+                optimizedStops.length ===
+                1
+                    ? "stop"
+                    : "stops"
+            }`;
+
+
+        stopList.innerHTML =
+            optimizedStops
+                .map(
+                    stop => {
+
+
+                        const visit =
+                            allVisits.find(
+                                item =>
+                                    Number(
+                                        item.id
+                                    ) ===
+                                    Number(
+                                        stop.id
+                                    )
+                            );
+
+
+                        const serviceName =
+                            visit?.service_name ||
+                            visit?.service_type ||
+                            "Service";
+
+
+                        const scheduledTime =
+                            formatAdminRouteScheduledTime(
+                                stop.scheduled_start
+                            );
+
+
+                        return `
+
+                            <article
+                                class="admin-route-stop"
+                                data-route-visit-id="${stop.id}"
+                            >
+
+                                <span class="admin-route-stop-number">
+                                    ${stop.order}
+                                </span>
+
+                                <div class="admin-route-stop-copy">
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            stop.label
+                                        )}
+                                    </strong>
+
+                                    <span>
+                                        ${escapeHtml(
+                                            serviceName
+                                        )}
+                                        •
+                                        ${escapeHtml(
+                                            stop.address
+                                        )}
+                                    </span>
+
+                                </div>
+
+                                <span class="admin-route-stop-time">
+                                    ${
+                                        scheduledTime
+                                            ? escapeHtml(
+                                                scheduledTime
+                                            )
+                                            : escapeHtml(
+                                                stop.time_window ||
+                                                ""
+                                            )
+                                    }
+                                </span>
+
+                            </article>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // SCHEDULE ORDER BEFORE OPTIMIZATION
+    // ========================================
+
+    driveTimeElement.textContent =
+        "—";
+
+
+    distanceElement.textContent =
+        "—";
+
+
     statusElement.textContent =
-        "Schedule Order";
+        "Ready";
 
 
     subtitleElement.textContent =
@@ -16408,12 +17160,8 @@ function renderAdminBestVisitRoute() {
             1
                 ? "stop"
                 : "stops"
-        }`;
+        } • Recalculate to optimize`;
 
-
-    // ========================================
-    // BUILD ROUTE STOPS
-    // ========================================
 
     stopList.innerHTML =
         remainingVisits
@@ -16424,26 +17172,10 @@ function renderAdminBestVisitRoute() {
                 ) => {
 
 
-                    const client =
-                        allProfiles.find(
-                            profile =>
-                                profile.id ===
-                                visit.client_id
-                        );
-
-
-                    const household =
-                        allHouseholds.find(
-                            item =>
-                                item.client_id ===
-                                visit.client_id
-                        );
-
-
                     const clientName =
-                        client?.full_name ||
-                        client?.email ||
-                        "Client";
+                        getAdminRouteClientName(
+                            visit
+                        );
 
 
                     const serviceName =
@@ -16457,71 +17189,11 @@ function renderAdminBestVisitRoute() {
                         "Time not set";
 
 
-                    const addressParts =
-                        [];
-
-
-                    if (
-                        household?.street_address
-                    ) {
-
-                        addressParts.push(
-                            household.street_address
-                        );
-
-                    }
-
-
-                    if (
-                        household?.address_line_2
-                    ) {
-
-                        addressParts.push(
-                            household.address_line_2
-                        );
-
-                    }
-
-
-                    const cityState =
-                        [
-                            household?.city,
-                            household?.state
-                        ]
-                            .filter(
-                                Boolean
-                            )
-                            .join(
-                                ", "
-                            );
-
-
-                    const cityStateZip =
-                        `${cityState}${
-                            household?.zip_code
-                                ? ` ${household.zip_code}`
-                                : ""
-                        }`
-                            .trim();
-
-
-                    if (
-                        cityStateZip
-                    ) {
-
-                        addressParts.push(
-                            cityStateZip
-                        );
-
-                    }
-
-
                     const address =
-                        addressParts.length
-                            ? addressParts.join(
-                                ", "
-                            )
-                            : "Address not added";
+                        getAdminRouteVisitAddress(
+                            visit
+                        ) ||
+                        "Address not added";
 
 
                     const progress =
@@ -16544,11 +17216,9 @@ function renderAdminBestVisitRoute() {
                             data-route-visit-id="${visit.id}"
                         >
 
-
                             <span class="admin-route-stop-number">
                                 ${index + 1}
                             </span>
-
 
                             <div class="admin-route-stop-copy">
 
@@ -16570,13 +17240,11 @@ function renderAdminBestVisitRoute() {
 
                             </div>
 
-
                             <span class="admin-route-stop-time">
                                 ${escapeHtml(
                                     timeWindow
                                 )}
                             </span>
-
 
                         </article>
 
@@ -16587,6 +17255,27 @@ function renderAdminBestVisitRoute() {
             .join("");
 
 }
+
+
+// ========================================
+// RECALCULATE BEST VISIT ROUTE
+// ========================================
+
+const adminRouteRecalculateButton =
+    document.getElementById(
+        "admin-route-recalculate-button"
+    );
+
+
+adminRouteRecalculateButton
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await calculateAdminBestVisitRoute();
+
+        }
+    );
 
 
 // ========================================
