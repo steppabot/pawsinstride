@@ -16590,6 +16590,319 @@ function renderAdminBestVisitRoute() {
 
 
 // ========================================
+// START ROUTE ACTION
+// ========================================
+
+const adminRouteStartButton =
+    document.getElementById(
+        "admin-route-start-button"
+    );
+
+
+adminRouteStartButton
+    ?.addEventListener(
+        "click",
+        () => {
+
+
+            const today =
+                getLocalDateString();
+
+
+            // ========================================
+            // GET REMAINING VISITS
+            // ========================================
+
+            const remainingVisits =
+                allVisits
+                    .filter(
+                        visit => {
+
+
+                            const status =
+                                String(
+                                    visit.status ||
+                                    ""
+                                )
+                                    .trim()
+                                    .toLowerCase();
+
+
+                            if (
+                                visit.visit_date !==
+                                    today ||
+                                status ===
+                                    "cancelled"
+                            ) {
+
+                                return false;
+
+                            }
+
+
+                            const progress =
+                                getVisitProgressInfo(
+                                    visit
+                                );
+
+
+                            return (
+                                progress.state ===
+                                    "scheduled" ||
+                                progress.state ===
+                                    "checked_in"
+                            );
+
+                        }
+                    )
+                    .sort(
+                        compareAdminVisits
+                    );
+
+
+            if (
+                remainingVisits.length ===
+                0
+            ) {
+
+                return;
+
+            }
+
+
+            // ========================================
+            // BUILD ROUTE ADDRESSES
+            // ========================================
+
+            const routeAddresses =
+                [];
+
+
+            const missingAddressClients =
+                [];
+
+
+            remainingVisits.forEach(
+                visit => {
+
+
+                    const client =
+                        allProfiles.find(
+                            profile =>
+                                profile.id ===
+                                visit.client_id
+                        );
+
+
+                    const household =
+                        allHouseholds.find(
+                            item =>
+                                item.client_id ===
+                                visit.client_id
+                        );
+
+
+                    const clientName =
+                        client?.full_name ||
+                        client?.email ||
+                        "Client";
+
+
+                    const addressParts =
+                        [];
+
+
+                    if (
+                        household?.street_address
+                    ) {
+
+                        addressParts.push(
+                            household.street_address
+                        );
+
+                    }
+
+
+                    if (
+                        household?.address_line_2
+                    ) {
+
+                        addressParts.push(
+                            household.address_line_2
+                        );
+
+                    }
+
+
+                    const cityState =
+                        [
+                            household?.city,
+                            household?.state
+                        ]
+                            .filter(
+                                Boolean
+                            )
+                            .join(
+                                ", "
+                            );
+
+
+                    const cityStateZip =
+                        `${cityState}${
+                            household?.zip_code
+                                ? ` ${household.zip_code}`
+                                : ""
+                        }`
+                            .trim();
+
+
+                    if (
+                        cityStateZip
+                    ) {
+
+                        addressParts.push(
+                            cityStateZip
+                        );
+
+                    }
+
+
+                    if (
+                        addressParts.length ===
+                        0
+                    ) {
+
+                        missingAddressClients.push(
+                            clientName
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    routeAddresses.push(
+                        addressParts.join(
+                            ", "
+                        )
+                    );
+
+
+                }
+            );
+
+
+            // ========================================
+            // BLOCK INCOMPLETE ROUTES
+            // ========================================
+
+            if (
+                missingAddressClients.length >
+                0
+            ) {
+
+                alert(
+                    `Can't start the full route yet. Missing address for: ${missingAddressClients.join(
+                        ", "
+                    )}`
+                );
+
+
+                return;
+
+            }
+
+
+            if (
+                routeAddresses.length ===
+                0
+            ) {
+
+                return;
+
+            }
+
+
+            // ========================================
+            // BUILD GOOGLE MAPS ROUTE
+            // ========================================
+
+            const destination =
+                routeAddresses[
+                    routeAddresses.length -
+                    1
+                ];
+
+
+            const waypoints =
+                routeAddresses.slice(
+                    0,
+                    -1
+                );
+
+
+            const routeUrl =
+                new URL(
+                    "https://www.google.com/maps/dir/"
+                );
+
+
+            routeUrl.searchParams.set(
+                "api",
+                "1"
+            );
+
+
+            routeUrl.searchParams.set(
+                "destination",
+                destination
+            );
+
+
+            routeUrl.searchParams.set(
+                "travelmode",
+                "driving"
+            );
+
+
+            routeUrl.searchParams.set(
+                "dir_action",
+                "navigate"
+            );
+
+
+            if (
+                waypoints.length >
+                0
+            ) {
+
+                routeUrl.searchParams.set(
+                    "waypoints",
+                    waypoints.join(
+                        "|"
+                    )
+                );
+
+            }
+
+
+            // ========================================
+            // OPEN GOOGLE MAPS
+            // ========================================
+
+            window.open(
+                routeUrl.toString(),
+                "_blank",
+                "noopener,noreferrer"
+            );
+
+
+        }
+    );
+
+
+// ========================================
 // ADMIN APP NAVIGATION STATE
 // ========================================
 
