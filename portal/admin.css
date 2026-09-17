@@ -415,7 +415,8 @@ body.admin-page {
 
     margin-bottom: 7px;
 
-    color: #ef602c;
+    color:
+        var(--admin-blue);
 
     font-size: 10px;
     font-weight: 800;
@@ -694,15 +695,15 @@ body.admin-page {
     background:
         linear-gradient(
             135deg,
-            rgba(245,171,64,0.16) 0%,
-            rgba(239,96,44,0.12) 100%
+            rgba(40,144,223,0.14) 0%,
+            rgba(71,206,230,0.10) 100%
         );
 
     color:
-        #ef602c;
+        var(--admin-blue);
 
     border:
-        1px solid rgba(239,96,44,0.18);
+        1px solid rgba(40,144,223,0.20);
 
     border-radius:
         11px;
@@ -722,7 +723,6 @@ body.admin-page {
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-
 
 /* ========================================
    SUMMARY VALUES
@@ -2161,36 +2161,35 @@ body.admin-page {
     }
 
 
-    /* ========================================
-       MOBILE NAV TOP ACCENT
-    ======================================== */
-
-    .admin-app-nav::before {
-        content: "";
-
-        position: absolute;
-
-        top: 0;
-        right: 0;
-        left: 0;
-
-        height: 4px;
-
-        background:
-            linear-gradient(
-                90deg,
-                #f5ab40 0%,
-                #ef602c 100%
-            );
-
-        border-radius:
-            0
-            0
-            999px
-            999px;
-    }
-
-
+   /* ========================================
+      MOBILE NAV TOP ACCENT
+   ======================================== */
+   
+   .admin-app-nav::before {
+       content: "";
+   
+       position: absolute;
+   
+       top: 0;
+       right: 0;
+       left: 0;
+   
+       height: 4px;
+   
+       background:
+           linear-gradient(
+               90deg,
+               var(--admin-blue) 0%,
+               var(--admin-cyan) 100%
+           );
+   
+       border-radius:
+           0
+           0
+           999px
+           999px;
+   }
+   
     .admin-app-nav-brand {
         display: none;
     }
@@ -2265,39 +2264,38 @@ body.admin-page {
     }
 
 
-    /* ========================================
-       MOBILE ACTIVE TAB
-    ======================================== */
-
-    .admin-app-nav-item-active {
-        background:
-            transparent;
-
-        color:
-            #ef602c;
-
-        box-shadow:
-            none;
-    }
-
-
-    .admin-app-nav-item-active:hover {
-        background:
-            transparent;
-
-        color:
-            #ef602c;
-    }
-
-
-    .admin-app-nav-item-active svg {
-        color:
-            #ef602c;
-
-        transform:
-            translateY(-1px);
-    }
-
+   /* ========================================
+      MOBILE ACTIVE TAB
+   ======================================== */
+   
+   .admin-app-nav-item-active {
+       background:
+           transparent;
+   
+       color:
+           var(--admin-blue);
+   
+       box-shadow:
+           none;
+   }
+   
+   
+   .admin-app-nav-item-active:hover {
+       background:
+           transparent;
+   
+       color:
+           var(--admin-blue);
+   }
+   
+   
+   .admin-app-nav-item-active svg {
+       color:
+           var(--admin-blue);
+   
+       transform:
+           translateY(-1px);
+   }
 
     /* ========================================
        MOBILE NAV BADGE
