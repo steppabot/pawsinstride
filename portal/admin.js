@@ -8050,10 +8050,11 @@ function replaceAdminVisit(
 
         renderAdminBestVisitRoute();
 
+        renderAdminFinancialSnapshot();
+
     }
 
 }
-
 
 // ========================================
 // BUILD SERVICE CARD
@@ -16219,6 +16220,439 @@ adminNeedsAttentionList
 
 
 // ========================================
+// FINANCIAL SNAPSHOT
+// ========================================
+
+function getAdminFinancialVisitMinutes(
+    visit
+) {
+
+
+    const actualMinutes =
+        getVisitDurationMinutes(
+            visit
+        );
+
+
+    if (
+        Number.isFinite(
+            actualMinutes
+        ) &&
+        actualMinutes >
+        0
+    ) {
+
+        return actualMinutes;
+
+    }
+
+
+    const serviceText =
+        [
+            visit.service_name,
+            visit.service_type,
+            visit.service_option,
+            visit.service_duration
+        ]
+            .filter(
+                Boolean
+            )
+            .join(
+                " "
+            )
+            .toLowerCase();
+
+
+    if (
+        serviceText.includes(
+            "60"
+        )
+    ) {
+
+        return 60;
+
+    }
+
+
+    if (
+        serviceText.includes(
+            "30"
+        )
+    ) {
+
+        return 30;
+
+    }
+
+
+    return 15;
+
+}
+
+
+function getAdminWeekDateRange() {
+
+
+    const today =
+        parseLocalDate(
+            getLocalDateString()
+        );
+
+
+    const day =
+        today.getDay();
+
+
+    const daysSinceMonday =
+        day ===
+        0
+
+            ? 6
+
+            : day - 1;
+
+
+    const monday =
+        new Date(
+            today
+        );
+
+
+    monday.setDate(
+        monday.getDate() -
+        daysSinceMonday
+    );
+
+
+    const sunday =
+        new Date(
+            monday
+        );
+
+
+    sunday.setDate(
+        sunday.getDate() +
+        6
+    );
+
+
+    return {
+
+        start:
+            makeDateString(
+                monday.getFullYear(),
+                monday.getMonth(),
+                monday.getDate()
+            ),
+
+        end:
+            makeDateString(
+                sunday.getFullYear(),
+                sunday.getMonth(),
+                sunday.getDate()
+            )
+
+    };
+
+}
+
+
+function getAdminFinancialVisits(
+    startDate,
+    endDate
+) {
+
+
+    return allVisits
+        .filter(
+            visit => {
+
+
+                const status =
+                    String(
+                        visit.status ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+
+                return (
+                    visit.visit_date >=
+                        startDate &&
+                    visit.visit_date <=
+                        endDate &&
+                    status !==
+                        "cancelled"
+                );
+
+            }
+        );
+
+}
+
+
+function getAdminFinancialRevenue(
+    visits
+) {
+
+
+    return visits.reduce(
+        (
+            total,
+            visit
+        ) => {
+
+            return (
+                total +
+                Number(
+                    visit.price ||
+                    0
+                )
+            );
+
+        },
+        0
+    );
+
+}
+
+
+function formatAdminFinancialCurrency(
+    amount
+) {
+
+
+    return Number(
+        amount ||
+        0
+    )
+        .toLocaleString(
+            "en-US",
+            {
+                style:
+                    "currency",
+
+                currency:
+                    "USD",
+
+                minimumFractionDigits:
+                    0,
+
+                maximumFractionDigits:
+                    0
+            }
+        );
+
+}
+
+
+function formatAdminFinancialTime(
+    totalMinutes
+) {
+
+
+    const minutes =
+        Math.max(
+            0,
+            Math.round(
+                Number(
+                    totalMinutes ||
+                    0
+                )
+            )
+        );
+
+
+    const hours =
+        Math.floor(
+            minutes /
+            60
+        );
+
+
+    const remainingMinutes =
+        minutes %
+        60;
+
+
+    if (
+        hours ===
+        0
+    ) {
+
+        return `${remainingMinutes}m`;
+
+    }
+
+
+    return `${hours}h ${remainingMinutes}m`;
+
+}
+
+
+function renderAdminFinancialSnapshot() {
+
+
+    const todayRevenueElement =
+        document.getElementById(
+            "admin-financial-today-revenue"
+        );
+
+
+    const weekRevenueElement =
+        document.getElementById(
+            "admin-financial-week-revenue"
+        );
+
+
+    const hourlyRateElement =
+        document.getElementById(
+            "admin-financial-hourly-rate"
+        );
+
+
+    const hourlyDetailElement =
+        document.getElementById(
+            "admin-financial-hourly-detail"
+        );
+
+
+    if (
+        !todayRevenueElement ||
+        !weekRevenueElement ||
+        !hourlyRateElement ||
+        !hourlyDetailElement
+    ) {
+
+        return;
+
+    }
+
+
+    const today =
+        getLocalDateString();
+
+
+    const todayVisits =
+        getAdminFinancialVisits(
+            today,
+            today
+        );
+
+
+    const weekRange =
+        getAdminWeekDateRange();
+
+
+    const weekVisits =
+        getAdminFinancialVisits(
+            weekRange.start,
+            weekRange.end
+        );
+
+
+    const todayRevenue =
+        getAdminFinancialRevenue(
+            todayVisits
+        );
+
+
+    const weekRevenue =
+        getAdminFinancialRevenue(
+            weekVisits
+        );
+
+
+    const visitMinutes =
+        todayVisits.reduce(
+            (
+                total,
+                visit
+            ) => {
+
+                return (
+                    total +
+                    getAdminFinancialVisitMinutes(
+                        visit
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const driveSeconds =
+        Number(
+            adminBestRoutePlan
+                ?.metrics
+                ?.travel_seconds ||
+            0
+        );
+
+
+    const driveMinutes =
+        driveSeconds /
+        60;
+
+
+    const workingMinutes =
+        visitMinutes +
+        driveMinutes;
+
+
+    const hourlyRate =
+        workingMinutes >
+        0
+
+            ? (
+                todayRevenue /
+                (
+                    workingMinutes /
+                    60
+                )
+            )
+
+            : 0;
+
+
+    todayRevenueElement.textContent =
+        formatAdminFinancialCurrency(
+            todayRevenue
+        );
+
+
+    weekRevenueElement.textContent =
+        formatAdminFinancialCurrency(
+            weekRevenue
+        );
+
+
+    hourlyRateElement.textContent =
+        `${formatAdminFinancialCurrency(
+            hourlyRate
+        )}/hr`;
+
+
+    hourlyDetailElement.textContent =
+        driveMinutes >
+        0
+
+            ? `${formatAdminFinancialTime(
+                visitMinutes
+            )} visits • ${formatAdminFinancialTime(
+                driveMinutes
+            )} estimated driving`
+
+            : `${formatAdminFinancialTime(
+                visitMinutes
+            )} visits • Optimize route for drive time`;
+
+}
+
+
+// ========================================
 // BEST VISIT ROUTE STATE
 // ========================================
 
@@ -16753,6 +17187,8 @@ async function calculateAdminBestVisitRoute() {
 
         renderAdminBestVisitRoute();
 
+        renderAdminFinancialSnapshot();
+
 
         return;
 
@@ -16931,6 +17367,8 @@ async function calculateAdminBestVisitRoute() {
 
 
         renderAdminBestVisitRoute();
+
+        renderAdminFinancialSnapshot();
 
     }
 
@@ -18779,12 +19217,13 @@ function showAdminAppScreen(
     
         renderAdminBestVisitRoute();
     
+        renderAdminFinancialSnapshot();
+    
     } else {
     
         stopAdminHomeSummaryTimer();
     
     }
-    
     
     // ========================================
     // REFRESH SCHEDULE
