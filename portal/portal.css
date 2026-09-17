@@ -3319,11 +3319,47 @@ section h3 {
    
    
    /* ========================================
+      SELECTED SCHEDULED DAY
+   ======================================== */
+   
+   body.mobile-app-screen-services
+   .upcoming-calendar-booked.upcoming-calendar-selected:not(
+       .upcoming-calendar-completed
+   ) {
+   
+       background:
+           linear-gradient(
+               145deg,
+               #2890df 0%,
+               #1768aa 100%
+           );
+   
+       color:
+           #ffffff;
+   
+       border-color:
+           transparent;
+   
+       box-shadow:
+           0
+           4px
+           10px
+           rgba(
+               31,
+               123,
+               194,
+               0.24
+           );
+   
+   }
+   
+   
+   /* ========================================
       SELECTED COMPLETED DAY
    ======================================== */
    
-    body.mobile-app-screen-services
-    .upcoming-calendar-completed.upcoming-calendar-selected {
+   body.mobile-app-screen-services
+   .upcoming-calendar-completed.upcoming-calendar-selected {
    
        background:
            linear-gradient(
@@ -10826,22 +10862,60 @@ body.client-portal-page:not(.mobile-app-screen-services)
 
 
 /* ========================================
-   SELECTED ACTIVE / EMPTY DAY
+   SELECTED EMPTY DAY
 ======================================== */
 
-body.client-portal-page:not(.mobile-app-screen-services)
-.upcoming-calendar-selected:not(:has(.upcoming-service-count-completed)) {
-    background: linear-gradient(
-        145deg,
-        #f5ab40 0%,
-        #eb872c 100%
-    );
+body.client-portal-page:not(
+    .mobile-app-screen-services
+)
+.upcoming-calendar-selected:not(
+    .upcoming-calendar-booked
+) {
+    background:
+        linear-gradient(
+            145deg,
+            #f5ab40 0%,
+            #eb872c 100%
+        );
 
-    color: #ffffff;
-    border-color: transparent;
+    color:
+        #ffffff;
+
+    border-color:
+        transparent;
 
     box-shadow:
         0 4px 12px rgba(201,111,25,0.23);
+}
+
+
+/* ========================================
+   SELECTED SCHEDULED DAY
+======================================== */
+
+body.client-portal-page:not(
+    .mobile-app-screen-services
+)
+.upcoming-calendar-booked.upcoming-calendar-selected:not(
+    :has(
+        .upcoming-service-count-completed
+    )
+) {
+    background:
+        linear-gradient(
+            145deg,
+            #2890df 0%,
+            #1768aa 100%
+        );
+
+    color:
+        #ffffff;
+
+    border-color:
+        transparent;
+
+    box-shadow:
+        0 4px 12px rgba(31,123,194,0.24);
 }
 
 
