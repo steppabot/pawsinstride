@@ -1953,7 +1953,7 @@ body.admin-page {
 
     width: auto;
 
-    min-width: 116px;
+    min-width: 118px;
     min-height: 42px;
 
     margin: 0;
@@ -1963,7 +1963,7 @@ body.admin-page {
         18px;
 
     border-radius:
-        8px;
+        6px;
 
     font-family:
         inherit;
@@ -1976,6 +1976,9 @@ body.admin-page {
 
     line-height:
         1;
+
+    letter-spacing:
+        0.01em;
 
     cursor:
         pointer;
@@ -1995,17 +1998,21 @@ body.admin-page {
 
 .admin-route-secondary-button {
     background:
-        #ffffff !important;
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f5faff 100%
+        ) !important;
 
     color:
-        #1f7bc2 !important;
+        var(--admin-blue-dark) !important;
 
     border:
         1px solid
         #9ed2f2 !important;
 
     box-shadow:
-        0 3px 8px rgba(40,144,223,0.06);
+        0 4px 10px rgba(40,144,223,0.08);
 }
 
 
@@ -2013,14 +2020,14 @@ body.admin-page {
     background:
         #eef7fd !important;
 
-    color:
-        #1f7bc2 !important;
-
     border-color:
-        #2890df !important;
+        var(--admin-blue) !important;
 
     transform:
         translateY(-1px);
+
+    box-shadow:
+        0 6px 14px rgba(40,144,223,0.12);
 }
 
 
@@ -2029,11 +2036,16 @@ body.admin-page {
 ======================================== */
 
 .admin-route-start-button {
+    position: relative;
+
+    overflow: hidden;
+
     background:
         linear-gradient(
             135deg,
             #2890df 0%,
-            #1f7bc2 100%
+            #1f7bc2 55%,
+            #1768aa 100%
         ) !important;
 
     color:
@@ -2041,29 +2053,52 @@ body.admin-page {
 
     border:
         1px solid
-        #1f7bc2 !important;
+        #1768aa !important;
 
     box-shadow:
-        0 5px 12px rgba(40,144,223,0.20);
+        0 6px 14px rgba(31,123,194,0.24);
+}
+
+
+.admin-route-start-button::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -45%;
+
+    width: 35%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255,255,255,0.22) 50%,
+            transparent 100%
+        );
+
+    transform:
+        skewX(-18deg);
+
+    transition:
+        left 0.35s ease;
 }
 
 
 .admin-route-start-button:hover {
-    background:
-        linear-gradient(
-            135deg,
-            #2386d2 0%,
-            #1b70b3 100%
-        ) !important;
-
-    border-color:
-        #1b70b3 !important;
-
     transform:
         translateY(-1px);
 
     box-shadow:
-        0 7px 15px rgba(40,144,223,0.24);
+        0 8px 18px rgba(31,123,194,0.28);
+}
+
+
+.admin-route-start-button:hover::after {
+    left:
+        120%;
 }
 
 
@@ -2086,7 +2121,6 @@ body.admin-page {
     box-shadow:
         none;
 }
-
 
 /* ========================================
    BEST ROUTE MOBILE
