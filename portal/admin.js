@@ -16204,6 +16204,392 @@ adminNeedsAttentionList
 
 
 // ========================================
+// RENDER BEST VISIT ROUTE
+// ========================================
+
+function renderAdminBestVisitRoute() {
+
+
+    const stopCountElement =
+        document.getElementById(
+            "admin-route-stop-count"
+        );
+
+
+    const driveTimeElement =
+        document.getElementById(
+            "admin-route-drive-time"
+        );
+
+
+    const distanceElement =
+        document.getElementById(
+            "admin-route-distance"
+        );
+
+
+    const statusElement =
+        document.getElementById(
+            "admin-route-status"
+        );
+
+
+    const subtitleElement =
+        document.getElementById(
+            "admin-route-subtitle"
+        );
+
+
+    const stopList =
+        document.getElementById(
+            "admin-route-stop-list"
+        );
+
+
+    const recalculateButton =
+        document.getElementById(
+            "admin-route-recalculate-button"
+        );
+
+
+    const startButton =
+        document.getElementById(
+            "admin-route-start-button"
+        );
+
+
+    if (
+        !stopCountElement ||
+        !driveTimeElement ||
+        !distanceElement ||
+        !statusElement ||
+        !subtitleElement ||
+        !stopList ||
+        !recalculateButton ||
+        !startButton
+    ) {
+
+        return;
+
+    }
+
+
+    const today =
+        getLocalDateString();
+
+
+    // ========================================
+    // FIND REMAINING VISITS
+    // ========================================
+
+    const remainingVisits =
+        allVisits
+            .filter(
+                visit => {
+
+
+                    const status =
+                        String(
+                            visit.status ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    if (
+                        visit.visit_date !==
+                            today ||
+                        status ===
+                            "cancelled"
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    const progress =
+                        getVisitProgressInfo(
+                            visit
+                        );
+
+
+                    return (
+                        progress.state ===
+                            "scheduled" ||
+                        progress.state ===
+                            "checked_in"
+                    );
+
+                }
+            )
+            .sort(
+                compareAdminVisits
+            );
+
+
+    // ========================================
+    // ROUTE SUMMARY
+    // ========================================
+
+    stopCountElement.textContent =
+        remainingVisits.length;
+
+
+    driveTimeElement.textContent =
+        "—";
+
+
+    distanceElement.textContent =
+        "—";
+
+
+    recalculateButton.disabled =
+        true;
+
+
+    startButton.disabled =
+        remainingVisits.length ===
+        0;
+
+
+    // ========================================
+    // NO REMAINING VISITS
+    // ========================================
+
+    if (
+        remainingVisits.length ===
+        0
+    ) {
+
+        statusElement.textContent =
+            "Complete";
+
+
+        subtitleElement.textContent =
+            "No remaining visits for today.";
+
+
+        stopList.innerHTML =
+            `
+
+                <div class="admin-route-empty">
+
+                    <strong>
+                        Today's route is complete.
+                    </strong>
+
+                    <span>
+                        There are no remaining scheduled visits for today.
+                    </span>
+
+                </div>
+
+            `;
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // SCHEDULE ORDER
+    // ========================================
+
+    statusElement.textContent =
+        "Schedule Order";
+
+
+    subtitleElement.textContent =
+        `${remainingVisits.length} remaining ${
+            remainingVisits.length ===
+            1
+                ? "stop"
+                : "stops"
+        }`;
+
+
+    // ========================================
+    // BUILD ROUTE STOPS
+    // ========================================
+
+    stopList.innerHTML =
+        remainingVisits
+            .map(
+                (
+                    visit,
+                    index
+                ) => {
+
+
+                    const client =
+                        allProfiles.find(
+                            profile =>
+                                profile.id ===
+                                visit.client_id
+                        );
+
+
+                    const household =
+                        allHouseholds.find(
+                            item =>
+                                item.client_id ===
+                                visit.client_id
+                        );
+
+
+                    const clientName =
+                        client?.full_name ||
+                        client?.email ||
+                        "Client";
+
+
+                    const serviceName =
+                        visit.service_name ||
+                        visit.service_type ||
+                        "Service";
+
+
+                    const timeWindow =
+                        visit.time_window ||
+                        "Time not set";
+
+
+                    const addressParts =
+                        [];
+
+
+                    if (
+                        household?.street_address
+                    ) {
+
+                        addressParts.push(
+                            household.street_address
+                        );
+
+                    }
+
+
+                    if (
+                        household?.address_line_2
+                    ) {
+
+                        addressParts.push(
+                            household.address_line_2
+                        );
+
+                    }
+
+
+                    const cityState =
+                        [
+                            household?.city,
+                            household?.state
+                        ]
+                            .filter(
+                                Boolean
+                            )
+                            .join(
+                                ", "
+                            );
+
+
+                    const cityStateZip =
+                        `${cityState}${
+                            household?.zip_code
+                                ? ` ${household.zip_code}`
+                                : ""
+                        }`
+                            .trim();
+
+
+                    if (
+                        cityStateZip
+                    ) {
+
+                        addressParts.push(
+                            cityStateZip
+                        );
+
+                    }
+
+
+                    const address =
+                        addressParts.length
+                            ? addressParts.join(
+                                ", "
+                            )
+                            : "Address not added";
+
+
+                    const progress =
+                        getVisitProgressInfo(
+                            visit
+                        );
+
+
+                    const progressLabel =
+                        progress.state ===
+                        "checked_in"
+                            ? "In Progress"
+                            : serviceName;
+
+
+                    return `
+
+                        <article
+                            class="admin-route-stop"
+                            data-route-visit-id="${visit.id}"
+                        >
+
+
+                            <span class="admin-route-stop-number">
+                                ${index + 1}
+                            </span>
+
+
+                            <div class="admin-route-stop-copy">
+
+                                <strong>
+                                    ${escapeHtml(
+                                        clientName
+                                    )}
+                                </strong>
+
+                                <span>
+                                    ${escapeHtml(
+                                        progressLabel
+                                    )}
+                                    •
+                                    ${escapeHtml(
+                                        address
+                                    )}
+                                </span>
+
+                            </div>
+
+
+                            <span class="admin-route-stop-time">
+                                ${escapeHtml(
+                                    timeWindow
+                                )}
+                            </span>
+
+
+                        </article>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+// ========================================
 // ADMIN APP NAVIGATION STATE
 // ========================================
 
@@ -16233,7 +16619,6 @@ const ADMIN_SCREEN_TITLES = {
         "More"
 
 };
-
 
 // ========================================
 // START HOME SUMMARY TIMER
@@ -16525,7 +16910,7 @@ function showAdminAppScreen(
     setAdminNavigationState(
         screenName
     );
-
+    
     // ========================================
     // REFRESH HOME
     // ========================================
@@ -16539,12 +16924,14 @@ function showAdminAppScreen(
     
         renderAdminNeedsAttention();
     
+        renderAdminBestVisitRoute();
+    
     } else {
     
         stopAdminHomeSummaryTimer();
     
     }
-    
+
     // ========================================
     // REFRESH SCHEDULE
     // ========================================
