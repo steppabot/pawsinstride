@@ -289,12 +289,12 @@ body.admin-page {
     background:
         linear-gradient(
             135deg,
-            var(--admin-orange) 0%,
-            var(--admin-orange-dark) 100%
+            var(--admin-blue) 0%,
+            var(--admin-blue-dark) 100%
         );
 
     box-shadow:
-        0 7px 18px rgba(239,96,44,0.18);
+        0 7px 18px rgba(40,144,223,0.18);
 }
 
 
@@ -305,8 +305,8 @@ body.admin-page {
     background:
         linear-gradient(
             135deg,
-            #f2a039 0%,
-            #e95827 100%
+            #2386d2 0%,
+            #1b70b3 100%
         );
 }
 
@@ -1844,27 +1844,136 @@ body.admin-page {
     align-items: center;
     justify-content: flex-end;
 
-    gap: 9px;
+    gap: 10px;
 
-    margin-top: 13px;
+    margin-top: 14px;
 }
 
 
 .admin-route-actions button {
-    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: auto;
+
+    min-width: 116px;
+    min-height: 42px;
+
+    margin: 0;
 
     padding:
         0
-        15px;
+        18px;
 
     border-radius:
-        10px;
+        8px;
+
+    font-family:
+        inherit;
 
     font-size:
         10px;
 
     font-weight:
         800;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+/* ========================================
+   RECALCULATE BUTTON
+======================================== */
+
+.admin-route-secondary-button {
+    background:
+        #ffffff !important;
+
+    color:
+        #1f7bc2 !important;
+
+    border:
+        1px solid
+        #9ed2f2 !important;
+
+    box-shadow:
+        0 3px 8px rgba(40,144,223,0.06);
+}
+
+
+.admin-route-secondary-button:hover {
+    background:
+        #eef7fd !important;
+
+    color:
+        #1f7bc2 !important;
+
+    border-color:
+        #2890df !important;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* ========================================
+   START ROUTE BUTTON
+======================================== */
+
+.admin-route-start-button {
+    background:
+        linear-gradient(
+            135deg,
+            #2890df 0%,
+            #1f7bc2 100%
+        ) !important;
+
+    color:
+        #ffffff !important;
+
+    border:
+        1px solid
+        #1f7bc2 !important;
+
+    box-shadow:
+        0 5px 12px rgba(40,144,223,0.20);
+}
+
+
+.admin-route-start-button:hover {
+    background:
+        linear-gradient(
+            135deg,
+            #2386d2 0%,
+            #1b70b3 100%
+        ) !important;
+
+    border-color:
+        #1b70b3 !important;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 7px 15px rgba(40,144,223,0.24);
+}
+
+
+.admin-route-actions button:active {
+    transform:
+        translateY(0);
 }
 
 
@@ -1876,6 +1985,9 @@ body.admin-page {
         not-allowed;
 
     transform:
+        none;
+
+    box-shadow:
         none;
 }
 
