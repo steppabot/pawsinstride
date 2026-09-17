@@ -1472,23 +1472,16 @@ body.admin-page {
 
 }
 
-
 /* ========================================
    BEST VISIT ROUTE
 ======================================== */
 
 .admin-best-route {
-    position:
-        relative;
-
     margin-top:
         18px;
 
     padding:
-        0;
-
-    overflow:
-        hidden;
+        22px;
 
     background:
         #ffffff;
@@ -1513,10 +1506,13 @@ body.admin-page {
         relative;
 
     margin:
-        0;
+        0
+        0
+        18px;
 
     padding:
-        22px;
+        18px
+        20px;
 
     overflow:
         hidden;
@@ -1528,6 +1524,12 @@ body.admin-page {
             #1f7bc2 58%,
             #1768aa 100%
         );
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        0 8px 18px rgba(31,123,194,0.18);
 
     color:
         #ffffff;
@@ -1542,16 +1544,16 @@ body.admin-page {
         absolute;
 
     top:
-        -80px;
+        -70px;
 
     right:
-        -55px;
+        -45px;
 
     width:
-        210px;
+        185px;
 
     height:
-        210px;
+        185px;
 
     background:
         rgba(255,255,255,0.07);
@@ -1623,85 +1625,26 @@ p {
 
 
 /* ========================================
-   ROUTE BODY SPACING
-======================================== */
-
-.admin-best-route .admin-route-summary {
-    margin-right:
-        22px;
-
-    margin-left:
-        22px;
-
-    margin-top:
-        18px;
-}
-
-
-.admin-best-route .admin-route-workspace {
-    margin-right:
-        22px;
-
-    margin-left:
-        22px;
-}
-
-
-.admin-best-route .admin-route-actions {
-    margin-right:
-        22px;
-
-    margin-bottom:
-        22px;
-
-    margin-left:
-        22px;
-}
-
-
-/* ========================================
    ROUTE HEADER MOBILE
 ======================================== */
 
 @media (max-width:700px) {
 
-    .admin-page .admin-best-route {
+    .admin-best-route {
         padding:
-            0;
+            16px;
     }
 
 
     .admin-best-route > .admin-home-section-heading {
-        padding:
-            18px
-            16px;
-    }
-
-
-    .admin-best-route .admin-route-summary,
-    .admin-best-route .admin-route-workspace,
-    .admin-best-route .admin-route-actions {
-        margin-right:
-            16px;
-
-        margin-left:
-            16px;
-    }
-
-
-    .admin-best-route .admin-route-summary {
-        margin-top:
-            16px;
-    }
-
-
-    .admin-best-route .admin-route-actions {
         margin-bottom:
+            16px;
+
+        padding:
             16px;
     }
 
 }
-
 
 /* ========================================
    ROUTE STATUS
