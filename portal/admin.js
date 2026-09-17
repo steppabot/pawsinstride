@@ -15830,6 +15830,380 @@ function renderAdminTodaySummary() {
 
 
 // ========================================
+// RENDER NEEDS ATTENTION
+// ========================================
+
+function renderAdminNeedsAttention() {
+
+
+    const section =
+        document.getElementById(
+            "admin-needs-attention"
+        );
+
+
+    const list =
+        document.getElementById(
+            "admin-needs-attention-list"
+        );
+
+
+    const countElement =
+        document.getElementById(
+            "admin-needs-attention-count"
+        );
+
+
+    if (
+        !section ||
+        !list ||
+        !countElement
+    ) {
+
+        return;
+
+    }
+
+
+    const today =
+        getLocalDateString();
+
+
+    // ========================================
+    // COMPLETED VISITS MISSING REPORTS
+    // ========================================
+
+    const missingReportVisits =
+        allVisits
+            .filter(
+                visit => {
+
+                    const status =
+                        String(
+                            visit.status ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    if (
+                        visit.visit_date !==
+                            today ||
+                        status ===
+                            "cancelled"
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    const progress =
+                        getVisitProgressInfo(
+                            visit
+                        );
+
+
+                    if (
+                        progress.state !==
+                        "completed"
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    const hasReport =
+                        allVisitReports.some(
+                            report =>
+                                Number(
+                                    report.visit_id
+                                ) ===
+                                Number(
+                                    visit.id
+                                )
+                        );
+
+
+                    return !hasReport;
+
+                }
+            )
+            .sort(
+                compareAdminVisits
+            );
+
+
+    // ========================================
+    // NOTHING NEEDS ATTENTION
+    // ========================================
+
+    if (
+        missingReportVisits.length ===
+        0
+    ) {
+
+        section.hidden =
+            true;
+
+
+        countElement.textContent =
+            "0";
+
+
+        list.innerHTML =
+            "";
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // SHOW ACTION CENTER
+    // ========================================
+
+    section.hidden =
+        false;
+
+
+    countElement.textContent =
+        missingReportVisits.length;
+
+
+    list.innerHTML =
+        missingReportVisits
+            .map(
+                visit => {
+
+
+                    const client =
+                        allProfiles.find(
+                            profile =>
+                                profile.id ===
+                                visit.client_id
+                        );
+
+
+                    const clientName =
+                        client?.full_name ||
+                        client?.email ||
+                        "Client";
+
+
+                    const serviceName =
+                        visit.service_name ||
+                        visit.service_type ||
+                        "Service";
+
+
+                    const timeWindow =
+                        visit.time_window ||
+                        "Time not set";
+
+
+                    return `
+
+                        <article class="admin-attention-item">
+
+
+                            <div class="admin-attention-item-main">
+
+
+                                <span class="admin-attention-item-icon">
+
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M6 3h9l3 3v15H6z"></path>
+                                        <path d="M9 11h6"></path>
+                                        <path d="M9 15h6"></path>
+                                        <path d="M9 7h3"></path>
+                                    </svg>
+
+                                </span>
+
+
+                                <div class="admin-attention-item-copy">
+
+                                    <strong>
+                                        Visit report needed
+                                    </strong>
+
+                                    <span>
+                                        ${escapeHtml(
+                                            clientName
+                                        )}
+                                        •
+                                        ${escapeHtml(
+                                            serviceName
+                                        )}
+                                        •
+                                        ${escapeHtml(
+                                            timeWindow
+                                        )}
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="admin-attention-action"
+                                data-admin-attention-action="visit-report"
+                                data-visit-id="${visit.id}"
+                                data-visit-date="${escapeHtml(
+                                    visit.visit_date
+                                )}"
+                            >
+                                Add Report
+                            </button>
+
+
+                        </article>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+// ========================================
+// NEEDS ATTENTION ACTIONS
+// ========================================
+
+const adminNeedsAttentionList =
+    document.getElementById(
+        "admin-needs-attention-list"
+    );
+
+
+adminNeedsAttentionList
+    ?.addEventListener(
+        "click",
+        async event => {
+
+
+            const button =
+                event.target.closest(
+                    "[data-admin-attention-action]"
+                );
+
+
+            if (
+                !button
+            ) {
+
+                return;
+
+            }
+
+
+            const action =
+                button.dataset
+                    .adminAttentionAction;
+
+
+            const visitId =
+                Number(
+                    button.dataset
+                        .visitId
+                );
+
+
+            const visitDate =
+                button.dataset
+                    .visitDate;
+
+
+            if (
+                action !==
+                    "visit-report" ||
+                !visitId ||
+                !visitDate
+            ) {
+
+                return;
+
+            }
+
+
+            // ========================================
+            // MOVE CALENDAR TO VISIT DATE
+            // ========================================
+
+            const visitDateObject =
+                parseLocalDate(
+                    visitDate
+                );
+
+
+            selectedAdminDate =
+                visitDate;
+
+
+            adminCalendarYear =
+                visitDateObject
+                    .getFullYear();
+
+
+            adminCalendarMonth =
+                visitDateObject
+                    .getMonth();
+
+
+            // ========================================
+            // OPEN SCHEDULE SCREEN
+            // ========================================
+
+            showAdminAppScreen(
+                "schedule"
+            );
+
+
+            // ========================================
+            // OPEN VISIT REPORT
+            // ========================================
+
+            await openAdminVisitReport(
+                visitId
+            );
+
+
+            // ========================================
+            // SCROLL REPORT INTO VIEW
+            // ========================================
+
+            const reportMount =
+                document.getElementById(
+                    `admin-visit-report-${visitId}`
+                );
+
+
+            reportMount
+                ?.scrollIntoView({
+                    behavior:
+                        "smooth",
+
+                    block:
+                        "center"
+                });
+
+
+        }
+    );
+
+
+// ========================================
 // ADMIN APP NAVIGATION STATE
 // ========================================
 
@@ -16163,12 +16537,13 @@ function showAdminAppScreen(
     
         startAdminHomeSummaryTimer();
     
+        renderAdminNeedsAttention();
+    
     } else {
     
         stopAdminHomeSummaryTimer();
     
     }
-    
     
     // ========================================
     // REFRESH SCHEDULE
