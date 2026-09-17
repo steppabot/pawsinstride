@@ -408,36 +408,281 @@
                     </div>
 
 
+                <!-- ========================================
+                     HOME DASHBOARD
+                     ======================================== -->
+
+                <div
+                    id="admin-home-dashboard"
+                    class="admin-home-dashboard"
+                >
+
+
                     <!-- ========================================
-                         HOME DASHBOARD
+                         TODAY'S SUMMARY
                          ======================================== -->
 
-                    <div
-                        id="admin-home-dashboard"
-                        class="admin-home-dashboard"
-                    >
+                    <section class="admin-today-summary">
 
-                        <div class="admin-home-placeholder">
 
-                            <strong>
-                                Operations dashboard coming online.
-                            </strong>
+                        <div class="admin-home-section-heading">
 
-                            <span>
-                                Today's summary, route optimization, quick actions, timeline, and yesterday's stats will live here.
-                            </span>
+
+                            <div>
+
+                                <span class="admin-screen-eyebrow">
+                                    TODAY AT A GLANCE
+                                </span>
+
+                                <h2>
+                                    Today's Summary
+                                </h2>
+
+                                <p id="admin-today-date">
+                                    Loading today's operations...
+                                </p>
+
+                            </div>
+
+
+                            <div
+                                id="admin-today-status"
+                                class="admin-today-status"
+                            >
+                                Live
+                            </div>
+
 
                         </div>
 
-                    </div>
+
+                        <!-- ========================================
+                             SUMMARY GRID
+                             ======================================== -->
+
+                        <div class="admin-summary-grid">
 
 
-                </section>
+                            <!-- ========================================
+                                 VISITS TODAY
+                                 ======================================== -->
+
+                            <article class="admin-summary-card">
+
+                                <div class="admin-summary-card-heading">
+
+                                    <span class="admin-summary-card-label">
+                                        Visits Today
+                                    </span>
+
+                                    <span class="admin-summary-card-icon">
+
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M3 10.5 12 3l9 7.5"></path>
+                                            <path d="M5 9.5V21h14V9.5"></path>
+                                        </svg>
+
+                                    </span>
+
+                                </div>
 
 
-                <!-- ========================================
-                     MORE SCREEN
-                     ======================================== -->
+                                <strong
+                                    id="admin-summary-total-visits"
+                                    class="admin-summary-card-value"
+                                >
+                                    0
+                                </strong>
+
+
+                                <span
+                                    id="admin-summary-service-breakdown"
+                                    class="admin-summary-card-detail"
+                                >
+                                    No services scheduled
+                                </span>
+
+                            </article>
+
+
+                            <!-- ========================================
+                                 DAILY PROGRESS
+                                 ======================================== -->
+
+                            <article class="admin-summary-card">
+
+                                <div class="admin-summary-card-heading">
+
+                                    <span class="admin-summary-card-label">
+                                        Daily Progress
+                                    </span>
+
+                                    <span class="admin-summary-card-icon">
+
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M20 6 9 17l-5-5"></path>
+                                        </svg>
+
+                                    </span>
+
+                                </div>
+
+
+                                <strong
+                                    id="admin-summary-completed-visits"
+                                    class="admin-summary-card-value"
+                                >
+                                    0 / 0
+                                </strong>
+
+
+                                <div class="admin-summary-progress-row">
+
+                                    <span>
+                                        <strong id="admin-summary-in-progress-visits">
+                                            0
+                                        </strong>
+
+                                        In Progress
+                                    </span>
+
+
+                                    <span>
+                                        <strong id="admin-summary-remaining-visits">
+                                            0
+                                        </strong>
+
+                                        Remaining
+                                    </span>
+
+                                </div>
+
+                            </article>
+
+
+                            <!-- ========================================
+                                 VISIT TIME
+                                 ======================================== -->
+
+                            <article class="admin-summary-card">
+
+                                <div class="admin-summary-card-heading">
+
+                                    <span class="admin-summary-card-label">
+                                        Visit Time
+                                    </span>
+
+                                    <span class="admin-summary-card-icon">
+
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <circle
+                                                cx="12"
+                                                cy="12"
+                                                r="9"
+                                            ></circle>
+
+                                            <path d="M12 7v5l3 2"></path>
+                                        </svg>
+
+                                    </span>
+
+                                </div>
+
+
+                                <strong
+                                    id="admin-summary-visit-time"
+                                    class="admin-summary-card-value"
+                                >
+                                    0h 0m
+                                </strong>
+
+
+                                <span
+                                    id="admin-summary-visit-time-detail"
+                                    class="admin-summary-card-detail"
+                                >
+                                    Total checked-in time today
+                                </span>
+
+                            </article>
+
+
+                            <!-- ========================================
+                                 WALK ACTIVITY
+                                 ======================================== -->
+
+                            <article class="admin-summary-card">
+
+                                <div class="admin-summary-card-heading">
+
+                                    <span class="admin-summary-card-label">
+                                        Walk Activity
+                                    </span>
+
+                                    <span class="admin-summary-card-icon">
+
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M4 18c3-5 5-8 8-8 2 0 3 2 5 2 1.5 0 2.5-1 3-2"></path>
+                                            <circle
+                                                cx="7"
+                                                cy="6"
+                                                r="2"
+                                            ></circle>
+                                        </svg>
+
+                                    </span>
+
+                                </div>
+
+
+                                <strong
+                                    id="admin-summary-walk-distance"
+                                    class="admin-summary-card-value"
+                                >
+                                    0.0 mi
+                                </strong>
+
+
+                                <span class="admin-summary-card-detail">
+
+                                    <strong id="admin-summary-walk-time">
+                                        0m
+                                    </strong>
+
+                                    walking today
+
+                                </span>
+
+                            </article>
+
+
+                        </div>
+
+
+                    </section>
+
+
+                </div>
+
+
+            </section>
+
+
+            <!-- ========================================
+                 MORE SCREEN
+                 ======================================== -->
 
                 <section
                     id="admin-screen-more"
