@@ -16922,19 +16922,16 @@ async function calculateAdminBestVisitRoute() {
             "Unable to calculate the route."
         );
 
-        
+
     } finally {
-    
-    
+
+
         adminBestRouteLoading =
             false;
-    
-    
+
+
         renderAdminBestVisitRoute();
-    
-    
-        renderAdminTodayTimeline();
-    
+
     }
 
 }
@@ -18781,8 +18778,6 @@ function showAdminAppScreen(
         renderAdminNeedsAttention();
     
         renderAdminBestVisitRoute();
-    
-        renderAdminTodayTimeline();
     
     } else {
     
