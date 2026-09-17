@@ -17291,216 +17291,58 @@ const adminRouteStartButton =
 adminRouteStartButton
     ?.addEventListener(
         "click",
-        () => {
-
-
-            const today =
-                getLocalDateString();
+        async () => {
 
 
             // ========================================
-            // GET REMAINING VISITS
+            // REQUIRE OPTIMIZED ROUTE
             // ========================================
-
-            const remainingVisits =
-                allVisits
-                    .filter(
-                        visit => {
-
-
-                            const status =
-                                String(
-                                    visit.status ||
-                                    ""
-                                )
-                                    .trim()
-                                    .toLowerCase();
-
-
-                            if (
-                                visit.visit_date !==
-                                    today ||
-                                status ===
-                                    "cancelled"
-                            ) {
-
-                                return false;
-
-                            }
-
-
-                            const progress =
-                                getVisitProgressInfo(
-                                    visit
-                                );
-
-
-                            return (
-                                progress.state ===
-                                    "scheduled" ||
-                                progress.state ===
-                                    "checked_in"
-                            );
-
-                        }
-                    )
-                    .sort(
-                        compareAdminVisits
-                    );
-
 
             if (
-                remainingVisits.length ===
-                0
+                !adminBestRoutePlan?.success ||
+                !Array.isArray(
+                    adminBestRoutePlan.stops
+                ) ||
+                adminBestRoutePlan.stops.length ===
+                    0
             ) {
 
-                return;
+
+                await calculateAdminBestVisitRoute();
+
+
+                if (
+                    !adminBestRoutePlan?.success ||
+                    !Array.isArray(
+                        adminBestRoutePlan.stops
+                    ) ||
+                    adminBestRoutePlan.stops.length ===
+                        0
+                ) {
+
+                    return;
+
+                }
 
             }
 
 
             // ========================================
-            // BUILD ROUTE ADDRESSES
+            // BUILD OPTIMIZED ROUTE ADDRESSES
             // ========================================
 
             const routeAddresses =
-                [];
-
-
-            const missingAddressClients =
-                [];
-
-
-            remainingVisits.forEach(
-                visit => {
-
-
-                    const client =
-                        allProfiles.find(
-                            profile =>
-                                profile.id ===
-                                visit.client_id
-                        );
-
-
-                    const household =
-                        allHouseholds.find(
-                            item =>
-                                item.client_id ===
-                                visit.client_id
-                        );
-
-
-                    const clientName =
-                        client?.full_name ||
-                        client?.email ||
-                        "Client";
-
-
-                    const addressParts =
-                        [];
-
-
-                    if (
-                        household?.street_address
-                    ) {
-
-                        addressParts.push(
-                            household.street_address
-                        );
-
-                    }
-
-
-                    if (
-                        household?.address_line_2
-                    ) {
-
-                        addressParts.push(
-                            household.address_line_2
-                        );
-
-                    }
-
-
-                    const cityState =
-                        [
-                            household?.city,
-                            household?.state
-                        ]
-                            .filter(
-                                Boolean
-                            )
-                            .join(
-                                ", "
-                            );
-
-
-                    const cityStateZip =
-                        `${cityState}${
-                            household?.zip_code
-                                ? ` ${household.zip_code}`
-                                : ""
-                        }`
-                            .trim();
-
-
-                    if (
-                        cityStateZip
-                    ) {
-
-                        addressParts.push(
-                            cityStateZip
-                        );
-
-                    }
-
-
-                    if (
-                        addressParts.length ===
-                        0
-                    ) {
-
-                        missingAddressClients.push(
-                            clientName
-                        );
-
-
-                        return;
-
-                    }
-
-
-                    routeAddresses.push(
-                        addressParts.join(
-                            ", "
-                        )
+                adminBestRoutePlan
+                    .stops
+                    .map(
+                        stop =>
+                            stop.formatted_address ||
+                            stop.address ||
+                            ""
+                    )
+                    .filter(
+                        Boolean
                     );
-
-
-                }
-            );
-
-
-            // ========================================
-            // BLOCK INCOMPLETE ROUTES
-            // ========================================
-
-            if (
-                missingAddressClients.length >
-                0
-            ) {
-
-                alert(
-                    `Can't start the full route yet. Missing address for: ${missingAddressClients.join(
-                        ", "
-                    )}`
-                );
-
-
-                return;
-
-            }
 
 
             if (
@@ -17514,7 +17356,7 @@ adminRouteStartButton
 
 
             // ========================================
-            // BUILD GOOGLE MAPS ROUTE
+            // GOOGLE MAPS ROUTE
             // ========================================
 
             const destination =
@@ -17540,6 +17382,12 @@ adminRouteStartButton
             routeUrl.searchParams.set(
                 "api",
                 "1"
+            );
+
+
+            routeUrl.searchParams.set(
+                "origin",
+                ADMIN_ROUTE_START_ADDRESS
             );
 
 
@@ -17586,10 +17434,8 @@ adminRouteStartButton
                 "noopener,noreferrer"
             );
 
-
         }
     );
-
 
 // ========================================
 // ADMIN APP NAVIGATION STATE
