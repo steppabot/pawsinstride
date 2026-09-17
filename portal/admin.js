@@ -15052,6 +15052,784 @@ function clearAdminMessageError() {
 
 
 // ========================================
+// TODAY SUMMARY FORMAT
+// ========================================
+
+function formatAdminSummaryDuration(
+    totalSeconds
+) {
+
+    const safeSeconds =
+        Math.max(
+            0,
+            Math.floor(
+                Number(
+                    totalSeconds ||
+                    0
+                )
+            )
+        );
+
+
+    const hours =
+        Math.floor(
+            safeSeconds /
+            3600
+        );
+
+
+    const minutes =
+        Math.floor(
+            (
+                safeSeconds %
+                3600
+            ) /
+            60
+        );
+
+
+    if (
+        hours >
+        0
+    ) {
+
+        return `${hours}h ${minutes}m`;
+
+    }
+
+
+    return `${minutes}m`;
+
+}
+
+
+// ========================================
+// RENDER TODAY SUMMARY
+// ========================================
+
+function renderAdminTodaySummary() {
+
+
+    const totalVisitsElement =
+        document.getElementById(
+            "admin-summary-total-visits"
+        );
+
+
+    if (
+        !totalVisitsElement
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // TODAY
+    // ========================================
+
+    const today =
+        getLocalDateString();
+
+
+    const now =
+        Date.now();
+
+
+    const dateElement =
+        document.getElementById(
+            "admin-today-date"
+        );
+
+
+    if (
+        dateElement
+    ) {
+
+        dateElement.textContent =
+            new Date(
+                `${today}T12:00:00`
+            )
+                .toLocaleDateString(
+                    "en-US",
+                    {
+                        weekday:
+                            "long",
+
+                        month:
+                            "long",
+
+                        day:
+                            "numeric",
+
+                        year:
+                            "numeric"
+                    }
+                );
+
+    }
+
+
+    // ========================================
+    // TODAY'S VISITS
+    // ========================================
+
+    const todayVisits =
+        allVisits.filter(
+            visit => {
+
+                const status =
+                    String(
+                        visit.status ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+
+                return (
+                    visit.visit_date ===
+                        today &&
+                    status !==
+                        "cancelled"
+                );
+
+            }
+        );
+
+
+    totalVisitsElement.textContent =
+        todayVisits.length;
+
+
+    // ========================================
+    // SERVICE BREAKDOWN
+    // ========================================
+
+    let walkCount =
+        0;
+
+
+    let dropInCount =
+        0;
+
+
+    let otherCount =
+        0;
+
+
+    todayVisits.forEach(
+        visit => {
+
+            const serviceName =
+                String(
+                    visit.service_name ||
+                    visit.service_type ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            if (
+                serviceName.includes(
+                    "walk"
+                )
+            ) {
+
+                walkCount +=
+                    1;
+
+
+                return;
+
+            }
+
+
+            if (
+                serviceName.includes(
+                    "drop"
+                ) ||
+                serviceName.includes(
+                    "check-in"
+                ) ||
+                serviceName.includes(
+                    "check in"
+                )
+            ) {
+
+                dropInCount +=
+                    1;
+
+
+                return;
+
+            }
+
+
+            otherCount +=
+                1;
+
+        }
+    );
+
+
+    const serviceParts =
+        [];
+
+
+    if (
+        walkCount >
+        0
+    ) {
+
+        serviceParts.push(
+            `${walkCount} ${
+                walkCount ===
+                1
+
+                    ? "walk"
+
+                    : "walks"
+            }`
+        );
+
+    }
+
+
+    if (
+        dropInCount >
+        0
+    ) {
+
+        serviceParts.push(
+            `${dropInCount} ${
+                dropInCount ===
+                1
+
+                    ? "drop-in"
+
+                    : "drop-ins"
+            }`
+        );
+
+    }
+
+
+    if (
+        otherCount >
+        0
+    ) {
+
+        serviceParts.push(
+            `${otherCount} other ${
+                otherCount ===
+                1
+
+                    ? "service"
+
+                    : "services"
+            }`
+        );
+
+    }
+
+
+    const serviceBreakdownElement =
+        document.getElementById(
+            "admin-summary-service-breakdown"
+        );
+
+
+    if (
+        serviceBreakdownElement
+    ) {
+
+        serviceBreakdownElement.textContent =
+            serviceParts.length >
+            0
+
+                ? serviceParts.join(
+                    " • "
+                )
+
+                : "No services scheduled";
+
+    }
+
+
+    // ========================================
+    // VISIT PROGRESS
+    // ========================================
+
+    let completedVisits =
+        0;
+
+
+    let inProgressVisits =
+        0;
+
+
+    let remainingVisits =
+        0;
+
+
+    let totalVisitSeconds =
+        0;
+
+
+    todayVisits.forEach(
+        visit => {
+
+            const progress =
+                getVisitProgressInfo(
+                    visit
+                );
+
+
+            if (
+                progress.state ===
+                "completed"
+            ) {
+
+                completedVisits +=
+                    1;
+
+            } else if (
+                progress.state ===
+                "checked_in"
+            ) {
+
+                inProgressVisits +=
+                    1;
+
+            } else {
+
+                remainingVisits +=
+                    1;
+
+            }
+
+
+            // ========================================
+            // VISIT TIME
+            // ========================================
+
+            if (
+                !progress.checkedInAt
+            ) {
+
+                return;
+
+            }
+
+
+            const startedAt =
+                new Date(
+                    progress.checkedInAt
+                )
+                    .getTime();
+
+
+            if (
+                !Number.isFinite(
+                    startedAt
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            let endedAt =
+                null;
+
+
+            if (
+                progress.state ===
+                "completed" &&
+                progress.completedAt
+            ) {
+
+                endedAt =
+                    new Date(
+                        progress.completedAt
+                    )
+                        .getTime();
+
+            } else if (
+                progress.state ===
+                "checked_in"
+            ) {
+
+                endedAt =
+                    now;
+
+            }
+
+
+            if (
+                !Number.isFinite(
+                    endedAt
+                ) ||
+                endedAt <
+                    startedAt
+            ) {
+
+                return;
+
+            }
+
+
+            totalVisitSeconds +=
+                Math.floor(
+                    (
+                        endedAt -
+                        startedAt
+                    ) /
+                    1000
+                );
+
+        }
+    );
+
+
+    const completedElement =
+        document.getElementById(
+            "admin-summary-completed-visits"
+        );
+
+
+    const inProgressElement =
+        document.getElementById(
+            "admin-summary-in-progress-visits"
+        );
+
+
+    const remainingElement =
+        document.getElementById(
+            "admin-summary-remaining-visits"
+        );
+
+
+    const visitTimeElement =
+        document.getElementById(
+            "admin-summary-visit-time"
+        );
+
+
+    if (
+        completedElement
+    ) {
+
+        completedElement.textContent =
+            `${completedVisits} / ${todayVisits.length}`;
+
+    }
+
+
+    if (
+        inProgressElement
+    ) {
+
+        inProgressElement.textContent =
+            inProgressVisits;
+
+    }
+
+
+    if (
+        remainingElement
+    ) {
+
+        remainingElement.textContent =
+            remainingVisits;
+
+    }
+
+
+    if (
+        visitTimeElement
+    ) {
+
+        visitTimeElement.textContent =
+            formatAdminSummaryDuration(
+                totalVisitSeconds
+            );
+
+    }
+
+
+    // ========================================
+    // TODAY'S WALK DATA
+    // ========================================
+
+    const todayVisitIds =
+        new Set(
+            todayVisits.map(
+                visit =>
+                    Number(
+                        visit.id
+                    )
+            )
+        );
+
+
+    const walksByVisit =
+        new Map();
+
+
+    allVisitWalks.forEach(
+        walk => {
+
+            const visitId =
+                Number(
+                    walk.visit_id
+                );
+
+
+            if (
+                !todayVisitIds.has(
+                    visitId
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const existingWalk =
+                walksByVisit.get(
+                    visitId
+                );
+
+
+            if (
+                !existingWalk
+            ) {
+
+                walksByVisit.set(
+                    visitId,
+                    walk
+                );
+
+
+                return;
+
+            }
+
+
+            const existingStatus =
+                String(
+                    existingWalk.status ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            const nextStatus =
+                String(
+                    walk.status ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            if (
+                existingStatus !==
+                    "completed" &&
+                nextStatus ===
+                    "completed"
+            ) {
+
+                walksByVisit.set(
+                    visitId,
+                    walk
+                );
+
+            }
+
+        }
+    );
+
+
+    let totalWalkSeconds =
+        0;
+
+
+    let totalWalkDistanceMeters =
+        0;
+
+
+    walksByVisit.forEach(
+        walk => {
+
+            const walkStatus =
+                String(
+                    walk.status ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            let distanceMeters =
+                Number(
+                    walk.distance_meters ||
+                    0
+                );
+
+
+            let durationSeconds =
+                Number(
+                    walk.duration_seconds ||
+                    0
+                );
+
+
+            const isActiveTracker =
+                activeWalkGpsTracker &&
+                Number(
+                    activeWalkGpsTracker.walkId
+                ) ===
+                Number(
+                    walk.id
+                );
+
+
+            if (
+                isActiveTracker
+            ) {
+
+                distanceMeters =
+                    Math.max(
+                        distanceMeters,
+                        Number(
+                            activeWalkGpsTracker
+                                .distanceMeters ||
+                            0
+                        )
+                    );
+
+
+                durationSeconds =
+                    Math.max(
+                        durationSeconds,
+                        Math.floor(
+                            (
+                                now -
+                                activeWalkGpsTracker
+                                    .startedAt
+                            ) /
+                            1000
+                        )
+                    );
+
+            } else if (
+                walkStatus ===
+                    "in_progress" &&
+                walk.started_at
+            ) {
+
+                const walkStartedAt =
+                    new Date(
+                        walk.started_at
+                    )
+                        .getTime();
+
+
+                if (
+                    Number.isFinite(
+                        walkStartedAt
+                    ) &&
+                    now >=
+                        walkStartedAt
+                ) {
+
+                    durationSeconds =
+                        Math.max(
+                            durationSeconds,
+                            Math.floor(
+                                (
+                                    now -
+                                    walkStartedAt
+                                ) /
+                                1000
+                            )
+                        );
+
+                }
+
+            }
+
+
+            totalWalkDistanceMeters +=
+                Math.max(
+                    0,
+                    distanceMeters
+                );
+
+
+            totalWalkSeconds +=
+                Math.max(
+                    0,
+                    durationSeconds
+                );
+
+        }
+    );
+
+
+    const walkDistanceElement =
+        document.getElementById(
+            "admin-summary-walk-distance"
+        );
+
+
+    const walkTimeElement =
+        document.getElementById(
+            "admin-summary-walk-time"
+        );
+
+
+    if (
+        walkDistanceElement
+    ) {
+
+        walkDistanceElement.textContent =
+            `${
+                (
+                    totalWalkDistanceMeters /
+                    1609.344
+                )
+                    .toFixed(
+                        2
+                    )
+            } mi`;
+
+    }
+
+
+    if (
+        walkTimeElement
+    ) {
+
+        walkTimeElement.textContent =
+            formatAdminSummaryDuration(
+                totalWalkSeconds
+            );
+
+    }
+
+}
+
+
+// ========================================
 // ADMIN APP NAVIGATION STATE
 // ========================================
 
