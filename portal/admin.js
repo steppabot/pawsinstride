@@ -16215,6 +16215,18 @@ let adminBestRouteLoading =
     false;
 
 
+let adminBestRouteMap =
+    null;
+
+
+let adminBestRouteMarkers =
+    new Map();
+
+
+let adminBestRouteInfoWindows =
+    new Map();
+
+
 // ========================================
 // ROUTE START ADDRESS
 // ========================================
@@ -17067,6 +17079,20 @@ function renderAdminOptimizedRouteMap() {
     }
 
 
+    // ========================================
+    // RESET MAP STATE
+    // ========================================
+
+    adminBestRouteMap =
+        null;
+
+
+    adminBestRouteMarkers.clear();
+
+
+    adminBestRouteInfoWindows.clear();
+
+
     if (
         !adminBestRoutePlan?.success ||
         !Array.isArray(
@@ -17172,7 +17198,7 @@ function renderAdminOptimizedRouteMap() {
         "";
 
 
-    const map =
+    adminBestRouteMap =
         new google.maps.Map(
             mapElement,
             {
@@ -17243,7 +17269,7 @@ function renderAdminOptimizedRouteMap() {
 
 
         routeLine.setMap(
-            map
+            adminBestRouteMap
         );
 
 
@@ -17269,7 +17295,7 @@ function renderAdminOptimizedRouteMap() {
             startPosition,
 
         map:
-            map,
+            adminBestRouteMap,
 
         title:
             "Route Start",
@@ -17368,7 +17394,7 @@ function renderAdminOptimizedRouteMap() {
                         position,
 
                         map:
-                            map,
+                            adminBestRouteMap,
 
                         title:
                             `${
@@ -17461,12 +17487,49 @@ function renderAdminOptimizedRouteMap() {
                     });
 
 
+                // ========================================
+                // SAVE MARKER REFERENCES
+                // ========================================
+
+                adminBestRouteMarkers.set(
+                    Number(
+                        stop.id
+                    ),
+                    marker
+                );
+
+
+                adminBestRouteInfoWindows.set(
+                    Number(
+                        stop.id
+                    ),
+                    infoWindow
+                );
+
+
+                // ========================================
+                // MAP MARKER CLICK
+                // ========================================
+
                 marker.addListener(
                     "click",
                     () => {
 
+
+                        adminBestRouteInfoWindows
+                            .forEach(
+                                windowItem => {
+
+                                    windowItem.close();
+
+                                }
+                            );
+
+
                         infoWindow.open({
-                            map,
+                            map:
+                                adminBestRouteMap,
+
                             anchor:
                                 marker
                         });
@@ -17482,7 +17545,7 @@ function renderAdminOptimizedRouteMap() {
     // FIT ENTIRE ROUTE
     // ========================================
 
-    map.fitBounds(
+    adminBestRouteMap.fitBounds(
         bounds,
         45
     );
@@ -17954,6 +18017,121 @@ function renderAdminBestVisitRoute() {
 }
 
 // ========================================
+// ROUTE STOP MAP FOCUS
+// ========================================
+
+const adminRouteStopList =
+    document.getElementById(
+        "admin-route-stop-list"
+    );
+
+
+adminRouteStopList
+    ?.addEventListener(
+        "click",
+        event => {
+
+
+            const stopCard =
+                event.target.closest(
+                    "[data-route-visit-id]"
+                );
+
+
+            if (
+                !stopCard ||
+                !adminBestRouteMap
+            ) {
+
+                return;
+
+            }
+
+
+            const visitId =
+                Number(
+                    stopCard.dataset
+                        .routeVisitId
+                );
+
+
+            const marker =
+                adminBestRouteMarkers.get(
+                    visitId
+                );
+
+
+            const infoWindow =
+                adminBestRouteInfoWindows.get(
+                    visitId
+                );
+
+
+            if (
+                !marker ||
+                !infoWindow
+            ) {
+
+                return;
+
+            }
+
+
+            // ========================================
+            // CLOSE OTHER INFO WINDOWS
+            // ========================================
+
+            adminBestRouteInfoWindows
+                .forEach(
+                    windowItem => {
+
+                        windowItem.close();
+
+                    }
+                );
+
+
+            // ========================================
+            // FOCUS SELECTED STOP
+            // ========================================
+
+            const position =
+                marker.getPosition();
+
+
+            if (
+                position
+            ) {
+
+                adminBestRouteMap.panTo(
+                    position
+                );
+
+
+                adminBestRouteMap.setZoom(
+                    14
+                );
+
+            }
+
+
+            // ========================================
+            // OPEN SELECTED STOP INFO
+            // ========================================
+
+            infoWindow.open({
+                map:
+                    adminBestRouteMap,
+
+                anchor:
+                    marker
+            });
+
+        }
+    );
+
+
+// ========================================
 // RECALCULATE BEST VISIT ROUTE
 // ========================================
 
@@ -17972,7 +18150,6 @@ adminRouteRecalculateButton
 
         }
     );
-
 
 // ========================================
 // START ROUTE ACTION
