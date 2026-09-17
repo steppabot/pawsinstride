@@ -3026,6 +3026,9 @@ p {
     justify-content:
         center;
 
+    gap:
+        7px;
+
     padding:
         11px
         16px;
@@ -3042,6 +3045,9 @@ p {
     line-height:
         1;
 
+    text-align:
+        center;
+
     transition:
         background 0.18s ease,
         color 0.18s ease,
@@ -3052,31 +3058,71 @@ p {
 
 
 /* ========================================
-   PRIMARY VISIT ACTION
+   PRIMARY VISIT ACTIONS
 ======================================== */
 
 .admin-check-in-button,
-.admin-visit-report-button {
+
+.admin-visit-report-button,
+
+.admin-visit-action-button[
+    data-visit-action="start-walk"
+],
+
+.admin-visit-action-button[
+    data-visit-action="resume-walk-gps"
+],
+
+.admin-visit-action-button[
+    data-visit-action="sync-visit"
+],
+
+.admin-visit-action-button[
+    data-visit-action="sync-walk"
+] {
     background:
         linear-gradient(
             135deg,
             #2890df 0%,
-            #1f7bc2 100%
+            #1f7bc2 58%,
+            #1768aa 100%
         );
 
     color:
         #ffffff;
 
     border:
-        1px solid #1f7bc2;
+        1px solid #1768aa;
 
     box-shadow:
-        0 5px 12px rgba(31,123,194,0.18);
+        0 5px 12px rgba(
+            31,
+            123,
+            194,
+            0.18
+        );
 }
 
 
 .admin-check-in-button:hover,
-.admin-visit-report-button:hover {
+
+.admin-visit-report-button:hover,
+
+.admin-visit-action-button[
+    data-visit-action="start-walk"
+]:hover,
+
+.admin-visit-action-button[
+    data-visit-action="resume-walk-gps"
+]:hover,
+
+.admin-visit-action-button[
+    data-visit-action="sync-visit"
+]:hover,
+
+.admin-visit-action-button[
+    data-visit-action="sync-walk"
+]:hover {
     background:
         linear-gradient(
             135deg,
@@ -3086,14 +3132,30 @@ p {
 
     transform:
         translateY(-1px);
+
+    box-shadow:
+        0 7px 15px rgba(
+            31,
+            123,
+            194,
+            0.23
+        );
 }
 
 
 /* ========================================
-   FINISH VISIT ACTION
+   COMPLETE VISIT ACTIONS
 ======================================== */
 
-.admin-finish-visit-button {
+.admin-finish-visit-button,
+
+.admin-visit-action-button[
+    data-visit-action="finish"
+],
+
+.admin-visit-action-button[
+    data-visit-action="finish-walk"
+] {
     background:
         linear-gradient(
             135deg,
@@ -3108,13 +3170,41 @@ p {
         1px solid #168a3a;
 
     box-shadow:
-        0 5px 12px rgba(22,138,58,0.18);
+        0 5px 12px rgba(
+            22,
+            138,
+            58,
+            0.18
+        );
 }
 
 
-.admin-finish-visit-button:hover {
+.admin-finish-visit-button:hover,
+
+.admin-visit-action-button[
+    data-visit-action="finish"
+]:hover,
+
+.admin-visit-action-button[
+    data-visit-action="finish-walk"
+]:hover {
+    background:
+        linear-gradient(
+            135deg,
+            #209a45 0%,
+            #117934 100%
+        );
+
     transform:
         translateY(-1px);
+
+    box-shadow:
+        0 7px 15px rgba(
+            22,
+            138,
+            58,
+            0.22
+        );
 }
 
 
@@ -3153,7 +3243,7 @@ p {
 
 
 /* ========================================
-   DISABLED VISIT ACTION
+   DISABLED VISIT ACTIONS
 ======================================== */
 
 .admin-visit-action-button:disabled,
