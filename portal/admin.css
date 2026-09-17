@@ -283,18 +283,55 @@ body.admin-page {
 ======================================== */
 
 .admin-app-nav-item-active {
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
     color:
         #ffffff;
 
     background:
         linear-gradient(
             135deg,
-            var(--admin-blue) 0%,
-            var(--admin-blue-dark) 100%
+            #2890df 0%,
+            #1f7bc2 58%,
+            #1768aa 100%
         );
 
     box-shadow:
-        0 7px 18px rgba(40,144,223,0.18);
+        0 8px 18px rgba(31,123,194,0.22);
+}
+
+
+.admin-app-nav-item-active::after {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        -24px;
+
+    right:
+        -18px;
+
+    width:
+        72px;
+
+    height:
+        72px;
+
+    background:
+        rgba(255,255,255,0.08);
+
+    border-radius:
+        50%;
+
+    pointer-events:
+        none;
 }
 
 
@@ -305,11 +342,24 @@ body.admin-page {
     background:
         linear-gradient(
             135deg,
-            #2386d2 0%,
-            #1b70b3 100%
+            #2589d5 0%,
+            #1d74b8 58%,
+            #155e9b 100%
         );
+
+    box-shadow:
+        0 10px 22px rgba(31,123,194,0.26);
 }
 
+
+.admin-app-nav-item-active svg,
+.admin-app-nav-item-active span {
+    position:
+        relative;
+
+    z-index:
+        1;
+}
 
 /* ========================================
    ADMIN NAV BADGE
