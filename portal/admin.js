@@ -16815,6 +16815,682 @@ async function calculateAdminBestVisitRoute() {
 
 
 // ========================================
+// DECODE GOOGLE ROUTE POLYLINE
+// ========================================
+
+function decodeAdminRoutePolyline(
+    encoded
+) {
+
+
+    if (
+        !encoded
+    ) {
+
+        return [];
+
+    }
+
+
+    const path =
+        [];
+
+
+    let index =
+        0;
+
+
+    let latitude =
+        0;
+
+
+    let longitude =
+        0;
+
+
+    while (
+        index <
+        encoded.length
+    ) {
+
+
+        let result =
+            0;
+
+
+        let shift =
+            0;
+
+
+        let byte;
+
+
+        do {
+
+            byte =
+                encoded.charCodeAt(
+                    index++
+                ) -
+                63;
+
+
+            result |=
+                (
+                    byte &
+                    0x1f
+                ) <<
+                shift;
+
+
+            shift +=
+                5;
+
+
+        } while (
+            byte >=
+            0x20
+        );
+
+
+        const latitudeChange =
+            (
+                result &
+                1
+            )
+                ? ~(
+                    result >>
+                    1
+                )
+                : (
+                    result >>
+                    1
+                );
+
+
+        latitude +=
+            latitudeChange;
+
+
+        result =
+            0;
+
+
+        shift =
+            0;
+
+
+        do {
+
+            byte =
+                encoded.charCodeAt(
+                    index++
+                ) -
+                63;
+
+
+            result |=
+                (
+                    byte &
+                    0x1f
+                ) <<
+                shift;
+
+
+            shift +=
+                5;
+
+
+        } while (
+            byte >=
+            0x20
+        );
+
+
+        const longitudeChange =
+            (
+                result &
+                1
+            )
+                ? ~(
+                    result >>
+                    1
+                )
+                : (
+                    result >>
+                    1
+                );
+
+
+        longitude +=
+            longitudeChange;
+
+
+        path.push({
+            lat:
+                latitude /
+                1e5,
+
+            lng:
+                longitude /
+                1e5
+        });
+
+    }
+
+
+    return path;
+
+}
+
+
+// ========================================
+// ROUTE MAP PLACEHOLDER
+// ========================================
+
+function renderAdminRouteMapPlaceholder(
+    title,
+    message
+) {
+
+
+    const mapElement =
+        document.getElementById(
+            "admin-route-map"
+        );
+
+
+    if (
+        !mapElement
+    ) {
+
+        return;
+
+    }
+
+
+    mapElement.innerHTML =
+        `
+
+            <div class="admin-route-map-placeholder">
+
+                <span class="admin-route-map-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path d="M9 18 3 21V6l6-3 6 3 6-3v15l-6 3-6-3Z"></path>
+                        <path d="M9 3v15"></path>
+                        <path d="M15 6v15"></path>
+                    </svg>
+
+                </span>
+
+                <strong>
+                    ${escapeHtml(
+                        title
+                    )}
+                </strong>
+
+                <span>
+                    ${escapeHtml(
+                        message
+                    )}
+                </span>
+
+            </div>
+
+        `;
+
+}
+
+
+// ========================================
+// RENDER OPTIMIZED ROUTE MAP
+// ========================================
+
+function renderAdminOptimizedRouteMap() {
+
+
+    const mapElement =
+        document.getElementById(
+            "admin-route-map"
+        );
+
+
+    if (
+        !mapElement
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !adminBestRoutePlan?.success ||
+        !Array.isArray(
+            adminBestRoutePlan.stops
+        ) ||
+        adminBestRoutePlan.stops.length ===
+            0
+    ) {
+
+        renderAdminRouteMapPlaceholder(
+            "Route Map",
+            "Your optimized stops will be mapped here."
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        !window.google ||
+        !google.maps
+    ) {
+
+        renderAdminRouteMapPlaceholder(
+            "Route Map",
+            "Google Maps is still loading."
+        );
+
+
+        setTimeout(
+            () => {
+
+                if (
+                    adminBestRoutePlan?.success
+                ) {
+
+                    renderAdminOptimizedRouteMap();
+
+                }
+
+            },
+            750
+        );
+
+
+        return;
+
+    }
+
+
+    const startLatitude =
+        Number(
+            adminBestRoutePlan
+                .start
+                ?.latitude
+        );
+
+
+    const startLongitude =
+        Number(
+            adminBestRoutePlan
+                .start
+                ?.longitude
+        );
+
+
+    if (
+        !Number.isFinite(
+            startLatitude
+        ) ||
+        !Number.isFinite(
+            startLongitude
+        )
+    ) {
+
+        renderAdminRouteMapPlaceholder(
+            "Route Map",
+            "The route start location could not be mapped."
+        );
+
+
+        return;
+
+    }
+
+
+    const startPosition = {
+        lat:
+            startLatitude,
+
+        lng:
+            startLongitude
+    };
+
+
+    // ========================================
+    // CREATE MAP
+    // ========================================
+
+    mapElement.innerHTML =
+        "";
+
+
+    const map =
+        new google.maps.Map(
+            mapElement,
+            {
+                center:
+                    startPosition,
+
+                zoom:
+                    11,
+
+                mapTypeControl:
+                    false,
+
+                streetViewControl:
+                    false,
+
+                fullscreenControl:
+                    true,
+
+                gestureHandling:
+                    "cooperative"
+            }
+        );
+
+
+    const bounds =
+        new google.maps.LatLngBounds();
+
+
+    bounds.extend(
+        startPosition
+    );
+
+
+    // ========================================
+    // DRAW OPTIMIZED ROAD ROUTE
+    // ========================================
+
+    const routePath =
+        decodeAdminRoutePolyline(
+            adminBestRoutePlan
+                .route_polyline
+        );
+
+
+    if (
+        routePath.length >
+        1
+    ) {
+
+
+        const routeLine =
+            new google.maps.Polyline({
+                path:
+                    routePath,
+
+                geodesic:
+                    true,
+
+                strokeColor:
+                    "#2890df",
+
+                strokeOpacity:
+                    0.95,
+
+                strokeWeight:
+                    5
+            });
+
+
+        routeLine.setMap(
+            map
+        );
+
+
+        routePath.forEach(
+            point => {
+
+                bounds.extend(
+                    point
+                );
+
+            }
+        );
+
+    }
+
+
+    // ========================================
+    // START MARKER
+    // ========================================
+
+    new google.maps.Marker({
+        position:
+            startPosition,
+
+        map:
+            map,
+
+        title:
+            "Route Start",
+
+        label: {
+            text:
+                "S",
+
+            color:
+                "#ffffff",
+
+            fontWeight:
+                "800"
+        },
+
+        icon: {
+            path:
+                google.maps.SymbolPath.CIRCLE,
+
+            scale:
+                12,
+
+            fillColor:
+                "#183447",
+
+            fillOpacity:
+                1,
+
+            strokeColor:
+                "#ffffff",
+
+            strokeWeight:
+                3
+        }
+    });
+
+
+    // ========================================
+    // NUMBERED VISIT MARKERS
+    // ========================================
+
+    adminBestRoutePlan
+        .stops
+        .forEach(
+            stop => {
+
+
+                const latitude =
+                    Number(
+                        stop.latitude
+                    );
+
+
+                const longitude =
+                    Number(
+                        stop.longitude
+                    );
+
+
+                if (
+                    !Number.isFinite(
+                        latitude
+                    ) ||
+                    !Number.isFinite(
+                        longitude
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                const position = {
+                    lat:
+                        latitude,
+
+                    lng:
+                        longitude
+                };
+
+
+                bounds.extend(
+                    position
+                );
+
+
+                const scheduledTime =
+                    formatAdminRouteScheduledTime(
+                        stop.scheduled_start
+                    );
+
+
+                const marker =
+                    new google.maps.Marker({
+                        position,
+
+                        map:
+                            map,
+
+                        title:
+                            `${
+                                stop.order
+                            }. ${
+                                stop.label
+                            }${
+                                scheduledTime
+                                    ? ` • ${scheduledTime}`
+                                    : ""
+                            }`,
+
+                        label: {
+                            text:
+                                String(
+                                    stop.order
+                                ),
+
+                            color:
+                                "#ffffff",
+
+                            fontWeight:
+                                "800"
+                        },
+
+                        icon: {
+                            path:
+                                google.maps.SymbolPath.CIRCLE,
+
+                            scale:
+                                13,
+
+                            fillColor:
+                                "#ef872c",
+
+                            fillOpacity:
+                                1,
+
+                            strokeColor:
+                                "#ffffff",
+
+                            strokeWeight:
+                                3
+                        }
+                    });
+
+
+                const infoWindow =
+                    new google.maps.InfoWindow({
+                        content:
+                            `
+
+                                <div style="min-width:180px;padding:2px 0;">
+
+                                    <strong style="display:block;margin-bottom:4px;">
+                                        ${
+                                            escapeHtml(
+                                                stop.order
+                                            )
+                                        }. ${
+                                            escapeHtml(
+                                                stop.label
+                                            )
+                                        }
+                                    </strong>
+
+                                    ${
+                                        scheduledTime
+                                            ? `
+                                                <div style="margin-bottom:3px;">
+                                                    ${escapeHtml(
+                                                        scheduledTime
+                                                    )}
+                                                </div>
+                                            `
+                                            : ""
+                                    }
+
+                                    <div style="font-size:12px;line-height:1.4;">
+                                        ${escapeHtml(
+                                            stop.formatted_address ||
+                                            stop.address ||
+                                            ""
+                                        )}
+                                    </div>
+
+                                </div>
+
+                            `
+                    });
+
+
+                marker.addListener(
+                    "click",
+                    () => {
+
+                        infoWindow.open({
+                            map,
+                            anchor:
+                                marker
+                        });
+
+                    }
+                );
+
+            }
+        );
+
+
+    // ========================================
+    // FIT ENTIRE ROUTE
+    // ========================================
+
+    map.fitBounds(
+        bounds,
+        45
+    );
+
+}
+
+
+// ========================================
 // RENDER BEST VISIT ROUTE
 // ========================================
 
@@ -16957,6 +17633,12 @@ function renderAdminBestVisitRoute() {
             `;
 
 
+        renderAdminRouteMapPlaceholder(
+            "Route Complete",
+            "There are no remaining stops to map."
+        );
+
+
         return;
 
     }
@@ -16985,6 +17667,12 @@ function renderAdminBestVisitRoute() {
 
         distanceElement.textContent =
             "—";
+
+
+        renderAdminRouteMapPlaceholder(
+            "Optimizing Route",
+            "Calculating today's best driving route..."
+        );
 
 
         return;
@@ -17133,6 +17821,9 @@ function renderAdminBestVisitRoute() {
                 .join("");
 
 
+        renderAdminOptimizedRouteMap();
+
+
         return;
 
     }
@@ -17254,8 +17945,13 @@ function renderAdminBestVisitRoute() {
             )
             .join("");
 
-}
 
+    renderAdminRouteMapPlaceholder(
+        "Route Map",
+        "Recalculate to map today's optimized route."
+    );
+
+}
 
 // ========================================
 // RECALCULATE BEST VISIT ROUTE
