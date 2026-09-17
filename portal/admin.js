@@ -15837,6 +15837,10 @@ let activeAdminScreen =
     "home";
 
 
+let adminHomeSummaryTimer =
+    null;
+
+
 const ADMIN_SCREEN_TITLES = {
 
     home:
@@ -15858,9 +15862,75 @@ const ADMIN_SCREEN_TITLES = {
 
 
 // ========================================
-// SETUP ADMIN APP NAVIGATION
+// START HOME SUMMARY TIMER
 // ========================================
 
+function startAdminHomeSummaryTimer() {
+
+
+    if (
+        adminHomeSummaryTimer
+    ) {
+
+        clearInterval(
+            adminHomeSummaryTimer
+        );
+
+    }
+
+
+    renderAdminTodaySummary();
+
+
+    adminHomeSummaryTimer =
+        setInterval(
+            () => {
+
+                if (
+                    activeAdminScreen ===
+                    "home"
+                ) {
+
+                    renderAdminTodaySummary();
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+// ========================================
+// STOP HOME SUMMARY TIMER
+// ========================================
+
+function stopAdminHomeSummaryTimer() {
+
+
+    if (
+        !adminHomeSummaryTimer
+    ) {
+
+        return;
+
+    }
+
+
+    clearInterval(
+        adminHomeSummaryTimer
+    );
+
+
+    adminHomeSummaryTimer =
+        null;
+
+}
+
+// ========================================
+// SETUP ADMIN APP NAVIGATION
+// ========================================
 function setupAdminAppNavigation() {
 
     const navButtons =
@@ -16091,7 +16161,11 @@ function showAdminAppScreen(
         "home"
     ) {
     
-        renderAdminTodaySummary();
+        startAdminHomeSummaryTimer();
+    
+    } else {
+    
+        stopAdminHomeSummaryTimer();
     
     }
     
