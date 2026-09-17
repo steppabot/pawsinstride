@@ -1520,16 +1520,16 @@ body.admin-page {
     background:
         linear-gradient(
             135deg,
-            #2890df 0%,
-            #1f7bc2 58%,
-            #1768aa 100%
+            #f5ab40 0%,
+            #ef872c 55%,
+            #ef602c 100%
         );
 
     border-radius:
         16px;
 
     box-shadow:
-        0 8px 18px rgba(31,123,194,0.18);
+        0 8px 18px rgba(239,96,44,0.18);
 
     color:
         #ffffff;
