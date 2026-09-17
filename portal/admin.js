@@ -8050,11 +8050,10 @@ function replaceAdminVisit(
 
         renderAdminBestVisitRoute();
 
-        renderAdminTodayTimeline();
-
     }
 
 }
+
 
 // ========================================
 // BUILD SERVICE CARD
