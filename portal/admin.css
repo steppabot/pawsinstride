@@ -1048,6 +1048,8 @@ body.admin-page {
 
     gap: 16px;
 
+    width: 100%;
+
     padding:
         14px
         15px;
@@ -1069,6 +1071,11 @@ body.admin-page {
 .admin-attention-item-main {
     display: flex;
     align-items: center;
+
+    flex:
+        1
+        1
+        auto;
 
     min-width: 0;
 
@@ -1123,6 +1130,11 @@ body.admin-page {
 ======================================== */
 
 .admin-attention-item-copy {
+    flex:
+        1
+        1
+        auto;
+
     min-width: 0;
 }
 
@@ -1166,13 +1178,29 @@ body.admin-page {
     align-items: center;
     justify-content: center;
 
-    flex-shrink: 0;
+    flex:
+        0
+        0
+        auto;
 
-    min-height: 34px;
+    width:
+        auto !important;
+
+    min-width:
+        92px;
+
+    max-width:
+        max-content;
+
+    min-height:
+        34px;
 
     padding:
         0
         13px;
+
+    margin:
+        0;
 
     background:
         #ffffff;
@@ -1194,6 +1222,9 @@ body.admin-page {
 
     font-weight:
         800;
+
+    white-space:
+        nowrap;
 
     cursor:
         pointer;
