@@ -16082,20 +16082,33 @@ function showAdminAppScreen(
         screenName
     );
 
-
+    // ========================================
+    // REFRESH HOME
+    // ========================================
+    
+    if (
+        screenName ===
+        "home"
+    ) {
+    
+        renderAdminTodaySummary();
+    
+    }
+    
+    
     // ========================================
     // REFRESH SCHEDULE
     // ========================================
-
+    
     if (
         screenName ===
         "schedule"
     ) {
-
+    
         renderAdminCalendar();
-
+    
         renderAdminDayServices();
-
+    
     }
 
 
