@@ -6064,6 +6064,375 @@ p {
 
 
 /* ========================================
+   MORE SCREEN
+======================================== */
+
+.admin-more-intro {
+    margin-bottom:
+        20px;
+}
+
+
+/* ========================================
+   MORE TOOLS
+======================================== */
+
+.admin-more-tools {
+    margin-bottom:
+        22px;
+
+    padding:
+        22px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        18px;
+
+    box-shadow:
+        0 7px 18px
+        rgba(
+            24,
+            52,
+            71,
+            0.07
+        );
+}
+
+
+.admin-more-section-heading {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    margin-bottom:
+        16px;
+}
+
+
+.admin-more-section-heading h2 {
+    margin:
+        3px
+        0
+        4px;
+
+    color:
+        #183447;
+
+    font-size:
+        22px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+}
+
+
+.admin-more-section-heading p {
+    margin:
+        0;
+
+    color:
+        #6b7785;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.5;
+}
+
+
+/* ========================================
+   MORE TOOL GRID
+======================================== */
+
+.admin-more-tool-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        14px;
+}
+
+
+/* ========================================
+   MORE TOOL CARD
+======================================== */
+
+.admin-more-tool-card {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        14px;
+
+    width:
+        100%;
+
+    min-height:
+        88px;
+
+    padding:
+        16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fbfdfe 0%,
+            #f4f9fc 100%
+        );
+
+    color:
+        #183447;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 4px 12px
+        rgba(
+            24,
+            52,
+            71,
+            0.045
+        );
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+
+.admin-more-tool-card:hover {
+    transform:
+        translateY(-1px);
+
+    background:
+        #ffffff;
+
+    border-color:
+        #9ed2f2;
+
+    box-shadow:
+        0 7px 16px
+        rgba(
+            40,
+            144,
+            223,
+            0.10
+        );
+}
+
+
+/* ========================================
+   MORE TOOL ICON
+======================================== */
+
+.admin-more-tool-icon {
+    flex:
+        0 0 46px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        46px;
+
+    height:
+        46px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
+
+    color:
+        #ffffff;
+
+    border-radius:
+        13px;
+
+    box-shadow:
+        0 5px 14px
+        rgba(
+            40,
+            144,
+            223,
+            0.20
+        );
+}
+
+
+.admin-more-tool-icon svg {
+    width:
+        22px;
+
+    height:
+        22px;
+
+    fill:
+        none;
+
+    stroke:
+        currentColor;
+
+    stroke-width:
+        1.8;
+
+    stroke-linecap:
+        round;
+
+    stroke-linejoin:
+        round;
+}
+
+
+/* ========================================
+   MORE TOOL COPY
+======================================== */
+
+.admin-more-tool-copy {
+    flex:
+        1;
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        4px;
+}
+
+
+.admin-more-tool-copy strong {
+    color:
+        #183447;
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-more-tool-copy span {
+    color:
+        #6b7785;
+
+    font-size:
+        12px;
+
+    font-weight:
+        500;
+
+    line-height:
+        1.4;
+}
+
+
+/* ========================================
+   MORE TOOL ARROW
+======================================== */
+
+.admin-more-tool-arrow {
+    flex:
+        0 0 auto;
+
+    color:
+        #2890df;
+
+    font-size:
+        28px;
+
+    font-weight:
+        400;
+
+    line-height:
+        1;
+}
+
+
+/* ========================================
+   MORE SCREEN — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-more-tools {
+        padding:
+            18px;
+    }
+
+
+    .admin-more-tool-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .admin-more-tool-card {
+        min-height:
+            82px;
+    }
+
+}
+
+
+/* ========================================
    EXTRA SMALL ADMIN MOBILE
 ======================================== */
 
