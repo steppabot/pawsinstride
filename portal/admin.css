@@ -3531,52 +3531,6 @@ p {
    CLIENT DIRECTORY
 ======================================== */
 
-.admin-client-directory-count {
-    display:
-        inline-flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    flex-shrink:
-        0;
-
-    min-height:
-        32px;
-
-    padding:
-        0
-        12px;
-
-    background:
-        #eef7fd;
-
-    color:
-        #1f7bc2;
-
-    border:
-        1px solid #9ed2f2;
-
-    border-radius:
-        999px;
-
-    font-size:
-        10px;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        0.03em;
-
-    text-transform:
-        uppercase;
-}
-
-
 .admin-client-directory {
     margin-top:
         20px;
@@ -3595,6 +3549,26 @@ p {
 
     box-shadow:
         0 7px 18px rgba(24,52,71,0.07);
+}
+
+
+.admin-client-directory:has(
+    .admin-client-household-detail:not([hidden])
+) {
+    padding:
+        22px;
+
+    background:
+        transparent;
+
+    border:
+        0;
+
+    border-radius:
+        0;
+
+    box-shadow:
+        none;
 }
 
 
@@ -4408,23 +4382,23 @@ p {
 ======================================== */
 
 .admin-client-household-detail {
-    margin-top:
-        18px;
+    margin:
+        0;
 
     padding:
-        22px;
+        0;
 
     background:
-        #ffffff;
+        transparent;
 
     border:
-        1px solid #d6e4eb;
+        0;
 
     border-radius:
-        18px;
+        0;
 
     box-shadow:
-        0 7px 18px rgba(24,52,71,0.07);
+        none;
 }
 
 
