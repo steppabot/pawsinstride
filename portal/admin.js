@@ -22400,16 +22400,19 @@ function beginAdminServiceEdit(
     closeAllAdminServiceMenus();
 
 
-    inputs[0]
-        ?.focus();
+    // ========================================
+    // FOCUS FIRST PRICE ONLY
+    // ========================================
 
+    if (
+        inputs[0]
+    ) {
 
-    inputs[0]
-        ?.select();
+        inputs[0].focus();
+
+    }
 
 }
-
-
 // ========================================
 // FINISH SERVICE EDIT
 // ========================================
@@ -22697,99 +22700,129 @@ adminServicesPricingModal
             // ========================================
             // SAVE EDIT
             // ========================================
-
+            
             const saveEditButton =
                 event.target.closest(
                     "[data-service-edit-save]"
                 );
-
-
+            
+            
             if (
                 saveEditButton
             ) {
-
-
+            
+            
                 const serviceKey =
                     saveEditButton.dataset
                         .serviceEditSave;
-
-
+            
+            
                 const serviceCard =
                     getAdminServiceCard(
                         serviceKey
                     );
-
-
+            
+            
                 const cancelButton =
                     serviceCard?.querySelector(
                         "[data-service-edit-cancel]"
                     );
-
-
+            
+            
+                const originalSaveText =
+                    saveEditButton.textContent;
+            
+            
                 saveEditButton.disabled =
                     true;
-
-
+            
+            
                 if (
                     cancelButton
                 ) {
-
+            
                     cancelButton.disabled =
                         true;
-
+            
                 }
-
-
+            
+            
                 saveEditButton.textContent =
                     "Saving...";
-
-
-                const saved =
-                    await saveAdminServicePricing(
-                        serviceKey
-                    );
-
-
-                if (
-                    saved
-                ) {
-
-
-                    await loadAdminServicePricing();
-
-
+            
+            
+                try {
+            
+            
+                    const saved =
+                        await saveAdminServicePricing(
+                            serviceKey
+                        );
+            
+            
+                    if (
+                        !saved
+                    ) {
+            
+                        return;
+            
+                    }
+            
+            
+                    // ========================================
+                    // EXIT EDIT MODE IMMEDIATELY
+                    // ========================================
+            
                     finishAdminServiceEdit(
                         serviceKey
                     );
-
-
-                } else {
-
-
+            
+            
+                    // ========================================
+                    // RELOAD SAVED DATABASE VALUES
+                    // ========================================
+            
+                    await loadAdminServicePricing();
+            
+            
+                } catch (
+                    error
+                ) {
+            
+            
+                    console.error(
+                        "Unable to finish service price save:",
+                        error
+                    );
+            
+            
+                } finally {
+            
+            
                     saveEditButton.disabled =
                         false;
-
-
+            
+            
                     if (
                         cancelButton
                     ) {
-
+            
                         cancelButton.disabled =
                             false;
-
+            
                     }
-
-
+            
+            
                     saveEditButton.textContent =
+                        originalSaveText ||
                         "Save";
-
+            
                 }
-
-
+            
+            
                 return;
-
+            
             }
-
 
             // ========================================
             // CANCEL EDIT
