@@ -404,11 +404,18 @@ body.admin-page {
 ======================================== */
 
 .admin-page .admin-dashboard-header {
-    width: 100%;
+    width:
+        100%;
+
+    max-width:
+        1500px;
+
+    min-height:
+        118px;
 
     margin:
         0
-        0
+        auto
         24px;
 
     padding:
@@ -421,17 +428,20 @@ body.admin-page {
 
 
 .admin-page .admin-dashboard-logo {
-    width: 105px;
+    width:
+        105px;
 }
 
 
 .admin-page .admin-dashboard-title {
-    padding-left: 14px;
+    padding-left:
+        14px;
 }
 
 
 .admin-page .admin-title-row h2 {
-    font-size: 20px;
+    font-size:
+        20px;
 }
 
 
