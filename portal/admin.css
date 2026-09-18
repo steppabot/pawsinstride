@@ -6490,6 +6490,474 @@ p {
 
 
 /* ========================================
+   SERVICE PRICING CARD
+======================================== */
+
+.admin-service-pricing-card {
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1fr
+        )
+        auto
+        36px;
+
+    align-items:
+        center;
+
+    gap:
+        18px;
+
+    padding:
+        16px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 4px 12px
+        rgba(
+            24,
+            52,
+            71,
+            0.05
+        );
+}
+
+
+/* ========================================
+   SERVICE PRICING MAIN
+======================================== */
+
+.admin-service-pricing-main {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        13px;
+
+    min-width:
+        0;
+}
+
+
+.admin-service-pricing-icon {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex:
+        0 0 42px;
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2890df 0%,
+            #1f7bc2 58%,
+            #1768aa 100%
+        );
+
+    color:
+        #ffffff;
+
+    border-radius:
+        8px;
+
+    box-shadow:
+        0 4px 10px
+        rgba(
+            31,
+            123,
+            194,
+            0.18
+        );
+}
+
+
+.admin-service-pricing-icon svg {
+    width:
+        20px;
+
+    height:
+        20px;
+
+    fill:
+        none;
+
+    stroke:
+        currentColor;
+
+    stroke-width:
+        1.8;
+
+    stroke-linecap:
+        round;
+
+    stroke-linejoin:
+        round;
+}
+
+
+/* ========================================
+   SERVICE PRICING COPY
+======================================== */
+
+.admin-service-pricing-copy {
+    min-width:
+        0;
+}
+
+
+.admin-service-pricing-title-row {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    margin-bottom:
+        3px;
+}
+
+
+.admin-service-pricing-title-row strong {
+    color:
+        #183447;
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-service-pricing-copy > span {
+    display:
+        block;
+
+    color:
+        #6b7785;
+
+    font-size:
+        10px;
+
+    line-height:
+        1.4;
+}
+
+
+/* ========================================
+   SERVICE STATUS
+======================================== */
+
+.admin-service-status {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        22px;
+
+    padding:
+        0
+        8px;
+
+    background:
+        #eef9f1;
+
+    color:
+        #168a3a;
+
+    border:
+        1px solid
+        #8fd19e;
+
+    border-radius:
+        999px;
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.03em;
+
+    text-transform:
+        uppercase;
+}
+
+
+/* ========================================
+   SERVICE PRICING RATES
+======================================== */
+
+.admin-service-pricing-rates {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            110px
+        );
+
+    gap:
+        10px;
+}
+
+
+.admin-service-rate-field {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        5px;
+}
+
+
+.admin-service-rate-field > span {
+    color:
+        #667784;
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.05em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.admin-service-rate-input {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    min-height:
+        38px;
+
+    background:
+        #f8fbfd;
+
+    border:
+        1px solid
+        #c8dce8;
+
+    border-radius:
+        7px;
+
+    overflow:
+        hidden;
+}
+
+
+.admin-service-rate-input > span {
+    padding-left:
+        10px;
+
+    color:
+        #1f7bc2;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-service-rate-input input {
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    height:
+        36px;
+
+    padding:
+        0
+        10px
+        0
+        4px;
+
+    background:
+        transparent;
+
+    color:
+        #183447;
+
+    border:
+        0;
+
+    outline:
+        none;
+
+    font-family:
+        inherit;
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+}
+
+
+/* ========================================
+   SERVICE PRICING MENU
+======================================== */
+
+.admin-service-pricing-menu {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        36px;
+
+    height:
+        36px;
+
+    padding:
+        0;
+
+    background:
+        #ffffff;
+
+    color:
+        #667784;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        7px;
+
+    font-size:
+        20px;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+}
+
+
+/* ========================================
+   SERVICE PRICING CARD — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-service-pricing-card {
+        grid-template-columns:
+            1fr
+            34px;
+
+        gap:
+            14px;
+
+        padding:
+            14px;
+    }
+
+
+    .admin-service-pricing-main {
+        grid-column:
+            1;
+    }
+
+
+    .admin-service-pricing-rates {
+        grid-column:
+            1
+            /
+            -1;
+
+        grid-template-columns:
+            1fr
+            1fr;
+
+        width:
+            100%;
+    }
+
+
+    .admin-service-pricing-menu {
+        grid-column:
+            2;
+
+        grid-row:
+            1;
+
+        align-self:
+            center;
+
+        width:
+            34px;
+
+        height:
+            34px;
+    }
+
+}
+
+
+/* ========================================
    SERVICES EMPTY STATE
 ======================================== */
 
