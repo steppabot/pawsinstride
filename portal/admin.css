@@ -4855,13 +4855,16 @@ p {
         );
 
     gap:
-        10px;
+        14px;
 
     margin-top:
         18px;
 
-    padding:
+    margin-bottom:
         10px;
+
+    padding:
+        12px;
 
     background:
         #f4f9fc;
@@ -4896,11 +4899,11 @@ p {
         0;
 
     min-height:
-        76px;
+        88px;
 
     padding:
-        13px
-        14px;
+        16px
+        16px;
 
     overflow:
         hidden;
@@ -4923,7 +4926,7 @@ p {
         );
 
     border-radius:
-        12px;
+        14px;
 
     box-shadow:
         0
@@ -4947,7 +4950,7 @@ p {
         block;
 
     margin-bottom:
-        6px;
+        8px;
 
     color:
         rgba(
@@ -5038,11 +5041,14 @@ p {
     display:
         flex;
 
+    flex-direction:
+        column;
+
     align-items:
-        center;
+        stretch;
 
     justify-content:
-        space-between;
+        flex-start;
 
     gap:
         10px;
@@ -5063,15 +5069,24 @@ p {
 ======================================== */
 
 .admin-client-pricing-tier-edit-button {
-    flex-shrink:
-        0;
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        100%;
 
     min-height:
-        27px;
+        30px;
 
     padding:
         0
-        9px;
+        10px;
 
     background:
         rgba(
@@ -5094,7 +5109,7 @@ p {
         );
 
     border-radius:
-        7px;
+        8px;
 
     font-family:
         inherit;
@@ -5104,6 +5119,12 @@ p {
 
     font-weight:
         800;
+
+    line-height:
+        1;
+
+    text-align:
+        center;
 
     cursor:
         pointer;
@@ -5152,7 +5173,10 @@ p {
         column;
 
     gap:
-        8px;
+        10px;
+
+    margin-top:
+        2px;
 }
 
 
@@ -5246,7 +5270,7 @@ p {
         1fr;
 
     gap:
-        6px;
+        8px;
 }
 
 
@@ -5262,7 +5286,7 @@ p {
         8px;
 
     border-radius:
-        7px;
+        8px;
 
     font-size:
         9px;
@@ -5319,22 +5343,32 @@ p {
 
     .admin-client-household-info-card {
         min-height:
-            70px;
+            76px;
     }
 
 }
-=
 
 /* ========================================
    HOUSEHOLD SECTIONS
 ======================================== */
 
+.admin-client-household-grid +
 .admin-client-household-section {
     margin-top:
-        22px;
+        28px;
+}
 
+
+.admin-client-household-section +
+.admin-client-household-section {
+    margin-top:
+        30px;
+}
+
+
+.admin-client-household-section {
     padding-top:
-        20px;
+        22px;
 
     border-top:
         1px solid
@@ -5356,7 +5390,7 @@ p {
         12px;
 
     margin-bottom:
-        14px;
+        16px;
 }
 
 
@@ -5414,7 +5448,6 @@ p {
     line-height:
         1.2;
 }
-
 
 /* ========================================
    HOUSEHOLD PETS
