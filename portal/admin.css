@@ -3650,30 +3650,72 @@ p {
 }
 
 
-.admin-client-directory-heading {
-    display:
-        flex;
+/* ========================================
+   CLIENT DIRECTORY SEARCH PANEL
+======================================== */
 
-    align-items:
-        flex-start;
-
-    justify-content:
-        space-between;
-
-    gap:
+.admin-client-directory-search-panel {
+    margin-bottom:
         18px;
 
-    margin-bottom:
+    padding:
+        18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2890df 0%,
+            #1f7bc2 58%,
+            #1768aa 100%
+        );
+
+    border:
+        1px solid rgba(31,123,194,0.30);
+
+    border-radius:
         16px;
+
+    box-shadow:
+        0 8px 20px rgba(31,123,194,0.14);
 }
 
 
-.admin-client-directory-heading h2 {
+.admin-client-directory-search-heading {
+    margin-bottom:
+        12px;
+}
+
+
+.admin-client-directory-search-eyebrow {
+    display:
+        block;
+
+    margin-bottom:
+        4px;
+
+    color:
+        rgba(255,255,255,0.68);
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.09em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.admin-client-directory-search-heading h2 {
     margin:
         0;
 
     color:
-        #183447;
+        #ffffff;
 
     font-size:
         20px;
@@ -3683,23 +3725,6 @@ p {
 
     line-height:
         1.2;
-}
-
-
-.admin-client-directory-heading p {
-    margin:
-        6px
-        0
-        0;
-
-    color:
-        #6b7785;
-
-    font-size:
-        12px;
-
-    line-height:
-        1.45;
 }
 
 
