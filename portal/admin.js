@@ -21687,7 +21687,7 @@ async function loadAdminServicePricing() {
 
 
     // ========================================
-    // 15 MINUTE VISIT
+    // 15 MINUTE WALK / DROP-IN
     // ========================================
 
     const fifteenStandard =
@@ -21723,7 +21723,7 @@ async function loadAdminServicePricing() {
 
 
     // ========================================
-    // 30 MINUTE VISIT
+    // 30 MINUTE WALK / DROP-IN
     // ========================================
 
     const thirtyStandard =
@@ -21759,7 +21759,7 @@ async function loadAdminServicePricing() {
 
 
     // ========================================
-    // 60 MINUTE VISIT
+    // 60 MINUTE WALK / DROP-IN
     // ========================================
 
     const sixtyStandard =
@@ -21790,6 +21790,114 @@ async function loadAdminServicePricing() {
         Boolean(
             sixtyStandard?.active &&
             sixtyGrandfathered?.active
+        )
+    );
+
+
+    // ========================================
+    // 4 HOUR PET SITTING
+    // ========================================
+
+    const petSitting4Standard =
+        findPrice(
+            "pet_sitting",
+            "basic_4_hour",
+            "standard"
+        );
+
+
+    const petSitting4Grandfathered =
+        findPrice(
+            "pet_sitting",
+            "basic_4_hour",
+            "grandfathered"
+        );
+
+
+    setAdminServicePrices(
+        "pet-sitting-4-hour",
+        petSitting4Standard?.base_price,
+        petSitting4Grandfathered?.base_price
+    );
+
+
+    applyAdminServiceState(
+        "pet-sitting-4-hour",
+        Boolean(
+            petSitting4Standard?.active &&
+            petSitting4Grandfathered?.active
+        )
+    );
+
+
+    // ========================================
+    // 8 HOUR PET SITTING
+    // ========================================
+
+    const petSitting8Standard =
+        findPrice(
+            "pet_sitting",
+            "standard_8_hour",
+            "standard"
+        );
+
+
+    const petSitting8Grandfathered =
+        findPrice(
+            "pet_sitting",
+            "standard_8_hour",
+            "grandfathered"
+        );
+
+
+    setAdminServicePrices(
+        "pet-sitting-8-hour",
+        petSitting8Standard?.base_price,
+        petSitting8Grandfathered?.base_price
+    );
+
+
+    applyAdminServiceState(
+        "pet-sitting-8-hour",
+        Boolean(
+            petSitting8Standard?.active &&
+            petSitting8Grandfathered?.active
+        )
+    );
+
+
+    // ========================================
+    // 12 HOUR PET SITTING
+    // ========================================
+
+    const petSitting12Standard =
+        findPrice(
+            "pet_sitting",
+            "vip_12_hour",
+            "standard"
+        );
+
+
+    const petSitting12Grandfathered =
+        findPrice(
+            "pet_sitting",
+            "vip_12_hour",
+            "grandfathered"
+        );
+
+
+    setAdminServicePrices(
+        "pet-sitting-12-hour",
+        petSitting12Standard?.base_price,
+        petSitting12Grandfathered?.base_price
+    );
+
+
+    applyAdminServiceState(
+        "pet-sitting-12-hour",
+        Boolean(
+            petSitting12Standard?.active &&
+            petSitting12Grandfathered?.active
         )
     );
 
@@ -22164,6 +22272,11 @@ function lockAllAdminServiceInputs() {
         "15-minute",
         "30-minute",
         "60-minute",
+
+        "pet-sitting-4-hour",
+        "pet-sitting-8-hour",
+        "pet-sitting-12-hour",
+
         "boarding"
     ]
         .forEach(
