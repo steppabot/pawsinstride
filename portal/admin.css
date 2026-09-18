@@ -5644,13 +5644,19 @@ p {
        MOBILE PAGE SHELL
     ======================================== */
 
-    body.admin-page {
-        padding-bottom:
-            calc(
-                86px +
-                env(safe-area-inset-bottom)
-            );
-    }
+   body.admin-page {
+       padding-bottom:
+           calc(
+               86px +
+               env(safe-area-inset-bottom)
+           );
+   
+       overflow-x:
+           hidden;
+   
+       touch-action:
+           pan-y;
+   }
 
 
     .admin-page .admin-dashboard-container {
