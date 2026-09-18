@@ -19700,7 +19700,78 @@ function getAdminClientVisits(
 // BUILD HOUSEHOLD PET CARD
 // ========================================
 
-function buildAdminClientPetCard(
+const adminPetPhotoUrlCache =
+    new Map();
+
+
+async function getAdminPetDisplayUrl(
+    pet
+) {
+
+
+    const defaultAvatar =
+        "./assets/default-pet-avatar.webp";
+
+
+    if (
+        !pet?.photo_path
+    ) {
+
+        return defaultAvatar;
+
+    }
+
+
+    if (
+        adminPetPhotoUrlCache.has(
+            pet.photo_path
+        )
+    ) {
+
+        return adminPetPhotoUrlCache.get(
+            pet.photo_path
+        );
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                "pet-photos"
+            )
+            .createSignedUrl(
+                pet.photo_path,
+                3600
+            );
+
+
+    if (
+        error ||
+        !data?.signedUrl
+    ) {
+
+        return defaultAvatar;
+
+    }
+
+
+    adminPetPhotoUrlCache.set(
+        pet.photo_path,
+        data.signedUrl
+    );
+
+
+    return data.signedUrl;
+
+}
+
+
+async function buildAdminClientPetCard(
     pet
 ) {
 
@@ -19723,25 +19794,27 @@ function buildAdminClientPetCard(
             );
 
 
+    const photoUrl =
+        await getAdminPetDisplayUrl(
+            pet
+        );
+
+
     return `
 
         <article class="admin-client-pet-card">
 
 
-            <span class="admin-client-pet-avatar">
-
-                ${escapeHtml(
-                    String(
-                        petName
-                    )
-                        .charAt(
-                            0
-                        )
-                        .toUpperCase() ||
-                    "P"
-                )}
-
-            </span>
+            <img
+                src="${escapeHtml(
+                    photoUrl
+                )}"
+                alt="${escapeHtml(
+                    petName
+                )}"
+                class="admin-client-pet-photo"
+                data-admin-pet-photo
+            >
 
 
             <div class="admin-client-pet-copy">
