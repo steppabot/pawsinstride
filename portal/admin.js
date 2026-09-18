@@ -544,7 +544,7 @@ async function loadAdminDashboard() {
             supabaseClient
                 .from("profiles")
                 .select(
-                    "id, full_name, email, phone, role"
+                    "id, full_name, email, phone, role, profile_photo_path"
                 ),
     
     
@@ -19270,7 +19270,234 @@ function formatAdminClientVisitDate(
 }
 
 
-function renderAdminClientDirectory() {
+// ========================================
+// BUILD CLIENT DIRECTORY CARD
+// ========================================
+
+async function buildAdminClientDirectoryCard(
+    profile
+) {
+
+
+    const pets =
+        getAdminClientPets(
+            profile.id
+        );
+
+
+    const address =
+        getAdminClientAddress(
+            profile.id
+        );
+
+
+    const stats =
+        getAdminClientVisitStats(
+            profile.id
+        );
+
+
+    const petNames =
+        pets.length >
+        0
+
+            ? pets.map(
+                pet =>
+                    pet.name ||
+                    "Pet"
+            )
+
+            : [];
+
+
+    let profilePhotoUrl =
+        null;
+
+
+    if (
+        profile.profile_photo_path
+    ) {
+
+        profilePhotoUrl =
+            await getAdminProfilePhotoUrl(
+                profile.profile_photo_path
+            );
+
+    }
+
+
+    const avatarMarkup =
+        profilePhotoUrl
+
+            ? `
+
+                <img
+                    src="${escapeHtml(
+                        profilePhotoUrl
+                    )}"
+                    alt="${escapeHtml(
+                        profile.full_name ||
+                        "Client"
+                    )}"
+                    class="admin-client-avatar-image"
+                    data-admin-client-photo
+                >
+
+            `
+
+            : `
+
+                <span class="admin-client-avatar">
+                    ${escapeHtml(
+                        getAdminClientInitials(
+                            profile
+                        )
+                    )}
+                </span>
+
+            `;
+
+
+    return `
+
+        <article
+            class="admin-client-card"
+            data-client-id="${escapeHtml(
+                String(
+                    profile.id
+                )
+            )}"
+        >
+
+
+            <div class="admin-client-card-top">
+
+
+                ${avatarMarkup}
+
+
+                <div class="admin-client-card-identity">
+
+                    <strong>
+                        ${escapeHtml(
+                            profile.full_name ||
+                            profile.email ||
+                            "Client"
+                        )}
+                    </strong>
+
+                    <span>
+                        ${escapeHtml(
+                            petNames.length >
+                            0
+
+                                ? petNames.join(
+                                    ", "
+                                )
+
+                                : "No pets added"
+                        )}
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="admin-client-card-details">
+
+
+                <div class="admin-client-card-detail">
+
+                    <span>
+                        Contact
+                    </span>
+
+                    <strong>
+                        ${escapeHtml(
+                            profile.phone ||
+                            profile.email ||
+                            "Not added"
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="admin-client-card-detail">
+
+                    <span>
+                        Address
+                    </span>
+
+                    <strong>
+                        ${escapeHtml(
+                            address ||
+                            "Not added"
+                        )}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="admin-client-card-footer">
+
+
+                <span>
+                    ${stats.total}
+                    ${
+                        stats.total ===
+                        1
+
+                            ? "visit"
+
+                            : "visits"
+                    }
+                </span>
+
+
+                <span>
+                    Next:
+                    ${escapeHtml(
+                        formatAdminClientVisitDate(
+                            stats.nextVisit
+                        )
+                    )}
+                </span>
+
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-client-view-button"
+                data-client-view="${escapeHtml(
+                    String(
+                        profile.id
+                    )
+                )}"
+            >
+                View Household
+            </button>
+
+
+        </article>
+
+    `;
+
+}
+
+
+// ========================================
+// RENDER CLIENT DIRECTORY
+// ========================================
+
+async function renderAdminClientDirectory() {
 
 
     const list =
@@ -19391,186 +19618,84 @@ function renderAdminClientDirectory() {
     }
 
 
-    list.innerHTML =
-        filteredClients
-            .map(
-                profile => {
-
-
-                    const pets =
-                        getAdminClientPets(
-                            profile.id
-                        );
-
-
-                    const address =
-                        getAdminClientAddress(
-                            profile.id
-                        );
-
-
-                    const stats =
-                        getAdminClientVisitStats(
-                            profile.id
-                        );
-
-
-                    const petNames =
-                        pets.length >
-                        0
-
-                            ? pets.map(
-                                pet =>
-                                    pet.name ||
-                                    "Pet"
-                            )
-
-                            : [];
-
-
-                    return `
-
-                        <article
-                            class="admin-client-card"
-                            data-client-id="${escapeHtml(
-                                String(
-                                    profile.id
-                                )
-                            )}"
-                        >
-
-
-                            <div class="admin-client-card-top">
-
-
-                                <span class="admin-client-avatar">
-                                    ${escapeHtml(
-                                        getAdminClientInitials(
-                                            profile
-                                        )
-                                    )}
-                                </span>
-
-
-                                <div class="admin-client-card-identity">
-
-                                    <strong>
-                                        ${escapeHtml(
-                                            profile.full_name ||
-                                            profile.email ||
-                                            "Client"
-                                        )}
-                                    </strong>
-
-                                    <span>
-                                        ${escapeHtml(
-                                            petNames.length >
-                                            0
-
-                                                ? petNames.join(
-                                                    ", "
-                                                )
-
-                                                : "No pets added"
-                                        )}
-                                    </span>
-
-                                </div>
-
-
-                            </div>
-
-
-                            <div class="admin-client-card-details">
-
-
-                                <div class="admin-client-card-detail">
-
-                                    <span>
-                                        Contact
-                                    </span>
-
-                                    <strong>
-                                        ${escapeHtml(
-                                            profile.phone ||
-                                            profile.email ||
-                                            "Not added"
-                                        )}
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="admin-client-card-detail">
-
-                                    <span>
-                                        Address
-                                    </span>
-
-                                    <strong>
-                                        ${escapeHtml(
-                                            address ||
-                                            "Not added"
-                                        )}
-                                    </strong>
-
-                                </div>
-
-
-                            </div>
-
-
-                            <div class="admin-client-card-footer">
-
-
-                                <span>
-                                    ${stats.total}
-                                    ${
-                                        stats.total ===
-                                        1
-
-                                            ? "visit"
-
-                                            : "visits"
-                                    }
-                                </span>
-
-
-                                <span>
-                                    Next:
-                                    ${escapeHtml(
-                                        formatAdminClientVisitDate(
-                                            stats.nextVisit
-                                        )
-                                    )}
-                                </span>
-
-
-                            </div>
-
-
-                            <button
-                                type="button"
-                                class="admin-client-view-button"
-                                data-client-view="${escapeHtml(
-                                    String(
-                                        profile.id
-                                    )
-                                )}"
-                            >
-                                View Household
-                            </button>
-
-
-                        </article>
-
-                    `;
-
-                }
+    const renderedClients =
+        await Promise.all(
+            filteredClients.map(
+                buildAdminClientDirectoryCard
             )
-            .join(
-                ""
-            );
+        );
+
+
+    list.innerHTML =
+        renderedClients.join(
+            ""
+        );
+
+
+    list
+        .querySelectorAll(
+            "[data-admin-client-photo]"
+        )
+        .forEach(
+            image => {
+
+
+                image.addEventListener(
+                    "error",
+                    () => {
+
+
+                        const profileId =
+                            image
+                                .closest(
+                                    "[data-client-id]"
+                                )
+                                ?.dataset
+                                .clientId;
+
+
+                        const profile =
+                            allProfiles.find(
+                                item =>
+                                    String(
+                                        item.id
+                                    ) ===
+                                    String(
+                                        profileId
+                                    )
+                            );
+
+
+                        const fallback =
+                            document.createElement(
+                                "span"
+                            );
+
+
+                        fallback.className =
+                            "admin-client-avatar";
+
+
+                        fallback.textContent =
+                            getAdminClientInitials(
+                                profile ||
+                                {}
+                            );
+
+
+                        image.replaceWith(
+                            fallback
+                        );
+
+                    },
+                    {
+                        once:
+                            true
+                    }
+                );
+
+            }
+        );
 
 }
 
