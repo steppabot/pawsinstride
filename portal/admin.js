@@ -21410,10 +21410,483 @@ function toggleAdminServiceMenu(
 
 
 // ========================================
+// APPLY SERVICE STATE
+// ========================================
+
+function applyAdminServiceState(
+    serviceKey,
+    isActive
+) {
+
+
+    const menuButton =
+        document.querySelector(
+            `[data-service-menu="${serviceKey}"]`
+        );
+
+
+    const serviceCard =
+        menuButton?.closest(
+            ".admin-service-pricing-card"
+        );
+
+
+    if (
+        !serviceCard
+    ) {
+
+        return;
+
+    }
+
+
+    const status =
+        serviceCard.querySelector(
+            ".admin-service-status"
+        );
+
+
+    const inputs =
+        serviceCard.querySelectorAll(
+            "input"
+        );
+
+
+    const actionButton =
+        serviceCard.querySelector(
+            "[data-service-action='deactivate'], [data-service-action='activate']"
+        );
+
+
+    serviceCard.classList.toggle(
+        "admin-service-is-inactive",
+        !isActive
+    );
+
+
+    if (
+        status
+    ) {
+
+        status.textContent =
+            isActive
+                ? "Active"
+                : "Inactive";
+
+    }
+
+
+    inputs.forEach(
+        input => {
+
+            input.disabled =
+                !isActive;
+
+        }
+    );
+
+
+    if (
+        actionButton
+    ) {
+
+        actionButton.dataset
+            .serviceAction =
+            isActive
+                ? "deactivate"
+                : "activate";
+
+
+        actionButton.textContent =
+            isActive
+                ? "Deactivate Service"
+                : "Activate Service";
+
+    }
+
+
+    // ========================================
+    // BOARDING SURCHARGES
+    // ========================================
+
+    if (
+        serviceKey ===
+        "boarding"
+    ) {
+
+
+        const boardingFees =
+            serviceCard
+                .nextElementSibling;
+
+
+        if (
+            boardingFees?.classList
+                .contains(
+                    "admin-boarding-fees"
+                )
+        ) {
+
+
+            boardingFees.classList.toggle(
+                "admin-service-is-inactive",
+                !isActive
+            );
+
+
+            boardingFees
+                .querySelectorAll(
+                    "input"
+                )
+                .forEach(
+                    input => {
+
+                        input.disabled =
+                            !isActive;
+
+                    }
+                );
+
+        }
+
+    }
+
+}
+
+
+// ========================================
+// SET SERVICE PRICE INPUTS
+// ========================================
+
+function setAdminServicePrices(
+    serviceKey,
+    standardPrice,
+    grandfatheredPrice
+) {
+
+
+    const menuButton =
+        document.querySelector(
+            `[data-service-menu="${serviceKey}"]`
+        );
+
+
+    const serviceCard =
+        menuButton?.closest(
+            ".admin-service-pricing-card"
+        );
+
+
+    if (
+        !serviceCard
+    ) {
+
+        return;
+
+    }
+
+
+    const inputs =
+        serviceCard.querySelectorAll(
+            ".admin-service-pricing-rates input"
+        );
+
+
+    if (
+        inputs[0]
+    ) {
+
+        inputs[0].value =
+            Number(
+                standardPrice ||
+                0
+            );
+
+    }
+
+
+    if (
+        inputs[1]
+    ) {
+
+        inputs[1].value =
+            Number(
+                grandfatheredPrice ||
+                0
+            );
+
+    }
+
+}
+
+
+// ========================================
+// LOAD ADMIN SERVICE PRICING
+// ========================================
+
+async function loadAdminServicePricing() {
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "get_admin_service_prices"
+            );
+
+
+    if (
+        error
+    ) {
+
+
+        console.error(
+            "Admin service pricing load error:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+
+    const prices =
+        data ||
+        [];
+
+
+    // ========================================
+    // FIND PRICE ROW
+    // ========================================
+
+    function findPrice(
+        serviceType,
+        serviceOption,
+        pricingTier
+    ) {
+
+
+        return prices.find(
+            row =>
+
+                row.service_type ===
+                    serviceType &&
+
+                row.service_option ===
+                    serviceOption &&
+
+                row.pricing_tier ===
+                    pricingTier
+        ) ||
+        null;
+
+    }
+
+
+    // ========================================
+    // 15 MINUTE VISIT
+    // ========================================
+
+    const fifteenStandard =
+        findPrice(
+            "dog_walking",
+            "15_min",
+            "standard"
+        );
+
+
+    const fifteenGrandfathered =
+        findPrice(
+            "dog_walking",
+            "15_min",
+            "grandfathered"
+        );
+
+
+    setAdminServicePrices(
+        "15-minute",
+        fifteenStandard?.base_price,
+        fifteenGrandfathered?.base_price
+    );
+
+
+    applyAdminServiceState(
+        "15-minute",
+        Boolean(
+            fifteenStandard?.active &&
+            fifteenGrandfathered?.active
+        )
+    );
+
+
+    // ========================================
+    // 30 MINUTE VISIT
+    // ========================================
+
+    const thirtyStandard =
+        findPrice(
+            "dog_walking",
+            "30_min",
+            "standard"
+        );
+
+
+    const thirtyGrandfathered =
+        findPrice(
+            "dog_walking",
+            "30_min",
+            "grandfathered"
+        );
+
+
+    setAdminServicePrices(
+        "30-minute",
+        thirtyStandard?.base_price,
+        thirtyGrandfathered?.base_price
+    );
+
+
+    applyAdminServiceState(
+        "30-minute",
+        Boolean(
+            thirtyStandard?.active &&
+            thirtyGrandfathered?.active
+        )
+    );
+
+
+    // ========================================
+    // 60 MINUTE VISIT
+    // ========================================
+
+    const sixtyStandard =
+        findPrice(
+            "dog_walking",
+            "60_min",
+            "standard"
+        );
+
+
+    const sixtyGrandfathered =
+        findPrice(
+            "dog_walking",
+            "60_min",
+            "grandfathered"
+        );
+
+
+    setAdminServicePrices(
+        "60-minute",
+        sixtyStandard?.base_price,
+        sixtyGrandfathered?.base_price
+    );
+
+
+    applyAdminServiceState(
+        "60-minute",
+        Boolean(
+            sixtyStandard?.active &&
+            sixtyGrandfathered?.active
+        )
+    );
+
+
+    // ========================================
+    // BOARDING
+    // ========================================
+
+    const boardingStandard =
+        findPrice(
+            "dog_boarding",
+            "vip_overnight",
+            "standard"
+        );
+
+
+    const boardingGrandfathered =
+        findPrice(
+            "dog_boarding",
+            "vip_overnight",
+            "grandfathered"
+        );
+
+
+    setAdminServicePrices(
+        "boarding",
+        boardingStandard?.base_price,
+        boardingGrandfathered?.base_price
+    );
+
+
+    applyAdminServiceState(
+        "boarding",
+        Boolean(
+            boardingStandard?.active &&
+            boardingGrandfathered?.active
+        )
+    );
+
+
+    // ========================================
+    // BOARDING SURCHARGES
+    // ========================================
+
+    const holidayInput =
+        document.querySelector(
+            'input[aria-label="Holiday boarding surcharge"]'
+        );
+
+
+    const largeDogInput =
+        document.querySelector(
+            'input[aria-label="Large dog boarding surcharge"]'
+        );
+
+
+    if (
+        holidayInput
+    ) {
+
+        holidayInput.value =
+            Number(
+                boardingStandard
+                    ?.holiday_fee ||
+                0
+            );
+
+    }
+
+
+    if (
+        largeDogInput
+    ) {
+
+        largeDogInput.value =
+            Number(
+                boardingStandard
+                    ?.large_dog_fee ||
+                0
+            );
+
+    }
+
+
+    console.log(
+        "Loaded admin service pricing:",
+        prices.length
+    );
+
+}
+
+
+// ========================================
 // OPEN SERVICES & PRICING
 // ========================================
 
-function openAdminServicesPricingModal() {
+async function openAdminServicesPricingModal() {
 
 
     if (
@@ -21434,11 +21907,29 @@ function openAdminServicesPricingModal() {
     );
 
 
+    try {
+
+
+        await loadAdminServicePricing();
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Unable to load Services & Pricing:",
+            error
+        );
+
+    }
+
+
     adminServicesPricingCloseButton
         ?.focus();
 
 }
-
 
 // ========================================
 // CLOSE SERVICES & PRICING
