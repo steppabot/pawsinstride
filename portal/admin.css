@@ -6493,6 +6493,9 @@ p {
 ======================================== */
 
 .admin-service-pricing-card {
+    position:
+        relative;
+
     display:
         grid;
 
@@ -6531,8 +6534,12 @@ p {
             71,
             0.05
         );
-}
 
+    transition:
+        border-color 0.16s ease,
+        box-shadow 0.16s ease,
+        background 0.16s ease;
+}
 
 /* ========================================
    SERVICE PRICING MAIN
