@@ -548,10 +548,11 @@ body.admin-page {
     margin-bottom: 22px;
 }
 
-
 .admin-home-intro .admin-screen-eyebrow,
 .admin-screen-intro .admin-screen-eyebrow,
-.admin-home-section-heading .admin-screen-eyebrow {
+.admin-home-section-heading .admin-screen-eyebrow,
+.admin-more-section-heading .admin-screen-eyebrow,
+.admin-services-pricing-header .admin-screen-eyebrow {
     display: inline-block;
 
     margin-bottom: 7px;
@@ -6471,7 +6472,7 @@ p {
         16px;
 
     border-radius:
-        10px;
+        6px !important;
 }
 
 
@@ -6892,23 +6893,24 @@ body.admin-services-pricing-open {
     background:
         linear-gradient(
             135deg,
-            #47cee6 0%,
-            #2890df 100%
+            #2890df 0%,
+            #1f7bc2 58%,
+            #1768aa 100%
         );
 
     color:
         #ffffff;
 
     border-radius:
-        13px;
+        8px;
 
     box-shadow:
         0 5px 14px
         rgba(
-            40,
-            144,
-            223,
-            0.20
+            31,
+            123,
+            194,
+            0.22
         );
 }
 
