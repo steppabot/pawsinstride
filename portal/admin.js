@@ -16,8 +16,6 @@ const supabaseClient =
         SUPABASE_PUBLISHABLE_KEY
     );
 
-
-
 // ========================================
 // CONSTANTS
 // ========================================
@@ -21516,6 +21514,10 @@ adminServicesPricingModal
         event => {
 
 
+            // ========================================
+            // THREE-DOT MENU BUTTON
+            // ========================================
+
             const menuButton =
                 event.target.closest(
                     "[data-service-menu]"
@@ -21541,6 +21543,10 @@ adminServicesPricingModal
             }
 
 
+            // ========================================
+            // MENU ACTION
+            // ========================================
+
             const menuAction =
                 event.target.closest(
                     "[data-service-action]"
@@ -21548,26 +21554,75 @@ adminServicesPricingModal
 
 
             if (
-                menuAction
+                !menuAction
             ) {
 
 
-                event.stopPropagation();
+                const clickedInsideDropdown =
+                    event.target.closest(
+                        ".admin-service-menu-dropdown"
+                    );
 
 
-                const action =
-                    menuAction.dataset
-                        .serviceAction;
+                if (
+                    clickedInsideDropdown
+                ) {
+
+                    return;
+
+                }
 
 
-                const serviceKey =
-                    menuAction.dataset
-                        .serviceKey;
+                closeAllAdminServiceMenus();
+
+
+                return;
+
+            }
+
+
+            event.stopPropagation();
+
+
+            const action =
+                menuAction.dataset
+                    .serviceAction;
+
+
+            const serviceKey =
+                menuAction.dataset
+                    .serviceKey;
+
+
+            const serviceCard =
+                menuAction.closest(
+                    ".admin-service-pricing-card"
+                );
+
+
+            if (
+                !serviceCard
+            ) {
+
+                closeAllAdminServiceMenus();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // EDIT SERVICE
+            // ========================================
+
+            if (
+                action ===
+                "edit"
+            ) {
 
 
                 console.log(
-                    "Service action:",
-                    action,
+                    "Edit service:",
                     serviceKey
                 );
 
@@ -21580,31 +21635,228 @@ adminServicesPricingModal
             }
 
 
-            const clickedInsideDropdown =
-                event.target.closest(
-                    ".admin-service-menu-dropdown"
+            // ========================================
+            // DEACTIVATE SERVICE
+            // ========================================
+
+            if (
+                action ===
+                "deactivate"
+            ) {
+
+
+                const status =
+                    serviceCard.querySelector(
+                        ".admin-service-status"
+                    );
+
+
+                const inputs =
+                    serviceCard.querySelectorAll(
+                        "input"
+                    );
+
+
+                serviceCard.classList.add(
+                    "admin-service-is-inactive"
                 );
 
 
-            if (
-                clickedInsideDropdown
-            ) {
+                if (
+                    status
+                ) {
+
+                    status.textContent =
+                        "Inactive";
+
+                }
+
+
+                inputs.forEach(
+                    input => {
+
+                        input.disabled =
+                            true;
+
+                    }
+                );
+
+
+                menuAction.dataset
+                    .serviceAction =
+                    "activate";
+
+
+                menuAction.textContent =
+                    "Activate Service";
+
+
+                // ========================================
+                // BOARDING SURCHARGES
+                // ========================================
+
+                if (
+                    serviceKey ===
+                    "boarding"
+                ) {
+
+
+                    const boardingFees =
+                        serviceCard
+                            .nextElementSibling;
+
+
+                    if (
+                        boardingFees?.classList
+                            .contains(
+                                "admin-boarding-fees"
+                            )
+                    ) {
+
+
+                        boardingFees.classList.add(
+                            "admin-service-is-inactive"
+                        );
+
+
+                        boardingFees
+                            .querySelectorAll(
+                                "input"
+                            )
+                            .forEach(
+                                input => {
+
+                                    input.disabled =
+                                        true;
+
+                                }
+                            );
+
+                    }
+
+                }
+
+
+                closeAllAdminServiceMenus();
+
 
                 return;
 
             }
 
 
-            closeAllAdminServiceMenus();
+            // ========================================
+            // ACTIVATE SERVICE
+            // ========================================
+
+            if (
+                action ===
+                "activate"
+            ) {
+
+
+                const status =
+                    serviceCard.querySelector(
+                        ".admin-service-status"
+                    );
+
+
+                const inputs =
+                    serviceCard.querySelectorAll(
+                        "input"
+                    );
+
+
+                serviceCard.classList.remove(
+                    "admin-service-is-inactive"
+                );
+
+
+                if (
+                    status
+                ) {
+
+                    status.textContent =
+                        "Active";
+
+                }
+
+
+                inputs.forEach(
+                    input => {
+
+                        input.disabled =
+                            false;
+
+                    }
+                );
+
+
+                menuAction.dataset
+                    .serviceAction =
+                    "deactivate";
+
+
+                menuAction.textContent =
+                    "Deactivate Service";
+
+
+                // ========================================
+                // BOARDING SURCHARGES
+                // ========================================
+
+                if (
+                    serviceKey ===
+                    "boarding"
+                ) {
+
+
+                    const boardingFees =
+                        serviceCard
+                            .nextElementSibling;
+
+
+                    if (
+                        boardingFees?.classList
+                            .contains(
+                                "admin-boarding-fees"
+                            )
+                    ) {
+
+
+                        boardingFees.classList.remove(
+                            "admin-service-is-inactive"
+                        );
+
+
+                        boardingFees
+                            .querySelectorAll(
+                                "input"
+                            )
+                            .forEach(
+                                input => {
+
+                                    input.disabled =
+                                        false;
+
+                                }
+                            );
+
+                    }
+
+                }
+
+
+                closeAllAdminServiceMenus();
+
+
+                return;
+
+            }
 
         }
 
     );
-
-
-// ========================================
-// BACKDROP CLOSE
-// ========================================
 
 adminServicesPricingModal
     ?.addEventListener(
