@@ -6958,6 +6958,108 @@ p {
 
 
 /* ========================================
+   BOARDING SURCHARGES
+======================================== */
+
+.admin-boarding-fees {
+    padding:
+        14px
+        16px;
+
+    background:
+        #f8fbfd;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        10px;
+}
+
+
+.admin-boarding-fees-heading {
+    margin-bottom:
+        12px;
+}
+
+
+.admin-boarding-fees-heading strong {
+    display:
+        block;
+
+    margin-bottom:
+        3px;
+
+    color:
+        #183447;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-boarding-fees-heading span {
+    display:
+        block;
+
+    color:
+        #6b7785;
+
+    font-size:
+        9px;
+
+    line-height:
+        1.4;
+}
+
+
+.admin-boarding-fees-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                140px
+            )
+        );
+
+    gap:
+        10px;
+}
+
+
+/* ========================================
+   BOARDING SURCHARGES — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-boarding-fees {
+        padding:
+            13px;
+    }
+
+
+    .admin-boarding-fees-grid {
+        grid-template-columns:
+            1fr
+            1fr;
+
+        width:
+            100%;
+    }
+
+}
+
+
+/* ========================================
    SERVICES EMPTY STATE
 ======================================== */
 
