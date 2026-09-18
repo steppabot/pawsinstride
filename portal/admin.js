@@ -20275,6 +20275,77 @@ async function openAdminClientHousehold(
         }`;
 
 
+    // ========================================
+    // PRICING TIER
+    // ========================================
+
+    const pricingTier =
+        profile.pricing_tier ===
+        "grandfathered"
+
+            ? "grandfathered"
+
+            : "standard";
+
+
+    const pricingTierDisplay =
+        document.getElementById(
+            "admin-client-household-pricing-tier"
+        );
+
+
+    const pricingTierSelect =
+        document.getElementById(
+            "admin-client-pricing-tier-select"
+        );
+
+
+    const pricingTierEditor =
+        document.getElementById(
+            "admin-client-pricing-tier-editor"
+        );
+
+
+    if (
+        pricingTierDisplay
+    ) {
+
+        pricingTierDisplay.textContent =
+            pricingTier ===
+            "grandfathered"
+
+                ? "Legacy"
+
+                : "Standard";
+
+    }
+
+
+    if (
+        pricingTierSelect
+    ) {
+
+        pricingTierSelect.value =
+            pricingTier;
+
+        pricingTierSelect.dataset.clientId =
+            String(
+                clientId
+            );
+
+    }
+
+
+    if (
+        pricingTierEditor
+    ) {
+
+        pricingTierEditor.hidden =
+            true;
+
+    }
+
+
     const petsContainer =
         document.getElementById(
             "admin-client-household-pets"
@@ -20456,7 +20527,6 @@ async function openAdminClientHousehold(
     });
 
 }
-
 
 // ========================================
 // CLOSE CLIENT HOUSEHOLD
