@@ -7262,30 +7262,9 @@ p {
    SERVICE EDIT ACTIONS
 ======================================== */
 
-.admin-service-pricing-card {
-    position:
-        relative;
-}
-
-
-.admin-service-pricing-card.admin-service-is-editing {
-    padding-bottom:
-        66px;
-}
-
-
 .admin-service-edit-actions {
     display:
         none;
-
-    position:
-        absolute;
-
-    right:
-        16px;
-
-    bottom:
-        14px;
 
     align-items:
         center;
@@ -7295,6 +7274,12 @@ p {
 
     gap:
         8px;
+
+    margin-left:
+        8px;
+
+    flex-shrink:
+        0;
 }
 
 
@@ -7323,20 +7308,19 @@ p {
         center;
 
     height:
-        36px;
+        38px;
 
     padding:
-        0
-        15px;
+        0 14px;
 
     border-radius:
-        9px;
+        8px;
 
     font-family:
         inherit;
 
     font-size:
-        11px;
+        10px;
 
     font-weight:
         800;
@@ -7351,7 +7335,6 @@ p {
         pointer;
 
     transition:
-        transform 0.15s ease,
         background 0.15s ease,
         border-color 0.15s ease,
         color 0.15s ease,
@@ -7359,42 +7342,30 @@ p {
 }
 
 
-.admin-service-edit-actions button:hover {
-    transform:
-        translateY(-1px);
-}
-
-
 /* CANCEL */
 
 .admin-service-edit-cancel {
     min-width:
-        74px;
+        72px;
 
     background:
         #ffffff;
 
     color:
-        #567084;
+        #536b7b;
 
     border:
         1px solid
-        #cfdde6;
-
-    box-shadow:
-        0 2px 6px rgba(24,52,71,0.04);
+        #cfdee7;
 }
 
 
 .admin-service-edit-cancel:hover {
     background:
-        #f6fafc;
+        #f5f9fb;
 
     border-color:
-        #b9cedb;
-
-    color:
-        #29485b;
+        #b8cdd9;
 }
 
 
@@ -7402,30 +7373,29 @@ p {
 
 .admin-service-edit-save {
     min-width:
-        108px;
+        110px;
 
     background:
-        linear-gradient(
-            135deg,
-            #47cee6 0%,
-            #2890df 100%
-        );
+        #3b8fd8;
 
     color:
         #ffffff;
 
     border:
         1px solid
-        #2890df;
+        #3b8fd8;
 
     box-shadow:
-        0 6px 14px rgba(40,144,223,0.20);
+        0 4px 10px rgba(40,144,223,0.16);
 }
 
 
 .admin-service-edit-save:hover {
-    box-shadow:
-        0 8px 18px rgba(40,144,223,0.27);
+    background:
+        #2b7fc6;
+
+    border-color:
+        #2b7fc6;
 }
 
 
@@ -7433,9 +7403,6 @@ p {
 .admin-service-edit-cancel:disabled {
     opacity:
         0.55;
-
-    transform:
-        none;
 
     cursor:
         wait;
@@ -7452,23 +7419,23 @@ p {
 ) {
 
     .admin-service-pricing-card.admin-service-is-editing {
-        padding-bottom:
-            64px;
+        align-items:
+            flex-start;
     }
 
 
     .admin-service-edit-actions {
-        right:
-            12px;
+        width:
+            100%;
 
-        bottom:
-            12px;
-    }
+        margin-left:
+            0;
 
+        margin-top:
+            10px;
 
-    .admin-service-edit-save {
-        min-width:
-            100px;
+        justify-content:
+            flex-end;
     }
 
 }
