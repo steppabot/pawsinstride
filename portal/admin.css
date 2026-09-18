@@ -6955,15 +6955,20 @@ p {
 
 }
 
-
 /* ========================================
    BOARDING SURCHARGES
 ======================================== */
 
 .admin-boarding-fees {
+    width:
+        fit-content;
+
+    max-width:
+        100%;
+
     padding:
-        14px
-        16px;
+        12px
+        14px;
 
     background:
         #f8fbfd;
@@ -6972,14 +6977,18 @@ p {
         1px solid
         #d6e4eb;
 
+    border-left:
+        4px solid
+        #2890df;
+
     border-radius:
-        10px;
+        9px;
 }
 
 
 .admin-boarding-fees-heading {
     margin-bottom:
-        12px;
+        10px;
 }
 
 
@@ -6988,7 +6997,7 @@ p {
         block;
 
     margin-bottom:
-        3px;
+        2px;
 
     color:
         #183447;
@@ -7023,10 +7032,7 @@ p {
     grid-template-columns:
         repeat(
             2,
-            minmax(
-                0,
-                140px
-            )
+            140px
         );
 
     gap:
@@ -7041,8 +7047,11 @@ p {
 @media (max-width:700px) {
 
     .admin-boarding-fees {
+        width:
+            100%;
+
         padding:
-            13px;
+            12px;
     }
 
 
