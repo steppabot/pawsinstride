@@ -1860,11 +1860,11 @@
                         <!-- ========================================
                              CLIENT SEARCH
                              ======================================== -->
-                
+                        
                         <div class="admin-client-search">
-                
+                        
                             <span class="admin-client-search-icon">
-                
+                        
                                 <svg
                                     viewBox="0 0 24 24"
                                     aria-hidden="true"
@@ -1874,13 +1874,13 @@
                                         cy="11"
                                         r="7"
                                     ></circle>
-                
+                        
                                     <path d="m20 20-4-4"></path>
                                 </svg>
-                
+                        
                             </span>
-                
-                
+                        
+                        
                             <input
                                 type="search"
                                 id="admin-client-search-input"
@@ -1888,8 +1888,8 @@
                                 placeholder="Search clients, pets, phone, email, or address"
                                 autocomplete="off"
                             >
-                
-                
+                        
+                        
                             <button
                                 type="button"
                                 id="admin-client-search-clear"
@@ -1899,10 +1899,213 @@
                             >
                                 ×
                             </button>
-                
+                        
                         </div>
-                
-                
+                        
+                        
+                        <!-- ========================================
+                             CLIENT HOUSEHOLD DETAIL
+                             ======================================== -->
+                        
+                        <section
+                            id="admin-client-household-detail"
+                            class="admin-client-household-detail"
+                            hidden
+                        >
+                        
+                        
+                            <!-- ========================================
+                                 HOUSEHOLD DETAIL HEADER
+                                 ======================================== -->
+                        
+                            <div class="admin-client-household-header">
+                        
+                        
+                                <button
+                                    type="button"
+                                    id="admin-client-household-back"
+                                    class="admin-client-household-back"
+                                >
+                        
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="m15 18-6-6 6-6"></path>
+                                    </svg>
+                        
+                                    <span>
+                                        Back to Clients
+                                    </span>
+                        
+                                </button>
+                        
+                        
+                                <div class="admin-client-household-heading">
+                        
+                        
+                                    <span
+                                        id="admin-client-household-avatar"
+                                        class="admin-client-household-avatar"
+                                    >
+                                        C
+                                    </span>
+                        
+                        
+                                    <div>
+                        
+                                        <span class="admin-screen-eyebrow">
+                                            CLIENT HOUSEHOLD
+                                        </span>
+                        
+                                        <h2 id="admin-client-household-name">
+                                            Client
+                                        </h2>
+                        
+                                        <p id="admin-client-household-pets-summary">
+                                            Household details
+                                        </p>
+                        
+                                    </div>
+                        
+                        
+                                </div>
+                        
+                        
+                            </div>
+                        
+                        
+                            <!-- ========================================
+                                 HOUSEHOLD CONTACT DETAILS
+                                 ======================================== -->
+                        
+                            <div class="admin-client-household-grid">
+                        
+                        
+                                <article class="admin-client-household-info-card">
+                        
+                                    <span class="admin-client-household-info-label">
+                                        Phone
+                                    </span>
+                        
+                                    <strong id="admin-client-household-phone">
+                                        Not added
+                                    </strong>
+                        
+                                </article>
+                        
+                        
+                                <article class="admin-client-household-info-card">
+                        
+                                    <span class="admin-client-household-info-label">
+                                        Email
+                                    </span>
+                        
+                                    <strong id="admin-client-household-email">
+                                        Not added
+                                    </strong>
+                        
+                                </article>
+                        
+                        
+                                <article class="admin-client-household-info-card">
+                        
+                                    <span class="admin-client-household-info-label">
+                                        Home Address
+                                    </span>
+                        
+                                    <strong id="admin-client-household-address">
+                                        Not added
+                                    </strong>
+                        
+                                </article>
+                        
+                        
+                                <article class="admin-client-household-info-card">
+                        
+                                    <span class="admin-client-household-info-label">
+                                        Service History
+                                    </span>
+                        
+                                    <strong id="admin-client-household-visits">
+                                        0 visits
+                                    </strong>
+                        
+                                </article>
+                        
+                        
+                            </div>
+                        
+                        
+                            <!-- ========================================
+                                 HOUSEHOLD PETS
+                                 ======================================== -->
+                        
+                            <div class="admin-client-household-section">
+                        
+                        
+                                <div class="admin-client-household-section-heading">
+                        
+                                    <div>
+                        
+                                        <span class="admin-screen-eyebrow">
+                                            PET PROFILES
+                                        </span>
+                        
+                                        <h3>
+                                            Pets
+                                        </h3>
+                        
+                                    </div>
+                        
+                                </div>
+                        
+                        
+                                <div
+                                    id="admin-client-household-pets"
+                                    class="admin-client-household-pets"
+                                ></div>
+                        
+                        
+                            </div>
+                        
+                        
+                            <!-- ========================================
+                                 HOUSEHOLD SERVICE ACTIVITY
+                                 ======================================== -->
+                        
+                            <div class="admin-client-household-section">
+                        
+                        
+                                <div class="admin-client-household-section-heading">
+                        
+                                    <div>
+                        
+                                        <span class="admin-screen-eyebrow">
+                                            SERVICE ACTIVITY
+                                        </span>
+                        
+                                        <h3>
+                                            Visits
+                                        </h3>
+                        
+                                    </div>
+                        
+                                </div>
+                        
+                        
+                                <div
+                                    id="admin-client-household-activity"
+                                    class="admin-client-household-activity"
+                                ></div>
+                        
+                        
+                            </div>
+                        
+                        
+                        </section>
+                        
+                        
                         <!-- ========================================
                              CLIENT RESULTS
                              ======================================== -->
