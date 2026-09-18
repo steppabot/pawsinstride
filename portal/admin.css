@@ -6722,6 +6722,112 @@ p {
 
 
 /* ========================================
+   INACTIVE SERVICE STATUS
+======================================== */
+
+.admin-service-pricing-card.admin-service-is-inactive {
+    background:
+        #f7f9fa;
+
+    border-color:
+        #dbe4e9;
+}
+
+
+.admin-service-pricing-card.admin-service-is-inactive
+.admin-service-pricing-icon {
+    background:
+        #aab7c0;
+
+    box-shadow:
+        none;
+}
+
+
+.admin-service-pricing-card.admin-service-is-inactive
+.admin-service-pricing-copy {
+    opacity:
+        0.68;
+}
+
+
+.admin-service-pricing-card.admin-service-is-inactive
+.admin-service-status {
+    background:
+        #f2f4f5;
+
+    color:
+        #71808a;
+
+    border-color:
+        #cbd5db;
+}
+
+
+.admin-service-pricing-card.admin-service-is-inactive
+.admin-service-rate-field {
+    opacity:
+        0.58;
+}
+
+
+.admin-service-pricing-card.admin-service-is-inactive
+.admin-service-rate-input {
+    background:
+        #eef2f4;
+
+    border-color:
+        #d7e0e5;
+}
+
+
+.admin-service-pricing-card.admin-service-is-inactive
+.admin-service-rate-input > span {
+    color:
+        #8b99a2;
+}
+
+
+.admin-service-pricing-card.admin-service-is-inactive
+.admin-service-rate-input input {
+    color:
+        #71808a;
+
+    cursor:
+        not-allowed;
+}
+
+
+/* ========================================
+   INACTIVE BOARDING SURCHARGES
+======================================== */
+
+.admin-boarding-fees.admin-service-is-inactive {
+    opacity:
+        0.58;
+}
+
+
+.admin-boarding-fees.admin-service-is-inactive
+.admin-service-rate-input {
+    background:
+        #eef2f4;
+
+    border-color:
+        #d7e0e5;
+}
+
+
+.admin-boarding-fees.admin-service-is-inactive
+.admin-service-rate-input input {
+    color:
+        #71808a;
+
+    cursor:
+        not-allowed;
+}
+
+/* ========================================
    SERVICE PRICING RATES
 ======================================== */
 
