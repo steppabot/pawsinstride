@@ -4433,6 +4433,9 @@ p {
 ======================================== */
 
 .admin-client-household-header {
+    position:
+        relative;
+
     padding-bottom:
         20px;
 
@@ -4441,42 +4444,64 @@ p {
 }
 
 
-.admin-client-household-back {
+/* ========================================
+   HOUSEHOLD CLOSE BUTTON
+======================================== */
+
+.admin-client-household-close {
+    position:
+        absolute;
+
+    top:
+        0;
+
+    right:
+        0;
+
+    z-index:
+        2;
+
     display:
         inline-flex;
 
     align-items:
         center;
 
-    gap:
-        6px;
+    justify-content:
+        center;
 
-    margin:
-        0
-        0
-        18px;
+    width:
+        34px;
+
+    height:
+        34px;
 
     padding:
-        8px
-        10px;
+        0;
 
     background:
-        #eef7fd;
+        #f4f8fa;
 
     color:
-        #1f7bc2;
+        #667784;
 
     border:
-        1px solid #b9d7ea;
+        1px solid #d6e4eb;
 
     border-radius:
-        8px;
+        9px;
+
+    font-family:
+        inherit;
 
     font-size:
-        10px;
+        22px;
 
     font-weight:
-        800;
+        500;
+
+    line-height:
+        1;
 
     cursor:
         pointer;
@@ -4489,42 +4514,31 @@ p {
 }
 
 
-.admin-client-household-back:hover {
+.admin-client-household-close:hover {
     background:
-        #2890df;
+        #eef7fd;
 
     color:
-        #ffffff;
+        #1f7bc2;
 
     border-color:
-        #2890df;
+        #9ed2f2;
 
     transform:
-        translateY(-1px);
+        scale(1.03);
 }
 
 
-.admin-client-household-back svg {
-    width:
-        15px;
+/* ========================================
+   HIDE DIRECTORY WHILE HOUSEHOLD IS OPEN
+======================================== */
 
-    height:
-        15px;
-
-    fill:
-        none;
-
-    stroke:
-        currentColor;
-
-    stroke-width:
-        2;
-
-    stroke-linecap:
-        round;
-
-    stroke-linejoin:
-        round;
+.admin-client-directory-heading[hidden],
+.admin-client-search[hidden],
+.admin-client-directory-list[hidden],
+.admin-client-household-detail[hidden] {
+    display:
+        none !important;
 }
 
 
