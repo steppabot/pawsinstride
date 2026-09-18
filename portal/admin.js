@@ -20687,6 +20687,8 @@ function showAdminAppScreen(
         "clients"
     ) {
     
+        closeAdminClientHousehold();
+    
         setupAdminClientDirectory();
     
     }
