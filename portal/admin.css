@@ -31,6 +31,87 @@
 
 
 /* ========================================
+   ADMIN PORTAL INTRO
+======================================== */
+
+.admin-portal-intro {
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        99999;
+
+    display:
+        none;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    height:
+        100dvh;
+
+    overflow:
+        hidden;
+
+    background:
+        #43a6fc;
+
+    opacity:
+        1;
+
+    transition:
+        opacity 350ms ease;
+}
+
+
+.admin-portal-intro.is-active {
+    display:
+        block;
+}
+
+
+.admin-portal-intro.is-leaving {
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+}
+
+
+.admin-portal-intro-video {
+    display:
+        block;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    object-fit:
+        cover;
+
+    object-position:
+        center;
+
+    background:
+        #43a6fc;
+}
+
+
+body.admin-portal-intro-open {
+    overflow:
+        hidden;
+}
+
+/* ========================================
    ADMIN PAGE SHELL
 ======================================== */
 
