@@ -16,7 +16,7 @@
 
     --admin-orange: #f5ab40;
     --admin-orange-dark: #ef602c;
-
+]1
     --admin-navy: #183447;
     --admin-muted: #667784;
 
@@ -3002,8 +3002,13 @@ p {
    ADMIN VISIT ACTION BUTTONS
 ======================================== */
 
+.admin-page
 .admin-visit-action-button,
+
+.admin-page
 .admin-visit-report-button,
+
+.admin-page
 .admin-reopen-visit-button {
     width:
         auto;
@@ -3034,7 +3039,7 @@ p {
         16px;
 
     border-radius:
-        10px;
+        8px;
 
     font-size:
         12px;
@@ -3061,22 +3066,28 @@ p {
    PRIMARY VISIT ACTIONS
 ======================================== */
 
+.admin-page
 .admin-check-in-button,
 
+.admin-page
 .admin-visit-report-button,
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="start-walk"
 ],
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="resume-walk-gps"
 ],
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="sync-visit"
 ],
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="sync-walk"
 ] {
@@ -3094,6 +3105,9 @@ p {
     border:
         1px solid #1768aa;
 
+    border-radius:
+        8px;
+
     box-shadow:
         0 5px 12px rgba(
             31,
@@ -3104,22 +3118,32 @@ p {
 }
 
 
+/* ========================================
+   PRIMARY VISIT ACTIONS — HOVER
+======================================== */
+
+.admin-page
 .admin-check-in-button:hover,
 
+.admin-page
 .admin-visit-report-button:hover,
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="start-walk"
 ]:hover,
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="resume-walk-gps"
 ]:hover,
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="sync-visit"
 ]:hover,
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="sync-walk"
 ]:hover {
@@ -3147,12 +3171,15 @@ p {
    COMPLETE VISIT ACTIONS
 ======================================== */
 
+.admin-page
 .admin-finish-visit-button,
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="finish"
 ],
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="finish-walk"
 ] {
@@ -3169,6 +3196,9 @@ p {
     border:
         1px solid #168a3a;
 
+    border-radius:
+        8px;
+
     box-shadow:
         0 5px 12px rgba(
             22,
@@ -3179,12 +3209,19 @@ p {
 }
 
 
+/* ========================================
+   COMPLETE VISIT ACTIONS — HOVER
+======================================== */
+
+.admin-page
 .admin-finish-visit-button:hover,
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="finish"
 ]:hover,
 
+.admin-page
 .admin-visit-action-button[
     data-visit-action="finish-walk"
 ]:hover {
@@ -3212,6 +3249,7 @@ p {
    REOPEN VISIT ACTION
 ======================================== */
 
+.admin-page
 .admin-reopen-visit-button {
     background:
         #ffffff;
@@ -3222,11 +3260,15 @@ p {
     border:
         1px solid #b9d7ea;
 
+    border-radius:
+        8px;
+
     box-shadow:
         none;
 }
 
 
+.admin-page
 .admin-reopen-visit-button:hover {
     background:
         #eef7fd;
@@ -3246,8 +3288,13 @@ p {
    DISABLED VISIT ACTIONS
 ======================================== */
 
+.admin-page
 .admin-visit-action-button:disabled,
+
+.admin-page
 .admin-visit-report-button:disabled,
+
+.admin-page
 .admin-reopen-visit-button:disabled {
     opacity:
         0.55;
@@ -3269,8 +3316,13 @@ p {
 
 @media (max-width:700px) {
 
+    .admin-page
     .admin-visit-action-button,
+
+    .admin-page
     .admin-visit-report-button,
+
+    .admin-page
     .admin-reopen-visit-button {
         width:
             100%;
@@ -3280,7 +3332,6 @@ p {
     }
 
 }
-
 
 /* ========================================
    ADMIN CALENDAR STATES
