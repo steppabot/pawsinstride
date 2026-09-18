@@ -7592,39 +7592,51 @@ body.mobile-app-screen-pets
         height: 22px;
     }
 
-    .client-message-drawer {
-       position: fixed;
+   .client-message-drawer {
+       position:
+           fixed;
    
-       top: 0;
-       left: 0;
-       right: 0;
+       inset:
+           0;
    
-       /*
-        * Stop the message screen ABOVE the fixed
-        * app navigation instead of extending behind it.
-        */
-       bottom: calc(
-           72px +
-           env(safe-area-inset-bottom)
-       );
+       display:
+           flex;
    
-       display: flex;
-       flex-direction: column;
+       flex-direction:
+           column;
    
-       width: 100%;
-       height: auto;
+       width:
+           100%;
    
-       max-width: none;
-       max-height: none;
+       height:
+           100vh;
    
-       overflow: hidden;
+       height:
+           100svh;
    
-       border: 0;
-       border-radius: 0;
+       height:
+           100dvh;
    
-       background: #ffffff;
+       max-width:
+           none;
    
-       transform: translateY(30px);
+       max-height:
+           none;
+   
+       overflow:
+           hidden;
+   
+       border:
+           0;
+   
+       border-radius:
+           0;
+   
+       background:
+           #ffffff;
+   
+       transform:
+           translateY(30px);
    }
 
     .client-message-drawer.is-open {
