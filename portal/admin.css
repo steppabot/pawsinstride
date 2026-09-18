@@ -6853,6 +6853,21 @@ p {
    SERVICE PRICING MENU
 ======================================== */
 
+.admin-service-menu-wrap {
+    position:
+        relative;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        flex-end;
+}
+
+
 .admin-service-pricing-menu {
     display:
         inline-flex;
@@ -6893,6 +6908,169 @@ p {
 
     cursor:
         pointer;
+
+    transition:
+        background 0.16s ease,
+        border-color 0.16s ease,
+        color 0.16s ease,
+        box-shadow 0.16s ease;
+}
+
+
+.admin-service-pricing-menu:hover {
+    background:
+        #f4f9fc;
+
+    color:
+        #2890df;
+
+    border-color:
+        #b8d5e6;
+}
+
+
+.admin-service-pricing-menu[
+    aria-expanded="true"
+] {
+    background:
+        #eef7fc;
+
+    color:
+        #1f7bc2;
+
+    border-color:
+        #9fcbe4;
+
+    box-shadow:
+        0 0 0 3px rgba(40,144,223,0.08);
+}
+
+
+/* ========================================
+   SERVICE PRICING DROPDOWN
+======================================== */
+
+.admin-service-menu-dropdown {
+    position:
+        absolute;
+
+    top:
+        calc(
+            100% +
+            7px
+        );
+
+    right:
+        0;
+
+    z-index:
+        60;
+
+    width:
+        180px;
+
+    padding:
+        6px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        10px;
+
+    box-shadow:
+        0 12px 30px rgba(24,52,71,0.14);
+}
+
+
+.admin-service-menu-dropdown[hidden] {
+    display:
+        none;
+}
+
+
+.admin-service-menu-dropdown button {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    width:
+        100%;
+
+    min-height:
+        38px;
+
+    margin:
+        0;
+
+    padding:
+        9px
+        11px;
+
+    background:
+        transparent;
+
+    color:
+        #314b5c;
+
+    border:
+        0;
+
+    border-radius:
+        7px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        11px;
+
+    font-weight:
+        750;
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.14s ease,
+        color 0.14s ease;
+}
+
+
+.admin-service-menu-dropdown button:hover {
+    background:
+        #f2f8fb;
+
+    color:
+        #1f7bc2;
+}
+
+
+.admin-service-menu-dropdown button[
+    data-service-action="deactivate"
+] {
+    color:
+        #b15b25;
+}
+
+
+.admin-service-menu-dropdown button[
+    data-service-action="deactivate"
+]:hover {
+    background:
+        #fff5ed;
+
+    color:
+        #944719;
 }
 
 
@@ -6936,7 +7114,7 @@ p {
     }
 
 
-    .admin-service-pricing-menu {
+    .admin-service-menu-wrap {
         grid-column:
             2;
 
@@ -6945,7 +7123,10 @@ p {
 
         align-self:
             center;
+    }
 
+
+    .admin-service-pricing-menu {
         width:
             34px;
 
@@ -6953,11 +7134,13 @@ p {
             34px;
     }
 
-}
 
-/* ========================================
-   BOARDING SURCHARGES
-======================================== */
+    .admin-service-menu-dropdown {
+        width:
+            170px;
+    }
+
+}
 
 .admin-boarding-fees {
     display:
