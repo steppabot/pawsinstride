@@ -3528,6 +3528,469 @@ p {
 
 
 /* ========================================
+   CLIENT DIRECTORY
+======================================== */
+
+.admin-client-directory-count {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex-shrink:
+        0;
+
+    min-height:
+        32px;
+
+    padding:
+        0
+        12px;
+
+    background:
+        #eef7fd;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid #9ed2f2;
+
+    border-radius:
+        999px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.03em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.admin-client-directory {
+    margin-top:
+        20px;
+
+    padding:
+        22px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #d6e4eb;
+
+    border-radius:
+        20px;
+
+    box-shadow:
+        0 7px 18px rgba(24,52,71,0.07);
+}
+
+
+/* ========================================
+   CLIENT DIRECTORY HEADING
+======================================== */
+
+.admin-client-directory-heading {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    margin-bottom:
+        16px;
+}
+
+
+.admin-client-directory-heading h2 {
+    margin:
+        0;
+
+    color:
+        #183447;
+
+    font-size:
+        20px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+}
+
+
+.admin-client-directory-heading p {
+    margin:
+        6px
+        0
+        0;
+
+    color:
+        #6b7785;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.45;
+}
+
+
+/* ========================================
+   CLIENT SEARCH
+======================================== */
+
+.admin-client-search {
+    position:
+        relative;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        18px;
+}
+
+
+.admin-client-search-icon {
+    position:
+        absolute;
+
+    left:
+        14px;
+
+    z-index:
+        1;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        18px;
+
+    height:
+        18px;
+
+    color:
+        #718592;
+
+    pointer-events:
+        none;
+}
+
+
+.admin-client-search-icon svg {
+    width:
+        18px;
+
+    height:
+        18px;
+
+    fill:
+        none;
+
+    stroke:
+        currentColor;
+
+    stroke-width:
+        1.8;
+
+    stroke-linecap:
+        round;
+
+    stroke-linejoin:
+        round;
+}
+
+
+.admin-client-search-input {
+    width:
+        100%;
+
+    min-height:
+        48px;
+
+    padding:
+        11px
+        44px
+        11px
+        43px;
+
+    background:
+        #f8fbfd;
+
+    color:
+        #183447;
+
+    border:
+        1px solid #c8dce8;
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        none;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+    outline:
+        none;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.admin-client-search-input::placeholder {
+    color:
+        #91a0aa;
+
+    font-weight:
+        500;
+}
+
+
+.admin-client-search-input:focus {
+    background:
+        #ffffff;
+
+    border-color:
+        #1f9aeb;
+
+    box-shadow:
+        0 0 0 3px rgba(31,154,235,0.10);
+}
+
+
+/* ========================================
+   CLEAR CLIENT SEARCH
+======================================== */
+
+.admin-client-search-clear {
+    position:
+        absolute;
+
+    right:
+        8px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    padding:
+        0;
+
+    background:
+        transparent;
+
+    color:
+        #7c8b95;
+
+    border:
+        0;
+
+    border-radius:
+        8px;
+
+    font-size:
+        21px;
+
+    line-height:
+        1;
+}
+
+
+.admin-client-search-clear:hover {
+    background:
+        #eef5f9;
+
+    color:
+        #183447;
+}
+
+
+/* ========================================
+   CLIENT DIRECTORY LIST
+======================================== */
+
+.admin-client-directory-list {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        12px;
+}
+
+
+/* ========================================
+   CLIENT DIRECTORY EMPTY
+======================================== */
+
+.admin-client-directory-empty {
+    grid-column:
+        1 / -1;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        180px;
+
+    padding:
+        28px;
+
+    background:
+        #f8fbfd;
+
+    border:
+        1px dashed #c8dce8;
+
+    border-radius:
+        14px;
+
+    text-align:
+        center;
+}
+
+
+.admin-client-directory-empty strong {
+    color:
+        #183447;
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-client-directory-empty span {
+    max-width:
+        360px;
+
+    margin-top:
+        5px;
+
+    color:
+        #6b7785;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.45;
+}
+
+
+/* ========================================
+   CLIENT DIRECTORY MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-screen-intro {
+        position:
+            relative;
+    }
+
+
+    .admin-client-directory-count {
+        margin-top:
+            12px;
+    }
+
+
+    .admin-client-directory {
+        margin-top:
+            16px;
+
+        padding:
+            16px;
+
+        border-radius:
+            18px;
+    }
+
+
+    .admin-client-directory-list {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .admin-client-search-input {
+        font-size:
+            12px;
+    }
+
+}
+
+
+/* ========================================
    MOBILE ADMIN APP
 ======================================== */
 
