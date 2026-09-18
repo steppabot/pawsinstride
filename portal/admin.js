@@ -21250,31 +21250,311 @@ function restoreAdminNavigationState() {
 
 
 // ========================================
+// ADMIN PORTAL INTRO
+// ========================================
+
+function startAdminPortalIntro() {
+
+    const intro =
+        document.getElementById(
+            "admin-portal-intro"
+        );
+
+    const video =
+        document.getElementById(
+            "admin-portal-intro-video"
+        );
+
+    const inactiveIntro = {
+        dashboardFinished() {}
+    };
+
+
+    if (
+        !intro ||
+        !video
+    ) {
+
+        return inactiveIntro;
+
+    }
+
+
+    const isMobile =
+        window.matchMedia(
+            "(max-width: 700px)"
+        ).matches;
+
+    const isInstalled =
+        window.matchMedia(
+            "(display-mode: standalone)"
+        ).matches ||
+        window.navigator.standalone === true;
+
+    const reducedMotion =
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+
+    if (
+        (!isMobile && !isInstalled) ||
+        reducedMotion
+    ) {
+
+        intro.remove();
+
+        return inactiveIntro;
+
+    }
+
+
+    let dismissed =
+        false;
+
+    let dashboardFinished =
+        false;
+
+    let videoFinished =
+        false;
+
+    let safetyTimer;
+
+
+    function dismissIntro() {
+
+        if (
+            dismissed
+        ) {
+
+            return;
+
+        }
+
+
+        dismissed =
+            true;
+
+
+        window.clearTimeout(
+            safetyTimer
+        );
+
+
+        document.body.classList.remove(
+            "admin-portal-intro-open"
+        );
+
+
+        intro.classList.add(
+            "is-leaving"
+        );
+
+
+        window.setTimeout(
+            () => {
+
+                video.pause();
+
+                intro.remove();
+
+            },
+            400
+        );
+
+    }
+
+
+    function finishWhenReady() {
+
+        if (
+            dashboardFinished &&
+            videoFinished
+        ) {
+
+            dismissIntro();
+
+        }
+
+    }
+
+
+    video.addEventListener(
+        "ended",
+        () => {
+
+            videoFinished =
+                true;
+
+            finishWhenReady();
+
+        },
+        {
+            once: true
+        }
+    );
+
+
+    video.addEventListener(
+        "error",
+        dismissIntro,
+        {
+            once: true
+        }
+    );
+
+
+    video
+        .querySelector(
+            "source"
+        )
+        ?.addEventListener(
+            "error",
+            dismissIntro,
+            {
+                once: true
+            }
+        );
+
+
+    safetyTimer =
+        window.setTimeout(
+            dismissIntro,
+            15000
+        );
+
+
+    video.muted =
+        true;
+
+    video.defaultMuted =
+        true;
+
+
+    intro.classList.add(
+        "is-active"
+    );
+
+
+    document.body.classList.add(
+        "admin-portal-intro-open"
+    );
+
+
+    try {
+
+        const playback =
+            video.play();
+
+
+        if (
+            playback &&
+            typeof playback.catch ===
+                "function"
+        ) {
+
+            playback.catch(
+                dismissIntro
+            );
+
+        }
+
+    } catch (error) {
+
+        dismissIntro();
+
+    }
+
+
+    return {
+
+        dashboardFinished(
+            success
+        ) {
+
+            dashboardFinished =
+                true;
+
+
+            if (
+                !success
+            ) {
+
+                dismissIntro();
+
+                return;
+
+            }
+
+
+            finishWhenReady();
+
+        }
+
+    };
+
+}
+
+
+// ========================================
 // START
 // ========================================
 
 (async function initializeAdminPortal() {
 
+    const adminIntro =
+        startAdminPortalIntro();
 
-    await loadAdminDashboard();
-
-
-    if (
-        currentUser &&
-        currentProfile
-    ) {
+    let dashboardReady =
+        false;
 
 
-        await initializeAdminMessaging();
+    try {
+
+        await loadAdminDashboard();
+
+
+        const adminContent =
+            document.getElementById(
+                "admin-content"
+            );
+
+
+        dashboardReady =
+            adminContent?.style.display ===
+            "block";
+
+
+        if (
+            currentUser &&
+            currentProfile
+        ) {
+
+            await initializeAdminMessaging();
+
+        }
+
+
+        // ========================================
+        // ADMIN APP NAVIGATION
+        // ========================================
+
+        setupAdminAppNavigation();
+
+    } catch (error) {
+
+        console.error(
+            "Admin portal initialization failed:",
+            error
+        );
+
+    } finally {
+
+        adminIntro.dashboardFinished(
+            dashboardReady
+        );
 
     }
-
-
-    // ========================================
-    // ADMIN APP NAVIGATION
-    // ========================================
-
-    setupAdminAppNavigation();
 
 
 })();
