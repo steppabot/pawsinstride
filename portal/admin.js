@@ -19979,7 +19979,7 @@ function buildAdminClientVisitItem(
 // OPEN CLIENT HOUSEHOLD
 // ========================================
 
-function openAdminClientHousehold(
+async function openAdminClientHousehold(
     clientId
 ) {
 
@@ -20165,19 +20165,58 @@ function openAdminClientHousehold(
     ) {
 
 
-        petsContainer.innerHTML =
+        if (
             pets.length >
             0
+        ) {
 
-                ? pets
-                    .map(
+
+            const renderedPets =
+                await Promise.all(
+                    pets.map(
                         buildAdminClientPetCard
                     )
-                    .join(
-                        ""
-                    )
+                );
 
-                : `
+
+            petsContainer.innerHTML =
+                renderedPets.join(
+                    ""
+                );
+
+
+            petsContainer
+                .querySelectorAll(
+                    "[data-admin-pet-photo]"
+                )
+                .forEach(
+                    image => {
+
+
+                        image.addEventListener(
+                            "error",
+                            () => {
+
+
+                                image.src =
+                                    "./assets/default-pet-avatar.webp";
+
+                            },
+                            {
+                                once:
+                                    true
+                            }
+                        );
+
+                    }
+                );
+
+
+        } else {
+
+
+            petsContainer.innerHTML =
+                `
 
                     <div class="admin-client-household-empty">
 
@@ -20192,6 +20231,8 @@ function openAdminClientHousehold(
                     </div>
 
                 `;
+
+        }
 
     }
 
