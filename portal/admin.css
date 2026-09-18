@@ -7181,8 +7181,228 @@ p {
 
 
 /* ========================================
-   SERVICE PRICING CARD — MOBILE
+   LOCKED SERVICE PRICE
 ======================================== */
+
+.admin-service-rate-input input[readonly] {
+    cursor:
+        default;
+}
+
+
+.admin-service-rate-input:has(
+    input[readonly]
+) {
+    background:
+        #f7fafc;
+
+    border-color:
+        #d6e4eb;
+}
+
+
+.admin-service-rate-input:has(
+    input[readonly]
+) > span {
+    color:
+        #55758a;
+}
+
+
+.admin-service-rate-input input[readonly]::-webkit-inner-spin-button,
+.admin-service-rate-input input[readonly]::-webkit-outer-spin-button {
+    -webkit-appearance:
+        none;
+
+    margin:
+        0;
+}
+
+
+.admin-service-rate-input input[readonly] {
+    -moz-appearance:
+        textfield;
+}
+
+
+/* ========================================
+   SERVICE EDIT MODE
+======================================== */
+
+.admin-service-pricing-card.admin-service-is-editing {
+    border-color:
+        #8fc7e8;
+
+    box-shadow:
+        0 8px 22px rgba(40,144,223,0.10);
+}
+
+
+.admin-service-pricing-card.admin-service-is-editing
+.admin-service-rate-input {
+    background:
+        #ffffff;
+
+    border-color:
+        #8fc7e8;
+
+    box-shadow:
+        0 0 0 3px rgba(40,144,223,0.06);
+}
+
+
+.admin-service-pricing-card.admin-service-is-editing
+.admin-service-rate-input > span {
+    color:
+        #1f7bc2;
+}
+
+
+/* ========================================
+   SERVICE EDIT ACTIONS
+======================================== */
+
+.admin-service-edit-actions {
+    display:
+        none;
+
+    align-items:
+        center;
+
+    justify-content:
+        flex-end;
+
+    gap:
+        7px;
+}
+
+
+.admin-service-pricing-card.admin-service-is-editing
+.admin-service-menu-wrap {
+    display:
+        none;
+}
+
+
+.admin-service-pricing-card.admin-service-is-editing
+.admin-service-edit-actions {
+    display:
+        flex;
+}
+
+
+.admin-service-edit-actions button {
+    min-height:
+        36px;
+
+    padding:
+        0
+        12px;
+
+    border-radius:
+        7px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+.admin-service-edit-cancel {
+    background:
+        #ffffff;
+
+    color:
+        #667784;
+
+    border:
+        1px solid
+        #d6e4eb;
+}
+
+
+.admin-service-edit-cancel:hover {
+    background:
+        #f5f8fa;
+
+    color:
+        #314b5c;
+}
+
+
+.admin-service-edit-save {
+    background:
+        #2890df;
+
+    color:
+        #ffffff;
+
+    border:
+        1px solid
+        #2890df;
+
+    box-shadow:
+        0 5px 12px rgba(40,144,223,0.18);
+}
+
+
+.admin-service-edit-save:hover {
+    background:
+        #1f7bc2;
+
+    border-color:
+        #1f7bc2;
+}
+
+
+.admin-service-edit-save:disabled,
+.admin-service-edit-cancel:disabled {
+    opacity:
+        0.55;
+
+    cursor:
+        wait;
+}
+
+
+/* ========================================
+   BOARDING EDIT MODE
+======================================== */
+
+.admin-boarding-fees.admin-service-is-editing {
+    border-color:
+        #8fc7e8;
+
+    background:
+        #fbfdff;
+}
+
+
+.admin-boarding-fees.admin-service-is-editing
+.admin-service-rate-input {
+    background:
+        #ffffff;
+
+    border-color:
+        #8fc7e8;
+
+    box-shadow:
+        0 0 0 3px rgba(40,144,223,0.06);
+}
 
 @media (max-width:700px) {
 
