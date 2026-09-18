@@ -21272,6 +21272,146 @@ const adminServicesPricingCloseButton =
 
 
 // ========================================
+// SERVICE MENU HELPERS
+// ========================================
+
+function closeAllAdminServiceMenus(
+    exceptKey =
+        null
+) {
+
+
+    const menuButtons =
+        document.querySelectorAll(
+            "[data-service-menu]"
+        );
+
+
+    const menuDropdowns =
+        document.querySelectorAll(
+            "[data-service-dropdown]"
+        );
+
+
+    menuButtons.forEach(
+        button => {
+
+
+            const serviceKey =
+                button.dataset
+                    .serviceMenu;
+
+
+            if (
+                serviceKey ===
+                exceptKey
+            ) {
+
+                return;
+
+            }
+
+
+            button.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+    );
+
+
+    menuDropdowns.forEach(
+        dropdown => {
+
+
+            const serviceKey =
+                dropdown.dataset
+                    .serviceDropdown;
+
+
+            if (
+                serviceKey ===
+                exceptKey
+            ) {
+
+                return;
+
+            }
+
+
+            dropdown.hidden =
+                true;
+
+        }
+    );
+
+}
+
+
+// ========================================
+// OPEN / CLOSE SERVICE MENU
+// ========================================
+
+function toggleAdminServiceMenu(
+    serviceKey
+) {
+
+
+    const menuButton =
+        document.querySelector(
+            `[data-service-menu="${serviceKey}"]`
+        );
+
+
+    const menuDropdown =
+        document.querySelector(
+            `[data-service-dropdown="${serviceKey}"]`
+        );
+
+
+    if (
+        !menuButton ||
+        !menuDropdown
+    ) {
+
+        return;
+
+    }
+
+
+    const isOpen =
+        menuButton.getAttribute(
+            "aria-expanded"
+        ) ===
+        "true";
+
+
+    closeAllAdminServiceMenus();
+
+
+    if (
+        isOpen
+    ) {
+
+        return;
+
+    }
+
+
+    menuButton.setAttribute(
+        "aria-expanded",
+        "true"
+    );
+
+
+    menuDropdown.hidden =
+        false;
+
+}
+
+
+// ========================================
 // OPEN SERVICES & PRICING
 // ========================================
 
@@ -21318,6 +21458,9 @@ function closeAdminServicesPricingModal() {
     }
 
 
+    closeAllAdminServiceMenus();
+
+
     adminServicesPricingModal.hidden =
         true;
 
@@ -21362,6 +21505,104 @@ adminServicesPricingCloseButton
 
 
 // ========================================
+// SERVICE MENU CLICK HANDLER
+// ========================================
+
+adminServicesPricingModal
+    ?.addEventListener(
+
+        "click",
+
+        event => {
+
+
+            const menuButton =
+                event.target.closest(
+                    "[data-service-menu]"
+                );
+
+
+            if (
+                menuButton
+            ) {
+
+
+                event.stopPropagation();
+
+
+                toggleAdminServiceMenu(
+                    menuButton.dataset
+                        .serviceMenu
+                );
+
+
+                return;
+
+            }
+
+
+            const menuAction =
+                event.target.closest(
+                    "[data-service-action]"
+                );
+
+
+            if (
+                menuAction
+            ) {
+
+
+                event.stopPropagation();
+
+
+                const action =
+                    menuAction.dataset
+                        .serviceAction;
+
+
+                const serviceKey =
+                    menuAction.dataset
+                        .serviceKey;
+
+
+                console.log(
+                    "Service action:",
+                    action,
+                    serviceKey
+                );
+
+
+                closeAllAdminServiceMenus();
+
+
+                return;
+
+            }
+
+
+            const clickedInsideDropdown =
+                event.target.closest(
+                    ".admin-service-menu-dropdown"
+                );
+
+
+            if (
+                clickedInsideDropdown
+            ) {
+
+                return;
+
+            }
+
+
+            closeAllAdminServiceMenus();
+
+        }
+
+    );
+
+
+// ========================================
 // BACKDROP CLOSE
 // ========================================
 
@@ -21396,6 +21637,35 @@ adminServicesPricingModal
 
 
 // ========================================
+// CLOSE MENUS OUTSIDE MODAL
+// ========================================
+
+document.addEventListener(
+
+    "click",
+
+    event => {
+
+
+        if (
+            event.target.closest(
+                ".admin-service-menu-wrap"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        closeAllAdminServiceMenus();
+
+    }
+
+);
+
+
+// ========================================
 // ESCAPE KEY
 // ========================================
 
@@ -21410,6 +21680,28 @@ document.addEventListener(
             event.key !==
             "Escape"
         ) {
+
+            return;
+
+        }
+
+
+        const openServiceMenu =
+            document.querySelector(
+                '[data-service-menu][aria-expanded="true"]'
+            );
+
+
+        if (
+            openServiceMenu
+        ) {
+
+
+            closeAllAdminServiceMenus();
+
+
+            openServiceMenu.focus();
+
 
             return;
 
@@ -21431,7 +21723,6 @@ document.addEventListener(
     }
 
 );
-
 
 // ========================================
 // ADMIN PORTAL INTRO
