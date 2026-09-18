@@ -19644,6 +19644,679 @@ function setupAdminClientDirectory() {
 
 
 // ========================================
+// CLIENT HOUSEHOLD DETAIL
+// ========================================
+
+function getAdminClientVisits(
+    clientId
+) {
+
+
+    return allVisits
+        .filter(
+            visit =>
+                visit.client_id ===
+                clientId &&
+                String(
+                    visit.status ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase() !==
+                "cancelled"
+        )
+        .sort(
+            (
+                first,
+                second
+            ) => {
+
+
+                const firstDate =
+                    String(
+                        first.visit_date ||
+                        ""
+                    );
+
+
+                const secondDate =
+                    String(
+                        second.visit_date ||
+                        ""
+                    );
+
+
+                return secondDate.localeCompare(
+                    firstDate
+                );
+
+            }
+        );
+
+}
+
+
+// ========================================
+// BUILD HOUSEHOLD PET CARD
+// ========================================
+
+function buildAdminClientPetCard(
+    pet
+) {
+
+
+    const petName =
+        pet.name ||
+        "Pet";
+
+
+    const petDetails =
+        [
+            pet.breed,
+            pet.gender
+        ]
+            .filter(
+                Boolean
+            )
+            .join(
+                " • "
+            );
+
+
+    return `
+
+        <article class="admin-client-pet-card">
+
+
+            <span class="admin-client-pet-avatar">
+
+                ${escapeHtml(
+                    String(
+                        petName
+                    )
+                        .charAt(
+                            0
+                        )
+                        .toUpperCase() ||
+                    "P"
+                )}
+
+            </span>
+
+
+            <div class="admin-client-pet-copy">
+
+                <strong>
+                    ${escapeHtml(
+                        petName
+                    )}
+                </strong>
+
+                <span>
+                    ${escapeHtml(
+                        petDetails ||
+                        "Pet profile"
+                    )}
+                </span>
+
+            </div>
+
+
+        </article>
+
+    `;
+
+}
+
+
+// ========================================
+// BUILD HOUSEHOLD VISIT ITEM
+// ========================================
+
+function buildAdminClientVisitItem(
+    visit
+) {
+
+
+    const serviceName =
+        visit.service_name ||
+        visit.service_type ||
+        "Service";
+
+
+    const status =
+        String(
+            visit.status ||
+            "scheduled"
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const statusLabel =
+        status ===
+        "completed"
+
+            ? "Completed"
+
+            : status ===
+                "checked_in"
+
+                ? "In Progress"
+
+                : "Scheduled";
+
+
+    const statusClass =
+        status ===
+        "completed"
+
+            ? "admin-client-activity-completed"
+
+            : status ===
+                "checked_in"
+
+                ? "admin-client-activity-live"
+
+                : "";
+
+
+    const price =
+        Number(
+            visit.price ||
+            0
+        );
+
+
+    return `
+
+        <article class="admin-client-activity-item ${statusClass}">
+
+
+            <div class="admin-client-activity-main">
+
+
+                <div>
+
+                    <strong>
+                        ${escapeHtml(
+                            serviceName
+                        )}
+                    </strong>
+
+                    <span>
+
+                        ${escapeHtml(
+                            formatAdminClientVisitDate(
+                                visit
+                            )
+                        )}
+
+                        ${
+                            visit.time_window
+
+                                ? ` • ${escapeHtml(
+                                    visit.time_window
+                                )}`
+
+                                : ""
+                        }
+
+                    </span>
+
+                </div>
+
+
+                <span class="admin-client-activity-status">
+                    ${escapeHtml(
+                        statusLabel
+                    )}
+                </span>
+
+
+            </div>
+
+
+            <div class="admin-client-activity-meta">
+
+                <span>
+                    ${escapeHtml(
+                        visit.notes ||
+                        "Client service"
+                    )}
+                </span>
+
+                <strong>
+                    $${Math.round(
+                        price
+                    )}
+                </strong>
+
+            </div>
+
+
+        </article>
+
+    `;
+
+}
+
+
+// ========================================
+// OPEN CLIENT HOUSEHOLD
+// ========================================
+
+function openAdminClientHousehold(
+    clientId
+) {
+
+
+    const profile =
+        allProfiles.find(
+            item =>
+                item.id ===
+                clientId
+        );
+
+
+    if (
+        !profile
+    ) {
+
+        return;
+
+    }
+
+
+    const pets =
+        getAdminClientPets(
+            clientId
+        );
+
+
+    const visits =
+        getAdminClientVisits(
+            clientId
+        );
+
+
+    const address =
+        getAdminClientAddress(
+            clientId
+        );
+
+
+    const directoryHeading =
+        document.querySelector(
+            ".admin-client-directory-heading"
+        );
+
+
+    const search =
+        document.querySelector(
+            ".admin-client-search"
+        );
+
+
+    const list =
+        document.getElementById(
+            "admin-client-directory-list"
+        );
+
+
+    const detail =
+        document.getElementById(
+            "admin-client-household-detail"
+        );
+
+
+    if (
+        !detail
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        directoryHeading
+    ) {
+
+        directoryHeading.hidden =
+            true;
+
+    }
+
+
+    if (
+        search
+    ) {
+
+        search.hidden =
+            true;
+
+    }
+
+
+    if (
+        list
+    ) {
+
+        list.hidden =
+            true;
+
+    }
+
+
+    detail.hidden =
+        false;
+
+
+    document.getElementById(
+        "admin-client-household-avatar"
+    ).textContent =
+        getAdminClientInitials(
+            profile
+        );
+
+
+    document.getElementById(
+        "admin-client-household-name"
+    ).textContent =
+        profile.full_name ||
+        profile.email ||
+        "Client";
+
+
+    document.getElementById(
+        "admin-client-household-pets-summary"
+    ).textContent =
+        pets.length >
+        0
+
+            ? `${pets.length} ${
+                pets.length ===
+                1
+
+                    ? "pet"
+
+                    : "pets"
+            } in this household`
+
+            : "No pets added";
+
+
+    document.getElementById(
+        "admin-client-household-phone"
+    ).textContent =
+        profile.phone ||
+        "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-email"
+    ).textContent =
+        profile.email ||
+        "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-address"
+    ).textContent =
+        address ||
+        "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-visits"
+    ).textContent =
+        `${visits.length} ${
+            visits.length ===
+            1
+
+                ? "visit"
+
+                : "visits"
+        }`;
+
+
+    const petsContainer =
+        document.getElementById(
+            "admin-client-household-pets"
+        );
+
+
+    if (
+        petsContainer
+    ) {
+
+
+        petsContainer.innerHTML =
+            pets.length >
+            0
+
+                ? pets
+                    .map(
+                        buildAdminClientPetCard
+                    )
+                    .join(
+                        ""
+                    )
+
+                : `
+
+                    <div class="admin-client-household-empty">
+
+                        <strong>
+                            No pets added
+                        </strong>
+
+                        <span>
+                            This household does not have any pet profiles yet.
+                        </span>
+
+                    </div>
+
+                `;
+
+    }
+
+
+    const activityContainer =
+        document.getElementById(
+            "admin-client-household-activity"
+        );
+
+
+    if (
+        activityContainer
+    ) {
+
+
+        activityContainer.innerHTML =
+            visits.length >
+            0
+
+                ? visits
+                    .slice(
+                        0,
+                        8
+                    )
+                    .map(
+                        buildAdminClientVisitItem
+                    )
+                    .join(
+                        ""
+                    )
+
+                : `
+
+                    <div class="admin-client-household-empty">
+
+                        <strong>
+                            No service history
+                        </strong>
+
+                        <span>
+                            Visits for this household will appear here.
+                        </span>
+
+                    </div>
+
+                `;
+
+    }
+
+
+    window.scrollTo({
+        top:
+            0,
+
+        left:
+            0,
+
+        behavior:
+            "auto"
+    });
+
+}
+
+
+// ========================================
+// CLOSE CLIENT HOUSEHOLD
+// ========================================
+
+function closeAdminClientHousehold() {
+
+
+    const directoryHeading =
+        document.querySelector(
+            ".admin-client-directory-heading"
+        );
+
+
+    const search =
+        document.querySelector(
+            ".admin-client-search"
+        );
+
+
+    const list =
+        document.getElementById(
+            "admin-client-directory-list"
+        );
+
+
+    const detail =
+        document.getElementById(
+            "admin-client-household-detail"
+        );
+
+
+    if (
+        directoryHeading
+    ) {
+
+        directoryHeading.hidden =
+            false;
+
+    }
+
+
+    if (
+        search
+    ) {
+
+        search.hidden =
+            false;
+
+    }
+
+
+    if (
+        list
+    ) {
+
+        list.hidden =
+            false;
+
+    }
+
+
+    if (
+        detail
+    ) {
+
+        detail.hidden =
+            true;
+
+    }
+
+
+    window.scrollTo({
+        top:
+            0,
+
+        left:
+            0,
+
+        behavior:
+            "auto"
+    });
+
+}
+
+
+// ========================================
+// CLIENT HOUSEHOLD ACTIONS
+// ========================================
+
+document.addEventListener(
+    "click",
+    event => {
+
+
+        const viewButton =
+            event.target.closest(
+                "[data-client-view]"
+            );
+
+
+        if (
+            viewButton
+        ) {
+
+
+            openAdminClientHousehold(
+                viewButton.dataset.clientView
+            );
+
+
+            return;
+
+        }
+
+
+        const backButton =
+            event.target.closest(
+                "#admin-client-household-back"
+            );
+
+
+        if (
+            backButton
+        ) {
+
+            closeAdminClientHousehold();
+
+        }
+
+    }
+);
+
+
+// ========================================
 // ADMIN APP NAVIGATION STATE
 // ========================================
 
