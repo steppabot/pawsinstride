@@ -4848,7 +4848,7 @@ p {
 
     grid-template-columns:
         repeat(
-            4,
+            5,
             minmax(
                 0,
                 1fr
@@ -4856,76 +4856,110 @@ p {
         );
 
     gap:
-        0;
+        10px;
 
     margin-top:
         18px;
 
-    overflow:
-        hidden;
+    padding:
+        10px;
 
     background:
-        linear-gradient(
-            135deg,
-            #2890df 0%,
-            #1f7bc2 58%,
-            #1768aa 100%
-        );
+        #f4f9fc;
 
     border:
-        1px solid rgba(31,123,194,0.28);
+        1px solid
+        #dce9f0;
 
     border-radius:
-        12px;
+        16px;
 
     box-shadow:
-        0 6px 16px rgba(31,123,194,0.14);
+        inset
+        0
+        1px
+        0
+        rgba(
+            255,
+            255,
+            255,
+            0.85
+        );
 }
 
+
+/* ========================================
+   HOUSEHOLD INFO CARD
+======================================== */
 
 .admin-client-household-info-card {
     position:
         relative;
 
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
     min-width:
         0;
 
+    min-height:
+        76px;
+
     padding:
-        14px
-        16px;
+        13px
+        14px;
+
+    overflow:
+        hidden;
 
     background:
-        transparent;
+        #ffffff;
 
     border:
-        0;
+        1px solid
+        #d9e7ee;
 
     border-radius:
-        0;
+        12px;
+
+    box-shadow:
+        0
+        3px
+        10px
+        rgba(
+            24,
+            52,
+            71,
+            0.045
+        );
 }
 
 
-.admin-client-household-info-card:not(:last-child) {
-    border-right:
-        1px solid rgba(255,255,255,0.20);
-}
-
+/* ========================================
+   HOUSEHOLD INFO LABEL
+======================================== */
 
 .admin-client-household-info-label {
     display:
         block;
 
     margin-bottom:
-        5px;
+        6px;
 
     color:
-        rgba(255,255,255,0.68);
+        #7b8b96;
 
     font-size:
         8px;
 
     font-weight:
-        800;
+        850;
 
     letter-spacing:
         0.08em;
@@ -4935,7 +4969,13 @@ p {
 }
 
 
-.admin-client-household-info-card strong {
+/* ========================================
+   HOUSEHOLD INFO VALUE
+======================================== */
+
+.admin-client-household-info-card > strong,
+.admin-client-household-info-card
+.admin-client-pricing-tier-display > strong {
     display:
         block;
 
@@ -4943,13 +4983,13 @@ p {
         hidden;
 
     color:
-        #ffffff;
+        #183447;
 
     font-size:
         11px;
 
     font-weight:
-        750;
+        800;
 
     line-height:
         1.4;
@@ -4963,6 +5003,263 @@ p {
 
 
 /* ========================================
+   PRICING TIER CARD
+======================================== */
+
+.admin-client-pricing-tier-card {
+    background:
+        linear-gradient(
+            145deg,
+            #f7fcff 0%,
+            #eef8fd 100%
+        );
+
+    border-color:
+        #bcdff1;
+}
+
+
+/* ========================================
+   PRICING TIER DISPLAY
+======================================== */
+
+.admin-client-pricing-tier-display {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    min-width:
+        0;
+}
+
+
+.admin-client-pricing-tier-display > strong {
+    color:
+        #1f7bc2 !important;
+}
+
+
+/* ========================================
+   PRICING TIER EDIT BUTTON
+======================================== */
+
+.admin-client-pricing-tier-edit-button {
+    flex-shrink:
+        0;
+
+    min-height:
+        27px;
+
+    padding:
+        0
+        9px;
+
+    background:
+        #ffffff;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid
+        #a9d5ed;
+
+    border-radius:
+        7px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.16s ease,
+        color 0.16s ease,
+        border-color 0.16s ease,
+        transform 0.16s ease;
+}
+
+
+.admin-client-pricing-tier-edit-button:hover {
+    background:
+        #2890df;
+
+    color:
+        #ffffff;
+
+    border-color:
+        #2890df;
+}
+
+
+.admin-client-pricing-tier-edit-button:active {
+    transform:
+        scale(0.97);
+}
+
+
+/* ========================================
+   PRICING TIER EDITOR
+======================================== */
+
+.admin-client-pricing-tier-editor {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+}
+
+
+.admin-client-pricing-tier-editor[hidden] {
+    display:
+        none !important;
+}
+
+
+.admin-client-pricing-tier-editor select {
+    width:
+        100%;
+
+    min-height:
+        34px;
+
+    padding:
+        0
+        30px
+        0
+        10px;
+
+    background:
+        #ffffff;
+
+    color:
+        #183447;
+
+    border:
+        1px solid
+        #a9d5ed;
+
+    border-radius:
+        8px;
+
+    outline:
+        none;
+
+    font-family:
+        inherit;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+}
+
+
+.admin-client-pricing-tier-editor select:focus {
+    border-color:
+        #2890df;
+
+    box-shadow:
+        0
+        0
+        0
+        3px
+        rgba(
+            40,
+            144,
+            223,
+            0.12
+        );
+}
+
+
+/* ========================================
+   PRICING TIER ACTIONS
+======================================== */
+
+.admin-client-pricing-tier-actions {
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap:
+        6px;
+}
+
+
+.admin-client-pricing-tier-actions button {
+    min-width:
+        0 !important;
+
+    min-height:
+        30px;
+
+    padding:
+        0
+        8px;
+
+    border-radius:
+        7px;
+
+    font-size:
+        9px;
+}
+
+
+/* ========================================
+   HOUSEHOLD INFO GRID — TABLET
+======================================== */
+
+@media (max-width:1050px) {
+
+    .admin-client-household-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+
+    .admin-client-pricing-tier-card {
+        grid-column:
+            1 /
+            -1;
+    }
+
+}
+
+
+/* ========================================
    HOUSEHOLD INFO GRID — MOBILE
 ======================================== */
 
@@ -4971,25 +5268,24 @@ p {
     .admin-client-household-grid {
         grid-template-columns:
             1fr;
+
+        padding:
+            8px;
+    }
+
+
+    .admin-client-pricing-tier-card {
+        grid-column:
+            auto;
     }
 
 
     .admin-client-household-info-card {
-        border-right:
-            0 !important;
-
-        border-bottom:
-            1px solid rgba(255,255,255,0.18);
-    }
-
-
-    .admin-client-household-info-card:last-child {
-        border-bottom:
-            0;
+        min-height:
+            70px;
     }
 
 }
-
 
 /* ========================================
    HOUSEHOLD SECTIONS
