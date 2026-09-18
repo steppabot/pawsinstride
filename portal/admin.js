@@ -20422,6 +20422,132 @@ function closeAdminClientHousehold() {
 
 
 // ========================================
+// CLIENT SERVICE HISTORY
+// ========================================
+
+function renderAdminClientVisitHistory(
+    clientId,
+    showAll = false
+) {
+
+
+    const activityContainer =
+        document.getElementById(
+            "admin-client-household-activity"
+        );
+
+
+    if (
+        !activityContainer
+    ) {
+
+        return;
+
+    }
+
+
+    const visits =
+        getAdminClientVisits(
+            clientId
+        );
+
+
+    if (
+        visits.length ===
+        0
+    ) {
+
+
+        activityContainer.innerHTML =
+            `
+
+                <div class="admin-client-household-empty">
+
+                    <strong>
+                        No service history
+                    </strong>
+
+                    <span>
+                        Visits for this household will appear here.
+                    </span>
+
+                </div>
+
+            `;
+
+
+        return;
+
+    }
+
+
+    const visibleVisits =
+        showAll
+
+            ? visits
+
+            : visits.slice(
+                0,
+                4
+            );
+
+
+    activityContainer.innerHTML =
+        `
+
+            ${visibleVisits
+                .map(
+                    buildAdminClientVisitItem
+                )
+                .join(
+                    ""
+                )}
+
+            ${
+                visits.length >
+                4
+
+                    ? `
+
+                        <button
+                            type="button"
+                            class="admin-client-view-history-button"
+                            ${
+                                showAll
+
+                                    ? `data-client-history-collapse="${escapeHtml(
+                                        String(
+                                            clientId
+                                        )
+                                    )}"`
+
+                                    : `data-client-history="${escapeHtml(
+                                        String(
+                                            clientId
+                                        )
+                                    )}"`
+                            }
+                        >
+                            ${
+                                showAll
+
+                                    ? "Show recent visits"
+
+                                    : `View all ${visits.length} visits`
+                            }
+                        </button>
+
+                    `
+
+                    : ""
+            }
+
+        `;
+
+}
+
+
+// ========================================
 // CLIENT HOUSEHOLD ACTIONS
 // ========================================
 
@@ -20444,6 +20570,63 @@ document.addEventListener(
             openAdminClientHousehold(
                 viewButton.dataset.clientView
             );
+
+
+            return;
+
+        }
+
+
+        const historyButton =
+            event.target.closest(
+                "[data-client-history]"
+            );
+
+
+        if (
+            historyButton
+        ) {
+
+
+            renderAdminClientVisitHistory(
+                historyButton.dataset.clientHistory,
+                true
+            );
+
+
+            return;
+
+        }
+
+
+        const collapseHistoryButton =
+            event.target.closest(
+                "[data-client-history-collapse]"
+            );
+
+
+        if (
+            collapseHistoryButton
+        ) {
+
+
+            renderAdminClientVisitHistory(
+                collapseHistoryButton.dataset.clientHistoryCollapse,
+                false
+            );
+
+
+            document
+                .querySelector(
+                    ".admin-client-household-section:last-of-type"
+                )
+                ?.scrollIntoView({
+                    behavior:
+                        "smooth",
+
+                    block:
+                        "start"
+                });
 
 
             return;
