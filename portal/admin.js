@@ -551,7 +551,7 @@ async function loadAdminDashboard() {
             supabaseClient
                 .from("pets")
                 .select(
-                    "id, client_id, name, breed, gender"
+                    "id, client_id, name, breed, gender, photo_path"
                 ),
     
     
