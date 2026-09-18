@@ -20738,6 +20738,84 @@ function renderAdminClientVisitHistory(
 
 }
 
+// ========================================
+// CLIENT PRICING TIER LABEL
+// ========================================
+
+function getAdminClientPricingTierLabel(
+    pricingTier
+) {
+
+    return (
+        pricingTier ===
+        "grandfathered"
+
+            ? "Legacy"
+
+            : "Standard"
+    );
+
+}
+
+
+// ========================================
+// SAVE CLIENT PRICING TIER
+// ========================================
+
+async function saveAdminClientPricingTier(
+    clientId,
+    pricingTier
+) {
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "update_admin_client_pricing_tier",
+                {
+                    p_client_id:
+                        clientId,
+
+                    p_pricing_tier:
+                        pricingTier
+                }
+            );
+
+
+    if (
+        error
+    ) {
+
+        throw error;
+
+    }
+
+
+    const profile =
+        allProfiles.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    clientId
+                )
+        );
+
+
+    if (
+        profile
+    ) {
+
+        profile.pricing_tier =
+            pricingTier;
+
+    }
+
+}
+
 
 // ========================================
 // CLIENT HOUSEHOLD ACTIONS
@@ -20745,8 +20823,12 @@ function renderAdminClientVisitHistory(
 
 document.addEventListener(
     "click",
-    event => {
+    async event => {
 
+
+        // ========================================
+        // VIEW HOUSEHOLD
+        // ========================================
 
         const viewButton =
             event.target.closest(
@@ -20769,6 +20851,10 @@ document.addEventListener(
         }
 
 
+        // ========================================
+        // VIEW FULL SERVICE HISTORY
+        // ========================================
+
         const historyButton =
             event.target.closest(
                 "[data-client-history]"
@@ -20790,6 +20876,10 @@ document.addEventListener(
 
         }
 
+
+        // ========================================
+        // COLLAPSE SERVICE HISTORY
+        // ========================================
 
         const collapseHistoryButton =
             event.target.closest(
@@ -20826,6 +20916,344 @@ document.addEventListener(
         }
 
 
+        // ========================================
+        // EDIT PRICING TIER
+        // ========================================
+
+        const pricingTierEditButton =
+            event.target.closest(
+                "#admin-client-pricing-tier-edit"
+            );
+
+
+        if (
+            pricingTierEditButton
+        ) {
+
+
+            const card =
+                pricingTierEditButton.closest(
+                    ".admin-client-pricing-tier-card"
+                );
+
+
+            const display =
+                card?.querySelector(
+                    ".admin-client-pricing-tier-display"
+                );
+
+
+            const editor =
+                card?.querySelector(
+                    ".admin-client-pricing-tier-editor"
+                );
+
+
+            if (
+                display
+            ) {
+
+                display.hidden =
+                    true;
+
+            }
+
+
+            if (
+                editor
+            ) {
+
+                editor.hidden =
+                    false;
+
+            }
+
+
+            return;
+
+        }
+
+
+        // ========================================
+        // CANCEL PRICING TIER EDIT
+        // ========================================
+
+        const pricingTierCancelButton =
+            event.target.closest(
+                "#admin-client-pricing-tier-cancel"
+            );
+
+
+        if (
+            pricingTierCancelButton
+        ) {
+
+
+            const select =
+                document.getElementById(
+                    "admin-client-pricing-tier-select"
+                );
+
+
+            const clientId =
+                select?.dataset
+                    .clientId;
+
+
+            const profile =
+                allProfiles.find(
+                    item =>
+                        String(
+                            item.id
+                        ) ===
+                        String(
+                            clientId
+                        )
+                );
+
+
+            if (
+                select
+            ) {
+
+                select.value =
+                    profile?.pricing_tier ===
+                    "grandfathered"
+
+                        ? "grandfathered"
+
+                        : "standard";
+
+            }
+
+
+            const card =
+                pricingTierCancelButton.closest(
+                    ".admin-client-pricing-tier-card"
+                );
+
+
+            const display =
+                card?.querySelector(
+                    ".admin-client-pricing-tier-display"
+                );
+
+
+            const editor =
+                card?.querySelector(
+                    ".admin-client-pricing-tier-editor"
+                );
+
+
+            if (
+                editor
+            ) {
+
+                editor.hidden =
+                    true;
+
+            }
+
+
+            if (
+                display
+            ) {
+
+                display.hidden =
+                    false;
+
+            }
+
+
+            return;
+
+        }
+
+
+        // ========================================
+        // SAVE PRICING TIER
+        // ========================================
+
+        const pricingTierSaveButton =
+            event.target.closest(
+                "#admin-client-pricing-tier-save"
+            );
+
+
+        if (
+            pricingTierSaveButton
+        ) {
+
+
+            const select =
+                document.getElementById(
+                    "admin-client-pricing-tier-select"
+                );
+
+
+            const clientId =
+                select?.dataset
+                    .clientId;
+
+
+            const pricingTier =
+                select?.value;
+
+
+            if (
+                !clientId ||
+                !pricingTier
+            ) {
+
+                return;
+
+            }
+
+
+            const cancelButton =
+                document.getElementById(
+                    "admin-client-pricing-tier-cancel"
+                );
+
+
+            const originalSaveText =
+                pricingTierSaveButton
+                    .textContent;
+
+
+            pricingTierSaveButton.disabled =
+                true;
+
+
+            if (
+                cancelButton
+            ) {
+
+                cancelButton.disabled =
+                    true;
+
+            }
+
+
+            pricingTierSaveButton.textContent =
+                "Saving...";
+
+
+            try {
+
+
+                await saveAdminClientPricingTier(
+                    clientId,
+                    pricingTier
+                );
+
+
+                const displayValue =
+                    document.getElementById(
+                        "admin-client-household-pricing-tier"
+                    );
+
+
+                if (
+                    displayValue
+                ) {
+
+                    displayValue.textContent =
+                        getAdminClientPricingTierLabel(
+                            pricingTier
+                        );
+
+                }
+
+
+                const card =
+                    pricingTierSaveButton.closest(
+                        ".admin-client-pricing-tier-card"
+                    );
+
+
+                const display =
+                    card?.querySelector(
+                        ".admin-client-pricing-tier-display"
+                    );
+
+
+                const editor =
+                    card?.querySelector(
+                        ".admin-client-pricing-tier-editor"
+                    );
+
+
+                if (
+                    editor
+                ) {
+
+                    editor.hidden =
+                        true;
+
+                }
+
+
+                if (
+                    display
+                ) {
+
+                    display.hidden =
+                        false;
+
+                }
+
+
+                console.log(
+                    "Updated client pricing tier:",
+                    clientId,
+                    pricingTier
+                );
+
+
+            } catch (
+                error
+            ) {
+
+
+                console.error(
+                    "Unable to update client pricing tier:",
+                    error
+                );
+
+
+            } finally {
+
+
+                pricingTierSaveButton.disabled =
+                    false;
+
+
+                pricingTierSaveButton.textContent =
+                    originalSaveText;
+
+
+                if (
+                    cancelButton
+                ) {
+
+                    cancelButton.disabled =
+                        false;
+
+                }
+
+            }
+
+
+            return;
+
+        }
+
+
+        // ========================================
+        // BACK TO CLIENT DIRECTORY
+        // ========================================
+
         const backButton =
             event.target.closest(
                 "#admin-client-household-back"
@@ -20842,7 +21270,6 @@ document.addEventListener(
 
     }
 );
-
 
 // ========================================
 // ADMIN APP NAVIGATION STATE
