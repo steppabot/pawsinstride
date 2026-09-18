@@ -9341,6 +9341,7 @@ function handleServiceTypeChange() {
     updateBookingTotal();
 
 }
+
 // ========================================
 // SERVICE OPTIONS
 // ========================================
@@ -9348,6 +9349,7 @@ function handleServiceTypeChange() {
 function populateServiceOptions(
     serviceType
 ) {
+
 
     const config =
         SERVICE_CONFIG[
@@ -9372,11 +9374,25 @@ function populateServiceOptions(
     config.options.forEach(
         option => {
 
+
             const pricing =
                 getServicePrice(
                     serviceType,
                     option.value
                 );
+
+
+            // ========================================
+            // HIDE INACTIVE / UNAVAILABLE OPTION
+            // ========================================
+
+            if (
+                !pricing
+            ) {
+
+                return;
+
+            }
 
 
             const element =
@@ -9385,35 +9401,24 @@ function populateServiceOptions(
                 );
 
 
+            const price =
+                Number(
+                    pricing.base_price
+                );
+
+
             element.value =
                 option.value;
 
 
-            if (pricing) {
-
-                const price =
-                    Number(
-                        pricing.base_price
-                    );
+            element.textContent =
+                `${option.value} — $${formatServicePrice(price)}`;
 
 
-                element.textContent =
-                    `${option.value} — $${formatServicePrice(price)}`;
-
-
-                element.dataset.price =
-                    String(price);
-
-            } else {
-
-                element.textContent =
-                    option.value;
-
-
-                element.dataset.price =
-                    "0";
-
-            }
+            element.dataset.price =
+                String(
+                    price
+                );
 
 
             serviceOptionSelect.appendChild(
@@ -9430,6 +9435,7 @@ serviceOptionSelect
     ?.addEventListener(
         "change",
         () => {
+
 
             if (
                 serviceTypeSelect.value ===
@@ -9461,7 +9467,9 @@ serviceOptionSelect
             if (
                 !serviceOptionSelect.value
             ) {
+
                 return;
+
             }
 
 
@@ -9478,7 +9486,6 @@ serviceOptionSelect
 
         }
     );
-
 
 // ========================================
 // TIMES
