@@ -21994,6 +21994,273 @@ adminServicesPricingCloseButton
 
 
 // ========================================
+// SAVE ADMIN SERVICE PRICING
+// ========================================
+
+async function saveAdminServicePricing(
+    serviceKey
+) {
+
+
+    const menuButton =
+        document.querySelector(
+            `[data-service-menu="${serviceKey}"]`
+        );
+
+
+    const serviceCard =
+        menuButton?.closest(
+            ".admin-service-pricing-card"
+        );
+
+
+    if (
+        !serviceCard
+    ) {
+
+        return false;
+
+    }
+
+
+    const priceInputs =
+        serviceCard.querySelectorAll(
+            ".admin-service-pricing-rates input"
+        );
+
+
+    const standardPrice =
+        Number(
+            priceInputs[0]?.value ||
+            0
+        );
+
+
+    const grandfatheredPrice =
+        Number(
+            priceInputs[1]?.value ||
+            0
+        );
+
+
+    const isActive =
+        !serviceCard.classList.contains(
+            "admin-service-is-inactive"
+        );
+
+
+    let holidayFee =
+        null;
+
+
+    let largeDogFee =
+        null;
+
+
+    // ========================================
+    // BOARDING SURCHARGES
+    // ========================================
+
+    if (
+        serviceKey ===
+        "boarding"
+    ) {
+
+
+        const holidayInput =
+            document.querySelector(
+                'input[aria-label="Holiday boarding surcharge"]'
+            );
+
+
+        const largeDogInput =
+            document.querySelector(
+                'input[aria-label="Large dog boarding surcharge"]'
+            );
+
+
+        holidayFee =
+            Number(
+                holidayInput?.value ||
+                0
+            );
+
+
+        largeDogFee =
+            Number(
+                largeDogInput?.value ||
+                0
+            );
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "update_admin_service_pricing",
+                {
+                    p_service_key:
+                        serviceKey,
+
+                    p_standard_price:
+                        standardPrice,
+
+                    p_grandfathered_price:
+                        grandfatheredPrice,
+
+                    p_active:
+                        isActive,
+
+                    p_holiday_fee:
+                        holidayFee,
+
+                    p_large_dog_fee:
+                        largeDogFee
+                }
+            );
+
+
+    if (
+        error
+    ) {
+
+
+        console.error(
+            "Admin service pricing save error:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+
+    console.log(
+        "Saved service pricing:",
+        serviceKey
+    );
+
+
+    return true;
+
+}
+
+
+// ========================================
+// SAVE PRICE FIELD CHANGE
+// ========================================
+
+adminServicesPricingModal
+    ?.addEventListener(
+
+        "change",
+
+        async event => {
+
+
+            const input =
+                event.target.closest(
+                    "input"
+                );
+
+
+            if (
+                !input
+            ) {
+
+                return;
+
+            }
+
+
+            const serviceCard =
+                input.closest(
+                    ".admin-service-pricing-card"
+                );
+
+
+            if (
+                serviceCard
+            ) {
+
+
+                const menuButton =
+                    serviceCard.querySelector(
+                        "[data-service-menu]"
+                    );
+
+
+                const serviceKey =
+                    menuButton?.dataset
+                        .serviceMenu;
+
+
+                if (
+                    !serviceKey
+                ) {
+
+                    return;
+
+                }
+
+
+                const saved =
+                    await saveAdminServicePricing(
+                        serviceKey
+                    );
+
+
+                if (
+                    !saved
+                ) {
+
+                    await loadAdminServicePricing();
+
+                }
+
+
+                return;
+
+            }
+
+
+            const boardingFees =
+                input.closest(
+                    ".admin-boarding-fees"
+                );
+
+
+            if (
+                boardingFees
+            ) {
+
+
+                const saved =
+                    await saveAdminServicePricing(
+                        "boarding"
+                    );
+
+
+                if (
+                    !saved
+                ) {
+
+                    await loadAdminServicePricing();
+
+                }
+
+            }
+
+        }
+
+    );
+
+
+// ========================================
 // SERVICE MENU CLICK HANDLER
 // ========================================
 
@@ -22002,12 +22269,8 @@ adminServicesPricingModal
 
         "click",
 
-        event => {
+        async event => {
 
-
-            // ========================================
-            // THREE-DOT MENU BUTTON
-            // ========================================
 
             const menuButton =
                 event.target.closest(
@@ -22033,10 +22296,6 @@ adminServicesPricingModal
 
             }
 
-
-            // ========================================
-            // MENU ACTION
-            // ========================================
 
             const menuAction =
                 event.target.closest(
@@ -22136,99 +22395,28 @@ adminServicesPricingModal
             ) {
 
 
-                const status =
-                    serviceCard.querySelector(
-                        ".admin-service-status"
-                    );
-
-
-                const inputs =
-                    serviceCard.querySelectorAll(
-                        "input"
-                    );
-
-
-                serviceCard.classList.add(
-                    "admin-service-is-inactive"
+                applyAdminServiceState(
+                    serviceKey,
+                    false
                 );
-
-
-                if (
-                    status
-                ) {
-
-                    status.textContent =
-                        "Inactive";
-
-                }
-
-
-                inputs.forEach(
-                    input => {
-
-                        input.disabled =
-                            true;
-
-                    }
-                );
-
-
-                menuAction.dataset
-                    .serviceAction =
-                    "activate";
-
-
-                menuAction.textContent =
-                    "Activate Service";
-
-
-                // ========================================
-                // BOARDING SURCHARGES
-                // ========================================
-
-                if (
-                    serviceKey ===
-                    "boarding"
-                ) {
-
-
-                    const boardingFees =
-                        serviceCard
-                            .nextElementSibling;
-
-
-                    if (
-                        boardingFees?.classList
-                            .contains(
-                                "admin-boarding-fees"
-                            )
-                    ) {
-
-
-                        boardingFees.classList.add(
-                            "admin-service-is-inactive"
-                        );
-
-
-                        boardingFees
-                            .querySelectorAll(
-                                "input"
-                            )
-                            .forEach(
-                                input => {
-
-                                    input.disabled =
-                                        true;
-
-                                }
-                            );
-
-                    }
-
-                }
 
 
                 closeAllAdminServiceMenus();
+
+
+                const saved =
+                    await saveAdminServicePricing(
+                        serviceKey
+                    );
+
+
+                if (
+                    !saved
+                ) {
+
+                    await loadAdminServicePricing();
+
+                }
 
 
                 return;
@@ -22246,99 +22434,28 @@ adminServicesPricingModal
             ) {
 
 
-                const status =
-                    serviceCard.querySelector(
-                        ".admin-service-status"
-                    );
-
-
-                const inputs =
-                    serviceCard.querySelectorAll(
-                        "input"
-                    );
-
-
-                serviceCard.classList.remove(
-                    "admin-service-is-inactive"
+                applyAdminServiceState(
+                    serviceKey,
+                    true
                 );
-
-
-                if (
-                    status
-                ) {
-
-                    status.textContent =
-                        "Active";
-
-                }
-
-
-                inputs.forEach(
-                    input => {
-
-                        input.disabled =
-                            false;
-
-                    }
-                );
-
-
-                menuAction.dataset
-                    .serviceAction =
-                    "deactivate";
-
-
-                menuAction.textContent =
-                    "Deactivate Service";
-
-
-                // ========================================
-                // BOARDING SURCHARGES
-                // ========================================
-
-                if (
-                    serviceKey ===
-                    "boarding"
-                ) {
-
-
-                    const boardingFees =
-                        serviceCard
-                            .nextElementSibling;
-
-
-                    if (
-                        boardingFees?.classList
-                            .contains(
-                                "admin-boarding-fees"
-                            )
-                    ) {
-
-
-                        boardingFees.classList.remove(
-                            "admin-service-is-inactive"
-                        );
-
-
-                        boardingFees
-                            .querySelectorAll(
-                                "input"
-                            )
-                            .forEach(
-                                input => {
-
-                                    input.disabled =
-                                        false;
-
-                                }
-                            );
-
-                    }
-
-                }
 
 
                 closeAllAdminServiceMenus();
+
+
+                const saved =
+                    await saveAdminServicePricing(
+                        serviceKey
+                    );
+
+
+                if (
+                    !saved
+                ) {
+
+                    await loadAdminServicePricing();
+
+                }
 
 
                 return;
@@ -22348,6 +22465,11 @@ adminServicesPricingModal
         }
 
     );
+
+
+// ========================================
+// SERVICES PRICING BACKDROP CLOSE
+// ========================================
 
 adminServicesPricingModal
     ?.addEventListener(
@@ -22377,8 +22499,6 @@ adminServicesPricingModal
         }
 
     );
-
-
 // ========================================
 // CLOSE MENUS OUTSIDE MODAL
 // ========================================
