@@ -1779,73 +1779,168 @@
                 <!-- ========================================
                      CLIENTS SCREEN
                      ======================================== -->
-
+                
                 <section
                     id="admin-screen-clients"
                     class="admin-app-screen"
                     data-admin-screen-panel="clients"
                     hidden
                 >
-
-
+                
+                
                     <!-- ========================================
                          CLIENTS INTRO
                          ======================================== -->
-
+                
                     <div class="admin-screen-intro">
-
+                
+                
                         <div>
-
+                
                             <span class="admin-screen-eyebrow">
                                 CLIENT MANAGEMENT
                             </span>
-
+                
                             <h1>
                                 Clients
                             </h1>
-
+                
                             <p>
-                                View client households, pets, contact information, service history, and account details.
+                                Search households, view pets, and quickly access the client information you need.
                             </p>
-
+                
                         </div>
-
+                
+                
+                        <span
+                            id="admin-client-directory-count"
+                            class="admin-client-directory-count"
+                        >
+                            0 clients
+                        </span>
+                
+                
                     </div>
-
-
+                
+                
                     <!-- ========================================
-                         CLIENTS WORKSPACE
+                         CLIENT DIRECTORY
                          ======================================== -->
-
-                    <div
-                        id="admin-clients-workspace"
-                        class="admin-clients-workspace"
-                    >
-
-                        <div class="admin-screen-placeholder">
-
-                            <strong>
-                                Client management is coming next.
-                            </strong>
-
-                            <span>
-                                Your client directory and household details will live here.
-                            </span>
-
+                
+                    <section class="admin-client-directory">
+                
+                
+                        <!-- ========================================
+                             DIRECTORY HEADER
+                             ======================================== -->
+                
+                        <div class="admin-client-directory-heading">
+                
+                
+                            <div>
+                
+                                <span class="admin-screen-eyebrow">
+                                    CLIENT DIRECTORY
+                                </span>
+                
+                                <h2>
+                                    Households
+                                </h2>
+                
+                                <p>
+                                    Find a client by name, pet, phone number, email, or address.
+                                </p>
+                
+                            </div>
+                
+                
                         </div>
-
-                    </div>
-
-
+                
+                
+                        <!-- ========================================
+                             CLIENT SEARCH
+                             ======================================== -->
+                
+                        <div class="admin-client-search">
+                
+                            <span class="admin-client-search-icon">
+                
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <circle
+                                        cx="11"
+                                        cy="11"
+                                        r="7"
+                                    ></circle>
+                
+                                    <path d="m20 20-4-4"></path>
+                                </svg>
+                
+                            </span>
+                
+                
+                            <input
+                                type="search"
+                                id="admin-client-search-input"
+                                class="admin-client-search-input"
+                                placeholder="Search clients, pets, phone, email, or address"
+                                autocomplete="off"
+                            >
+                
+                
+                            <button
+                                type="button"
+                                id="admin-client-search-clear"
+                                class="admin-client-search-clear"
+                                aria-label="Clear client search"
+                                hidden
+                            >
+                                ×
+                            </button>
+                
+                        </div>
+                
+                
+                        <!-- ========================================
+                             CLIENT RESULTS
+                             ======================================== -->
+                
+                        <div
+                            id="admin-client-directory-list"
+                            class="admin-client-directory-list"
+                        >
+                
+                
+                            <div class="admin-client-directory-empty">
+                
+                                <strong>
+                                    Loading clients...
+                                </strong>
+                
+                                <span>
+                                    Your client households will appear here.
+                                </span>
+                
+                            </div>
+                
+                
+                        </div>
+                
+                
+                    </section>
+                
+                
                 </section>
-
-
-            </div>
-
-
-        </main>
-
-
+                
+                
+                </div>
+                
+                
+                </main>
+                
+                
         <!-- ========================================
              ADMIN MESSAGING
              ======================================== -->
