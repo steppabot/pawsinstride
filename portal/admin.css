@@ -5636,27 +5636,34 @@ p {
 
 @media (max-width:700px) {
 
-    /* ========================================
-       MOBILE PAGE SHELL
-    ======================================== */
-
-    /* ========================================
-       MOBILE PAGE SHELL
-    ======================================== */
-
-   body.admin-page {
-       padding-bottom:
-           calc(
-               86px +
-               env(safe-area-inset-bottom)
-           );
-   
-       overflow-x:
-           hidden;
-   
-       touch-action:
-           pan-y;
-   }
+      /* ========================================
+         MOBILE PAGE SHELL
+      ======================================== */
+      
+      body.admin-page {
+          padding-bottom:
+              calc(
+                  86px +
+                  env(safe-area-inset-bottom)
+              );
+      
+          overflow-x:
+              hidden;
+      
+          touch-action:
+              pan-y;
+      }
+      
+      
+      /* ========================================
+         MOBILE MESSAGING FULL SCREEN
+      ======================================== */
+      
+      body.admin-messaging-open
+      .admin-app-nav {
+          display:
+              none;
+      }
 
 
     .admin-page .admin-dashboard-container {
