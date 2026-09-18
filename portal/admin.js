@@ -21250,6 +21250,190 @@ function restoreAdminNavigationState() {
 
 
 // ========================================
+// SERVICES & PRICING MODAL
+// ========================================
+
+const adminServicesPricingModal =
+    document.getElementById(
+        "admin-services-pricing-modal"
+    );
+
+
+const adminOpenServicesPricingButton =
+    document.getElementById(
+        "admin-open-services-pricing"
+    );
+
+
+const adminServicesPricingCloseButton =
+    document.getElementById(
+        "admin-services-pricing-close"
+    );
+
+
+// ========================================
+// OPEN SERVICES & PRICING
+// ========================================
+
+function openAdminServicesPricingModal() {
+
+
+    if (
+        !adminServicesPricingModal
+    ) {
+
+        return;
+
+    }
+
+
+    adminServicesPricingModal.hidden =
+        false;
+
+
+    document.body.classList.add(
+        "admin-services-pricing-open"
+    );
+
+
+    adminServicesPricingCloseButton
+        ?.focus();
+
+}
+
+
+// ========================================
+// CLOSE SERVICES & PRICING
+// ========================================
+
+function closeAdminServicesPricingModal() {
+
+
+    if (
+        !adminServicesPricingModal
+    ) {
+
+        return;
+
+    }
+
+
+    adminServicesPricingModal.hidden =
+        true;
+
+
+    document.body.classList.remove(
+        "admin-services-pricing-open"
+    );
+
+
+    adminOpenServicesPricingButton
+        ?.focus();
+
+}
+
+
+// ========================================
+// OPEN BUTTON
+// ========================================
+
+adminOpenServicesPricingButton
+    ?.addEventListener(
+
+        "click",
+
+        openAdminServicesPricingModal
+
+    );
+
+
+// ========================================
+// CLOSE BUTTON
+// ========================================
+
+adminServicesPricingCloseButton
+    ?.addEventListener(
+
+        "click",
+
+        closeAdminServicesPricingModal
+
+    );
+
+
+// ========================================
+// BACKDROP CLOSE
+// ========================================
+
+adminServicesPricingModal
+    ?.addEventListener(
+
+        "click",
+
+        event => {
+
+
+            const closeTarget =
+                event.target.closest(
+                    "[data-close-services-pricing]"
+                );
+
+
+            if (
+                !closeTarget
+            ) {
+
+                return;
+
+            }
+
+
+            closeAdminServicesPricingModal();
+
+        }
+
+    );
+
+
+// ========================================
+// ESCAPE KEY
+// ========================================
+
+document.addEventListener(
+
+    "keydown",
+
+    event => {
+
+
+        if (
+            event.key !==
+            "Escape"
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !adminServicesPricingModal ||
+            adminServicesPricingModal.hidden
+        ) {
+
+            return;
+
+        }
+
+
+        closeAdminServicesPricingModal();
+
+    }
+
+);
+
+
+// ========================================
 // ADMIN PORTAL INTRO
 // ========================================
 
