@@ -21874,13 +21874,19 @@ async function loadAdminServicePricing() {
     }
 
 
+    // ========================================
+    // LOCK LOADED PRICES
+    // ========================================
+
+    lockAllAdminServiceInputs();
+
+
     console.log(
         "Loaded admin service pricing:",
         prices.length
     );
 
 }
-
 
 // ========================================
 // OPEN SERVICES & PRICING
@@ -21994,10 +22000,18 @@ adminServicesPricingCloseButton
 
 
 // ========================================
-// SAVE ADMIN SERVICE PRICING
+// SERVICE EDIT STATE
 // ========================================
 
-async function saveAdminServicePricing(
+const adminServiceEditSnapshots =
+    new Map();
+
+
+// ========================================
+// GET SERVICE CARD
+// ========================================
+
+function getAdminServiceCard(
     serviceKey
 ) {
 
@@ -22008,9 +22022,527 @@ async function saveAdminServicePricing(
         );
 
 
-    const serviceCard =
+    return (
         menuButton?.closest(
             ".admin-service-pricing-card"
+        ) ||
+        null
+    );
+
+}
+
+
+// ========================================
+// GET SERVICE EDIT INPUTS
+// ========================================
+
+function getAdminServiceEditInputs(
+    serviceKey
+) {
+
+
+    const serviceCard =
+        getAdminServiceCard(
+            serviceKey
+        );
+
+
+    if (
+        !serviceCard
+    ) {
+
+        return [];
+
+    }
+
+
+    const inputs =
+        [
+            ...serviceCard.querySelectorAll(
+                ".admin-service-pricing-rates input"
+            )
+        ];
+
+
+    // ========================================
+    // BOARDING SURCHARGES
+    // ========================================
+
+    if (
+        serviceKey ===
+        "boarding"
+    ) {
+
+
+        const boardingFees =
+            serviceCard
+                .nextElementSibling;
+
+
+        if (
+            boardingFees?.classList
+                .contains(
+                    "admin-boarding-fees"
+                )
+        ) {
+
+
+            inputs.push(
+                ...boardingFees.querySelectorAll(
+                    "input"
+                )
+            );
+
+        }
+
+    }
+
+
+    return inputs;
+
+}
+
+
+// ========================================
+// LOCK SERVICE PRICE INPUTS
+// ========================================
+
+function lockAdminServiceInputs(
+    serviceKey
+) {
+
+
+    const serviceCard =
+        getAdminServiceCard(
+            serviceKey
+        );
+
+
+    if (
+        !serviceCard
+    ) {
+
+        return;
+
+    }
+
+
+    const isActive =
+        !serviceCard.classList.contains(
+            "admin-service-is-inactive"
+        );
+
+
+    getAdminServiceEditInputs(
+        serviceKey
+    )
+        .forEach(
+            input => {
+
+
+                input.readOnly =
+                    true;
+
+
+                input.disabled =
+                    !isActive;
+
+            }
+        );
+
+}
+
+
+// ========================================
+// LOCK ALL SERVICE PRICE INPUTS
+// ========================================
+
+function lockAllAdminServiceInputs() {
+
+
+    [
+        "15-minute",
+        "30-minute",
+        "60-minute",
+        "boarding"
+    ]
+        .forEach(
+            serviceKey => {
+
+                lockAdminServiceInputs(
+                    serviceKey
+                );
+
+            }
+        );
+
+}
+
+
+// ========================================
+// ENSURE EDIT ACTION BUTTONS
+// ========================================
+
+function ensureAdminServiceEditActions(
+    serviceKey
+) {
+
+
+    const serviceCard =
+        getAdminServiceCard(
+            serviceKey
+        );
+
+
+    if (
+        !serviceCard
+    ) {
+
+        return null;
+
+    }
+
+
+    let actions =
+        serviceCard.querySelector(
+            ".admin-service-edit-actions"
+        );
+
+
+    if (
+        actions
+    ) {
+
+        return actions;
+
+    }
+
+
+    actions =
+        document.createElement(
+            "div"
+        );
+
+
+    actions.className =
+        "admin-service-edit-actions";
+
+
+    actions.innerHTML =
+        `
+
+            <button
+                type="button"
+                class="admin-service-edit-cancel"
+                data-service-edit-cancel="${serviceKey}"
+            >
+                Cancel
+            </button>
+
+            <button
+                type="button"
+                class="admin-service-edit-save"
+                data-service-edit-save="${serviceKey}"
+            >
+                Save
+            </button>
+
+        `;
+
+
+    serviceCard.appendChild(
+        actions
+    );
+
+
+    return actions;
+
+}
+
+
+// ========================================
+// BEGIN SERVICE EDIT
+// ========================================
+
+function beginAdminServiceEdit(
+    serviceKey
+) {
+
+
+    const serviceCard =
+        getAdminServiceCard(
+            serviceKey
+        );
+
+
+    if (
+        !serviceCard
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // CLOSE ANY OTHER EDIT
+    // ========================================
+
+    document
+        .querySelectorAll(
+            ".admin-service-pricing-card.admin-service-is-editing"
+        )
+        .forEach(
+            card => {
+
+
+                if (
+                    card ===
+                    serviceCard
+                ) {
+
+                    return;
+
+                }
+
+
+                const otherMenuButton =
+                    card.querySelector(
+                        "[data-service-menu]"
+                    );
+
+
+                const otherServiceKey =
+                    otherMenuButton?.dataset
+                        .serviceMenu;
+
+
+                if (
+                    otherServiceKey
+                ) {
+
+                    cancelAdminServiceEdit(
+                        otherServiceKey
+                    );
+
+                }
+
+            }
+        );
+
+
+    const inputs =
+        getAdminServiceEditInputs(
+            serviceKey
+        );
+
+
+    // ========================================
+    // SAVE ORIGINAL VALUES
+    // ========================================
+
+    adminServiceEditSnapshots.set(
+        serviceKey,
+        inputs.map(
+            input =>
+                input.value
+        )
+    );
+
+
+    ensureAdminServiceEditActions(
+        serviceKey
+    );
+
+
+    serviceCard.classList.add(
+        "admin-service-is-editing"
+    );
+
+
+    // ========================================
+    // BOARDING EDIT STATE
+    // ========================================
+
+    if (
+        serviceKey ===
+        "boarding"
+    ) {
+
+
+        const boardingFees =
+            serviceCard
+                .nextElementSibling;
+
+
+        boardingFees?.classList.add(
+            "admin-service-is-editing"
+        );
+
+    }
+
+
+    inputs.forEach(
+        input => {
+
+
+            input.disabled =
+                false;
+
+
+            input.readOnly =
+                false;
+
+        }
+    );
+
+
+    closeAllAdminServiceMenus();
+
+
+    inputs[0]
+        ?.focus();
+
+
+    inputs[0]
+        ?.select();
+
+}
+
+
+// ========================================
+// FINISH SERVICE EDIT
+// ========================================
+
+function finishAdminServiceEdit(
+    serviceKey
+) {
+
+
+    const serviceCard =
+        getAdminServiceCard(
+            serviceKey
+        );
+
+
+    if (
+        !serviceCard
+    ) {
+
+        return;
+
+    }
+
+
+    serviceCard.classList.remove(
+        "admin-service-is-editing"
+    );
+
+
+    // ========================================
+    // BOARDING EDIT STATE
+    // ========================================
+
+    if (
+        serviceKey ===
+        "boarding"
+    ) {
+
+
+        const boardingFees =
+            serviceCard
+                .nextElementSibling;
+
+
+        boardingFees?.classList.remove(
+            "admin-service-is-editing"
+        );
+
+    }
+
+
+    adminServiceEditSnapshots.delete(
+        serviceKey
+    );
+
+
+    lockAdminServiceInputs(
+        serviceKey
+    );
+
+}
+
+
+// ========================================
+// CANCEL SERVICE EDIT
+// ========================================
+
+function cancelAdminServiceEdit(
+    serviceKey
+) {
+
+
+    const snapshot =
+        adminServiceEditSnapshots.get(
+            serviceKey
+        );
+
+
+    const inputs =
+        getAdminServiceEditInputs(
+            serviceKey
+        );
+
+
+    if (
+        Array.isArray(
+            snapshot
+        )
+    ) {
+
+
+        inputs.forEach(
+            (
+                input,
+                index
+            ) => {
+
+
+                if (
+                    snapshot[index] !==
+                    undefined
+                ) {
+
+                    input.value =
+                        snapshot[index];
+
+                }
+
+            }
+        );
+
+    }
+
+
+    finishAdminServiceEdit(
+        serviceKey
+    );
+
+}
+
+
+// ========================================
+// SAVE ADMIN SERVICE PRICING
+// ========================================
+
+async function saveAdminServicePricing(
+    serviceKey
+) {
+
+
+    const serviceCard =
+        getAdminServiceCard(
+            serviceKey
         );
 
 
@@ -22151,116 +22683,6 @@ async function saveAdminServicePricing(
 
 
 // ========================================
-// SAVE PRICE FIELD CHANGE
-// ========================================
-
-adminServicesPricingModal
-    ?.addEventListener(
-
-        "change",
-
-        async event => {
-
-
-            const input =
-                event.target.closest(
-                    "input"
-                );
-
-
-            if (
-                !input
-            ) {
-
-                return;
-
-            }
-
-
-            const serviceCard =
-                input.closest(
-                    ".admin-service-pricing-card"
-                );
-
-
-            if (
-                serviceCard
-            ) {
-
-
-                const menuButton =
-                    serviceCard.querySelector(
-                        "[data-service-menu]"
-                    );
-
-
-                const serviceKey =
-                    menuButton?.dataset
-                        .serviceMenu;
-
-
-                if (
-                    !serviceKey
-                ) {
-
-                    return;
-
-                }
-
-
-                const saved =
-                    await saveAdminServicePricing(
-                        serviceKey
-                    );
-
-
-                if (
-                    !saved
-                ) {
-
-                    await loadAdminServicePricing();
-
-                }
-
-
-                return;
-
-            }
-
-
-            const boardingFees =
-                input.closest(
-                    ".admin-boarding-fees"
-                );
-
-
-            if (
-                boardingFees
-            ) {
-
-
-                const saved =
-                    await saveAdminServicePricing(
-                        "boarding"
-                    );
-
-
-                if (
-                    !saved
-                ) {
-
-                    await loadAdminServicePricing();
-
-                }
-
-            }
-
-        }
-
-    );
-
-
-// ========================================
 // SERVICE MENU CLICK HANDLER
 // ========================================
 
@@ -22271,6 +22693,133 @@ adminServicesPricingModal
 
         async event => {
 
+
+            // ========================================
+            // SAVE EDIT
+            // ========================================
+
+            const saveEditButton =
+                event.target.closest(
+                    "[data-service-edit-save]"
+                );
+
+
+            if (
+                saveEditButton
+            ) {
+
+
+                const serviceKey =
+                    saveEditButton.dataset
+                        .serviceEditSave;
+
+
+                const serviceCard =
+                    getAdminServiceCard(
+                        serviceKey
+                    );
+
+
+                const cancelButton =
+                    serviceCard?.querySelector(
+                        "[data-service-edit-cancel]"
+                    );
+
+
+                saveEditButton.disabled =
+                    true;
+
+
+                if (
+                    cancelButton
+                ) {
+
+                    cancelButton.disabled =
+                        true;
+
+                }
+
+
+                saveEditButton.textContent =
+                    "Saving...";
+
+
+                const saved =
+                    await saveAdminServicePricing(
+                        serviceKey
+                    );
+
+
+                if (
+                    saved
+                ) {
+
+
+                    await loadAdminServicePricing();
+
+
+                    finishAdminServiceEdit(
+                        serviceKey
+                    );
+
+
+                } else {
+
+
+                    saveEditButton.disabled =
+                        false;
+
+
+                    if (
+                        cancelButton
+                    ) {
+
+                        cancelButton.disabled =
+                            false;
+
+                    }
+
+
+                    saveEditButton.textContent =
+                        "Save";
+
+                }
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // CANCEL EDIT
+            // ========================================
+
+            const cancelEditButton =
+                event.target.closest(
+                    "[data-service-edit-cancel]"
+                );
+
+
+            if (
+                cancelEditButton
+            ) {
+
+
+                cancelAdminServiceEdit(
+                    cancelEditButton.dataset
+                        .serviceEditCancel
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // THREE-DOT MENU BUTTON
+            // ========================================
 
             const menuButton =
                 event.target.closest(
@@ -22296,6 +22845,10 @@ adminServicesPricingModal
 
             }
 
+
+            // ========================================
+            // MENU ACTION
+            // ========================================
 
             const menuAction =
                 event.target.closest(
@@ -22344,23 +22897,6 @@ adminServicesPricingModal
                     .serviceKey;
 
 
-            const serviceCard =
-                menuAction.closest(
-                    ".admin-service-pricing-card"
-                );
-
-
-            if (
-                !serviceCard
-            ) {
-
-                closeAllAdminServiceMenus();
-
-                return;
-
-            }
-
-
             // ========================================
             // EDIT SERVICE
             // ========================================
@@ -22371,13 +22907,9 @@ adminServicesPricingModal
             ) {
 
 
-                console.log(
-                    "Edit service:",
+                beginAdminServiceEdit(
                     serviceKey
                 );
-
-
-                closeAllAdminServiceMenus();
 
 
                 return;
@@ -22419,6 +22951,11 @@ adminServicesPricingModal
                 }
 
 
+                lockAdminServiceInputs(
+                    serviceKey
+                );
+
+
                 return;
 
             }
@@ -22456,6 +22993,11 @@ adminServicesPricingModal
                     await loadAdminServicePricing();
 
                 }
+
+
+                lockAdminServiceInputs(
+                    serviceKey
+                );
 
 
                 return;
@@ -22499,6 +23041,7 @@ adminServicesPricingModal
         }
 
     );
+
 // ========================================
 // CLOSE MENUS OUTSIDE MODAL
 // ========================================
