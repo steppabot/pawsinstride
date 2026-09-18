@@ -11698,54 +11698,164 @@ body.client-portal-page:not(.mobile-app-screen-services)
 ======================================== */
 
 @media (max-width:700px) {
-    .client-portal-page .client-message-form {
-        gap: 8px;
-        padding: 8px 10px calc(78px+env(safe-area-inset-bottom));
+
+    .client-portal-page
+    .client-message-form {
+        gap:
+            8px;
+
+        padding:
+            10px
+            10px
+            max(
+                14px,
+                env(safe-area-inset-bottom)
+            );
+
+        background:
+            #ffffff;
+
+        border-top:
+            1px solid
+            #dce7ed;
     }
 
-    .client-portal-page .client-message-form textarea {
-        min-height: 42px;
-        max-height: 110px;
-        padding: 9px 12px;
-        background: #f8fbfd;
-        color: #183447;
-        border: 1px solid #c8dce8;
-        border-radius: 10px;
-        outline: none;
-        -webkit-appearance: none;
-        appearance: none;
-        font-size: 16px;
-        line-height: 1.4;
+
+    .client-portal-page
+    .client-message-form textarea {
+        min-height:
+            42px;
+
+        max-height:
+            110px;
+
+        padding:
+            9px
+            12px;
+
+        background:
+            #f8fbfd;
+
+        color:
+            #183447;
+
+        border:
+            1px solid
+            #c8dce8;
+
+        border-radius:
+            10px;
+
+        outline:
+            none;
+
+        -webkit-appearance:
+            none;
+
+        appearance:
+            none;
+
+        font-size:
+            16px;
+
+        line-height:
+            1.4;
     }
 
-    .client-portal-page .client-message-form textarea:focus {
-        background: #ffffff;
-        border-color: #78bde8;
-        box-shadow: 0 0 0 2px rgba(31,154,235,0.08);
-        outline: none;
+
+    .client-portal-page
+    .client-message-form textarea:focus {
+        background:
+            #ffffff;
+
+        border-color:
+            #78bde8;
+
+        box-shadow:
+            0 0 0 2px
+            rgba(
+                31,
+                154,
+                235,
+                0.08
+            );
+
+        outline:
+            none;
     }
 
-    .client-portal-page .client-message-send {
-        flex: 0 0 42px;
-        width: 42px;
-        height: 42px;
-        background: linear-gradient(135deg,#f5ab40 0%,#ef602c 100%);
-        color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(239,96,44,0.18);
-        transition: transform 0.18s ease,box-shadow 0.18s ease;
+
+    .client-portal-page
+    .client-message-send {
+        flex:
+            0 0 42px;
+
+        width:
+            42px;
+
+        height:
+            42px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        color:
+            #ffffff;
+
+        border-radius:
+            10px;
+
+        box-shadow:
+            0 4px 10px
+            rgba(
+                239,
+                96,
+                44,
+                0.18
+            );
+
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
     }
 
-    .client-portal-page .client-message-send:hover {
-        background: linear-gradient(135deg,#f5ab40 0%,#ef602c 100%);
-        box-shadow: 0 5px 12px rgba(239,96,44,0.22);
+
+    .client-portal-page
+    .client-message-send:hover {
+        background:
+            linear-gradient(
+                135deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        box-shadow:
+            0 5px 12px
+            rgba(
+                239,
+                96,
+                44,
+                0.22
+            );
     }
 
-    .client-portal-page .client-message-send:active {
-        transform: scale(0.96);
+
+    .client-portal-page
+    .client-message-send:active {
+        transform:
+            scale(0.96);
     }
+
 }
 
+
+/* ========================================
+   KEEP FUNCTIONAL STATUS COLORS
+======================================== */
 /* ========================================
    KEEP FUNCTIONAL STATUS COLORS
 ======================================== */
