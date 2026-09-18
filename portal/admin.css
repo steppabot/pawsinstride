@@ -7262,9 +7262,24 @@ p {
    SERVICE EDIT ACTIONS
 ======================================== */
 
+.admin-service-pricing-card.admin-service-is-editing {
+    padding-bottom:
+        62px;
+}
+
+
 .admin-service-edit-actions {
     display:
         none;
+
+    position:
+        absolute;
+
+    right:
+        69px;
+
+    bottom:
+        14px;
 
     align-items:
         center;
@@ -7273,13 +7288,7 @@ p {
         flex-end;
 
     gap:
-        8px;
-
-    margin-left:
-        8px;
-
-    flex-shrink:
-        0;
+        10px;
 }
 
 
@@ -7297,6 +7306,10 @@ p {
 }
 
 
+/* ========================================
+   EDIT ACTION BUTTONS
+======================================== */
+
 .admin-service-edit-actions button {
     display:
         inline-flex;
@@ -7307,11 +7320,14 @@ p {
     justify-content:
         center;
 
+    width:
+        110px;
+
     height:
-        38px;
+        36px;
 
     padding:
-        0 14px;
+        0;
 
     border-radius:
         8px;
@@ -7320,7 +7336,7 @@ p {
         inherit;
 
     font-size:
-        10px;
+        11px;
 
     font-weight:
         800;
@@ -7338,16 +7354,16 @@ p {
         background 0.15s ease,
         border-color 0.15s ease,
         color 0.15s ease,
-        box-shadow 0.15s ease;
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
 }
 
 
-/* CANCEL */
+/* ========================================
+   CANCEL BUTTON
+======================================== */
 
 .admin-service-edit-cancel {
-    min-width:
-        72px;
-
     background:
         #ffffff;
 
@@ -7356,7 +7372,7 @@ p {
 
     border:
         1px solid
-        #cfdee7;
+        #cfdde6;
 }
 
 
@@ -7366,43 +7382,68 @@ p {
 
     border-color:
         #b8cdd9;
+
+    color:
+        #29485b;
 }
 
 
-/* SAVE */
+/* ========================================
+   SAVE BUTTON
+======================================== */
 
 .admin-service-edit-save {
-    min-width:
-        110px;
-
     background:
-        #3b8fd8;
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
 
     color:
         #ffffff;
 
     border:
         1px solid
-        #3b8fd8;
+        #2890df;
 
     box-shadow:
-        0 4px 10px rgba(40,144,223,0.16);
+        0 5px 12px
+        rgba(
+            40,
+            144,
+            223,
+            0.18
+        );
 }
 
 
 .admin-service-edit-save:hover {
-    background:
-        #2b7fc6;
+    box-shadow:
+        0 7px 16px
+        rgba(
+            40,
+            144,
+            223,
+            0.24
+        );
 
-    border-color:
-        #2b7fc6;
+    transform:
+        translateY(-1px);
 }
 
+
+/* ========================================
+   SAVING STATE
+======================================== */
 
 .admin-service-edit-save:disabled,
 .admin-service-edit-cancel:disabled {
     opacity:
         0.55;
+
+    transform:
+        none;
 
     cursor:
         wait;
@@ -7419,27 +7460,32 @@ p {
 ) {
 
     .admin-service-pricing-card.admin-service-is-editing {
-        align-items:
-            flex-start;
+        padding-bottom:
+            60px;
     }
 
 
     .admin-service-edit-actions {
+        right:
+            12px;
+
+        bottom:
+            12px;
+
+        gap:
+            8px;
+    }
+
+
+    .admin-service-edit-actions button {
         width:
-            100%;
+            104px;
 
-        margin-left:
-            0;
-
-        margin-top:
-            10px;
-
-        justify-content:
-            flex-end;
+        height:
+            36px;
     }
 
 }
-
 /* ========================================
    BOARDING EDIT MODE
 ======================================== */
