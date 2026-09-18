@@ -5337,7 +5337,8 @@ p {
         20px;
 
     border-top:
-        1px solid #e3edf2;
+        1px solid
+        #e3edf2;
 }
 
 
@@ -5359,6 +5360,44 @@ p {
 }
 
 
+/* ========================================
+   HOUSEHOLD EYEBROW HEADINGS
+======================================== */
+
+.admin-client-household-heading
+.admin-screen-eyebrow,
+.admin-client-household-section-heading
+.admin-screen-eyebrow {
+    display:
+        inline-block;
+
+    margin-bottom:
+        5px;
+
+    color:
+        var(--admin-blue);
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.12em;
+
+    line-height:
+        1.2;
+
+    text-transform:
+        uppercase;
+}
+
+
+/* ========================================
+   HOUSEHOLD SECTION TITLES
+======================================== */
+
 .admin-client-household-section-heading h3 {
     margin:
         0;
@@ -5367,7 +5406,7 @@ p {
         #183447;
 
     font-size:
-        17px;
+        18px;
 
     font-weight:
         800;
