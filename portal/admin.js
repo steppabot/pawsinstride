@@ -22400,19 +22400,8 @@ function beginAdminServiceEdit(
     closeAllAdminServiceMenus();
 
 
-    // ========================================
-    // FOCUS FIRST PRICE ONLY
-    // ========================================
-
-    if (
-        inputs[0]
-    ) {
-
-        inputs[0].focus();
-
-    }
-
 }
+
 // ========================================
 // FINISH SERVICE EDIT
 // ========================================
