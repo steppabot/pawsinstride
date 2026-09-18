@@ -1833,72 +1833,68 @@
                         <!-- ========================================
                              DIRECTORY HEADER
                              ======================================== -->
-                
-                        <div class="admin-client-directory-heading">
-                
-                
-                            <div>
-                
-                                <span class="admin-screen-eyebrow">
+                        
+                        <div class="admin-client-directory-search-panel">
+                        
+                        
+                            <div class="admin-client-directory-search-heading">
+                        
+                                <span class="admin-client-directory-search-eyebrow">
                                     CLIENT DIRECTORY
                                 </span>
-                
+                        
                                 <h2>
-                                    Households
+                                    Search Households
                                 </h2>
-                
-                                <p>
-                                    Find a client by name, pet, phone number, email, or address.
-                                </p>
-                
+                        
                             </div>
-                
-                
-                        </div>
-                
-                
-                        <!-- ========================================
-                             CLIENT SEARCH
-                             ======================================== -->
                         
-                        <div class="admin-client-search">
                         
-                            <span class="admin-client-search-icon">
+                            <!-- ========================================
+                                 CLIENT SEARCH
+                                 ======================================== -->
                         
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
+                            <div class="admin-client-search">
+                        
+                                <span class="admin-client-search-icon">
+                        
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <circle
+                                            cx="11"
+                                            cy="11"
+                                            r="7"
+                                        ></circle>
+                        
+                                        <path d="m20 20-4-4"></path>
+                                    </svg>
+                        
+                                </span>
+                        
+                        
+                                <input
+                                    type="search"
+                                    id="admin-client-search-input"
+                                    class="admin-client-search-input"
+                                    placeholder="Search clients, pets, phone, email, or address"
+                                    autocomplete="off"
                                 >
-                                    <circle
-                                        cx="11"
-                                        cy="11"
-                                        r="7"
-                                    ></circle>
-                        
-                                    <path d="m20 20-4-4"></path>
-                                </svg>
-                        
-                            </span>
                         
                         
-                            <input
-                                type="search"
-                                id="admin-client-search-input"
-                                class="admin-client-search-input"
-                                placeholder="Search clients, pets, phone, email, or address"
-                                autocomplete="off"
-                            >
+                                <button
+                                    type="button"
+                                    id="admin-client-search-clear"
+                                    class="admin-client-search-clear"
+                                    aria-label="Clear client search"
+                                    hidden
+                                >
+                                    ×
+                                </button>
                         
+                            </div>
                         
-                            <button
-                                type="button"
-                                id="admin-client-search-clear"
-                                class="admin-client-search-clear"
-                                aria-label="Clear client search"
-                                hidden
-                            >
-                                ×
-                            </button>
                         
                         </div>
                         
