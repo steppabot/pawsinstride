@@ -18881,6 +18881,769 @@ adminRouteStartButton
     );
 
 // ========================================
+// CLIENT DIRECTORY
+// ========================================
+
+function getAdminClientDirectoryProfiles() {
+
+
+    return allProfiles
+        .filter(
+            profile => {
+
+
+                const role =
+                    String(
+                        profile.role ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+
+                return role !==
+                    "admin";
+
+            }
+        )
+        .sort(
+            (
+                first,
+                second
+            ) => {
+
+
+                const firstName =
+                    String(
+                        first.full_name ||
+                        first.email ||
+                        ""
+                    );
+
+
+                const secondName =
+                    String(
+                        second.full_name ||
+                        second.email ||
+                        ""
+                    );
+
+
+                return firstName.localeCompare(
+                    secondName
+                );
+
+            }
+        );
+
+}
+
+
+function getAdminClientHousehold(
+    clientId
+) {
+
+
+    return allHouseholds.find(
+        household =>
+            household.client_id ===
+            clientId
+    ) ||
+    null;
+
+}
+
+
+function getAdminClientPets(
+    clientId
+) {
+
+
+    return allPets
+        .filter(
+            pet =>
+                pet.client_id ===
+                clientId
+        )
+        .sort(
+            (
+                first,
+                second
+            ) =>
+                String(
+                    first.name ||
+                    ""
+                )
+                    .localeCompare(
+                        String(
+                            second.name ||
+                            ""
+                        )
+                    )
+        );
+
+}
+
+
+function getAdminClientAddress(
+    clientId
+) {
+
+
+    const household =
+        getAdminClientHousehold(
+            clientId
+        );
+
+
+    if (
+        !household
+    ) {
+
+        return "";
+
+    }
+
+
+    const parts =
+        [];
+
+
+    if (
+        household.street_address
+    ) {
+
+        parts.push(
+            household.street_address
+        );
+
+    }
+
+
+    if (
+        household.address_line_2
+    ) {
+
+        parts.push(
+            household.address_line_2
+        );
+
+    }
+
+
+    const cityState =
+        [
+            household.city,
+            household.state
+        ]
+            .filter(
+                Boolean
+            )
+            .join(
+                ", "
+            );
+
+
+    const cityStateZip =
+        `${cityState}${
+            household.zip_code
+                ? ` ${household.zip_code}`
+                : ""
+        }`
+            .trim();
+
+
+    if (
+        cityStateZip
+    ) {
+
+        parts.push(
+            cityStateZip
+        );
+
+    }
+
+
+    return parts
+        .join(
+            ", "
+        );
+
+}
+
+
+function getAdminClientInitials(
+    profile
+) {
+
+
+    const name =
+        String(
+            profile.full_name ||
+            profile.email ||
+            "Client"
+        )
+            .trim();
+
+
+    const words =
+        name
+            .split(
+                /\s+/
+            )
+            .filter(
+                Boolean
+            );
+
+
+    if (
+        words.length ===
+        0
+    ) {
+
+        return "C";
+
+    }
+
+
+    return words
+        .slice(
+            0,
+            2
+        )
+        .map(
+            word =>
+                word.charAt(
+                    0
+                )
+                    .toUpperCase()
+        )
+        .join(
+            ""
+        );
+
+}
+
+
+function getAdminClientVisitStats(
+    clientId
+) {
+
+
+    const today =
+        getLocalDateString();
+
+
+    const visits =
+        allVisits
+            .filter(
+                visit =>
+                    visit.client_id ===
+                    clientId &&
+                    String(
+                        visit.status ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase() !==
+                        "cancelled"
+            )
+            .sort(
+                (
+                    first,
+                    second
+                ) =>
+                    String(
+                        first.visit_date ||
+                        ""
+                    )
+                        .localeCompare(
+                            String(
+                                second.visit_date ||
+                                ""
+                            )
+                        )
+            );
+
+
+    const nextVisit =
+        visits.find(
+            visit =>
+                visit.visit_date >=
+                today
+        ) ||
+        null;
+
+
+    return {
+
+        total:
+            visits.length,
+
+        nextVisit:
+            nextVisit
+
+    };
+
+}
+
+
+function getAdminClientSearchText(
+    profile
+) {
+
+
+    const pets =
+        getAdminClientPets(
+            profile.id
+        );
+
+
+    const address =
+        getAdminClientAddress(
+            profile.id
+        );
+
+
+    return [
+        profile.full_name,
+        profile.email,
+        profile.phone,
+        address,
+        ...pets.map(
+            pet => pet.name
+        ),
+        ...pets.map(
+            pet => pet.breed
+        )
+    ]
+        .filter(
+            Boolean
+        )
+        .join(
+            " "
+        )
+        .toLowerCase();
+
+}
+
+
+function formatAdminClientVisitDate(
+    visit
+) {
+
+
+    if (
+        !visit?.visit_date
+    ) {
+
+        return "No upcoming visit";
+
+    }
+
+
+    const date =
+        parseLocalDate(
+            visit.visit_date
+        );
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month:
+                "short",
+
+            day:
+                "numeric",
+
+            year:
+                date.getFullYear() !==
+                new Date().getFullYear()
+
+                    ? "numeric"
+
+                    : undefined
+        }
+    );
+
+}
+
+
+function renderAdminClientDirectory() {
+
+
+    const list =
+        document.getElementById(
+            "admin-client-directory-list"
+        );
+
+
+    const countElement =
+        document.getElementById(
+            "admin-client-directory-count"
+        );
+
+
+    const searchInput =
+        document.getElementById(
+            "admin-client-search-input"
+        );
+
+
+    const clearButton =
+        document.getElementById(
+            "admin-client-search-clear"
+        );
+
+
+    if (
+        !list ||
+        !countElement ||
+        !searchInput ||
+        !clearButton
+    ) {
+
+        return;
+
+    }
+
+
+    const clients =
+        getAdminClientDirectoryProfiles();
+
+
+    const query =
+        String(
+            searchInput.value ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const filteredClients =
+        query
+
+            ? clients.filter(
+                profile =>
+                    getAdminClientSearchText(
+                        profile
+                    )
+                        .includes(
+                            query
+                        )
+            )
+
+            : clients;
+
+
+    countElement.textContent =
+        `${clients.length} ${
+            clients.length ===
+            1
+
+                ? "client"
+
+                : "clients"
+        }`;
+
+
+    clearButton.hidden =
+        query.length ===
+        0;
+
+
+    if (
+        filteredClients.length ===
+        0
+    ) {
+
+
+        list.innerHTML =
+            `
+
+                <div class="admin-client-directory-empty">
+
+                    <strong>
+                        ${
+                            query
+                                ? "No clients found"
+                                : "No clients yet"
+                        }
+                    </strong>
+
+                    <span>
+                        ${
+                            query
+                                ? "Try a different name, pet, phone number, email, or address."
+                                : "Client households will appear here once they have been added."
+                        }
+                    </span>
+
+                </div>
+
+            `;
+
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+        filteredClients
+            .map(
+                profile => {
+
+
+                    const pets =
+                        getAdminClientPets(
+                            profile.id
+                        );
+
+
+                    const address =
+                        getAdminClientAddress(
+                            profile.id
+                        );
+
+
+                    const stats =
+                        getAdminClientVisitStats(
+                            profile.id
+                        );
+
+
+                    const petNames =
+                        pets.length >
+                        0
+
+                            ? pets.map(
+                                pet =>
+                                    pet.name ||
+                                    "Pet"
+                            )
+
+                            : [];
+
+
+                    return `
+
+                        <article
+                            class="admin-client-card"
+                            data-client-id="${escapeHtml(
+                                String(
+                                    profile.id
+                                )
+                            )}"
+                        >
+
+
+                            <div class="admin-client-card-top">
+
+
+                                <span class="admin-client-avatar">
+                                    ${escapeHtml(
+                                        getAdminClientInitials(
+                                            profile
+                                        )
+                                    )}
+                                </span>
+
+
+                                <div class="admin-client-card-identity">
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            profile.full_name ||
+                                            profile.email ||
+                                            "Client"
+                                        )}
+                                    </strong>
+
+                                    <span>
+                                        ${escapeHtml(
+                                            petNames.length >
+                                            0
+
+                                                ? petNames.join(
+                                                    ", "
+                                                )
+
+                                                : "No pets added"
+                                        )}
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <div class="admin-client-card-details">
+
+
+                                <div class="admin-client-card-detail">
+
+                                    <span>
+                                        Contact
+                                    </span>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            profile.phone ||
+                                            profile.email ||
+                                            "Not added"
+                                        )}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="admin-client-card-detail">
+
+                                    <span>
+                                        Address
+                                    </span>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            address ||
+                                            "Not added"
+                                        )}
+                                    </strong>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <div class="admin-client-card-footer">
+
+
+                                <span>
+                                    ${stats.total}
+                                    ${
+                                        stats.total ===
+                                        1
+
+                                            ? "visit"
+
+                                            : "visits"
+                                    }
+                                </span>
+
+
+                                <span>
+                                    Next:
+                                    ${escapeHtml(
+                                        formatAdminClientVisitDate(
+                                            stats.nextVisit
+                                        )
+                                    )}
+                                </span>
+
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="admin-client-view-button"
+                                data-client-view="${escapeHtml(
+                                    String(
+                                        profile.id
+                                    )
+                                )}"
+                            >
+                                View Household
+                            </button>
+
+
+                        </article>
+
+                    `;
+
+                }
+            )
+            .join(
+                ""
+            );
+
+}
+
+
+function setupAdminClientDirectory() {
+
+
+    const searchInput =
+        document.getElementById(
+            "admin-client-search-input"
+        );
+
+
+    const clearButton =
+        document.getElementById(
+            "admin-client-search-clear"
+        );
+
+
+    if (
+        searchInput &&
+        !searchInput.dataset.clientDirectoryBound
+    ) {
+
+
+        searchInput.dataset.clientDirectoryBound =
+            "true";
+
+
+        searchInput.addEventListener(
+            "input",
+            renderAdminClientDirectory
+        );
+
+    }
+
+
+    if (
+        clearButton &&
+        !clearButton.dataset.clientDirectoryBound
+    ) {
+
+
+        clearButton.dataset.clientDirectoryBound =
+            "true";
+
+
+        clearButton.addEventListener(
+            "click",
+            () => {
+
+
+                searchInput.value =
+                    "";
+
+
+                renderAdminClientDirectory();
+
+
+                searchInput.focus();
+
+            }
+        );
+
+    }
+
+
+    renderAdminClientDirectory();
+
+}
+
+
+// ========================================
 // ADMIN APP NAVIGATION STATE
 // ========================================
 
@@ -18910,6 +19673,7 @@ const ADMIN_SCREEN_TITLES = {
         "More"
 
 };
+
 
 // ========================================
 // START HOME SUMMARY TIMER
@@ -19239,8 +20003,22 @@ function showAdminAppScreen(
         renderAdminDayServices();
     
     }
-
-
+    
+    
+    // ========================================
+    // REFRESH CLIENTS
+    // ========================================
+    
+    if (
+        screenName ===
+        "clients"
+    ) {
+    
+        setupAdminClientDirectory();
+    
+    }
+    
+    
     // ========================================
     // RETURN TO TOP
     // ========================================
