@@ -542,7 +542,7 @@ async function loadAdminDashboard() {
             supabaseClient
                 .from("profiles")
                 .select(
-                    "id, full_name, email, phone, role, profile_photo_path"
+                    "id, full_name, email, phone, role, profile_photo_path, pricing_tier"
                 ),
     
     
@@ -580,7 +580,6 @@ async function loadAdminDashboard() {
     
     
         ]);
-    
     
     // ========================================
     // SERVER VISITS AVAILABLE
