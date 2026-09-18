@@ -5383,6 +5383,72 @@ p {
 
 
 /* ========================================
+   CLIENT VIEW FULL HISTORY
+======================================== */
+
+.admin-client-view-history-button {
+    width:
+        100%;
+
+    min-height:
+        42px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        10px
+        14px;
+
+    background:
+        #eef7fd;
+
+    color:
+        #1f7bc2;
+
+    border:
+        0;
+
+    border-top:
+        1px solid #dce8ee;
+
+    border-radius:
+        0;
+
+    font-family:
+        inherit;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
+}
+
+
+.admin-client-view-history-button:hover {
+    background:
+        #e2f1fb;
+
+    color:
+        #1768aa;
+}
+
+
+/* ========================================
    CLIENT HOUSEHOLD EMPTY STATE
 ======================================== */
 
@@ -5446,38 +5512,6 @@ p {
 
     line-height:
         1.4;
-}
-
-
-/* ========================================
-   CLIENT HOUSEHOLD ACTIVITY — MOBILE
-======================================== */
-
-@media (max-width:700px) {
-
-    .admin-client-activity-main {
-        gap:
-            8px;
-    }
-
-
-    .admin-client-activity-meta {
-        align-items:
-            flex-start;
-
-        flex-direction:
-            column;
-
-        gap:
-            5px;
-    }
-
-
-    .admin-client-activity-meta span {
-        white-space:
-            normal;
-    }
-
 }
 
 
