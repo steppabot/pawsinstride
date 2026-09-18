@@ -19974,7 +19974,6 @@ function buildAdminClientVisitItem(
 
 }
 
-
 // ========================================
 // OPEN CLIENT HOUSEHOLD
 // ========================================
@@ -20248,23 +20247,61 @@ async function openAdminClientHousehold(
     ) {
 
 
-        activityContainer.innerHTML =
+        if (
             visits.length >
             0
+        ) {
 
-                ? visits
-                    .slice(
-                        0,
-                        8
-                    )
-                    .map(
-                        buildAdminClientVisitItem
-                    )
-                    .join(
-                        ""
-                    )
 
-                : `
+            const recentVisits =
+                visits.slice(
+                    0,
+                    4
+                );
+
+
+            activityContainer.innerHTML =
+                `
+
+                    ${recentVisits
+                        .map(
+                            buildAdminClientVisitItem
+                        )
+                        .join(
+                            ""
+                        )}
+
+                    ${
+                        visits.length >
+                        4
+
+                            ? `
+
+                                <button
+                                    type="button"
+                                    class="admin-client-view-history-button"
+                                    data-client-history="${escapeHtml(
+                                        String(
+                                            clientId
+                                        )
+                                    )}"
+                                >
+                                    View all ${visits.length} visits
+                                </button>
+
+                            `
+
+                            : ""
+                    }
+
+                `;
+
+
+        } else {
+
+
+            activityContainer.innerHTML =
+                `
 
                     <div class="admin-client-household-empty">
 
@@ -20279,6 +20316,8 @@ async function openAdminClientHousehold(
                     </div>
 
                 `;
+
+        }
 
     }
 
