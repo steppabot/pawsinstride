@@ -7572,6 +7572,7 @@ body.mobile-app-screen-pets
 ======================================== */
 
 @media (max-width:700px) {
+
     .client-message-launcher {
         right: 16px;
         bottom: 16px;
@@ -7582,9 +7583,11 @@ body.mobile-app-screen-pets
         border-radius: 50%;
     }
 
+
     .client-message-launcher-label {
         display: none;
     }
+
 
     .client-message-launcher-icon,
     .client-message-launcher-icon svg {
@@ -7592,56 +7595,39 @@ body.mobile-app-screen-pets
         height: 22px;
     }
 
-   .client-message-drawer {
-       position:
-           fixed;
-   
-       inset:
-           0;
-   
-       display:
-           flex;
-   
-       flex-direction:
-           column;
-   
-       width:
-           100%;
-   
-       height:
-           100vh;
-   
-       height:
-           100svh;
-   
-       height:
-           100dvh;
-   
-       max-width:
-           none;
-   
-       max-height:
-           none;
-   
-       overflow:
-           hidden;
-   
-       border:
-           0;
-   
-       border-radius:
-           0;
-   
-       background:
-           #ffffff;
-   
-       transform:
-           translateY(30px);
-   }
+
+    .client-message-drawer {
+        position: fixed;
+
+        inset: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        width: 100%;
+
+        height: 100vh;
+        height: 100svh;
+        height: 100dvh;
+
+        max-width: none;
+        max-height: none;
+
+        overflow: hidden;
+
+        border: 0;
+        border-radius: 0;
+
+        background: #ffffff;
+
+        transform: translateY(30px);
+    }
+
 
     .client-message-drawer.is-open {
         transform: translateY(0);
     }
+
 
     .client-message-backdrop.is-open {
         opacity: 1;
@@ -7649,70 +7635,163 @@ body.mobile-app-screen-pets
         pointer-events: auto;
     }
 
+
     .client-message-header {
         flex: 0 0 auto;
-        padding: max(16px,env(safe-area-inset-top)) 16px 14px;
+
+        padding:
+            max(
+                16px,
+                env(safe-area-inset-top)
+            )
+            16px
+            14px;
     }
+
 
     .client-message-list {
         flex: 1 1 auto;
+
         min-height: 0;
+
         padding: 16px;
+
         overflow-y: auto;
     }
 
+
     .client-message-form {
         position: relative;
+
         z-index: 5;
+
         flex: 0 0 auto;
+
         display: flex;
         align-items: flex-end;
+
         gap: 9px;
-        padding: 10px;
+
+        padding:
+            10px
+            10px
+            max(
+                10px,
+                env(safe-area-inset-bottom)
+            );
+
         background: #ffffff;
-        border-top: 1px solid #dce7ed;
+
+        border-top:
+            1px solid
+            #dce7ed;
     }
 
+
     /*
-     * * IMPORTANT:
-     * * iOS Safari zooms focused form fields when
-     * * their text size is below 16px.
+     * IMPORTANT:
+     * iOS Safari zooms focused form fields when
+     * their text size is below 16px.
      */
 
     .client-message-form textarea {
         flex: 1 1 auto;
+
         min-width: 0;
         min-height: 44px;
         max-height: 120px;
-        padding: 11px 13px;
-        background: #f8fbfd;
-        border: 1px solid #c8dce8;
-        border-radius: 12px;
-        color: #183447;
-        font-size: 16px;
-        line-height: 1.4;
+
+        padding:
+            11px
+            13px;
+
+        background:
+            #f8fbfd;
+
+        border:
+            1px solid
+            #c8dce8;
+
+        border-radius:
+            12px;
+
+        color:
+            #183447;
+
+        font-size:
+            16px;
+
+        line-height:
+            1.4;
     }
+
 
     .client-message-form textarea:focus {
-        background: #ffffff;
-        border-color: #1f9aeb;
-        box-shadow: 0 0 0 3px rgba(31,154,235,0.10);
+        background:
+            #ffffff;
+
+        border-color:
+            #1f9aeb;
+
+        box-shadow:
+            0 0 0 3px
+            rgba(
+                31,
+                154,
+                235,
+                0.10
+            );
     }
+
 
     .client-message-send {
-        flex: 0 0 44px;
-        width: 44px;
-        height: 44px;
-        background: linear-gradient(135deg,#f5ab40 0%,#ef602c 100%);
-        color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(239,96,44,0.18);
+        flex:
+            0 0 44px;
+
+        width:
+            44px;
+
+        height:
+            44px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #f5ab40 0%,
+                #ef602c 100%
+            );
+
+        color:
+            #ffffff;
+
+        border-radius:
+            12px;
+
+        box-shadow:
+            0 4px 12px
+            rgba(
+                239,
+                96,
+                44,
+                0.18
+            );
     }
 
+
     body.client-messaging-open {
-        overflow: hidden;
+        overflow:
+            hidden;
     }
+
+
+    body.client-messaging-open
+    .client-app-nav {
+        display:
+            none;
+    }
+
 }
+
 
 /* ========================================
    ADMIN MESSAGING
