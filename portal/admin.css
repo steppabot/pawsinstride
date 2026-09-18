@@ -16,7 +16,7 @@
 
     --admin-orange: #f5ab40;
     --admin-orange-dark: #ef602c;
-]1
+   
     --admin-navy: #183447;
     --admin-muted: #667784;
 
@@ -6058,6 +6058,608 @@ p {
             10px;
 
         font-size: 10px;
+    }
+
+}
+
+
+/* ========================================
+   SERVICES & PRICING MODAL
+======================================== */
+
+.admin-services-pricing-modal {
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        3000;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        24px;
+
+    overflow:
+        hidden;
+}
+
+
+.admin-services-pricing-modal[hidden] {
+    display:
+        none !important;
+}
+
+
+/* ========================================
+   SERVICES & PRICING BACKDROP
+======================================== */
+
+.admin-services-pricing-backdrop {
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    background:
+        rgba(
+            15,
+            37,
+            52,
+            0.48
+        );
+
+    backdrop-filter:
+        blur(8px);
+
+    -webkit-backdrop-filter:
+        blur(8px);
+}
+
+
+/* ========================================
+   SERVICES & PRICING DIALOG
+======================================== */
+
+.admin-services-pricing-dialog {
+    position:
+        relative;
+
+    z-index:
+        1;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    width:
+        min(
+            960px,
+            100%
+        );
+
+    max-height:
+        min(
+            820px,
+            calc(100dvh - 48px)
+        );
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    overflow:
+        hidden;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        20px;
+
+    box-shadow:
+        0 28px 80px
+        rgba(
+            16,
+            48,
+            67,
+            0.26
+        );
+}
+
+
+/* ========================================
+   SERVICES & PRICING HEADER
+======================================== */
+
+.admin-services-pricing-header {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    flex:
+        0 0 auto;
+
+    padding:
+        22px
+        24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fdff 0%,
+            #edf8fd 100%
+        );
+
+    border-bottom:
+        1px solid
+        #d6e4eb;
+}
+
+
+.admin-services-pricing-header h2 {
+    margin:
+        2px
+        0
+        5px;
+
+    color:
+        #183447;
+
+    font-size:
+        24px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.15;
+}
+
+
+.admin-services-pricing-header p {
+    margin:
+        0;
+
+    max-width:
+        560px;
+
+    color:
+        #667784;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+}
+
+
+/* ========================================
+   SERVICES & PRICING CLOSE
+======================================== */
+
+.admin-services-pricing-close {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex:
+        0 0 40px;
+
+    width:
+        40px;
+
+    height:
+        40px;
+
+    min-height:
+        40px;
+
+    padding:
+        0;
+
+    margin:
+        0;
+
+    background:
+        #eef7fd;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid
+        #c8dce8;
+
+    border-radius:
+        11px;
+
+    font-size:
+        25px;
+
+    font-weight:
+        400;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.admin-services-pricing-close:hover {
+    background:
+        #2890df;
+
+    color:
+        #ffffff;
+
+    border-color:
+        #2890df;
+}
+
+
+.admin-services-pricing-close:active {
+    transform:
+        scale(0.96);
+}
+
+
+/* ========================================
+   SERVICES & PRICING BODY
+======================================== */
+
+.admin-services-pricing-body {
+    flex:
+        1 1 auto;
+
+    min-height:
+        0;
+
+    padding:
+        22px
+        24px
+        24px;
+
+    overflow-y:
+        auto;
+
+    background:
+        #f8fbfd;
+}
+
+
+/* ========================================
+   SERVICES & PRICING TOOLBAR
+======================================== */
+
+.admin-services-pricing-toolbar {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    margin-bottom:
+        16px;
+
+    padding:
+        16px
+        18px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 4px 12px
+        rgba(
+            24,
+            52,
+            71,
+            0.045
+        );
+}
+
+
+.admin-services-pricing-toolbar strong {
+    display:
+        block;
+
+    margin-bottom:
+        3px;
+
+    color:
+        #183447;
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-services-pricing-toolbar span {
+    display:
+        block;
+
+    color:
+        #6b7785;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.45;
+}
+
+
+/* ========================================
+   ADD SERVICE BUTTON
+======================================== */
+
+.admin-add-service-button {
+    flex:
+        0 0 auto;
+
+    width:
+        auto !important;
+
+    min-width:
+        128px;
+
+    min-height:
+        42px;
+
+    margin:
+        0;
+
+    padding:
+        0
+        16px;
+
+    border-radius:
+        10px;
+}
+
+
+/* ========================================
+   SERVICES LIST
+======================================== */
+
+.admin-services-pricing-list {
+    display:
+        grid;
+
+    gap:
+        12px;
+}
+
+
+/* ========================================
+   SERVICES EMPTY STATE
+======================================== */
+
+.admin-services-pricing-empty {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        260px;
+
+    padding:
+        32px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px dashed
+        #b9d5e4;
+
+    border-radius:
+        16px;
+
+    text-align:
+        center;
+}
+
+
+.admin-services-pricing-empty strong {
+    margin-bottom:
+        5px;
+
+    color:
+        #183447;
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-services-pricing-empty span {
+    max-width:
+        390px;
+
+    color:
+        #6b7785;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.5;
+}
+
+
+/* ========================================
+   SERVICES & PRICING BODY LOCK
+======================================== */
+
+body.admin-services-pricing-open {
+    overflow:
+        hidden;
+}
+
+
+/* ========================================
+   SERVICES & PRICING — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-services-pricing-modal {
+        align-items:
+            stretch;
+
+        padding:
+            0;
+    }
+
+
+    .admin-services-pricing-dialog {
+        width:
+            100%;
+
+        max-width:
+            none;
+
+        height:
+            100vh;
+
+        height:
+            100svh;
+
+        height:
+            100dvh;
+
+        max-height:
+            none;
+
+        border:
+            0;
+
+        border-radius:
+            0;
+    }
+
+
+    .admin-services-pricing-header {
+        padding:
+            max(
+                16px,
+                env(safe-area-inset-top)
+            )
+            16px
+            14px;
+    }
+
+
+    .admin-services-pricing-header h2 {
+        font-size:
+            20px;
+    }
+
+
+    .admin-services-pricing-header p {
+        font-size:
+            11px;
+    }
+
+
+    .admin-services-pricing-body {
+        padding:
+            14px
+            14px
+            max(
+                18px,
+                env(safe-area-inset-bottom)
+            );
+    }
+
+
+    .admin-services-pricing-toolbar {
+        align-items:
+            stretch;
+
+        flex-direction:
+            column;
+
+        gap:
+            12px;
+
+        padding:
+            14px;
+    }
+
+
+    .admin-add-service-button {
+        width:
+            100% !important;
     }
 
 }
