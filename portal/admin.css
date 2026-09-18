@@ -4404,6 +4404,506 @@ p {
 
 
 /* ========================================
+   CLIENT HOUSEHOLD DETAIL
+======================================== */
+
+.admin-client-household-detail {
+    margin-top:
+        18px;
+
+    padding:
+        22px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #d6e4eb;
+
+    border-radius:
+        18px;
+
+    box-shadow:
+        0 7px 18px rgba(24,52,71,0.07);
+}
+
+
+/* ========================================
+   HOUSEHOLD DETAIL HEADER
+======================================== */
+
+.admin-client-household-header {
+    padding-bottom:
+        20px;
+
+    border-bottom:
+        1px solid #e3edf2;
+}
+
+
+.admin-client-household-back {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        6px;
+
+    margin:
+        0
+        0
+        18px;
+
+    padding:
+        8px
+        10px;
+
+    background:
+        #eef7fd;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid #b9d7ea;
+
+    border-radius:
+        8px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.admin-client-household-back:hover {
+    background:
+        #2890df;
+
+    color:
+        #ffffff;
+
+    border-color:
+        #2890df;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.admin-client-household-back svg {
+    width:
+        15px;
+
+    height:
+        15px;
+
+    fill:
+        none;
+
+    stroke:
+        currentColor;
+
+    stroke-width:
+        2;
+
+    stroke-linecap:
+        round;
+
+    stroke-linejoin:
+        round;
+}
+
+
+/* ========================================
+   HOUSEHOLD IDENTITY
+======================================== */
+
+.admin-client-household-heading {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        14px;
+}
+
+
+.admin-client-household-avatar {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex:
+        0
+        0
+        54px;
+
+    width:
+        54px;
+
+    height:
+        54px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2890df 0%,
+            #1f7bc2 58%,
+            #1768aa 100%
+        );
+
+    color:
+        #ffffff;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 7px 16px rgba(31,123,194,0.20);
+
+    font-size:
+        15px;
+
+    font-weight:
+        850;
+
+    letter-spacing:
+        0.03em;
+}
+
+
+.admin-client-household-heading h2 {
+    margin:
+        0;
+
+    color:
+        #183447;
+
+    font-size:
+        22px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+}
+
+
+.admin-client-household-heading p {
+    margin:
+        4px
+        0
+        0;
+
+    color:
+        #6b7785;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.4;
+}
+
+
+/* ========================================
+   HOUSEHOLD INFO GRID
+======================================== */
+
+.admin-client-household-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        11px;
+
+    margin-top:
+        18px;
+}
+
+
+.admin-client-household-info-card {
+    min-width:
+        0;
+
+    padding:
+        14px;
+
+    background:
+        #f8fbfd;
+
+    border:
+        1px solid #dce8ee;
+
+    border-radius:
+        12px;
+}
+
+
+.admin-client-household-info-label {
+    display:
+        block;
+
+    margin-bottom:
+        6px;
+
+    color:
+        #718592;
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.08em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.admin-client-household-info-card strong {
+    display:
+        block;
+
+    overflow:
+        hidden;
+
+    color:
+        #183447;
+
+    font-size:
+        11px;
+
+    font-weight:
+        750;
+
+    line-height:
+        1.45;
+
+    text-overflow:
+        ellipsis;
+}
+
+
+/* ========================================
+   HOUSEHOLD SECTIONS
+======================================== */
+
+.admin-client-household-section {
+    margin-top:
+        22px;
+
+    padding-top:
+        20px;
+
+    border-top:
+        1px solid #e3edf2;
+}
+
+
+.admin-client-household-section-heading {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    margin-bottom:
+        14px;
+}
+
+
+.admin-client-household-section-heading h3 {
+    margin:
+        0;
+
+    color:
+        #183447;
+
+    font-size:
+        17px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+}
+
+
+/* ========================================
+   HOUSEHOLD PETS
+======================================== */
+
+.admin-client-household-pets {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        10px;
+}
+
+
+/* ========================================
+   HOUSEHOLD ACTIVITY
+======================================== */
+
+.admin-client-household-activity {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        9px;
+}
+
+
+/* ========================================
+   CLIENT HOUSEHOLD DETAIL — TABLET
+======================================== */
+
+@media (max-width:1050px) {
+
+    .admin-client-household-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+
+    .admin-client-household-pets {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+}
+
+
+/* ========================================
+   CLIENT HOUSEHOLD DETAIL — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-client-household-detail {
+        margin-top:
+            14px;
+
+        padding:
+            16px;
+
+        border-radius:
+            16px;
+    }
+
+
+    .admin-client-household-heading {
+        align-items:
+            flex-start;
+    }
+
+
+    .admin-client-household-avatar {
+        flex-basis:
+            46px;
+
+        width:
+            46px;
+
+        height:
+            46px;
+
+        border-radius:
+            12px;
+
+        font-size:
+            13px;
+    }
+
+
+    .admin-client-household-heading h2 {
+        font-size:
+            19px;
+    }
+
+
+    .admin-client-household-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .admin-client-household-pets {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+/* ========================================
    MOBILE ADMIN APP
 ======================================== */
 
