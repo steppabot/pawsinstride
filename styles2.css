@@ -752,7 +752,7 @@ header {
             calc(100% - 20px);
 
         min-height:
-            62px;
+            76px;
 
         margin:
             0 auto;
@@ -787,7 +787,7 @@ header {
 
     .site-header-v2-logo {
         width:
-            64px;
+            72px;
 
         height:
             auto;
@@ -836,20 +836,41 @@ header {
 
     .site-header-v2-mobile-register,
     .site-header-v2-mobile-login {
+        min-height:
+            42px;
+
+        padding:
+            0 12px;
+
+        border-radius:
+            8px;
+
         font-size:
-            11px;
+            13px;
     }
 
 
     .site-header-v2-mobile-register {
         min-width:
-            72px;
+            84px;
     }
 
 
     .site-header-v2-mobile-login {
         min-width:
-            50px;
+            58px;
+    }
+
+
+    .site-header-v2-menu-button {
+        width:
+            42px;
+
+        height:
+            42px;
+
+        border-radius:
+            8px;
     }
 
 
@@ -1066,7 +1087,7 @@ header {
     .site-mobile-menu-v2-primary,
     .site-mobile-menu-v2-secondary {
         min-height:
-            48px;
+            50px;
 
         display:
             flex;
@@ -1080,18 +1101,30 @@ header {
         border-radius:
             8px;
 
+        color:
+            #ffffff;
+
         text-decoration:
             none;
+
+        text-transform:
+            uppercase;
+
+        text-shadow:
+            0 1px 2px rgba(0, 0, 0, 0.18);
 
         font-family:
             "Manrope",
             sans-serif;
 
         font-size:
-            15px;
+            14px;
 
         font-weight:
-            700;
+            800;
+
+        letter-spacing:
+            0.04em;
 
         text-align:
             center;
@@ -1100,19 +1133,21 @@ header {
 
     .site-mobile-menu-v2-primary {
         background:
-            #f0a94a;
-
-        color:
-            #1e2a3a;
+            linear-gradient(
+                135deg,
+                #f4a63a 0%,
+                #e58a1f 100%
+            );
     }
 
 
     .site-mobile-menu-v2-secondary {
         background:
-            #2b7fb8;
-
-        color:
-            #ffffff;
+            linear-gradient(
+                135deg,
+                #47cee6 0%,
+                #2890df 100%
+            );
     }
 
 
@@ -1126,16 +1161,18 @@ header {
 
 /* ========================================
    SMALL MOBILE
+   (only very small phones, roughly iPhone SE
+   and older, need things shrunk back down)
 ======================================== */
 
-@media (max-width: 420px) {
+@media (max-width: 360px) {
 
     .site-header-v2-inner {
         width:
             calc(100% - 14px);
 
         min-height:
-            58px;
+            64px;
 
         gap:
             5px;
@@ -1157,39 +1194,42 @@ header {
     .site-header-v2-mobile-register,
     .site-header-v2-mobile-login {
         min-height:
-            32px;
+            36px;
 
         padding:
-            0 8px;
+            0 9px;
 
         font-size:
-            11px;
+            11.5px;
     }
 
 
     .site-header-v2-mobile-register {
         min-width:
-            68px;
+            70px;
     }
 
 
     .site-header-v2-mobile-login {
         min-width:
-            46px;
+            48px;
     }
 
 
     .site-header-v2-menu-button {
         width:
-            32px;
+            36px;
 
         height:
-            32px;
+            36px;
     }
 
 }
 
-/* Hero Section */
+/* ========================================
+   HERO SECTION
+======================================== */
+
 .hero-section {
     background: none;
     padding: 0;
