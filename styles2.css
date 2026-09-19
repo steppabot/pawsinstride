@@ -846,7 +846,13 @@ header {
             8px;
 
         font-size:
-            13px;
+            12px;
+
+        letter-spacing:
+            0.04em;
+
+        text-transform:
+            uppercase;
     }
 
 
@@ -1200,7 +1206,10 @@ header {
             0 9px;
 
         font-size:
-            11.5px;
+            11px;
+
+        letter-spacing:
+            0.03em;
     }
 
 
