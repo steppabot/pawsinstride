@@ -347,15 +347,91 @@ window.initializeSignupAddressAutocomplete =
         
         
                 // ========================================
-                // CLEAR PREVIOUS ADDRESS COMPONENTS
+                // FORMATTED ADDRESS FALLBACK
                 // ========================================
                 //
-                // Google may replace the street field before
-                // our place_changed handler runs.
+                // Some rural / unusual Google addresses do
+                // not return every normal component such as:
                 //
-                // Clearing the dependent fields first prevents
-                // a previous City / State / ZIP from remaining
-                // visible when a new Google result is selected.
+                // street_number
+                // route
+                // locality
+                //
+                // formatted_address gives us a safe fallback
+                // for those cases.
+                // ========================================
+        
+                const formattedParts =
+                    String(
+                        place.formatted_address ||
+                        ""
+                    )
+                        .split(",")
+                        .map(
+                            part =>
+                                part.trim()
+                        )
+                        .filter(Boolean);
+        
+        
+                let fallbackStreet =
+                    "";
+        
+                let fallbackCity =
+                    "";
+        
+        
+                let stateZipIndex =
+                    -1;
+        
+        
+                for (
+                    let index = 0;
+                    index < formattedParts.length;
+                    index++
+                ) {
+        
+                    if (
+                        /^[A-Z]{2}\s+\d{5}/.test(
+                            formattedParts[index]
+                        )
+                    ) {
+        
+                        stateZipIndex =
+                            index;
+        
+                        break;
+        
+                    }
+        
+                }
+        
+        
+                if (
+                    stateZipIndex >
+                    0
+                ) {
+        
+                    fallbackCity =
+                        formattedParts[
+                            stateZipIndex - 1
+                        ] || "";
+        
+        
+                    fallbackStreet =
+                        formattedParts
+                            .slice(
+                                0,
+                                stateZipIndex - 1
+                            )
+                            .join(", ")
+                            .trim();
+        
+                }
+        
+        
+                // ========================================
+                // CLEAR PREVIOUS ADDRESS COMPONENTS
                 // ========================================
         
                 cityInput.value =
@@ -382,16 +458,29 @@ window.initializeSignupAddressAutocomplete =
                             .trim();
         
                 }
+                else if (
+                    fallbackStreet
+                ) {
+        
+                    addressInput.value =
+                        fallbackStreet;
+        
+                }
         
         
                 // ========================================
                 // POPULATE CITY
                 // ========================================
         
-                if (address.city) {
+                const resolvedCity =
+                    address.city ||
+                    fallbackCity;
+        
+        
+                if (resolvedCity) {
         
                     cityInput.value =
-                        address.city;
+                        resolvedCity;
         
                 }
         
@@ -435,19 +524,28 @@ window.initializeSignupAddressAutocomplete =
         
                 const hasCity =
                     Boolean(
-                        address.city
+                        String(
+                            cityInput.value ||
+                            ""
+                        ).trim()
                     );
         
         
                 const hasState =
                     Boolean(
-                        address.state
+                        String(
+                            stateInput.value ||
+                            ""
+                        ).trim()
                     );
         
         
                 const hasZip =
                     Boolean(
-                        address.zip
+                        String(
+                            zipInput.value ||
+                            ""
+                        ).trim()
                     );
         
         
