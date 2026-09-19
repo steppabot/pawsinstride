@@ -3031,6 +3031,71 @@ header {
 }
 
 /* =========================
+   TRUST SECTION
+========================= */
+.trust-images-section {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    padding: 34px 28px 28px;
+}
+
+.trust-images-section .section-heading,
+.homepage-pricing .section-heading,
+.homepage-services .section-heading {
+    max-width: 900px;
+    margin: 0 auto 24px;
+    text-align: center;
+}
+
+.trust-images-section .section-heading h2,
+.homepage-pricing h2,
+.homepage-services .section-heading h2,
+.service-areas-container h2,
+.fresh-food-header h2,
+.final-cta-container h2 {
+    font-size: 2.2rem;
+    color: #f3aa4c;
+    margin-bottom: 10px;
+}
+
+.trust-images-section .section-heading p,
+.homepage-pricing p,
+.homepage-services .section-heading p,
+.service-areas-container p,
+.final-cta-container p {
+    color: #444;
+    line-height: 1.6;
+}
+
+.trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.trust-grid img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 22px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
+    display: block;
+}
+
+.trust-grid img:nth-child(1) {
+    object-position: center 54%; /* move UP */
+}
+
+.trust-grid img:nth-child(2) {
+    object-position: center 23%; /* move DOWN */
+}
+
+.trust-grid img:nth-child(3) {
+    object-position: center 47%; /* move UP more */
+}
+
+/* =========================
    PRICING
 ========================= */
 .homepage-pricing .homepage-pricing-container {
