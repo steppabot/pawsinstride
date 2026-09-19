@@ -19,125 +19,1371 @@ header {
     margin-bottom: 28px;
 }
 
-/* Logo styling */
-.logo-container {
-    margin-bottom: 10px;
-}
+/* ========================================
+   SITE HEADER V2
+======================================== */
 
-.logo {
-    width: 200px; /* Original size for desktop */
-    height: auto;
-}
-
-/* Navigation styling for desktop */
-nav {
-    background-color: #fff;
-    padding: 10px 20px;
-    border-radius: 25px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    margin: 0 auto;
-    width: fit-content;
-    cursor: pointer; /* Entire white box is clickable */
-}
-
-.nav-links {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
-}
-
-.nav-links li {
-    margin: 0 20px;
+.site-header-v2 {
     position: relative;
-}
+    z-index: 1000;
 
-.nav-links li a {
-    text-decoration: none;
-    color: #333;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 5px 0;
-    display: inline-block;
-    position: relative;
-}
-
-/* Hover effect for navigation */
-.nav-links li a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 0%;
-    height: 3px;
-    background-color: #f09d51;
-    transition: width 0.3s ease-in-out;
-}
-
-.nav-links li a:hover::after {
     width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            circle at 12% 0%,
+            rgba(243, 170, 76, 0.10) 0,
+            rgba(243, 170, 76, 0.10) 74px,
+            transparent 75px
+        ),
+        radial-gradient(
+            circle at 72% 105%,
+            rgba(71, 206, 230, 0.10) 0,
+            rgba(71, 206, 230, 0.10) 105px,
+            transparent 106px
+        ),
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #fbfdff 100%
+        );
+
+    border-bottom:
+        4px solid #47cee6;
+
+    box-shadow:
+        0 8px 28px rgba(22, 72, 108, 0.08);
 }
 
-.nav-links li a:hover {
-    color: #f09d51;
+
+.site-header-v2-inner {
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    width:
+        min(
+            1360px,
+            calc(100% - 40px)
+        );
+
+    min-height:
+        88px;
+
+    margin:
+        0 auto;
+    
+    transform:
+        translateX(-16px);
+    
+    display:
+        grid;
+
+    grid-template-columns:
+        auto
+        auto
+        auto
+        auto;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        26px;
+
+    font-family:
+        "Manrope",
+        sans-serif;
 }
 
-/* Mobile Menu (collapsed by default) */
-@media (max-width: 768px) {
-    .nav-links {
-        display: none; /* Hidden by default on mobile */
-        flex-direction: column;
-        align-items: center;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 25px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    }
+/* ========================================
+   BRAND
+======================================== */
 
-    .nav-links.open {
-        display: flex; /* Show when 'MENU' is clicked */
-    }
+.site-header-v2-brand {
+    display:
+        inline-flex;
 
-    /* Style the entire box that will show 'MENU' */
-    #menu-box {
-        display: block;
-        background-color: #fff;
-        color: #333;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 10px;
-        border-radius: 25px;
-        cursor: pointer;
-        margin: 0 auto;
-        width: 90%; /* Make the menu button wider */
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
+    align-items:
+        center;
 
-    /* Hide the desktop version of the menu */
-    .logo {
-        width: 120px; /* Smaller logo size for mobile */
-    }
+    justify-content:
+        center;
 
-    nav {
-        width: 90%;
-        margin: 0 auto;
-    }
+    text-decoration:
+        none;
 }
 
-/* Desktop Layout remains unchanged */
-@media (min-width: 769px) {
-    .menu-button {
-        display: none; /* Hide the "MENU" button on desktop */
-    }
 
-    .nav-links {
-        display: flex; /* Show the menu normally on desktop */
-    }
+.site-header-v2-logo {
+    display:
+        block;
+
+    width:
+        100px;
+
+    height:
+        auto;
 }
 
-/* Hero Section */
+
+/* ========================================
+   DESKTOP NAVIGATION
+======================================== */
+
+.site-header-v2-nav {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        27px;
+}
+
+
+.site-header-v2-nav-link {
+    position:
+        relative;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        42px;
+
+    padding:
+        0
+        1px;
+
+    color:
+        #243949;
+
+    text-decoration:
+        none;
+
+    font-family:
+        "Manrope",
+        sans-serif;
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+    letter-spacing:
+        0.045em;
+
+    text-transform:
+        uppercase;
+
+    white-space:
+        nowrap;
+
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.site-header-v2-nav-link::after {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    bottom:
+        1px;
+
+    width:
+        0;
+
+    height:
+        3px;
+
+    background:
+        #f3aa4c;
+
+    border-radius:
+        2px;
+
+    transform:
+        translateX(-50%);
+
+    transition:
+        width 0.18s ease;
+}
+
+
+.site-header-v2-nav-link:hover {
+    color:
+        #2890df;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.site-header-v2-nav-link:hover::after {
+    width:
+        100%;
+}
+
+
+.site-header-v2-nav-link-active {
+    color:
+        #2890df;
+}
+
+
+.site-header-v2-nav-link-active::after {
+    width:
+        100%;
+}
+
+
+/* ========================================
+   DESKTOP SOCIAL LINKS
+======================================== */
+
+.site-header-v2-socials {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+}
+
+
+.site-header-v2-socials a {
+    width:
+        36px;
+
+    height:
+        36px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        rgba(255, 255, 255, 0.82);
+
+    border:
+        1px solid #d9e7ef;
+
+    border-radius:
+        8px;
+
+    color:
+        #243949;
+
+    text-decoration:
+        none;
+
+    font-size:
+        16px;
+
+    box-shadow:
+        0 4px 12px rgba(24, 52, 71, 0.05);
+
+    transition:
+        transform 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.site-header-v2-socials a:hover {
+    transform:
+        translateY(-2px);
+
+    color:
+        #2890df;
+
+    border-color:
+        #9dd7ec;
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        0 7px 16px rgba(40, 144, 223, 0.12);
+}
+
+
+.site-header-v2-socials a:nth-child(2):hover {
+    color:
+        #ef8f24;
+}
+
+
+/* ========================================
+   DESKTOP CLIENT ACTIONS
+======================================== */
+
+.site-header-v2-actions {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+}
+
+
+.site-header-v2-register,
+.site-header-v2-login {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        44px;
+
+    padding:
+        0
+        17px;
+
+    border-radius:
+        9px;
+
+    text-decoration:
+        none;
+
+    font-family:
+        "Manrope",
+        sans-serif;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+    letter-spacing:
+        0.01em;
+
+    white-space:
+        nowrap;
+
+    transition:
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+
+.site-header-v2-register {
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
+
+    color:
+        #ffffff;
+
+    box-shadow:
+        0 7px 18px rgba(40, 144, 223, 0.18);
+}
+
+
+/* Light streak that sweeps across the button on hover.
+   It only plays forward: when the mouse leaves, it snaps
+   back to the start instantly instead of sliding backwards. */
+
+.site-header-v2-register::before {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    left:
+        0;
+
+    width:
+        45%;
+
+    height:
+        100%;
+
+    background:
+        linear-gradient(
+            105deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.55) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+
+    transform:
+        translateX(-160%)
+        skewX(-20deg);
+
+    transition:
+        none;
+
+    pointer-events:
+        none;
+}
+
+
+.site-header-v2-register:hover::before,
+.site-header-v2-register:focus-visible::before {
+    transform:
+        translateX(320%)
+        skewX(-20deg);
+
+    transition:
+        transform 0.75s ease;
+}
+
+
+.site-header-v2-login {
+    background:
+        #ffffff;
+
+    color:
+        #ef8f24;
+
+    border:
+        2px solid #f3aa4c;
+}
+
+
+.site-header-v2-register:hover {
+    box-shadow:
+        0 9px 22px rgba(40, 144, 223, 0.24);
+}
+
+
+.site-header-v2-login:hover {
+    background:
+        #fff8ef;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .site-header-v2-register::before {
+        display:
+            none;
+    }
+
+}
+
+/* ========================================
+   MOBILE HEADER ACTIONS
+======================================== */
+
+.site-header-v2-mobile-actions {
+    display:
+        none;
+}
+
+
+.site-header-v2-mobile-register,
+.site-header-v2-mobile-login {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        34px;
+
+    padding:
+        0 10px;
+
+    border-radius:
+        7px;
+
+    text-decoration:
+        none;
+
+    font-family:
+        "Manrope",
+        sans-serif;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    white-space:
+        nowrap;
+}
+
+
+.site-header-v2-mobile-register {
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
+
+    color:
+        #ffffff;
+
+    border:
+        1px solid transparent;
+
+    box-shadow:
+        0 4px 10px rgba(40, 144, 223, 0.14);
+}
+
+
+.site-header-v2-mobile-login {
+    background:
+        #ffffff;
+
+    color:
+        #ef8f24;
+
+    border:
+        1px solid #f3aa4c;
+}
+
+
+/* ========================================
+   MOBILE MENU BUTTON
+======================================== */
+
+.site-header-v2-menu-button {
+    width:
+        34px;
+
+    height:
+        34px;
+
+    display:
+        inline-flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        4px;
+
+    padding:
+        0;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #d7e3ec;
+
+    border-radius:
+        7px;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 2px 7px rgba(31, 72, 102, 0.05);
+}
+
+
+.site-header-v2-menu-button span {
+    display:
+        block;
+
+    width:
+        17px;
+
+    height:
+        2px;
+
+    background:
+        #243949;
+
+    border-radius:
+        2px;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+.site-header-v2-menu-button-open span:nth-child(1) {
+    transform:
+        translateY(6px)
+        rotate(45deg);
+}
+
+
+.site-header-v2-menu-button-open span:nth-child(2) {
+    opacity:
+        0;
+}
+
+
+.site-header-v2-menu-button-open span:nth-child(3) {
+    transform:
+        translateY(-6px)
+        rotate(-45deg);
+}
+
+
+/* ========================================
+   MOBILE NAVIGATION PANEL
+======================================== */
+
+.site-mobile-menu-v2 {
+    display:
+        none;
+}
+
+
+/* ========================================
+   MOBILE HEADER
+======================================== */
+
+@media (max-width: 900px) {
+
+    /* ========================================
+       COMPACT ANNOUNCEMENT BAR
+       ("body" in front makes these win over the
+       base #notification-bar rule lower in the file)
+    ======================================== */
+
+    body #notification-bar {
+        justify-content:
+            center;
+
+        flex-wrap:
+            nowrap;
+
+        gap:
+            0;
+
+        padding:
+            8px 38px 8px 14px;
+
+        font-family:
+            "Manrope",
+            sans-serif;
+
+        font-size:
+            12px;
+
+        font-weight:
+            700;
+
+        line-height:
+            1.3;
+
+        color:
+            #1e2a3a;
+
+        box-shadow:
+            none;
+    }
+
+
+    body #notification-bar p {
+        white-space:
+            normal;
+
+        text-wrap:
+            balance;
+    }
+
+
+    body #notification-bar .banner-phone {
+        display:
+            none;
+    }
+
+
+    body #notification-bar .close-btn {
+        right:
+            8px;
+
+        padding:
+            6px;
+
+        font-size:
+            16px;
+
+        color:
+            #1e2a3a;
+    }
+
+
+    /* ========================================
+       MOBILE HEADER SHELL
+    ======================================== */
+
+    .site-header-v2 {
+        overflow:
+            visible;
+
+        border-bottom:
+            3px solid #f3aa4c;
+
+        border-image:
+            linear-gradient(
+                90deg,
+                #f7b955 0%,
+                #f3aa4c 50%,
+                #ef8f24 100%
+            )
+            1;
+
+        background:
+            radial-gradient(
+                circle at 92% 100%,
+                rgba(71, 206, 230, 0.09) 0,
+                rgba(71, 206, 230, 0.09) 55px,
+                transparent 56px
+            ),
+            #ffffff;
+
+        box-shadow:
+            0 6px 18px rgba(16, 60, 100, 0.22);
+    }
+
+
+    .site-header-v2-inner {
+        position:
+            static;
+
+        width:
+            calc(100% - 20px);
+
+        min-height:
+            76px;
+
+        margin:
+            0 auto;
+
+        transform:
+            none;
+
+        display:
+            grid;
+
+        grid-template-columns:
+            auto
+            1fr;
+
+        align-items:
+            center;
+
+        gap:
+            8px;
+    }
+
+
+    /* ========================================
+       MOBILE BRAND
+    ======================================== */
+
+    .site-header-v2-brand {
+        justify-self:
+            start;
+    }
+
+
+    .site-header-v2-logo {
+        width:
+            72px;
+
+        height:
+            auto;
+    }
+
+
+    /* ========================================
+       HIDE DESKTOP HEADER ITEMS
+    ======================================== */
+
+    .site-header-v2-nav,
+    .site-header-v2-socials,
+    .site-header-v2-actions {
+        display:
+            none;
+    }
+
+
+    /* ========================================
+       MOBILE ACTION GROUP
+    ======================================== */
+
+    .site-header-v2-mobile-actions {
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            flex-end;
+
+        justify-self:
+            end;
+
+        gap:
+            6px;
+
+        margin:
+            0;
+
+        width:
+            auto;
+    }
+
+
+    .site-header-v2-mobile-register,
+    .site-header-v2-mobile-login {
+        min-height:
+            42px;
+
+        padding:
+            0 12px;
+
+        border-radius:
+            8px;
+
+        font-size:
+            12px;
+
+        letter-spacing:
+            0.04em;
+
+        text-transform:
+            uppercase;
+    }
+
+
+    .site-header-v2-mobile-register {
+        min-width:
+            84px;
+    }
+
+
+    .site-header-v2-mobile-login {
+        min-width:
+            58px;
+    }
+
+
+    .site-header-v2-menu-button {
+        width:
+            42px;
+
+        height:
+            42px;
+
+        border-radius:
+            8px;
+    }
+
+
+    /* ========================================
+       MOBILE DROPDOWN MENU
+       Full-width panel anchored to the header
+    ======================================== */
+
+    .site-mobile-menu-v2 {
+        position:
+            absolute;
+
+        top:
+            calc(100% + 3px);
+
+        left:
+            0;
+
+        right:
+            0;
+
+        z-index:
+            3;
+
+        display:
+            block;
+
+        width:
+            100%;
+
+        max-height:
+            0;
+
+        overflow:
+            hidden;
+
+        visibility:
+            hidden;
+
+        background:
+            #ffffff;
+
+        border-top:
+            1px solid transparent;
+
+        box-shadow:
+            none;
+
+        transition:
+            max-height 0.28s ease,
+            box-shadow 0.28s ease,
+            visibility 0s linear 0.28s;
+    }
+
+
+    .site-mobile-menu-v2-open {
+        max-height:
+            640px;
+
+        visibility:
+            visible;
+
+        border-top-color:
+            #e6ecf1;
+
+        box-shadow:
+            0 18px 32px rgba(24, 52, 71, 0.12);
+
+        transition:
+            max-height 0.28s ease,
+            box-shadow 0.28s ease,
+            visibility 0s;
+    }
+
+
+    /* ========================================
+       MOBILE MENU LINKS
+    ======================================== */
+
+    .site-mobile-menu-v2-links {
+        width:
+            100%;
+
+        margin:
+            0;
+
+        padding:
+            0;
+
+        display:
+            flex;
+
+        flex-direction:
+            column;
+
+        background:
+            #ffffff;
+    }
+
+
+    .site-mobile-menu-v2-links a {
+        position:
+            relative;
+
+        width:
+            100%;
+
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        min-height:
+            50px;
+
+        padding:
+            0 20px;
+
+        color:
+            #1e2a3a;
+
+        text-decoration:
+            none;
+
+        font-family:
+            "Manrope",
+            sans-serif;
+
+        font-size:
+            19px;
+
+        font-weight:
+            600;
+
+        letter-spacing:
+            -0.005em;
+
+        text-align:
+            left;
+
+        border-bottom:
+            1px solid #e6ecf1;
+    }
+
+
+    .site-mobile-menu-v2-links a:active {
+        background:
+            #f4f8fb;
+    }
+
+
+    /* Active link: thin orange bar on the left edge.
+       ":first-child" keeps Home highlighted like before.
+       Delete that one line once you add class="active"
+       to the current page's link. */
+
+    .site-mobile-menu-v2-links a:first-child::before,
+    .site-mobile-menu-v2-links a.active::before,
+    .site-mobile-menu-v2-links a[aria-current="page"]::before {
+        content:
+            "";
+
+        position:
+            absolute;
+
+        left:
+            0;
+
+        top:
+            0;
+
+        bottom:
+            0;
+
+        width:
+            3px;
+
+        background:
+            #f3aa4c;
+    }
+
+
+    /* ========================================
+       MOBILE MENU CTA AREA
+       Stacked full-width buttons. Login lives in
+       the header, so the extra login link is hidden.
+    ======================================== */
+
+    .site-mobile-menu-v2-actions {
+        width:
+            100%;
+
+        margin:
+            0;
+
+        padding:
+            16px 20px calc(20px + env(safe-area-inset-bottom));
+
+        display:
+            grid;
+
+        grid-template-columns:
+            1fr;
+
+        gap:
+            10px;
+
+        background:
+            #ffffff;
+    }
+
+
+    .site-mobile-menu-v2-primary,
+    .site-mobile-menu-v2-secondary {
+        min-height:
+            50px;
+
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
+
+        border-radius:
+            8px;
+
+        color:
+            #ffffff;
+
+        text-decoration:
+            none;
+
+        text-transform:
+            uppercase;
+
+        text-shadow:
+            0 1px 2px rgba(0, 0, 0, 0.18);
+
+        font-family:
+            "Manrope",
+            sans-serif;
+
+        font-size:
+            14px;
+
+        font-weight:
+            800;
+
+        letter-spacing:
+            0.04em;
+
+        text-align:
+            center;
+    }
+
+
+    .site-mobile-menu-v2-primary {
+        background:
+            linear-gradient(
+                135deg,
+                #f4a63a 0%,
+                #e58a1f 100%
+            );
+    }
+
+
+    .site-mobile-menu-v2-secondary {
+        background:
+            linear-gradient(
+                135deg,
+                #47cee6 0%,
+                #2890df 100%
+            );
+    }
+
+
+    .site-mobile-menu-v2-client {
+        display:
+            none;
+    }
+
+
+    /* ========================================
+       MOBILE MENU SOCIAL LINKS
+       Centered icons under the buttons
+    ======================================== */
+
+    .site-mobile-menu-v2-socials {
+        margin:
+            0 20px;
+
+        padding:
+            18px 0 22px;
+
+        display:
+            flex;
+
+        justify-content:
+            center;
+
+        gap:
+            12px;
+
+        border-top:
+            1px solid #e6ecf1;
+    }
+
+
+    .site-mobile-menu-v2-socials a {
+        width:
+            44px;
+
+        height:
+            44px;
+
+        display:
+            inline-flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
+
+        background:
+            #ffffff;
+
+        border:
+            1px solid #d9e7ef;
+
+        border-radius:
+            8px;
+
+        color:
+            #243949;
+
+        text-decoration:
+            none;
+
+        font-size:
+            18px;
+    }
+
+
+    .site-mobile-menu-v2-socials a:active {
+        background:
+            #f4f8fb;
+
+        color:
+            #2890df;
+    }
+
+}
+
+
+/* ========================================
+   SMALL MOBILE
+   (only very small phones, roughly iPhone SE
+   and older, need things shrunk back down)
+======================================== */
+
+@media (max-width: 360px) {
+
+    .site-header-v2-inner {
+        width:
+            calc(100% - 14px);
+
+        min-height:
+            64px;
+
+        gap:
+            5px;
+    }
+
+
+    .site-header-v2-logo {
+        width:
+            58px;
+    }
+
+
+    .site-header-v2-mobile-actions {
+        gap:
+            5px;
+    }
+
+
+    .site-header-v2-mobile-register,
+    .site-header-v2-mobile-login {
+        min-height:
+            36px;
+
+        padding:
+            0 9px;
+
+        font-size:
+            11px;
+
+        letter-spacing:
+            0.03em;
+    }
+
+
+    .site-header-v2-mobile-register {
+        min-width:
+            70px;
+    }
+
+
+    .site-header-v2-mobile-login {
+        min-width:
+            48px;
+    }
+
+
+    .site-header-v2-menu-button {
+        width:
+            36px;
+
+        height:
+            36px;
+    }
+
+}
+
+
+/* ========================================
+   HERO SECTION
+======================================== */
+
 .hero-section {
     background: none;
     padding: 0;
@@ -1532,15 +2778,24 @@ header {
 /* =========================
    HERO - ONE SINGLE CARD
 ========================= */
+
+/* Space between the header and the hero card.
+   Two classes so this beats the "margin: 0 auto 28px" rule above
+   and the ".homepage-hero { margin-top: 0 }" rule further down. */
+.hero-section.homepage-hero {
+    margin-top: 36px;
+}
+
 .homepage-hero .hero-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(560px, auto);
     gap: 0;
     align-items: stretch;
     background: #fff;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 18px 44px rgba(16, 60, 100, 0.22);
     width: 100%;
     margin: 0;
     max-width: none;
@@ -1551,12 +2806,19 @@ header {
     min-width: 0;
 }
 
+/* The photo fills whatever height the text needs, instead of
+   forcing the whole card to be as tall as the photo itself. */
+.homepage-hero .hero-image {
+    contain: size;
+    overflow: hidden;
+}
+
 .homepage-hero .hero-image img {
     width: 100%;
     height: 100%;
-    min-height: 520px;
+    min-height: 0;
     object-fit: cover;
-    object-position: center top;
+    object-position: center 22%;
     border-radius: 0;
     box-shadow: none;
     display: block;
@@ -1565,7 +2827,7 @@ header {
 .homepage-hero .hero-text-container {
     background: transparent;
     border-radius: 0;
-    padding: 36px 30px;
+    padding: 44px 36px;
     box-shadow: none;
     display: flex;
     align-items: center;
@@ -1573,75 +2835,56 @@ header {
     text-align: center;
 }
 
+/* Column layout so the visual order can be set with "order" below:
+   headline, then the button, then the supporting proof. */
 .homepage-hero .hero-text {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: #fff7ea;
+    color: #b86f14;
+    border: 1px solid #f3d19d;
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.homepage-hero .hero-badge {
+    order: 1;
 }
 
 .homepage-hero .hero-text h1 {
-    font-size: 3rem;
+    order: 2;
+    font-size: clamp(2.1rem, 3.1vw, 2.8rem);
     line-height: 1.1;
+    letter-spacing: -0.02em;
     margin: 0 0 12px;
     color: #f3aa4c;
     text-transform: none;
 }
 
 .homepage-hero .hero-text h3 {
-    font-size: 1.45rem;
-    color: #333;
+    order: 3;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #4a5a68;
     margin: 0 0 16px;
 }
 
-.hero-badge {
-    display: inline-block;
-    background: rgba(243, 170, 76, 0.14);
-    color: #d8891d;
-    font-weight: 700;
-    padding: 8px 14px;
-    border-radius: 999px;
-    margin-bottom: 14px;
-    font-size: 0.95rem;
-}
-
-.hero-subtext {
-    font-size: 1.08rem;
-    line-height: 1.65;
-    margin-bottom: 18px;
-    color: #444;
-}
-
-.hero-trust-points {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin: 18px 0 20px;
-}
-
-.hero-trust-points span {
-    background: #f7f7f7;
-    color: #333;
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.95rem;
-}
-
-.hero-pricing-preview {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 24px;
-}
-
-.price-pill {
-    background: #fff7ea;
-    color: #333;
-    border: 1px solid #f3aa4c;
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.95rem;
+.homepage-hero .hero-text .hero-subtext {
+    order: 4;
+    max-width: 30em;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: #4a5a68;
+    margin: 0 0 22px;
 }
 
 .hero-buttons {
@@ -1652,24 +2895,139 @@ header {
     margin-top: 10px;
 }
 
+.homepage-hero .hero-buttons {
+    order: 5;
+    width: 100%;
+    margin-top: 0;
+}
+
+/* The "Spots Fill Quickly" line (it has an inline style, so the
+   margin needs !important). Now sits right under the buttons. */
+.homepage-hero .hero-text > p:not(.hero-subtext) {
+    order: 6;
+    margin: 14px 0 0 !important;
+    font-size: 0.9rem;
+}
+
+/* Pricing: one bordered strip instead of three pills */
+.hero-pricing-preview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    background: #fffaf3;
+    border: 1px solid #f0dcc0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.homepage-hero .hero-pricing-preview {
+    order: 7;
+    margin: 26px 0 0;
+}
+
+.price-pill {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #6b7a89;
+    background: none;
+    border: none;
+    border-radius: 0;
+}
+
+.price-pill + .price-pill {
+    border-left: 1px solid #f0dcc0;
+}
+
+.price-pill strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 1.1rem;
+    color: #1e2a3a;
+}
+
+.hero-trust-points {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.homepage-hero .hero-trust-points {
+    order: 8;
+    margin: 18px 0 0;
+}
+
+.hero-trust-points span {
+    background: #f4f7fa;
+    border: 1px solid #e6ecf1;
+    color: #33414f;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* Hero button colors (shape, font and shine live in the
+   BUTTON SYSTEM block at the bottom of the file) */
 .cta-button.primary {
-    background: #f3aa4c;
+    background: linear-gradient(135deg, #f4a63a 0%, #e58a1f 100%);
     color: #fff;
 }
 
 .cta-button.primary:hover {
-    background: #ef602c;
+    background: linear-gradient(135deg, #ef8f24 0%, #d97812 100%);
 }
 
 .cta-button.secondary {
     background: #fff;
-    color: #333;
+    color: #1e2a3a;
     border: 2px solid #f3aa4c;
 }
 
 .cta-button.secondary:hover {
-    background: #fff7ea;
-    color: #333;
+    background: #fff8ef;
+    color: #1e2a3a;
+}
+
+/* Tablet and mobile: photo goes on top at a fixed height */
+@media (max-width: 980px) {
+    .homepage-hero .hero-container {
+        grid-template-rows: none;
+    }
+
+    .homepage-hero .hero-image {
+        contain: none;
+    }
+
+    .hero-section.homepage-hero .hero-image img {
+        height: 460px;
+        object-position: center 0%;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section.homepage-hero {
+        margin-top: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .hero-section.homepage-hero .hero-image img {
+        height: auto;
+        aspect-ratio: 3 / 2;
+        object-position: center 0%;
+    }
+
+    .price-pill {
+        padding: 10px 4px;
+        font-size: 0.74rem;
+    }
+
+    .price-pill strong {
+        font-size: 1rem;
+    }
 }
 
 /* =========================
@@ -2726,5 +4084,1618 @@ html {
 
     .services-top-card .services-page-hero {
         padding-bottom: 16px;
+    }
+}
+
+/* =========================
+   BUTTON SYSTEM (rectangular)
+   Paste at the VERY BOTTOM of styles2.css.
+   Matches the header buttons: 9px corners, Manrope 800, caps.
+========================= */
+
+.cta-button,
+.send-button,
+.fresh-food-btn,
+.about-cta .cta-button,
+.contact-form-card .send-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 28px;
+    border-radius: 9px;
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+}
+
+/* All orange buttons share one gradient (the outlined ".secondary"
+   button keeps its white background from the hero block) */
+.cta-button:not(.secondary),
+.send-button,
+.fresh-food-btn,
+.about-cta .cta-button,
+.contact-form-card .send-button {
+    background: linear-gradient(135deg, #f4a63a 0%, #e58a1f 100%);
+    color: #fff;
+    border: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+/* Hover: slightly deeper orange, no lift */
+.cta-button:not(.secondary):hover,
+.send-button:hover,
+.fresh-food-btn:hover,
+.about-cta .cta-button:hover,
+.contact-form-card .send-button:hover {
+    background: linear-gradient(135deg, #ef8f24 0%, #d97812 100%);
+    transform: none;
+}
+
+/* Light streak on the main orange buttons (same effect as the
+   New Client Registration button in the header). It only plays
+   forward, then snaps back when the mouse leaves. */
+.cta-button.primary,
+.fresh-food-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button.primary::before,
+.fresh-food-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(
+        105deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.45) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: translateX(-160%) skewX(-20deg);
+    transition: none;
+    pointer-events: none;
+}
+
+.cta-button.primary:hover::before,
+.cta-button.primary:focus-visible::before,
+.fresh-food-btn:hover::before,
+.fresh-food-btn:focus-visible::before {
+    transform: translateX(320%) skewX(-20deg);
+    transition: transform 0.75s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cta-button.primary::before,
+    .fresh-food-btn::before {
+        display: none;
+    }
+}
+
+/* Long labels on small phones */
+@media (max-width: 640px) {
+    .cta-button,
+    .send-button,
+    .fresh-food-btn {
+        padding: 0 14px;
+        font-size: 13px;
+        letter-spacing: 0.03em;
+    }
+}
+
+/* Other pill-shaped buttons and links -> rectangular */
+.fresh-btn,
+.fresh-form-btn,
+.service-areas-container li,
+.service-areas-container li a,
+.services-jump-menu a,
+.contact-pill {
+    border-radius: 9px;
+}
+
+/* Small tags -> slightly softer rectangle.
+   Delete this rule if you'd rather keep these pill-shaped. */
+.fresh-tag,
+.service-note,
+.services-trust-strip span {
+    border-radius: 6px;
+}
+
+/* =========================
+   HAPPY DOGS + CARD SYSTEM
+   Paste at the VERY BOTTOM of styles2.css (after the button system).
+   Self-contained: the old "TRUST SECTION" block becomes unused.
+========================= */
+
+/* One place to control every card on the page */
+:root {
+    --card-radius: 16px;
+    --card-shadow: 0 12px 32px rgba(16, 60, 100, 0.16);
+}
+
+.homepage-hero .hero-container,
+.trust-images-section,
+.homepage-reviews-container,
+.homepage-pricing .homepage-pricing-container,
+.homepage-services .homepage-services-card,
+.service-areas .service-areas-container,
+.fresh-food-feature.lower-priority,
+.final-cta .final-cta-container,
+.elfsight-wrapper {
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+}
+
+/* Things inside the cards: a smaller radius than the card itself */
+.homepage-pricing-card,
+.homepage-services .service-image {
+    border-radius: 12px;
+}
+
+.fresh-food-image-wrap img {
+    border-radius: 10px;
+}
+
+/* Section headings: same size and tighter spacing everywhere */
+.trust-images-section .section-heading h2,
+.homepage-reviews .section-heading h2,
+.homepage-pricing h2,
+.homepage-services .section-heading h2,
+.service-areas-container h2,
+.fresh-food-header h2,
+.final-cta-container h2 {
+    font-size: 2rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+}
+
+/* Instagram feed card: same width and shadow as the other cards */
+.elfsight-container {
+    width: min(1200px, calc(100% - 40px));
+    max-width: none;
+    margin: 0 auto 28px;
+    padding: 0;
+}
+
+.elfsight-wrapper {
+    padding: 28px;
+}
+
+
+/* ---------- Happy Dogs photo strip ---------- */
+
+.trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.trust-grid img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: none;
+    display: block;
+}
+
+.trust-grid img:nth-child(1) {
+    object-position: center 54%;
+}
+
+.trust-grid img:nth-child(2) {
+    object-position: center 23%;
+}
+
+.trust-grid img:nth-child(3) {
+    object-position: center 47%;
+}
+
+
+/* ---------- Tablet and phone ---------- */
+
+@media (max-width: 980px) {
+    .trust-grid img {
+        height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .elfsight-container {
+        width: calc(100% - 28px);
+        margin-bottom: 20px;
+    }
+
+    .elfsight-wrapper {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .trust-images-section .section-heading h2,
+    .homepage-reviews .section-heading h2,
+    .homepage-pricing h2,
+    .homepage-services .section-heading h2,
+    .service-areas-container h2,
+    .fresh-food-header h2,
+    .final-cta-container h2 {
+        font-size: 1.6rem;
+    }
+
+    /* Photos become a swipeable row: the next photo peeks in
+       from the right so people know they can swipe. */
+    .trust-grid {
+        display: flex;
+        gap: 10px;
+        margin: 0 -18px;
+        padding: 0 18px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-padding-left: 18px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .trust-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .trust-grid img {
+        flex: 0 0 78%;
+        width: 78%;
+        height: 220px;
+        scroll-snap-align: start;
+    }
+}
+
+/* =========================
+   HAPPY DOGS POLISH
+   Paste at the VERY BOTTOM of styles2.css, below the
+   "HAPPY DOGS + CARD SYSTEM" block you already added.
+========================= */
+
+/* More breathing room around the heading and photos (desktop/tablet) */
+@media (min-width: 769px) {
+    .trust-images-section {
+        padding: 44px 40px 42px;
+    }
+
+    .trust-images-section .section-heading {
+        margin-bottom: 32px;
+    }
+}
+
+.trust-images-section .section-heading p {
+    color: #5b6b7b;
+}
+
+/* Center photo is taller than the two beside it, so the row has
+   a focal point instead of three identical tiles */
+.trust-grid {
+    align-items: center;
+    gap: 16px;
+}
+
+.trust-grid img {
+    height: 240px;
+}
+
+.trust-grid img:nth-child(2) {
+    height: 290px;
+}
+
+.trust-images-section .section-heading h2 span { display: inline-block; }
+
+@media (max-width: 980px) {
+    .trust-grid img {
+        height: 190px;
+    }
+
+    .trust-grid img:nth-child(2) {
+        height: 230px;
+    }
+}
+
+/* Phones keep the swipeable row, with equal heights */
+@media (max-width: 640px) {
+    .trust-grid img,
+    .trust-grid img:nth-child(2) {
+        height: 220px;
+    }
+}
+
+/* =========================
+   SECTION HEADING FONT
+   Paste at the VERY BOTTOM of styles2.css.
+   Uses Manrope (same as your nav and buttons) for the section
+   headings on the homepage. Colors are unchanged.
+========================= */
+
+.trust-images-section .section-heading h2,
+.homepage-reviews .section-heading h2,
+.homepage-pricing h2,
+.homepage-services .section-heading h2,
+.service-areas-container h2,
+.fresh-food-header h2,
+.final-cta-container h2 {
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+
+
+/* Hero headline: Manrope too, so it matches the section headings.
+   Manrope is wider than Roboto, so the sizes are a touch smaller
+   (and balanced) to keep the headline on two lines. */
+.homepage-hero .hero-text h1 {
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+}
+
+@media (min-width: 981px) {
+    .homepage-hero .hero-text h1 {
+        font-size: clamp(1.9rem, 2.9vw, 2.6rem);
+    }
+}
+
+@media (min-width: 641px) and (max-width: 980px) {
+    .homepage-hero .hero-text h1 {
+        font-size: 2.3rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .homepage-hero .hero-text h1 {
+        font-size: clamp(1.35rem, 6.6vw, 1.7rem);
+    }
+}
+
+
+@media (max-width: 768px) {
+    .homepage-services .service-container { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .homepage-services .service-image { height: 210px; }
+    .homepage-services .service-image h2 { width: 92%; font-size: 0.95rem; text-wrap: balance; }
+}
+
+/* =========================
+   SERVICE AREAS (branded map)
+   Paste at the VERY BOTTOM of styles2.css.
+   Works with service-areas-section.html.
+   If you already pasted the earlier Service Areas CSS, replace it with this.
+========================= */
+
+.areas-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 480px) 440px;
+    justify-content: center;
+    gap: 36px;
+    align-items: center;
+    text-align: left;
+}
+
+.areas-info {
+    min-width: 0;
+}
+
+.service-areas-container .areas-info h2 {
+    margin-bottom: 8px;
+}
+
+.service-areas-container .areas-info p {
+    margin-bottom: 22px;
+}
+
+/* Town cards */
+.service-areas-container .areas-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.service-areas-container .areas-list li,
+.service-areas-container .areas-list li:hover {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.service-areas-container .areas-list a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    padding: 18px 20px;
+    background: #f7fafc;
+    border: 1px solid #e6ecf1;
+    border-radius: 12px;
+    color: #1e2a3a;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.service-areas-container .areas-list a:hover,
+.service-areas-container .areas-list li:hover a {
+    background: #fff8ef;
+    border-color: #f3aa4c;
+    color: #1e2a3a;
+}
+
+.areas-list svg {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    fill: #f3aa4c;
+}
+
+.areas-cta {
+    margin-top: 24px;
+}
+
+/* Map */
+.areas-map {
+    background: #e8f1f7;
+    border: 1px solid #d9e6ee;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.areas-map-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: "Manrope", "Roboto", sans-serif;
+}
+
+.map-ctx path {
+    fill: #f7fbfd;
+    stroke: #d3e1ea;
+    stroke-width: 0.8;
+}
+
+.map-ctx-labels text {
+    font-size: 9.5px;
+    font-weight: 600;
+    fill: #9fb2c0;
+    text-anchor: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.map-town path {
+    fill: #fde4c0;
+    stroke: #ef9b2f;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    transition: fill 0.2s ease;
+}
+
+.map-town text {
+    font-size: 15px;
+    font-weight: 800;
+    fill: #1e2a3a;
+    paint-order: stroke;
+    stroke: #ffffff;
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.map-town:focus-visible {
+    outline: none;
+}
+
+.map-town:focus-visible path {
+    stroke-width: 3;
+}
+
+.map-note {
+    font-size: 9px;
+    font-weight: 600;
+    fill: #8aa0b0;
+}
+
+/* Hover a card and its town lights up on the map, and the other way round */
+.map-town:hover path,
+.areas-layout:has(.areas-list li:nth-child(1) a:hover) .map-frisco path,
+.areas-layout:has(.areas-list li:nth-child(2) a:hover) .map-prosper path,
+.areas-layout:has(.areas-list li:nth-child(3) a:hover) .map-celina path,
+.areas-layout:has(.areas-list li:nth-child(4) a:hover) .map-little-elm path {
+    fill: #f9c880;
+}
+
+.areas-layout:has(.map-frisco:hover) .areas-list li:nth-child(1) a,
+.areas-layout:has(.map-prosper:hover) .areas-list li:nth-child(2) a,
+.areas-layout:has(.map-celina:hover) .areas-list li:nth-child(3) a,
+.areas-layout:has(.map-little-elm:hover) .areas-list li:nth-child(4) a {
+    background: #fff8ef;
+    border-color: #f3aa4c;
+}
+
+/* Tablet: stack, map underneath */
+@media (max-width: 900px) {
+    .areas-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        text-align: center;
+    }
+
+    .areas-layout {
+        justify-content: stretch;
+    }
+
+    .service-areas-container .areas-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .areas-map {
+        width: 100%;
+        max-width: 460px;
+        margin: 0 auto;
+    }
+}
+
+/* Phones: tighter cards */
+@media (max-width: 768px) {
+    .service-areas-container .areas-list a {
+        gap: 10px;
+        padding: 14px;
+        font-size: 0.95rem;
+    }
+
+    /* ", Texas" is dropped on phones so each town fits on one line */
+    .areas-state {
+        display: none;
+    }
+}
+
+/* =========================
+   SITE FOOTER V2
+   Paste at the VERY BOTTOM of styles2.css.
+   Matches the header: white bar, Manrope, the same link,
+   icon and button styles. Leave your old footer CSS alone;
+   it just becomes unused.
+========================= */
+
+.site-footer-v2 {
+    position: relative;
+    margin-top: 12px;
+    padding: 0;
+    overflow: hidden;
+    text-align: left;
+    font-family: "Manrope", "Roboto", sans-serif;
+    background:
+        radial-gradient(circle at 93% 0%, rgba(243, 170, 76, 0.10) 0, rgba(243, 170, 76, 0.10) 74px, transparent 75px),
+        radial-gradient(circle at 5% 100%, rgba(71, 206, 230, 0.10) 0, rgba(71, 206, 230, 0.10) 105px, transparent 106px),
+        linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    border-top: 4px solid #f3aa4c;
+    border-image: linear-gradient(90deg, #f7b955 0%, #f3aa4c 50%, #ef8f24 100%) 1;
+    box-shadow: 0 -8px 28px rgba(22, 72, 108, 0.08);
+}
+
+.site-footer-v2-inner {
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 48px 0 36px;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1.1fr;
+    gap: 40px;
+}
+
+/* Brand column */
+.site-footer-v2-logo {
+    display: block;
+    width: 88px;
+    height: auto;
+}
+
+.site-footer-v2-brand p {
+    max-width: 260px;
+    margin: 14px 0 18px;
+    color: #5b6b7b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Social icons: same look as the header ones */
+.site-footer-v2-socials {
+    display: flex;
+    gap: 8px;
+}
+
+.site-footer-v2-socials a {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #d9e7ef;
+    border-radius: 8px;
+    color: #243949;
+    text-decoration: none;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(24, 52, 71, 0.05);
+    transition: transform 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.site-footer-v2-socials a:hover {
+    transform: translateY(-2px);
+    color: #2890df;
+    border-color: #9dd7ec;
+    background: #ffffff;
+    box-shadow: 0 7px 16px rgba(40, 144, 223, 0.12);
+}
+
+.site-footer-v2-socials a:nth-child(2):hover {
+    color: #ef8f24;
+}
+
+/* Link columns */
+.site-footer-v2-col h3 {
+    margin: 0 0 14px;
+    color: #d9780f;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.site-footer-v2-col > a:not(.site-header-v2-register):not(.site-header-v2-login):not(.site-footer-v2-phone) {
+    display: block;
+    width: fit-content;
+    padding: 6px 0;
+    color: #243949;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    background-image: linear-gradient(#f3aa4c, #f3aa4c);
+    background-repeat: no-repeat;
+    background-position: 0 calc(100% - 3px);
+    background-size: 0 3px;
+    transition: color 0.18s ease, background-size 0.18s ease;
+}
+
+.site-footer-v2-col > a:not(.site-header-v2-register):not(.site-header-v2-login):not(.site-footer-v2-phone):hover {
+    color: #2890df;
+    background-size: 100% 3px;
+}
+
+/* The Explore column copies the top nav: caps, tracked out */
+.site-footer-v2-explore > a {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+/* Get started column */
+.site-footer-v2-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.site-footer-v2-cta h3 {
+    margin-bottom: 4px;
+}
+
+.site-footer-v2-phone {
+    margin-bottom: 4px;
+    color: #243949;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+}
+
+.site-footer-v2-phone:hover {
+    color: #2890df;
+}
+
+/* Bottom bar */
+.site-footer-v2-bottom {
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 18px 0 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 24px;
+    border-top: 1px solid #e6ecf1;
+    color: #5b6b7b;
+    font-size: 13px;
+}
+
+.site-footer-v2-bottom p {
+    margin: 0;
+}
+
+/* Back to top: a rounded square that matches the rest of the site */
+#backToTop {
+    right: 20px;
+    bottom: 20px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #47cee6 0%, #2890df 100%);
+    box-shadow: 0 8px 20px rgba(40, 144, 223, 0.28);
+    font-size: 20px;
+    line-height: 44px;
+    text-align: center;
+}
+
+#backToTop:hover {
+    background: linear-gradient(135deg, #3bc0d9 0%, #1f7bc2 100%);
+}
+
+/* Keeps the back-to-top button off the bottom line of text */
+@media (max-width: 1300px) {
+    .site-footer-v2-bottom {
+        padding-right: 64px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+    .site-footer-v2-inner {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px 24px;
+        padding: 40px 0 28px;
+    }
+
+    .site-footer-v2-brand,
+    .site-footer-v2-cta {
+        grid-column: 1 / -1;
+    }
+
+    .site-footer-v2-cta {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .site-footer-v2-cta h3 {
+        flex: 0 0 100%;
+    }
+
+    .site-footer-v2-phone {
+        flex: 0 0 100%;
+    }
+
+    .site-footer-v2-cta .site-header-v2-register,
+    .site-footer-v2-cta .site-header-v2-login {
+        flex: 1 1 200px;
+    }
+}
+
+/* Phones */
+@media (max-width: 520px) {
+    .site-footer-v2-cta .site-header-v2-register,
+    .site-footer-v2-cta .site-header-v2-login {
+        flex: 1 1 100%;
+    }
+
+    .site-footer-v2-bottom {
+        flex-direction: column;
+        padding-bottom: 76px;   /* keeps the back-to-top button off the text */
+    }
+}
+
+/* =========================
+   SERVICES PAGE
+   Paste at the VERY BOTTOM of styles2.css.
+   Works with the new services.html. Nothing gets deleted:
+   your old services CSS just becomes unused.
+========================= */
+
+/* ---------- Mobile menu: highlight only the CURRENT page ----------
+   The menu used to always highlight the first link (Home).
+   Now it follows aria-current="page". On index2.html, add
+   aria-current="page" to the Home link in the mobile menu. */
+@media (max-width: 900px) {
+    .site-mobile-menu-v2-links a:first-child:not([aria-current="page"]):not(.active)::before {
+        display: none;
+    }
+}
+
+
+/* ---------- Layout widths (same as the homepage cards) ---------- */
+.svc-hero,
+.svc-card {
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto 28px;
+}
+
+.svc-hero {
+    margin-top: 36px;
+}
+
+
+/* ---------- Top card ---------- */
+.svc-hero-card {
+    padding: 44px 40px 36px;
+    text-align: center;
+    background: #ffffff;
+    border-radius: var(--card-radius, 16px);
+    box-shadow: var(--card-shadow, 0 12px 32px rgba(16, 60, 100, 0.16));
+}
+
+.svc-hero-card .hero-badge {
+    margin-bottom: 16px;
+}
+
+.svc-hero-card h1 {
+    max-width: 900px;
+    margin: 0 auto 14px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    color: #f3aa4c;
+    text-wrap: balance;
+}
+
+.svc-nobr {
+    white-space: nowrap;
+}
+
+.svc-lead {
+    max-width: 720px;
+    margin: 0 auto 10px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #33414f;
+    text-wrap: balance;
+}
+
+.svc-sub {
+    max-width: 760px;
+    margin: 0 auto;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: #5b6b7b;
+    text-wrap: balance;
+}
+
+.svc-sub strong {
+    color: #33414f;
+}
+
+/* "What every visit includes" chips */
+.svc-trust {
+    list-style: none;
+    margin: 22px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.svc-trust li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f4f7fa;
+    border: 1px solid #e6ecf1;
+    border-radius: 6px;
+    color: #33414f;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.svc-trust svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    fill: #f3aa4c;
+}
+
+/* Photo tiles that jump to each service */
+.svc-tiles {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.svc-tile {
+    position: relative;
+    display: block;
+    height: 150px;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(16, 60, 100, 0.14);
+    text-decoration: none;
+}
+
+.svc-tile img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.svc-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0.12));
+}
+
+.svc-tile span {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    text-align: center;
+    color: #ffffff;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.02rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.svc-tile:hover img {
+    transform: scale(1.06);
+}
+
+
+/* ---------- Service cards ---------- */
+.svc-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+    background: #ffffff;
+    border-radius: var(--card-radius, 16px);
+    box-shadow: var(--card-shadow, 0 12px 32px rgba(16, 60, 100, 0.16));
+}
+
+.svc-card--reverse .svc-media {
+    order: 2;
+}
+
+/* The photo fills the full height of the text next to it, edge to edge
+   (same as the photo in the homepage hero) */
+.svc-media {
+    min-width: 0;
+    overflow: hidden;
+    contain: size;
+}
+
+.svc-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Tune the crop of each photo here if a head gets cut off */
+.svc-media img.svc-img-walking  { object-position: center center; }
+.svc-media img.svc-img-dropin   { object-position: 15% center; }
+.svc-media img.svc-img-sitting  { object-position: center center; }
+.svc-media img.svc-img-boarding { object-position: center center; }
+
+.svc-body {
+    min-width: 0;
+    padding: 44px 40px;
+}
+
+.svc-body h2 {
+    margin: 0 0 14px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: #f3aa4c;
+}
+
+.svc-body p {
+    margin: 0 0 14px;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #444444;
+}
+
+/* Callout notes */
+.svc-body .svc-note {
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    background: #fffaf3;
+    border: 1px solid #f3d19d;
+    border-left: 4px solid #f3aa4c;
+    border-radius: 6px;
+    color: #5c4420;
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+.svc-note strong {
+    color: #7a5a2b;
+}
+
+
+/* ---------- Rates ---------- */
+.svc-rates-block {
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px solid #e6ecf1;
+}
+
+.svc-rates-block h3 {
+    margin: 0 0 14px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+    color: #1e2a3a;
+}
+
+.svc-rates-block h4 {
+    margin: 24px 0 10px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #d9780f;
+}
+
+/* Three price tiles (walks and drop-ins) */
+.svc-rates {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.svc-rate {
+    padding: 16px 8px 14px;
+    text-align: center;
+    background: #fffaf3;
+    border: 1px solid #f0dcc0;
+    border-radius: 10px;
+}
+
+.svc-rate-time {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #6b7a89;
+}
+
+.svc-rate-price {
+    margin: 4px 0 2px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    line-height: 1.1;
+    color: #1e2a3a;
+}
+
+.svc-rate-unit {
+    font-size: 0.78rem;
+    color: #6b7a89;
+}
+
+/* Fee rows */
+.svc-fees {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #e6ecf1;
+    border-radius: 10px;
+}
+
+.svc-fees li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    color: #33414f;
+    font-size: 0.95rem;
+}
+
+.svc-fees li + li {
+    border-top: 1px solid #e6ecf1;
+}
+
+.svc-fees strong {
+    flex: none;
+    color: #1e2a3a;
+}
+
+/* Package rows (pet sitting and boarding) */
+.svc-package {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 18px;
+    background: #f9fbfd;
+    border: 1px solid #e6eef5;
+    border-radius: 12px;
+}
+
+.svc-package + .svc-package {
+    margin-top: 10px;
+}
+
+.svc-package-name {
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #1e2a3a;
+}
+
+.svc-package-time {
+    margin-top: 2px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #d9780f;
+}
+
+.svc-package-price {
+    flex: none;
+    text-align: right;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    line-height: 1.1;
+    color: #1e2a3a;
+}
+
+.svc-package-price small {
+    margin-left: 2px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #6b7a89;
+}
+
+.svc-inc {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.svc-inc li {
+    padding: 4px 8px;
+    background: #ffffff;
+    border: 1px solid #e6ecf1;
+    border-radius: 6px;
+    color: #4a5a68;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.svc-cta {
+    margin-top: 28px;
+}
+
+
+/* ---------- Tablet ---------- */
+@media (max-width: 900px) {
+    .svc-card {
+        grid-template-columns: 1fr;
+    }
+
+    .svc-card--reverse .svc-media {
+        order: 0;
+    }
+
+    .svc-media {
+        contain: none;
+    }
+
+    .svc-media img {
+        height: auto;
+        aspect-ratio: 4 / 3;
+        object-position: center 40%;
+    }
+
+    .svc-media img.svc-img-dropin {
+        object-position: 15% 40%;
+    }
+
+    .svc-body {
+        padding: 32px 26px;
+    }
+
+    .svc-tiles {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 768px) {
+    .svc-hero,
+    .svc-card {
+        width: calc(100% - 28px);
+        margin-bottom: 20px;
+    }
+
+    .svc-hero {
+        margin-top: 18px;
+    }
+
+    .svc-hero-card {
+        padding: 30px 20px 26px;
+    }
+
+    .svc-tile {
+        height: 120px;
+    }
+
+    .svc-body {
+        padding: 26px 20px;
+    }
+
+    .svc-body h2 {
+        font-size: 1.6rem;
+    }
+
+    .svc-cta .cta-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 520px) {
+    .svc-trust {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .svc-trust li {
+        min-width: 0;
+        font-size: 0.82rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .svc-rate-price {
+        font-size: 1.5rem;
+    }
+
+    .svc-package {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .svc-package-price {
+        text-align: left;
+    }
+}
+
+/* =========================
+   12% DISCOUNT CALLOUT (services page)
+   Paste at the VERY BOTTOM of styles2.css,
+   below the services page block you already added.
+========================= */
+
+.svc-deal {
+    display: flex;
+    align-items: stretch;
+    margin-top: 14px;
+    overflow: hidden;
+    background: #f2f9fe;
+    border: 1px solid #cfe6f7;
+    border-radius: 10px;
+}
+
+.svc-deal-badge {
+    flex: none;
+    width: 84px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #47cee6 0%, #2890df 100%);
+    color: #ffffff;
+    font-family: "Manrope", "Roboto", sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.svc-deal-badge strong {
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.svc-deal-badge span {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.svc-body .svc-deal p {
+    margin: 0;
+    padding: 12px 16px;
+    align-self: center;
+    color: #33414f;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.svc-deal p strong {
+    display: block;
+    margin-bottom: 2px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: #1e2a3a;
+}
+
+/* =========================
+   ABOUT PAGE
+   Paste at the VERY BOTTOM of styles2.css.
+   Works with the new aboutus.html. Nothing gets deleted:
+   your old about-page CSS just becomes unused.
+========================= */
+
+/* ---------- Cards ---------- */
+.abt-hero,
+.abt-card {
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: var(--card-radius, 16px);
+    box-shadow: var(--card-shadow, 0 12px 32px rgba(16, 60, 100, 0.16));
+}
+
+.abt-hero {
+    margin-top: 36px;
+}
+
+.abt-card--reverse .abt-media {
+    order: 2;
+}
+
+/* The photo fills the full height of the text next to it */
+.abt-media {
+    min-width: 0;
+    overflow: hidden;
+    contain: size;
+}
+
+.abt-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Tune the crop of each photo here if a face gets cut off */
+.abt-media img.abt-img-owner  { object-position: center 30%; }
+.abt-media img.abt-img-commit { object-position: center center; }
+
+.abt-body {
+    min-width: 0;
+    padding: 44px 40px;
+}
+
+.abt-hero .hero-badge {
+    margin-bottom: 16px;
+}
+
+.abt-body h1,
+.abt-body h2 {
+    margin: 0 0 16px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: #f3aa4c;
+}
+
+.abt-body h1 {
+    font-size: clamp(1.9rem, 3vw, 2.5rem);
+    line-height: 1.1;
+}
+
+.abt-body h2 {
+    font-size: 2rem;
+    line-height: 1.15;
+}
+
+.abt-body p {
+    margin: 0 0 14px;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #444444;
+}
+
+
+/* ---------- Pull quote ---------- */
+.abt-quote {
+    margin: 20px 0 0;
+    padding: 14px 18px;
+    background: #fffaf3;
+    border: 1px solid #f3d19d;
+    border-left: 4px solid #f3aa4c;
+    border-radius: 6px;
+    color: #1e2a3a;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+
+/* ---------- Quick facts ---------- */
+.abt-stats {
+    list-style: none;
+    margin: 26px 0 0;
+    padding: 22px 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    border-top: 1px solid #e6ecf1;
+}
+
+.abt-stats strong {
+    display: block;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: #1e2a3a;
+}
+
+.abt-stats span {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: #6b7a89;
+}
+
+
+/* ---------- Commitment list ---------- */
+.abt-values {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.abt-values li {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    padding: 16px 18px;
+    background: #f9fbfd;
+    border: 1px solid #e6eef5;
+    border-radius: 12px;
+}
+
+.abt-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff1dc;
+    border-radius: 10px;
+}
+
+.abt-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: #e58a1f;
+}
+
+.abt-values h3 {
+    margin: 2px 0 4px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.08rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #1e2a3a;
+}
+
+.abt-body .abt-values p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #4a5a68;
+}
+
+
+/* ---------- Tablet ---------- */
+@media (max-width: 900px) {
+    .abt-hero,
+    .abt-card {
+        grid-template-columns: 1fr;
+    }
+
+    .abt-card--reverse .abt-media {
+        order: 0;
+    }
+
+    .abt-media {
+        contain: none;
+    }
+
+    .abt-media img {
+        height: auto;
+        aspect-ratio: 4 / 3;
+        object-position: center 35%;
+    }
+
+    .abt-body {
+        padding: 32px 26px;
+    }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 768px) {
+    .abt-hero,
+    .abt-card {
+        width: calc(100% - 28px);
+        margin-bottom: 20px;
+    }
+
+    .abt-hero {
+        margin-top: 18px;
+    }
+
+    .abt-body {
+        padding: 26px 20px;
+    }
+
+    .abt-body h2 {
+        font-size: 1.6rem;
+    }
+
+    .abt-stats strong {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .abt-values li {
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 }
