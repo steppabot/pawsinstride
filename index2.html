@@ -1,20 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Replace everything between <head> and </head> in index2.html with this (delete this comment). -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dog Walker in Frisco TX 🐾 5-Star Rated | Free Meet & Greet</title>
-    <meta name="description" content="Looking for a reliable dog walker in Frisco, TX? Paws in Stride offers 5-star dog walking, pet sitting, and boarding with flexible scheduling and a free meet & greet.">
-        
+
+    <title>Dog Walker in Frisco, TX | Paws in Stride | Free Meet &amp; Greet</title>
+    <meta name="description" content="5-star dog walking, pet sitting, and boarding in Frisco, TX with flexible scheduling. Book a free meet &amp; greet with Paws in Stride.">
+
+    <!-- Tells Google which address is THE homepage. Use the www or non-www version you want
+         to be the main one, and 301-redirect the other to it. -->
+    <link rel="canonical" href="https://www.pawsinstride.com/">
+
+    <!-- Link previews (Facebook, iMessage, Slack, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Paws in Stride">
+    <meta property="og:title" content="Dog Walking, Pet Sitting &amp; Boarding in Frisco, TX | Paws in Stride">
+    <meta property="og:description" content="5-star dog walking, pet sitting, and boarding in Frisco, Prosper, Celina, and Little Elm. Book a free meet &amp; greet.">
+    <meta property="og:url" content="https://www.pawsinstride.com/">
+    <meta property="og:image" content="https://www.pawsinstride.com/images/golden.jpg">
+    <meta property="og:image:alt" content="Happy golden retriever on a walk in Frisco, Texas">
+    <meta name="twitter:card" content="summary_large_image">
+
     <script type="application/ld+json">
-    {|
+    {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "Paws in Stride",
-      "image": "https://www.pawsinstride.com/pawsnstridelogo1.png",
-      "url": "https://www.pawsinstride.com",
+      "url": "https://www.pawsinstride.com/",
+      "logo": "https://www.pawsinstride.com/pawsnstridelogo1.png",
+      "image": "https://www.pawsinstride.com/images/golden.jpg",
       "telephone": "+1-214-736-7923",
-    
+
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "4545 Mission Ave",
@@ -23,32 +40,26 @@
         "postalCode": "75034",
         "addressCountry": "US"
       },
-    
+
       "description": "Paws in Stride provides professional dog walking, pet sitting, and dog boarding services in Frisco, Prosper, Celina, and Little Elm, Texas.",
-    
+
       "areaServed": [
-        {
-          "@type": "City",
-          "name": "Frisco"
-        },
-        {
-          "@type": "City",
-          "name": "Prosper"
-        },
-        {
-          "@type": "City",
-          "name": "Celina"
-        },
-        {
-          "@type": "City",
-          "name": "Little Elm"
-        }
+        { "@type": "City", "name": "Frisco" },
+        { "@type": "City", "name": "Prosper" },
+        { "@type": "City", "name": "Celina" },
+        { "@type": "City", "name": "Little Elm" }
       ],
-    
-      "openingHours": "Mo-Fr 09:00-18:00"
+
+      "openingHours": "Mo-Fr 09:00-18:00",
+
+      "sameAs": [
+        "https://www.facebook.com/pawsinstride",
+        "https://www.instagram.com/paws.in.stride",
+        "https://www.tiktok.com/@pawsnstride"
+      ]
     }
     </script>
-    
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-S8KBFC0X04"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -56,7 +67,7 @@
       gtag('js', new Date());
       gtag('config', 'G-S8KBFC0X04');
     </script>
-    
+
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
@@ -66,18 +77,27 @@
 
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
-   
+
+    <!-- Speeds up the font downloads -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"
     >
-    <link rel="stylesheet" href="styles2.css">
 
-    
+    <!-- Starts loading the big hero photo right away (it's the biggest thing on screen) -->
+    <link rel="preload" as="image" href="/images/golden.jpg" fetchpriority="high">
+
+    <!-- Leading slash so it works from any folder. Change the ?v= number whenever you
+         edit the CSS so visitors don't get an old cached copy. -->
+    <link rel="stylesheet" href="/styles2.css?v=20260919">
+
     <script>
         window.onscroll = function() {scrollFunction()};
-    
+
         function scrollFunction() {
             const backToTopButton = document.getElementById("backToTop");
             if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
@@ -86,7 +106,7 @@
                 backToTopButton.style.display = "none";
             }
         }
-    
+
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
