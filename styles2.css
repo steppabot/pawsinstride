@@ -2778,15 +2778,24 @@ header {
 /* =========================
    HERO - ONE SINGLE CARD
 ========================= */
+
+/* Space between the header and the hero card.
+   Two classes so this beats the "margin: 0 auto 28px" rule above
+   and the ".homepage-hero { margin-top: 0 }" rule further down. */
+.hero-section.homepage-hero {
+    margin-top: 36px;
+}
+
 .homepage-hero .hero-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(560px, auto);
     gap: 0;
     align-items: stretch;
     background: #fff;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 18px 44px rgba(16, 60, 100, 0.22);
     width: 100%;
     margin: 0;
     max-width: none;
@@ -2797,12 +2806,19 @@ header {
     min-width: 0;
 }
 
+/* The photo fills whatever height the text needs, instead of
+   forcing the whole card to be as tall as the photo itself. */
+.homepage-hero .hero-image {
+    contain: size;
+    overflow: hidden;
+}
+
 .homepage-hero .hero-image img {
     width: 100%;
     height: 100%;
-    min-height: 520px;
+    min-height: 0;
     object-fit: cover;
-    object-position: center top;
+    object-position: center 22%;
     border-radius: 0;
     box-shadow: none;
     display: block;
@@ -2811,7 +2827,7 @@ header {
 .homepage-hero .hero-text-container {
     background: transparent;
     border-radius: 0;
-    padding: 36px 30px;
+    padding: 44px 36px;
     box-shadow: none;
     display: flex;
     align-items: center;
@@ -2819,75 +2835,56 @@ header {
     text-align: center;
 }
 
+/* Column layout so the visual order can be set with "order" below:
+   headline, then the button, then the supporting proof. */
 .homepage-hero .hero-text {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: #fff7ea;
+    color: #b86f14;
+    border: 1px solid #f3d19d;
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.homepage-hero .hero-badge {
+    order: 1;
 }
 
 .homepage-hero .hero-text h1 {
-    font-size: 3rem;
+    order: 2;
+    font-size: clamp(2.1rem, 3.1vw, 2.8rem);
     line-height: 1.1;
+    letter-spacing: -0.02em;
     margin: 0 0 12px;
     color: #f3aa4c;
     text-transform: none;
 }
 
 .homepage-hero .hero-text h3 {
-    font-size: 1.45rem;
-    color: #333;
+    order: 3;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #4a5a68;
     margin: 0 0 16px;
 }
 
-.hero-badge {
-    display: inline-block;
-    background: rgba(243, 170, 76, 0.14);
-    color: #d8891d;
-    font-weight: 700;
-    padding: 8px 14px;
-    border-radius: 999px;
-    margin-bottom: 14px;
-    font-size: 0.95rem;
-}
-
-.hero-subtext {
-    font-size: 1.08rem;
-    line-height: 1.65;
-    margin-bottom: 18px;
-    color: #444;
-}
-
-.hero-trust-points {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin: 18px 0 20px;
-}
-
-.hero-trust-points span {
-    background: #f7f7f7;
-    color: #333;
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.95rem;
-}
-
-.hero-pricing-preview {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 24px;
-}
-
-.price-pill {
-    background: #fff7ea;
-    color: #333;
-    border: 1px solid #f3aa4c;
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.95rem;
+.homepage-hero .hero-text .hero-subtext {
+    order: 4;
+    max-width: 30em;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: #4a5a68;
+    margin: 0 0 22px;
 }
 
 .hero-buttons {
@@ -2898,24 +2895,137 @@ header {
     margin-top: 10px;
 }
 
+.homepage-hero .hero-buttons {
+    order: 5;
+    width: 100%;
+    margin-top: 0;
+}
+
+/* The "Spots Fill Quickly" line (it has an inline style, so the
+   margin needs !important). Now sits right under the buttons. */
+.homepage-hero .hero-text > p:not(.hero-subtext) {
+    order: 6;
+    margin: 14px 0 0 !important;
+    font-size: 0.9rem;
+}
+
+/* Pricing: one bordered strip instead of three pills */
+.hero-pricing-preview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    background: #fffaf3;
+    border: 1px solid #f0dcc0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.homepage-hero .hero-pricing-preview {
+    order: 7;
+    margin: 26px 0 0;
+}
+
+.price-pill {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #6b7a89;
+    background: none;
+    border: none;
+    border-radius: 0;
+}
+
+.price-pill + .price-pill {
+    border-left: 1px solid #f0dcc0;
+}
+
+.price-pill strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 1.1rem;
+    color: #1e2a3a;
+}
+
+.hero-trust-points {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.homepage-hero .hero-trust-points {
+    order: 8;
+    margin: 18px 0 0;
+}
+
+.hero-trust-points span {
+    background: #f4f7fa;
+    border: 1px solid #e6ecf1;
+    color: #33414f;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* Hero button colors (shape, font and shine live in the
+   BUTTON SYSTEM block at the bottom of the file) */
 .cta-button.primary {
-    background: #f3aa4c;
+    background: linear-gradient(135deg, #f4a63a 0%, #e58a1f 100%);
     color: #fff;
 }
 
 .cta-button.primary:hover {
-    background: #ef602c;
+    background: linear-gradient(135deg, #ef8f24 0%, #d97812 100%);
 }
 
 .cta-button.secondary {
     background: #fff;
-    color: #333;
+    color: #1e2a3a;
     border: 2px solid #f3aa4c;
 }
 
 .cta-button.secondary:hover {
-    background: #fff7ea;
-    color: #333;
+    background: #fff8ef;
+    color: #1e2a3a;
+}
+
+/* Tablet and mobile: photo goes on top at a fixed height */
+@media (max-width: 980px) {
+    .homepage-hero .hero-container {
+        grid-template-rows: none;
+    }
+
+    .homepage-hero .hero-image {
+        contain: none;
+    }
+
+    .hero-section.homepage-hero .hero-image img {
+        height: 380px;
+        object-position: center 20%;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section.homepage-hero {
+        margin-top: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .hero-section.homepage-hero .hero-image img {
+        height: 240px;
+    }
+
+    .price-pill {
+        padding: 10px 4px;
+        font-size: 0.74rem;
+    }
+
+    .price-pill strong {
+        font-size: 1rem;
+    }
 }
 
 /* =========================
@@ -3973,4 +4083,126 @@ html {
     .services-top-card .services-page-hero {
         padding-bottom: 16px;
     }
+}
+
+/* =========================
+   BUTTON SYSTEM (rectangular)
+   Paste at the VERY BOTTOM of styles2.css.
+   Matches the header buttons: 9px corners, Manrope 800, caps.
+========================= */
+
+.cta-button,
+.send-button,
+.fresh-food-btn,
+.about-cta .cta-button,
+.contact-form-card .send-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 28px;
+    border-radius: 9px;
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+}
+
+/* All orange buttons share one gradient (the outlined ".secondary"
+   button keeps its white background from the hero block) */
+.cta-button:not(.secondary),
+.send-button,
+.fresh-food-btn,
+.about-cta .cta-button,
+.contact-form-card .send-button {
+    background: linear-gradient(135deg, #f4a63a 0%, #e58a1f 100%);
+    color: #fff;
+    border: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+/* Hover: slightly deeper orange, no lift */
+.cta-button:not(.secondary):hover,
+.send-button:hover,
+.fresh-food-btn:hover,
+.about-cta .cta-button:hover,
+.contact-form-card .send-button:hover {
+    background: linear-gradient(135deg, #ef8f24 0%, #d97812 100%);
+    transform: none;
+}
+
+/* Light streak on the main orange buttons (same effect as the
+   New Client Registration button in the header). It only plays
+   forward, then snaps back when the mouse leaves. */
+.cta-button.primary,
+.fresh-food-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button.primary::before,
+.fresh-food-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(
+        105deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.45) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: translateX(-160%) skewX(-20deg);
+    transition: none;
+    pointer-events: none;
+}
+
+.cta-button.primary:hover::before,
+.cta-button.primary:focus-visible::before,
+.fresh-food-btn:hover::before,
+.fresh-food-btn:focus-visible::before {
+    transform: translateX(320%) skewX(-20deg);
+    transition: transform 0.75s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cta-button.primary::before,
+    .fresh-food-btn::before {
+        display: none;
+    }
+}
+
+/* Long labels on small phones */
+@media (max-width: 640px) {
+    .cta-button,
+    .send-button,
+    .fresh-food-btn {
+        padding: 0 14px;
+        font-size: 13px;
+        letter-spacing: 0.03em;
+    }
+}
+
+/* Other pill-shaped buttons and links -> rectangular */
+.fresh-btn,
+.fresh-form-btn,
+.service-areas-container li,
+.service-areas-container li a,
+.services-jump-menu a,
+.contact-pill {
+    border-radius: 9px;
+}
+
+/* Small tags -> slightly softer rectangle.
+   Delete this rule if you'd rather keep these pill-shaped. */
+.fresh-tag,
+.service-note,
+.services-trust-strip span {
+    border-radius: 6px;
 }
