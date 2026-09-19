@@ -35,14 +35,14 @@ header {
 
 
 .site-header-v2-inner {
-    width: min(1400px, calc(100% - 48px));
-    min-height: 96px;
+    width: min(1480px, calc(100% - 56px));
+    min-height: 118px;
     margin: 0 auto;
 
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 28px;
+    gap: 36px;
 }
 
 
@@ -59,7 +59,7 @@ header {
 
 .site-header-v2-logo {
     display: block;
-    width: 180px;
+    width: 190px;
     height: auto;
 }
 
@@ -72,7 +72,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 28px;
+    gap: 36px;
 }
 
 
@@ -82,11 +82,11 @@ header {
     color: #243949;
     text-decoration: none;
 
-    font-size: 15px;
-    font-weight: 700;
+    font-size: 17px;
+    font-weight: 800;
     line-height: 1;
 
-    padding: 14px 0;
+    padding: 18px 0;
 
     transition:
         color 0.18s ease;
@@ -98,7 +98,7 @@ header {
 
     position: absolute;
     left: 50%;
-    bottom: 4px;
+    bottom: 7px;
 
     width: 0;
     height: 3px;
@@ -132,7 +132,7 @@ header {
 .site-header-v2-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 
@@ -142,17 +142,17 @@ header {
     align-items: center;
     justify-content: center;
 
-    min-height: 44px;
+    min-height: 48px;
 
     padding:
         0
-        18px;
+        20px;
 
-    border-radius: 999px;
+    border-radius: 10px;
 
     text-decoration: none;
 
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
     line-height: 1;
 
@@ -177,7 +177,7 @@ header {
     color: #ffffff;
 
     box-shadow:
-        0 8px 20px rgba(40, 144, 223, 0.20);
+        0 8px 20px rgba(40, 144, 223, 0.18);
 }
 
 
@@ -199,14 +199,13 @@ header {
 
 .site-header-v2-register:hover {
     box-shadow:
-        0 10px 24px rgba(40, 144, 223, 0.26);
+        0 10px 24px rgba(40, 144, 223, 0.24);
 }
 
 
 .site-header-v2-login:hover {
     background: #fff8ef;
 }
-
 
 /* ========================================
    MOBILE HEADER ACTIONS
