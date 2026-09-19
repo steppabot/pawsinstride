@@ -491,17 +491,20 @@ header {
         center;
 
     min-height:
-        36px;
+        34px;
 
     padding:
-        0
-        10px;
+        0 10px;
 
     border-radius:
         7px;
 
     text-decoration:
         none;
+
+    font-family:
+        "Manrope",
+        sans-serif;
 
     font-size:
         10px;
@@ -526,10 +529,10 @@ header {
         #ffffff;
 
     border:
-        2px solid transparent;
+        1px solid transparent;
 
     box-shadow:
-        0 5px 12px rgba(40, 144, 223, 0.14);
+        0 4px 10px rgba(40, 144, 223, 0.14);
 }
 
 
@@ -541,7 +544,7 @@ header {
         #ef8f24;
 
     border:
-        2px solid #f3aa4c;
+        1px solid #f3aa4c;
 }
 
 
@@ -551,10 +554,10 @@ header {
 
 .site-header-v2-menu-button {
     width:
-        36px;
+        34px;
 
     height:
-        36px;
+        34px;
 
     display:
         inline-flex;
@@ -569,22 +572,25 @@ header {
         center;
 
     gap:
-        5px;
+        4px;
 
     padding:
         0;
 
     background:
-        #f3f8fc;
+        #ffffff;
 
     border:
-        1px solid #d6e5ef;
+        1px solid #d7e3ec;
 
     border-radius:
         7px;
 
     cursor:
         pointer;
+
+    box-shadow:
+        0 2px 7px rgba(31, 72, 102, 0.05);
 }
 
 
@@ -593,7 +599,7 @@ header {
         block;
 
     width:
-        18px;
+        17px;
 
     height:
         2px;
@@ -612,7 +618,7 @@ header {
 
 .site-header-v2-menu-button-open span:nth-child(1) {
     transform:
-        translateY(7px)
+        translateY(6px)
         rotate(45deg);
 }
 
@@ -625,7 +631,7 @@ header {
 
 .site-header-v2-menu-button-open span:nth-child(3) {
     transform:
-        translateY(-7px)
+        translateY(-6px)
         rotate(-45deg);
 }
 
@@ -635,32 +641,96 @@ header {
 ======================================== */
 
 .site-mobile-menu-v2 {
-    position:
-        relative;
-
-    z-index:
-        2;
-
     display:
         none;
 }
 
 
+/* ========================================
+   MOBILE HEADER
+======================================== */
+
 @media (max-width: 900px) {
 
+    /* ========================================
+       COMPACT ANNOUNCEMENT BAR
+    ======================================== */
+
+    #notification-bar {
+        min-height:
+            28px;
+
+        padding:
+            5px 34px 5px 10px;
+
+        gap:
+            0;
+
+        flex-wrap:
+            nowrap;
+
+        font-family:
+            "Manrope",
+            sans-serif;
+
+        font-size:
+            10px;
+
+        font-weight:
+            800;
+
+        line-height:
+            1.25;
+    }
+
+
+    #notification-bar p {
+        margin:
+            0;
+
+        padding:
+            0;
+
+        white-space:
+            nowrap;
+    }
+
+
+    #notification-bar .banner-phone {
+        display:
+            none;
+    }
+
+
+    #notification-bar .close-btn {
+        right:
+            8px;
+
+        padding:
+            2px;
+
+        font-size:
+            13px;
+    }
+
+
+    /* ========================================
+       MOBILE HEADER SHELL
+    ======================================== */
+
     .site-header-v2 {
+        overflow:
+            visible;
+
+        border-bottom:
+            3px solid #47cee6;
+
         background:
             radial-gradient(
-                circle at 4% 0%,
-                rgba(243, 170, 76, 0.10) 0,
-                rgba(243, 170, 76, 0.10) 52px,
-                transparent 53px
-            ),
-            radial-gradient(
-                circle at 88% 110%,
-                rgba(71, 206, 230, 0.10) 0,
-                rgba(71, 206, 230, 0.10) 72px,
-                transparent 73px
+                circle at 92% 100%,
+                rgba(71, 206, 230, 0.09) 0,
+                rgba(71, 206, 230, 0.09) 55px,
+                transparent 56px
             ),
             #ffffff;
     }
@@ -668,10 +738,16 @@ header {
 
     .site-header-v2-inner {
         width:
-            calc(100% - 18px);
+            calc(100% - 20px);
 
         min-height:
-            80px;
+            62px;
+
+        margin:
+            0 auto;
+
+        transform:
+            none;
 
         display:
             grid;
@@ -688,6 +764,10 @@ header {
     }
 
 
+    /* ========================================
+       MOBILE BRAND
+    ======================================== */
+
     .site-header-v2-brand {
         justify-self:
             start;
@@ -696,9 +776,16 @@ header {
 
     .site-header-v2-logo {
         width:
-            96px;
+            64px;
+
+        height:
+            auto;
     }
 
+
+    /* ========================================
+       HIDE DESKTOP HEADER ITEMS
+    ======================================== */
 
     .site-header-v2-nav,
     .site-header-v2-socials,
@@ -707,6 +794,10 @@ header {
             none;
     }
 
+
+    /* ========================================
+       MOBILE ACTION GROUP
+    ======================================== */
 
     .site-header-v2-mobile-actions {
         display:
@@ -724,17 +815,42 @@ header {
         gap:
             6px;
 
-        width:
-            auto;
-
         margin:
             0;
+
+        width:
+            auto;
     }
 
 
+    .site-header-v2-mobile-register {
+        min-width:
+            72px;
+    }
+
+
+    .site-header-v2-mobile-login {
+        min-width:
+            50px;
+    }
+
+
+    /* ========================================
+       MOBILE DROPDOWN MENU
+    ======================================== */
+
     .site-mobile-menu-v2 {
+        position:
+            relative;
+
+        z-index:
+            3;
+
         display:
             block;
+
+        width:
+            100%;
 
         max-height:
             0;
@@ -743,10 +859,13 @@ header {
             hidden;
 
         background:
-            rgba(255, 255, 255, 0.98);
+            rgba(255, 255, 255, 0.99);
 
         border-top:
             1px solid transparent;
+
+        box-shadow:
+            none;
 
         transition:
             max-height 0.28s ease,
@@ -757,22 +876,29 @@ header {
 
     .site-mobile-menu-v2-open {
         max-height:
-            620px;
+            580px;
 
         border-top-color:
-            #e7eef4;
+            #e6edf3;
 
         box-shadow:
-            0 18px 30px rgba(23, 73, 111, 0.10);
+            0 18px 32px rgba(24, 52, 71, 0.10);
     }
 
 
+    /* ========================================
+       MOBILE MENU LINKS
+    ======================================== */
+
     .site-mobile-menu-v2-links {
         width:
-            calc(100% - 28px);
+            100%;
 
         margin:
-            0 auto;
+            0;
+
+        padding:
+            0 14px;
 
         display:
             flex;
@@ -780,32 +906,60 @@ header {
         flex-direction:
             column;
 
-        padding:
-            16px
-            0
-            8px;
+        background:
+            #ffffff;
     }
 
 
     .site-mobile-menu-v2-links a {
+        width:
+            100%;
+
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        min-height:
+            48px;
+
+        padding:
+            0 6px;
+
         color:
             #243949;
 
         text-decoration:
             none;
 
+        font-family:
+            "Manrope",
+            sans-serif;
+
         font-size:
-            15px;
+            14px;
 
         font-weight:
             800;
 
-        padding:
-            14px
-            4px;
+        text-align:
+            left;
 
         border-bottom:
             1px solid #edf2f6;
+    }
+
+
+    .site-mobile-menu-v2-links a:first-child {
+        color:
+            #2890df;
+
+        border-left:
+            3px solid #f3aa4c;
+
+        padding-left:
+            10px;
     }
 
 
@@ -815,31 +969,42 @@ header {
     }
 
 
+    /* ========================================
+       MOBILE MENU CTA AREA
+    ======================================== */
+
     .site-mobile-menu-v2-actions {
         width:
-            calc(100% - 28px);
+            100%;
 
         margin:
-            0 auto;
+            0;
+
+        padding:
+            16px 14px 18px;
 
         display:
             grid;
 
-        gap:
-            10px;
+        grid-template-columns:
+            1fr
+            1fr;
 
-        padding:
-            10px
-            0
-            20px;
+        gap:
+            8px;
+
+        background:
+            #f8fbfd;
+
+        border-top:
+            1px solid #edf2f6;
     }
 
 
     .site-mobile-menu-v2-primary,
-    .site-mobile-menu-v2-secondary,
-    .site-mobile-menu-v2-client {
+    .site-mobile-menu-v2-secondary {
         min-height:
-            46px;
+            42px;
 
         display:
             flex;
@@ -851,13 +1016,17 @@ header {
             center;
 
         border-radius:
-            9px;
+            8px;
 
         text-decoration:
             none;
 
+        font-family:
+            "Manrope",
+            sans-serif;
+
         font-size:
-            14px;
+            11px;
 
         font-weight:
             800;
@@ -872,7 +1041,7 @@ header {
             linear-gradient(
                 135deg,
                 #f5ab40 0%,
-                #ef8f24 100%
+                #ef9b2f 100%
             );
 
         color:
@@ -894,8 +1063,20 @@ header {
 
 
     .site-mobile-menu-v2-client {
+        grid-column:
+            1 / -1;
+
         min-height:
-            38px;
+            34px;
+
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
 
         background:
             transparent;
@@ -903,12 +1084,26 @@ header {
         color:
             #2890df;
 
+        text-decoration:
+            none;
+
+        font-family:
+            "Manrope",
+            sans-serif;
+
         font-size:
-            13px;
+            11px;
+
+        font-weight:
+            800;
     }
 
 }
 
+
+/* ========================================
+   SMALL MOBILE
+======================================== */
 
 @media (max-width: 420px) {
 
@@ -917,7 +1112,7 @@ header {
             calc(100% - 14px);
 
         min-height:
-            76px;
+            58px;
 
         gap:
             5px;
@@ -926,7 +1121,7 @@ header {
 
     .site-header-v2-logo {
         width:
-            90px;
+            58px;
     }
 
 
@@ -939,27 +1134,46 @@ header {
     .site-header-v2-mobile-register,
     .site-header-v2-mobile-login {
         min-height:
-            34px;
+            32px;
 
         padding:
-            0
-            8px;
+            0 8px;
 
         font-size:
             9px;
     }
 
 
+    .site-header-v2-mobile-register {
+        min-width:
+            68px;
+    }
+
+
+    .site-header-v2-mobile-login {
+        min-width:
+            46px;
+    }
+
+
     .site-header-v2-menu-button {
         width:
-            34px;
+            32px;
 
         height:
-            34px;
+            32px;
+    }
+
+
+    .site-mobile-menu-v2-links a {
+        min-height:
+            45px;
+
+        font-size:
+            13px;
     }
 
 }
-
 
 /* Hero Section */
 .hero-section {
