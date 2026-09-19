@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <!-- Main Pages -->
+  
   <url>
     <loc>https://www.pawsinstride.com/</loc>
   </url>
@@ -17,8 +18,9 @@
   <url>
     <loc>https://www.pawsinstride.com/contact.html</loc>
   </url>
-
+  
   <!-- SEO City Pages -->
+  
   <url>
     <loc>https://www.pawsinstride.com/dog-walker-frisco-tx.html</loc>
   </url>
