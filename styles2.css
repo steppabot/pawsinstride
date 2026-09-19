@@ -4467,3 +4467,201 @@ html {
     .homepage-services .service-image { height: 210px; }
     .homepage-services .service-image h2 { width: 92%; font-size: 0.95rem; text-wrap: balance; }
 }
+
+/* =========================
+   SERVICE AREAS (branded map)
+   Paste at the VERY BOTTOM of styles2.css.
+   Works with service-areas-section.html.
+   If you already pasted the earlier Service Areas CSS, replace it with this.
+========================= */
+
+.areas-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 480px) 440px;
+    justify-content: center;
+    gap: 36px;
+    align-items: center;
+    text-align: left;
+}
+
+.areas-info {
+    min-width: 0;
+}
+
+.service-areas-container .areas-info h2 {
+    margin-bottom: 8px;
+}
+
+.service-areas-container .areas-info p {
+    margin-bottom: 22px;
+}
+
+/* Town cards */
+.service-areas-container .areas-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.service-areas-container .areas-list li,
+.service-areas-container .areas-list li:hover {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.service-areas-container .areas-list a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    padding: 18px 20px;
+    background: #f7fafc;
+    border: 1px solid #e6ecf1;
+    border-radius: 12px;
+    color: #1e2a3a;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.service-areas-container .areas-list a:hover,
+.service-areas-container .areas-list li:hover a {
+    background: #fff8ef;
+    border-color: #f3aa4c;
+    color: #1e2a3a;
+}
+
+.areas-list svg {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    fill: #f3aa4c;
+}
+
+.areas-cta {
+    margin-top: 24px;
+}
+
+/* Map */
+.areas-map {
+    background: #e8f1f7;
+    border: 1px solid #d9e6ee;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.areas-map-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: "Manrope", "Roboto", sans-serif;
+}
+
+.map-ctx path {
+    fill: #f7fbfd;
+    stroke: #d3e1ea;
+    stroke-width: 0.8;
+}
+
+.map-ctx-labels text {
+    font-size: 9.5px;
+    font-weight: 600;
+    fill: #9fb2c0;
+    text-anchor: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.map-town path {
+    fill: #fde4c0;
+    stroke: #ef9b2f;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    transition: fill 0.2s ease;
+}
+
+.map-town text {
+    font-size: 15px;
+    font-weight: 800;
+    fill: #1e2a3a;
+    paint-order: stroke;
+    stroke: #ffffff;
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.map-town:focus-visible {
+    outline: none;
+}
+
+.map-town:focus-visible path {
+    stroke-width: 3;
+}
+
+.map-note {
+    font-size: 9px;
+    font-weight: 600;
+    fill: #8aa0b0;
+}
+
+/* Hover a card and its town lights up on the map, and the other way round */
+.map-town:hover path,
+.areas-layout:has(.areas-list li:nth-child(1) a:hover) .map-frisco path,
+.areas-layout:has(.areas-list li:nth-child(2) a:hover) .map-prosper path,
+.areas-layout:has(.areas-list li:nth-child(3) a:hover) .map-celina path,
+.areas-layout:has(.areas-list li:nth-child(4) a:hover) .map-little-elm path {
+    fill: #f9c880;
+}
+
+.areas-layout:has(.map-frisco:hover) .areas-list li:nth-child(1) a,
+.areas-layout:has(.map-prosper:hover) .areas-list li:nth-child(2) a,
+.areas-layout:has(.map-celina:hover) .areas-list li:nth-child(3) a,
+.areas-layout:has(.map-little-elm:hover) .areas-list li:nth-child(4) a {
+    background: #fff8ef;
+    border-color: #f3aa4c;
+}
+
+/* Tablet: stack, map underneath */
+@media (max-width: 900px) {
+    .areas-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        text-align: center;
+    }
+
+    .areas-layout {
+        justify-content: stretch;
+    }
+
+    .service-areas-container .areas-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .areas-map {
+        width: 100%;
+        max-width: 460px;
+        margin: 0 auto;
+    }
+}
+
+/* Phones: tighter cards */
+@media (max-width: 768px) {
+    .service-areas-container .areas-list a {
+        gap: 10px;
+        padding: 14px;
+        font-size: 0.95rem;
+    }
+
+    /* ", Texas" is dropped on phones so each town fits on one line */
+    .areas-state {
+        display: none;
+    }
+}
