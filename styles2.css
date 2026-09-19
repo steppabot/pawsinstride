@@ -3031,71 +3031,6 @@ header {
 }
 
 /* =========================
-   TRUST SECTION
-========================= */
-.trust-images-section {
-    background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-    padding: 34px 28px 28px;
-}
-
-.trust-images-section .section-heading,
-.homepage-pricing .section-heading,
-.homepage-services .section-heading {
-    max-width: 900px;
-    margin: 0 auto 24px;
-    text-align: center;
-}
-
-.trust-images-section .section-heading h2,
-.homepage-pricing h2,
-.homepage-services .section-heading h2,
-.service-areas-container h2,
-.fresh-food-header h2,
-.final-cta-container h2 {
-    font-size: 2.2rem;
-    color: #f3aa4c;
-    margin-bottom: 10px;
-}
-
-.trust-images-section .section-heading p,
-.homepage-pricing p,
-.homepage-services .section-heading p,
-.service-areas-container p,
-.final-cta-container p {
-    color: #444;
-    line-height: 1.6;
-}
-
-.trust-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-}
-
-.trust-grid img {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-    border-radius: 22px;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
-    display: block;
-}
-
-.trust-grid img:nth-child(1) {
-    object-position: center 54%; /* move UP */
-}
-
-.trust-grid img:nth-child(2) {
-    object-position: center 23%; /* move DOWN */
-}
-
-.trust-grid img:nth-child(3) {
-    object-position: center 47%; /* move UP more */
-}
-
-/* =========================
    PRICING
 ========================= */
 .homepage-pricing .homepage-pricing-container {
@@ -4207,4 +4142,152 @@ html {
 .service-note,
 .services-trust-strip span {
     border-radius: 6px;
+}
+
+/* =========================
+   HAPPY DOGS + CARD SYSTEM
+   Paste at the VERY BOTTOM of styles2.css (after the button system).
+   Self-contained: the old "TRUST SECTION" block becomes unused.
+========================= */
+
+/* One place to control every card on the page */
+:root {
+    --card-radius: 16px;
+    --card-shadow: 0 12px 32px rgba(16, 60, 100, 0.16);
+}
+
+.homepage-hero .hero-container,
+.trust-images-section,
+.homepage-reviews-container,
+.homepage-pricing .homepage-pricing-container,
+.homepage-services .homepage-services-card,
+.service-areas .service-areas-container,
+.fresh-food-feature.lower-priority,
+.final-cta .final-cta-container,
+.elfsight-wrapper {
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+}
+
+/* Things inside the cards: a smaller radius than the card itself */
+.homepage-pricing-card,
+.homepage-services .service-image {
+    border-radius: 12px;
+}
+
+.fresh-food-image-wrap img {
+    border-radius: 10px;
+}
+
+/* Section headings: same size and tighter spacing everywhere */
+.trust-images-section .section-heading h2,
+.homepage-reviews .section-heading h2,
+.homepage-pricing h2,
+.homepage-services .section-heading h2,
+.service-areas-container h2,
+.fresh-food-header h2,
+.final-cta-container h2 {
+    font-size: 2rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+}
+
+/* Instagram feed card: same width and shadow as the other cards */
+.elfsight-container {
+    width: min(1200px, calc(100% - 40px));
+    max-width: none;
+    margin: 0 auto 28px;
+    padding: 0;
+}
+
+.elfsight-wrapper {
+    padding: 28px;
+}
+
+
+/* ---------- Happy Dogs photo strip ---------- */
+
+.trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.trust-grid img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: none;
+    display: block;
+}
+
+.trust-grid img:nth-child(1) {
+    object-position: center 54%;
+}
+
+.trust-grid img:nth-child(2) {
+    object-position: center 23%;
+}
+
+.trust-grid img:nth-child(3) {
+    object-position: center 47%;
+}
+
+
+/* ---------- Tablet and phone ---------- */
+
+@media (max-width: 980px) {
+    .trust-grid img {
+        height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .elfsight-container {
+        width: calc(100% - 28px);
+        margin-bottom: 20px;
+    }
+
+    .elfsight-wrapper {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .trust-images-section .section-heading h2,
+    .homepage-reviews .section-heading h2,
+    .homepage-pricing h2,
+    .homepage-services .section-heading h2,
+    .service-areas-container h2,
+    .fresh-food-header h2,
+    .final-cta-container h2 {
+        font-size: 1.6rem;
+    }
+
+    /* Photos become a swipeable row: the next photo peeks in
+       from the right so people know they can swipe. */
+    .trust-grid {
+        display: flex;
+        gap: 10px;
+        margin: 0 -18px;
+        padding: 0 18px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-padding-left: 18px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .trust-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .trust-grid img {
+        flex: 0 0 78%;
+        width: 78%;
+        height: 220px;
+        scroll-snap-align: start;
+    }
 }
