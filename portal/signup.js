@@ -164,11 +164,33 @@ function initializeSignup() {
 // GOOGLE ADDRESS AUTOCOMPLETE
 // ========================================
 
-let signupAddressAutocomplete = null;
+let signupAddressAutocomplete =
+    null;
+
 
 let signupAddressWasSelected =
     false;
 
+
+// ========================================
+// GOOGLE ADDRESS STREET PROTECTION
+// ========================================
+//
+// Mobile Safari + Google Places can sometimes
+// write formatted_address back into the street
+// input AFTER place_changed has already finished.
+//
+// Keep the clean street value briefly so any
+// delayed Google input event can be corrected.
+// ========================================
+
+
+let signupResolvedStreet =
+    "";
+
+
+let signupAddressProtectionUntil =
+    0;
 
 /*
  * Google calls this function automatically
@@ -476,40 +498,18 @@ window.initializeSignupAddressAutocomplete =
                     resolvedStreet
                 ) {
                 
-                    addressInput.value =
+                    signupResolvedStreet =
                         resolvedStreet;
                 
                 
-                    // ========================================
-                    // SAFARI / GOOGLE AUTOCOMPLETE FALLBACK
-                    // ========================================
-                    //
-                    // On mobile Safari, Google Places can
-                    // occasionally write formatted_address back
-                    // into the input AFTER place_changed fires.
-                    //
-                    // Re-apply our clean street address after
-                    // Google's internal input update finishes.
-                    // ========================================
+                    signupAddressProtectionUntil =
+                        Date.now() + 2000;
                 
-                    window.setTimeout(
-                        () => {
                 
-                            if (
-                                resolvedStreet
-                            ) {
-                
-                                addressInput.value =
-                                    resolvedStreet;
-                
-                            }
-                
-                        },
-                        50
-                    );
+                    addressInput.value =
+                        resolvedStreet;
                 
                 }
-        
                 // ========================================
                 // POPULATE CITY
                 // ========================================
@@ -665,30 +665,98 @@ window.initializeSignupAddressAutocomplete =
         );
 
         // ========================================
-        // MANUAL STREET EDIT
+        // STREET ADDRESS INPUT PROTECTION
         // ========================================
-
-        /*
-         * If Google filled an address and the
-         * client later changes the street manually,
-         * it is no longer considered a Google
-         * selected address.
-         *
-         * Manual entry is still allowed.
-         */
-
+        
         addressInput.addEventListener(
             "input",
             () => {
-
+        
+                // ========================================
+                // GOOGLE DELAYED AUTOFILL
+                // ========================================
+                //
+                // During the short protection window,
+                // Google may attempt to overwrite the clean
+                // street with its complete formatted address.
+                //
+                // If that happens, immediately restore the
+                // canonical street-only value.
+                // ========================================
+        
+                if (
+                    Date.now() <
+                        signupAddressProtectionUntil &&
+                    signupResolvedStreet
+                ) {
+        
+                    if (
+                        addressInput.value !==
+                        signupResolvedStreet
+                    ) {
+        
+                        requestAnimationFrame(
+                            () => {
+        
+                                addressInput.value =
+                                    signupResolvedStreet;
+        
+                            }
+                        );
+        
+                    }
+        
+        
+                    return;
+        
+                }
+        
+        
+                // ========================================
+                // REAL MANUAL STREET EDIT
+                // ========================================
+        
                 signupAddressWasSelected =
                     false;
-
+        
+        
+                signupResolvedStreet =
+                    "";
+        
+        
+                signupAddressProtectionUntil =
+                    0;
+        
             }
         );
-
-    };
-
+        
+        
+        // ========================================
+        // STREET ADDRESS BLUR SAFETY
+        // ========================================
+        //
+        // One final cleanup when the user leaves the field.
+        // This catches Safari updates that happen without a
+        // normal input event.
+        // ========================================
+        
+        addressInput.addEventListener(
+            "blur",
+            () => {
+        
+                if (
+                    signupResolvedStreet &&
+                    Date.now() <
+                        signupAddressProtectionUntil
+                ) {
+        
+                    addressInput.value =
+                        signupResolvedStreet;
+        
+                }
+        
+            }
+        );
 
 // ========================================
 // PARSE GOOGLE ADDRESS COMPONENTS
