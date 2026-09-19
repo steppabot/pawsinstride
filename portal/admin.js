@@ -20108,8 +20108,12 @@ async function openAdminClientHousehold(
     const profile =
         allProfiles.find(
             item =>
-                item.id ===
-                clientId
+                String(
+                    item.id
+                ) ===
+                String(
+                    clientId
+                )
         );
 
 
@@ -20120,6 +20124,12 @@ async function openAdminClientHousehold(
         return;
 
     }
+
+
+    const household =
+        getAdminClientHousehold(
+            clientId
+        );
 
 
     const pets =
@@ -20136,25 +20146,25 @@ async function openAdminClientHousehold(
 
     const address =
         getAdminClientAddress(
-            clientId
+            household
         );
 
 
     const directoryHeading =
-        document.querySelector(
-            ".admin-client-directory-heading"
+        document.getElementById(
+            "admin-client-directory-heading"
         );
 
 
     const search =
-        document.querySelector(
-            ".admin-client-search"
+        document.getElementById(
+            "admin-client-search"
         );
 
 
     const list =
         document.getElementById(
-            "admin-client-directory-list"
+            "admin-client-list"
         );
 
 
@@ -20162,15 +20172,6 @@ async function openAdminClientHousehold(
         document.getElementById(
             "admin-client-household-detail"
         );
-
-
-    if (
-        !detail
-    ) {
-
-        return;
-
-    }
 
 
     if (
@@ -20203,16 +20204,14 @@ async function openAdminClientHousehold(
     }
 
 
-    detail.hidden =
-        false;
+    if (
+        detail
+    ) {
 
+        detail.hidden =
+            false;
 
-    document.getElementById(
-        "admin-client-household-avatar"
-    ).textContent =
-        getAdminClientInitials(
-            profile
-        );
+    }
 
 
     document.getElementById(
@@ -20279,11 +20278,25 @@ async function openAdminClientHousehold(
     // PRICING TIER
     // ========================================
 
-    const pricingTier =
-        profile.pricing_tier ===
-        "grandfathered"
+    const rawPricingTier =
+        String(
+            profile.pricing_tier ||
+            "standard"
+        )
+            .trim()
+            .toLowerCase();
 
-            ? "grandfathered"
+
+    const pricingTier =
+        [
+            "standard",
+            "grandfathered",
+            "preferred"
+        ].includes(
+            rawPricingTier
+        )
+
+            ? rawPricingTier
 
             : "standard";
 
@@ -20306,17 +20319,20 @@ async function openAdminClientHousehold(
         );
 
 
+    const pricingTierDisplayWrap =
+        document.querySelector(
+            ".admin-client-pricing-tier-display"
+        );
+
+
     if (
         pricingTierDisplay
     ) {
 
         pricingTierDisplay.textContent =
-            pricingTier ===
-            "grandfathered"
-
-                ? "Legacy"
-
-                : "Standard";
+            getAdminClientPricingTierLabel(
+                pricingTier
+            );
 
     }
 
@@ -20342,6 +20358,16 @@ async function openAdminClientHousehold(
 
         pricingTierEditor.hidden =
             true;
+
+    }
+
+
+    if (
+        pricingTierDisplayWrap
+    ) {
+
+        pricingTierDisplayWrap.hidden =
+            false;
 
     }
 
@@ -20746,14 +20772,63 @@ function getAdminClientPricingTierLabel(
     pricingTier
 ) {
 
-    return (
+
+    if (
         pricingTier ===
         "grandfathered"
+    ) {
 
-            ? "Legacy"
+        return "Legacy";
 
-            : "Standard"
-    );
+    }
+
+
+    if (
+        pricingTier ===
+        "preferred"
+    ) {
+
+        return "Preferred";
+
+    }
+
+
+    return "Standard";
+
+}
+
+
+// ========================================
+// NORMALIZE CLIENT PRICING TIER
+// ========================================
+
+function normalizeAdminClientPricingTier(
+    pricingTier
+) {
+
+
+    const normalized =
+        String(
+            pricingTier ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    if (
+        normalized ===
+            "grandfathered" ||
+        normalized ===
+            "preferred"
+    ) {
+
+        return normalized;
+
+    }
+
+
+    return "standard";
 
 }
 
@@ -20768,6 +20843,12 @@ async function saveAdminClientPricingTier(
 ) {
 
 
+    const normalizedPricingTier =
+        normalizeAdminClientPricingTier(
+            pricingTier
+        );
+
+
     const {
         error
     } =
@@ -20779,7 +20860,7 @@ async function saveAdminClientPricingTier(
                         clientId,
 
                     p_pricing_tier:
-                        pricingTier
+                        normalizedPricingTier
                 }
             );
 
@@ -20810,7 +20891,7 @@ async function saveAdminClientPricingTier(
     ) {
 
         profile.pricing_tier =
-            pricingTier;
+            normalizedPricingTier;
 
     }
 
@@ -21017,12 +21098,9 @@ document.addEventListener(
             ) {
 
                 select.value =
-                    profile?.pricing_tier ===
-                    "grandfathered"
-
-                        ? "grandfathered"
-
-                        : "standard";
+                    normalizeAdminClientPricingTier(
+                        profile?.pricing_tier
+                    );
 
             }
 
@@ -21097,12 +21175,13 @@ document.addEventListener(
 
 
             const pricingTier =
-                select?.value;
+                normalizeAdminClientPricingTier(
+                    select?.value
+                );
 
 
             if (
-                !clientId ||
-                !pricingTier
+                !clientId
             ) {
 
                 return;
