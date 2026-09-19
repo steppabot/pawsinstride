@@ -672,9 +672,8 @@ window.initializeSignupAddressAutocomplete =
         // rewrite the Street Address field after
         // place_changed finishes.
         //
-        // We protect against that delayed Google rewrite,
-        // but immediately release the protection when
-        // the user actually starts typing a new address.
+        // Release protection immediately when the
+        // user begins entering a new address.
         // ========================================
         
         
@@ -686,39 +685,14 @@ window.initializeSignupAddressAutocomplete =
             "beforeinput",
             event => {
         
-                const manualInputTypes =
-                    [
-                        "insertText",
-                        "deleteContentBackward",
-                        "deleteContentForward",
-                        "insertFromPaste",
-                        "insertFromDrop",
-                        "historyUndo",
-                        "historyRedo"
-                    ];
-        
-        
-                const isManualEdit =
-                    (
-                        event.isTrusted &&
-                        manualInputTypes.includes(
-                            event.inputType
-                        )
-                    );
-        
-        
                 if (
-                    !isManualEdit
+                    !event.isTrusted
                 ) {
         
                     return;
         
                 }
         
-        
-                // ========================================
-                // USER STARTED A NEW ADDRESS
-                // ========================================
         
                 signupAddressProtectionUntil =
                     0;
@@ -736,52 +710,12 @@ window.initializeSignupAddressAutocomplete =
         
         
         // ========================================
-        // PROTECT AGAINST GOOGLE DELAYED REWRITE
+        // NORMAL STREET INPUT
         // ========================================
         
         addressInput.addEventListener(
             "input",
             () => {
-        
-                if (
-                    Date.now() <
-                        signupAddressProtectionUntil &&
-                    signupResolvedStreet
-                ) {
-        
-                    if (
-                        addressInput.value !==
-                        signupResolvedStreet
-                    ) {
-        
-                        requestAnimationFrame(
-                            () => {
-        
-                                if (
-                                    Date.now() <
-                                        signupAddressProtectionUntil &&
-                                    signupResolvedStreet
-                                ) {
-        
-                                    addressInput.value =
-                                        signupResolvedStreet;
-        
-                                }
-        
-                            }
-                        );
-        
-                    }
-        
-        
-                    return;
-        
-                }
-        
-        
-                // ========================================
-                // NORMAL MANUAL EDIT
-                // ========================================
         
                 signupAddressWasSelected =
                     false;
@@ -811,6 +745,8 @@ window.initializeSignupAddressAutocomplete =
         
             }
         );
+        
+            };
         
 // ========================================
 // PARSE GOOGLE ADDRESS COMPONENTS
