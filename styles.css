@@ -5699,3 +5699,425 @@ html {
         gap: 10px;
     }
 }
+
+/* =========================
+   CONTACT PAGE
+   Paste at the VERY BOTTOM of styles2.css.
+   Works with the new contact.html. Nothing gets deleted:
+   your old contact CSS just becomes unused.
+========================= */
+
+/* ---------- Widths (same as the other pages) ---------- */
+.ct-hero,
+.ct-grid {
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto 28px;
+}
+
+.ct-hero {
+    margin-top: 36px;
+}
+
+
+/* ---------- Top card ---------- */
+.ct-hero-card,
+.ct-card {
+    background: #ffffff;
+    border-radius: var(--card-radius, 16px);
+    box-shadow: var(--card-shadow, 0 12px 32px rgba(16, 60, 100, 0.16));
+}
+
+.ct-hero-card {
+    padding: 44px 40px 40px;
+    text-align: center;
+}
+
+.ct-hero-card .hero-badge {
+    margin-bottom: 16px;
+}
+
+.ct-hero-card h1 {
+    margin: 0 0 14px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    color: #f3aa4c;
+    text-wrap: balance;
+}
+
+.ct-nobr {
+    white-space: nowrap;
+}
+
+.ct-hero-card p {
+    max-width: 640px;
+    margin: 0 auto 26px;
+    font-size: 1.08rem;
+    line-height: 1.65;
+    color: #33414f;
+    text-wrap: balance;
+}
+
+.ct-hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+
+/* ---------- Two cards ---------- */
+.ct-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.ct-card {
+    min-width: 0;
+    padding: 36px 32px;
+}
+
+.ct-card h2 {
+    margin: 0 0 8px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: #f3aa4c;
+}
+
+.ct-sub {
+    margin: 0 0 22px;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #5b6b7b;
+}
+
+
+/* ---------- Form ---------- */
+.ct-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.ct-field label {
+    margin-bottom: 7px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e2a3a;
+}
+
+.ct-field input,
+.ct-field select,
+.ct-field textarea {
+    width: 100%;
+    padding: 13px 14px;
+    background: #ffffff;
+    border: 1px solid #d5e0ea;
+    border-radius: 9px;
+    color: #1e2a3a;
+    font-family: "Roboto", sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ct-field textarea {
+    min-height: 140px;
+    height: auto;
+    resize: vertical;
+}
+
+.ct-field select {
+    padding-right: 38px;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23243949' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 12px 8px;
+}
+
+.ct-field input::placeholder,
+.ct-field textarea::placeholder {
+    color: #8fa0af;
+    font-size: 15px;
+}
+
+.ct-field input:focus,
+.ct-field select:focus,
+.ct-field textarea:focus {
+    outline: none;
+    border-color: #2890df;
+    box-shadow: 0 0 0 3px rgba(40, 144, 223, 0.14);
+}
+
+/* The message box stretches so both cards end at the same height */
+.ct-card--form {
+    display: flex;
+    flex-direction: column;
+}
+
+.ct-card--form .ct-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* the "hidden" attribute has to win over the flex layout above */
+.ct-card--form .ct-form[hidden] {
+    display: none;
+}
+
+.ct-card--form.is-sent .ct-sub {
+    display: none;
+}
+
+.ct-field--grow {
+    flex: 1 1 auto;
+}
+
+.ct-field--grow textarea {
+    flex: 1 1 auto;
+}
+
+.ct-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 14px;
+}
+
+.ct-trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.ct-form .send-button {
+    margin-top: 6px;
+}
+
+.ct-form .send-button:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+/* Thank-you message */
+.ct-success {
+    padding: 24px 0 8px;
+    text-align: center;
+}
+
+.ct-success[hidden] {
+    display: none;
+}
+
+.ct-card--form .ct-success {
+    margin-block: auto;
+}
+
+.ct-success-icon {
+    display: inline-flex;
+    width: 60px;
+    height: 60px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    background: #fff1dc;
+    border-radius: 14px;
+}
+
+.ct-success-icon svg {
+    width: 34px;
+    height: 34px;
+    fill: #e58a1f;
+}
+
+.ct-success h3 {
+    margin: 0 0 8px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e2a3a;
+}
+
+.ct-success p {
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.65;
+    color: #4a5a68;
+}
+
+.ct-success a {
+    color: #2890df;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+
+/* ---------- Contact details ---------- */
+.ct-rows {
+    display: grid;
+    gap: 10px;
+}
+
+.ct-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #f7fafc;
+    border: 1px solid #e6ecf1;
+    border-radius: 12px;
+    color: #1e2a3a;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.ct-row:hover {
+    background: #fff8ef;
+    border-color: #f3aa4c;
+}
+
+.ct-row-icon {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff1dc;
+    border-radius: 10px;
+}
+
+.ct-row-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: #e58a1f;
+}
+
+.ct-row-text {
+    min-width: 0;
+}
+
+.ct-row-text small {
+    display: block;
+    font-size: 0.8rem;
+    color: #6b7a89;
+}
+
+.ct-row-text strong {
+    display: block;
+    overflow-wrap: anywhere;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e2a3a;
+}
+
+.ct-map {
+    margin-top: 16px;
+    overflow: hidden;
+    border: 1px solid #e6ecf1;
+    border-radius: 12px;
+}
+
+.ct-map iframe {
+    display: block;
+    width: 100%;
+    height: 260px;
+    border: 0;
+    border-radius: 0;
+}
+
+.ct-address {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-top: 16px;
+    padding: 16px 18px;
+    background: #f9fbfd;
+    border: 1px solid #e6eef5;
+    border-radius: 12px;
+}
+
+.ct-address-text {
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.ct-address-text h3 {
+    margin: 0 0 2px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e2a3a;
+}
+
+.ct-address-text p {
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: #4a5a68;
+}
+
+.ct-directions {
+    flex: none;
+    min-height: 44px;
+    padding: 0 18px;
+    font-size: 12px;
+}
+
+
+/* ---------- Tablet and phones ---------- */
+@media (max-width: 900px) {
+    .ct-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .ct-hero,
+    .ct-grid {
+        width: calc(100% - 28px);
+        margin-bottom: 20px;
+    }
+
+    .ct-hero {
+        margin-top: 18px;
+    }
+
+    .ct-hero-card {
+        padding: 30px 20px 26px;
+    }
+
+    .ct-card {
+        padding: 26px 20px;
+    }
+
+    .ct-hero-buttons .cta-button {
+        width: 100%;
+    }
+
+    .ct-card h2 {
+        font-size: 1.6rem;
+    }
+
+    .ct-directions {
+        width: 100%;
+    }
+}
+
+@media (max-width: 520px) {
+    .ct-two {
+        grid-template-columns: 1fr;
+    }
+}
