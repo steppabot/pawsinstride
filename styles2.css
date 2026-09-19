@@ -5460,3 +5460,242 @@ html {
     font-weight: 800;
     color: #1e2a3a;
 }
+
+/* =========================
+   ABOUT PAGE
+   Paste at the VERY BOTTOM of styles2.css.
+   Works with the new aboutus.html. Nothing gets deleted:
+   your old about-page CSS just becomes unused.
+========================= */
+
+/* ---------- Cards ---------- */
+.abt-hero,
+.abt-card {
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: var(--card-radius, 16px);
+    box-shadow: var(--card-shadow, 0 12px 32px rgba(16, 60, 100, 0.16));
+}
+
+.abt-hero {
+    margin-top: 36px;
+}
+
+.abt-card--reverse .abt-media {
+    order: 2;
+}
+
+/* The photo fills the full height of the text next to it */
+.abt-media {
+    min-width: 0;
+    overflow: hidden;
+    contain: size;
+}
+
+.abt-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Tune the crop of each photo here if a face gets cut off */
+.abt-media img.abt-img-owner  { object-position: center 30%; }
+.abt-media img.abt-img-commit { object-position: center center; }
+
+.abt-body {
+    min-width: 0;
+    padding: 44px 40px;
+}
+
+.abt-hero .hero-badge {
+    margin-bottom: 16px;
+}
+
+.abt-body h1,
+.abt-body h2 {
+    margin: 0 0 16px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: #f3aa4c;
+}
+
+.abt-body h1 {
+    font-size: clamp(1.9rem, 3vw, 2.5rem);
+    line-height: 1.1;
+}
+
+.abt-body h2 {
+    font-size: 2rem;
+    line-height: 1.15;
+}
+
+.abt-body p {
+    margin: 0 0 14px;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #444444;
+}
+
+
+/* ---------- Pull quote ---------- */
+.abt-quote {
+    margin: 20px 0 0;
+    padding: 14px 18px;
+    background: #fffaf3;
+    border: 1px solid #f3d19d;
+    border-left: 4px solid #f3aa4c;
+    border-radius: 6px;
+    color: #1e2a3a;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+
+/* ---------- Quick facts ---------- */
+.abt-stats {
+    list-style: none;
+    margin: 26px 0 0;
+    padding: 22px 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    border-top: 1px solid #e6ecf1;
+}
+
+.abt-stats strong {
+    display: block;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: #1e2a3a;
+}
+
+.abt-stats span {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: #6b7a89;
+}
+
+
+/* ---------- Commitment list ---------- */
+.abt-values {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.abt-values li {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    padding: 16px 18px;
+    background: #f9fbfd;
+    border: 1px solid #e6eef5;
+    border-radius: 12px;
+}
+
+.abt-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff1dc;
+    border-radius: 10px;
+}
+
+.abt-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: #e58a1f;
+}
+
+.abt-values h3 {
+    margin: 2px 0 4px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.08rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #1e2a3a;
+}
+
+.abt-body .abt-values p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #4a5a68;
+}
+
+
+/* ---------- Tablet ---------- */
+@media (max-width: 900px) {
+    .abt-hero,
+    .abt-card {
+        grid-template-columns: 1fr;
+    }
+
+    .abt-card--reverse .abt-media {
+        order: 0;
+    }
+
+    .abt-media {
+        contain: none;
+    }
+
+    .abt-media img {
+        height: auto;
+        aspect-ratio: 4 / 3;
+        object-position: center 35%;
+    }
+
+    .abt-body {
+        padding: 32px 26px;
+    }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 768px) {
+    .abt-hero,
+    .abt-card {
+        width: calc(100% - 28px);
+        margin-bottom: 20px;
+    }
+
+    .abt-hero {
+        margin-top: 18px;
+    }
+
+    .abt-body {
+        padding: 26px 20px;
+    }
+
+    .abt-body h2 {
+        font-size: 1.6rem;
+    }
+
+    .abt-stats strong {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .abt-values li {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
