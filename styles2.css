@@ -5398,3 +5398,65 @@ html {
         text-align: left;
     }
 }
+
+/* =========================
+   12% DISCOUNT CALLOUT (services page)
+   Paste at the VERY BOTTOM of styles2.css,
+   below the services page block you already added.
+========================= */
+
+.svc-deal {
+    display: flex;
+    align-items: stretch;
+    margin-top: 14px;
+    overflow: hidden;
+    background: #f2f9fe;
+    border: 1px solid #cfe6f7;
+    border-radius: 10px;
+}
+
+.svc-deal-badge {
+    flex: none;
+    width: 84px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #47cee6 0%, #2890df 100%);
+    color: #ffffff;
+    font-family: "Manrope", "Roboto", sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.svc-deal-badge strong {
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.svc-deal-badge span {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.svc-body .svc-deal p {
+    margin: 0;
+    padding: 12px 16px;
+    align-self: center;
+    color: #33414f;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.svc-deal p strong {
+    display: block;
+    margin-bottom: 2px;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: #1e2a3a;
+}
