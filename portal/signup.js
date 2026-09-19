@@ -447,26 +447,68 @@ window.initializeSignupAddressAutocomplete =
                 // ========================================
                 // POPULATE STREET
                 // ========================================
-        
+                
+                let resolvedStreet =
+                    "";
+                
+                
                 if (
                     address.streetNumber &&
                     address.route
                 ) {
-        
-                    addressInput.value =
+                
+                    resolvedStreet =
                         `${address.streetNumber} ${address.route}`
                             .trim();
-        
+                
                 }
                 else if (
                     fallbackStreet
                 ) {
-        
-                    addressInput.value =
+                
+                    resolvedStreet =
                         fallbackStreet;
-        
+                
                 }
-        
+                
+                
+                if (
+                    resolvedStreet
+                ) {
+                
+                    addressInput.value =
+                        resolvedStreet;
+                
+                
+                    // ========================================
+                    // SAFARI / GOOGLE AUTOCOMPLETE FALLBACK
+                    // ========================================
+                    //
+                    // On mobile Safari, Google Places can
+                    // occasionally write formatted_address back
+                    // into the input AFTER place_changed fires.
+                    //
+                    // Re-apply our clean street address after
+                    // Google's internal input update finishes.
+                    // ========================================
+                
+                    window.setTimeout(
+                        () => {
+                
+                            if (
+                                resolvedStreet
+                            ) {
+                
+                                addressInput.value =
+                                    resolvedStreet;
+                
+                            }
+                
+                        },
+                        50
+                    );
+                
+                }
         
                 // ========================================
                 // POPULATE CITY
