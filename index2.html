@@ -105,52 +105,297 @@
         <span class="close-btn" onclick="closeNotificationBar()">✖</span>
     </div>
 
-    <header>
+    <header class="site-header-v2">
+    
+    
+        <!-- ========================================
+             META PIXEL
+             ======================================== -->
+    
         <script>
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '270500070223789');
-        fbq('track', 'PageView');
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+    
+            fbq(
+                'init',
+                '270500070223789'
+            );
+    
+            fbq(
+                'track',
+                'PageView'
+            );
         </script>
-        <noscript><img height="1" width="1" style="display:none"
-        src="https://www.facebook.com/tr?id=270500070223789&ev=PageView&noscript=1"
-        /></noscript>
-        
-        <div class="logo-container">
-            <a href="/index.html">
-                <img src="pawsnstridelogo1.png" alt="Dog Walking Services Frisco Prosper Celina Little Elm Texas" class="logo">
+    
+        <noscript>
+    
+            <img
+                height="1"
+                width="1"
+                style="display:none"
+                src="https://www.facebook.com/tr?id=270500070223789&ev=PageView&noscript=1"
+                alt=""
+            >
+    
+        </noscript>
+    
+    
+        <!-- ========================================
+             HEADER INNER
+             ======================================== -->
+    
+        <div class="site-header-v2-inner">
+    
+    
+            <!-- ========================================
+                 BRAND
+                 ======================================== -->
+    
+            <a
+                href="/index2.html"
+                class="site-header-v2-brand"
+                aria-label="Paws in Stride Home"
+            >
+    
+                <img
+                    src="/pawsnstridelogo1.png"
+                    alt="Paws in Stride"
+                    class="site-header-v2-logo"
+                >
+    
             </a>
+    
+    
+            <!-- ========================================
+                 DESKTOP NAVIGATION
+                 ======================================== -->
+    
+            <nav
+                class="site-header-v2-nav"
+                aria-label="Primary navigation"
+            >
+    
+                <a
+                    href="/index2.html"
+                    class="site-header-v2-nav-link site-header-v2-nav-link-active"
+                >
+                    Home
+                </a>
+    
+                <a
+                    href="/services.html"
+                    class="site-header-v2-nav-link"
+                >
+                    Services
+                </a>
+    
+                <a
+                    href="/fresh-dog-food"
+                    class="site-header-v2-nav-link"
+                >
+                    Fresh Dog Food
+                </a>
+    
+                <a
+                    href="/aboutus.html"
+                    class="site-header-v2-nav-link"
+                >
+                    About
+                </a>
+    
+                <a
+                    href="/contact.html"
+                    class="site-header-v2-nav-link"
+                >
+                    Contact
+                </a>
+    
+            </nav>
+    
+    
+            <!-- ========================================
+                 DESKTOP CLIENT ACTIONS
+                 ======================================== -->
+    
+            <div class="site-header-v2-actions">
+    
+                <a
+                    href="/portal/signup.html"
+                    class="site-header-v2-register"
+                >
+                    New Client Registration
+                </a>
+    
+                <a
+                    href="/portal/login.html"
+                    class="site-header-v2-login"
+                >
+                    Client Login
+                </a>
+    
+            </div>
+    
+    
+            <!-- ========================================
+                 MOBILE HEADER ACTIONS
+                 ======================================== -->
+    
+            <div class="site-header-v2-mobile-actions">
+    
+                <a
+                    href="/portal/login.html"
+                    class="site-header-v2-mobile-login"
+                >
+                    Login
+                </a>
+    
+    
+                <button
+                    type="button"
+                    class="site-header-v2-menu-button"
+                    aria-label="Open navigation menu"
+                    aria-expanded="false"
+                    aria-controls="site-mobile-menu-v2"
+                    onclick="toggleSiteMenuV2(this)"
+                >
+    
+                    <span></span>
+                    <span></span>
+                    <span></span>
+    
+                </button>
+    
+            </div>
+    
+    
         </div>
-
-        <div class="social-media-icons">
-            <a href="https://www.facebook.com/pawsinstride" target="_blank" class="social-icon">
-                <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="https://www.instagram.com/paws.in.stride" target="_blank" class="social-icon">
-                <i class="fab fa-instagram"></i>
-            </a>
-            <a href="https://www.tiktok.com/@pawsnstride" target="_blank" class="social-icon">
-                <i class="fab fa-tiktok"></i>
-            </a>
+    
+    
+        <!-- ========================================
+             MOBILE NAVIGATION PANEL
+             ======================================== -->
+    
+        <div
+            id="site-mobile-menu-v2"
+            class="site-mobile-menu-v2"
+        >
+    
+            <nav
+                class="site-mobile-menu-v2-links"
+                aria-label="Mobile navigation"
+            >
+    
+                <a href="/index2.html">
+                    Home
+                </a>
+    
+                <a href="/services.html">
+                    Services
+                </a>
+    
+                <a href="/fresh-dog-food">
+                    Fresh Dog Food
+                </a>
+    
+                <a href="/aboutus.html">
+                    About
+                </a>
+    
+                <a href="/contact.html">
+                    Contact
+                </a>
+    
+            </nav>
+    
+    
+            <!-- ========================================
+                 MOBILE CONVERSION ACTIONS
+                 ======================================== -->
+    
+            <div class="site-mobile-menu-v2-actions">
+    
+                <a
+                    href="/portal/signup.html"
+                    class="site-mobile-menu-v2-primary"
+                >
+                    Book a Free Meet &amp; Greet
+                </a>
+    
+                <a
+                    href="tel:2147367923"
+                    class="site-mobile-menu-v2-secondary"
+                >
+                    Call 214-736-7923
+                </a>
+    
+                <a
+                    href="/portal/login.html"
+                    class="site-mobile-menu-v2-client"
+                >
+                    Existing Client? Log In
+                </a>
+    
+            </div>
+    
         </div>
-
-        <nav id="menu-box">
-            <div class="menu-button" onclick="toggleMenu()">MENU</div>
-
-            <ul class="nav-links" id="nav-menu">
-                <li><a href="/index.html">HOME</a></li>
-                <li><a href="/services.html">SERVICES</a></li>
-                <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
-                <li><a href="/aboutus.html">ABOUT</a></li>
-                <li><a href="/contact.html">CONTACT</a></li>
-            </ul>
-        </nav>
+    
+    
+    </header>
+    
+    
+    <script>
+    
+        // ========================================
+        // MOBILE SITE MENU
+        // ========================================
+    
+        function toggleSiteMenuV2(
+            button
+        ) {
+    
+            const menu =
+                document.getElementById(
+                    "site-mobile-menu-v2"
+                );
+    
+    
+            if (
+                !menu
+            ) {
+    
+                return;
+    
+            }
+    
+    
+            const isOpen =
+                menu.classList.toggle(
+                    "site-mobile-menu-v2-open"
+                );
+    
+    
+            button.setAttribute(
+                "aria-expanded",
+                String(
+                    isOpen
+                )
+            );
+    
+    
+            button.classList.toggle(
+                "site-header-v2-menu-button-open",
+                isOpen
+            );
+    
+        }
+    
+    </script>
     </header>
     
     <main>
