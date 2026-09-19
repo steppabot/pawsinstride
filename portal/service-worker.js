@@ -15,6 +15,7 @@
 const STATIC_CACHE_NAME =
     "paws-in-stride-static";
 
+
 // ========================================
 // APP SHELL FILES
 // ========================================
@@ -24,10 +25,16 @@ const APP_SHELL_FILES = [
     "/portal/",
     "/portal/dashboard.html",
     "/portal/admin.html",
+
     "/portal/portal.js",
     "/portal/admin.js",
+
     "/portal/portal.css",
-    "/portal/assets/pwa-icon-192.png"
+    "/portal/admin.css",
+
+    "/portal/assets/paws-in-stride-logo.png",
+    "/portal/assets/pwa-icon-192.png",
+    "/portal/assets/apple-touch-icon.png"
 
 ];
 
@@ -131,10 +138,8 @@ self.addEventListener(
 
 
         console.log(
-            "Paws in Stride service worker installing:",
-            SERVICE_WORKER_VERSION
+            "Paws in Stride service worker installing."
         );
-
 
         event.waitUntil(
 
@@ -189,8 +194,7 @@ self.addEventListener(
 
 
         console.log(
-            "Paws in Stride service worker activated:",
-            SERVICE_WORKER_VERSION
+            "Paws in Stride service worker activated."
         );
 
 
