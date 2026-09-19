@@ -22048,8 +22048,6 @@ function applyAdminServiceState(
     }
 
 }
-
-
 // ========================================
 // SET SERVICE PRICE INPUTS
 // ========================================
@@ -22057,7 +22055,8 @@ function applyAdminServiceState(
 function setAdminServicePrices(
     serviceKey,
     standardPrice,
-    grandfatheredPrice
+    grandfatheredPrice,
+    preferredPrice
 ) {
 
 
@@ -22108,6 +22107,19 @@ function setAdminServicePrices(
         inputs[1].value =
             Number(
                 grandfatheredPrice ||
+                0
+            );
+
+    }
+
+
+    if (
+        inputs[2]
+    ) {
+
+        inputs[2].value =
+            Number(
+                preferredPrice ||
                 0
             );
 
@@ -22202,10 +22214,19 @@ async function loadAdminServicePricing() {
         );
 
 
+    const fifteenPreferred =
+        findPrice(
+            "dog_walking",
+            "15_min",
+            "preferred"
+        );
+
+
     setAdminServicePrices(
         "15-minute",
         fifteenStandard?.base_price,
-        fifteenGrandfathered?.base_price
+        fifteenGrandfathered?.base_price,
+        fifteenPreferred?.base_price
     );
 
 
@@ -22213,7 +22234,8 @@ async function loadAdminServicePricing() {
         "15-minute",
         Boolean(
             fifteenStandard?.active &&
-            fifteenGrandfathered?.active
+            fifteenGrandfathered?.active &&
+            fifteenPreferred?.active
         )
     );
 
@@ -22238,10 +22260,19 @@ async function loadAdminServicePricing() {
         );
 
 
+    const thirtyPreferred =
+        findPrice(
+            "dog_walking",
+            "30_min",
+            "preferred"
+        );
+
+
     setAdminServicePrices(
         "30-minute",
         thirtyStandard?.base_price,
-        thirtyGrandfathered?.base_price
+        thirtyGrandfathered?.base_price,
+        thirtyPreferred?.base_price
     );
 
 
@@ -22249,7 +22280,8 @@ async function loadAdminServicePricing() {
         "30-minute",
         Boolean(
             thirtyStandard?.active &&
-            thirtyGrandfathered?.active
+            thirtyGrandfathered?.active &&
+            thirtyPreferred?.active
         )
     );
 
@@ -22274,10 +22306,19 @@ async function loadAdminServicePricing() {
         );
 
 
+    const sixtyPreferred =
+        findPrice(
+            "dog_walking",
+            "60_min",
+            "preferred"
+        );
+
+
     setAdminServicePrices(
         "60-minute",
         sixtyStandard?.base_price,
-        sixtyGrandfathered?.base_price
+        sixtyGrandfathered?.base_price,
+        sixtyPreferred?.base_price
     );
 
 
@@ -22285,7 +22326,8 @@ async function loadAdminServicePricing() {
         "60-minute",
         Boolean(
             sixtyStandard?.active &&
-            sixtyGrandfathered?.active
+            sixtyGrandfathered?.active &&
+            sixtyPreferred?.active
         )
     );
 
@@ -22310,10 +22352,19 @@ async function loadAdminServicePricing() {
         );
 
 
+    const petSitting4Preferred =
+        findPrice(
+            "pet_sitting",
+            "basic_4_hour",
+            "preferred"
+        );
+
+
     setAdminServicePrices(
         "pet-sitting-4-hour",
         petSitting4Standard?.base_price,
-        petSitting4Grandfathered?.base_price
+        petSitting4Grandfathered?.base_price,
+        petSitting4Preferred?.base_price
     );
 
 
@@ -22321,7 +22372,8 @@ async function loadAdminServicePricing() {
         "pet-sitting-4-hour",
         Boolean(
             petSitting4Standard?.active &&
-            petSitting4Grandfathered?.active
+            petSitting4Grandfathered?.active &&
+            petSitting4Preferred?.active
         )
     );
 
@@ -22346,10 +22398,19 @@ async function loadAdminServicePricing() {
         );
 
 
+    const petSitting8Preferred =
+        findPrice(
+            "pet_sitting",
+            "standard_8_hour",
+            "preferred"
+        );
+
+
     setAdminServicePrices(
         "pet-sitting-8-hour",
         petSitting8Standard?.base_price,
-        petSitting8Grandfathered?.base_price
+        petSitting8Grandfathered?.base_price,
+        petSitting8Preferred?.base_price
     );
 
 
@@ -22357,7 +22418,8 @@ async function loadAdminServicePricing() {
         "pet-sitting-8-hour",
         Boolean(
             petSitting8Standard?.active &&
-            petSitting8Grandfathered?.active
+            petSitting8Grandfathered?.active &&
+            petSitting8Preferred?.active
         )
     );
 
@@ -22382,10 +22444,19 @@ async function loadAdminServicePricing() {
         );
 
 
+    const petSitting12Preferred =
+        findPrice(
+            "pet_sitting",
+            "vip_12_hour",
+            "preferred"
+        );
+
+
     setAdminServicePrices(
         "pet-sitting-12-hour",
         petSitting12Standard?.base_price,
-        petSitting12Grandfathered?.base_price
+        petSitting12Grandfathered?.base_price,
+        petSitting12Preferred?.base_price
     );
 
 
@@ -22393,7 +22464,8 @@ async function loadAdminServicePricing() {
         "pet-sitting-12-hour",
         Boolean(
             petSitting12Standard?.active &&
-            petSitting12Grandfathered?.active
+            petSitting12Grandfathered?.active &&
+            petSitting12Preferred?.active
         )
     );
 
@@ -22418,10 +22490,19 @@ async function loadAdminServicePricing() {
         );
 
 
+    const boardingPreferred =
+        findPrice(
+            "dog_boarding",
+            "vip_overnight",
+            "preferred"
+        );
+
+
     setAdminServicePrices(
         "boarding",
         boardingStandard?.base_price,
-        boardingGrandfathered?.base_price
+        boardingGrandfathered?.base_price,
+        boardingPreferred?.base_price
     );
 
 
@@ -22429,7 +22510,8 @@ async function loadAdminServicePricing() {
         "boarding",
         Boolean(
             boardingStandard?.active &&
-            boardingGrandfathered?.active
+            boardingGrandfathered?.active &&
+            boardingPreferred?.active
         )
     );
 
@@ -23131,7 +23213,6 @@ function cancelAdminServiceEdit(
 
 }
 
-
 // ========================================
 // SAVE ADMIN SERVICE PRICING
 // ========================================
@@ -23172,6 +23253,13 @@ async function saveAdminServicePricing(
     const grandfatheredPrice =
         Number(
             priceInputs[1]?.value ||
+            0
+        );
+
+
+    const preferredPrice =
+        Number(
+            priceInputs[2]?.value ||
             0
         );
 
@@ -23244,6 +23332,9 @@ async function saveAdminServicePricing(
                     p_grandfathered_price:
                         grandfatheredPrice,
 
+                    p_preferred_price:
+                        preferredPrice,
+
                     p_active:
                         isActive,
 
@@ -23281,7 +23372,6 @@ async function saveAdminServicePricing(
     return true;
 
 }
-
 
 // ========================================
 // SERVICE MENU CLICK HANDLER
