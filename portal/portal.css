@@ -13573,29 +13573,26 @@ body.admin-page {
 
 .portal-signup-page .signup-shell {
     width:
-        min(
-            calc(100% - 48px),
-            1460px
-        );
+        100%;
+
+    min-height:
+        100vh;
 
     margin:
-        0 auto;
+        0;
 
     padding:
-        36px 0 48px;
+        0;
 
     display:
         grid;
 
     grid-template-columns:
-        minmax(360px, 0.82fr)
-        minmax(680px, 1.18fr);
+        minmax(390px, 48vw)
+        minmax(0, 1fr);
 
     align-items:
-        start;
-
-    gap:
-        34px;
+        stretch;
 }
 
 
@@ -13605,13 +13602,22 @@ body.admin-page {
 
 .portal-signup-page .signup-desktop-brand-panel {
     position:
-        sticky;
+        fixed;
 
     top:
-        36px;
+        0;
 
-    min-height:
-        calc(100vh - 72px);
+    left:
+        0;
+
+    bottom:
+        0;
+
+    width:
+        48vw;
+
+    min-width:
+        390px;
 
     overflow:
         hidden;
@@ -13626,20 +13632,20 @@ body.admin-page {
         center;
 
     padding:
-        54px;
+        56px;
 
     background:
         radial-gradient(
             circle at 8% 7%,
             rgba(255,255,255,0.15) 0,
-            rgba(255,255,255,0.15) 105px,
-            transparent 106px
+            rgba(255,255,255,0.15) 115px,
+            transparent 116px
         ),
         radial-gradient(
             circle at 94% 92%,
             rgba(255,255,255,0.10) 0,
-            rgba(255,255,255,0.10) 135px,
-            transparent 136px
+            rgba(255,255,255,0.10) 145px,
+            transparent 146px
         ),
         linear-gradient(
             145deg,
@@ -13648,11 +13654,8 @@ body.admin-page {
             #1f7bc2 100%
         );
 
-    border-radius:
-        30px;
-
-    box-shadow:
-        0 24px 60px rgba(31,123,194,0.18);
+    z-index:
+        2;
 }
 
 
@@ -13665,7 +13668,7 @@ body.admin-page {
         100%;
 
     max-width:
-        410px;
+        430px;
 
     color:
         #ffffff;
@@ -13868,11 +13871,43 @@ body.admin-page {
 ======================================== */
 
 .portal-signup-page .signup-form-column {
+    grid-column:
+        2;
+
     min-width:
         0;
 
     width:
         100%;
+
+    min-height:
+        100vh;
+
+    padding:
+        42px 46px 54px;
+
+    overflow:
+        visible;
+}
+
+
+/* ========================================
+   SIGNUP FORM CONTENT WIDTH
+======================================== */
+
+.portal-signup-page .signup-form-column > .signup-card,
+.portal-signup-page .signup-form-column > .signup-footer {
+    width:
+        min(
+            100%,
+            840px
+        );
+
+    margin-left:
+        auto;
+
+    margin-right:
+        auto;
 }
 
 
@@ -13953,11 +13988,17 @@ body.admin-page {
                 820px
             );
 
-        display:
-            block;
+        min-height:
+            auto;
+
+        margin:
+            0 auto;
 
         padding:
             36px 0 48px;
+
+        display:
+            block;
     }
 
 
@@ -13965,6 +14006,25 @@ body.admin-page {
     .signup-desktop-brand-panel {
         display:
             none;
+
+        position:
+            static;
+
+        width:
+            auto;
+
+        min-width:
+            0;
+    }
+
+
+    .portal-signup-page
+    .signup-form-column {
+        min-height:
+            0;
+
+        padding:
+            0;
     }
 
 
