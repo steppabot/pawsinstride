@@ -317,105 +317,153 @@ window.initializeSignupAddressAutocomplete =
         // ========================================
         // ADDRESS SELECTED
         // ========================================
-
+        
         signupAddressAutocomplete.addListener(
             "place_changed",
             () => {
-
+        
                 const place =
                     signupAddressAutocomplete
                         .getPlace();
-
-
+        
+        
                 if (
                     !place ||
                     !place.address_components
                 ) {
-
+        
                     signupAddressWasSelected =
                         false;
-
+        
                     return;
-
+        
                 }
-
-
+        
+        
                 const address =
                     getSignupGoogleAddressParts(
                         place.address_components
                     );
-
-
+        
+        
                 // ========================================
-                // REQUIRE STREET NUMBER + ROUTE
+                // CLEAR PREVIOUS ADDRESS COMPONENTS
                 // ========================================
-
-                if (
-                    !address.streetNumber ||
-                    !address.route
-                ) {
-
-                    signupAddressWasSelected =
-                        false;
-
-                    return;
-
-                }
-
-
+                //
+                // Google may replace the street field before
+                // our place_changed handler runs.
+                //
+                // Clearing the dependent fields first prevents
+                // a previous City / State / ZIP from remaining
+                // visible when a new Google result is selected.
+                // ========================================
+        
+                cityInput.value =
+                    "";
+        
+                stateInput.value =
+                    "";
+        
+                zipInput.value =
+                    "";
+        
+        
                 // ========================================
                 // POPULATE STREET
                 // ========================================
-
-                addressInput.value =
-                    `${address.streetNumber} ${address.route}`
-                        .trim();
-
-
+        
+                if (
+                    address.streetNumber &&
+                    address.route
+                ) {
+        
+                    addressInput.value =
+                        `${address.streetNumber} ${address.route}`
+                            .trim();
+        
+                }
+        
+        
                 // ========================================
                 // POPULATE CITY
                 // ========================================
-
+        
                 if (address.city) {
-
+        
                     cityInput.value =
                         address.city;
-
+        
                 }
-
-
+        
+        
                 // ========================================
                 // POPULATE STATE
                 // ========================================
-
+        
                 if (address.state) {
-
+        
                     stateInput.value =
                         address.state;
-
+        
                 }
-
-
+        
+        
                 // ========================================
                 // POPULATE ZIP
                 // ========================================
-
+        
                 if (address.zip) {
-
+        
                     zipInput.value =
                         address.zip;
-
+        
                 }
-
-
+        
+        
+                // ========================================
+                // GOOGLE ADDRESS VALIDATION
+                // ========================================
+        
+                const hasStreet =
+                    Boolean(
+                        String(
+                            addressInput.value ||
+                            ""
+                        ).trim()
+                    );
+        
+        
+                const hasCity =
+                    Boolean(
+                        address.city
+                    );
+        
+        
+                const hasState =
+                    Boolean(
+                        address.state
+                    );
+        
+        
+                const hasZip =
+                    Boolean(
+                        address.zip
+                    );
+        
+        
                 signupAddressWasSelected =
-                    true;
-
-
+                    (
+                        hasStreet &&
+                        hasCity &&
+                        hasState &&
+                        hasZip
+                    );
+        
+        
                 // ========================================
-                // CLEAR EXISTING VALIDATION ERRORS
+                // CLEAR UPDATED FIELD ERRORS
                 // ========================================
-
+        
                 [
                     addressInput,
                     cityInput,
@@ -423,50 +471,58 @@ window.initializeSignupAddressAutocomplete =
                     zipInput
                 ].forEach(
                     field => {
-
-                        field.classList.remove(
-                            "signup-field-error"
-                        );
-
-                        field.removeAttribute(
-                            "aria-invalid"
-                        );
-
+        
+                        if (
+                            String(
+                                field.value ||
+                                ""
+                            ).trim()
+                        ) {
+        
+                            field.classList.remove(
+                                "signup-field-error"
+                            );
+        
+                            field.removeAttribute(
+                                "aria-invalid"
+                            );
+        
+                        }
+        
                     }
                 );
-
-
+        
+        
                 clearSignupError();
-
-
+        
+        
                 // ========================================
                 // MOVE TO ADDRESS LINE 2
                 // ========================================
-
+        
                 const addressLine2 =
                     document.getElementById(
                         "signup-address-line-2"
                     );
-
-
+        
+        
                 if (addressLine2) {
-
+        
                     window.setTimeout(
                         () => {
-
+        
                             addressLine2.focus({
                                 preventScroll: true
                             });
-
+        
                         },
                         100
                     );
-
+        
                 }
-
+        
             }
         );
-
 
         // ========================================
         // MANUAL STREET EDIT
