@@ -3002,8 +3002,8 @@ header {
     }
 
     .hero-section.homepage-hero .hero-image img {
-        height: 380px;
-        object-position: center 20%;
+        height: 460px;
+        object-position: center 0%;
     }
 }
 
@@ -3015,7 +3015,9 @@ header {
 
 @media (max-width: 640px) {
     .hero-section.homepage-hero .hero-image img {
-        height: 240px;
+        height: auto;
+        aspect-ratio: 3 / 2;
+        object-position: center 0%;
     }
 
     .price-pill {
