@@ -6386,84 +6386,287 @@ p {
         font-size: 8px;
     }
 
+   
+   /* ========================================
+      MOBILE HEADER
+   ======================================== */
+   
+       .admin-page .admin-dashboard-header {
+           position:
+               sticky;
+   
+           top:
+               0;
+   
+           z-index:
+               800;
+   
+           display:
+               flex;
+   
+           flex-direction:
+               row;
+   
+           align-items:
+               center;
+   
+           justify-content:
+               space-between;
+   
+           gap:
+               12px;
+   
+           width:
+               calc(100% + 32px);
+   
+           min-height:
+               0;
+   
+           margin:
+               0
+               -16px
+               18px;
+   
+           padding:
+               max(
+                   10px,
+                   env(safe-area-inset-top)
+               )
+               16px
+               10px;
+   
+           background:
+               rgba(255,255,255,0.96);
+   
+           border-top:
+               0;
+   
+           border-right:
+               0;
+   
+           border-left:
+               0;
+   
+           border-radius:
+               0
+               0
+               16px
+               16px;
+   
+           box-shadow:
+               0 5px 18px rgba(24,52,71,0.07);
+       }
+
 
     /* ========================================
-       MOBILE HEADER
+       MOBILE HEADER BRAND
     ======================================== */
 
-    .admin-page .admin-dashboard-header {
-        position: sticky;
+    .admin-page .admin-dashboard-brand {
+        display:
+            flex;
 
-        top: 0;
+        align-items:
+            center;
 
-        z-index: 800;
+        flex:
+            1
+            1
+            auto;
 
-        width:
-            calc(100% + 32px);
+        min-width:
+            0;
 
-        margin:
-            0
-            -16px
-            18px;
-
-        padding:
-            max(
-                10px,
-                env(safe-area-inset-top)
-            )
-            16px
-            10px;
-
-        background:
-            rgba(255,255,255,0.95);
-
-        border-top: 0;
-        border-right: 0;
-        border-left: 0;
-
-        border-radius:
-            0
-            0
-            16px
-            16px;
-
-        box-shadow:
-            0 5px 18px rgba(24,52,71,0.07);
+        gap:
+            12px;
     }
 
+
+    /* ========================================
+       MOBILE HEADER LOGO
+    ======================================== */
 
     .admin-page .admin-dashboard-logo {
-        width: 82px;
+        display:
+            block;
+
+        width:
+            100px;
+
+        height:
+            auto;
+
+        flex:
+            0
+            0
+            auto;
     }
 
 
+    /* ========================================
+       MOBILE HEADER TITLE
+    ======================================== */
+
     .admin-page .admin-dashboard-title {
-        padding-left: 9px;
+        display:
+            flex;
+
+        flex-direction:
+            column;
+
+        justify-content:
+            center;
+
+        min-width:
+            0;
+
+        padding-left:
+            0;
+    }
+
+
+    .admin-page .admin-portal-label {
+        margin-bottom:
+            3px;
+
+        color:
+            var(--admin-blue);
+
+        font-size:
+            10px;
+
+        font-weight:
+            850;
+
+        letter-spacing:
+            0.10em;
+
+        line-height:
+            1.1;
+
+        text-transform:
+            uppercase;
+
+        white-space:
+            nowrap;
+    }
+
+
+    /* ========================================
+       MOBILE HEADER TITLE ROW
+    ======================================== */
+
+    .admin-page .admin-title-row {
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        gap:
+            7px;
+
+        min-width:
+            0;
     }
 
 
     .admin-page .admin-title-row h2 {
-        font-size: 15px;
+        margin:
+            0;
+
+        color:
+            var(--admin-navy);
+
+        font-size:
+            18px;
+
+        font-weight:
+            850;
+
+        line-height:
+            1.05;
+
+        white-space:
+            nowrap;
     }
 
+
+    /* ========================================
+       MOBILE ADMIN BADGE
+    ======================================== */
 
     .admin-page .admin-role-badge {
+        flex:
+            0
+            0
+            auto;
+
         padding:
             4px
-            6px;
+            7px;
 
-        font-size: 7px;
+        font-size:
+            8px;
+
+        font-weight:
+            850;
+
+        line-height:
+            1;
     }
 
 
+    /* ========================================
+       MOBILE HEADER ACTIONS
+    ======================================== */
+
+    .admin-page .admin-dashboard-header-actions {
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            flex-end;
+
+        flex:
+            0
+            0
+            auto;
+
+        margin-left:
+            auto;
+    }
+
+
+    /* ========================================
+       MOBILE LOGOUT BUTTON
+    ======================================== */
+
     .admin-page .admin-header-logout {
-        min-height: 36px;
+        min-width:
+            62px;
+
+        min-height:
+            38px;
+
+        margin:
+            0;
 
         padding:
             7px
             10px;
 
-        font-size: 10px;
+        font-size:
+            10px;
+
+        font-weight:
+            800;
+
+        white-space:
+            nowrap;
     }
 
 }
