@@ -2772,56 +2772,95 @@ async function completeExistingClientSignup() {
         // ========================================
         // FINALIZE HOUSEHOLD + PETS
         // ========================================
-
+        
         const {
             error: onboardingError
         } =
             await signupSupabase.rpc(
                 "finalize_client_onboarding",
                 {
-
+        
                     p_street_address:
                         signupState.owner.addressLine1,
-
+        
                     p_address_line_2:
                         signupState.owner.addressLine2 || "",
-
+        
                     p_city:
                         signupState.owner.city,
-
+        
                     p_state:
                         signupState.owner.state,
-
+        
                     p_zip_code:
                         signupState.owner.zip,
-
+        
                     p_pets:
                         signupState.pets.map(
                             (pet) => ({
-
+        
                                 name:
                                     pet.name,
-
+        
                                 breed:
                                     pet.breed,
-
+        
                                 birthday:
                                     pet.birthday || null,
-
+        
                                 gender:
                                     pet.gender || null
-
+        
                             })
                         )
-
+        
                 }
             );
-
-
+        
+        
         if (onboardingError) {
             throw onboardingError;
         }
-
+        
+        
+        // ========================================
+        // EXISTING CLIENT PRICING TIER
+        // ========================================
+        //
+        // Existing clients keep their current pricing
+        // until the October 1 pricing transition.
+        //
+        // Existing Client:
+        //     preferred
+        //
+        // On October 1:
+        //     preferred -> grandfathered
+        // ========================================
+        
+        const {
+            error: pricingTierError
+        } =
+            await signupSupabase
+                .from("profiles")
+                .update({
+        
+                    pricing_tier:
+                        "preferred"
+        
+                })
+                .eq(
+                    "id",
+                    authData.user.id
+                );
+        
+        
+        if (pricingTierError) {
+        
+            throw new Error(
+                `Your account was created, but we couldn't apply your existing-client pricing. ${pricingTierError.message}`
+            );
+        
+        }
 
         // ========================================
         // SIGN USER BACK OUT
