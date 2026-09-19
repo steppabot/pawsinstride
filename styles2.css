@@ -63,17 +63,20 @@ header {
 
 
 .site-header-v2-inner {
-    position: relative;
-    z-index: 2;
+    position:
+        relative;
+
+    z-index:
+        2;
 
     width:
         min(
-            1480px,
-            calc(100% - 56px)
+            1260px,
+            calc(100% - 40px)
         );
 
     min-height:
-        104px;
+        92px;
 
     margin:
         0 auto;
@@ -83,10 +86,13 @@ header {
 
     grid-template-columns:
         auto
-        1fr
+        auto
         auto;
 
     align-items:
+        center;
+
+    justify-content:
         center;
 
     gap:
@@ -105,6 +111,9 @@ header {
     align-items:
         center;
 
+    justify-content:
+        center;
+
     text-decoration:
         none;
 }
@@ -115,7 +124,7 @@ header {
         block;
 
     width:
-        152px;
+        122px;
 
     height:
         auto;
@@ -137,10 +146,7 @@ header {
         center;
 
     gap:
-        32px;
-
-    justify-self:
-        center;
+        24px;
 }
 
 
@@ -162,7 +168,7 @@ header {
 
     padding:
         0
-        2px;
+        1px;
 
     color:
         #243949;
@@ -171,13 +177,16 @@ header {
         none;
 
     font-size:
-        15px;
+        16px;
 
     font-weight:
         800;
 
     line-height:
         1;
+
+    white-space:
+        nowrap;
 
     transition:
         color 0.18s ease,
@@ -196,7 +205,7 @@ header {
         50%;
 
     bottom:
-        4px;
+        2px;
 
     width:
         0;
@@ -257,7 +266,7 @@ header {
         center;
 
     gap:
-        12px;
+        10px;
 }
 
 
@@ -273,20 +282,20 @@ header {
         center;
 
     min-height:
-        48px;
+        46px;
 
     padding:
         0
-        20px;
+        18px;
 
     border-radius:
-        10px;
+        9px;
 
     text-decoration:
         none;
 
     font-size:
-        14px;
+        13px;
 
     font-weight:
         800;
@@ -349,7 +358,6 @@ header {
     background:
         #fff8ef;
 }
-
 
 /* ========================================
    MOBILE HEADER ACTIONS
