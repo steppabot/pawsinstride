@@ -7250,7 +7250,7 @@ p {
 
     grid-template-columns:
         repeat(
-            2,
+            3,
             110px
         );
 
@@ -7366,7 +7366,6 @@ p {
     font-weight:
         800;
 }
-
 
 /* ========================================
    SERVICE PRICING MENU
@@ -7899,6 +7898,8 @@ p {
     }
 
 }
+
+
 /* ========================================
    BOARDING EDIT MODE
 ======================================== */
@@ -7923,6 +7924,11 @@ p {
     box-shadow:
         0 0 0 3px rgba(40,144,223,0.06);
 }
+
+
+/* ========================================
+   SERVICE PRICING — MOBILE
+======================================== */
 
 @media (max-width:700px) {
 
@@ -7957,6 +7963,15 @@ p {
 
         width:
             100%;
+    }
+
+
+    .admin-service-pricing-rates
+    .admin-service-rate-field:nth-child(3) {
+        grid-column:
+            1
+            /
+            -1;
     }
 
 
