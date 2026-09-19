@@ -7,7 +7,7 @@
     <meta name="description" content="Looking for a reliable dog walker in Frisco, TX? Paws in Stride offers 5-star dog walking, pet sitting, and boarding with flexible scheduling and a free meet & greet.">
         
     <script type="application/ld+json">
-    {
+    {|
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "Paws in Stride",
@@ -634,22 +634,64 @@
         </div>
     </div>
         
-    <footer>
-        <div class="footer-container">
-            <ul class="footer-nav">
-                <li><a href="/index.html">HOME</a></li>
-                <li><a href="/services.html">SERVICES</a></li>
-                <li><a href="/fresh-dog-food">FRESH DOG FOOD</a></li>
-                <li><a href="/aboutus.html">ABOUT</a></li>
-                <li><a href="/contact.html">CONTACT</a></li>
-            </ul>
-            <div class="footer-info">
-                <p>&copy; 2024 Paws in Stride®</p>
-                <p>Proudly serving Frisco, Prosper, Celina, and Little Elm Texas</p>
-                <p>Phone Number: <a href="tel:+12147367923">+1-214-736-7923</a></p>
+    <!-- Replace the whole <footer> ... </footer> block with this.
+         Keep the <button id="backToTop"> that comes right after it. -->
+    <footer class="site-footer-v2">
+    
+        <div class="site-footer-v2-inner">
+    
+            <!-- Brand -->
+            <div class="site-footer-v2-brand">
+                <a href="/index2.html" aria-label="Paws in Stride Home">
+                    <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
+                </a>
+                <p>Dog walking, pet sitting &amp; boarding in Frisco, TX.</p>
+    
+                <div class="site-footer-v2-socials">
+                    <a href="https://www.facebook.com/pawsinstride" target="_blank" rel="noopener noreferrer" aria-label="Paws in Stride on Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/paws.in.stride" target="_blank" rel="noopener noreferrer" aria-label="Paws in Stride on Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.tiktok.com/@pawsnstride" target="_blank" rel="noopener noreferrer" aria-label="Paws in Stride on TikTok"><i class="fab fa-tiktok"></i></a>
+                </div>
             </div>
+    
+            <!-- Explore (same links as the top nav) -->
+            <nav class="site-footer-v2-col site-footer-v2-explore" aria-label="Footer navigation">
+                <h3>Explore</h3>
+                <a href="/index2.html">Home</a>
+                <a href="/services.html">Services</a>
+                <a href="/fresh-dog-food">Fresh Dog Food</a>
+                <a href="/aboutus.html">About</a>
+                <a href="/contact.html">Contact</a>
+            </nav>
+    
+            <!-- Service areas -->
+            <div class="site-footer-v2-col">
+                <h3>Service areas</h3>
+                <a href="dog-walker-frisco-tx.html">Frisco, Texas</a>
+                <a href="dog-walker-prosper-tx.html">Prosper, Texas</a>
+                <a href="dog-walker-celina-tx.html">Celina, Texas</a>
+                <a href="dog-walker-little-elm-tx.html">Little Elm, Texas</a>
+            </div>
+    
+            <!-- Get started (uses the same button styles as the header) -->
+            <div class="site-footer-v2-col site-footer-v2-cta">
+                <h3>Get started</h3>
+                <a href="tel:+12147367923" class="site-footer-v2-phone">214-736-7923</a>
+                <a href="/portal/signup.html" class="site-header-v2-register">New Client Registration</a>
+                <a href="/portal/login.html" class="site-header-v2-login">Client Login</a>
+            </div>
+    
         </div>
+    
+        <div class="site-footer-v2-bottom">
+            <p>&copy; <span id="footer-year">2026</span> Paws in Stride&reg;</p>
+            <p>Proudly serving Frisco, Prosper, Celina, and Little Elm, Texas</p>
+        </div>
+    
     </footer>
+    
+    <!-- Keeps the copyright year current. Put this right after the footer. -->
+    <script>document.getElementById("footer-year").textContent = new Date().getFullYear();</script>
     
     <button onclick="scrollToTop()" id="backToTop" title="Back to Top">↑</button>
     
