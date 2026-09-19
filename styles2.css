@@ -19,122 +19,535 @@ header {
     margin-bottom: 28px;
 }
 
-/* Logo styling */
-.logo-container {
-    margin-bottom: 10px;
+/* ========================================
+   SITE HEADER V2
+======================================== */
+
+.site-header-v2 {
+    width: 100%;
+    background: #ffffff;
+    box-shadow: 0 8px 30px rgba(23, 73, 111, 0.10);
+    position: relative;
+    z-index: 1000;
+    margin: 0;
+    padding: 0;
 }
 
-.logo {
-    width: 200px; /* Original size for desktop */
+
+.site-header-v2-inner {
+    width: min(1400px, calc(100% - 48px));
+    min-height: 96px;
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 28px;
+}
+
+
+/* ========================================
+   BRAND
+======================================== */
+
+.site-header-v2-brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+
+.site-header-v2-logo {
+    display: block;
+    width: 180px;
     height: auto;
 }
 
-/* Navigation styling for desktop */
-nav {
-    background-color: #fff;
-    padding: 10px 20px;
-    border-radius: 25px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    margin: 0 auto;
-    width: fit-content;
-    cursor: pointer; /* Entire white box is clickable */
-}
 
-.nav-links {
-    list-style: none;
+/* ========================================
+   DESKTOP NAVIGATION
+======================================== */
+
+.site-header-v2-nav {
     display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 0;
-    margin: 0;
+    gap: 28px;
 }
 
-.nav-links li {
-    margin: 0 20px;
+
+.site-header-v2-nav-link {
     position: relative;
-}
 
-.nav-links li a {
+    color: #243949;
     text-decoration: none;
-    color: #333;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 5px 0;
-    display: inline-block;
-    position: relative;
+
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+
+    padding: 14px 0;
+
+    transition:
+        color 0.18s ease;
 }
 
-/* Hover effect for navigation */
-.nav-links li a::after {
+
+.site-header-v2-nav-link::after {
     content: "";
+
     position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 0%;
+    left: 50%;
+    bottom: 4px;
+
+    width: 0;
     height: 3px;
-    background-color: #f09d51;
-    transition: width 0.3s ease-in-out;
+
+    background: #f3aa4c;
+    border-radius: 999px;
+
+    transform: translateX(-50%);
+
+    transition:
+        width 0.18s ease;
 }
 
-.nav-links li a:hover::after {
+
+.site-header-v2-nav-link:hover,
+.site-header-v2-nav-link-active {
+    color: #2890df;
+}
+
+
+.site-header-v2-nav-link:hover::after,
+.site-header-v2-nav-link-active::after {
     width: 100%;
 }
 
-.nav-links li a:hover {
-    color: #f09d51;
+
+/* ========================================
+   DESKTOP CLIENT ACTIONS
+======================================== */
+
+.site-header-v2-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Mobile Menu (collapsed by default) */
-@media (max-width: 768px) {
-    .nav-links {
-        display: none; /* Hidden by default on mobile */
-        flex-direction: column;
+
+.site-header-v2-register,
+.site-header-v2-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 44px;
+
+    padding:
+        0
+        18px;
+
+    border-radius: 999px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+
+    white-space: nowrap;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        color 0.18s ease;
+}
+
+
+.site-header-v2-register {
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
+
+    color: #ffffff;
+
+    box-shadow:
+        0 8px 20px rgba(40, 144, 223, 0.20);
+}
+
+
+.site-header-v2-login {
+    background: #ffffff;
+
+    color: #ef8f24;
+
+    border:
+        2px solid #f3aa4c;
+}
+
+
+.site-header-v2-register:hover,
+.site-header-v2-login:hover {
+    transform: translateY(-1px);
+}
+
+
+.site-header-v2-register:hover {
+    box-shadow:
+        0 10px 24px rgba(40, 144, 223, 0.26);
+}
+
+
+.site-header-v2-login:hover {
+    background: #fff8ef;
+}
+
+
+/* ========================================
+   MOBILE HEADER ACTIONS
+======================================== */
+
+.site-header-v2-mobile-actions {
+    display: none;
+}
+
+
+.site-header-v2-mobile-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 38px;
+
+    padding:
+        0
+        14px;
+
+    border-radius: 999px;
+
+    background: #ffffff;
+
+    border:
+        2px solid #f3aa4c;
+
+    color: #ef8f24;
+
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.site-header-v2-menu-button {
+    width: 42px;
+    height: 42px;
+
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 0;
+
+    background: #f3f8fc;
+
+    border:
+        1px solid #dceaf3;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+}
+
+
+.site-header-v2-menu-button span {
+    display: block;
+
+    width: 19px;
+    height: 2px;
+
+    background: #243949;
+
+    border-radius: 999px;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+.site-header-v2-menu-button-open span:nth-child(1) {
+    transform:
+        translateY(7px)
+        rotate(45deg);
+}
+
+
+.site-header-v2-menu-button-open span:nth-child(2) {
+    opacity: 0;
+}
+
+
+.site-header-v2-menu-button-open span:nth-child(3) {
+    transform:
+        translateY(-7px)
+        rotate(-45deg);
+}
+
+
+/* ========================================
+   MOBILE NAVIGATION PANEL
+======================================== */
+
+.site-mobile-menu-v2 {
+    display: none;
+}
+
+
+@media (max-width: 1100px) {
+
+    .site-header-v2-inner {
+        width: min(100% - 32px, 1200px);
+        min-height: 86px;
+
+        grid-template-columns: auto 1fr auto;
+
+        gap: 18px;
+    }
+
+
+    .site-header-v2-logo {
+        width: 150px;
+    }
+
+
+    .site-header-v2-nav {
+        gap: 18px;
+    }
+
+
+    .site-header-v2-nav-link {
+        font-size: 13px;
+    }
+
+
+    .site-header-v2-register,
+    .site-header-v2-login {
+        padding:
+            0
+            14px;
+
+        font-size: 12px;
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .site-header-v2-inner {
+        width: calc(100% - 28px);
+        min-height: 78px;
+
+        display: flex;
         align-items: center;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 25px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        justify-content: space-between;
+
+        gap: 16px;
     }
 
-    .nav-links.open {
-        display: flex; /* Show when 'MENU' is clicked */
+
+    .site-header-v2-logo {
+        width: 132px;
     }
 
-    /* Style the entire box that will show 'MENU' */
-    #menu-box {
+
+    .site-header-v2-nav,
+    .site-header-v2-actions {
+        display: none;
+    }
+
+
+    .site-header-v2-mobile-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+
+    .site-mobile-menu-v2 {
         display: block;
-        background-color: #fff;
-        color: #333;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 10px;
-        border-radius: 25px;
-        cursor: pointer;
+
+        max-height: 0;
+
+        overflow: hidden;
+
+        background: #ffffff;
+
+        border-top:
+            1px solid transparent;
+
+        transition:
+            max-height 0.28s ease,
+            border-color 0.28s ease,
+            box-shadow 0.28s ease;
+    }
+
+
+    .site-mobile-menu-v2-open {
+        max-height: 620px;
+
+        border-top-color: #e7eef4;
+
+        box-shadow:
+            0 18px 30px rgba(23, 73, 111, 0.10);
+    }
+
+
+    .site-mobile-menu-v2-links {
+        width: calc(100% - 28px);
         margin: 0 auto;
-        width: 90%; /* Make the menu button wider */
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+        display: flex;
+        flex-direction: column;
+
+        padding:
+            16px
+            0
+            8px;
+    }
+
+
+    .site-mobile-menu-v2-links a {
+        color: #243949;
+
+        text-decoration: none;
+
+        font-size: 15px;
+        font-weight: 800;
+
+        padding:
+            14px
+            4px;
+
+        border-bottom:
+            1px solid #edf2f6;
+    }
+
+
+    .site-mobile-menu-v2-links a:last-child {
+        border-bottom: 0;
+    }
+
+
+    .site-mobile-menu-v2-actions {
+        width: calc(100% - 28px);
+        margin: 0 auto;
+
+        display: grid;
+        gap: 10px;
+
+        padding:
+            10px
+            0
+            20px;
+    }
+
+
+    .site-mobile-menu-v2-primary,
+    .site-mobile-menu-v2-secondary,
+    .site-mobile-menu-v2-client {
+        min-height: 48px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 14px;
+
+        text-decoration: none;
+
+        font-size: 14px;
+        font-weight: 800;
+
         text-align: center;
     }
 
-    /* Hide the desktop version of the menu */
-    .logo {
-        width: 120px; /* Smaller logo size for mobile */
+
+    .site-mobile-menu-v2-primary {
+        background:
+            linear-gradient(
+                135deg,
+                #f5ab40 0%,
+                #ef8f24 100%
+            );
+
+        color: #ffffff;
     }
 
-    nav {
-        width: 90%;
-        margin: 0 auto;
+
+    .site-mobile-menu-v2-secondary {
+        background:
+            linear-gradient(
+                135deg,
+                #47cee6 0%,
+                #2890df 100%
+            );
+
+        color: #ffffff;
     }
+
+
+    .site-mobile-menu-v2-client {
+        min-height: 40px;
+
+        background: transparent;
+
+        color: #2890df;
+
+        font-size: 13px;
+    }
+
 }
 
-/* Desktop Layout remains unchanged */
-@media (min-width: 769px) {
-    .menu-button {
-        display: none; /* Hide the "MENU" button on desktop */
+
+@media (max-width: 480px) {
+
+    .site-header-v2-inner {
+        width: calc(100% - 22px);
+        min-height: 72px;
     }
 
-    .nav-links {
-        display: flex; /* Show the menu normally on desktop */
+
+    .site-header-v2-logo {
+        width: 118px;
     }
+
+
+    .site-header-v2-mobile-login {
+        min-height: 36px;
+
+        padding:
+            0
+            11px;
+
+        font-size: 11px;
+    }
+
+
+    .site-header-v2-menu-button {
+        width: 39px;
+        height: 39px;
+    }
+
 }
 
 /* Hero Section */
