@@ -12937,6 +12937,163 @@ const ADMIN_VAPID_PUBLIC_KEY =
     "BJMZyLb__6L55n-7l1SB3H97mQDGkUXiudH4X9EQMjqO2Do7jIGtS9Gu-gxkIZ5sMxrfLsCo5EaWpGb6kRi5_DA";
 
 
+const adminPushNotificationsButton =
+    document.getElementById(
+        "admin-enable-push-notifications"
+    );
+
+
+const adminPushNotificationStatus =
+    document.getElementById(
+        "admin-push-notification-status"
+    );
+
+
+const adminPushNotificationAction =
+    document.getElementById(
+        "admin-push-notification-action"
+    );
+
+
+// ========================================
+// UPDATE ADMIN PUSH UI
+// ========================================
+
+async function updateAdminPushNotificationUI() {
+
+    if (
+        !adminPushNotificationsButton ||
+        !adminPushNotificationStatus ||
+        !adminPushNotificationAction
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // UNSUPPORTED
+    // ========================================
+
+    if (
+        !(
+            "serviceWorker" in navigator
+        ) ||
+        !(
+            "PushManager" in window
+        ) ||
+        !(
+            "Notification" in window
+        )
+    ) {
+
+        adminPushNotificationStatus.textContent =
+            "Push notifications are not supported on this device.";
+
+        adminPushNotificationAction.textContent =
+            "—";
+
+        adminPushNotificationsButton.disabled =
+            true;
+
+        return;
+
+    }
+
+
+    // ========================================
+    // BLOCKED
+    // ========================================
+
+    if (
+        Notification.permission ===
+        "denied"
+    ) {
+
+        adminPushNotificationStatus.textContent =
+            "Notifications are blocked in your browser or device settings.";
+
+        adminPushNotificationAction.textContent =
+            "!";
+
+        return;
+
+    }
+
+
+    // ========================================
+    // NOT ENABLED YET
+    // ========================================
+
+    if (
+        Notification.permission !==
+        "granted"
+    ) {
+
+        adminPushNotificationStatus.textContent =
+            "Enable alerts for new bookings, messages, and important client activity.";
+
+        adminPushNotificationAction.textContent =
+            "›";
+
+        return;
+
+    }
+
+
+    // ========================================
+    // CHECK EXISTING SUBSCRIPTION
+    // ========================================
+
+    try {
+
+        const registration =
+            await navigator
+                .serviceWorker
+                .ready;
+
+
+        const subscription =
+            await registration
+                .pushManager
+                .getSubscription();
+
+
+        if (
+            subscription
+        ) {
+
+            adminPushNotificationStatus.textContent =
+                "Notifications are enabled on this device.";
+
+            adminPushNotificationAction.textContent =
+                "✓";
+
+            return;
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(
+            "Admin push status check error:",
+            error
+        );
+
+    }
+
+
+    adminPushNotificationStatus.textContent =
+        "Notification permission is enabled, but this device still needs to be registered.";
+
+    adminPushNotificationAction.textContent =
+        "›";
+
+}
+
+
 // ========================================
 // CONVERT BASE64URL TO UINT8ARRAY
 // ========================================
@@ -13002,11 +13159,9 @@ async function saveAdminPushSubscription(
         !currentUser?.id
     ) {
 
-        console.error(
+        throw new Error(
             "No authenticated admin user is available for push registration."
         );
-
-        return;
 
     }
 
@@ -13033,23 +13188,15 @@ async function saveAdminPushSubscription(
         !auth
     ) {
 
-        console.error(
+        throw new Error(
             "Admin push subscription information is incomplete."
         );
-
-        return;
 
     }
 
 
     // ========================================
     // CLAIM THIS DEVICE FOR CURRENT USER
-    // ========================================
-    //
-    // The database derives user_id from
-    // auth.uid(). This also safely transfers
-    // an existing PWA endpoint when another
-    // account signs into this installation.
     // ========================================
 
     const {
@@ -13081,13 +13228,7 @@ async function saveAdminPushSubscription(
         error
     ) {
 
-        console.error(
-            "Admin push subscription claim error:",
-            error
-        );
-
-
-        return;
+        throw error;
 
     }
 
@@ -13097,7 +13238,11 @@ async function saveAdminPushSubscription(
         subscriptionId
     );
 
+
+    return subscriptionId;
+
 }
+
 
 // ========================================
 // ENSURE ADMIN PUSH SUBSCRIPTION
@@ -13117,7 +13262,7 @@ async function ensureAdminPushSubscription() {
         )
     ) {
 
-        return;
+        return null;
 
     }
 
@@ -13127,62 +13272,197 @@ async function ensureAdminPushSubscription() {
         "granted"
     ) {
 
+        return null;
+
+    }
+
+
+    const registration =
+        await navigator
+            .serviceWorker
+            .ready;
+
+
+    let subscription =
+        await registration
+            .pushManager
+            .getSubscription();
+
+
+    if (
+        !subscription
+    ) {
+
+        subscription =
+            await registration
+                .pushManager
+                .subscribe(
+                    {
+                        userVisibleOnly:
+                            true,
+
+                        applicationServerKey:
+                            adminUrlBase64ToUint8Array(
+                                ADMIN_VAPID_PUBLIC_KEY
+                            )
+                    }
+                );
+
+    }
+
+
+    await saveAdminPushSubscription(
+        subscription
+    );
+
+
+    return subscription;
+
+}
+
+
+// ========================================
+// ENABLE ADMIN PUSH NOTIFICATIONS
+// ========================================
+
+async function enableAdminPushNotifications() {
+
+    if (
+        !adminPushNotificationsButton
+    ) {
+
         return;
 
     }
 
 
+    adminPushNotificationsButton.disabled =
+        true;
+
+
+    adminPushNotificationStatus.textContent =
+        "Setting up notifications...";
+
+
     try {
 
-        const registration =
-            await navigator
-                .serviceWorker
-                .ready;
+        if (
+            !(
+                "serviceWorker" in navigator
+            ) ||
+            !(
+                "PushManager" in window
+            ) ||
+            !(
+                "Notification" in window
+            )
+        ) {
+
+            throw new Error(
+                "Push notifications are not supported on this device."
+            );
+
+        }
 
 
-        let subscription =
-            await registration
-                .pushManager
-                .getSubscription();
+        // ========================================
+        // REQUEST PERMISSION
+        // ========================================
+
+        let permission =
+            Notification.permission;
+
+
+        if (
+            permission ===
+            "default"
+        ) {
+
+            permission =
+                await Notification
+                    .requestPermission();
+
+        }
+
+
+        if (
+            permission !==
+            "granted"
+        ) {
+
+            await updateAdminPushNotificationUI();
+
+            return;
+
+        }
+
+
+        // ========================================
+        // CREATE + SAVE SUBSCRIPTION
+        // ========================================
+
+        const subscription =
+            await ensureAdminPushSubscription();
 
 
         if (
             !subscription
         ) {
 
-            subscription =
-                await registration
-                    .pushManager
-                    .subscribe(
-                        {
-                            userVisibleOnly:
-                                true,
-
-                            applicationServerKey:
-                                adminUrlBase64ToUint8Array(
-                                    ADMIN_VAPID_PUBLIC_KEY
-                                )
-                        }
-                    );
+            throw new Error(
+                "Unable to create a push subscription for this device."
+            );
 
         }
 
 
-        await saveAdminPushSubscription(
-            subscription
+        adminPushNotificationStatus.textContent =
+            "Notifications are enabled on this device.";
+
+        adminPushNotificationAction.textContent =
+            "✓";
+
+
+        console.log(
+            "Admin push notifications enabled:",
+            subscription.endpoint
         );
 
     }
     catch (error) {
 
         console.error(
-            "Admin push setup error:",
+            "Admin push notification setup error:",
             error
         );
+
+
+        adminPushNotificationStatus.textContent =
+            "We couldn't finish setting up notifications on this device.";
+
+    }
+    finally {
+
+        adminPushNotificationsButton.disabled =
+            false;
 
     }
 
 }
+
+
+// ========================================
+// ADMIN PUSH BUTTON
+// ========================================
+
+adminPushNotificationsButton
+    ?.addEventListener(
+        "click",
+        enableAdminPushNotifications
+    );
+
+
+updateAdminPushNotificationUI();
 
 
 // ========================================
