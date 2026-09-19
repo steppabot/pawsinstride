@@ -945,7 +945,7 @@ header {
 
     .site-mobile-menu-v2-open {
         max-height:
-            600px;
+            640px;
 
         visibility:
             visible;
@@ -1173,6 +1173,77 @@ header {
             none;
     }
 
+
+    /* ========================================
+       MOBILE MENU SOCIAL LINKS
+       Centered icons under the buttons
+    ======================================== */
+
+    .site-mobile-menu-v2-socials {
+        margin:
+            0 20px;
+
+        padding:
+            18px 0 22px;
+
+        display:
+            flex;
+
+        justify-content:
+            center;
+
+        gap:
+            12px;
+
+        border-top:
+            1px solid #e6ecf1;
+    }
+
+
+    .site-mobile-menu-v2-socials a {
+        width:
+            44px;
+
+        height:
+            44px;
+
+        display:
+            inline-flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
+
+        background:
+            #ffffff;
+
+        border:
+            1px solid #d9e7ef;
+
+        border-radius:
+            8px;
+
+        color:
+            #243949;
+
+        text-decoration:
+            none;
+
+        font-size:
+            18px;
+    }
+
+
+    .site-mobile-menu-v2-socials a:active {
+        background:
+            #f4f8fb;
+
+        color:
+            #2890df;
+    }
+
 }
 
 
@@ -1245,6 +1316,7 @@ header {
     }
 
 }
+
 
 /* ========================================
    HERO SECTION
