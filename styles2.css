@@ -70,7 +70,7 @@ header {
 
     width:
         min(
-            1320px,
+            1360px,
             calc(100% - 40px)
         );
 
@@ -86,6 +86,7 @@ header {
     grid-template-columns:
         auto
         auto
+        auto
         auto;
 
     align-items:
@@ -95,7 +96,7 @@ header {
         center;
 
     gap:
-        30px;
+        26px;
 
     font-family:
         "Manrope",
@@ -127,7 +128,7 @@ header {
         block;
 
     width:
-        104px;
+        100px;
 
     height:
         auto;
@@ -149,7 +150,7 @@ header {
         center;
 
     gap:
-        24px;
+        27px;
 }
 
 
@@ -268,6 +269,92 @@ header {
 
 
 /* ========================================
+   DESKTOP SOCIAL LINKS
+======================================== */
+
+.site-header-v2-socials {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+}
+
+
+.site-header-v2-socials a {
+    width:
+        36px;
+
+    height:
+        36px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        rgba(255, 255, 255, 0.82);
+
+    border:
+        1px solid #d9e7ef;
+
+    border-radius:
+        8px;
+
+    color:
+        #243949;
+
+    text-decoration:
+        none;
+
+    font-size:
+        16px;
+
+    box-shadow:
+        0 4px 12px rgba(24, 52, 71, 0.05);
+
+    transition:
+        transform 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.site-header-v2-socials a:hover {
+    transform:
+        translateY(-2px);
+
+    color:
+        #2890df;
+
+    border-color:
+        #9dd7ec;
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        0 7px 16px rgba(40, 144, 223, 0.12);
+}
+
+
+.site-header-v2-socials a:nth-child(2):hover {
+    color:
+        #ef8f24;
+}
+
+
+/* ========================================
    DESKTOP CLIENT ACTIONS
 ======================================== */
 
@@ -378,7 +465,6 @@ header {
     background:
         #fff8ef;
 }
-
 
 /* ========================================
    MOBILE HEADER ACTIONS
@@ -612,6 +698,7 @@ header {
 
 
     .site-header-v2-nav,
+    .site-header-v2-socials,
     .site-header-v2-actions {
         display:
             none;
