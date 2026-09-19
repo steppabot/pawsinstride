@@ -4356,3 +4356,76 @@ html {
         scroll-snap-align: start;
     }
 }
+
+/* =========================
+   HAPPY DOGS POLISH
+   Paste at the VERY BOTTOM of styles2.css, below the
+   "HAPPY DOGS + CARD SYSTEM" block you already added.
+========================= */
+
+/* More breathing room around the heading and photos (desktop/tablet) */
+@media (min-width: 769px) {
+    .trust-images-section {
+        padding: 44px 40px 42px;
+    }
+
+    .trust-images-section .section-heading {
+        margin-bottom: 32px;
+    }
+}
+
+.trust-images-section .section-heading p {
+    color: #5b6b7b;
+}
+
+/* Center photo is taller than the two beside it, so the row has
+   a focal point instead of three identical tiles */
+.trust-grid {
+    align-items: center;
+    gap: 16px;
+}
+
+.trust-grid img {
+    height: 240px;
+}
+
+.trust-grid img:nth-child(2) {
+    height: 290px;
+}
+
+@media (max-width: 980px) {
+    .trust-grid img {
+        height: 190px;
+    }
+
+    .trust-grid img:nth-child(2) {
+        height: 230px;
+    }
+}
+
+/* Phones keep the swipeable row, with equal heights */
+@media (max-width: 640px) {
+    .trust-grid img,
+    .trust-grid img:nth-child(2) {
+        height: 220px;
+    }
+}
+
+/* =========================
+   SECTION HEADING FONT
+   Paste at the VERY BOTTOM of styles2.css.
+   Uses Manrope (same as your nav and buttons) for the section
+   headings on the homepage. Colors are unchanged.
+========================= */
+
+.trust-images-section .section-heading h2,
+.homepage-reviews .section-heading h2,
+.homepage-pricing h2,
+.homepage-services .section-heading h2,
+.service-areas-container h2,
+.fresh-food-header h2,
+.final-cta-container h2 {
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
