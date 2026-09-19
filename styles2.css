@@ -4429,3 +4429,32 @@ html {
     font-weight: 800;
     letter-spacing: -0.025em;
 }
+
+
+/* Hero headline: Manrope too, so it matches the section headings.
+   Manrope is wider than Roboto, so the sizes are a touch smaller
+   (and balanced) to keep the headline on two lines. */
+.homepage-hero .hero-text h1 {
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+}
+
+@media (min-width: 981px) {
+    .homepage-hero .hero-text h1 {
+        font-size: clamp(1.9rem, 2.9vw, 2.6rem);
+    }
+}
+
+@media (min-width: 641px) and (max-width: 980px) {
+    .homepage-hero .hero-text h1 {
+        font-size: 2.3rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .homepage-hero .hero-text h1 {
+        font-size: clamp(1.35rem, 6.6vw, 1.7rem);
+    }
+}
