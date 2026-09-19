@@ -731,7 +731,16 @@ header {
             visible;
 
         border-bottom:
-            3px solid #47cee6;
+            3px solid #f3aa4c;
+
+        border-image:
+            linear-gradient(
+                90deg,
+                #f7b955 0%,
+                #f3aa4c 50%,
+                #ef8f24 100%
+            )
+            1;
 
         background:
             radial-gradient(
@@ -741,6 +750,9 @@ header {
                 transparent 56px
             ),
             #ffffff;
+
+        box-shadow:
+            0 6px 18px rgba(16, 60, 100, 0.22);
     }
 
 
