@@ -6306,171 +6306,337 @@ body.client-modal-open {
 ======================================== */
 
 @media (min-width:701px) {
+
+
     /* ========================================
        FULL-WIDTH DESKTOP REPORT MOUNT
     ======================================== */
 
     .client-desktop-visit-report-mount {
-        width: 100%;
-        margin-top: 22px;
+        width:
+            100%;
+
+        margin-top:
+            22px;
     }
 
+
     .client-desktop-visit-report-mount:empty {
-        display: none;
+        display:
+            none;
     }
+
 
     /* ========================================
        REPORT SHELL
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-visit-report {
-        display: grid;
-        grid-template-columns: minmax(0,0.9fr) minmax(0,1.1fr);
-        overflow: hidden;
-        border-radius: 18px;
-        box-shadow: 0 14px 38px rgba(24,70,95,0.09);
+    .client-desktop-visit-report-mount
+    .client-visit-report {
+        display:
+            block;
+
+        overflow:
+            hidden;
+
+        border-radius:
+            18px;
+
+        box-shadow:
+            0 14px 38px rgba(24,70,95,0.09);
     }
+
 
     /* ========================================
        REPORT HEADER
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-visit-report-header {
-        grid-column: 1/-1;
-        grid-row: 1;
-        padding: 22px 24px;
+    .client-desktop-visit-report-mount
+    .client-visit-report-header {
+        padding:
+            22px
+            24px;
     }
 
-    .client-desktop-visit-report-mount .client-visit-report-header h5 {
-        font-size: 24px;
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-header h5 {
+        font-size:
+            24px;
     }
 
-    .client-desktop-visit-report-mount .client-visit-report-header p {
-        font-size: 13px;
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-header p {
+        font-size:
+            13px;
     }
+
+
+    /* ========================================
+       REPORT CONTENT GRID
+    ======================================== */
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-content {
+        display:
+            grid;
+
+        grid-template-columns:
+            minmax(
+                0,
+                0.9fr
+            )
+            minmax(
+                0,
+                1.1fr
+            );
+
+        align-items:
+            stretch;
+    }
+
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-main,
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-side {
+        min-width:
+            0;
+    }
+
 
     /* ========================================
        LEFT COLUMN
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-visit-report-section:nth-child(2) {
-        grid-column: 1;
-        grid-row: 2;
-        min-width: 0;
-        padding: 22px 24px;
-        border-right: 1px solid #e3ebef;
+    .client-desktop-visit-report-mount
+    .client-visit-report-main {
+        border-right:
+            1px solid #e3ebef;
     }
 
-    /* ========================================
-       LEFT COLUMN
-    ======================================== */
 
-    .client-desktop-visit-report-mount .client-visit-report-section:nth-child(3) {
-        grid-column: 1;
-        grid-row: 3;
-        min-width: 0;
-        padding: 22px 24px;
-        border-right: 1px solid #e3ebef;
+    .client-desktop-visit-report-mount
+    .client-visit-report-main
+    .client-visit-report-section {
+        min-width:
+            0;
+
+        padding:
+            22px
+            24px;
     }
 
-    /* ========================================
-       LEFT COLUMN
-    ======================================== */
-
-    .client-desktop-visit-report-mount .client-visit-report-section:nth-child(4) {
-        grid-column: 1;
-        grid-row: 4;
-        min-width: 0;
-        padding: 22px 24px;
-        border-right: 1px solid #e3ebef;
-    }
 
     /* ========================================
        RIGHT COLUMN
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-visit-report-section:nth-child(5) {
-        grid-column: 2;
-        grid-row: 2/5;
-        min-width: 0;
-        padding: 22px;
-        border-top: none;
-        display: flex;
-        align-items: stretch;
+    .client-desktop-visit-report-mount
+    .client-visit-report-side {
+        display:
+            flex;
+
+        min-width:
+            0;
     }
 
-    .client-desktop-visit-report-mount .client-visit-report-section:nth-child(5) .client-walk-summary-card {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-side
+    .client-visit-report-section {
+        width:
+            100%;
+
+        min-width:
+            0;
+
+        padding:
+            22px;
+
+        border-top:
+            none;
     }
+
+
+    /* ========================================
+       NON-WALK REPORT
+    ======================================== */
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-nonwalk
+    .client-visit-report-side
+    .client-visit-report-photos-section {
+        width:
+            100%;
+    }
+
+
+    /* ========================================
+       WALK REPORT
+    ======================================== */
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-walk
+    .client-visit-report-side
+    .client-visit-report-section {
+        display:
+            flex;
+
+        align-items:
+            stretch;
+    }
+
+
+    .client-desktop-visit-report-mount
+    .client-visit-report-walk
+    .client-walk-summary-card {
+        display:
+            flex;
+
+        flex-direction:
+            column;
+
+        width:
+            100%;
+    }
+
 
     /* ========================================
        WALK SUMMARY HEADER
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-walk-summary-heading {
-        padding: 18px 20px 16px;
+    .client-desktop-visit-report-mount
+    .client-walk-summary-heading {
+        padding:
+            18px
+            20px
+            16px;
     }
 
-    .client-desktop-visit-report-mount .client-walk-summary-heading strong {
-        font-size: 17px;
+
+    .client-desktop-visit-report-mount
+    .client-walk-summary-heading strong {
+        font-size:
+            17px;
     }
 
-    .client-desktop-visit-report-mount .client-walk-summary-heading span {
-        font-size: 12px;
+
+    .client-desktop-visit-report-mount
+    .client-walk-summary-heading span {
+        font-size:
+            12px;
     }
+
 
     /* ========================================
        WALK STATS
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-walk-summary-stats {
-        grid-template-columns: repeat(4,minmax(0,1fr));
-        gap: 10px;
-        padding: 16px;
+    .client-desktop-visit-report-mount
+    .client-walk-summary-stats {
+        grid-template-columns:
+            repeat(
+                4,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap:
+            10px;
+
+        padding:
+            16px;
     }
 
-    .client-desktop-visit-report-mount .client-walk-summary-stat {
-        padding: 14px 10px;
+
+    .client-desktop-visit-report-mount
+    .client-walk-summary-stat {
+        padding:
+            14px
+            10px;
     }
 
-    .client-desktop-visit-report-mount .client-walk-summary-stat strong {
-        font-size: 14px;
+
+    .client-desktop-visit-report-mount
+    .client-walk-summary-stat strong {
+        font-size:
+            14px;
     }
+
 
     /* ========================================
        LARGE DESKTOP ROUTE MAP
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-walk-route-map {
-        width: calc(100% - 32px);
-        height: 420px;
-        flex: 1;
-        min-height: 360px;
-        margin: 0 16px 16px;
+    .client-desktop-visit-report-mount
+    .client-walk-route-map {
+        width:
+            calc(
+                100% - 32px
+            );
+
+        height:
+            420px;
+
+        flex:
+            1;
+
+        min-height:
+            360px;
+
+        margin:
+            0
+            16px
+            16px;
     }
 
-    .client-desktop-visit-report-mount .client-walk-route-empty {
-        min-height: 280px;
-        margin: 0 16px 16px;
+
+    .client-desktop-visit-report-mount
+    .client-walk-route-empty {
+        min-height:
+            280px;
+
+        margin:
+            0
+            16px
+            16px;
     }
+
 
     /* ========================================
        BRANDING
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-walk-summary-branding {
-        padding: 0 18px 18px;
+    .client-desktop-visit-report-mount
+    .client-walk-summary-branding {
+        padding:
+            0
+            18px
+            18px;
     }
+
 
     /* ========================================
        PHOTOS
     ======================================== */
 
-    .client-desktop-visit-report-mount .client-visit-report-photo-grid {
-        grid-template-columns: repeat(2,minmax(0,1fr));
+    .client-desktop-visit-report-mount
+    .client-visit-report-photo-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
     }
+
 }
 
 /* ========================================
