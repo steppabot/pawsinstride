@@ -2359,12 +2359,190 @@
                                     hidden
                                 >
 
-                                    <div class="client-notifications-placeholder">
-
-                                        <p>
-                                            Notification settings will appear here.
-                                        </p>
-
+                                    <div class="client-notification-settings">
+                                    
+                                    
+                                        <!-- ========================================
+                                             THIS DEVICE
+                                             ======================================== -->
+                                    
+                                        <div class="client-notification-device-card">
+                                    
+                                            <div class="client-notification-device-copy">
+                                    
+                                                <span class="household-detail-label">
+                                                    This Device
+                                                </span>
+                                    
+                                                <strong>
+                                                    Push Notifications
+                                                </strong>
+                                    
+                                                <p id="push-notification-status">
+                                                    Checking notification status...
+                                                </p>
+                                    
+                                            </div>
+                                    
+                                    
+                                            <button
+                                                type="button"
+                                                id="enable-push-notifications"
+                                                class="primary-button client-notification-enable-button"
+                                            >
+                                                Enable Notifications
+                                            </button>
+                                    
+                                        </div>
+                                    
+                                    
+                                        <!-- ========================================
+                                             NOTIFICATION PREFERENCES
+                                             ======================================== -->
+                                    
+                                        <div class="client-notification-preferences">
+                                    
+                                            <div class="client-notification-preferences-heading">
+                                    
+                                                <span class="household-detail-label">
+                                                    Notify Me About
+                                                </span>
+                                    
+                                                <p>
+                                                    Choose which pet care updates you want to receive.
+                                                </p>
+                                    
+                                            </div>
+                                    
+                                    
+                                            <label class="client-notification-preference-row">
+                                    
+                                                <span>
+                                                    <strong>
+                                                        Visit Started
+                                                    </strong>
+                                    
+                                                    <small>
+                                                        Get notified when your pet care visit begins.
+                                                    </small>
+                                                </span>
+                                    
+                                                <input
+                                                    type="checkbox"
+                                                    data-client-push-preference="visit_started"
+                                                    checked
+                                                >
+                                    
+                                            </label>
+                                    
+                                    
+                                            <label class="client-notification-preference-row">
+                                    
+                                                <span>
+                                                    <strong>
+                                                        Visit Completed
+                                                    </strong>
+                                    
+                                                    <small>
+                                                        Know when your pet care visit has finished.
+                                                    </small>
+                                                </span>
+                                    
+                                                <input
+                                                    type="checkbox"
+                                                    data-client-push-preference="visit_completed"
+                                                    checked
+                                                >
+                                    
+                                            </label>
+                                    
+                                    
+                                            <label class="client-notification-preference-row">
+                                    
+                                                <span>
+                                                    <strong>
+                                                        Visit Reports
+                                                    </strong>
+                                    
+                                                    <small>
+                                                        Get notified when a new visit report is available.
+                                                    </small>
+                                                </span>
+                                    
+                                                <input
+                                                    type="checkbox"
+                                                    data-client-push-preference="visit_reports"
+                                                    checked
+                                                >
+                                    
+                                            </label>
+                                    
+                                    
+                                            <label class="client-notification-preference-row">
+                                    
+                                                <span>
+                                                    <strong>
+                                                        New Messages
+                                                    </strong>
+                                    
+                                                    <small>
+                                                        Receive alerts when Paws in Stride sends you a message.
+                                                    </small>
+                                                </span>
+                                    
+                                                <input
+                                                    type="checkbox"
+                                                    data-client-push-preference="messages"
+                                                    checked
+                                                >
+                                    
+                                            </label>
+                                    
+                                    
+                                            <label class="client-notification-preference-row">
+                                    
+                                                <span>
+                                                    <strong>
+                                                        Booking Updates
+                                                    </strong>
+                                    
+                                                    <small>
+                                                        Get notified about important booking updates.
+                                                    </small>
+                                                </span>
+                                    
+                                                <input
+                                                    type="checkbox"
+                                                    data-client-push-preference="booking_updates"
+                                                    checked
+                                                >
+                                    
+                                            </label>
+                                    
+                                    
+                                            <label class="client-notification-preference-row">
+                                    
+                                                <span>
+                                                    <strong>
+                                                        Cancellation & Refund Updates
+                                                    </strong>
+                                    
+                                                    <small>
+                                                        Receive alerts about cancellations, credits, or refunds.
+                                                    </small>
+                                                </span>
+                                    
+                                                <input
+                                                    type="checkbox"
+                                                    data-client-push-preference="cancellations"
+                                                    checked
+                                                >
+                                    
+                                            </label>
+                                    
+                                        </div>
+                                    
+                                    
                                     </div>
 
                                 </div>
