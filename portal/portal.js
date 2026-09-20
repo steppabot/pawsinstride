@@ -26288,13 +26288,52 @@ function isInstalledPawsInStridePWA() {
 
 }
 
-
 function shouldUseMobilePushNotifications() {
 
     return (
         isMobileDeviceForPush() &&
         isInstalledPawsInStridePWA()
     );
+
+}
+
+
+// ========================================
+// PUSH SETTINGS CARD VISIBILITY
+// ========================================
+
+function updateClientPushSettingsCardVisibility() {
+
+    const pushSettingsCard =
+        document.getElementById(
+            "client-push-settings-card"
+        );
+
+
+    if (
+        !pushSettingsCard
+    ) {
+
+        return;
+
+    }
+
+
+    const isMobileDevice =
+        isMobileDeviceForPush();
+
+
+    const isInstalledPWA =
+        isInstalledPawsInStridePWA();
+
+
+    const shouldShowPushSettings =
+        !isMobileDevice ||
+        isInstalledPWA;
+
+
+    pushSettingsCard.hidden =
+        !shouldShowPushSettings;
 
 }
 
@@ -26952,10 +26991,12 @@ clientNotificationsToggle
         }
     );
 
-
 // ========================================
 // PUSH NOTIFICATION BUTTON
 // ========================================
+
+updateClientPushSettingsCardVisibility();
+
 
 if (
     enablePushNotificationsButton
@@ -26971,7 +27012,6 @@ if (
     updatePushNotificationUI();
 
 }
-
 
 // ========================================
 // MOBILE PWA FIRST-TIME NOTIFICATION PROMPT
