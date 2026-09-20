@@ -2555,6 +2555,13 @@ async function loadDashboard() {
 
 
 // ========================================
+// INITIAL CLIENT NOTIFICATIONS
+// ========================================
+
+await loadClientNotifications();
+
+
+// ========================================
 // INITIAL LATEST UPDATE / MOBILE APP HOME
 // ========================================
 
@@ -24000,11 +24007,1197 @@ document
     );
 
 // ========================================
+// CLIENT NOTIFICATION CENTER
+// ========================================
+
+const clientNotificationCenterButton =
+    document.getElementById(
+        "client-notification-center-button"
+    );
+
+
+const clientNotificationPanel =
+    document.getElementById(
+        "client-notification-panel"
+    );
+
+
+const clientNotificationList =
+    document.getElementById(
+        "client-notification-list"
+    );
+
+
+const clientNotificationUnreadBadge =
+    document.getElementById(
+        "client-notification-unread-badge"
+    );
+
+
+const clientNotificationMarkAllRead =
+    document.getElementById(
+        "client-notification-mark-all-read"
+    );
+
+
+const clientNotificationClearAll =
+    document.getElementById(
+        "client-notification-clear-all"
+    );
+
+
+let currentClientNotifications =
+    [];
+
+
+// ========================================
+// NOTIFICATION ICON
+// ========================================
+
+function getClientNotificationIcon(
+    notificationType
+) {
+
+
+    const type =
+        String(
+            notificationType ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    if (
+        type ===
+        "visit_started"
+    ) {
+
+        return "🐾";
+
+    }
+
+
+    if (
+        type ===
+        "visit_completed"
+    ) {
+
+        return "✅";
+
+    }
+
+
+    if (
+        type ===
+        "visit_report"
+    ) {
+
+        return "📋";
+
+    }
+
+
+    if (
+        type ===
+        "booking_confirmed" ||
+        type ===
+        "booking_updated"
+    ) {
+
+        return "📅";
+
+    }
+
+
+    if (
+        type ===
+        "cancellation_update"
+    ) {
+
+        return "💳";
+
+    }
+
+
+    if (
+        type ===
+        "client_message"
+    ) {
+
+        return "💬";
+
+    }
+
+
+    return "🔔";
+
+}
+
+
+// ========================================
+// FORMAT NOTIFICATION TIME
+// ========================================
+
+function formatClientNotificationTime(
+    timestamp
+) {
+
+
+    if (
+        !timestamp
+    ) {
+
+        return "";
+
+    }
+
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    const now =
+        new Date();
+
+
+    const differenceMs =
+        Math.max(
+            0,
+            now.getTime() -
+            date.getTime()
+        );
+
+
+    const differenceMinutes =
+        Math.floor(
+            differenceMs /
+            60000
+        );
+
+
+    if (
+        differenceMinutes <
+        1
+    ) {
+
+        return "Just now";
+
+    }
+
+
+    if (
+        differenceMinutes <
+        60
+    ) {
+
+        return `${differenceMinutes} min ago`;
+
+    }
+
+
+    const differenceHours =
+        Math.floor(
+            differenceMinutes /
+            60
+        );
+
+
+    if (
+        differenceHours <
+        24
+    ) {
+
+        return `${differenceHours} ${
+            differenceHours ===
+            1
+                ? "hour"
+                : "hours"
+        } ago`;
+
+    }
+
+
+    const differenceDays =
+        Math.floor(
+            differenceHours /
+            24
+        );
+
+
+    if (
+        differenceDays ===
+        1
+    ) {
+
+        return "Yesterday";
+
+    }
+
+
+    if (
+        differenceDays <
+        7
+    ) {
+
+        return `${differenceDays} days ago`;
+
+    }
+
+
+    return date
+        .toLocaleDateString(
+            "en-US",
+            {
+                month:
+                    "short",
+
+                day:
+                    "numeric"
+            }
+        );
+
+}
+
+
+// ========================================
+// UPDATE NOTIFICATION BADGE
+// ========================================
+
+function updateClientNotificationBadge() {
+
+
+    if (
+        !clientNotificationUnreadBadge
+    ) {
+
+        return;
+
+    }
+
+
+    const unreadCount =
+        currentClientNotifications
+            .filter(
+                notification =>
+                    !notification.read_at
+            )
+            .length;
+
+
+    if (
+        unreadCount <=
+        0
+    ) {
+
+        clientNotificationUnreadBadge.hidden =
+            true;
+
+        clientNotificationUnreadBadge.textContent =
+            "0";
+
+
+        return;
+
+    }
+
+
+    clientNotificationUnreadBadge.textContent =
+        unreadCount >
+        99
+            ? "99+"
+            : String(
+                unreadCount
+            );
+
+
+    clientNotificationUnreadBadge.hidden =
+        false;
+
+}
+
+
+// ========================================
+// RENDER NOTIFICATION CENTER
+// ========================================
+
+function renderClientNotifications() {
+
+
+    if (
+        !clientNotificationList
+    ) {
+
+        return;
+
+    }
+
+
+    updateClientNotificationBadge();
+
+
+    if (
+        currentClientNotifications.length ===
+        0
+    ) {
+
+        clientNotificationList.innerHTML = `
+
+            <div class="client-notification-empty">
+
+                <span
+                    class="client-notification-empty-icon"
+                    aria-hidden="true"
+                >
+                    🔔
+                </span>
+
+                <strong>
+                    You're all caught up
+                </strong>
+
+                <p>
+                    New pet care updates will appear here.
+                </p>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    clientNotificationList.innerHTML =
+        currentClientNotifications
+            .map(
+                notification => {
+
+
+                    const unread =
+                        !notification.read_at;
+
+
+                    const icon =
+                        getClientNotificationIcon(
+                            notification.notification_type
+                        );
+
+
+                    return `
+
+                        <div
+                            class="client-notification-item ${
+                                unread
+                                    ? "is-unread"
+                                    : ""
+                            }"
+                            data-client-notification-id="${notification.id}"
+                            data-client-notification-url="${escapeHtml(
+                                notification.action_url ||
+                                ""
+                            )}"
+                            role="button"
+                            tabindex="0"
+                        >
+
+                            <span
+                                class="client-notification-item-icon"
+                                aria-hidden="true"
+                            >
+                                ${icon}
+                            </span>
+
+
+                            <div class="client-notification-item-copy">
+
+                                <div class="client-notification-item-title">
+
+                                    ${
+                                        unread
+                                            ? `
+                                                <span
+                                                    class="client-notification-unread-dot"
+                                                    aria-hidden="true"
+                                                ></span>
+                                            `
+                                            : ""
+                                    }
+
+                                    <span>
+                                        ${escapeHtml(
+                                            notification.title ||
+                                            "Notification"
+                                        )}
+                                    </span>
+
+                                </div>
+
+
+                                <p class="client-notification-item-message">
+                                    ${escapeHtml(
+                                        notification.message ||
+                                        ""
+                                    )}
+                                </p>
+
+
+                                <span class="client-notification-item-time">
+                                    ${escapeHtml(
+                                        formatClientNotificationTime(
+                                            notification.created_at
+                                        )
+                                    )}
+                                </span>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="client-notification-dismiss"
+                                data-client-notification-dismiss="${notification.id}"
+                                aria-label="Clear notification"
+                                title="Clear notification"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+// ========================================
+// LOAD CLIENT NOTIFICATIONS
+// ========================================
+
+async function loadClientNotifications() {
+
+
+    if (
+        !currentUser?.id
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "client_notifications"
+                )
+                .select(
+                    `
+                        id,
+                        notification_type,
+                        title,
+                        message,
+                        action_url,
+                        entity_type,
+                        entity_id,
+                        read_at,
+                        created_at
+                    `
+                )
+                .eq(
+                    "client_id",
+                    currentUser.id
+                )
+                .is(
+                    "dismissed_at",
+                    null
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending:
+                            false
+                    }
+                )
+                .limit(
+                    50
+                );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        currentClientNotifications =
+            data ||
+            [];
+
+
+        renderClientNotifications();
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Client notification load error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ========================================
+// OPEN NOTIFICATION CENTER
+// ========================================
+
+async function openClientNotificationCenter() {
+
+
+    if (
+        !clientNotificationPanel ||
+        !clientNotificationCenterButton
+    ) {
+
+        return;
+
+    }
+
+
+    await loadClientNotifications();
+
+
+    clientNotificationPanel.hidden =
+        false;
+
+
+    clientNotificationCenterButton.setAttribute(
+        "aria-expanded",
+        "true"
+    );
+
+}
+
+
+// ========================================
+// CLOSE NOTIFICATION CENTER
+// ========================================
+
+function closeClientNotificationCenter() {
+
+
+    if (
+        !clientNotificationPanel ||
+        !clientNotificationCenterButton
+    ) {
+
+        return;
+
+    }
+
+
+    clientNotificationPanel.hidden =
+        true;
+
+
+    clientNotificationCenterButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+}
+
+
+// ========================================
+// TOGGLE NOTIFICATION CENTER
+// ========================================
+
+async function toggleClientNotificationCenter() {
+
+
+    if (
+        !clientNotificationPanel
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        clientNotificationPanel.hidden
+    ) {
+
+        await openClientNotificationCenter();
+
+        return;
+
+    }
+
+
+    closeClientNotificationCenter();
+
+}
+
+
+// ========================================
+// MARK ONE NOTIFICATION READ
+// ========================================
+
+async function markClientNotificationRead(
+    notificationId
+) {
+
+
+    if (
+        !currentUser?.id ||
+        !notificationId
+    ) {
+
+        return false;
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "client_notifications"
+            )
+            .update({
+                read_at:
+                    new Date()
+                        .toISOString()
+            })
+            .eq(
+                "id",
+                notificationId
+            )
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .is(
+                "read_at",
+                null
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Notification read update error:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+
+    const notification =
+        currentClientNotifications
+            .find(
+                item =>
+                    Number(
+                        item.id
+                    ) ===
+                    Number(
+                        notificationId
+                    )
+            );
+
+
+    if (
+        notification &&
+        !notification.read_at
+    ) {
+
+        notification.read_at =
+            new Date()
+                .toISOString();
+
+    }
+
+
+    renderClientNotifications();
+
+
+    return true;
+
+}
+
+
+// ========================================
+// MARK ALL NOTIFICATIONS READ
+// ========================================
+
+async function markAllClientNotificationsRead() {
+
+
+    if (
+        !currentUser?.id
+    ) {
+
+        return;
+
+    }
+
+
+    const readAt =
+        new Date()
+            .toISOString();
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "client_notifications"
+            )
+            .update({
+                read_at:
+                    readAt
+            })
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .is(
+                "dismissed_at",
+                null
+            )
+            .is(
+                "read_at",
+                null
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Mark all notifications read error:",
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    currentClientNotifications =
+        currentClientNotifications
+            .map(
+                notification => ({
+
+                    ...notification,
+
+                    read_at:
+                        notification.read_at ||
+                        readAt
+
+                })
+            );
+
+
+    renderClientNotifications();
+
+}
+
+
+// ========================================
+// DISMISS ONE NOTIFICATION
+// ========================================
+
+async function dismissClientNotification(
+    notificationId
+) {
+
+
+    if (
+        !currentUser?.id ||
+        !notificationId
+    ) {
+
+        return;
+
+    }
+
+
+    const dismissedAt =
+        new Date()
+            .toISOString();
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "client_notifications"
+            )
+            .update({
+                dismissed_at:
+                    dismissedAt,
+
+                read_at:
+                    dismissedAt
+            })
+            .eq(
+                "id",
+                notificationId
+            )
+            .eq(
+                "client_id",
+                currentUser.id
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Notification dismiss error:",
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    currentClientNotifications =
+        currentClientNotifications
+            .filter(
+                notification =>
+                    Number(
+                        notification.id
+                    ) !==
+                    Number(
+                        notificationId
+                    )
+            );
+
+
+    renderClientNotifications();
+
+}
+
+
+// ========================================
+// CLEAR ALL NOTIFICATIONS
+// ========================================
+
+async function clearAllClientNotifications() {
+
+
+    if (
+        !currentUser?.id ||
+        currentClientNotifications.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+    const dismissedAt =
+        new Date()
+            .toISOString();
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "client_notifications"
+            )
+            .update({
+                dismissed_at:
+                    dismissedAt,
+
+                read_at:
+                    dismissedAt
+            })
+            .eq(
+                "client_id",
+                currentUser.id
+            )
+            .is(
+                "dismissed_at",
+                null
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Clear notifications error:",
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    currentClientNotifications =
+        [];
+
+
+    renderClientNotifications();
+
+}
+
+
+// ========================================
+// NOTIFICATION CENTER EVENTS
+// ========================================
+
+clientNotificationCenterButton
+    ?.addEventListener(
+        "click",
+        async event => {
+
+
+            event.stopPropagation();
+
+
+            await toggleClientNotificationCenter();
+
+        }
+    );
+
+
+clientNotificationPanel
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+        }
+    );
+
+
+clientNotificationMarkAllRead
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await markAllClientNotificationsRead();
+
+        }
+    );
+
+
+clientNotificationClearAll
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await clearAllClientNotifications();
+
+        }
+    );
+
+
+clientNotificationList
+    ?.addEventListener(
+        "click",
+        async event => {
+
+
+            const dismissButton =
+                event.target.closest(
+                    "[data-client-notification-dismiss]"
+                );
+
+
+            if (
+                dismissButton
+            ) {
+
+
+                const notificationId =
+                    Number(
+                        dismissButton.dataset
+                            .clientNotificationDismiss
+                    );
+
+
+                await dismissClientNotification(
+                    notificationId
+                );
+
+
+                return;
+
+            }
+
+
+            const notificationItem =
+                event.target.closest(
+                    "[data-client-notification-id]"
+                );
+
+
+            if (
+                !notificationItem
+            ) {
+
+                return;
+
+            }
+
+
+            const notificationId =
+                Number(
+                    notificationItem.dataset
+                        .clientNotificationId
+                );
+
+
+            const notificationUrl =
+                String(
+                    notificationItem.dataset
+                        .clientNotificationUrl ||
+                    ""
+                )
+                    .trim();
+
+
+            await markClientNotificationRead(
+                notificationId
+            );
+
+
+            if (
+                notificationUrl
+            ) {
+
+                window.location.href =
+                    notificationUrl;
+
+            }
+
+        }
+    );
+
+
+document
+    .addEventListener(
+        "click",
+        event => {
+
+
+            if (
+                clientNotificationPanel?.hidden
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                event.target.closest(
+                    ".client-notification-center"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            closeClientNotificationCenter();
+
+        }
+    );
+
+
+document
+    .addEventListener(
+        "keydown",
+        event => {
+
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                closeClientNotificationCenter();
+
+            }
+
+        }
+    );
+
+
+// ========================================
 // PUSH NOTIFICATIONS
 // ========================================
 
 const VAPID_PUBLIC_KEY =
     "BJMZyLb__6L55n-7l1SB3H97mQDGkUXiudH4X9EQMjqO2Do7jIGtS9Gu-gxkIZ5sMxrfLsCo5EaWpGb6kRi5_DA";
+
+
+const pushNotificationCard =
+    document.getElementById(
+        "push-notification-card"
+    );
 
 
 const enablePushNotificationsButton =
@@ -24331,7 +25524,6 @@ function shouldUseMobilePushNotifications() {
 
 }
 
-
 // ========================================
 // UPDATE PUSH NOTIFICATION UI
 // ========================================
@@ -24482,7 +25674,6 @@ async function updatePushNotificationUI() {
 
 }
 
-
 // ========================================
 // REQUEST NOTIFICATION PERMISSION
 // ========================================
@@ -24582,7 +25773,6 @@ async function enablePushNotifications() {
     }
 
 }
-
 
 // ========================================
 // CLIENT NOTIFICATION PREFERENCES
@@ -24953,7 +26143,6 @@ async function saveClientNotificationPreference(
 
 }
 
-
 // ========================================
 // PREFERENCE CHANGE LISTENERS
 // ========================================
@@ -24974,7 +26163,6 @@ clientPushPreferenceInputs.forEach(
 
     }
 );
-
 
 // ========================================
 // LOAD PREFERENCES WHEN SETTINGS OPEN
