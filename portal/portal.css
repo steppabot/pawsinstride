@@ -8564,6 +8564,22 @@ body.mobile-app-screen-pets
 }
 
 /* ========================================
+   CLIENT NOTIFICATION CENTER
+======================================== */
+
+.client-portal-page
+.client-notification-center {
+
+    position:
+        relative;
+
+    flex:
+        0 0 auto;
+
+}
+
+
+/* ========================================
    CLIENT NOTIFICATION CENTER BUTTON
 ======================================== */
 
@@ -8761,90 +8777,34 @@ body.mobile-app-screen-pets
 
 
 /* ========================================
-   CLIENT NOTIFICATION SETTINGS MODAL
+   CLIENT NOTIFICATION PANEL
 ======================================== */
 
-.client-notifications-modal {
-
-    position:
-        fixed;
-
-    inset:
-        0;
-
-    z-index:
-        10050;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    padding:
-        24px;
-
-}
-
-
-.client-notifications-modal[hidden] {
-
-    display:
-        none !important;
-
-}
-
-
-.client-notifications-modal-backdrop {
+.client-portal-page
+.client-notification-panel {
 
     position:
         absolute;
 
-    inset:
+    top:
+        calc(100% + 12px);
+
+    right:
         0;
 
-    background:
-        rgba(
-            14,
-            35,
-            49,
-            0.58
-        );
-
-    backdrop-filter:
-        blur(5px);
-
-    -webkit-backdrop-filter:
-        blur(5px);
-
-}
-
-
-.client-notifications-dialog {
-
-    position:
-        relative;
-
     z-index:
-        1;
+        2500;
 
     width:
         min(
-            100%,
-            720px
+            390px,
+            calc(
+                100vw - 24px
+            )
         );
 
-    max-height:
-        min(
-            90vh,
-            820px
-        );
-
-    overflow-y:
-        auto;
+    overflow:
+        hidden;
 
     background:
         #ffffff;
@@ -8855,37 +8815,47 @@ body.mobile-app-screen-pets
             40,
             144,
             223,
-            0.14
+            0.16
         );
 
     border-radius:
-        22px;
+        18px;
 
     box-shadow:
         0
-        28px
-        70px
+        24px
+        60px
         rgba(
-            19,
-            50,
-            68,
-            0.24
+            24,
+            52,
+            71,
+            0.18
         );
 
 }
 
 
+.client-portal-page
+.client-notification-panel[hidden] {
+
+    display:
+        none !important;
+
+}
+
+
 /* ========================================
-   CLIENT NOTIFICATION MODAL HEADER
+   CLIENT NOTIFICATION PANEL HEADER
 ======================================== */
 
-.client-notifications-header {
+.client-portal-page
+.client-notification-panel-header {
 
     display:
         flex;
 
     align-items:
-        flex-start;
+        center;
 
     justify-content:
         space-between;
@@ -8894,7 +8864,7 @@ body.mobile-app-screen-pets
         18px;
 
     padding:
-        24px 26px 20px;
+        18px 18px 16px;
 
     background:
         linear-gradient(
@@ -8903,7 +8873,7 @@ body.mobile-app-screen-pets
                 71,
                 206,
                 230,
-                0.11
+                0.12
             ),
             rgba(
                 40,
@@ -8915,64 +8885,36 @@ body.mobile-app-screen-pets
 
     border-bottom:
         1px solid
-        #e1edf3;
+        rgba(
+            40,
+            144,
+            223,
+            0.11
+        );
 
 }
 
 
-.client-notifications-header h2 {
-
-    margin:
-        3px 0 5px;
-
-    color:
-        #183447;
-
-    font-size:
-        24px;
-
-    font-weight:
-        800;
-
-}
-
-
-.client-notifications-header p {
-
-    max-width:
-        520px;
-
-    margin:
-        0;
-
-    color:
-        #687986;
-
-    font-size:
-        13px;
-
-    line-height:
-        1.5;
-
-}
-
-
-.client-notifications-eyebrow {
+.client-portal-page
+.client-notification-panel-eyebrow {
 
     display:
         block;
+
+    margin-bottom:
+        3px;
 
     color:
         #2890df;
 
     font-size:
-        10px;
+        9px;
 
     font-weight:
-        800;
+        900;
 
     letter-spacing:
-        0.09em;
+        0.12em;
 
     text-transform:
         uppercase;
@@ -8980,7 +8922,213 @@ body.mobile-app-screen-pets
 }
 
 
-.client-notifications-close {
+.client-portal-page
+.client-notification-panel-header h3 {
+
+    margin:
+        0;
+
+    color:
+        #183447;
+
+    font-size:
+        19px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        -0.02em;
+
+}
+
+
+/* ========================================
+   CLIENT NOTIFICATION MARK ALL READ
+======================================== */
+
+.client-portal-page
+.client-notification-mark-all-read {
+
+    flex:
+        0 0 auto;
+
+    padding:
+        8px 10px;
+
+    background:
+        #ffffff;
+
+    color:
+        #2890df;
+
+    border:
+        1px solid
+        #c7dce8;
+
+    border-radius:
+        9px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        10px;
+
+    font-weight:
+        850;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease;
+
+}
+
+
+.client-portal-page
+.client-notification-mark-all-read:hover {
+
+    background:
+        #f4fbff;
+
+    color:
+        #1f79bd;
+
+    border-color:
+        #9ec8df;
+
+}
+
+
+/* ========================================
+   CLIENT NOTIFICATION LIST
+======================================== */
+
+.client-portal-page
+.client-notification-list {
+
+    max-height:
+        430px;
+
+    overflow-y:
+        auto;
+
+    background:
+        #ffffff;
+
+}
+
+
+/* ========================================
+   CLIENT NOTIFICATION ITEM
+======================================== */
+
+.client-portal-page
+.client-notification-item {
+
+    position:
+        relative;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        38px
+        minmax(
+            0,
+            1fr
+        )
+        auto;
+
+    gap:
+        11px;
+
+    padding:
+        15px 15px 15px 16px;
+
+    border-bottom:
+        1px solid
+        #edf2f5;
+
+    transition:
+        background 0.18s ease;
+
+}
+
+
+.client-portal-page
+.client-notification-item:hover {
+
+    background:
+        #fbfdfe;
+
+}
+
+
+.client-portal-page
+.client-notification-item.is-unread {
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(
+                71,
+                206,
+                230,
+                0.08
+            ),
+            rgba(
+                255,
+                255,
+                255,
+                1
+            )
+        );
+
+}
+
+
+.client-portal-page
+.client-notification-item.is-unread::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    bottom:
+        0;
+
+    left:
+        0;
+
+    width:
+        3px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #47cee6,
+            #2890df
+        );
+
+}
+
+
+/* ========================================
+   CLIENT NOTIFICATION ITEM ICON
+======================================== */
+
+.client-portal-page
+.client-notification-item-icon {
 
     display:
         inline-flex;
@@ -8991,41 +9139,201 @@ body.mobile-app-screen-pets
     justify-content:
         center;
 
-    flex:
-        0 0 auto;
-
     width:
         38px;
 
     height:
         38px;
 
+    background:
+        linear-gradient(
+            135deg,
+            rgba(
+                71,
+                206,
+                230,
+                0.16
+            ),
+            rgba(
+                40,
+                144,
+                223,
+                0.10
+            )
+        );
+
+    border-radius:
+        12px;
+
+    font-size:
+        17px;
+
+}
+
+
+/* ========================================
+   CLIENT NOTIFICATION ITEM COPY
+======================================== */
+
+.client-portal-page
+.client-notification-item-copy {
+
+    min-width:
+        0;
+
+}
+
+
+.client-portal-page
+.client-notification-item-title {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        6px;
+
+    margin:
+        0 0 4px;
+
+    color:
+        #183447;
+
+    font-size:
+        13px;
+
+    font-weight:
+        850;
+
+    line-height:
+        1.25;
+
+}
+
+
+.client-portal-page
+.client-notification-unread-dot {
+
+    flex:
+        0 0 auto;
+
+    width:
+        7px;
+
+    height:
+        7px;
+
+    background:
+        #ef602c;
+
+    border-radius:
+        50%;
+
+    box-shadow:
+        0
+        0
+        0
+        3px
+        rgba(
+            239,
+            96,
+            44,
+            0.10
+        );
+
+}
+
+
+.client-portal-page
+.client-notification-item-message {
+
+    margin:
+        0;
+
+    color:
+        #657783;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.45;
+
+}
+
+
+.client-portal-page
+.client-notification-item-time {
+
+    display:
+        block;
+
+    margin-top:
+        6px;
+
+    color:
+        #94a3ad;
+
+    font-size:
+        9px;
+
+    font-weight:
+        700;
+
+}
+
+
+/* ========================================
+   CLIENT NOTIFICATION ITEM DISMISS
+======================================== */
+
+.client-portal-page
+.client-notification-dismiss {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    align-self:
+        start;
+
+    width:
+        28px;
+
+    height:
+        28px;
+
+    margin-top:
+        -3px;
+
     padding:
         0;
 
     background:
-        rgba(
-            255,
-            255,
-            255,
-            0.88
-        );
+        transparent;
 
     color:
-        #677a87;
+        #91a1ab;
 
     border:
-        1px solid
-        #c8dce8;
+        0;
 
     border-radius:
-        10px;
+        8px;
+
+    font-family:
+        inherit;
 
     font-size:
-        25px;
-
-    font-weight:
-        400;
+        18px;
 
     line-height:
         1;
@@ -9035,109 +9343,130 @@ body.mobile-app-screen-pets
 
     transition:
         background 0.18s ease,
-        color 0.18s ease,
-        transform 0.18s ease;
+        color 0.18s ease;
 
 }
 
 
-.client-notifications-close:hover {
+.client-portal-page
+.client-notification-dismiss:hover {
 
     background:
-        #ffffff;
+        #f3f7f9;
 
     color:
-        #183447;
-
-}
-
-
-.client-notifications-close:active {
-
-    transform:
-        scale(0.96);
+        #ef602c;
 
 }
 
 
 /* ========================================
-   CLIENT NOTIFICATION DEVICE SECTION
+   CLIENT NOTIFICATION EMPTY STATE
 ======================================== */
 
-.client-notifications-device-section {
+.client-portal-page
+.client-notification-empty {
 
     display:
         flex;
+
+    flex-direction:
+        column;
 
     align-items:
         center;
 
     justify-content:
-        space-between;
+        center;
 
-    gap:
-        20px;
-
-    margin:
-        0;
+    min-height:
+        210px;
 
     padding:
-        22px 26px;
+        28px 22px;
 
-    background:
-        #ffffff;
-
-    border-bottom:
-        1px solid
-        #e7eef2;
-
-    border-radius:
-        0;
+    text-align:
+        center;
 
 }
 
 
-.client-notifications-device-copy {
-
-    min-width:
-        0;
-
-}
-
-
-.client-notifications-device-copy strong {
+.client-portal-page
+.client-notification-empty-icon {
 
     display:
-        block;
+        inline-flex;
 
-    margin-top:
-        3px;
+    align-items:
+        center;
 
-    color:
-        #203847;
+    justify-content:
+        center;
 
-    font-size:
+    width:
+        48px;
+
+    height:
+        48px;
+
+    margin-bottom:
+        12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(
+                71,
+                206,
+                230,
+                0.14
+            ),
+            rgba(
+                40,
+                144,
+                223,
+                0.09
+            )
+        );
+
+    border-radius:
         15px;
 
-    font-weight:
-        800;
+    font-size:
+        21px;
 
 }
 
 
-.client-notifications-device-copy p {
+.client-portal-page
+.client-notification-empty strong {
 
-    margin:
-        5px 0 0;
+    margin-bottom:
+        4px;
 
     color:
-        #6b7785;
+        #183447;
 
     font-size:
-        12px;
+        14px;
 
     font-weight:
-        600;
+        850;
+
+}
+
+
+.client-portal-page
+.client-notification-empty p {
+
+    margin:
+        0;
+
+    color:
+        #7d8d97;
+
+    font-size:
+        11px;
 
     line-height:
         1.45;
@@ -9145,13 +9474,49 @@ body.mobile-app-screen-pets
 }
 
 
-.client-notifications-section-label {
+/* ========================================
+   CLIENT NOTIFICATION PANEL FOOTER
+======================================== */
 
-    display:
-        block;
+.client-portal-page
+.client-notification-panel-footer {
+
+    padding:
+        10px 14px;
+
+    background:
+        #fbfcfd;
+
+    border-top:
+        1px solid
+        #edf2f5;
+
+    text-align:
+        center;
+
+}
+
+
+.client-portal-page
+.client-notification-clear-all {
+
+    padding:
+        8px 12px;
+
+    background:
+        transparent;
 
     color:
-        #2890df;
+        #7b8b95;
+
+    border:
+        0;
+
+    border-radius:
+        8px;
+
+    font-family:
+        inherit;
 
     font-size:
         10px;
@@ -9159,341 +9524,107 @@ body.mobile-app-screen-pets
     font-weight:
         800;
 
-    letter-spacing:
-        0.07em;
+    cursor:
+        pointer;
 
-    text-transform:
-        uppercase;
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
 
 }
 
 
-.client-notification-enable-button {
-
-    flex:
-        0 0 auto;
-
-    width:
-        auto;
-
-    min-height:
-        42px;
-
-    padding:
-        10px 16px;
+.client-portal-page
+.client-notification-clear-all:hover {
 
     background:
-        linear-gradient(
-            135deg,
-            #f5ab40,
-            #ef602c
-        );
+        #f1f5f7;
 
     color:
-        #ffffff;
-
-    border:
-        0;
-
-    border-radius:
-        11px;
-
-    box-shadow:
-        0
-        6px
-        16px
-        rgba(
-            239,
-            96,
-            44,
-            0.20
-        );
-
-    font-size:
-        12px;
-
-    font-weight:
-        800;
-
-    white-space:
-        nowrap;
-
-    cursor:
-        pointer;
-
-}
-
-
-.client-notification-enable-button:disabled {
-
-    opacity:
-        0.6;
-
-    cursor:
-        default;
+        #ef602c;
 
 }
 
 
 /* ========================================
-   CLIENT NOTIFICATION PREFERENCES
+   CLIENT NOTIFICATION CENTER — MOBILE
 ======================================== */
 
-.client-notifications-preferences-section {
-
-    margin:
-        0;
-
-    padding:
-        22px 26px 26px;
-
-    background:
-        #ffffff;
-
-    border-radius:
-        0 0 22px 22px;
-
-}
-
-
-.client-notifications-section-heading {
-
-    margin-bottom:
-        12px;
-
-}
-
-
-.client-notifications-section-heading p {
-
-    margin:
-        4px 0 0;
-
-    color:
-        #71808b;
-
-    font-size:
-        12px;
-
-    line-height:
-        1.45;
-
-}
-
-
-.client-notification-preference-row {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    gap:
-        20px;
-
-    min-height:
-        64px;
-
-    padding:
-        13px 0;
-
-    border-bottom:
-        1px solid
-        #edf2f5;
-
-    cursor:
-        pointer;
-
-}
-
-
-.client-notification-preference-row:last-child {
-
-    border-bottom:
-        0;
-
-}
-
-
-.client-notification-preference-row > span {
-
-    min-width:
-        0;
-
-}
-
-
-.client-notification-preference-row strong {
-
-    display:
-        block;
-
-    margin-bottom:
-        3px;
-
-    color:
-        #243746;
-
-    font-size:
-        14px;
-
-    font-weight:
-        800;
-
-}
-
-
-.client-notification-preference-row small {
-
-    display:
-        block;
-
-    color:
-        #71808b;
-
-    font-size:
-        12px;
-
-    line-height:
-        1.4;
-
-}
-
-
-.client-notification-preference-row input {
-
-    flex:
-        0 0 auto;
-
-    width:
-        20px;
-
-    height:
-        20px;
-
-    margin:
-        0;
-
-    accent-color:
-        #2890df;
-
-    cursor:
-        pointer;
-
-}
-
-
-/* ========================================
-   CLIENT NOTIFICATION MODAL OPEN
-======================================== */
-
-body.client-notifications-modal-open {
-
-    overflow:
-        hidden;
-
-}
-
-
-/* ========================================
-   CLIENT NOTIFICATION MODAL — MOBILE
-======================================== */
-
-@media (max-width:700px) {
-
-    .client-notifications-modal {
-
-        align-items:
-            flex-end;
-
-        padding:
-            0;
-
-    }
-
-
-    .client-notifications-dialog {
+@media (
+    max-width:
+        700px
+) {
+
+    .client-portal-page
+    .client-notification-panel {
+
+        position:
+            fixed;
+
+        top:
+            auto;
+
+        right:
+            12px;
+
+        bottom:
+            calc(
+                82px +
+                env(
+                    safe-area-inset-bottom
+                )
+            );
+
+        left:
+            12px;
 
         width:
-            100%;
+            auto;
 
         max-height:
-            88dvh;
+            min(
+                72vh,
+                620px
+            );
 
         border-radius:
-            22px
-            22px
-            0
-            0;
+            20px;
 
     }
 
 
-    .client-notifications-header {
+    .client-portal-page
+    .client-notification-list {
+
+        max-height:
+            52vh;
+
+    }
+
+
+    .client-portal-page
+    .client-notification-panel-header {
 
         padding:
-            20px
-            18px
-            17px;
+            16px;
 
     }
 
 
-    .client-notifications-header h2 {
+    .client-portal-page
+    .client-notification-panel-header h3 {
 
         font-size:
-            22px;
-
-    }
-
-
-    .client-notifications-device-section {
-
-        align-items:
-            stretch;
-
-        flex-direction:
-            column;
-
-        gap:
-            14px;
-
-        padding:
             18px;
 
     }
 
 
-    .client-notification-enable-button {
-
-        width:
-            100%;
-
-    }
-
-
-    .client-notifications-preferences-section {
+    .client-portal-page
+    .client-notification-item {
 
         padding:
-            18px;
-
-        border-radius:
-            0;
-
-    }
-
-
-    .client-notification-preference-row {
-
-        min-height:
-            68px;
-
-        gap:
-            14px;
+            14px 14px 14px 15px;
 
     }
 
