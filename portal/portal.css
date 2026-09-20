@@ -9715,25 +9715,46 @@ body.mobile-app-screen-pets
         700px
 ) {
 
+
+    /* ========================================
+       MOBILE NOTIFICATION POSITIONING
+    ======================================== */
+
+    .client-portal-page
+    .client-dashboard-header {
+
+        overflow:
+            visible;
+
+    }
+
+
+    .client-portal-page
+    .client-notification-center {
+
+        position:
+            static;
+
+    }
+
+
     .client-portal-page
     .client-notification-panel {
 
         position:
-            fixed;
+            absolute;
 
         top:
-            auto;
+            calc(
+                100% +
+                10px
+            );
 
         right:
             12px;
 
         bottom:
-            calc(
-                82px +
-                env(
-                    safe-area-inset-bottom
-                )
-            );
+            auto;
 
         left:
             12px;
@@ -9743,27 +9764,39 @@ body.mobile-app-screen-pets
 
         max-height:
             min(
-                72vh,
-                620px
+                70dvh,
+                560px
             );
 
+        overflow:
+            hidden;
+
         border-radius:
-            20px;
+            18px;
+
+        box-shadow:
+            0
+            22px
+            55px
+            rgba(
+                24,
+                52,
+                71,
+                0.22
+            );
 
     }
 
 
-    .client-portal-page
-    .client-notification-list {
-
-        max-height:
-            52vh;
-
-    }
-
+    /* ========================================
+       MOBILE NOTIFICATION HEADER
+    ======================================== */
 
     .client-portal-page
     .client-notification-panel-header {
+
+        flex:
+            0 0 auto;
 
         padding:
             16px;
@@ -9781,10 +9814,116 @@ body.mobile-app-screen-pets
 
 
     .client-portal-page
+    .client-notification-panel-eyebrow {
+
+        font-size:
+            9px;
+
+    }
+
+
+    /* ========================================
+       MOBILE NOTIFICATION LIST
+    ======================================== */
+
+    .client-portal-page
+    .client-notification-list {
+
+        max-height:
+            calc(
+                min(
+                    70dvh,
+                    560px
+                ) -
+                120px
+            );
+
+        overflow-y:
+            auto;
+
+        overscroll-behavior:
+            contain;
+
+        -webkit-overflow-scrolling:
+            touch;
+
+    }
+
+
+    .client-portal-page
     .client-notification-item {
 
+        grid-template-columns:
+            40px
+            minmax(
+                0,
+                1fr
+            )
+            30px;
+
+        gap:
+            10px;
+
         padding:
-            14px 14px 14px 15px;
+            15px;
+
+    }
+
+
+    .client-portal-page
+    .client-notification-item-icon {
+
+        width:
+            40px;
+
+        height:
+            40px;
+
+    }
+
+
+    .client-portal-page
+    .client-notification-item-title {
+
+        font-size:
+            13px;
+
+    }
+
+
+    .client-portal-page
+    .client-notification-item-message {
+
+        font-size:
+            11px;
+
+    }
+
+
+    .client-portal-page
+    .client-notification-item-time {
+
+        margin-top:
+            5px;
+
+        font-size:
+            9px;
+
+    }
+
+
+    /* ========================================
+       MOBILE NOTIFICATION FOOTER
+    ======================================== */
+
+    .client-portal-page
+    .client-notification-panel-footer {
+
+        flex:
+            0 0 auto;
+
+        padding:
+            9px 14px;
 
     }
 
