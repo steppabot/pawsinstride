@@ -11993,7 +11993,75 @@ async function saveAdminVisitReport(
 
         }
 
-
+        // ========================================
+        // PUBLISH VISIT REPORT
+        // ========================================
+        //
+        // The report is only published AFTER:
+        //
+        // - overall report data is saved
+        // - per-pet care is saved
+        // - all pending photos are uploaded
+        //
+        // Existing published reports keep their
+        // original published_at timestamp so edits
+        // do not send another client notification.
+        // ========================================
+        
+        if (
+            !savedReport.published_at
+        ) {
+        
+            const {
+                data:
+                    publishedReport,
+        
+                error:
+                    publishError
+            } =
+                await supabaseClient
+                    .from(
+                        "visit_reports"
+                    )
+                    .update({
+                        published_at:
+                            new Date()
+                                .toISOString()
+                    })
+                    .eq(
+                        "id",
+                        savedReport.id
+                    )
+                    .is(
+                        "published_at",
+                        null
+                    )
+                    .select("*")
+                    .maybeSingle();
+        
+        
+            if (
+                publishError
+            ) {
+        
+                throw publishError;
+        
+            }
+        
+        
+            if (
+                publishedReport
+            ) {
+        
+                Object.assign(
+                    savedReport,
+                    publishedReport
+                );
+        
+            }
+        
+        }
+        
         // ========================================
         // UPDATE LOCAL VISIT REPORT STATE
         // ========================================
