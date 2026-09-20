@@ -24999,7 +24999,6 @@ async function clearAllClientNotifications() {
 
 }
 
-
 // ========================================
 // NOTIFICATION CENTER EVENTS
 // ========================================
@@ -25051,6 +25050,268 @@ clientNotificationClearAll
         }
     );
 
+
+// ========================================
+// HANDLE NOTIFICATION ACTION
+// ========================================
+
+async function handleClientNotificationAction(
+    notificationId
+) {
+
+
+    const notification =
+        currentClientNotifications
+            .find(
+                item =>
+                    Number(
+                        item.id
+                    ) ===
+                    Number(
+                        notificationId
+                    )
+            );
+
+
+    if (
+        !notification
+    ) {
+
+        return;
+
+    }
+
+
+    const notificationType =
+        String(
+            notification.notification_type ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const entityType =
+        String(
+            notification.entity_type ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const entityId =
+        Number(
+            notification.entity_id
+        );
+
+
+    closeClientNotificationCenter();
+
+
+    // ========================================
+    // VISIT-RELATED NOTIFICATIONS
+    // ========================================
+
+    if (
+        entityType ===
+            "visit" &&
+        entityId
+    ) {
+
+
+        const visit =
+            currentVisits.find(
+                item =>
+                    Number(
+                        item.id
+                    ) ===
+                    entityId
+            );
+
+
+        if (
+            visit
+        ) {
+
+
+            selectedUpcomingDate =
+                visit.visit_date;
+
+
+            const visitDate =
+                parseLocalDate(
+                    visit.visit_date
+                );
+
+
+            upcomingCalendarYear =
+                visitDate.getFullYear();
+
+
+            upcomingCalendarMonth =
+                visitDate.getMonth();
+
+
+            renderUpcomingCalendar();
+
+            renderSelectedUpcomingServices();
+
+
+            if (
+                window.matchMedia(
+                    "(max-width: 700px)"
+                ).matches
+            ) {
+
+                setActiveMobileAppTab(
+                    "services"
+                );
+
+            }
+
+
+            window.setTimeout(
+                () => {
+
+
+                    document
+                        .getElementById(
+                            "services-section"
+                        )
+                        ?.scrollIntoView({
+                            behavior:
+                                "smooth",
+
+                            block:
+                                "start"
+                        });
+
+
+                },
+                80
+            );
+
+
+            return;
+
+        }
+
+    }
+
+
+    // ========================================
+    // MESSAGE NOTIFICATIONS
+    // ========================================
+
+    if (
+        notificationType ===
+        "client_message"
+    ) {
+
+
+        if (
+            window.matchMedia(
+                "(max-width: 700px)"
+            ).matches
+        ) {
+
+            setActiveMobileAppTab(
+                "messages"
+            );
+
+        }
+
+
+        window.setTimeout(
+            () => {
+
+                document
+                    .getElementById(
+                        "client-message-launcher"
+                    )
+                    ?.click();
+
+            },
+            120
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // BOOKING / CANCELLATION NOTIFICATIONS
+    // ========================================
+
+    if (
+        notificationType ===
+            "booking_confirmed" ||
+        notificationType ===
+            "booking_updated" ||
+        notificationType ===
+            "cancellation_update"
+    ) {
+
+
+        if (
+            window.matchMedia(
+                "(max-width: 700px)"
+            ).matches
+        ) {
+
+            setActiveMobileAppTab(
+                "services"
+            );
+
+        }
+
+
+        window.setTimeout(
+            () => {
+
+                document
+                    .getElementById(
+                        "services-section"
+                    )
+                    ?.scrollIntoView({
+                        behavior:
+                            "smooth",
+
+                        block:
+                            "start"
+                    });
+
+            },
+            80
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // DEFAULT
+    // ========================================
+
+    window.scrollTo({
+        top:
+            0,
+
+        behavior:
+            "smooth"
+    });
+
+}
+
+
+// ========================================
+// NOTIFICATION LIST CLICK
+// ========================================
 
 clientNotificationList
     ?.addEventListener(
@@ -25108,32 +25369,22 @@ clientNotificationList
                 );
 
 
-            const notificationUrl =
-                String(
-                    notificationItem.dataset
-                        .clientNotificationUrl ||
-                    ""
-                )
-                    .trim();
-
-
             await markClientNotificationRead(
                 notificationId
             );
 
 
-            if (
-                notificationUrl
-            ) {
-
-                window.location.href =
-                    notificationUrl;
-
-            }
+            await handleClientNotificationAction(
+                notificationId
+            );
 
         }
     );
 
+
+// ========================================
+// CLOSE NOTIFICATIONS OUTSIDE PANEL
+// ========================================
 
 document
     .addEventListener(
@@ -25167,6 +25418,10 @@ document
     );
 
 
+// ========================================
+// CLOSE NOTIFICATIONS WITH ESCAPE
+// ========================================
+
 document
     .addEventListener(
         "keydown",
@@ -25184,7 +25439,6 @@ document
 
         }
     );
-
 
 // ========================================
 // PUSH NOTIFICATIONS
