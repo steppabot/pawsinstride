@@ -17750,7 +17750,7 @@ function renderClientVisitReport(
 
 
     // ========================================
-    // VISIT PETS
+    // VISIT
     // ========================================
 
     const reportVisit =
@@ -17774,6 +17774,50 @@ function renderClientVisitReport(
             )
 
             : [];
+
+
+    // ========================================
+    // WALK SERVICE CHECK
+    // ========================================
+
+    const serviceType =
+        String(
+            reportVisit?.service_type ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const serviceName =
+        String(
+            reportVisit?.service_name ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const walkingService =
+        (
+            serviceType ===
+                "dog_walking" ||
+
+            serviceType ===
+                "dog walking" ||
+
+            (
+                !serviceType &&
+                (
+                    serviceName.startsWith(
+                        "dog walking"
+                    ) ||
+
+                    serviceName ===
+                        "dog walk"
+                )
+            )
+        );
 
 
     // ========================================
@@ -17927,7 +17971,9 @@ function renderClientVisitReport(
                                     .map(
                                         buildCareChip
                                     )
-                                    .join("")
+                                    .join(
+                                        ""
+                                    )
 
                                 : `
                                     <span class="client-visit-report-muted">
@@ -17965,7 +18011,9 @@ function renderClientVisitReport(
 
                     }
                 )
-                .join("");
+                .join(
+                    ""
+                );
 
     } else {
 
@@ -17996,7 +18044,9 @@ function renderClientVisitReport(
                     .map(
                         buildCareChip
                     )
-                    .join("")
+                    .join(
+                        ""
+                    )
 
                 : `
                     <span class="client-visit-report-muted">
@@ -18034,6 +18084,7 @@ function renderClientVisitReport(
             `;
 
     }
+
 
     // ========================================
     // VISIT PHOTOS
@@ -18080,7 +18131,9 @@ function renderClientVisitReport(
 
                     }
                 )
-                .join("")
+                .join(
+                    ""
+                )
 
             : `
 
@@ -18118,190 +18171,201 @@ function renderClientVisitReport(
 
 
     // ========================================
-    // AUTOMATIC WALK SUMMARY
+    // WALK SUMMARY
     // ========================================
 
     let walkSummaryHtml =
-        `
-
-            <div class="client-walk-summary-empty">
-
-                No walk was recorded for this visit.
-
-            </div>
-
-        `;
+        "";
 
 
     if (
-        completedWalk
+        walkingService
     ) {
-
-
-        const duration =
-            formatClientWalkDuration(
-                completedWalk.duration_seconds
-            );
-
-
-        const distanceMiles =
-            (
-                Number(
-                    completedWalk.distance_meters ||
-                    0
-                ) /
-                1609.344
-            ).toFixed(
-                2
-            );
-
-
-        const startedAt =
-            formatClientVisitTimestamp(
-                completedWalk.started_at
-            );
-
-
-        const finishedAt =
-            formatClientVisitTimestamp(
-                completedWalk.ended_at
-            );
-
-
-        const hasRoute =
-            Array.isArray(
-                walkPoints
-            ) &&
-            walkPoints.length >=
-            2;
 
 
         walkSummaryHtml =
             `
 
-                <div class="client-walk-summary-card">
+                <div class="client-walk-summary-empty">
 
-
-                    <div class="client-walk-summary-heading">
-
-                        <div>
-
-                            <strong>
-                                Walk Summary
-                            </strong>
-
-                            <span>
-                                Automatically recorded by Paws in Stride.
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="client-walk-summary-stats">
-
-
-                        <div class="client-walk-summary-stat">
-
-                            <span class="client-walk-summary-stat-label">
-                                Walk Time
-                            </span>
-
-                            <strong>
-                                ${escapeHtml(
-                                    duration
-                                )}
-                            </strong>
-
-                        </div>
-
-
-                        <div class="client-walk-summary-stat">
-
-                            <span class="client-walk-summary-stat-label">
-                                Distance
-                            </span>
-
-                            <strong>
-                                ${escapeHtml(
-                                    distanceMiles
-                                )} mi
-                            </strong>
-
-                        </div>
-
-
-                        <div class="client-walk-summary-stat">
-
-                            <span class="client-walk-summary-stat-label">
-                                Started
-                            </span>
-
-                            <strong>
-                                ${escapeHtml(
-                                    startedAt ||
-                                    "—"
-                                )}
-                            </strong>
-
-                        </div>
-
-
-                        <div class="client-walk-summary-stat">
-
-                            <span class="client-walk-summary-stat-label">
-                                Finished
-                            </span>
-
-                            <strong>
-                                ${escapeHtml(
-                                    finishedAt ||
-                                    "—"
-                                )}
-                            </strong>
-
-                        </div>
-
-
-                    </div>
-
-
-                    ${
-                        hasRoute
-
-                            ? `
-
-                                <div
-                                    id="client-walk-route-map-${report.visit_id}"
-                                    class="client-walk-route-map"
-                                    aria-label="Recorded dog walk route"
-                                ></div>
-
-                            `
-
-                            : `
-
-                                <div class="client-walk-route-empty">
-
-                                    Route map unavailable for this walk.
-
-                                </div>
-
-                            `
-                    }
-
-
-                    <div class="client-walk-summary-branding">
-
-                        🐾 Recorded by Paws in Stride
-
-                    </div>
-
+                    No walk was recorded for this visit.
 
                 </div>
 
             `;
+
+
+        if (
+            completedWalk
+        ) {
+
+
+            const duration =
+                formatClientWalkDuration(
+                    completedWalk.duration_seconds
+                );
+
+
+            const distanceMiles =
+                (
+                    Number(
+                        completedWalk.distance_meters ||
+                        0
+                    ) /
+                    1609.344
+                ).toFixed(
+                    2
+                );
+
+
+            const startedAt =
+                formatClientVisitTimestamp(
+                    completedWalk.started_at
+                );
+
+
+            const finishedAt =
+                formatClientVisitTimestamp(
+                    completedWalk.ended_at
+                );
+
+
+            const hasRoute =
+                Array.isArray(
+                    walkPoints
+                ) &&
+                walkPoints.length >=
+                2;
+
+
+            walkSummaryHtml =
+                `
+
+                    <div class="client-walk-summary-card">
+
+
+                        <div class="client-walk-summary-heading">
+
+                            <div>
+
+                                <strong>
+                                    Walk Summary
+                                </strong>
+
+                                <span>
+                                    Automatically recorded by Paws in Stride.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="client-walk-summary-stats">
+
+
+                            <div class="client-walk-summary-stat">
+
+                                <span class="client-walk-summary-stat-label">
+                                    Walk Time
+                                </span>
+
+                                <strong>
+                                    ${escapeHtml(
+                                        duration
+                                    )}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="client-walk-summary-stat">
+
+                                <span class="client-walk-summary-stat-label">
+                                    Distance
+                                </span>
+
+                                <strong>
+                                    ${escapeHtml(
+                                        distanceMiles
+                                    )} mi
+                                </strong>
+
+                            </div>
+
+
+                            <div class="client-walk-summary-stat">
+
+                                <span class="client-walk-summary-stat-label">
+                                    Started
+                                </span>
+
+                                <strong>
+                                    ${escapeHtml(
+                                        startedAt ||
+                                        "—"
+                                    )}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="client-walk-summary-stat">
+
+                                <span class="client-walk-summary-stat-label">
+                                    Finished
+                                </span>
+
+                                <strong>
+                                    ${escapeHtml(
+                                        finishedAt ||
+                                        "—"
+                                    )}
+                                </strong>
+
+                            </div>
+
+
+                        </div>
+
+
+                        ${
+                            hasRoute
+
+                                ? `
+
+                                    <div
+                                        id="client-walk-route-map-${report.visit_id}"
+                                        class="client-walk-route-map"
+                                        aria-label="Recorded dog walk route"
+                                    ></div>
+
+                                `
+
+                                : `
+
+                                    <div class="client-walk-route-empty">
+
+                                        Route map unavailable for this walk.
+
+                                    </div>
+
+                                `
+                        }
+
+
+                        <div class="client-walk-summary-branding">
+
+                            🐾 Recorded by Paws in Stride
+
+                        </div>
+
+
+                    </div>
+
+                `;
+
+        }
 
     }
 
@@ -18309,7 +18373,7 @@ function renderClientVisitReport(
     // ========================================
     // REPORT PET TITLE
     // ========================================
-    
+
     const visitPetNames =
         visitPets
             .map(
@@ -18322,152 +18386,201 @@ function renderClientVisitReport(
             .filter(
                 Boolean
             );
-    
-    
+
+
     let visitPetTitle =
         "Your Pet's Visit";
-    
-    
+
+
     if (
         visitPetNames.length ===
         1
     ) {
-    
-    
+
+
         visitPetTitle =
             `${visitPetNames[0]}'s Visit`;
-    
+
     }
-    
-    
+
+
     if (
         visitPetNames.length >
         1
     ) {
-    
-    
+
+
         const finalPetName =
             visitPetNames[
                 visitPetNames.length -
                 1
             ];
-    
-    
+
+
         const leadingPetNames =
             visitPetNames.slice(
                 0,
                 -1
             );
-    
-    
+
+
         const combinedPetNames =
             leadingPetNames.length ===
             1
-    
+
                 ? `${leadingPetNames[0]} & ${finalPetName}`
-    
-                : `${leadingPetNames.join(", ")} & ${finalPetName}`;
-    
-    
+
+                : `${leadingPetNames.join(
+                    ", "
+                )} & ${finalPetName}`;
+
+
         visitPetTitle =
             `${combinedPetNames}'s Visit`;
-    
+
     }
-    
-    
+
+
+    // ========================================
+    // PHOTOS SECTION
+    // ========================================
+
+    const photosSectionHtml =
+        `
+
+            <div
+                class="client-visit-report-section client-visit-report-photos-section"
+            >
+
+                <span class="client-visit-report-label">
+                    Photos
+                </span>
+
+
+                <div class="client-visit-report-photo-grid">
+
+                    ${photosHtml}
+
+                </div>
+
+            </div>
+
+        `;
+
+
     // ========================================
     // RENDER REPORT
     // ========================================
-    
+
     mount.innerHTML =
         `
-    
-            <div class="client-visit-report">
-    
-    
+
+            <div
+                class="client-visit-report ${
+                    walkingService
+                        ? "client-visit-report-walk"
+                        : "client-visit-report-nonwalk"
+                }"
+            >
+
+
                 <div class="client-visit-report-header">
-    
+
                     <div>
-    
+
                         <span class="client-visit-report-eyebrow">
                             VISIT REPORT
                         </span>
-    
+
                         <h5>
                             ${escapeHtml(
                                 visitPetTitle
                             )}
                         </h5>
-    
+
                         <p>
                             Here's everything from this completed visit.
                         </p>
-    
+
                     </div>
-    
+
                 </div>
-    
-    
-                <div class="client-visit-report-section">
-    
-                    <span class="client-visit-report-label">
-                        Care Updates
-                    </span>
-    
-    
-                    <div class="client-visit-report-pet-care-list">
-    
-                        ${careHtml}
-    
+
+
+                <div class="client-visit-report-content">
+
+
+                    <div class="client-visit-report-main">
+
+
+                        <div class="client-visit-report-section">
+
+                            <span class="client-visit-report-label">
+                                Care Updates
+                            </span>
+
+
+                            <div class="client-visit-report-pet-care-list">
+
+                                ${careHtml}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="client-visit-report-section">
+
+                            <span class="client-visit-report-label">
+                                Notes
+                            </span>
+
+                            ${notesHtml}
+
+                        </div>
+
+
+                        ${
+                            walkingService
+                                ? photosSectionHtml
+                                : ""
+                        }
+
+
                     </div>
-    
-                </div>
-    
-    
-                <div class="client-visit-report-section">
-    
-                    <span class="client-visit-report-label">
-                        Notes
-                    </span>
-    
-                    ${notesHtml}
-    
-                </div>
-    
-    
-                <div class="client-visit-report-section">
-    
-                    <span class="client-visit-report-label">
-                        Photos
-                    </span>
-    
-    
-                    <div class="client-visit-report-photo-grid">
-    
-                        ${photosHtml}
-    
+
+
+                    <div class="client-visit-report-side">
+
+
+                        ${
+                            walkingService
+
+                                ? `
+
+                                    <div class="client-visit-report-section">
+
+                                        ${walkSummaryHtml}
+
+                                    </div>
+
+                                `
+
+                                : photosSectionHtml
+                        }
+
+
                     </div>
-    
+
+
                 </div>
-    
-    
-                <div class="client-visit-report-section">
-    
-                    ${walkSummaryHtml}
-    
-                </div>
-    
-    
+
+
             </div>
-    
+
         `;
-    
-    }
 
-
-// ========================================
-// CLIENT WALK DURATION
-// ========================================
+}
 
 // ========================================
 // CLIENT WALK DURATION
