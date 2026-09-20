@@ -16233,17 +16233,144 @@ document
 // CLIENT CANCELLATION MODAL
 // ========================================
 
-function openClientCancellationModal(
+async function openClientCancellationModal(
     visit
 ) {
 
     closeClientCancellationModal();
 
 
+    let cancellationPreview =
+        null;
+
+
+    // ========================================
+    // LOAD SERVER-SIDE CREDIT PREVIEW
+    // ========================================
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.rpc(
+                "preview_my_visit_cancellation",
+                {
+                    p_visit_id:
+                        Number(
+                            visit.id
+                        )
+                }
+            );
+
+
+        if (
+            error
+        ) {
+            throw error;
+        }
+
+
+        cancellationPreview =
+            Array.isArray(
+                data
+            )
+                ? data[0]
+                : data;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Cancellation preview error:",
+            error
+        );
+
+    }
+
+
     const price =
         Number(
-            visit.price || 0
+            cancellationPreview
+                ?.original_price ??
+            visit.price ??
+            0
         );
+
+
+    const estimatedCredit =
+        cancellationPreview
+            ? Number(
+                cancellationPreview
+                    .credit_amount ||
+                0
+            )
+            : null;
+
+
+    const creditPercent =
+        cancellationPreview
+            ? Number(
+                cancellationPreview
+                    .credit_percent ||
+                0
+            )
+            : null;
+
+
+    const formattedPrice =
+        price.toLocaleString(
+            "en-US",
+            {
+                style:
+                    "currency",
+
+                currency:
+                    "USD"
+            }
+        );
+
+
+    const formattedCredit =
+        estimatedCredit !==
+            null
+            ? estimatedCredit
+                .toLocaleString(
+                    "en-US",
+                    {
+                        style:
+                            "currency",
+
+                        currency:
+                            "USD"
+                    }
+                )
+            : null;
+
+
+    let creditExplanation =
+        "Your exact credit will be calculated when you confirm the cancellation.";
+
+
+    if (
+        creditPercent ===
+        100
+    ) {
+
+        creditExplanation =
+            "100% account credit — this cancellation is at least 24 hours before the scheduled service.";
+
+    }
+    else if (
+        creditPercent ===
+        50
+    ) {
+
+        creditExplanation =
+            "50% account credit — this cancellation is less than 24 hours before the scheduled service.";
+
+    }
 
 
     const overlay =
@@ -16357,24 +16484,38 @@ function openClientCancellationModal(
                     </span>
 
                     <strong>
-                        ${price.toLocaleString(
-                            "en-US",
-                            {
-                                style: "currency",
-                                currency: "USD"
-                            }
-                        )}
+                        ${formattedPrice}
                     </strong>
 
                 </div>
+
+
+                ${
+                    formattedCredit
+                        ? `
+                            <div class="client-cancellation-price">
+
+                                <span>
+                                    Estimated Account Credit
+                                </span>
+
+                                <strong>
+                                    ${formattedCredit}
+                                </strong>
+
+                            </div>
+                        `
+                        : ""
+                }
 
 
                 <p
                     id="client-cancellation-message"
                     class="client-cancellation-note"
                 >
-                    Your exact credit will be calculated when you
-                    confirm the cancellation.
+                    ${escapeHtml(
+                        creditExplanation
+                    )}
                 </p>
 
 
@@ -16550,19 +16691,22 @@ function openClientCancellationModal(
 
                 const creditAmount =
                     Number(
-                        result.credit_amount || 0
+                        result.credit_amount ||
+                        0
                     );
 
 
                 const creditPercent =
                     Number(
-                        result.credit_percent || 0
+                        result.credit_percent ||
+                        0
                     );
 
 
                 const newCreditBalance =
                     Number(
-                        result.new_credit_balance || 0
+                        result.new_credit_balance ||
+                        0
                     );
 
 
@@ -16676,7 +16820,6 @@ function openClientCancellationModal(
     );
 
 }
-
 
 // ========================================
 // CLOSE CLIENT CANCELLATION MODAL
