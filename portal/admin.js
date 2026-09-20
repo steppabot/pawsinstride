@@ -10483,17 +10483,33 @@ function renderAdminVisitReportForm(
     report,
     existingPetCare = []
 ) {
+
     const mount =
         document.getElementById(
             `admin-visit-report-${visit.id}`
         );
 
-    if (!mount) return;
+
+    if (
+        !mount
+    ) {
+
+        return;
+
+    }
+
 
     const pets =
         getAdminPetsForVisit(
             visit
         );
+
+
+    const walkingService =
+        isWalkingService(
+            visit
+        );
+
 
     const petNameList =
         pets
@@ -10504,10 +10520,14 @@ function renderAdminVisitReportForm(
                         ""
                     ).trim()
             )
-            .filter(Boolean);
+            .filter(
+                Boolean
+            );
+
 
     let petNames =
         "Pet";
+
 
     if (
         petNameList.length ===
@@ -10519,6 +10539,7 @@ function renderAdminVisitReportForm(
 
     }
 
+
     if (
         petNameList.length ===
         2
@@ -10529,6 +10550,7 @@ function renderAdminVisitReportForm(
 
     }
 
+
     if (
         petNameList.length >
         2
@@ -10536,14 +10558,21 @@ function renderAdminVisitReportForm(
 
         petNames =
             `${petNameList
-                .slice(0, -1)
-                .join(", ")} & ${
+                .slice(
+                    0,
+                    -1
+                )
+                .join(
+                    ", "
+                )} & ${
                     petNameList[
-                        petNameList.length - 1
+                        petNameList.length -
+                        1
                     ]
                 }`;
 
     }
+
 
     const existingVisitPhotos =
         activeVisitReportMedia.filter(
@@ -10551,6 +10580,7 @@ function renderAdminVisitReportForm(
                 item.photo_type ===
                 "visit"
         );
+
 
     // ========================================
     // PER-PET CARE CARDS
@@ -10703,7 +10733,9 @@ function renderAdminVisitReportForm(
 
                     }
                 )
-                .join("")
+                .join(
+                    ""
+                )
 
             : `
                 <div class="admin-visit-report-help">
@@ -10746,19 +10778,25 @@ function renderAdminVisitReportForm(
         }
     );
 
+
     // ========================================
     // AUTOMATIC WALK SUMMARY
     // ========================================
 
     const completedWalk =
-        getVisitWalk(
-            visit.id
-        );
+        walkingService
+
+            ? getVisitWalk(
+                visit.id
+            )
+
+            : null;
 
 
     const hasCompletedWalk =
+        walkingService &&
         completedWalk?.status ===
-        "completed";
+            "completed";
 
 
     const walkDuration =
@@ -10803,6 +10841,7 @@ function renderAdminVisitReportForm(
                 {
                     hour:
                         "numeric",
+
                     minute:
                         "2-digit"
                 }
@@ -10822,6 +10861,7 @@ function renderAdminVisitReportForm(
                 {
                     hour:
                         "numeric",
+
                     minute:
                         "2-digit"
                 }
@@ -10830,274 +10870,131 @@ function renderAdminVisitReportForm(
             : null;
 
 
-    mount.innerHTML =
-        `
+    // ========================================
+    // PHOTOS SECTION
+    // ========================================
 
-            <form
-                class="admin-visit-report-form"
-                data-visit-report-form
-                data-visit-id="${visit.id}"
+    const photosSectionHtml =
+        `
+            <div
+                class="admin-visit-report-section admin-visit-report-photos-section"
             >
 
 
-                <div class="admin-visit-report-header">
+                <span class="admin-visit-report-label">
+                    Photos
+                </span>
 
 
-                    <div>
-
-                        <span class="admin-visit-report-eyebrow">
-                            VISIT REPORT
-                        </span>
+                <p class="admin-visit-report-help">
+                    Add photos from today's visit.
+                </p>
 
 
-                        <h5>
-                            ${escapeHtml(
-                                petNames
-                            )}
-                        </h5>
+                ${
+                    existingVisitPhotos.length
+
+                        ? `
+
+                            <div class="admin-visit-existing-media">
+
+                                ${existingVisitPhotos
+                                    .map(
+                                        item => `
+
+                                            <div
+                                                class="admin-visit-media-preview admin-visit-saved-media"
+                                                data-saved-visit-media="${item.id}"
+                                            >
+
+                                                ${
+                                                    item.signed_url
+
+                                                        ? `
+
+                                                            <img
+                                                                src="${escapeHtml(
+                                                                    item.signed_url
+                                                                )}"
+                                                                alt="Visit photo"
+                                                            >
+
+                                                        `
+
+                                                        : `
+
+                                                            <div class="admin-visit-media-missing">
+                                                                Photo
+                                                            </div>
+
+                                                        `
+                                                }
 
 
-                        <p>
-                            Add care updates, photos, notes, and your recorded walk summary.
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="admin-visit-report-close"
-                        data-visit-report-close
-                        aria-label="Close visit report"
-                    >
-                        ×
-                    </button>
-
-
-                </div>
-
-
-                <div class="admin-visit-report-section">
-
-
-                    <span class="admin-visit-report-label">
-                        Care Completed
-                    </span>
-
-
-                    <div class="admin-visit-care-grid">
-
-
-                        <label class="admin-visit-care-option">
-
-                            <input
-                                type="checkbox"
-                                name="fed"
-                                ${
-                                    report?.fed
-                                        ? "checked"
-                                        : ""
-                                }
-                            >
-
-                            <span>
-                                Fed
-                            </span>
-
-                        </label>
-
-
-                        <label class="admin-visit-care-option">
-
-                            <input
-                                type="checkbox"
-                                name="fresh_water"
-                                ${
-                                    report?.fresh_water
-                                        ? "checked"
-                                        : ""
-                                }
-                            >
-
-                            <span>
-                                Fresh Water
-                            </span>
-
-                        </label>
-
-
-                        <label class="admin-visit-care-option">
-
-                            <input
-                                type="checkbox"
-                                name="pee"
-                                ${
-                                    report?.pee
-                                        ? "checked"
-                                        : ""
-                                }
-                            >
-
-                            <span>
-                                Pee
-                            </span>
-
-                        </label>
-
-
-                        <label class="admin-visit-care-option">
-
-                            <input
-                                type="checkbox"
-                                name="poop"
-                                ${
-                                    report?.poop
-                                        ? "checked"
-                                        : ""
-                                }
-                            >
-
-                            <span>
-                                Poop
-                            </span>
-
-                        </label>
-
-
-                    </div>
-
-
-                </div>
-
-
-                <div class="admin-visit-report-section">
-
-
-                    <label
-                        class="admin-visit-report-label"
-                        for="visit-report-notes-${visit.id}"
-                    >
-                        Visit Notes
-                    </label>
-
-
-                    <textarea
-                        id="visit-report-notes-${visit.id}"
-                        name="notes"
-                        class="admin-visit-report-notes"
-                        placeholder="How did the visit go? Add anything the client should know..."
-                    >${escapeHtml(
-                        report?.notes ||
-                        ""
-                    )}</textarea>
-
-
-                </div>
-
-
-                <div class="admin-visit-report-section">
-
-
-                    <span class="admin-visit-report-label">
-                        Photos
-                    </span>
-
-
-                    <p class="admin-visit-report-help">
-                        Add photos from today's visit.
-                    </p>
-
-
-                    ${
-                        existingVisitPhotos.length
-
-                            ? `
-
-                                <div class="admin-visit-existing-media">
-
-                                    ${existingVisitPhotos
-                                        .map(
-                                            item => `
-
-                                                <div
-                                                    class="admin-visit-media-preview admin-visit-saved-media"
-                                                    data-saved-visit-media="${item.id}"
+                                                <button
+                                                    type="button"
+                                                    class="admin-visit-media-delete"
+                                                    data-delete-visit-report-media="${item.id}"
+                                                    aria-label="Delete visit photo"
+                                                    title="Delete photo"
                                                 >
-
-                                                    ${
-                                                        item.signed_url
-
-                                                            ? `
-
-                                                                <img
-                                                                    src="${escapeHtml(
-                                                                        item.signed_url
-                                                                    )}"
-                                                                    alt="Visit photo"
-                                                                >
-
-                                                            `
-
-                                                            : `
-
-                                                                <div class="admin-visit-media-missing">
-                                                                    Photo
-                                                                </div>
-
-                                                            `
-                                                    }
+                                                    ×
+                                                </button>
 
 
-                                                    <button
-                                                        type="button"
-                                                        class="admin-visit-media-delete"
-                                                        data-delete-visit-report-media="${item.id}"
-                                                        aria-label="Delete visit photo"
-                                                        title="Delete photo"
-                                                    >
-                                                        ×
-                                                    </button>
+                                            </div>
+
+                                        `
+                                    )
+                                    .join(
+                                        ""
+                                    )}
+
+                            </div>
+
+                        `
+
+                        : ""
+                }
 
 
-                                                </div>
+                <label class="admin-visit-media-upload-button">
 
-                                            `
-                                        )
-                                        .join("")}
+                    + Add Photos
 
-                                </div>
+                    <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        hidden
+                        data-visit-report-photos
+                    >
 
-                            `
-
-                            : ""
-                    }
-
-
-                    <label class="admin-visit-media-upload-button">
-
-                        + Add Photos
-
-                        <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            multiple
-                            hidden
-                            data-visit-report-photos
-                        >
-
-                    </label>
+                </label>
 
 
-                    <div
-                        class="admin-visit-pending-media"
-                        data-pending-visit-photos
-                    ></div>
+                <div
+                    class="admin-visit-pending-media"
+                    data-pending-visit-photos
+                ></div>
 
 
-                </div>
+            </div>
+        `;
 
 
-                <div class="admin-visit-report-section admin-walk-summary-section">
+    // ========================================
+    // WALK SUMMARY SECTION
+    // ========================================
+
+    const walkSummarySectionHtml =
+        walkingService
+
+            ? `
+
+                <div
+                    class="admin-visit-report-section admin-walk-summary-section"
+                >
 
 
                     <div class="admin-walk-summary-heading">
@@ -11252,6 +11149,215 @@ function renderAdminVisitReportForm(
 
                 </div>
 
+            `
+
+            : "";
+
+
+    mount.innerHTML =
+        `
+
+            <form
+                class="admin-visit-report-form ${
+                    walkingService
+                        ? "admin-visit-report-form-walk"
+                        : "admin-visit-report-form-nonwalk"
+                }"
+                data-visit-report-form
+                data-visit-id="${visit.id}"
+            >
+
+
+                <div class="admin-visit-report-header">
+
+
+                    <div>
+
+                        <span class="admin-visit-report-eyebrow">
+                            VISIT REPORT
+                        </span>
+
+
+                        <h5>
+                            ${escapeHtml(
+                                petNames
+                            )}
+                        </h5>
+
+
+                        <p>
+                            ${
+                                walkingService
+                                    ? "Add care updates, photos, notes, and your recorded walk summary."
+                                    : "Add care updates, photos, and notes from this visit."
+                            }
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="admin-visit-report-close"
+                        data-visit-report-close
+                        aria-label="Close visit report"
+                    >
+                        ×
+                    </button>
+
+
+                </div>
+
+
+                <div class="admin-visit-report-content">
+
+
+                    <div class="admin-visit-report-main">
+
+
+                        <div class="admin-visit-report-section">
+
+
+                            <span class="admin-visit-report-label">
+                                Care Completed
+                            </span>
+
+
+                            <div class="admin-visit-care-grid">
+
+
+                                <label class="admin-visit-care-option">
+
+                                    <input
+                                        type="checkbox"
+                                        name="fed"
+                                        ${
+                                            report?.fed
+                                                ? "checked"
+                                                : ""
+                                        }
+                                    >
+
+                                    <span>
+                                        Fed
+                                    </span>
+
+                                </label>
+
+
+                                <label class="admin-visit-care-option">
+
+                                    <input
+                                        type="checkbox"
+                                        name="fresh_water"
+                                        ${
+                                            report?.fresh_water
+                                                ? "checked"
+                                                : ""
+                                        }
+                                    >
+
+                                    <span>
+                                        Fresh Water
+                                    </span>
+
+                                </label>
+
+
+                                <label class="admin-visit-care-option">
+
+                                    <input
+                                        type="checkbox"
+                                        name="pee"
+                                        ${
+                                            report?.pee
+                                                ? "checked"
+                                                : ""
+                                        }
+                                    >
+
+                                    <span>
+                                        Pee
+                                    </span>
+
+                                </label>
+
+
+                                <label class="admin-visit-care-option">
+
+                                    <input
+                                        type="checkbox"
+                                        name="poop"
+                                        ${
+                                            report?.poop
+                                                ? "checked"
+                                                : ""
+                                        }
+                                    >
+
+                                    <span>
+                                        Poop
+                                    </span>
+
+                                </label>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="admin-visit-report-section">
+
+
+                            <label
+                                class="admin-visit-report-label"
+                                for="visit-report-notes-${visit.id}"
+                            >
+                                Visit Notes
+                            </label>
+
+
+                            <textarea
+                                id="visit-report-notes-${visit.id}"
+                                name="notes"
+                                class="admin-visit-report-notes"
+                                placeholder="How did the visit go? Add anything the client should know..."
+                            >${escapeHtml(
+                                report?.notes ||
+                                ""
+                            )}</textarea>
+
+
+                        </div>
+
+
+                        ${
+                            walkingService
+                                ? photosSectionHtml
+                                : ""
+                        }
+
+
+                    </div>
+
+
+                    <div class="admin-visit-report-side">
+
+
+                        ${
+                            walkingService
+                                ? walkSummarySectionHtml
+                                : photosSectionHtml
+                        }
+
+
+                    </div>
+
+
+                </div>
+
 
                 <div class="admin-visit-report-footer">
 
@@ -11285,7 +11391,6 @@ function renderAdminVisitReportForm(
     renderPendingVisitPhotos();
 
 }
-
 
 // ========================================
 // DELETE SAVED VISIT REPORT MEDIA
