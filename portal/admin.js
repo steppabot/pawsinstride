@@ -12928,7 +12928,6 @@ function clearAdminPhotoPreviewUrl() {
 
 }
 
-
 // ========================================
 // ADMIN PUSH NOTIFICATIONS
 // ========================================
@@ -12955,16 +12954,38 @@ const adminPushNotificationAction =
     );
 
 
+const adminPushNotificationsModal =
+    document.getElementById(
+        "admin-push-notifications-modal"
+    );
+
+
+const adminPushNotificationsClose =
+    document.getElementById(
+        "admin-push-notifications-close"
+    );
+
+
+const adminPushModalEnableButton =
+    document.getElementById(
+        "admin-push-modal-enable-button"
+    );
+
+
+const adminPushModalStatus =
+    document.getElementById(
+        "admin-push-modal-status"
+    );
+
+
 // ========================================
-// UPDATE ADMIN PUSH UI
+// OPEN ADMIN PUSH SETTINGS
 // ========================================
 
-async function updateAdminPushNotificationUI() {
+async function openAdminPushNotificationsModal() {
 
     if (
-        !adminPushNotificationsButton ||
-        !adminPushNotificationStatus ||
-        !adminPushNotificationAction
+        !adminPushNotificationsModal
     ) {
 
         return;
@@ -12972,30 +12993,110 @@ async function updateAdminPushNotificationUI() {
     }
 
 
+    adminPushNotificationsModal.hidden =
+        false;
+
+
+    document.body.classList.add(
+        "admin-modal-open"
+    );
+
+
+    await updateAdminPushNotificationUI();
+
+}
+
+
+// ========================================
+// CLOSE ADMIN PUSH SETTINGS
+// ========================================
+
+function closeAdminPushNotificationsModal() {
+
+    if (
+        !adminPushNotificationsModal
+    ) {
+
+        return;
+
+    }
+
+
+    adminPushNotificationsModal.hidden =
+        true;
+
+
+    document.body.classList.remove(
+        "admin-modal-open"
+    );
+
+}
+
+
+// ========================================
+// UPDATE ADMIN PUSH UI
+// ========================================
+
+async function updateAdminPushNotificationUI() {
+
+    const pushSupported =
+        (
+            "serviceWorker" in navigator &&
+            "PushManager" in window &&
+            "Notification" in window
+        );
+
+
     // ========================================
     // UNSUPPORTED
     // ========================================
 
     if (
-        !(
-            "serviceWorker" in navigator
-        ) ||
-        !(
-            "PushManager" in window
-        ) ||
-        !(
-            "Notification" in window
-        )
+        !pushSupported
     ) {
 
-        adminPushNotificationStatus.textContent =
-            "Push notifications are not supported on this device.";
+        if (
+            adminPushNotificationStatus
+        ) {
 
-        adminPushNotificationAction.textContent =
-            "—";
+            adminPushNotificationStatus.textContent =
+                "Push notifications are not supported on this device.";
 
-        adminPushNotificationsButton.disabled =
-            true;
+        }
+
+
+        if (
+            adminPushNotificationAction
+        ) {
+
+            adminPushNotificationAction.textContent =
+                "—";
+
+        }
+
+
+        if (
+            adminPushModalStatus
+        ) {
+
+            adminPushModalStatus.textContent =
+                "Push notifications are not supported on this device.";
+
+        }
+
+
+        if (
+            adminPushModalEnableButton
+        ) {
+
+            adminPushModalEnableButton.disabled =
+                true;
+
+            adminPushModalEnableButton.textContent =
+                "Not Supported";
+
+        }
+
 
         return;
 
@@ -13011,11 +13112,48 @@ async function updateAdminPushNotificationUI() {
         "denied"
     ) {
 
-        adminPushNotificationStatus.textContent =
-            "Notifications are blocked in your browser or device settings.";
+        if (
+            adminPushNotificationStatus
+        ) {
 
-        adminPushNotificationAction.textContent =
-            "!";
+            adminPushNotificationStatus.textContent =
+                "Notifications are blocked on this device.";
+
+        }
+
+
+        if (
+            adminPushNotificationAction
+        ) {
+
+            adminPushNotificationAction.textContent =
+                "!";
+
+        }
+
+
+        if (
+            adminPushModalStatus
+        ) {
+
+            adminPushModalStatus.textContent =
+                "Notifications are blocked in your browser or device settings.";
+
+        }
+
+
+        if (
+            adminPushModalEnableButton
+        ) {
+
+            adminPushModalEnableButton.disabled =
+                true;
+
+            adminPushModalEnableButton.textContent =
+                "Blocked";
+
+        }
+
 
         return;
 
@@ -13031,11 +13169,48 @@ async function updateAdminPushNotificationUI() {
         "granted"
     ) {
 
-        adminPushNotificationStatus.textContent =
-            "Enable alerts for new bookings, messages, and important client activity.";
+        if (
+            adminPushNotificationStatus
+        ) {
 
-        adminPushNotificationAction.textContent =
-            "›";
+            adminPushNotificationStatus.textContent =
+                "Configure notification alerts for this device.";
+
+        }
+
+
+        if (
+            adminPushNotificationAction
+        ) {
+
+            adminPushNotificationAction.textContent =
+                "›";
+
+        }
+
+
+        if (
+            adminPushModalStatus
+        ) {
+
+            adminPushModalStatus.textContent =
+                "Notifications have not been enabled on this device yet.";
+
+        }
+
+
+        if (
+            adminPushModalEnableButton
+        ) {
+
+            adminPushModalEnableButton.disabled =
+                false;
+
+            adminPushModalEnableButton.textContent =
+                "Enable Notifications";
+
+        }
+
 
         return;
 
@@ -13064,11 +13239,48 @@ async function updateAdminPushNotificationUI() {
             subscription
         ) {
 
-            adminPushNotificationStatus.textContent =
-                "Notifications are enabled on this device.";
+            if (
+                adminPushNotificationStatus
+            ) {
 
-            adminPushNotificationAction.textContent =
-                "✓";
+                adminPushNotificationStatus.textContent =
+                    "Notifications are enabled on this device.";
+
+            }
+
+
+            if (
+                adminPushNotificationAction
+            ) {
+
+                adminPushNotificationAction.textContent =
+                    "✓";
+
+            }
+
+
+            if (
+                adminPushModalStatus
+            ) {
+
+                adminPushModalStatus.textContent =
+                    "Notifications are enabled on this device.";
+
+            }
+
+
+            if (
+                adminPushModalEnableButton
+            ) {
+
+                adminPushModalEnableButton.disabled =
+                    true;
+
+                adminPushModalEnableButton.textContent =
+                    "Notifications Enabled";
+
+            }
+
 
             return;
 
@@ -13085,11 +13297,51 @@ async function updateAdminPushNotificationUI() {
     }
 
 
-    adminPushNotificationStatus.textContent =
-        "Notification permission is enabled, but this device still needs to be registered.";
+    // ========================================
+    // PERMISSION GRANTED BUT NO SUBSCRIPTION
+    // ========================================
 
-    adminPushNotificationAction.textContent =
-        "›";
+    if (
+        adminPushNotificationStatus
+    ) {
+
+        adminPushNotificationStatus.textContent =
+            "This device still needs to be registered for notifications.";
+
+    }
+
+
+    if (
+        adminPushNotificationAction
+    ) {
+
+        adminPushNotificationAction.textContent =
+            "›";
+
+    }
+
+
+    if (
+        adminPushModalStatus
+    ) {
+
+        adminPushModalStatus.textContent =
+            "Notification permission is enabled, but this device still needs to be registered.";
+
+    }
+
+
+    if (
+        adminPushModalEnableButton
+    ) {
+
+        adminPushModalEnableButton.disabled =
+            false;
+
+        adminPushModalEnableButton.textContent =
+            "Register Device";
+
+    }
 
 }
 
@@ -13194,10 +13446,6 @@ async function saveAdminPushSubscription(
 
     }
 
-
-    // ========================================
-    // CLAIM THIS DEVICE FOR CURRENT USER
-    // ========================================
 
     const {
         data:
@@ -13328,7 +13576,7 @@ async function ensureAdminPushSubscription() {
 async function enableAdminPushNotifications() {
 
     if (
-        !adminPushNotificationsButton
+        !adminPushModalEnableButton
     ) {
 
         return;
@@ -13336,12 +13584,22 @@ async function enableAdminPushNotifications() {
     }
 
 
-    adminPushNotificationsButton.disabled =
+    adminPushModalEnableButton.disabled =
         true;
 
 
-    adminPushNotificationStatus.textContent =
-        "Setting up notifications...";
+    adminPushModalEnableButton.textContent =
+        "Setting Up...";
+
+
+    if (
+        adminPushModalStatus
+    ) {
+
+        adminPushModalStatus.textContent =
+            "Setting up notifications on this device...";
+
+    }
 
 
     try {
@@ -13364,10 +13622,6 @@ async function enableAdminPushNotifications() {
 
         }
 
-
-        // ========================================
-        // REQUEST PERMISSION
-        // ========================================
 
         let permission =
             Notification.permission;
@@ -13397,10 +13651,6 @@ async function enableAdminPushNotifications() {
         }
 
 
-        // ========================================
-        // CREATE + SAVE SUBSCRIPTION
-        // ========================================
-
         const subscription =
             await ensureAdminPushSubscription();
 
@@ -13416,17 +13666,13 @@ async function enableAdminPushNotifications() {
         }
 
 
-        adminPushNotificationStatus.textContent =
-            "Notifications are enabled on this device.";
-
-        adminPushNotificationAction.textContent =
-            "✓";
-
-
         console.log(
             "Admin push notifications enabled:",
             subscription.endpoint
         );
+
+
+        await updateAdminPushNotificationUI();
 
     }
     catch (error) {
@@ -13437,14 +13683,21 @@ async function enableAdminPushNotifications() {
         );
 
 
-        adminPushNotificationStatus.textContent =
-            "We couldn't finish setting up notifications on this device.";
+        if (
+            adminPushModalStatus
+        ) {
 
-    }
-    finally {
+            adminPushModalStatus.textContent =
+                "We couldn't finish setting up notifications on this device.";
 
-        adminPushNotificationsButton.disabled =
+        }
+
+
+        adminPushModalEnableButton.disabled =
             false;
+
+        adminPushModalEnableButton.textContent =
+            "Try Again";
 
     }
 
@@ -13452,18 +13705,60 @@ async function enableAdminPushNotifications() {
 
 
 // ========================================
-// ADMIN PUSH BUTTON
+// ADMIN PUSH MODAL EVENTS
 // ========================================
 
 adminPushNotificationsButton
+    ?.addEventListener(
+        "click",
+        openAdminPushNotificationsModal
+    );
+
+
+adminPushModalEnableButton
     ?.addEventListener(
         "click",
         enableAdminPushNotifications
     );
 
 
-updateAdminPushNotificationUI();
+adminPushNotificationsClose
+    ?.addEventListener(
+        "click",
+        closeAdminPushNotificationsModal
+    );
 
+
+document
+    .querySelector(
+        "[data-close-admin-push-notifications]"
+    )
+    ?.addEventListener(
+        "click",
+        closeAdminPushNotificationsModal
+    );
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key ===
+                "Escape" &&
+            adminPushNotificationsModal &&
+            !adminPushNotificationsModal.hidden
+        ) {
+
+            closeAdminPushNotificationsModal();
+
+        }
+
+    }
+);
+
+
+updateAdminPushNotificationUI();
 
 // ========================================
 // LOGOUT
