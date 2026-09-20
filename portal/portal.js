@@ -27014,46 +27014,16 @@ if (
 }
 
 // ========================================
-// MOBILE PWA FIRST-TIME NOTIFICATION PROMPT
+// MOBILE PWA NOTIFICATION SETTINGS
+// ========================================
+//
+// Push notification settings are now opened
+// manually from the Profile screen.
+//
+// Do not automatically open the notification
+// settings modal when the PWA launches.
 // ========================================
 
-async function maybeOpenMobilePushPrompt() {
-
-    if (
-        !shouldUseMobilePushNotifications() ||
-        !browserSupportsPushNotifications() ||
-        Notification.permission !==
-            "default"
-    ) {
-
-        return;
-
-    }
-
-
-    window.setTimeout(
-        async () => {
-
-            await loadClientNotificationPreferences();
-
-
-            openClientNotificationSettings();
-
-        },
-        900
-    );
-
-}
-
-
-window.addEventListener(
-    "load",
-    () => {
-
-        maybeOpenMobilePushPrompt();
-
-    }
-);
 
 // ========================================
 // PWA SERVICE WORKER
