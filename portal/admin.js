@@ -12979,6 +12979,20 @@ const adminPushModalStatus =
 
 
 // ========================================
+// ADMIN PUSH PREFERENCE KEYS
+// ========================================
+
+const ADMIN_PUSH_PREFERENCE_KEYS = [
+    "new_bookings",
+    "new_clients",
+    "messages",
+    "cancellations",
+    "schedule_changes",
+    "visit_activity"
+];
+
+
+// ========================================
 // OPEN ADMIN PUSH SETTINGS
 // ========================================
 
@@ -13002,7 +13016,10 @@ async function openAdminPushNotificationsModal() {
     );
 
 
-    await updateAdminPushNotificationUI();
+    await Promise.all([
+        updateAdminPushNotificationUI(),
+        loadAdminPushPreferences()
+    ]);
 
 }
 
@@ -13032,6 +13049,180 @@ function closeAdminPushNotificationsModal() {
 
 }
 
+
+// ========================================
+// LOAD ADMIN PUSH PREFERENCES
+// ========================================
+
+async function loadAdminPushPreferences() {
+
+    if (
+        !currentUser?.id
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const {
+            data:
+                preferences,
+
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "admin_notification_preferences"
+                )
+                .select(
+                    `
+                        new_bookings,
+                        new_clients,
+                        messages,
+                        cancellations,
+                        schedule_changes,
+                        visit_activity
+                    `
+                )
+                .eq(
+                    "user_id",
+                    currentUser.id
+                )
+                .maybeSingle();
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        if (
+            !preferences
+        ) {
+
+            console.warn(
+                "No admin notification preferences were found."
+            );
+
+            return;
+
+        }
+
+
+        ADMIN_PUSH_PREFERENCE_KEYS.forEach(
+            preferenceKey => {
+
+                const input =
+                    document.querySelector(
+                        `[data-admin-push-preference="${preferenceKey}"]`
+                    );
+
+
+                if (
+                    !input
+                ) {
+
+                    return;
+
+                }
+
+
+                input.checked =
+                    preferences[
+                        preferenceKey
+                    ] !==
+                    false;
+
+            }
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Admin push preference load error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ========================================
+// SAVE ADMIN PUSH PREFERENCE
+// ========================================
+
+async function saveAdminPushPreference(
+    preferenceKey,
+    enabled
+) {
+
+    if (
+        !currentUser?.id ||
+        !ADMIN_PUSH_PREFERENCE_KEYS.includes(
+            preferenceKey
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "admin_notification_preferences"
+            )
+            .update({
+                [preferenceKey]:
+                    enabled,
+
+                updated_at:
+                    new Date()
+                        .toISOString()
+            })
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Admin push preference save error:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+
+    console.log(
+        "Admin push preference saved:",
+        preferenceKey,
+        enabled
+    );
+
+
+    return true;
+
+}
 
 // ========================================
 // UPDATE ADMIN PUSH UI
@@ -13702,6 +13893,63 @@ async function enableAdminPushNotifications() {
     }
 
 }
+
+
+// ========================================
+// ADMIN PUSH PREFERENCE EVENTS
+// ========================================
+
+document
+    .querySelectorAll(
+        "[data-admin-push-preference]"
+    )
+    .forEach(
+        input => {
+
+            input.addEventListener(
+                "change",
+                async event => {
+
+                    const preferenceKey =
+                        event.target
+                            .dataset
+                            .adminPushPreference;
+
+
+                    const enabled =
+                        event.target
+                            .checked;
+
+
+                    event.target.disabled =
+                        true;
+
+
+                    const saved =
+                        await saveAdminPushPreference(
+                            preferenceKey,
+                            enabled
+                        );
+
+
+                    if (
+                        !saved
+                    ) {
+
+                        event.target.checked =
+                            !enabled;
+
+                    }
+
+
+                    event.target.disabled =
+                        false;
+
+                }
+            );
+
+        }
+    );
 
 
 // ========================================
