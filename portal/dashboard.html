@@ -259,31 +259,131 @@
                  CLIENT NOTIFICATION CENTER
                  ======================================== -->
         
-            <button
-                type="button"
-                id="client-notification-center-button"
-                class="client-notification-center-button"
-                aria-label="Open notifications"
-                title="Notifications"
+            <div
+                class="client-notification-center"
             >
         
-                <span
-                    class="client-notification-bell"
-                    aria-hidden="true"
+        
+                <button
+                    type="button"
+                    id="client-notification-center-button"
+                    class="client-notification-center-button"
+                    aria-label="Open notifications"
+                    aria-expanded="false"
+                    aria-controls="client-notification-panel"
+                    title="Notifications"
                 >
-                    🔔
-                </span>
+        
+                    <span
+                        class="client-notification-bell"
+                        aria-hidden="true"
+                    >
+                        🔔
+                    </span>
         
         
-                <span
-                    id="client-notification-unread-badge"
-                    class="client-notification-unread-badge"
+                    <span
+                        id="client-notification-unread-badge"
+                        class="client-notification-unread-badge"
+                        hidden
+                    >
+                        0
+                    </span>
+        
+                </button>
+        
+        
+                <!-- ========================================
+                     CLIENT NOTIFICATION PANEL
+                     ======================================== -->
+        
+                <div
+                    id="client-notification-panel"
+                    class="client-notification-panel"
                     hidden
                 >
-                    0
-                </span>
         
-            </button>
+        
+                    <div class="client-notification-panel-header">
+        
+        
+                        <div>
+        
+                            <span class="client-notification-panel-eyebrow">
+                                Paws in Stride
+                            </span>
+        
+        
+                            <h3>
+                                Notifications
+                            </h3>
+        
+                        </div>
+        
+        
+                        <button
+                            type="button"
+                            id="client-notification-mark-all-read"
+                            class="client-notification-mark-all-read"
+                        >
+                            Mark all read
+                        </button>
+        
+        
+                    </div>
+        
+        
+                    <div
+                        id="client-notification-list"
+                        class="client-notification-list"
+                        aria-live="polite"
+                    >
+        
+        
+                        <div class="client-notification-empty">
+        
+                            <span
+                                class="client-notification-empty-icon"
+                                aria-hidden="true"
+                            >
+                                🔔
+                            </span>
+        
+        
+                            <strong>
+                                You're all caught up
+                            </strong>
+        
+        
+                            <p>
+                                New pet care updates will appear here.
+                            </p>
+        
+                        </div>
+        
+        
+                    </div>
+        
+        
+                    <div class="client-notification-panel-footer">
+        
+        
+                        <button
+                            type="button"
+                            id="client-notification-clear-all"
+                            class="client-notification-clear-all"
+                        >
+                            Clear all
+                        </button>
+        
+        
+                    </div>
+        
+        
+                </div>
+        
+        
+            </div>
         
         
             <button
@@ -314,7 +414,6 @@
         </div>
         
         </div>
-    
     
     <!-- ========================================
          DASHBOARD LOADING / REDUCED MOTION
