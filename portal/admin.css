@@ -8609,6 +8609,24 @@ body.admin-services-pricing-open {
 }
 
 
+.admin-push-device-copy .admin-screen-eyebrow {
+    color:
+        #2890df;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.08em;
+
+    text-transform:
+        uppercase;
+}
+
+
 .admin-push-device-copy strong {
     color:
         #17364a;
