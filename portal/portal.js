@@ -3138,9 +3138,15 @@ const clientNotificationsToggle =
     );
 
 
-const clientNotificationsContent =
+const clientNotificationsModal =
     document.getElementById(
-        "client-notifications-content"
+        "client-notifications-modal"
+    );
+
+
+const clientNotificationsClose =
+    document.getElementById(
+        "client-notifications-close"
     );
 
 
@@ -3221,41 +3227,139 @@ if (
 
 
 // ========================================
-// NOTIFICATIONS TOGGLE
+// OPEN CLIENT NOTIFICATION SETTINGS
 // ========================================
 
-if (
-    clientNotificationsToggle &&
-    clientNotificationsContent
-) {
+function openClientNotificationSettings() {
 
-    clientNotificationsToggle.addEventListener(
-        "click",
+    if (
+        !clientNotificationsModal
+    ) {
+
+        return;
+
+    }
+
+
+    clientNotificationsModal.hidden =
+        false;
+
+
+    document.body.classList.add(
+        "client-notifications-modal-open"
+    );
+
+
+    window.requestAnimationFrame(
         () => {
 
-            const isExpanded =
-                clientNotificationsToggle
-                    .getAttribute(
-                        "aria-expanded"
-                    ) ===
-                    "true";
-
-
-            clientNotificationsToggle.setAttribute(
-                "aria-expanded",
-                String(
-                    !isExpanded
-                )
-            );
-
-
-            clientNotificationsContent.hidden =
-                isExpanded;
+            clientNotificationsClose
+                ?.focus({
+                    preventScroll:
+                        true
+                });
 
         }
     );
 
 }
+
+
+// ========================================
+// CLOSE CLIENT NOTIFICATION SETTINGS
+// ========================================
+
+function closeClientNotificationSettings() {
+
+    if (
+        !clientNotificationsModal
+    ) {
+
+        return;
+
+    }
+
+
+    clientNotificationsModal.hidden =
+        true;
+
+
+    document.body.classList.remove(
+        "client-notifications-modal-open"
+    );
+
+}
+
+
+// ========================================
+// NOTIFICATION SETTINGS LAUNCHER
+// ========================================
+
+clientNotificationsToggle
+    ?.addEventListener(
+        "click",
+        openClientNotificationSettings
+    );
+
+
+// ========================================
+// NOTIFICATION SETTINGS CLOSE BUTTON
+// ========================================
+
+clientNotificationsClose
+    ?.addEventListener(
+        "click",
+        closeClientNotificationSettings
+    );
+
+
+// ========================================
+// NOTIFICATION SETTINGS BACKDROP
+// ========================================
+
+clientNotificationsModal
+    ?.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.closest(
+                    "[data-client-notifications-close]"
+                )
+            ) {
+
+                closeClientNotificationSettings();
+
+            }
+
+        }
+    );
+
+
+// ========================================
+// NOTIFICATION SETTINGS ESCAPE KEY
+// ========================================
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !==
+                "Escape" ||
+            !clientNotificationsModal ||
+            clientNotificationsModal.hidden
+        ) {
+
+            return;
+
+        }
+
+
+        closeClientNotificationSettings();
+
+    }
+);
 
 // ========================================
 // HOUSEHOLD EDIT FORM
