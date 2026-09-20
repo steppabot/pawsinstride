@@ -9349,16 +9349,16 @@ body.mobile-app-screen-pets
 
 }
 
-
 /* ========================================
    CLIENT NOTIFICATION ITEM DISMISS
 ======================================== */
 
 .client-portal-page
+.client-notification-panel
 .client-notification-dismiss {
 
     display:
-        inline-flex;
+        inline-flex !important;
 
     align-items:
         center;
@@ -9369,60 +9369,97 @@ body.mobile-app-screen-pets
     align-self:
         start;
 
+    flex:
+        0 0 28px !important;
+
     width:
-        28px;
+        28px !important;
+
+    min-width:
+        28px !important;
+
+    max-width:
+        28px !important;
 
     height:
-        28px;
+        28px !important;
 
-    margin-top:
-        -3px;
+    min-height:
+        28px !important;
+
+    margin:
+        -3px 0 0 !important;
 
     padding:
-        0;
+        0 !important;
 
     background:
-        transparent;
+        transparent !important;
 
     color:
-        #91a1ab;
+        #91a1ab !important;
 
     border:
-        0;
+        0 !important;
 
     border-radius:
-        8px;
+        8px !important;
+
+    box-shadow:
+        none !important;
 
     font-family:
         inherit;
 
     font-size:
-        18px;
+        18px !important;
+
+    font-weight:
+        500 !important;
 
     line-height:
-        1;
+        1 !important;
 
     cursor:
         pointer;
 
+    appearance:
+        none;
+
+    -webkit-appearance:
+        none;
+
     transition:
         background 0.18s ease,
-        color 0.18s ease;
+        color 0.18s ease,
+        transform 0.18s ease;
 
 }
 
 
 .client-portal-page
+.client-notification-panel
 .client-notification-dismiss:hover {
 
     background:
-        #f3f7f9;
+        #f3f7f9 !important;
 
     color:
-        #ef602c;
+        #ef602c !important;
 
 }
 
+
+.client-portal-page
+.client-notification-panel
+.client-notification-dismiss:active {
+
+    transform:
+        scale(
+            0.92
+        );
+
+}
 
 /* ========================================
    CLIENT NOTIFICATION EMPTY STATE
