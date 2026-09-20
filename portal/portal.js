@@ -25157,13 +25157,17 @@ async function handleClientNotificationAction(
             renderSelectedUpcomingServices();
     
     
+            // ========================================
+            // MOBILE — OPEN REAL SERVICES SCREEN
+            // ========================================
+    
             if (
                 window.matchMedia(
                     "(max-width: 700px)"
                 ).matches
             ) {
     
-                setActiveMobileAppTab(
+                await handleMobileAppTab(
                     "services"
                 );
     
@@ -25227,7 +25231,7 @@ async function handleClientNotificationAction(
     
     
                                 },
-                                120
+                                150
                             );
     
     
@@ -25250,7 +25254,7 @@ async function handleClientNotificationAction(
     
     
                     },
-                    160
+                    220
                 );
     
     
@@ -25281,7 +25285,7 @@ async function handleClientNotificationAction(
     
     
                 },
-                80
+                120
             );
     
     
