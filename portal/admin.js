@@ -571,13 +571,12 @@ async function loadAdminDashboard() {
                     "client_id, street_address, address_line_2, city, state, zip_code"
                 ),
     
-    
+                
             supabaseClient
                 .from("visit_reports")
                 .select(
-                    "id, visit_id, created_by, notes, fed, fresh_water, pee, poop, created_at, updated_at"
+                    "id, visit_id, created_by, notes, fed, fresh_water, pee, poop, created_at, updated_at, published_at"
                 )
-    
     
         ]);
     
@@ -11997,68 +11996,58 @@ async function saveAdminVisitReport(
         // PUBLISH VISIT REPORT
         // ========================================
         //
-        // The report is only published AFTER:
+        // Only the first successful publish changes
+        // published_at from NULL to a timestamp.
         //
-        // - overall report data is saved
-        // - per-pet care is saved
-        // - all pending photos are uploaded
-        //
-        // Existing published reports keep their
-        // original published_at timestamp so edits
-        // do not send another client notification.
+        // The database condition below prevents
+        // duplicate report notifications on edits.
         // ========================================
         
+        const {
+            data:
+                publishedReport,
+        
+            error:
+                publishError
+        } =
+            await supabaseClient
+                .from(
+                    "visit_reports"
+                )
+                .update({
+                    published_at:
+                        new Date()
+                            .toISOString()
+                })
+                .eq(
+                    "id",
+                    savedReport.id
+                )
+                .is(
+                    "published_at",
+                    null
+                )
+                .select("*")
+                .maybeSingle();
+        
+        
         if (
-            !savedReport.published_at
+            publishError
         ) {
         
-            const {
-                data:
-                    publishedReport,
+            throw publishError;
         
-                error:
-                    publishError
-            } =
-                await supabaseClient
-                    .from(
-                        "visit_reports"
-                    )
-                    .update({
-                        published_at:
-                            new Date()
-                                .toISOString()
-                    })
-                    .eq(
-                        "id",
-                        savedReport.id
-                    )
-                    .is(
-                        "published_at",
-                        null
-                    )
-                    .select("*")
-                    .maybeSingle();
+        }
         
         
-            if (
-                publishError
-            ) {
+        if (
+            publishedReport
+        ) {
         
-                throw publishError;
-        
-            }
-        
-        
-            if (
+            Object.assign(
+                savedReport,
                 publishedReport
-            ) {
-        
-                Object.assign(
-                    savedReport,
-                    publishedReport
-                );
-        
-            }
+            );
         
         }
         
