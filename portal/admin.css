@@ -3412,7 +3412,6 @@ p {
         none;
 }
 
-
 /* ========================================
    ADMIN VISIT ACTION BUTTONS — MOBILE
 ======================================== */
@@ -3432,6 +3431,190 @@ p {
 
         min-width:
             0;
+    }
+
+}
+
+
+/* ========================================
+   ADMIN VISIT REPORT LAYOUT
+======================================== */
+
+.admin-page
+.admin-visit-report-content {
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1fr
+        )
+        minmax(
+            320px,
+            0.9fr
+        );
+
+    gap:
+        18px;
+
+    align-items:
+        start;
+}
+
+
+.admin-page
+.admin-visit-report-main,
+
+.admin-page
+.admin-visit-report-side {
+    min-width:
+        0;
+}
+
+
+.admin-page
+.admin-visit-report-main {
+    display:
+        grid;
+
+    gap:
+        16px;
+}
+
+
+.admin-page
+.admin-visit-report-side {
+    display:
+        grid;
+
+    gap:
+        16px;
+}
+
+
+.admin-page
+.admin-visit-report-content
+.admin-visit-report-section {
+    margin:
+        0;
+}
+
+
+/* ========================================
+   NON-WALK VISIT REPORT
+======================================== */
+
+.admin-page
+.admin-visit-report-form-nonwalk
+.admin-visit-report-side
+.admin-visit-report-photos-section {
+    height:
+        100%;
+}
+
+
+.admin-page
+.admin-visit-report-form-nonwalk
+.admin-visit-report-side
+.admin-visit-report-photos-section {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+}
+
+
+.admin-page
+.admin-visit-report-form-nonwalk
+.admin-visit-pending-media {
+    width:
+        100%;
+}
+
+
+.admin-page
+.admin-visit-report-form-nonwalk
+.admin-visit-existing-media {
+    width:
+        100%;
+}
+
+
+/* ========================================
+   WALK VISIT REPORT
+======================================== */
+
+.admin-page
+.admin-visit-report-form-walk
+.admin-walk-summary-section {
+    width:
+        100%;
+}
+
+
+.admin-page
+.admin-visit-report-form-walk
+.admin-walk-summary-card {
+    width:
+        100%;
+}
+
+
+.admin-page
+.admin-visit-report-form-walk
+.admin-walk-route-map {
+    width:
+        100%;
+}
+
+
+/* ========================================
+   ADMIN VISIT REPORT — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-page
+    .admin-visit-report-content {
+        grid-template-columns:
+            minmax(
+                0,
+                1fr
+            );
+
+        gap:
+            14px;
+    }
+
+
+    .admin-page
+    .admin-visit-report-main,
+
+    .admin-page
+    .admin-visit-report-side {
+        width:
+            100%;
+
+        min-width:
+            0;
+    }
+
+
+    .admin-page
+    .admin-visit-report-form-nonwalk
+    .admin-visit-report-side {
+        order:
+            2;
+    }
+
+
+    .admin-page
+    .admin-visit-report-form-nonwalk
+    .admin-visit-report-photos-section {
+        height:
+            auto;
     }
 
 }
