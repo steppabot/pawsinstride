@@ -9574,13 +9574,21 @@ body.mobile-app-screen-pets
 
 }
 
-
 /* ========================================
    CLIENT NOTIFICATION PANEL FOOTER
 ======================================== */
 
 .client-portal-page
 .client-notification-panel-footer {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
 
     padding:
         10px 14px;
@@ -9592,60 +9600,111 @@ body.mobile-app-screen-pets
         1px solid
         #edf2f5;
 
-    text-align:
-        center;
-
 }
 
 
+/* ========================================
+   CLIENT NOTIFICATION CLEAR ALL
+======================================== */
+
 .client-portal-page
+.client-notification-panel
 .client-notification-clear-all {
 
+    display:
+        inline-flex !important;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        auto !important;
+
+    min-width:
+        0 !important;
+
+    min-height:
+        30px;
+
+    margin:
+        0 !important;
+
     padding:
-        8px 12px;
+        7px 12px !important;
 
     background:
-        transparent;
+        transparent !important;
 
     color:
-        #7b8b95;
+        #7b8b95 !important;
 
     border:
-        0;
+        0 !important;
 
     border-radius:
-        8px;
+        8px !important;
+
+    box-shadow:
+        none !important;
 
     font-family:
         inherit;
 
     font-size:
-        10px;
+        10px !important;
 
     font-weight:
-        800;
+        800 !important;
+
+    line-height:
+        1 !important;
+
+    white-space:
+        nowrap;
 
     cursor:
         pointer;
 
+    appearance:
+        none;
+
+    -webkit-appearance:
+        none;
+
     transition:
         background 0.18s ease,
-        color 0.18s ease;
+        color 0.18s ease,
+        transform 0.18s ease;
 
 }
 
 
 .client-portal-page
+.client-notification-panel
 .client-notification-clear-all:hover {
 
     background:
-        #f1f5f7;
+        #f1f5f7 !important;
 
     color:
-        #ef602c;
+        #ef602c !important;
 
 }
 
+
+.client-portal-page
+.client-notification-panel
+.client-notification-clear-all:active {
+
+    transform:
+        scale(
+            0.97
+        );
+
+}
 
 /* ========================================
    CLIENT NOTIFICATION CENTER — MOBILE
