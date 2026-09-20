@@ -24329,6 +24329,413 @@ async function enablePushNotifications() {
 
 
 // ========================================
+// CLIENT NOTIFICATION PREFERENCES
+// ========================================
+
+const clientPushPreferenceInputs =
+    Array.from(
+        document.querySelectorAll(
+            "[data-client-push-preference]"
+        )
+    );
+
+
+const DEFAULT_CLIENT_NOTIFICATION_PREFERENCES = {
+
+    visit_started:
+        true,
+
+    visit_completed:
+        true,
+
+    visit_reports:
+        true,
+
+    messages:
+        true,
+
+    booking_updates:
+        true,
+
+    cancellations:
+        true
+
+};
+
+
+const CLIENT_NOTIFICATION_PREFERENCE_KEYS =
+    new Set(
+        Object.keys(
+            DEFAULT_CLIENT_NOTIFICATION_PREFERENCES
+        )
+    );
+
+
+// ========================================
+// DISABLE / ENABLE PREFERENCE INPUTS
+// ========================================
+
+function setClientNotificationPreferenceInputsDisabled(
+    disabled
+) {
+
+    clientPushPreferenceInputs.forEach(
+        input => {
+
+            input.disabled =
+                Boolean(
+                    disabled
+                );
+
+        }
+    );
+
+}
+
+
+// ========================================
+// RENDER CLIENT NOTIFICATION PREFERENCES
+// ========================================
+
+function renderClientNotificationPreferences(
+    preferences
+) {
+
+    clientPushPreferenceInputs.forEach(
+        input => {
+
+            const preferenceKey =
+                input.dataset
+                    .clientPushPreference;
+
+
+            if (
+                !CLIENT_NOTIFICATION_PREFERENCE_KEYS.has(
+                    preferenceKey
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            input.checked =
+                preferences[
+                    preferenceKey
+                ] !==
+                false;
+
+        }
+    );
+
+}
+
+
+// ========================================
+// LOAD CLIENT NOTIFICATION PREFERENCES
+// ========================================
+
+async function loadClientNotificationPreferences() {
+
+    if (
+        !currentUser?.id
+    ) {
+
+        return;
+
+    }
+
+
+    setClientNotificationPreferenceInputsDisabled(
+        true
+    );
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "client_notification_preferences"
+                )
+                .select(
+                    [
+                        "user_id",
+                        "visit_started",
+                        "visit_completed",
+                        "visit_reports",
+                        "messages",
+                        "booking_updates",
+                        "cancellations"
+                    ].join(",")
+                )
+                .eq(
+                    "user_id",
+                    currentUser.id
+                )
+                .maybeSingle();
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        // ========================================
+        // CREATE DEFAULT ROW WHEN MISSING
+        // ========================================
+
+        if (
+            !data
+        ) {
+
+            const defaultRow = {
+
+                user_id:
+                    currentUser.id,
+
+                ...DEFAULT_CLIENT_NOTIFICATION_PREFERENCES
+
+            };
+
+
+            const {
+                data:
+                    createdPreferences,
+
+                error:
+                    createError
+            } =
+                await supabaseClient
+                    .from(
+                        "client_notification_preferences"
+                    )
+                    .insert(
+                        defaultRow
+                    )
+                    .select(
+                        [
+                            "user_id",
+                            "visit_started",
+                            "visit_completed",
+                            "visit_reports",
+                            "messages",
+                            "booking_updates",
+                            "cancellations"
+                        ].join(",")
+                    )
+                    .single();
+
+
+            if (
+                createError
+            ) {
+
+                throw createError;
+
+            }
+
+
+            renderClientNotificationPreferences(
+                createdPreferences
+            );
+
+
+            return;
+
+        }
+
+
+        renderClientNotificationPreferences(
+            data
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Client notification preferences load error:",
+            error
+        );
+
+    }
+    finally {
+
+        setClientNotificationPreferenceInputsDisabled(
+            false
+        );
+
+    }
+
+}
+
+
+// ========================================
+// SAVE CLIENT NOTIFICATION PREFERENCE
+// ========================================
+
+async function saveClientNotificationPreference(
+    input
+) {
+
+    if (
+        !currentUser?.id ||
+        !input
+    ) {
+
+        return;
+
+    }
+
+
+    const preferenceKey =
+        input.dataset
+            .clientPushPreference;
+
+
+    if (
+        !CLIENT_NOTIFICATION_PREFERENCE_KEYS.has(
+            preferenceKey
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const newValue =
+        Boolean(
+            input.checked
+        );
+
+
+    const previousValue =
+        !newValue;
+
+
+    input.disabled =
+        true;
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "client_notification_preferences"
+                )
+                .update(
+                    {
+                        [preferenceKey]:
+                            newValue,
+
+                        updated_at:
+                            new Date()
+                                .toISOString()
+                    }
+                )
+                .eq(
+                    "user_id",
+                    currentUser.id
+                );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        console.log(
+            "Client notification preference saved:",
+            {
+                preference:
+                    preferenceKey,
+
+                enabled:
+                    newValue
+            }
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Client notification preference save error:",
+            error
+        );
+
+
+        input.checked =
+            previousValue;
+
+    }
+    finally {
+
+        input.disabled =
+            false;
+
+    }
+
+}
+
+
+// ========================================
+// PREFERENCE CHANGE LISTENERS
+// ========================================
+
+clientPushPreferenceInputs.forEach(
+    input => {
+
+        input.addEventListener(
+            "change",
+            () => {
+
+                saveClientNotificationPreference(
+                    input
+                );
+
+            }
+        );
+
+    }
+);
+
+
+// ========================================
+// LOAD PREFERENCES WHEN SETTINGS OPEN
+// ========================================
+
+clientNotificationsToggle
+    ?.addEventListener(
+        "click",
+        () => {
+
+            loadClientNotificationPreferences();
+
+        }
+    );
+
+
+// ========================================
 // PUSH NOTIFICATION BUTTON
 // ========================================
 
@@ -24367,7 +24774,10 @@ async function maybeOpenMobilePushPrompt() {
 
 
     window.setTimeout(
-        () => {
+        async () => {
+
+            await loadClientNotificationPreferences();
+
 
             openClientNotificationSettings();
 
