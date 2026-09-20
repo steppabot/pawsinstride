@@ -8636,29 +8636,74 @@ function isWalkingService(
 ) {
 
 
-    const serviceName =
+    const serviceType =
         String(
-
-            visit?.service_name ||
             visit?.service_type ||
             ""
-
         )
             .trim()
             .toLowerCase();
 
 
-    return (
-
-        serviceName.includes(
-            "walk"
-        ) ||
-
-        serviceName.includes(
-            "walking"
+    const serviceName =
+        String(
+            visit?.service_name ||
+            ""
         )
+            .trim()
+            .toLowerCase();
 
-    );
+
+    // ========================================
+    // PRIMARY SERVICE TYPE CHECK
+    // ========================================
+    //
+    // Only actual Dog Walking services should
+    // use GPS walk tracking.
+    //
+    // Drop-In Visits, Pet Sitting, Boarding,
+    // Meet & Greets, and other services must
+    // never expose Start Walk.
+    // ========================================
+
+    if (
+        serviceType ===
+            "dog walking" ||
+        serviceType ===
+            "dog_walking"
+    ) {
+
+        return true;
+
+    }
+
+
+    // ========================================
+    // LEGACY SERVICE NAME FALLBACK
+    // ========================================
+    //
+    // Older visits may not have service_type.
+    // Only use this fallback when the name
+    // clearly identifies Dog Walking.
+    // ========================================
+
+    if (
+        !serviceType &&
+        (
+            serviceName.startsWith(
+                "dog walking"
+            ) ||
+            serviceName ===
+                "dog walk"
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
 
 }
 
