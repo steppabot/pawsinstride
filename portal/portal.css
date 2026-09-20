@@ -10667,17 +10667,68 @@ body.client-portal-page {
    CLIENT DASHBOARD HEADER
 ======================================== */
 
-.client-portal-page .client-dashboard-header {
-    position: relative;
-    align-items: center;
-    margin-bottom: 24px;
-    padding: 16px 18px;
-    background: rgba(255,255,255,0.88);
-    border: 1px solid rgba(200,220,232,0.82);
-    border-radius: 18px;
-    box-shadow: 0 6px 24px rgba(40,144,223,0.07);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+.client-portal-page
+.client-dashboard-header {
+
+    position:
+        relative;
+
+    z-index:
+        1200;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        24px;
+
+    padding:
+        16px 18px;
+
+    overflow:
+        visible;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.88
+        );
+
+    border:
+        1px solid
+        rgba(
+            200,
+            220,
+            232,
+            0.82
+        );
+
+    border-radius:
+        18px;
+
+    box-shadow:
+        0
+        6px
+        24px
+        rgba(
+            40,
+            144,
+            223,
+            0.07
+        );
+
+    backdrop-filter:
+        blur(
+            14px
+        );
+
+    -webkit-backdrop-filter:
+        blur(
+            14px
+        );
+
 }
 
 /* ========================================
