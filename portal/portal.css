@@ -5219,13 +5219,72 @@ body.client-modal-open {
 .admin-service-statuses {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: flex-end;
     gap: 6px;
 }
 
+/* ========================================
+   ADMIN SERVICE STATUS PILLS
+======================================== */
+
+.admin-service-statuses
+.service-status {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: auto;
+
+    padding:
+        5px
+        9px;
+
+    background:
+        #eef7fd;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid
+        #c8dce8;
+
+    border-radius:
+        999px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+
+    letter-spacing:
+        0.025em;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ========================================
+   ADMIN PAYMENT STATUS PILL
+======================================== */
+
+.admin-service-statuses
 .admin-payment-status {
-    background: #fff;
-    border: 1px solid #ddd;
+    background:
+        #f7f9fa;
+
+    color:
+        #53616d;
+
+    border-color:
+        #d6e1e7;
 }
 
 .admin-service-main-grid {
