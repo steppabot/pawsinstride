@@ -2560,6 +2560,7 @@ async function loadDashboard() {
 
 await loadClientNotifications();
 
+subscribeToClientNotifications();
 
 // ========================================
 // INITIAL LATEST UPDATE / MOBILE APP HOME
@@ -25000,6 +25001,226 @@ async function clearAllClientNotifications() {
 }
 
 // ========================================
+// REALTIME CLIENT NOTIFICATIONS
+// ========================================
+
+let clientNotificationRealtimeChannel =
+    null;
+
+
+// ========================================
+// REFRESH DATA FOR NEW NOTIFICATION
+// ========================================
+
+async function refreshClientDataForNotification(
+    notification
+) {
+
+    if (
+        !notification
+    ) {
+
+        return;
+
+    }
+
+
+    const notificationType =
+        String(
+            notification.notification_type ||
+            ""
+        );
+
+
+    // ========================================
+    // VISIT / BOOKING / REPORT UPDATES
+    // ========================================
+
+    if (
+        notificationType ===
+            "visit_started" ||
+        notificationType ===
+            "visit_completed" ||
+        notificationType ===
+            "client_visit_completed" ||
+        notificationType ===
+            "visit_report" ||
+        notificationType ===
+            "client_visit_report" ||
+        notificationType ===
+            "booking_confirmed" ||
+        notificationType ===
+            "client_booking_confirmed" ||
+        notificationType ===
+            "booking_updated" ||
+        notificationType ===
+            "client_booking_updated"
+    ) {
+
+        await refreshUpcomingVisits();
+
+    }
+
+
+    // ========================================
+    // CANCELLATION / ACCOUNT CREDIT
+    // ========================================
+
+    if (
+        notificationType ===
+            "cancellation_update" ||
+        notificationType ===
+            "client_cancellation_update"
+    ) {
+
+        await refreshUpcomingVisits();
+
+        await renderAccountCredit();
+
+    }
+
+}
+
+
+// ========================================
+// ADD REALTIME NOTIFICATION
+// ========================================
+
+async function addRealtimeClientNotification(
+    notification
+) {
+
+    if (
+        !notification ||
+        !currentUser?.id
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        notification.client_id !==
+        currentUser.id
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        notification.dismissed_at
+    ) {
+
+        return;
+
+    }
+
+
+    const alreadyExists =
+        currentClientNotifications
+            .some(
+                existingNotification =>
+                    Number(
+                        existingNotification.id
+                    ) ===
+                    Number(
+                        notification.id
+                    )
+            );
+
+
+    if (
+        alreadyExists
+    ) {
+
+        return;
+
+    }
+
+
+    currentClientNotifications.unshift(
+        notification
+    );
+
+
+    currentClientNotifications =
+        currentClientNotifications.slice(
+            0,
+            50
+        );
+
+
+    renderClientNotifications();
+
+
+    await refreshClientDataForNotification(
+        notification
+    );
+
+}
+
+
+// ========================================
+// SUBSCRIBE TO REALTIME NOTIFICATIONS
+// ========================================
+
+function subscribeToClientNotifications() {
+
+    if (
+        !currentUser?.id ||
+        clientNotificationRealtimeChannel
+    ) {
+
+        return;
+
+    }
+
+
+    clientNotificationRealtimeChannel =
+        supabaseClient
+            .channel(
+                `client-notifications-${currentUser.id}`
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event:
+                        "INSERT",
+
+                    schema:
+                        "public",
+
+                    table:
+                        "client_notifications",
+
+                    filter:
+                        `client_id=eq.${currentUser.id}`
+                },
+                async payload => {
+
+                    await addRealtimeClientNotification(
+                        payload.new
+                    );
+
+                }
+            )
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "Client notification realtime:",
+                        status
+                    );
+
+                }
+            );
+
+}
+
+// ========================================
 // NOTIFICATION CENTER EVENTS
 // ========================================
 
@@ -25109,7 +25330,89 @@ async function handleClientNotificationAction(
     closeClientNotificationCenter();
 
     // ========================================
-    // VISIT-RELATED NOTIFICATIONS
+    // CANCELLATION / ACCOUNT CREDIT
+    // ========================================
+    
+    if (
+        notificationType ===
+            "cancellation_update" ||
+        notificationType ===
+            "client_cancellation_update"
+    ) {
+    
+    
+        // ========================================
+        // REFRESH ACCOUNT CREDIT
+        // ========================================
+    
+        await renderAccountCredit();
+    
+    
+        // ========================================
+        // MOBILE — OPEN PROFILE
+        // ========================================
+    
+        if (
+            window.matchMedia(
+                "(max-width: 700px)"
+            ).matches
+        ) {
+    
+            await handleMobileAppTab(
+                "profile"
+            );
+    
+        }
+    
+    
+        // ========================================
+        // SCROLL TO ACCOUNT CREDIT
+        // ========================================
+    
+        window.setTimeout(
+            () => {
+    
+    
+                const creditCard =
+                    document.getElementById(
+                        "household-credit-card"
+                    );
+    
+    
+                const profileSection =
+                    document.getElementById(
+                        "household-section"
+                    );
+    
+    
+                (
+                    creditCard &&
+                    creditCard.style.display !==
+                        "none"
+                        ? creditCard
+                        : profileSection
+                )
+                    ?.scrollIntoView({
+                        behavior:
+                            "smooth",
+    
+                        block:
+                            "center"
+                    });
+    
+    
+            },
+            140
+        );
+    
+    
+        return;
+    
+    }
+    
+    
+    // ========================================
+    // VISIT / BOOKING NOTIFICATIONS
     // ========================================
     
     if (
@@ -25264,6 +25567,57 @@ async function handleClientNotificationAction(
     
     
             // ========================================
+            // BOOKING CONFIRMED / UPDATED
+            // ========================================
+    
+            if (
+                notificationType ===
+                    "booking_confirmed" ||
+                notificationType ===
+                    "client_booking_confirmed" ||
+                notificationType ===
+                    "booking_updated" ||
+                notificationType ===
+                    "client_booking_updated"
+            ) {
+    
+    
+                window.setTimeout(
+                    () => {
+    
+    
+                        const visitElement =
+                            document.querySelector(
+                                `[data-client-visit-id="${entityId}"]`
+                            );
+    
+    
+                        (
+                            visitElement ||
+                            document.getElementById(
+                                "selected-upcoming-services"
+                            )
+                        )
+                            ?.scrollIntoView({
+                                behavior:
+                                    "smooth",
+    
+                                block:
+                                    "center"
+                            });
+    
+    
+                    },
+                    140
+                );
+    
+    
+                return;
+    
+            }
+    
+    
+            // ========================================
             // STANDARD VISIT NOTIFICATION
             // ========================================
     
@@ -25271,16 +25625,24 @@ async function handleClientNotificationAction(
                 () => {
     
     
-                    document
-                        .getElementById(
-                            "services-section"
+                    const visitElement =
+                        document.querySelector(
+                            `[data-client-visit-id="${entityId}"]`
+                        );
+    
+    
+                    (
+                        visitElement ||
+                        document.getElementById(
+                            "selected-upcoming-services"
                         )
+                    )
                         ?.scrollIntoView({
                             behavior:
                                 "smooth",
     
                             block:
-                                "start"
+                                "center"
                         });
     
     
@@ -25292,6 +25654,68 @@ async function handleClientNotificationAction(
             return;
     
         }
+    
+    }
+    
+    
+    // ========================================
+    // BOOKING FALLBACK
+    // ========================================
+    //
+    // If a booking notification doesn't contain
+    // a visit entity for some reason, still take
+    // the client to Services instead of doing
+    // nothing.
+    // ========================================
+    
+    if (
+        notificationType ===
+            "booking_confirmed" ||
+        notificationType ===
+            "client_booking_confirmed" ||
+        notificationType ===
+            "booking_updated" ||
+        notificationType ===
+            "client_booking_updated"
+    ) {
+    
+    
+        if (
+            window.matchMedia(
+                "(max-width: 700px)"
+            ).matches
+        ) {
+    
+            await handleMobileAppTab(
+                "services"
+            );
+    
+        }
+    
+    
+        window.setTimeout(
+            () => {
+    
+    
+                document
+                    .getElementById(
+                        "services-section"
+                    )
+                    ?.scrollIntoView({
+                        behavior:
+                            "smooth",
+    
+                        block:
+                            "start"
+                    });
+    
+    
+            },
+            120
+        );
+    
+    
+        return;
     
     }
     
