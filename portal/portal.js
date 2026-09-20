@@ -3132,6 +3132,18 @@ const accountSecurityContent =
     );
 
 
+const clientNotificationsToggle =
+    document.getElementById(
+        "client-notifications-toggle"
+    );
+
+
+const clientNotificationsContent =
+    document.getElementById(
+        "client-notifications-content"
+    );
+
+
 // ========================================
 // PROPERTY ACCESS TOGGLE
 // ========================================
@@ -3206,6 +3218,45 @@ if (
     );
 
 }
+
+
+// ========================================
+// NOTIFICATIONS TOGGLE
+// ========================================
+
+if (
+    clientNotificationsToggle &&
+    clientNotificationsContent
+) {
+
+    clientNotificationsToggle.addEventListener(
+        "click",
+        () => {
+
+            const isExpanded =
+                clientNotificationsToggle
+                    .getAttribute(
+                        "aria-expanded"
+                    ) ===
+                    "true";
+
+
+            clientNotificationsToggle.setAttribute(
+                "aria-expanded",
+                String(
+                    !isExpanded
+                )
+            );
+
+
+            clientNotificationsContent.hidden =
+                isExpanded;
+
+        }
+    );
+
+}
+
 // ========================================
 // HOUSEHOLD EDIT FORM
 // ========================================
