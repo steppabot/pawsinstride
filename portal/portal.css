@@ -8942,67 +8942,131 @@ body.mobile-app-screen-pets
 
 }
 
-
 /* ========================================
    CLIENT NOTIFICATION MARK ALL READ
 ======================================== */
 
 .client-portal-page
+.client-notification-panel
 .client-notification-mark-all-read {
 
+    display:
+        inline-flex !important;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
     flex:
-        0 0 auto;
+        0 0 auto !important;
+
+    width:
+        auto !important;
+
+    min-width:
+        0 !important;
+
+    min-height:
+        32px;
+
+    margin:
+        0 !important;
 
     padding:
-        8px 10px;
+        7px 10px !important;
 
     background:
-        #ffffff;
+        rgba(
+            255,
+            255,
+            255,
+            0.92
+        ) !important;
 
     color:
-        #2890df;
+        #2890df !important;
 
     border:
         1px solid
-        #c7dce8;
+        rgba(
+            40,
+            144,
+            223,
+            0.22
+        ) !important;
 
     border-radius:
-        9px;
+        9px !important;
+
+    box-shadow:
+        none !important;
 
     font-family:
         inherit;
 
     font-size:
-        10px;
+        10px !important;
 
     font-weight:
-        850;
+        800 !important;
+
+    line-height:
+        1 !important;
+
+    white-space:
+        nowrap;
 
     cursor:
         pointer;
 
+    appearance:
+        none;
+
+    -webkit-appearance:
+        none;
+
     transition:
         background 0.18s ease,
         color 0.18s ease,
-        border-color 0.18s ease;
+        border-color 0.18s ease,
+        transform 0.18s ease;
 
 }
 
 
 .client-portal-page
+.client-notification-panel
 .client-notification-mark-all-read:hover {
 
     background:
-        #f4fbff;
+        #ffffff !important;
 
     color:
-        #1f79bd;
+        #1f79bd !important;
 
     border-color:
-        #9ec8df;
+        rgba(
+            40,
+            144,
+            223,
+            0.38
+        ) !important;
 
 }
 
+
+.client-portal-page
+.client-notification-panel
+.client-notification-mark-all-read:active {
+
+    transform:
+        scale(
+            0.97
+        );
+
+}
 
 /* ========================================
    CLIENT NOTIFICATION LIST
