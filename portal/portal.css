@@ -1951,6 +1951,378 @@ section h3 {
 }
 
 /* ========================================
+   CLIENT PROFILE APP SETTINGS
+======================================== */
+
+.client-portal-page
+.client-profile-tools {
+    position: relative;
+
+    overflow: hidden;
+
+    margin-bottom: 20px;
+
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #d6e4eb;
+    border-radius: 18px;
+
+    box-shadow:
+        0 7px 18px
+        rgba(
+            24,
+            52,
+            71,
+            0.07
+        );
+}
+
+
+.client-portal-page
+.client-profile-tools::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 18px;
+    right: 18px;
+
+    height: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #47cee6,
+            #2890df,
+            #f5ab40
+        );
+
+    border-radius:
+        0
+        0
+        999px
+        999px;
+}
+
+
+/* ========================================
+   APP SETTINGS HEADING
+======================================== */
+
+.client-profile-tools-heading {
+    margin-bottom: 15px;
+}
+
+
+.client-profile-tools-eyebrow {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #2890df;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.10em;
+
+    text-transform: uppercase;
+}
+
+
+.client-portal-page
+.client-profile-tools-heading h3 {
+    margin: 0 0 4px;
+
+    color: #183447;
+
+    font-size: 20px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.client-profile-tools-heading p {
+    margin: 0;
+
+    color: #6b7785;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    line-height: 1.45;
+}
+
+
+/* ========================================
+   PUSH NOTIFICATION TOOL CARD
+======================================== */
+
+.client-portal-page
+.client-profile-tool-card {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    width: 100%;
+    min-height: 84px;
+
+    padding: 15px 16px;
+
+    appearance: none;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fbfdfe 0%,
+            #f4f9fc 100%
+        );
+
+    color: #183447;
+
+    border: 1px solid #d6e4eb;
+    border-radius: 14px;
+
+    box-shadow:
+        0 4px 12px
+        rgba(
+            24,
+            52,
+            71,
+            0.045
+        );
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+
+.client-portal-page
+.client-profile-tool-card:hover {
+    transform: translateY(-1px);
+
+    background: #ffffff;
+
+    border-color: #9ed2f2;
+
+    box-shadow:
+        0 7px 16px
+        rgba(
+            40,
+            144,
+            223,
+            0.10
+        );
+}
+
+
+.client-portal-page
+.client-profile-tool-card:active {
+    transform: scale(0.99);
+}
+
+
+/* ========================================
+   PUSH TOOL ICON
+======================================== */
+
+.client-profile-tool-icon {
+    flex: 0 0 46px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 46px;
+    height: 46px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2890df 0%,
+            #1f7bc2 58%,
+            #1768aa 100%
+        );
+
+    color: #ffffff;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 5px 14px
+        rgba(
+            31,
+            123,
+            194,
+            0.22
+        );
+}
+
+
+.client-profile-tool-icon svg {
+    width: 23px;
+    height: 23px;
+}
+
+
+/* ========================================
+   PUSH TOOL COPY
+======================================== */
+
+.client-profile-tool-copy {
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.client-profile-tool-copy strong {
+    color: #183447;
+
+    font-size: 15px;
+    font-weight: 800;
+
+    line-height: 1.25;
+}
+
+
+.client-profile-tool-copy small {
+    color: #6b7785;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    line-height: 1.4;
+}
+
+
+/* ========================================
+   PUSH TOOL ACTION
+======================================== */
+
+.client-profile-tool-action {
+    flex: 0 0 auto;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: #2890df;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+.client-profile-tool-action > span {
+    font-size: 24px;
+    font-weight: 400;
+
+    line-height: 1;
+}
+
+
+/* ========================================
+   PUSH TOOL — MOBILE / PWA
+======================================== */
+
+@media (max-width:700px) {
+
+    .client-portal-page
+    .client-profile-tools {
+        margin-bottom: 16px;
+
+        padding: 17px;
+
+        border-radius: 15px;
+    }
+
+
+    .client-portal-page
+    .client-profile-tools-heading h3 {
+        font-size: 18px;
+    }
+
+
+    .client-profile-tools-heading p {
+        font-size: 12px;
+    }
+
+
+    .client-portal-page
+    .client-profile-tool-card {
+        gap: 12px;
+
+        min-height: 78px;
+
+        padding: 13px;
+
+        border-radius: 12px;
+    }
+
+
+    .client-profile-tool-icon {
+        flex-basis: 42px;
+
+        width: 42px;
+        height: 42px;
+
+        border-radius: 9px;
+    }
+
+
+    .client-profile-tool-icon svg {
+        width: 21px;
+        height: 21px;
+    }
+
+
+    .client-profile-tool-copy strong {
+        font-size: 14px;
+    }
+
+
+    .client-profile-tool-copy small {
+        font-size: 11px;
+    }
+
+
+    .client-profile-tool-action {
+        font-size: 11px;
+    }
+
+
+    .client-profile-tool-action > span {
+        font-size: 22px;
+    }
+
+}
+
+/* ========================================
    HOUSEHOLD SECTION
 ======================================== */
 
