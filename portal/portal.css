@@ -8845,6 +8845,78 @@ body.mobile-app-screen-pets
 
 
 /* ========================================
+   CLIENT NOTIFICATION PANEL
+======================================== */
+
+.client-portal-page
+.client-notification-panel {
+
+    position:
+        absolute;
+
+    top:
+        calc(
+            100% +
+            10px
+        );
+
+    right:
+        0;
+
+    z-index:
+        2500;
+
+    width:
+        min(
+            370px,
+            calc(
+                100vw -
+                24px
+            )
+        );
+
+    overflow:
+        hidden;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        rgba(
+            40,
+            144,
+            223,
+            0.16
+        );
+
+    border-radius:
+        17px;
+
+    box-shadow:
+        0
+        22px
+        52px
+        rgba(
+            24,
+            52,
+            71,
+            0.17
+        );
+
+}
+
+
+.client-portal-page
+.client-notification-panel[hidden] {
+
+    display:
+        none !important;
+
+}
+
+
+/* ========================================
    CLIENT NOTIFICATION PANEL HEADER
 ======================================== */
 
@@ -8861,10 +8933,10 @@ body.mobile-app-screen-pets
         space-between;
 
     gap:
-        18px;
+        16px;
 
     padding:
-        18px 18px 16px;
+        15px 16px 14px;
 
     background:
         linear-gradient(
@@ -8902,7 +8974,7 @@ body.mobile-app-screen-pets
         block;
 
     margin-bottom:
-        3px;
+        2px;
 
     color:
         #2890df;
@@ -8932,15 +9004,19 @@ body.mobile-app-screen-pets
         #183447;
 
     font-size:
-        19px;
+        18px;
 
     font-weight:
         900;
+
+    line-height:
+        1.15;
 
     letter-spacing:
         -0.02em;
 
 }
+
 
 /* ========================================
    CLIENT NOTIFICATION MARK ALL READ
@@ -8969,13 +9045,13 @@ body.mobile-app-screen-pets
         0 !important;
 
     min-height:
-        32px;
+        30px;
 
     margin:
         0 !important;
 
     padding:
-        7px 10px !important;
+        6px 9px !important;
 
     background:
         rgba(
@@ -8998,7 +9074,7 @@ body.mobile-app-screen-pets
         ) !important;
 
     border-radius:
-        9px !important;
+        8px !important;
 
     box-shadow:
         none !important;
@@ -9007,7 +9083,7 @@ body.mobile-app-screen-pets
         inherit;
 
     font-size:
-        10px !important;
+        9px !important;
 
     font-weight:
         800 !important;
@@ -9068,6 +9144,7 @@ body.mobile-app-screen-pets
 
 }
 
+
 /* ========================================
    CLIENT NOTIFICATION LIST
 ======================================== */
@@ -9076,7 +9153,7 @@ body.mobile-app-screen-pets
 .client-notification-list {
 
     max-height:
-        430px;
+        410px;
 
     overflow-y:
         auto;
@@ -9106,13 +9183,13 @@ body.mobile-app-screen-pets
             0,
             1fr
         )
-        auto;
+        28px;
 
     gap:
-        11px;
+        10px;
 
     padding:
-        15px 15px 15px 16px;
+        13px 14px 13px 15px;
 
     border-bottom:
         1px solid
@@ -9227,7 +9304,7 @@ body.mobile-app-screen-pets
         );
 
     border-radius:
-        12px;
+        11px;
 
     font-size:
         17px;
@@ -9245,6 +9322,9 @@ body.mobile-app-screen-pets
     min-width:
         0;
 
+    padding-top:
+        1px;
+
 }
 
 
@@ -9261,7 +9341,7 @@ body.mobile-app-screen-pets
         6px;
 
     margin:
-        0 0 4px;
+        0 0 5px;
 
     color:
         #183447;
@@ -9324,7 +9404,7 @@ body.mobile-app-screen-pets
         11px;
 
     line-height:
-        1.45;
+        1.5;
 
 }
 
@@ -9336,7 +9416,7 @@ body.mobile-app-screen-pets
         block;
 
     margin-top:
-        6px;
+        5px;
 
     color:
         #94a3ad;
@@ -9348,6 +9428,7 @@ body.mobile-app-screen-pets
         700;
 
 }
+
 
 /* ========================================
    CLIENT NOTIFICATION ITEM DISMISS
@@ -9461,6 +9542,7 @@ body.mobile-app-screen-pets
 
 }
 
+
 /* ========================================
    CLIENT NOTIFICATION EMPTY STATE
 ======================================== */
@@ -9481,10 +9563,10 @@ body.mobile-app-screen-pets
         center;
 
     min-height:
-        210px;
+        185px;
 
     padding:
-        28px 22px;
+        24px 20px;
 
     text-align:
         center;
@@ -9505,13 +9587,13 @@ body.mobile-app-screen-pets
         center;
 
     width:
-        48px;
+        46px;
 
     height:
-        48px;
+        46px;
 
     margin-bottom:
-        12px;
+        10px;
 
     background:
         linear-gradient(
@@ -9531,10 +9613,10 @@ body.mobile-app-screen-pets
         );
 
     border-radius:
-        15px;
+        14px;
 
     font-size:
-        21px;
+        20px;
 
 }
 
@@ -9574,6 +9656,7 @@ body.mobile-app-screen-pets
 
 }
 
+
 /* ========================================
    CLIENT NOTIFICATION PANEL FOOTER
 ======================================== */
@@ -9591,7 +9674,7 @@ body.mobile-app-screen-pets
         center;
 
     padding:
-        10px 14px;
+        6px 12px;
 
     background:
         #fbfcfd;
@@ -9627,13 +9710,13 @@ body.mobile-app-screen-pets
         0 !important;
 
     min-height:
-        30px;
+        27px;
 
     margin:
         0 !important;
 
     padding:
-        7px 12px !important;
+        5px 10px !important;
 
     background:
         transparent !important;
@@ -9645,7 +9728,7 @@ body.mobile-app-screen-pets
         0 !important;
 
     border-radius:
-        8px !important;
+        7px !important;
 
     box-shadow:
         none !important;
@@ -9654,7 +9737,7 @@ body.mobile-app-screen-pets
         inherit;
 
     font-size:
-        10px !important;
+        9px !important;
 
     font-weight:
         800 !important;
