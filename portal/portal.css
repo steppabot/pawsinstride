@@ -1987,10 +1987,10 @@ section h3 {
     position: absolute;
 
     top: 0;
-    left: 18px;
-    right: 18px;
+    left: 0;
+    right: 0;
 
-    height: 3px;
+    height: 4px;
 
     background:
         linear-gradient(
@@ -1999,11 +1999,9 @@ section h3 {
             #ef602c 100%
         );
 
-    border-radius:
-        0
-        0
-        999px
-        999px;
+    border-radius: 0;
+
+    pointer-events: none;
 }
 
 
@@ -20361,6 +20359,7 @@ body.booking-success-page {
    }
    
    body.mobile-app-screen-home .client-dashboard-grid,
+   body.mobile-app-screen-home #client-push-settings-card,
    body.mobile-app-screen-home #push-notification-card,
    body.mobile-app-screen-home #logout-button {
        display: none !important;
@@ -20375,50 +20374,54 @@ body.booking-success-page {
        display: none !important;
    }
 
-    /* ========================================
-       SERVICES SCREEN
-    ======================================== */
-
-    body.mobile-app-screen-services #household-section,
-    body.mobile-app-screen-services #pets-section,
-    body.mobile-app-screen-services #push-notification-card,
-    body.mobile-app-screen-services #logout-button {
-        display: none !important;
-    }
-
-    body.mobile-app-screen-services #services-section {
-        display: block !important;
-        width: 100% !important;
-        margin: 0 !important;
-    }
-
-    /* ========================================
-       PETS SCREEN
-    ======================================== */
-
-    body.mobile-app-screen-pets #household-section,
-    body.mobile-app-screen-pets #services-section,
-    body.mobile-app-screen-pets #push-notification-card,
-    body.mobile-app-screen-pets #logout-button {
-        display: none !important;
-    }
-
-    body.mobile-app-screen-pets #pets-section {
-        display: block !important;
-        width: 100% !important;
-        margin: 0 !important;
-    }
-
-    /* ========================================
-       PROFILE SCREEN
-    ======================================== */
-
-    body.mobile-app-screen-profile #pets-section,
-    body.mobile-app-screen-profile #services-section,
-    body.mobile-app-screen-profile #push-notification-card,
-    body.mobile-app-screen-profile #logout-button {
-        display: none !important;
-    }
+   /* ========================================
+      SERVICES SCREEN
+   ======================================== */
+   
+   body.mobile-app-screen-services #household-section,
+   body.mobile-app-screen-services #pets-section,
+   body.mobile-app-screen-services #client-push-settings-card,
+   body.mobile-app-screen-services #push-notification-card,
+   body.mobile-app-screen-services #logout-button {
+       display: none !important;
+   }
+   
+   body.mobile-app-screen-services #services-section {
+       display: block !important;
+       width: 100% !important;
+       margin: 0 !important;
+   }
+   
+   
+   /* ========================================
+      PETS SCREEN
+   ======================================== */
+   
+   body.mobile-app-screen-pets #household-section,
+   body.mobile-app-screen-pets #services-section,
+   body.mobile-app-screen-pets #client-push-settings-card,
+   body.mobile-app-screen-pets #push-notification-card,
+   body.mobile-app-screen-pets #logout-button {
+       display: none !important;
+   }
+   
+   body.mobile-app-screen-pets #pets-section {
+       display: block !important;
+       width: 100% !important;
+       margin: 0 !important;
+   }
+   
+   
+   /* ========================================
+      PROFILE SCREEN
+   ======================================== */
+   
+   body.mobile-app-screen-profile #pets-section,
+   body.mobile-app-screen-profile #services-section,
+   body.mobile-app-screen-profile #push-notification-card,
+   body.mobile-app-screen-profile #logout-button {
+       display: none !important;
+   }
 
     body.mobile-app-screen-profile #household-section {
         display: block !important;
