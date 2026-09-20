@@ -1828,6 +1828,349 @@
                 </section>
 
 
+
+                <!-- ========================================
+                     PUSH NOTIFICATIONS MODAL
+                     ======================================== -->
+                
+                <div
+                    id="admin-push-notifications-modal"
+                    class="admin-services-pricing-modal"
+                    hidden
+                >
+                
+                    <div
+                        class="admin-services-pricing-backdrop"
+                        data-close-admin-push-notifications
+                    ></div>
+                
+                
+                    <section
+                        class="admin-services-pricing-dialog admin-push-notifications-dialog"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="admin-push-notifications-title"
+                    >
+                
+                
+                        <!-- ========================================
+                             PUSH NOTIFICATIONS HEADER
+                             ======================================== -->
+                
+                        <div class="admin-services-pricing-header">
+                
+                            <div>
+                
+                                <span class="admin-screen-eyebrow">
+                                    ADMIN SETTINGS
+                                </span>
+                
+                                <h2 id="admin-push-notifications-title">
+                                    Push Notifications
+                                </h2>
+                
+                                <p>
+                                    Choose which alerts you want to receive on this device.
+                                </p>
+                
+                            </div>
+                
+                
+                            <button
+                                type="button"
+                                id="admin-push-notifications-close"
+                                class="admin-services-pricing-close"
+                                aria-label="Close push notification settings"
+                            >
+                                ×
+                            </button>
+                
+                        </div>
+                
+                
+                        <!-- ========================================
+                             PUSH NOTIFICATIONS BODY
+                             ======================================== -->
+                
+                        <div class="admin-services-pricing-body admin-push-notifications-body">
+                
+                
+                            <!-- ========================================
+                                 DEVICE STATUS
+                                 ======================================== -->
+                
+                            <section class="admin-push-device-card">
+                
+                                <div class="admin-push-device-copy">
+                
+                                    <span class="admin-screen-eyebrow">
+                                        THIS DEVICE
+                                    </span>
+                
+                                    <strong>
+                                        Notification Access
+                                    </strong>
+                
+                                    <span
+                                        id="admin-push-modal-status"
+                                        class="admin-push-modal-status"
+                                    >
+                                        Notifications have not been enabled on this device yet.
+                                    </span>
+                
+                                </div>
+                
+                
+                                <button
+                                    type="button"
+                                    id="admin-push-modal-enable-button"
+                                    class="primary-button admin-push-enable-button"
+                                >
+                                    Enable Notifications
+                                </button>
+                
+                            </section>
+                
+                
+                            <!-- ========================================
+                                 NOTIFICATION PREFERENCES
+                                 ======================================== -->
+                
+                            <section class="admin-push-preferences">
+                
+                                <div class="admin-more-section-heading">
+                
+                                    <div>
+                
+                                        <span class="admin-screen-eyebrow">
+                                            ALERT PREFERENCES
+                                        </span>
+                
+                                        <h3>
+                                            What should notify you?
+                                        </h3>
+                
+                                        <p>
+                                            Turn individual alerts on or off anytime.
+                                        </p>
+                
+                                    </div>
+                
+                                </div>
+                
+                
+                                <div class="admin-push-preference-list">
+                
+                
+                                    <!-- NEW BOOKINGS -->
+                
+                                    <label class="admin-push-preference-row">
+                
+                                        <span class="admin-push-preference-copy">
+                
+                                            <strong>
+                                                New Bookings
+                                            </strong>
+                
+                                            <span>
+                                                Get notified when a client books a new service.
+                                            </span>
+                
+                                        </span>
+                
+                
+                                        <span class="admin-push-switch">
+                
+                                            <input
+                                                type="checkbox"
+                                                id="admin-push-new-bookings"
+                                                data-admin-push-preference="new_bookings"
+                                                checked
+                                            >
+                
+                                            <span class="admin-push-switch-track"></span>
+                
+                                        </span>
+                
+                                    </label>
+                
+                
+                                    <!-- NEW CLIENTS -->
+                
+                                    <label class="admin-push-preference-row">
+                
+                                        <span class="admin-push-preference-copy">
+                
+                                            <strong>
+                                                New Clients & Meet and Greets
+                                            </strong>
+                
+                                            <span>
+                                                Get notified when a new client registers or schedules a meet and greet.
+                                            </span>
+                
+                                        </span>
+                
+                
+                                        <span class="admin-push-switch">
+                
+                                            <input
+                                                type="checkbox"
+                                                id="admin-push-new-clients"
+                                                data-admin-push-preference="new_clients"
+                                                checked
+                                            >
+                
+                                            <span class="admin-push-switch-track"></span>
+                
+                                        </span>
+                
+                                    </label>
+                
+                
+                                    <!-- MESSAGES -->
+                
+                                    <label class="admin-push-preference-row">
+                
+                                        <span class="admin-push-preference-copy">
+                
+                                            <strong>
+                                                Messages
+                                            </strong>
+                
+                                            <span>
+                                                Get notified when a client sends you a new message.
+                                            </span>
+                
+                                        </span>
+                
+                
+                                        <span class="admin-push-switch">
+                
+                                            <input
+                                                type="checkbox"
+                                                id="admin-push-messages"
+                                                data-admin-push-preference="messages"
+                                                checked
+                                            >
+                
+                                            <span class="admin-push-switch-track"></span>
+                
+                                        </span>
+                
+                                    </label>
+                
+                
+                                    <!-- CANCELLATIONS -->
+                
+                                    <label class="admin-push-preference-row">
+                
+                                        <span class="admin-push-preference-copy">
+                
+                                            <strong>
+                                                Cancellations
+                                            </strong>
+                
+                                            <span>
+                                                Get notified when a client cancels a scheduled service.
+                                            </span>
+                
+                                        </span>
+                
+                
+                                        <span class="admin-push-switch">
+                
+                                            <input
+                                                type="checkbox"
+                                                id="admin-push-cancellations"
+                                                data-admin-push-preference="cancellations"
+                                                checked
+                                            >
+                
+                                            <span class="admin-push-switch-track"></span>
+                
+                                        </span>
+                
+                                    </label>
+                
+                
+                                    <!-- SCHEDULE CHANGES -->
+                
+                                    <label class="admin-push-preference-row">
+                
+                                        <span class="admin-push-preference-copy">
+                
+                                            <strong>
+                                                Schedule Changes
+                                            </strong>
+                
+                                            <span>
+                                                Get notified when an existing booking or service schedule changes.
+                                            </span>
+                
+                                        </span>
+                
+                
+                                        <span class="admin-push-switch">
+                
+                                            <input
+                                                type="checkbox"
+                                                id="admin-push-schedule-changes"
+                                                data-admin-push-preference="schedule_changes"
+                                                checked
+                                            >
+                
+                                            <span class="admin-push-switch-track"></span>
+                
+                                        </span>
+                
+                                    </label>
+                
+                
+                                    <!-- VISIT ACTIVITY -->
+                
+                                    <label class="admin-push-preference-row">
+                
+                                        <span class="admin-push-preference-copy">
+                
+                                            <strong>
+                                                Visit Activity
+                                            </strong>
+                
+                                            <span>
+                                                Receive operational alerts related to visits and visit reports.
+                                            </span>
+                
+                                        </span>
+                
+                
+                                        <span class="admin-push-switch">
+                
+                                            <input
+                                                type="checkbox"
+                                                id="admin-push-visit-activity"
+                                                data-admin-push-preference="visit_activity"
+                                                checked
+                                            >
+                
+                                            <span class="admin-push-switch-track"></span>
+                
+                                        </span>
+                
+                                    </label>
+                
+                
+                                </div>
+                
+                            </section>
+                
+                
+                        </div>
+                
+                    </section>
+                
+                </div>
+
                 <!-- ========================================
                      SERVICES & PRICING MODAL
                      ======================================== -->
