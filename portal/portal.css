@@ -7773,6 +7773,763 @@ body.mobile-app-screen-pets
 }
 
 /* ========================================
+   CLIENT NOTIFICATION SETTINGS MODAL
+======================================== */
+
+body.client-notifications-modal-open {
+    overflow: hidden;
+}
+
+
+.client-notifications-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 12000;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+}
+
+
+.client-notifications-modal[hidden] {
+    display: none;
+}
+
+
+/* ========================================
+   NOTIFICATION MODAL BACKDROP
+======================================== */
+
+.client-notifications-modal-backdrop {
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        rgba(
+            10,
+            27,
+            39,
+            0.62
+        );
+
+    backdrop-filter:
+        blur(4px);
+
+    -webkit-backdrop-filter:
+        blur(4px);
+}
+
+
+/* ========================================
+   NOTIFICATION DIALOG
+======================================== */
+
+.client-notifications-dialog {
+    position: relative;
+
+    z-index: 1;
+
+    width: min(
+        100%,
+        560px
+    );
+
+    max-height:
+        calc(
+            100vh -
+            48px
+        );
+
+    overflow-y: auto;
+
+    padding: 0;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        20px;
+
+    box-shadow:
+        0 24px 70px
+        rgba(
+            9,
+            38,
+            56,
+            0.28
+        );
+}
+
+
+/* ========================================
+   NOTIFICATION MODAL HEADER
+======================================== */
+
+.client-notifications-header {
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding:
+        24px
+        24px
+        20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #f8fcfe 0%,
+            #eef8fd 100%
+        );
+
+    border-bottom:
+        1px solid
+        #dce8ef;
+}
+
+
+.client-notifications-header > div {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.client-notifications-eyebrow {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color:
+        #2890df;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.10em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.client-notifications-header h2 {
+    margin:
+        0
+        0
+        6px;
+
+    color:
+        #183447;
+
+    font-size:
+        24px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -0.02em;
+
+    line-height:
+        1.15;
+}
+
+
+.client-notifications-header p {
+    margin:
+        0;
+
+    max-width:
+        400px;
+
+    color:
+        #667784;
+
+    font-size:
+        13px;
+
+    font-weight:
+        500;
+
+    line-height:
+        1.5;
+}
+
+
+/* ========================================
+   NOTIFICATION MODAL CLOSE
+======================================== */
+
+.client-portal-page
+.client-notifications-close {
+    flex:
+        0 0 auto;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        38px !important;
+
+    height:
+        38px;
+
+    padding:
+        0 !important;
+
+    background:
+        #ffffff;
+
+    color:
+        #667784;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        10px;
+
+    box-shadow:
+        0 3px 10px
+        rgba(
+            24,
+            52,
+            71,
+            0.06
+        );
+
+    font-size:
+        24px;
+
+    font-weight:
+        400;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.client-portal-page
+.client-notifications-close:hover {
+    background:
+        #f4f9fc;
+
+    color:
+        #183447;
+
+    border-color:
+        #b9d8e8;
+}
+
+
+.client-portal-page
+.client-notifications-close:active {
+    transform:
+        scale(0.96);
+}
+
+
+/* ========================================
+   THIS DEVICE SECTION
+======================================== */
+
+.client-portal-page
+.client-notifications-device-section {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin:
+        20px
+        20px
+        0;
+
+    padding:
+        18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fbfdfe 0%,
+            #f4f9fc 100%
+        );
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        none;
+}
+
+
+.client-notifications-device-copy {
+    min-width: 0;
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.client-notifications-section-label {
+    color:
+        #2890df;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.09em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.client-notifications-device-copy strong {
+    color:
+        #183447;
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+}
+
+
+.client-notifications-device-copy p {
+    margin:
+        0;
+
+    color:
+        #6b7785;
+
+    font-size:
+        12px;
+
+    font-weight:
+        500;
+
+    line-height:
+        1.4;
+}
+
+
+/* ========================================
+   ENABLE NOTIFICATIONS BUTTON
+======================================== */
+
+.client-portal-page
+.client-notification-enable-button {
+    flex:
+        0 0 auto;
+
+    width:
+        auto;
+
+    min-height:
+        42px;
+
+    padding:
+        10px
+        16px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #f5ab40 0%,
+            #ef602c 100%
+        );
+
+    color:
+        #ffffff;
+
+    border:
+        0;
+
+    border-radius:
+        10px;
+
+    box-shadow:
+        0 5px 14px
+        rgba(
+            239,
+            96,
+            44,
+            0.18
+        );
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+    white-space:
+        nowrap;
+}
+
+
+.client-portal-page
+.client-notification-enable-button:disabled {
+    opacity:
+        0.65;
+
+    cursor:
+        default;
+}
+
+
+/* ========================================
+   NOTIFICATION PREFERENCES
+======================================== */
+
+.client-portal-page
+.client-notifications-preferences-section {
+    margin:
+        16px
+        20px
+        20px;
+
+    padding:
+        18px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        none;
+}
+
+
+.client-notifications-section-heading {
+    margin-bottom:
+        12px;
+}
+
+
+.client-notifications-section-heading p {
+    margin:
+        5px
+        0
+        0;
+
+    color:
+        #6b7785;
+
+    font-size:
+        12px;
+
+    font-weight:
+        500;
+
+    line-height:
+        1.45;
+}
+
+
+/* ========================================
+   NOTIFICATION PREFERENCE ROW
+======================================== */
+
+.client-notification-preference-row {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    padding:
+        14px
+        2px;
+
+    border-bottom:
+        1px solid
+        #e7eef2;
+
+    cursor:
+        pointer;
+}
+
+
+.client-notification-preference-row:last-child {
+    border-bottom:
+        0;
+}
+
+
+.client-notification-preference-row > span {
+    min-width:
+        0;
+
+    flex:
+        1;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+}
+
+
+.client-notification-preference-row strong {
+    color:
+        #183447;
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.3;
+}
+
+
+.client-notification-preference-row small {
+    color:
+        #6b7785;
+
+    font-size:
+        11px;
+
+    font-weight:
+        500;
+
+    line-height:
+        1.4;
+}
+
+
+/* ========================================
+   NOTIFICATION CHECKBOXES
+======================================== */
+
+.client-notification-preference-row input[type="checkbox"] {
+    flex:
+        0 0 auto;
+
+    width:
+        20px;
+
+    height:
+        20px;
+
+    margin:
+        0;
+
+    accent-color:
+        #2890df;
+
+    cursor:
+        pointer;
+}
+
+
+/* ========================================
+   NOTIFICATION MODAL — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .client-notifications-modal {
+        align-items:
+            flex-end;
+
+        padding:
+            0;
+    }
+
+
+    .client-notifications-dialog {
+        width:
+            100%;
+
+        max-height:
+            92vh;
+
+        max-height:
+            92dvh;
+
+        border:
+            0;
+
+        border-radius:
+            20px
+            20px
+            0
+            0;
+
+        box-shadow:
+            0 -12px 40px
+            rgba(
+                9,
+                38,
+                56,
+                0.22
+            );
+    }
+
+
+    .client-notifications-header {
+        padding:
+            20px
+            18px
+            16px;
+    }
+
+
+    .client-notifications-header h2 {
+        font-size:
+            21px;
+    }
+
+
+    .client-notifications-header p {
+        font-size:
+            12px;
+    }
+
+
+    .client-portal-page
+    .client-notifications-device-section {
+        align-items:
+            stretch;
+
+        flex-direction:
+            column;
+
+        gap:
+            14px;
+
+        margin:
+            16px
+            16px
+            0;
+
+        padding:
+            16px;
+    }
+
+
+    .client-portal-page
+    .client-notification-enable-button {
+        width:
+            100%;
+    }
+
+
+    .client-portal-page
+    .client-notifications-preferences-section {
+        margin:
+            14px
+            16px
+            max(
+                18px,
+                env(
+                    safe-area-inset-bottom
+                )
+            );
+
+        padding:
+            16px;
+    }
+
+
+    .client-notification-preference-row {
+        gap:
+            14px;
+
+        padding:
+            13px
+            0;
+    }
+
+
+    .client-notification-preference-row strong {
+        font-size:
+            13px;
+    }
+
+
+    .client-notification-preference-row small {
+        font-size:
+            10.5px;
+    }
+
+}
+
+/* ========================================
    CLIENT MESSAGING
 ======================================== */
 
