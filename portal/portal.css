@@ -1995,9 +1995,8 @@ section h3 {
     background:
         linear-gradient(
             90deg,
-            #47cee6,
-            #2890df,
-            #f5ab40
+            #f5ab40 0%,
+            #ef602c 100%
         );
 
     border-radius:
