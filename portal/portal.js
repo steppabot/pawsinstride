@@ -23751,12 +23751,6 @@ const VAPID_PUBLIC_KEY =
     "BJMZyLb__6L55n-7l1SB3H97mQDGkUXiudH4X9EQMjqO2Do7jIGtS9Gu-gxkIZ5sMxrfLsCo5EaWpGb6kRi5_DA";
 
 
-const pushNotificationCard =
-    document.getElementById(
-        "push-notification-card"
-    );
-
-
 const enablePushNotificationsButton =
     document.getElementById(
         "enable-push-notifications"
@@ -23780,18 +23774,14 @@ function setPushNotificationStatus(
     if (
         !pushNotificationStatus
     ) {
+
         return;
+
     }
 
 
     pushNotificationStatus.textContent =
         message || "";
-
-
-    pushNotificationStatus.style.display =
-        message
-            ? "block"
-            : "none";
 
 }
 
@@ -23867,35 +23857,6 @@ function urlBase64ToUint8Array(
 // ========================================
 // SAVE PUSH SUBSCRIPTION
 // ========================================
-//
-// The browser does NOT directly insert or
-// update push_subscriptions.
-//
-// Instead, the authenticated user claims
-// this physical browser/PWA subscription
-// through the secure Supabase RPC.
-//
-// This is important because the same phone
-// may previously have been registered while
-// another Paws in Stride account was signed
-// in.
-//
-// Example:
-//
-// Test Client
-//     ↓
-// Same iPhone PWA
-//     ↓
-// Log out
-//     ↓
-// Admin logs in
-//     ↓
-// Same push endpoint is reassigned to Admin
-//
-// The server derives the authenticated user
-// from auth.uid(). The browser does not get
-// to choose another user's ID.
-// ========================================
 
 async function savePushSubscription(
     subscription
@@ -23940,10 +23901,6 @@ async function savePushSubscription(
 
     }
 
-
-    // ========================================
-    // CLAIM THIS DEVICE FOR CURRENT USER
-    // ========================================
 
     const {
         data,
@@ -23996,6 +23953,7 @@ async function savePushSubscription(
 
 }
 
+
 // ========================================
 // CREATE OR RESTORE PUSH SUBSCRIPTION
 // ========================================
@@ -24013,10 +23971,6 @@ async function ensurePushSubscription() {
             .pushManager
             .getSubscription();
 
-
-    // ========================================
-    // CREATE NEW SUBSCRIPTION
-    // ========================================
 
     if (
         !subscription
@@ -24043,10 +23997,6 @@ async function ensurePushSubscription() {
     }
 
 
-    // ========================================
-    // SAVE DEVICE TO SUPABASE
-    // ========================================
-
     await savePushSubscription(
         subscription
     );
@@ -24058,31 +24008,10 @@ async function ensurePushSubscription() {
 
 
 // ========================================
-// UPDATE PUSH NOTIFICATION UI
-// ========================================
-//
-// Push notifications are intended for the
-// installed Paws in Stride mobile PWA.
-//
-// Normal desktop browsers should NEVER
-// show the notification setup card.
-//
-// Normal mobile Safari / Chrome should also
-// keep the card hidden unless Paws in Stride
-// is actually running as an installed PWA.
-//
-// If notification permission is already
-// granted inside the installed PWA, we still
-// silently restore / claim the physical push
-// subscription for the currently signed-in
-// account.
+// MOBILE PUSH AVAILABILITY
 // ========================================
 
 function isMobileDeviceForPush() {
-
-    // ========================================
-    // MODERN MOBILE HINT
-    // ========================================
 
     if (
         navigator.userAgentData
@@ -24095,10 +24024,6 @@ function isMobileDeviceForPush() {
     }
 
 
-    // ========================================
-    // MOBILE USER AGENT FALLBACK
-    // ========================================
-
     if (
         /Android|iPhone|iPad|iPod|Mobile/i
             .test(
@@ -24110,10 +24035,6 @@ function isMobileDeviceForPush() {
 
     }
 
-
-    // ========================================
-    // IPADOS DESKTOP-STYLE USER AGENT
-    // ========================================
 
     if (
         navigator.platform ===
@@ -24134,23 +24055,12 @@ function isMobileDeviceForPush() {
 
 function isInstalledPawsInStridePWA() {
 
-    const displayModeStandalone =
-        window
-            .matchMedia(
-                "(display-mode: standalone)"
-            )
-            .matches;
-
-
-    const iosStandalone =
-        window.navigator
-            .standalone ===
-        true;
-
-
     return (
-        displayModeStandalone ||
-        iosStandalone
+        window.matchMedia(
+            "(display-mode: standalone)"
+        ).matches ||
+        window.navigator.standalone ===
+            true
     );
 
 }
@@ -24166,34 +24076,16 @@ function shouldUseMobilePushNotifications() {
 }
 
 
+// ========================================
+// UPDATE PUSH NOTIFICATION UI
+// ========================================
+
 async function updatePushNotificationUI() {
 
     if (
-        !pushNotificationCard ||
-        !enablePushNotificationsButton
+        !enablePushNotificationsButton ||
+        !pushNotificationStatus
     ) {
-
-        return;
-
-    }
-
-
-    // ========================================
-    // NOT INSTALLED MOBILE PWA
-    // ========================================
-    //
-    // Desktop browsers and ordinary mobile
-    // browser tabs should never display this
-    // card.
-    // ========================================
-
-    if (
-        !shouldUseMobilePushNotifications()
-    ) {
-
-        pushNotificationCard.style.display =
-            "none";
-
 
         return;
 
@@ -24208,8 +24100,15 @@ async function updatePushNotificationUI() {
         !browserSupportsPushNotifications()
     ) {
 
-        pushNotificationCard.style.display =
-            "none";
+        enablePushNotificationsButton.disabled =
+            true;
+
+        enablePushNotificationsButton.textContent =
+            "Not Supported";
+
+        setPushNotificationStatus(
+            "Push notifications are not supported on this device or browser."
+        );
 
 
         return;
@@ -24218,14 +24117,7 @@ async function updatePushNotificationUI() {
 
 
     // ========================================
-    // PERMISSION ALREADY GRANTED
-    // ========================================
-    //
-    // Do not show a setup prompt.
-    //
-    // Silently make sure this physical PWA
-    // subscription belongs to whichever user
-    // is currently signed in.
+    // PERMISSION GRANTED
     // ========================================
 
     if (
@@ -24238,11 +24130,21 @@ async function updatePushNotificationUI() {
             await ensurePushSubscription();
 
 
-            pushNotificationCard.style.display =
-                "none";
+            enablePushNotificationsButton.disabled =
+                true;
+
+            enablePushNotificationsButton.textContent =
+                "Notifications Enabled";
+
+
+            setPushNotificationStatus(
+                "Push notifications are enabled on this device."
+            );
 
         }
-        catch (error) {
+        catch (
+            error
+        ) {
 
             console.error(
                 "Existing push subscription setup error:",
@@ -24250,16 +24152,11 @@ async function updatePushNotificationUI() {
             );
 
 
-            pushNotificationCard.style.display =
-                "flex";
-
+            enablePushNotificationsButton.disabled =
+                false;
 
             enablePushNotificationsButton.textContent =
                 "Finish Notification Setup";
-
-
-            enablePushNotificationsButton.disabled =
-                false;
 
 
             setPushNotificationStatus(
@@ -24283,16 +24180,11 @@ async function updatePushNotificationUI() {
         "denied"
     ) {
 
-        pushNotificationCard.style.display =
-            "flex";
-
+        enablePushNotificationsButton.disabled =
+            true;
 
         enablePushNotificationsButton.textContent =
             "Notifications Blocked";
-
-
-        enablePushNotificationsButton.disabled =
-            true;
 
 
         setPushNotificationStatus(
@@ -24309,21 +24201,28 @@ async function updatePushNotificationUI() {
     // PERMISSION NOT YET REQUESTED
     // ========================================
 
-    pushNotificationCard.style.display =
-        "flex";
-
+    enablePushNotificationsButton.disabled =
+        false;
 
     enablePushNotificationsButton.textContent =
         "Enable Notifications";
 
 
-    enablePushNotificationsButton.disabled =
-        false;
+    if (
+        shouldUseMobilePushNotifications()
+    ) {
 
+        setPushNotificationStatus(
+            "Enable alerts for visit updates, messages, reports, and booking activity."
+        );
 
-    setPushNotificationStatus(
-        ""
-    );
+    } else {
+
+        setPushNotificationStatus(
+            "Enable browser notifications on this device."
+        );
+
+    }
 
 }
 
@@ -24343,29 +24242,6 @@ async function enablePushNotifications() {
     }
 
 
-    // ========================================
-    // INSTALLED MOBILE PWA ONLY
-    // ========================================
-
-    if (
-        !shouldUseMobilePushNotifications()
-    ) {
-
-        if (
-            pushNotificationCard
-        ) {
-
-            pushNotificationCard.style.display =
-                "none";
-
-        }
-
-
-        return;
-
-    }
-
-
     if (
         !browserSupportsPushNotifications()
     ) {
@@ -24378,7 +24254,6 @@ async function enablePushNotifications() {
     enablePushNotificationsButton.disabled =
         true;
 
-
     enablePushNotificationsButton.textContent =
         "Enabling...";
 
@@ -24388,10 +24263,6 @@ async function enablePushNotifications() {
         let permission =
             Notification.permission;
 
-
-        // ========================================
-        // ASK FOR PERMISSION
-        // ========================================
 
         if (
             permission ===
@@ -24404,10 +24275,6 @@ async function enablePushNotifications() {
 
         }
 
-
-        // ========================================
-        // PERMISSION NOT GRANTED
-        // ========================================
 
         if (
             permission !==
@@ -24422,10 +24289,6 @@ async function enablePushNotifications() {
         }
 
 
-        // ========================================
-        // CREATE + SAVE SUBSCRIPTION
-        // ========================================
-
         const subscription =
             await ensurePushSubscription();
 
@@ -24436,15 +24299,12 @@ async function enablePushNotifications() {
         );
 
 
-        // ========================================
-        // HIDE SETUP PROMPT
-        // ========================================
-
-        pushNotificationCard.style.display =
-            "none";
+        await updatePushNotificationUI();
 
     }
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "Push notification setup error:",
@@ -24454,7 +24314,6 @@ async function enablePushNotifications() {
 
         enablePushNotificationsButton.disabled =
             false;
-
 
         enablePushNotificationsButton.textContent =
             "Enable Notifications";
@@ -24487,6 +24346,46 @@ if (
     updatePushNotificationUI();
 
 }
+
+
+// ========================================
+// MOBILE PWA FIRST-TIME NOTIFICATION PROMPT
+// ========================================
+
+async function maybeOpenMobilePushPrompt() {
+
+    if (
+        !shouldUseMobilePushNotifications() ||
+        !browserSupportsPushNotifications() ||
+        Notification.permission !==
+            "default"
+    ) {
+
+        return;
+
+    }
+
+
+    window.setTimeout(
+        () => {
+
+            openClientNotificationSettings();
+
+        },
+        900
+    );
+
+}
+
+
+window.addEventListener(
+    "load",
+    () => {
+
+        maybeOpenMobilePushPrompt();
+
+    }
+);
 
 // ========================================
 // PWA SERVICE WORKER
@@ -24593,9 +24492,6 @@ if (clientMessageBadge) {
 
         }
     );
-
-
-
 
     syncClientNavigationMessageBadge();
 
