@@ -25108,18 +25108,17 @@ async function handleClientNotificationAction(
 
     closeClientNotificationCenter();
 
-
     // ========================================
     // VISIT-RELATED NOTIFICATIONS
     // ========================================
-
+    
     if (
         entityType ===
             "visit" &&
         entityId
     ) {
-
-
+    
+    
         const visit =
             currentVisits.find(
                 item =>
@@ -25128,53 +25127,146 @@ async function handleClientNotificationAction(
                     ) ===
                     entityId
             );
-
-
+    
+    
         if (
             visit
         ) {
-
-
+    
+    
             selectedUpcomingDate =
                 visit.visit_date;
-
-
+    
+    
             const visitDate =
                 parseLocalDate(
                     visit.visit_date
                 );
-
-
+    
+    
             upcomingCalendarYear =
                 visitDate.getFullYear();
-
-
+    
+    
             upcomingCalendarMonth =
                 visitDate.getMonth();
-
-
+    
+    
             renderUpcomingCalendar();
-
+    
             renderSelectedUpcomingServices();
-
-
+    
+    
             if (
                 window.matchMedia(
                     "(max-width: 700px)"
                 ).matches
             ) {
-
+    
                 setActiveMobileAppTab(
                     "services"
                 );
-
+    
             }
-
-
+    
+    
+            // ========================================
+            // VISIT REPORT READY
+            // ========================================
+    
+            if (
+                notificationType ===
+                    "visit_report" ||
+                notificationType ===
+                    "client_visit_report"
+            ) {
+    
+    
+                window.setTimeout(
+                    async () => {
+    
+    
+                        const reportButton =
+                            document.querySelector(
+                                `[data-client-visit-report-open="${entityId}"]`
+                            );
+    
+    
+                        if (
+                            reportButton
+                        ) {
+    
+    
+                            await toggleClientVisitReport(
+                                entityId,
+                                reportButton
+                            );
+    
+    
+                            window.setTimeout(
+                                () => {
+    
+    
+                                    const reportMount =
+                                        document.getElementById(
+                                            `client-visit-report-${entityId}`
+                                        );
+    
+    
+                                    (
+                                        reportMount ||
+                                        reportButton
+                                    )
+                                        ?.scrollIntoView({
+                                            behavior:
+                                                "smooth",
+    
+                                            block:
+                                                "center"
+                                        });
+    
+    
+                                },
+                                120
+                            );
+    
+    
+                            return;
+    
+                        }
+    
+    
+                        document
+                            .getElementById(
+                                "services-section"
+                            )
+                            ?.scrollIntoView({
+                                behavior:
+                                    "smooth",
+    
+                                block:
+                                    "start"
+                            });
+    
+    
+                    },
+                    160
+                );
+    
+    
+                return;
+    
+            }
+    
+    
+            // ========================================
+            // STANDARD VISIT NOTIFICATION
+            // ========================================
+    
             window.setTimeout(
                 () => {
-
-
+    
+    
                     document
                         .getElementById(
                             "services-section"
@@ -25182,24 +25274,24 @@ async function handleClientNotificationAction(
                         ?.scrollIntoView({
                             behavior:
                                 "smooth",
-
+    
                             block:
                                 "start"
                         });
-
-
+    
+    
                 },
                 80
             );
-
-
+    
+    
             return;
-
+    
         }
-
+    
     }
-
-
+    
+    
     // ========================================
     // MESSAGE NOTIFICATIONS
     // ========================================
