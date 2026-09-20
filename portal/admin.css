@@ -8552,9 +8552,11 @@ body.admin-services-pricing-open {
 
 .admin-push-notifications-dialog {
     max-width:
-        760px;
-}
+        820px;
 
+    max-height:
+        92vh;
+}
 
 /* ========================================
    PUSH DEVICE CARD
