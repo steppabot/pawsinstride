@@ -8547,6 +8547,492 @@ body.admin-services-pricing-open {
 
 
 /* ========================================
+   PUSH NOTIFICATIONS MODAL
+======================================== */
+
+.admin-push-notifications-dialog {
+    max-width:
+        760px;
+}
+
+
+/* ========================================
+   PUSH DEVICE CARD
+======================================== */
+
+.admin-push-device-card {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    padding:
+        20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f7fbfe,
+            #edf7fc
+        );
+
+    border:
+        1px solid
+        #d5e9f3;
+
+    border-radius:
+        16px;
+}
+
+
+.admin-push-device-copy {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        flex-start;
+
+    gap:
+        5px;
+}
+
+
+.admin-push-device-copy strong {
+    color:
+        #17364a;
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-push-modal-status {
+    color:
+        #6a7b87;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.45;
+}
+
+
+.admin-push-enable-button {
+    flex:
+        0 0 auto;
+
+    min-width:
+        170px;
+}
+
+
+/* ========================================
+   PUSH PREFERENCES
+======================================== */
+
+.admin-push-preferences {
+    margin-top:
+        16px;
+
+    padding:
+        20px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #e0e9ee;
+
+    border-radius:
+        16px;
+}
+
+
+.admin-push-preferences .admin-more-section-heading {
+    margin-bottom:
+        14px;
+}
+
+
+.admin-push-preferences h3 {
+    margin:
+        3px 0 0;
+
+    color:
+        #17364a;
+
+    font-size:
+        18px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-push-preferences .admin-more-section-heading p {
+    margin-top:
+        6px;
+
+    color:
+        #6c7c88;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.45;
+}
+
+
+/* ========================================
+   PUSH PREFERENCE LIST
+======================================== */
+
+.admin-push-preference-list {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        0;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid
+        #e2eaef;
+
+    border-radius:
+        14px;
+}
+
+
+/* ========================================
+   PUSH PREFERENCE ROW
+======================================== */
+
+.admin-push-preference-row {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    padding:
+        15px
+        16px;
+
+    background:
+        #ffffff;
+
+    border-bottom:
+        1px solid
+        #edf2f5;
+
+    cursor:
+        pointer;
+
+    transition:
+        background
+        0.18s ease;
+}
+
+
+.admin-push-preference-row:last-child {
+    border-bottom:
+        0;
+}
+
+
+.admin-push-preference-row:hover {
+    background:
+        #f8fbfd;
+}
+
+
+/* ========================================
+   PUSH PREFERENCE COPY
+======================================== */
+
+.admin-push-preference-copy {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        4px;
+
+    min-width:
+        0;
+}
+
+
+.admin-push-preference-copy strong {
+    color:
+        #19384b;
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+}
+
+
+.admin-push-preference-copy > span {
+    color:
+        #778691;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.45;
+}
+
+
+/* ========================================
+   PUSH SWITCH
+======================================== */
+
+.admin-push-switch {
+    position:
+        relative;
+
+    flex:
+        0 0 auto;
+
+    width:
+        44px;
+
+    height:
+        25px;
+}
+
+
+.admin-push-switch input {
+    position:
+        absolute;
+
+    width:
+        1px;
+
+    height:
+        1px;
+
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+}
+
+
+.admin-push-switch-track {
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    background:
+        #ccd8df;
+
+    border-radius:
+        999px;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(
+            0,
+            0,
+            0,
+            0.04
+        );
+
+    transition:
+        background
+        0.2s ease,
+        box-shadow
+        0.2s ease;
+}
+
+
+.admin-push-switch-track::after {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        3px;
+
+    left:
+        3px;
+
+    width:
+        19px;
+
+    height:
+        19px;
+
+    background:
+        #ffffff;
+
+    border-radius:
+        50%;
+
+    box-shadow:
+        0 2px 5px
+        rgba(
+            24,
+            52,
+            71,
+            0.24
+        );
+
+    transition:
+        transform
+        0.2s ease;
+}
+
+
+.admin-push-switch input:checked +
+.admin-push-switch-track {
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6,
+            #2890df
+        );
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            40,
+            144,
+            223,
+            0.08
+        );
+}
+
+
+.admin-push-switch input:checked +
+.admin-push-switch-track::after {
+    transform:
+        translateX(
+            19px
+        );
+}
+
+
+.admin-push-switch input:focus-visible +
+.admin-push-switch-track {
+    outline:
+        2px solid
+        #2890df;
+
+    outline-offset:
+        3px;
+}
+
+
+/* ========================================
+   PUSH NOTIFICATIONS — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-push-notifications-dialog {
+        max-width:
+            none;
+    }
+
+
+    .admin-push-device-card {
+        align-items:
+            stretch;
+
+        flex-direction:
+            column;
+
+        gap:
+            14px;
+
+        padding:
+            16px;
+    }
+
+
+    .admin-push-enable-button {
+        width:
+            100%;
+
+        min-width:
+            0;
+    }
+
+
+    .admin-push-preferences {
+        margin-top:
+            14px;
+
+        padding:
+            16px;
+    }
+
+
+    .admin-push-preference-row {
+        gap:
+            14px;
+
+        padding:
+            14px;
+    }
+
+
+    .admin-push-preference-copy strong {
+        font-size:
+            13px;
+    }
+
+
+    .admin-push-preference-copy > span {
+        font-size:
+            10.5px;
+    }
+
+}
+
+
+/* ========================================
    MORE SCREEN
 ======================================== */
 
