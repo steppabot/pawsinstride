@@ -8445,7 +8445,37 @@ function buildAdminServiceCard(
 
 }
 
+// ========================================
+// MEET & GREET SERVICE CHECK
+// ========================================
 
+function isMeetAndGreetService(
+    visit
+) {
+
+
+    const serviceName =
+        String(
+
+            visit?.service_name ||
+            visit?.service_type ||
+            ""
+
+        )
+            .trim()
+            .toLowerCase();
+
+
+    return (
+        serviceName.includes(
+            "meet & greet"
+        ) ||
+        serviceName.includes(
+            "meet and greet"
+        )
+    );
+
+}
 
 // ========================================
 // VISIT PROGRESS INFO
