@@ -551,7 +551,8 @@ body.admin-page {
 .admin-screen-intro .admin-screen-eyebrow,
 .admin-home-section-heading .admin-screen-eyebrow,
 .admin-more-section-heading .admin-screen-eyebrow,
-.admin-services-pricing-header .admin-screen-eyebrow {
+.admin-services-pricing-header .admin-screen-eyebrow,
+.admin-client-credit-modal-header .admin-screen-eyebrow {
     display: inline-block;
 
     margin-bottom: 7px;
