@@ -8903,6 +8903,12 @@ function buildAdminVisitProgressSection(
             );
     
     
+        const meetAndGreet =
+            isMeetAndGreetService(
+                visit
+            );
+    
+    
         // ========================================
         // COMPLETED WALK STATS
         // ========================================
@@ -9024,19 +9030,29 @@ function buildAdminVisitProgressSection(
                 <div class="admin-completed-visit-actions">
     
     
-                    <button
-                        type="button"
-                        class="primary-button admin-visit-report-button"
-                        data-visit-report-open="${visit.id}"
-                    >
-                        ${
-                            existingReport
+                    ${
+                        !meetAndGreet
     
-                                ? "Edit Visit Report"
+                            ? `
     
-                                : "Add Visit Report"
-                        }
-                    </button>
+                                <button
+                                    type="button"
+                                    class="primary-button admin-visit-report-button"
+                                    data-visit-report-open="${visit.id}"
+                                >
+                                    ${
+                                        existingReport
+    
+                                            ? "Edit Visit Report"
+    
+                                            : "Add Visit Report"
+                                    }
+                                </button>
+    
+                            `
+    
+                            : ""
+                    }
     
     
                     <button
@@ -9055,16 +9071,26 @@ function buildAdminVisitProgressSection(
             </div>
     
     
-            <div
-                id="admin-visit-report-${visit.id}"
-                class="admin-visit-report-mount"
-            ></div>
+            ${
+                !meetAndGreet
+    
+                    ? `
+    
+                        <div
+                            id="admin-visit-report-${visit.id}"
+                            class="admin-visit-report-mount"
+                        ></div>
+    
+                    `
+    
+                    : ""
+            }
     
         `;
     
     }
-
-
+    
+    
     // ========================================
     // CHECKED IN
     // ========================================
