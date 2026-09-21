@@ -9715,7 +9715,7 @@ body.admin-services-pricing-open {
 .admin-client-household-grid {
     grid-template-columns:
         repeat(
-            3,
+            4,
             minmax(
                 0,
                 1fr
@@ -9723,6 +9723,12 @@ body.admin-services-pricing-open {
         );
 }
 
+
+.admin-client-pricing-tier-card,
+.admin-client-credit-card {
+    grid-column:
+        span 2;
+}
 
 /* ========================================
    CREDIT CARD
