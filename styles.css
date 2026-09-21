@@ -6767,11 +6767,11 @@ html {
 
 @media (max-width: 768px) {
 
-    .svc-img-boarding {
+    .svc-media img.svc-img-boarding {
 
         object-position:
             center
-            42%;
+            62%;
 
     }
 
