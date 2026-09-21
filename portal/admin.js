@@ -1170,7 +1170,341 @@ async function loadAdminDashboard() {
 
 }
 
+// ========================================
+// ADMIN BUSINESS DATA REALTIME
+// ========================================
 
+let adminBusinessRealtimeChannel =
+    null;
+
+
+let adminBusinessRefreshTimer =
+    null;
+
+
+let adminBusinessRefreshInFlight =
+    false;
+
+
+let adminBusinessRefreshQueued =
+    false;
+
+
+// ========================================
+// SCHEDULE REALTIME DATA REFRESH
+// ========================================
+
+function scheduleAdminBusinessDataRefresh() {
+
+    if (
+        adminBusinessRefreshTimer
+    ) {
+
+        window.clearTimeout(
+            adminBusinessRefreshTimer
+        );
+
+    }
+
+
+    adminBusinessRefreshTimer =
+        window.setTimeout(
+            () => {
+
+                refreshAdminBusinessData();
+
+            },
+            500
+        );
+
+}
+
+// ========================================
+// REFRESH ADMIN BUSINESS DATA
+// ========================================
+
+async function refreshAdminBusinessData() {
+
+    if (
+        !navigator.onLine
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        adminBusinessRefreshInFlight
+    ) {
+
+        adminBusinessRefreshQueued =
+            true;
+
+        return;
+
+    }
+
+
+    adminBusinessRefreshInFlight =
+        true;
+
+
+    try {
+
+        const [
+
+            profilesResult,
+            petsResult,
+            visitsResult,
+            householdsResult,
+            visitPetsResult
+
+        ] =
+            await Promise.all([
+
+                supabaseClient
+                    .from(
+                        "profiles"
+                    )
+                    .select(
+                        "id, full_name, email, phone, role, profile_photo_path, pricing_tier"
+                    ),
+
+                supabaseClient
+                    .from(
+                        "pets"
+                    )
+                    .select(
+                        "id, client_id, name, breed, gender, photo_path"
+                    ),
+
+                supabaseClient
+                    .from(
+                        "visits"
+                    )
+                    .select(
+                        "*"
+                    )
+                    .order(
+                        "visit_date",
+                        {
+                            ascending:
+                                true
+                        }
+                    ),
+
+                supabaseClient
+                    .from(
+                        "households"
+                    )
+                    .select(
+                        "client_id, street_address, address_line_2, city, state, zip_code"
+                    ),
+
+                supabaseClient
+                    .from(
+                        "visit_pets"
+                    )
+                    .select(
+                        "visit_id, pet_id, is_primary, additional_pet_fee"
+                    )
+
+            ]);
+
+
+        const firstError =
+            profilesResult.error ||
+            petsResult.error ||
+            visitsResult.error ||
+            householdsResult.error ||
+            visitPetsResult.error;
+
+
+        if (
+            firstError
+        ) {
+
+            throw firstError;
+
+        }
+
+
+        allProfiles =
+            profilesResult.data ||
+            [];
+
+
+        allPets =
+            petsResult.data ||
+            [];
+
+
+        allVisits =
+            visitsResult.data ||
+            [];
+
+
+        allHouseholds =
+            householdsResult.data ||
+            [];
+
+
+        allVisitPets =
+            visitPetsResult.data ||
+            [];
+
+
+        // ========================================
+        // REFRESH ACTIVE ADMIN SCREEN
+        // ========================================
+
+        if (
+            activeAdminScreen ===
+            "schedule"
+        ) {
+
+            renderAdminCalendar();
+
+            renderAdminDayServices();
+
+        }
+
+
+        if (
+            activeAdminScreen ===
+            "clients"
+        ) {
+
+            setupAdminClientDirectory();
+
+        }
+
+
+        if (
+            activeAdminScreen ===
+            "home"
+        ) {
+
+            renderAdminTodaySummary();
+
+            renderAdminNeedsAttention();
+
+            renderAdminBestVisitRoute();
+
+            renderAdminFinancialSnapshot();
+
+        }
+
+
+        console.log(
+            "Admin business data refreshed from Realtime."
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Admin realtime business data refresh failed:",
+            error
+        );
+
+    }
+    finally {
+
+        adminBusinessRefreshInFlight =
+            false;
+
+
+        if (
+            adminBusinessRefreshQueued
+        ) {
+
+            adminBusinessRefreshQueued =
+                false;
+
+
+            scheduleAdminBusinessDataRefresh();
+
+        }
+
+    }
+
+}
+
+// ========================================
+// SUBSCRIBE TO ADMIN BUSINESS DATA
+// ========================================
+
+function setupAdminBusinessRealtime() {
+
+    if (
+        adminBusinessRealtimeChannel
+    ) {
+
+        return;
+
+    }
+
+
+    const realtimeTables = [
+
+        "profiles",
+        "pets",
+        "visits",
+        "households",
+        "visit_pets"
+
+    ];
+
+
+    const channel =
+        supabaseClient.channel(
+            "admin-business-data"
+        );
+
+
+    realtimeTables.forEach(
+        tableName => {
+
+            channel.on(
+                "postgres_changes",
+                {
+                    event:
+                        "*",
+
+                    schema:
+                        "public",
+
+                    table:
+                        tableName
+                },
+                () => {
+
+                    scheduleAdminBusinessDataRefresh();
+
+                }
+            );
+
+        }
+    );
+
+
+    adminBusinessRealtimeChannel =
+        channel.subscribe(
+            status => {
+
+                console.log(
+                    "Admin business Realtime:",
+                    status
+                );
+
+            }
+        );
+
+}
 
 // ========================================
 // ADMIN PROFILE
@@ -26134,14 +26468,15 @@ function startAdminPortalIntro() {
             adminContent?.style.display ===
             "block";
 
-
         if (
             currentUser &&
             currentProfile
         ) {
-
+        
             await initializeAdminMessaging();
-
+        
+            setupAdminBusinessRealtime();
+        
         }
 
 
