@@ -6725,3 +6725,38 @@ html {
         68%;
 
 }
+
+/* ========================================
+   CITY HERO MOBILE IMAGE POSITIONING
+======================================== */
+
+@media (max-width: 768px) {
+
+    .frisco-page .city-hero .hero-image img {
+        object-position:
+            center
+            70%;
+    }
+
+
+    .prosper-page .city-hero .hero-image img {
+        object-position:
+            center
+            82%;
+    }
+
+
+    .celina-page .city-hero .hero-image img {
+        object-position:
+            center
+            78%;
+    }
+
+
+    .little-elm-page .city-hero .hero-image img {
+        object-position:
+            center
+            68%;
+    }
+
+}
