@@ -6760,3 +6760,19 @@ html {
     }
 
 }
+
+/* ========================================
+   VIP BOARDING IMAGE MOBILE POSITION
+======================================== */
+
+@media (max-width: 768px) {
+
+    .svc-img-boarding {
+
+        object-position:
+            center
+            62%;
+
+    }
+
+}
