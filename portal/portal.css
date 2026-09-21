@@ -22131,17 +22131,22 @@ body.portal-intro-open {
             0;
 
         padding:
-            14px
-            16px
-            12px;
+            12px
+            16px;
 
     }
 
 
     .client-portal-page .client-navigation-brand {
 
+        flex-direction:
+            row;
+
+        align-items:
+            center;
+
         gap:
-            2px;
+            10px;
 
     }
 
@@ -22149,7 +22154,10 @@ body.portal-intro-open {
     .client-portal-page .client-navigation-logo {
 
         width:
-            82px;
+            64px;
+
+        height:
+            auto;
 
     }
 
@@ -22159,7 +22167,13 @@ body.portal-intro-open {
     span {
 
         font-size:
-            9px;
+            10px;
+
+        line-height:
+            1;
+
+        white-space:
+            nowrap;
 
     }
 
