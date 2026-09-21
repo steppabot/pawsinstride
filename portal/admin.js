@@ -22123,6 +22123,605 @@ async function saveAdminClientPricingTier(
 
 
 // ========================================
+// CLOSE ADMIN CLIENT CREDIT MODAL
+// ========================================
+
+function closeAdminClientCreditModal() {
+
+
+    document
+        .getElementById(
+            "admin-client-credit-modal"
+        )
+        ?.remove();
+
+
+    document.body.classList.remove(
+        "admin-client-credit-modal-open"
+    );
+
+}
+
+// ========================================
+// OPEN ADMIN CLIENT CREDIT MODAL
+// ========================================
+
+function openAdminClientCreditModal(
+    clientId
+) {
+
+
+    if (
+        !clientId
+    ) {
+
+        return;
+
+    }
+
+
+    closeAdminClientCreditModal();
+
+
+    const profile =
+        allProfiles.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    clientId
+                )
+        );
+
+
+    const clientName =
+        profile?.full_name ||
+        profile?.email ||
+        "Client";
+
+
+    const currentBalance =
+        document
+            .getElementById(
+                "admin-client-household-credit"
+            )
+            ?.textContent
+            ?.trim() ||
+        "$0.00";
+
+
+    // ========================================
+    // CREATE MODAL
+    // ========================================
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "admin-client-credit-modal";
+
+
+    modal.className =
+        "admin-client-credit-modal-backdrop";
+
+
+    modal.innerHTML =
+        `
+
+            <div
+                class="admin-client-credit-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="admin-client-credit-modal-title"
+            >
+
+
+                <!-- ========================================
+                     MODAL HEADER
+                     ======================================== -->
+
+                <div class="admin-client-credit-modal-header">
+
+
+                    <div>
+
+                        <span class="admin-screen-eyebrow">
+                            ACCOUNT CREDIT
+                        </span>
+
+                        <h2 id="admin-client-credit-modal-title">
+                            Add Credit
+                        </h2>
+
+                        <p>
+                            ${escapeHtml(
+                                clientName
+                            )}
+                            currently has
+                            <strong>
+                                ${escapeHtml(
+                                    currentBalance
+                                )}
+                            </strong>
+                            available.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="admin-client-credit-modal-close"
+                        aria-label="Close account credit"
+                    >
+                        ×
+                    </button>
+
+
+                </div>
+
+
+                <!-- ========================================
+                     CREDIT FORM
+                     ======================================== -->
+
+                <div class="admin-client-credit-modal-body">
+
+
+                    <label
+                        class="admin-client-credit-field"
+                        for="admin-client-credit-amount"
+                    >
+
+                        <span>
+                            Credit Amount
+                        </span>
+
+
+                        <div class="admin-client-credit-amount-wrap">
+
+                            <span>
+                                $
+                            </span>
+
+                            <input
+                                type="number"
+                                id="admin-client-credit-amount"
+                                min="0.01"
+                                step="0.01"
+                                inputmode="decimal"
+                                placeholder="0.00"
+                                autocomplete="off"
+                            >
+
+                        </div>
+
+                    </label>
+
+
+                    <label
+                        class="admin-client-credit-field"
+                        for="admin-client-credit-description"
+                    >
+
+                        <span>
+                            Description
+                        </span>
+
+                        <input
+                            type="text"
+                            id="admin-client-credit-description"
+                            maxlength="150"
+                            placeholder="Example: Courtesy credit"
+                            autocomplete="off"
+                        >
+
+                    </label>
+
+
+                    <p
+                        id="admin-client-credit-message"
+                        class="admin-client-credit-message"
+                        aria-live="polite"
+                    ></p>
+
+
+                </div>
+
+
+                <!-- ========================================
+                     MODAL ACTIONS
+                     ======================================== -->
+
+                <div class="admin-client-credit-modal-actions">
+
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        id="admin-client-credit-cancel"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="primary-button"
+                        id="admin-client-credit-save"
+                    >
+                        Add Credit
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+        `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    document.body.classList.add(
+        "admin-client-credit-modal-open"
+    );
+
+
+    // ========================================
+    // MODAL ELEMENTS
+    // ========================================
+
+    const amountInput =
+        document.getElementById(
+            "admin-client-credit-amount"
+        );
+
+
+    const descriptionInput =
+        document.getElementById(
+            "admin-client-credit-description"
+        );
+
+
+    const saveButton =
+        document.getElementById(
+            "admin-client-credit-save"
+        );
+
+
+    const cancelButton =
+        document.getElementById(
+            "admin-client-credit-cancel"
+        );
+
+
+    const closeButton =
+        modal.querySelector(
+            ".admin-client-credit-modal-close"
+        );
+
+
+    const message =
+        document.getElementById(
+            "admin-client-credit-message"
+        );
+
+
+    // ========================================
+    // CLOSE ACTIONS
+    // ========================================
+
+    closeButton?.addEventListener(
+        "click",
+        closeAdminClientCreditModal
+    );
+
+
+    cancelButton?.addEventListener(
+        "click",
+        closeAdminClientCreditModal
+    );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+
+            if (
+                event.target ===
+                modal
+            ) {
+
+                closeAdminClientCreditModal();
+
+            }
+
+        }
+    );
+
+
+    // ========================================
+    // SAVE CREDIT
+    // ========================================
+
+    saveButton?.addEventListener(
+        "click",
+        async () => {
+
+
+            const amount =
+                Number(
+                    amountInput?.value ||
+                    0
+                );
+
+
+            const description =
+                String(
+                    descriptionInput?.value ||
+                    ""
+                )
+                    .trim();
+
+
+            // ========================================
+            // VALIDATE AMOUNT
+            // ========================================
+
+            if (
+                !Number.isFinite(
+                    amount
+                ) ||
+                amount <=
+                    0
+            ) {
+
+
+                if (
+                    message
+                ) {
+
+                    message.textContent =
+                        "Enter a credit amount greater than $0.00.";
+
+                }
+
+
+                amountInput?.focus();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // VALIDATE DESCRIPTION
+            // ========================================
+
+            if (
+                !description
+            ) {
+
+
+                if (
+                    message
+                ) {
+
+                    message.textContent =
+                        "Enter a description for this credit.";
+
+                }
+
+
+                descriptionInput?.focus();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // SAVING STATE
+            // ========================================
+
+            saveButton.disabled =
+                true;
+
+
+            if (
+                cancelButton
+            ) {
+
+                cancelButton.disabled =
+                    true;
+
+            }
+
+
+            saveButton.textContent =
+                "Adding...";
+
+
+            if (
+                message
+            ) {
+
+                message.textContent =
+                    "Adding account credit...";
+
+            }
+
+
+            try {
+
+
+                // ========================================
+                // ADD CREDIT
+                // ========================================
+
+                const {
+                    data:
+                        newBalance,
+                    error:
+                        creditError
+                } =
+                    await supabaseClient
+                        .rpc(
+                            "add_manual_client_credit",
+                            {
+
+                                p_client_id:
+                                    clientId,
+
+                                p_amount:
+                                    amount,
+
+                                p_description:
+                                    description
+
+                            }
+                        );
+
+
+                if (
+                    creditError
+                ) {
+
+                    throw creditError;
+
+                }
+
+
+                const balance =
+                    Number(
+                        newBalance ||
+                        0
+                    );
+
+
+                // ========================================
+                // UPDATE HOUSEHOLD DISPLAY
+                // ========================================
+
+                const creditDisplay =
+                    document.getElementById(
+                        "admin-client-household-credit"
+                    );
+
+
+                const creditStatus =
+                    document.getElementById(
+                        "admin-client-credit-status"
+                    );
+
+
+                if (
+                    creditDisplay
+                ) {
+
+                    creditDisplay.textContent =
+                        balance.toLocaleString(
+                            "en-US",
+                            {
+
+                                style:
+                                    "currency",
+
+                                currency:
+                                    "USD"
+
+                            }
+                        );
+
+                }
+
+
+                if (
+                    creditStatus
+                ) {
+
+                    creditStatus.textContent =
+                        "Available balance";
+
+                }
+
+
+                closeAdminClientCreditModal();
+
+
+            }
+            catch (
+                error
+            ) {
+
+
+                console.error(
+                    "Unable to add client account credit:",
+                    error
+                );
+
+
+                if (
+                    message
+                ) {
+
+                    message.textContent =
+                        error?.message ||
+                        "Unable to add account credit.";
+
+                }
+
+
+                saveButton.disabled =
+                    false;
+
+
+                if (
+                    cancelButton
+                ) {
+
+                    cancelButton.disabled =
+                        false;
+
+                }
+
+
+                saveButton.textContent =
+                    "Add Credit";
+
+            }
+
+        }
+    );
+
+
+    // ========================================
+    // FOCUS AMOUNT
+    // ========================================
+
+    window.setTimeout(
+        () => {
+
+            amountInput?.focus();
+
+        },
+        50
+    );
+
+}
+
+
+// ========================================
 // CLIENT HOUSEHOLD ACTIONS
 // ========================================
 
@@ -22130,6 +22729,44 @@ document.addEventListener(
     "click",
     async event => {
 
+
+        // ========================================
+        // ADD ACCOUNT CREDIT
+        // ========================================
+
+        const addCreditButton =
+            event.target.closest(
+                "#admin-client-credit-add"
+            );
+
+
+        if (
+            addCreditButton
+        ) {
+
+
+            const clientId =
+                addCreditButton.dataset
+                    .clientId;
+
+
+            if (
+                !clientId
+            ) {
+
+                return;
+
+            }
+
+
+            openAdminClientCreditModal(
+                clientId
+            );
+
+
+            return;
+
+        }
 
         // ========================================
         // VIEW HOUSEHOLD
