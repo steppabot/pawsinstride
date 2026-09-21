@@ -4010,11 +4010,11 @@ html {
 }
 
 .little-elm-page .trust-grid img:nth-child(2) {
-    object-position: center 10%;
+    object-position: center 28%;
 }
 
 .little-elm-page .trust-grid img:nth-child(3) {
-    object-position: center 82%;
+    object-position: center 38%;
 }
 
 @media (max-width: 980px) {
