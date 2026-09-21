@@ -22119,3 +22119,64 @@ body.portal-intro-open {
 .install-inline-link:hover {
     text-decoration: underline;
 }
+
+/* ========================================
+   DESKTOP NAVIGATION DRAWER HEADER FIX
+======================================== */
+
+@media (min-width: 701px) {
+
+    .client-portal-page .client-navigation-header {
+
+        min-height:
+            0;
+
+        padding:
+            14px
+            16px
+            12px;
+
+    }
+
+
+    .client-portal-page .client-navigation-brand {
+
+        gap:
+            2px;
+
+    }
+
+
+    .client-portal-page .client-navigation-logo {
+
+        width:
+            82px;
+
+    }
+
+
+    .client-portal-page
+    .client-navigation-brand
+    span {
+
+        font-size:
+            9px;
+
+    }
+
+
+    .client-portal-page
+    .client-navigation-close {
+
+        width:
+            34px;
+
+        height:
+            34px;
+
+        font-size:
+            23px;
+
+    }
+
+}
