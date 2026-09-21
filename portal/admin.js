@@ -21444,6 +21444,158 @@ async function openAdminClientHousehold(
     }
 
 
+    // ========================================
+    // ACCOUNT CREDIT
+    // ========================================
+
+    const creditDisplay =
+        document.getElementById(
+            "admin-client-household-credit"
+        );
+
+
+    const creditStatus =
+        document.getElementById(
+            "admin-client-credit-status"
+        );
+
+
+    const creditAddButton =
+        document.getElementById(
+            "admin-client-credit-add"
+        );
+
+
+    if (
+        creditAddButton
+    ) {
+
+        creditAddButton.dataset.clientId =
+            String(
+                clientId
+            );
+
+    }
+
+
+    if (
+        creditDisplay
+    ) {
+
+        creditDisplay.textContent =
+            "Loading...";
+
+    }
+
+
+    if (
+        creditStatus
+    ) {
+
+        creditStatus.textContent =
+            "Loading account credit...";
+
+    }
+
+
+    try {
+
+        const {
+            data:
+                creditBalance,
+            error:
+                creditBalanceError
+        } =
+            await supabaseClient
+                .rpc(
+                    "get_admin_client_credit_balance",
+                    {
+                        p_client_id:
+                            clientId
+                    }
+                );
+
+
+        if (
+            creditBalanceError
+        ) {
+
+            throw creditBalanceError;
+
+        }
+
+
+        const balance =
+            Number(
+                creditBalance ||
+                0
+            );
+
+
+        if (
+            creditDisplay
+        ) {
+
+            creditDisplay.textContent =
+                balance.toLocaleString(
+                    "en-US",
+                    {
+                        style:
+                            "currency",
+
+                        currency:
+                            "USD"
+                    }
+                );
+
+        }
+
+
+        if (
+            creditStatus
+        ) {
+
+            creditStatus.textContent =
+                "Available balance";
+
+        }
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Unable to load client account credit:",
+            error
+        );
+
+
+        if (
+            creditDisplay
+        ) {
+
+            creditDisplay.textContent =
+                "$0.00";
+
+        }
+
+
+        if (
+            creditStatus
+        ) {
+
+            creditStatus.textContent =
+                "Unable to load balance";
+
+        }
+
+    }
+
+    // ========================================
+    // HOUSEHOLD PETS
+    // ========================================
+
     const petsContainer =
         document.getElementById(
             "admin-client-household-pets"
