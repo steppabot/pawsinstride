@@ -18227,20 +18227,50 @@ body.admin-page {
 ======================================== */
 
 .payment-page-header {
+
     position: relative;
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
+
     gap: 24px;
+
     margin-bottom: 24px;
+
     padding: 22px 24px;
+
     overflow: hidden;
-    background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(200,220,232,0.82);
+
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.20
+        );
+
     border-radius: 18px;
-    box-shadow: 0 8px 28px rgba(35,93,125,0.08);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+
+    box-shadow:
+        0 10px 30px
+        rgba(
+            31,
+            123,
+            194,
+            0.22
+        );
+
 }
 
 /* ========================================
@@ -18248,14 +18278,9 @@ body.admin-page {
 ======================================== */
 
 .payment-page-header::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 24px;
-    right: 24px;
-    height: 3px;
-    background: linear-gradient(90deg,var(--pis-cyan),var(--pis-blue),var(--pis-orange));
-    border-radius: 0 0 999px 999px;
+
+    display: none;
+
 }
 
 /* ========================================
@@ -18286,34 +18311,79 @@ body.admin-page {
 ======================================== */
 
 .payment-header-copy {
+
     min-width: 0;
+
     padding-left: 18px;
-    border-left: 1px solid var(--pis-border);
+
+    border-left:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.28
+        );
+
 }
+
 
 .payment-eyebrow {
+
     display: block;
+
     margin-bottom: 5px;
-    color: var(--pis-blue);
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.82
+        );
+
     font-size: 10px;
+
     font-weight: 800;
+
     letter-spacing: 0.10em;
+
     text-transform: uppercase;
+
 }
+
 
 .payment-header-copy h1 {
+
     margin: 0;
-    color: var(--pis-ink);
+
+    color: #ffffff;
+
     font-size: 28px;
+
     font-weight: 800;
+
     line-height: 1.2;
+
 }
 
+
 .payment-header-copy p {
+
     margin: 7px 0 0;
-    color: var(--pis-muted);
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.86
+        );
+
     font-size: 14px;
+
     line-height: 1.5;
+
 }
 
 /* ========================================
@@ -18321,32 +18391,84 @@ body.admin-page {
 ======================================== */
 
 .payment-security-badge {
+
     display: inline-flex;
+
     align-items: center;
+
     gap: 7px;
+
     flex: 0 0 auto;
+
     padding: 9px 12px;
-    color: var(--pis-blue-dark);
-    background: linear-gradient(135deg,#eef9fd,#e5f4fb);
-    border: 1px solid rgba(40,144,223,0.18);
+
+    color: #ffffff;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.14
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.26
+        );
+
     border-radius: 999px;
+
     font-size: 11px;
+
     font-weight: 800;
+
     white-space: nowrap;
-    box-shadow: 0 3px 10px rgba(40,144,223,0.06);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+
+    backdrop-filter:
+        blur(10px);
+
+    -webkit-backdrop-filter:
+        blur(10px);
+
 }
 
+
 .payment-security-icon {
+
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
+
     width: 18px;
+
     height: 18px;
-    color: #ffffff;
-    background: linear-gradient(135deg,var(--pis-cyan),var(--pis-blue));
+
+    color: #2890df;
+
+    background: #ffffff;
+
     border-radius: 50%;
+
     font-size: 11px;
+
 }
+
 
 /* ========================================
    PAYMENT LAYOUT
