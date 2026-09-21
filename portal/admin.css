@@ -3729,6 +3729,61 @@ p {
 
 
 /* ========================================
+   ADMIN SCHEDULE PET PILLS
+======================================== */
+
+.admin-service-pet-chips {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+}
+
+
+.admin-service-pet-chips
+.service-pet-chip {
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: fit-content;
+
+    padding:
+        6px
+        11px;
+
+    background:
+        #eef7fd;
+
+    color:
+        #245b78;
+
+    border:
+        1px solid
+        #cfe4f2;
+
+    border-radius:
+        999px;
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+    white-space:
+        nowrap;
+
+}
+
+/* ========================================
    SELECTED COMPLETED DAY
 ======================================== */
 
