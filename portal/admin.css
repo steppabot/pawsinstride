@@ -9703,4 +9703,781 @@ body.admin-services-pricing-open {
         font-size: 8px;
     }
 
+/* ========================================
+   ADMIN CLIENT ACCOUNT CREDIT
+======================================== */
+
+/* ========================================
+   HOUSEHOLD GRID — SIX INFO CARDS
+======================================== */
+
+.admin-client-household-grid {
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+}
+
+
+/* ========================================
+   CREDIT CARD
+======================================== */
+
+.admin-client-credit-card {
+    border-color:
+        rgba(
+            255,
+            255,
+            255,
+            0.24
+        );
+
+    box-shadow:
+        0
+        6px
+        16px
+        rgba(
+            31,
+            123,
+            194,
+            0.20
+        );
+}
+
+
+/* ========================================
+   CREDIT DISPLAY
+======================================== */
+
+.admin-client-credit-display {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        stretch;
+
+    gap:
+        10px;
+}
+
+
+.admin-client-credit-display > strong {
+    display:
+        block;
+
+    color:
+        #ffffff;
+
+    font-size:
+        17px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+}
+
+
+/* ========================================
+   ADD CREDIT BUTTON
+======================================== */
+
+.admin-client-credit-add-button {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        100%;
+
+    min-height:
+        30px;
+
+    padding:
+        0
+        10px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        );
+
+    color:
+        #ffffff;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.34
+        );
+
+    border-radius:
+        8px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.16s ease,
+        border-color 0.16s ease,
+        transform 0.16s ease;
+}
+
+
+.admin-client-credit-add-button:hover {
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.22
+        );
+
+    border-color:
+        rgba(
+            255,
+            255,
+            255,
+            0.58
+        );
+}
+
+
+.admin-client-credit-add-button:active {
+    transform:
+        scale(
+            0.97
+        );
+}
+
+
+/* ========================================
+   CREDIT STATUS
+======================================== */
+
+.admin-client-credit-status {
+    display:
+        block;
+
+    margin-top:
+        7px;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.68
+        );
+
+    font-size:
+        8px;
+
+    font-weight:
+        700;
+
+    line-height:
+        1.3;
+}
+
+
+/* ========================================
+   CREDIT MODAL PAGE LOCK
+======================================== */
+
+body.admin-client-credit-modal-open {
+    overflow:
+        hidden;
+}
+
+
+/* ========================================
+   CREDIT MODAL BACKDROP
+======================================== */
+
+.admin-client-credit-modal-backdrop {
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        4000;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        20px;
+
+    background:
+        rgba(
+            15,
+            37,
+            52,
+            0.52
+        );
+
+    backdrop-filter:
+        blur(
+            8px
+        );
+
+    -webkit-backdrop-filter:
+        blur(
+            8px
+        );
+}
+
+
+/* ========================================
+   CREDIT MODAL
+======================================== */
+
+.admin-client-credit-modal {
+    width:
+        min(
+            460px,
+            100%
+        );
+
+    max-height:
+        calc(
+            100dvh -
+            40px
+        );
+
+    overflow:
+        auto;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6e4eb;
+
+    border-radius:
+        20px;
+
+    box-shadow:
+        0
+        28px
+        80px
+        rgba(
+            16,
+            48,
+            67,
+            0.28
+        );
+}
+
+
+/* ========================================
+   CREDIT MODAL HEADER
+======================================== */
+
+.admin-client-credit-modal-header {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    padding:
+        22px
+        22px
+        18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fdff 0%,
+            #edf8fd 100%
+        );
+
+    border-bottom:
+        1px solid
+        #d6e4eb;
+}
+
+
+.admin-client-credit-modal-header h2 {
+    margin:
+        3px
+        0
+        6px;
+
+    color:
+        #183447;
+
+    font-size:
+        22px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.15;
+}
+
+
+.admin-client-credit-modal-header p {
+    margin:
+        0;
+
+    color:
+        #667784;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+}
+
+
+.admin-client-credit-modal-header p strong {
+    color:
+        #2890df;
+}
+
+
+/* ========================================
+   CREDIT MODAL CLOSE
+======================================== */
+
+.admin-client-credit-modal-close {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex:
+        0 0 38px;
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    padding:
+        0;
+
+    background:
+        #eef7fd;
+
+    color:
+        #1f7bc2;
+
+    border:
+        1px solid
+        #c8dce8;
+
+    border-radius:
+        11px;
+
+    font-size:
+        24px;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+}
+
+
+/* ========================================
+   CREDIT MODAL BODY
+======================================== */
+
+.admin-client-credit-modal-body {
+    display:
+        grid;
+
+    gap:
+        18px;
+
+    padding:
+        22px;
+}
+
+
+/* ========================================
+   CREDIT FIELDS
+======================================== */
+
+.admin-client-credit-field {
+    display:
+        grid;
+
+    gap:
+        7px;
+}
+
+
+.admin-client-credit-field > span {
+    color:
+        #465a68;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.04em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.admin-client-credit-field input {
+    width:
+        100%;
+
+    min-height:
+        44px;
+
+    padding:
+        0
+        13px;
+
+    box-sizing:
+        border-box;
+
+    background:
+        #ffffff;
+
+    color:
+        #183447;
+
+    border:
+        1px solid
+        #cbdde7;
+
+    border-radius:
+        10px;
+
+    outline:
+        none;
+
+    font-family:
+        inherit;
+
+    font-size:
+        14px;
+}
+
+
+.admin-client-credit-field input:focus {
+    border-color:
+        #2890df;
+
+    box-shadow:
+        0
+        0
+        0
+        3px
+        rgba(
+            40,
+            144,
+            223,
+            0.12
+        );
+}
+
+
+/* ========================================
+   CREDIT AMOUNT INPUT
+======================================== */
+
+.admin-client-credit-amount-wrap {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    min-height:
+        46px;
+
+    overflow:
+        hidden;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #cbdde7;
+
+    border-radius:
+        10px;
+}
+
+
+.admin-client-credit-amount-wrap:focus-within {
+    border-color:
+        #2890df;
+
+    box-shadow:
+        0
+        0
+        0
+        3px
+        rgba(
+            40,
+            144,
+            223,
+            0.12
+        );
+}
+
+
+.admin-client-credit-amount-wrap > span {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    align-self:
+        stretch;
+
+    width:
+        42px;
+
+    background:
+        #edf8fd;
+
+    color:
+        #1f7bc2;
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+    border-right:
+        1px solid
+        #d6e4eb;
+}
+
+
+.admin-client-credit-amount-wrap input {
+    min-height:
+        44px;
+
+    border:
+        0;
+
+    border-radius:
+        0;
+
+    box-shadow:
+        none !important;
+}
+
+
+/* ========================================
+   CREDIT MESSAGE
+======================================== */
+
+.admin-client-credit-message {
+    min-height:
+        18px;
+
+    margin:
+        0;
+
+    color:
+        #c04432;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+    line-height:
+        1.4;
+}
+
+
+/* ========================================
+   CREDIT MODAL ACTIONS
+======================================== */
+
+.admin-client-credit-modal-actions {
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap:
+        10px;
+
+    padding:
+        0
+        22px
+        22px;
+}
+
+
+.admin-client-credit-modal-actions button {
+    width:
+        100% !important;
+
+    min-height:
+        44px;
+
+    margin:
+        0;
+}
+
+
+/* ========================================
+   CLIENT CREDIT — TABLET
+======================================== */
+
+@media (max-width: 1050px) {
+
+    .admin-client-household-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+
+    .admin-client-pricing-tier-card {
+        grid-column:
+            auto;
+    }
+
+}
+
+
+/* ========================================
+   CLIENT CREDIT — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    .admin-client-household-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .admin-client-credit-modal-backdrop {
+        align-items:
+            flex-end;
+
+        padding:
+            12px;
+    }
+
+
+    .admin-client-credit-modal {
+        width:
+            100%;
+
+        max-height:
+            calc(
+                100dvh -
+                24px
+            );
+
+        border-radius:
+            18px;
+    }
+
+
+    .admin-client-credit-modal-header {
+        padding:
+            18px;
+    }
+
+
+    .admin-client-credit-modal-body {
+        padding:
+            18px;
+    }
+
+
+    .admin-client-credit-modal-actions {
+        padding:
+            0
+            18px
+            max(
+                18px,
+                env(
+                    safe-area-inset-bottom
+                )
+            );
+    }
+
+}
+
 }
