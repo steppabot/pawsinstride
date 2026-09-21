@@ -6448,3 +6448,259 @@ html {
     }
 
 }
+
+/* ========================================
+   CITY PAGE — BENEFITS
+======================================== */
+
+.city-benefits-section .service-areas-container {
+
+    padding:
+        42px
+        36px;
+
+}
+
+
+.city-benefits-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        18px;
+
+    margin-top:
+        28px;
+
+}
+
+
+.city-benefit-card {
+
+    padding:
+        26px
+        22px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f8fbfd 100%
+        );
+
+    border:
+        1px solid
+        #e4edf3;
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        0 10px 24px
+        rgba(
+            25,
+            72,
+            112,
+            0.08
+        );
+
+    text-align:
+        center;
+
+}
+
+
+.city-benefit-icon {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        54px;
+
+    height:
+        54px;
+
+    margin-bottom:
+        16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
+
+    border-radius:
+        14px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        22px;
+
+    box-shadow:
+        0 7px 16px
+        rgba(
+            40,
+            144,
+            223,
+            0.22
+        );
+
+}
+
+
+.city-benefit-card h3 {
+
+    margin:
+        0 0 10px;
+
+    font-family:
+        "Manrope",
+        "Roboto",
+        sans-serif;
+
+    font-size:
+        18px;
+
+    font-weight:
+        800;
+
+    color:
+        #243949;
+
+}
+
+
+.city-benefit-card p {
+
+    margin:
+        0;
+
+    color:
+        #5b6b7b;
+
+    font-size:
+        14px;
+
+    line-height:
+        1.65;
+
+}
+
+
+.city-benefits-note {
+
+    max-width:
+        760px;
+
+    margin:
+        28px auto 0;
+
+    padding:
+        16px
+        20px;
+
+    background:
+        #fff8ef;
+
+    border:
+        1px solid
+        #f3d19d;
+
+    border-left:
+        4px solid
+        #f3aa4c;
+
+    border-radius:
+        12px;
+
+    color:
+        #5c4420;
+
+    font-weight:
+        700;
+
+    line-height:
+        1.6;
+
+    text-align:
+        center;
+
+}
+
+
+/* ========================================
+   CITY PAGE — BENEFITS TABLET
+======================================== */
+
+@media (
+    max-width:
+        900px
+) {
+
+    .city-benefits-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+/* ========================================
+   CITY PAGE — BENEFITS MOBILE
+======================================== */
+
+@media (
+    max-width:
+        520px
+) {
+
+    .city-benefits-section
+    .service-areas-container {
+
+        padding:
+            30px
+            20px;
+
+    }
+
+
+    .city-benefit-card {
+
+        padding:
+            22px
+            18px;
+
+    }
+
+
+    .city-benefits-note {
+
+        padding:
+            14px
+            16px;
+
+    }
+
+}
