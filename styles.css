@@ -6704,3 +6704,24 @@ html {
     }
 
 }
+
+/* ========================================
+   LITTLE ELM TRUST IMAGE CROPPING
+======================================== */
+
+.little-elm-page .little-elm-trust-image-2 {
+
+    object-position:
+        58%
+        24%;
+
+}
+
+
+.little-elm-page .little-elm-trust-image-3 {
+
+    object-position:
+        50%
+        68%;
+
+}
