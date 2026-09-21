@@ -841,6 +841,10 @@ async function loadCheckoutVisits() {
                 service_type,
                 service_option,
                 time_window,
+                base_price_cents,
+                additional_pet_fee_cents,
+                evening_fee_cents,
+                holiday_fee_cents,
                 total_price_cents
             `)
             .eq(
@@ -1537,24 +1541,46 @@ function renderCheckoutSummary() {
                         // ========================================
                         // SERVICE PRICE
                         // ========================================
-    
+                        
+                        const undiscountedVisitPrice =
+                            Number(
+                                visit.base_price_cents ||
+                                0
+                            )
+                            +
+                            Number(
+                                visit.additional_pet_fee_cents ||
+                                0
+                            )
+                            +
+                            Number(
+                                visit.evening_fee_cents ||
+                                0
+                            )
+                            +
+                            Number(
+                                visit.holiday_fee_cents ||
+                                0
+                            );
+                        
+                        
                         const servicePrice =
                             document.createElement(
                                 "div"
                             );
-    
-    
+                        
+                        
                         servicePrice.className =
                             "payment-summary-service-price";
-    
-    
+                        
+                        
                         servicePrice.textContent =
                             formatMoney(
-                                visit.total_price_cents,
+                                undiscountedVisitPrice,
                                 checkoutData.currency
                             );
-    
-    
+                        
+                        
                         // ========================================
                         // ADD SERVICE ROW
                         // ========================================
@@ -1687,6 +1713,161 @@ function renderCheckoutSummary() {
     
     
     // ========================================
+    // PRE-DISCOUNT SUBTOTAL
+    // ========================================
+    
+    const preDiscountSubtotalCents =
+        checkoutVisits.reduce(
+            (
+                sum,
+                visit
+            ) => {
+    
+                return (
+                    sum
+                    +
+                    Number(
+                        visit.base_price_cents ||
+                        0
+                    )
+                    +
+                    Number(
+                        visit.additional_pet_fee_cents ||
+                        0
+                    )
+                    +
+                    Number(
+                        visit.evening_fee_cents ||
+                        0
+                    )
+                    +
+                    Number(
+                        visit.holiday_fee_cents ||
+                        0
+                    )
+                );
+    
+            },
+            0
+        );
+    
+    
+    // ========================================
+    // WEEKLY DISCOUNT
+    // ========================================
+    
+    const weeklyDiscountCents =
+        Math.max(
+            preDiscountSubtotalCents -
+            originalTotalCents,
+            0
+        );
+    
+    
+    if (
+        weeklyDiscountCents >
+        0
+    ) {
+    
+        const subtotalRow =
+            document.createElement(
+                "div"
+            );
+    
+    
+        subtotalRow.className =
+            "payment-summary-credit";
+    
+    
+        const subtotalLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        subtotalLabel.textContent =
+            "Subtotal";
+    
+    
+        const subtotalAmount =
+            document.createElement(
+                "span"
+            );
+    
+    
+        subtotalAmount.textContent =
+            formatMoney(
+                preDiscountSubtotalCents,
+                checkoutData.currency
+            );
+    
+    
+        subtotalRow.appendChild(
+            subtotalLabel
+        );
+    
+    
+        subtotalRow.appendChild(
+            subtotalAmount
+        );
+    
+    
+        paymentSummaryContent.appendChild(
+            subtotalRow
+        );
+    
+    
+        const discountRow =
+            document.createElement(
+                "div"
+            );
+    
+    
+        discountRow.className =
+            "payment-summary-credit";
+    
+    
+        const discountLabel =
+            document.createElement(
+                "span"
+            );
+    
+    
+        discountLabel.textContent =
+            "Weekly Service Discount (12%)";
+    
+    
+        const discountAmount =
+            document.createElement(
+                "span"
+            );
+    
+    
+        discountAmount.textContent =
+            `-${formatMoney(
+                weeklyDiscountCents,
+                checkoutData.currency
+            )}`;
+    
+    
+        discountRow.appendChild(
+            discountLabel
+        );
+    
+    
+        discountRow.appendChild(
+            discountAmount
+        );
+    
+    
+        paymentSummaryContent.appendChild(
+            discountRow
+        );
+    
+    }
+    
+    
+    // ========================================
     // SERVICE TOTAL
     // ========================================
     
@@ -1738,6 +1919,7 @@ function renderCheckoutSummary() {
     paymentSummaryContent.appendChild(
         totalRow
     );
+    
     
     // ========================================
     // AVAILABLE ACCOUNT CREDIT
