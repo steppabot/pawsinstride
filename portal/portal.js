@@ -11504,7 +11504,7 @@ function renderBookingCalendar() {
 
 
     let blanks =
-        firstDay.getDay() - 1;
+        firstDay.getDay();
 
 
     if (
@@ -15131,7 +15131,7 @@ function renderUpcomingCalendar() {
 
 
     let blanks =
-        firstDay.getDay() - 1;
+        firstDay.getDay();
 
 
     if (
