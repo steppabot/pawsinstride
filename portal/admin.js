@@ -13178,6 +13178,74 @@ function clearAdminPhotoPreviewUrl() {
 }
 
 // ========================================
+// ADMIN PWA SERVICE WORKER
+// ========================================
+
+async function registerAdminServiceWorker() {
+
+    if (
+        !(
+            "serviceWorker" in navigator
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const registration =
+            await navigator
+                .serviceWorker
+                .register(
+                    "/portal/service-worker.js",
+                    {
+                        scope:
+                            "/portal/",
+
+                        updateViaCache:
+                            "none"
+                    }
+                );
+
+
+        await registration
+            .update();
+
+
+        console.log(
+            "Admin service worker registered:",
+            registration.scope
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Admin service worker registration failed:",
+            error
+        );
+
+    }
+
+}
+
+
+window.addEventListener(
+    "load",
+    () => {
+
+        registerAdminServiceWorker();
+
+    }
+);
+
+
+// ========================================
 // ADMIN PUSH NOTIFICATIONS
 // ========================================
 
