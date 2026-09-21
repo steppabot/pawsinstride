@@ -6121,3 +6121,330 @@ html {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========================================
+   CITY PAGE — NEIGHBORHOODS
+======================================== */
+
+.city-neighborhoods-section .service-areas-container {
+
+    padding:
+        42px
+        36px;
+
+}
+
+
+.city-section-heading {
+
+    max-width:
+        760px;
+
+    margin:
+        0 auto 30px;
+
+    text-align:
+        center;
+
+}
+
+
+.city-section-eyebrow {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin-bottom:
+        10px;
+
+    padding:
+        7px
+        12px;
+
+    background:
+        #fff4e6;
+
+    border:
+        1px solid
+        #f5d4aa;
+
+    border-radius:
+        999px;
+
+    color:
+        #d9780f;
+
+    font-family:
+        "Manrope",
+        "Roboto",
+        sans-serif;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.08em;
+
+}
+
+
+.city-section-heading h2 {
+
+    margin:
+        0 0 10px;
+
+}
+
+
+.city-section-heading p {
+
+    margin:
+        0;
+
+}
+
+
+.city-neighborhood-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        14px;
+
+    margin-top:
+        26px;
+
+}
+
+
+.city-neighborhood-card {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    min-height:
+        72px;
+
+    padding:
+        16px
+        18px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #f8fcff 0%,
+            #eef8fe 100%
+        );
+
+    border:
+        1px solid
+        #d6ebf8;
+
+    border-radius:
+        14px;
+
+    color:
+        #243949;
+
+    font-family:
+        "Manrope",
+        "Roboto",
+        sans-serif;
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.3;
+
+    box-shadow:
+        0 5px 14px
+        rgba(
+            31,
+            123,
+            194,
+            0.08
+        );
+
+}
+
+
+.city-neighborhood-icon {
+
+    flex:
+        0 0 auto;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        36px;
+
+    height:
+        36px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
+
+    border-radius:
+        10px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        14px;
+
+    box-shadow:
+        0 4px 10px
+        rgba(
+            40,
+            144,
+            223,
+            0.20
+        );
+
+}
+
+
+.city-neighborhood-note {
+
+    margin:
+        26px 0 0;
+
+    text-align:
+        center;
+
+    color:
+        #5b6b7b;
+
+}
+
+
+.city-neighborhood-note a {
+
+    color:
+        #2890df;
+
+    font-weight:
+        800;
+
+    text-decoration:
+        none;
+
+}
+
+
+.city-neighborhood-note a:hover {
+
+    text-decoration:
+        underline;
+
+}
+
+
+/* ========================================
+   CITY PAGE — NEIGHBORHOODS TABLET
+======================================== */
+
+@media (
+    max-width:
+        900px
+) {
+
+    .city-neighborhood-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+}
+
+
+/* ========================================
+   CITY PAGE — NEIGHBORHOODS MOBILE
+======================================== */
+
+@media (
+    max-width:
+        520px
+) {
+
+    .city-neighborhoods-section
+    .service-areas-container {
+
+        padding:
+            30px
+            20px;
+
+    }
+
+
+    .city-neighborhood-grid {
+
+        grid-template-columns:
+            1fr;
+
+        gap:
+            10px;
+
+    }
+
+
+    .city-neighborhood-card {
+
+        min-height:
+            62px;
+
+        padding:
+            14px
+            15px;
+
+    }
+
+}
