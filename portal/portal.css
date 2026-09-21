@@ -22193,3 +22193,22 @@ body.portal-intro-open {
     }
 
 }
+
+/* ========================================
+   DESKTOP NAVIGATION STACKING FIX
+======================================== */
+
+@media (min-width: 701px) {
+
+    .client-navigation-backdrop {
+        z-index:
+            1298;
+    }
+
+
+    .client-navigation-drawer {
+        z-index:
+            1299;
+    }
+
+}
