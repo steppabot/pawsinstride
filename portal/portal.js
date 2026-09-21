@@ -20480,23 +20480,30 @@ window.addEventListener(
             .toLowerCase() !==
             "admin"
     ) {
-
+    
+        // ========================================
+        // CLIENT REALTIME VISITS
+        // ========================================
+    
+        subscribeToClientVisitRealtime();
+    
+    
         try {
-
+    
             await initializeClientMessaging();
-
+    
         }
         catch (
             error
         ) {
-
+    
             console.error(
                 "Client messaging initialization failed:",
                 error
             );
-
+    
         }
-
+    
     }
 
 })();
@@ -24816,7 +24823,6 @@ async function toggleClientNotificationCenter() {
 
 }
 
-
 // ========================================
 // MARK ONE NOTIFICATION READ
 // ========================================
@@ -24909,7 +24915,6 @@ async function markClientNotificationRead(
 
 }
 
-
 // ========================================
 // MARK ALL NOTIFICATIONS READ
 // ========================================
@@ -24989,7 +24994,6 @@ async function markAllClientNotificationsRead() {
     renderClientNotifications();
 
 }
-
 
 // ========================================
 // DISMISS ONE NOTIFICATION
@@ -25071,7 +25075,6 @@ async function dismissClientNotification(
 
 }
 
-
 // ========================================
 // CLEAR ALL NOTIFICATIONS
 // ========================================
@@ -25139,6 +25142,112 @@ async function clearAllClientNotifications() {
 
 
     renderClientNotifications();
+
+}
+
+// ========================================
+// CLIENT VISIT REALTIME
+// ========================================
+
+let clientVisitRealtimeChannel =
+    null;
+
+
+let clientVisitRealtimeRefreshTimer =
+    null;
+
+
+// ========================================
+// SCHEDULE CLIENT VISIT REFRESH
+// ========================================
+
+function scheduleClientVisitRealtimeRefresh() {
+
+    if (
+        clientVisitRealtimeRefreshTimer
+    ) {
+
+        window.clearTimeout(
+            clientVisitRealtimeRefreshTimer
+        );
+
+    }
+
+
+    clientVisitRealtimeRefreshTimer =
+        window.setTimeout(
+            async () => {
+
+                clientVisitRealtimeRefreshTimer =
+                    null;
+
+
+                await refreshUpcomingVisits();
+
+
+                console.log(
+                    "Client visits refreshed from Realtime."
+                );
+
+            },
+            300
+        );
+
+}
+
+
+// ========================================
+// SUBSCRIBE TO CLIENT VISITS
+// ========================================
+
+function subscribeToClientVisitRealtime() {
+
+    if (
+        !currentUser?.id ||
+        clientVisitRealtimeChannel
+    ) {
+
+        return;
+
+    }
+
+
+    clientVisitRealtimeChannel =
+        supabaseClient
+            .channel(
+                `client-visits-${currentUser.id}`
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event:
+                        "*",
+
+                    schema:
+                        "public",
+
+                    table:
+                        "visits",
+
+                    filter:
+                        `client_id=eq.${currentUser.id}`
+                },
+                () => {
+
+                    scheduleClientVisitRealtimeRefresh();
+
+                }
+            )
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "Client visit Realtime:",
+                        status
+                    );
+
+                }
+            );
 
 }
 
