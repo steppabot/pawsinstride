@@ -13039,94 +13039,196 @@ function updateBookingTotal() {
     }
 
 
+// ========================================
+// CALCULATE WEEKLY SERVICE DAYS
+// ========================================
+//
+// 5+ UNIQUE service days inside the same
+// Monday-Sunday week receives 12% off.
+//
+// Multiple visits on the same date still
+// count as ONE service day.
+//
+// Only Dog Walking + Drop-In qualify.
+// ========================================
+
+const weeklyServiceDays =
+    new Map();
+
+
+selectedVisits.forEach(
+    visit => {
+
+        const weekKey =
+            getWeekKey(
+                visit.date
+            );
+
+
+        if (
+            !weeklyServiceDays.has(
+                weekKey
+            )
+        ) {
+
+            weeklyServiceDays.set(
+                weekKey,
+                new Set()
+            );
+
+        }
+
+
+        weeklyServiceDays
+            .get(
+                weekKey
+            )
+            .add(
+                visit.date
+            );
+
+    }
+);
+
+
     // ========================================
     // CALCULATE EACH SELECTED VISIT
     // ========================================
-
+    
     const pricedVisits =
         selectedVisits.map(
             visit => {
-
+    
                 let surcharge =
                     0;
-
-
+    
+    
                 if (
                     serviceType ===
                         "Dog Walking" ||
                     serviceType ===
                         "Drop-In Visit"
                 ) {
-
+    
                     const timeWindowConfig =
                         TIME_WINDOWS.find(
                             window =>
                                 window.value ===
                                 visit.timeWindow
                         );
-
-
+    
+    
                     if (
                         timeWindowConfig
                     ) {
-
+    
                         const timeWindowDisplay =
                             getPreferredTimeWindowLabel(
                                 timeWindowConfig,
                                 pricing
                             );
-
-
+    
+    
                         surcharge =
                             Number(
                                 timeWindowDisplay
                                     ?.surcharge
                             ) || 0;
-
+    
                     }
-
+    
                 }
-
-
+    
+    
                 const holidayName =
                     getServiceHolidayName(
                         visit.date
                     );
-
-
+    
+    
                 const visitHolidayFee =
                     holidayName
                         ? holidayFee
                         : 0;
-
-
-                const visitTotal =
+    
+    
+                // ========================================
+                // 5+ DAY WEEKLY DISCOUNT
+                // ========================================
+    
+                const weekKey =
+                    getWeekKey(
+                        visit.date
+                    );
+    
+    
+                const weekServiceDayCount =
+                    weeklyServiceDays
+                        .get(
+                            weekKey
+                        )
+                        ?.size || 0;
+    
+    
+                const qualifiesForWeeklyDiscount =
+                    (
+                        serviceType ===
+                            "Dog Walking" ||
+                        serviceType ===
+                            "Drop-In Visit"
+                    ) &&
+                    weekServiceDayCount >=
+                        5;
+    
+    
+                const discountableBase =
                     basePrice +
-                    additionalPetFee +
+                    additionalPetFee;
+    
+    
+                const weeklyDiscount =
+                    qualifiesForWeeklyDiscount
+                        ? Math.round(
+                            (
+                                discountableBase *
+                                0.12
+                            ) *
+                            100
+                        ) / 100
+                        : 0;
+    
+    
+                const visitTotal =
+                    discountableBase -
+                    weeklyDiscount +
                     surcharge +
                     visitHolidayFee;
-
-
+    
+    
                 return {
-
+    
                     ...visit,
-
+    
                     surcharge,
-
+    
                     holidayName,
-
+    
                     holidayFee:
                         visitHolidayFee,
-
+    
+                    weeklyDiscount,
+    
+                    qualifiesForWeeklyDiscount,
+    
                     total:
                         visitTotal
-
+    
                 };
-
+    
             }
         );
-
-
+    
+    
     // ========================================
     // TOTAL PRICE
     // ========================================
@@ -13221,6 +13323,46 @@ function updateBookingTotal() {
     }
 
 
+    // ========================================
+    // WEEKLY DISCOUNT
+    // ========================================
+    
+    const weeklyDiscountTotal =
+        pricedVisits.reduce(
+            (
+                sum,
+                visit
+            ) =>
+                sum +
+                Number(
+                    visit.weeklyDiscount ||
+                    0
+                ),
+            0
+        );
+    
+    
+    const discountedVisitCount =
+        pricedVisits.filter(
+            visit =>
+                visit.weeklyDiscount >
+                0
+        ).length;
+    
+    
+    if (
+        weeklyDiscountTotal >
+        0
+    ) {
+    
+        pieces.push(
+            `12% weekly discount -$${formatServicePrice(
+                weeklyDiscountTotal
+            )}`
+        );
+    
+    }
+    
     // ========================================
     // EVENING SURCHARGES
     // ========================================
