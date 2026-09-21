@@ -2600,7 +2600,6 @@ document.getElementById(
 
 );
 
-
 // ========================================
 // RENDER ADMIN CALENDAR
 // ========================================
@@ -2718,20 +2717,7 @@ function renderAdminCalendar() {
 
 
     let blanks =
-        firstDay.getDay() -
-        1;
-
-
-    if (
-        blanks <
-        0
-    ) {
-
-
-        blanks =
-            6;
-
-    }
+        firstDay.getDay();
 
 
     for (
