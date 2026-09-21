@@ -3081,14 +3081,9 @@ async function completeExistingClientSignup() {
         // EXISTING CLIENT PRICING TIER
         // ========================================
         //
-        // Existing clients keep their current pricing
-        // until the October 1 pricing transition.
-        //
-        // Existing Client:
-        //     preferred
-        //
-        // On October 1:
-        //     preferred -> grandfathered
+        // Existing clients receive the
+        // grandfathered pricing tier when
+        // creating their portal account.
         // ========================================
         
         const {
@@ -3099,7 +3094,7 @@ async function completeExistingClientSignup() {
                 .update({
         
                     pricing_tier:
-                        "preferred"
+                        "grandfathered"
         
                 })
                 .eq(
@@ -3115,7 +3110,8 @@ async function completeExistingClientSignup() {
             );
         
         }
-
+        
+        
         // ========================================
         // SIGN USER BACK OUT
         // ========================================
