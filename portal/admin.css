@@ -6422,7 +6422,6 @@ body.admin-client-household-modal-open {
     white-space:
         nowrap;
 }
-
 /* ========================================
    PET DETAILS
 ======================================== */
@@ -6435,7 +6434,7 @@ body.admin-client-household-modal-open {
         column;
 
     margin:
-        10px;
+        9px;
 
     overflow:
         hidden;
@@ -6456,12 +6455,28 @@ body.admin-client-household-modal-open {
 ======================================== */
 
 .admin-client-pet-detail {
+    display:
+        grid;
+
+    grid-template-columns:
+        92px
+        minmax(
+            0,
+            1fr
+        );
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
     min-width:
         0;
 
     padding:
         8px
-        11px;
+        10px;
 
     background:
         transparent;
@@ -6487,8 +6502,8 @@ body.admin-client-household-modal-open {
     display:
         block;
 
-    margin-bottom:
-        3px;
+    margin:
+        0;
 
     color:
         #748995;
@@ -6539,7 +6554,6 @@ body.admin-client-household-modal-open {
     width:
         100%;
 }
-
 
 /* ========================================
    PET CARDS — TABLET
