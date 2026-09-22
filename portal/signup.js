@@ -3076,42 +3076,6 @@ async function completeExistingClientSignup() {
             throw onboardingError;
         }
         
-        
-        // ========================================
-        // EXISTING CLIENT PRICING TIER
-        // ========================================
-        //
-        // Existing clients receive the
-        // grandfathered pricing tier when
-        // creating their portal account.
-        // ========================================
-        
-        const {
-            error: pricingTierError
-        } =
-            await signupSupabase
-                .from("profiles")
-                .update({
-        
-                    pricing_tier:
-                        "grandfathered"
-        
-                })
-                .eq(
-                    "id",
-                    authData.user.id
-                );
-        
-        
-        if (pricingTierError) {
-        
-            throw new Error(
-                `Your account was created, but we couldn't apply your existing-client pricing. ${pricingTierError.message}`
-            );
-        
-        }
-        
-        
         // ========================================
         // SIGN USER BACK OUT
         // ========================================
