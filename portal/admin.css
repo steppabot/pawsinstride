@@ -4839,43 +4839,171 @@ p {
 
 
 /* ========================================
-   CLIENT HOUSEHOLD DETAIL
+   CLIENT HOUSEHOLD MODAL
 ======================================== */
 
-.admin-client-household-detail {
-    margin:
+.admin-client-household-modal {
+    position:
+        fixed;
+
+    inset:
         0;
 
+    z-index:
+        1200;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
     padding:
-        22px;
+        24px;
+
+    background:
+        rgba(10, 31, 45, 0.58);
+
+    backdrop-filter:
+        blur(8px);
+
+    -webkit-backdrop-filter:
+        blur(8px);
+}
+
+
+.admin-client-household-modal[hidden] {
+    display:
+        none !important;
+}
+
+
+body.admin-client-household-modal-open {
+    overflow:
+        hidden;
+}
+
+
+/* ========================================
+   HOUSEHOLD MODAL PANEL
+======================================== */
+
+.admin-client-household-modal-panel {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    width:
+        min(
+            1100px,
+            100%
+        );
+
+    max-height:
+        calc(
+            100vh -
+            48px
+        );
+
+    overflow:
+        hidden;
 
     background:
         #ffffff;
 
     border:
-        1px solid #d6e4eb;
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.28
+        );
 
     border-radius:
-        18px;
+        22px;
 
     box-shadow:
-        0 8px 22px rgba(24,52,71,0.07);
+        0
+        28px
+        70px
+        rgba(
+            6,
+            31,
+            48,
+            0.32
+        );
 }
 
 
 /* ========================================
-   HOUSEHOLD DETAIL HEADER
+   HOUSEHOLD MODAL HEADER
 ======================================== */
 
 .admin-client-household-header {
     position:
         relative;
 
-    padding-bottom:
-        20px;
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    flex-shrink:
+        0;
+
+    padding:
+        20px
+        24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
 
     border-bottom:
-        1px solid #e3edf2;
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.18
+        );
+}
+
+
+/* ========================================
+   HOUSEHOLD MODAL BODY
+======================================== */
+
+.admin-client-household-modal-body {
+    min-height:
+        0;
+
+    padding:
+        22px
+        24px
+        28px;
+
+    overflow-y:
+        auto;
+
+    overscroll-behavior:
+        contain;
 }
 
 
@@ -4884,18 +5012,6 @@ p {
 ======================================== */
 
 .admin-client-household-close {
-    position:
-        absolute;
-
-    top:
-        0;
-
-    right:
-        0;
-
-    z-index:
-        2;
-
     display:
         inline-flex;
 
@@ -4905,35 +5021,51 @@ p {
     justify-content:
         center;
 
+    flex:
+        0
+        0
+        38px;
+
     width:
-        34px;
+        38px;
 
     height:
-        34px;
+        38px;
 
     padding:
         0;
 
     background:
-        #f4f8fa;
+        rgba(
+            255,
+            255,
+            255,
+            0.14
+        );
 
     color:
-        #667784;
+        #ffffff;
 
     border:
-        1px solid #d6e4eb;
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.32
+        );
 
     border-radius:
-        9px;
+        10px;
 
     font-family:
         inherit;
 
     font-size:
-        22px;
+        24px;
 
     font-weight:
-        500;
+        400;
 
     line-height:
         1;
@@ -4943,7 +5075,6 @@ p {
 
     transition:
         background 0.18s ease,
-        color 0.18s ease,
         border-color 0.18s ease,
         transform 0.18s ease;
 }
@@ -4951,29 +5082,23 @@ p {
 
 .admin-client-household-close:hover {
     background:
-        #eef7fd;
-
-    color:
-        #1f7bc2;
+        rgba(
+            255,
+            255,
+            255,
+            0.24
+        );
 
     border-color:
-        #9ed2f2;
+        rgba(
+            255,
+            255,
+            255,
+            0.55
+        );
 
     transform:
-        scale(1.03);
-}
-
-
-/* ========================================
-   HIDE DIRECTORY WHILE HOUSEHOLD IS OPEN
-======================================== */
-
-.admin-client-directory-heading[hidden],
-.admin-client-search[hidden],
-.admin-client-directory-list[hidden],
-.admin-client-household-detail[hidden] {
-    display:
-        none !important;
+        scale(1.04);
 }
 
 
@@ -4990,6 +5115,9 @@ p {
 
     gap:
         14px;
+
+    min-width:
+        0;
 }
 
 
@@ -5015,21 +5143,38 @@ p {
         54px;
 
     background:
-        linear-gradient(
-            135deg,
-            #2890df 0%,
-            #1f7bc2 58%,
-            #1768aa 100%
+        rgba(
+            255,
+            255,
+            255,
+            0.18
         );
 
     color:
         #ffffff;
 
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.34
+        );
+
     border-radius:
         14px;
 
     box-shadow:
-        0 7px 16px rgba(31,123,194,0.20);
+        0
+        7px
+        16px
+        rgba(
+            16,
+            80,
+            124,
+            0.16
+        );
 
     font-size:
         15px;
@@ -5042,18 +5187,48 @@ p {
 }
 
 
+.admin-client-household-heading
+.admin-screen-eyebrow {
+    display:
+        inline-block;
+
+    margin-bottom:
+        4px;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.72
+        );
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.12em;
+
+    text-transform:
+        uppercase;
+}
+
+
 .admin-client-household-heading h2 {
     margin:
         0;
 
     color:
-        #183447;
+        #ffffff;
 
     font-size:
         22px;
 
     font-weight:
-        800;
+        850;
 
     line-height:
         1.2;
@@ -5067,13 +5242,206 @@ p {
         0;
 
     color:
-        #6b7785;
+        rgba(
+            255,
+            255,
+            255,
+            0.80
+        );
 
     font-size:
         11px;
 
     line-height:
         1.4;
+}
+
+
+/* ========================================
+   HOUSEHOLD NOTES GRID
+======================================== */
+
+.admin-client-household-notes-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        12px;
+}
+
+
+/* ========================================
+   HOUSEHOLD NOTE CARD
+======================================== */
+
+.admin-client-household-note-card {
+    min-width:
+        0;
+
+    padding:
+        15px
+        16px;
+
+    background:
+        #f8fbfd;
+
+    border:
+        1px solid
+        #dce9f0;
+
+    border-radius:
+        12px;
+}
+
+
+.admin-client-household-note-card > span {
+    display:
+        block;
+
+    margin-bottom:
+        7px;
+
+    color:
+        #6f8491;
+
+    font-size:
+        8px;
+
+    font-weight:
+        850;
+
+    letter-spacing:
+        0.08em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.admin-client-household-note-card strong,
+.admin-client-household-note-card p {
+    display:
+        block;
+
+    margin:
+        0;
+
+    color:
+        #183447;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+    line-height:
+        1.55;
+
+    white-space:
+        pre-wrap;
+
+    overflow-wrap:
+        anywhere;
+}
+
+
+.admin-client-household-note-wide {
+    grid-column:
+        1 /
+        -1;
+}
+
+
+/* ========================================
+   HOUSEHOLD MODAL — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-client-household-modal {
+        align-items:
+            stretch;
+
+        padding:
+            0;
+    }
+
+
+    .admin-client-household-modal-panel {
+        width:
+            100%;
+
+        max-height:
+            100dvh;
+
+        height:
+            100dvh;
+
+        border:
+            0;
+
+        border-radius:
+            0;
+    }
+
+
+    .admin-client-household-header {
+        padding:
+            16px
+            18px;
+    }
+
+
+    .admin-client-household-modal-body {
+        padding:
+            16px
+            14px
+            28px;
+    }
+
+
+    .admin-client-household-avatar {
+        flex-basis:
+            46px;
+
+        width:
+            46px;
+
+        height:
+            46px;
+
+        border-radius:
+            12px;
+    }
+
+
+    .admin-client-household-heading h2 {
+        font-size:
+            19px;
+    }
+
+
+    .admin-client-household-notes-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .admin-client-household-note-wide {
+        grid-column:
+            auto;
+    }
+
 }
 
 /* ========================================
