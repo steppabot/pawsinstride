@@ -78,6 +78,10 @@ let allHouseholds =
     [];
 
 
+let allPropertyAccess =
+    [];
+
+
 let allVisitReports =
     [];
 
@@ -496,6 +500,9 @@ async function loadAdminDashboard() {
                     households:
                         allHouseholds,
     
+                    propertyAccess:
+                        allPropertyAccess,
+    
                     visitReports:
                         allVisitReports,
     
@@ -533,6 +540,7 @@ async function loadAdminDashboard() {
         petsResult,
         visitsResult,
         householdsResult,
+        propertyAccessResult,
         visitReportsResult
     
     ] =
@@ -549,7 +557,7 @@ async function loadAdminDashboard() {
             supabaseClient
                 .from("pets")
                 .select(
-                    "id, client_id, name, breed, gender, photo_path"
+                    "id, client_id, name, breed, gender, birthday, feeding_notes, care_notes, photo_path"
                 ),
     
     
@@ -568,10 +576,17 @@ async function loadAdminDashboard() {
             supabaseClient
                 .from("households")
                 .select(
-                    "client_id, street_address, address_line_2, city, state, zip_code"
+                    "client_id, street_address, address_line_2, city, state, zip_code, preferred_contact_method, emergency_contact_name, emergency_contact_phone, home_notes"
                 ),
     
-                
+    
+            supabaseClient
+                .from("property_access")
+                .select(
+                    "client_id, gate_code, door_code, key_instructions, alarm_instructions, parking_instructions, other_access_notes"
+                ),
+    
+    
             supabaseClient
                 .from("visit_reports")
                 .select(
@@ -579,6 +594,7 @@ async function loadAdminDashboard() {
                 )
     
         ]);
+    
     
     // ========================================
     // SERVER VISITS AVAILABLE
@@ -629,6 +645,19 @@ async function loadAdminDashboard() {
     
     
         if (
+            propertyAccessResult.error
+        ) {
+    
+    
+            console.error(
+                "Admin property access error:",
+                propertyAccessResult.error
+            );
+    
+        }
+    
+    
+        if (
             visitReportsResult.error
         ) {
     
@@ -658,6 +687,11 @@ async function loadAdminDashboard() {
     
         allHouseholds =
             householdsResult.data ||
+            [];
+    
+    
+        allPropertyAccess =
+            propertyAccessResult.data ||
             [];
     
     
@@ -740,6 +774,14 @@ async function loadAdminDashboard() {
                 : [];
     
     
+        allPropertyAccess =
+            Array.isArray(
+                offlineData.propertyAccess
+            )
+                ? offlineData.propertyAccess
+                : [];
+    
+    
         allVisitReports =
             Array.isArray(
                 offlineData.visitReports
@@ -755,7 +797,8 @@ async function loadAdminDashboard() {
         );
     
     }
-
+    
+    
     // ========================================
     // RESTORE PENDING LOCAL VISIT STATES
     // ========================================
@@ -1258,6 +1301,7 @@ async function refreshAdminBusinessData() {
             petsResult,
             visitsResult,
             householdsResult,
+            propertyAccessResult,
             visitPetsResult
 
         ] =
@@ -1276,7 +1320,7 @@ async function refreshAdminBusinessData() {
                         "pets"
                     )
                     .select(
-                        "id, client_id, name, breed, gender, photo_path"
+                        "id, client_id, name, breed, gender, birthday, feeding_notes, care_notes, photo_path"
                     ),
 
                 supabaseClient
@@ -1299,7 +1343,15 @@ async function refreshAdminBusinessData() {
                         "households"
                     )
                     .select(
-                        "client_id, street_address, address_line_2, city, state, zip_code"
+                        "client_id, street_address, address_line_2, city, state, zip_code, preferred_contact_method, emergency_contact_name, emergency_contact_phone, home_notes"
+                    ),
+
+                supabaseClient
+                    .from(
+                        "property_access"
+                    )
+                    .select(
+                        "client_id, gate_code, door_code, key_instructions, alarm_instructions, parking_instructions, other_access_notes"
                     ),
 
                 supabaseClient
@@ -1318,6 +1370,7 @@ async function refreshAdminBusinessData() {
             petsResult.error ||
             visitsResult.error ||
             householdsResult.error ||
+            propertyAccessResult.error ||
             visitPetsResult.error;
 
 
@@ -1347,6 +1400,11 @@ async function refreshAdminBusinessData() {
 
         allHouseholds =
             householdsResult.data ||
+            [];
+
+
+        allPropertyAccess =
+            propertyAccessResult.data ||
             [];
 
 
@@ -1455,6 +1513,7 @@ function setupAdminBusinessRealtime() {
         "pets",
         "visits",
         "households",
+        "property_access",
         "visit_pets"
 
     ];
