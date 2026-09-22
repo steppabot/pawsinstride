@@ -5983,7 +5983,6 @@ body.admin-client-household-modal-open {
 
 }
 
-
 /* ========================================
    HOUSEHOLD INFO GRID — MOBILE
 ======================================== */
@@ -5992,22 +5991,48 @@ body.admin-client-household-modal-open {
 
     .admin-client-household-grid {
         grid-template-columns:
-            1fr;
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap:
+            8px;
 
         padding:
             8px;
     }
 
 
-    .admin-client-pricing-tier-card {
+    .admin-client-pricing-tier-card,
+    .admin-client-credit-card {
         grid-column:
-            auto;
+            1 /
+            -1;
     }
 
 
     .admin-client-household-info-card {
         min-height:
-            76px;
+            68px;
+
+        padding:
+            12px;
+    }
+
+
+    .admin-client-household-info-card > strong {
+        white-space:
+            normal;
+
+        overflow-wrap:
+            anywhere;
+
+        text-overflow:
+            clip;
     }
 
 }
