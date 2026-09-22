@@ -10487,3 +10487,55 @@ body.admin-client-credit-modal-open {
     }
 
 }
+
+/* ========================================
+   CLIENT HOUSEHOLD CARDS - MOBILE FIX
+======================================== */
+
+@media (max-width: 768px) {
+
+    .admin-client-household-grid,
+    .client-household-grid,
+    .admin-client-summary-grid,
+    .client-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+
+    .admin-client-household-grid > *,
+    .client-household-grid > *,
+    .admin-client-summary-grid > *,
+    .client-summary-grid > * {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+
+    .admin-client-household-card,
+    .client-household-card,
+    .admin-client-summary-card,
+    .client-summary-card {
+        width: 100% !important;
+        min-height: auto !important;
+    }
+
+
+    .admin-client-household-card .admin-card-value,
+    .client-household-card .admin-card-value,
+    .admin-client-summary-card .admin-card-value,
+    .client-summary-card .admin-card-value {
+        word-break: break-word;
+    }
+
+
+    .admin-client-household-card button,
+    .client-household-card button,
+    .admin-client-summary-card button,
+    .client-summary-card button {
+        width: 100%;
+    }
+
+}
