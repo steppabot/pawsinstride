@@ -16184,51 +16184,161 @@ function buildClientVisitProgressSection(
         progress.state ===
         "checked_in"
     ) {
-
-
+    
+    
         const checkedIn =
             formatClientVisitTimestamp(
                 progress.checkedInAt
             );
-
-
+    
+    
+        const liveWalk =
+            currentClientLiveWalks.get(
+                Number(
+                    visit.id
+                )
+            ) ||
+            null;
+    
+    
+        // ========================================
+        // LIVE WALK IN PROGRESS
+        // ========================================
+    
+        if (
+            liveWalk
+        ) {
+    
+            const startedAt =
+                new Date(
+                    liveWalk.started_at
+                );
+    
+    
+            const elapsedMilliseconds =
+                Date.now() -
+                startedAt.getTime();
+    
+    
+            const elapsedMinutes =
+                Number.isFinite(
+                    elapsedMilliseconds
+                ) &&
+                elapsedMilliseconds >
+                    0
+    
+                    ? Math.floor(
+                        elapsedMilliseconds /
+                        60000
+                    )
+    
+                    : 0;
+    
+    
+            const distanceMeters =
+                Number(
+                    liveWalk.distance_meters ||
+                    0
+                );
+    
+    
+            const distanceMiles =
+                (
+                    distanceMeters /
+                    1609.344
+                ).toFixed(
+                    2
+                );
+    
+    
+            return `
+    
+                <div class="client-visit-progress client-visit-progress-live">
+    
+    
+                    <div class="client-visit-progress-heading">
+    
+                        <span class="client-visit-live-dot"></span>
+    
+                        <strong>
+                            Walk In Progress
+                        </strong>
+    
+                    </div>
+    
+    
+                    <p
+                        class="client-live-walk-summary"
+                        data-live-walk-started-at="${escapeHtml(
+                            liveWalk.started_at ||
+                            ""
+                        )}"
+                        data-live-walk-distance-meters="${distanceMeters}"
+                    >
+    
+                        ${elapsedMinutes}
+                        ${
+                            elapsedMinutes ===
+                            1
+    
+                                ? "minute"
+    
+                                : "minutes"
+                        }
+                        ·
+                        ${distanceMiles} mi
+    
+                    </p>
+    
+    
+                </div>
+    
+            `;
+    
+        }
+    
+    
+        // ========================================
+        // VISIT CHECKED IN / NO WALK YET
+        // ========================================
+    
         return `
-
+    
             <div class="client-visit-progress client-visit-progress-live">
-
-
+    
+    
                 <div class="client-visit-progress-heading">
-
+    
                     <span class="client-visit-live-dot"></span>
-
+    
                     <strong>
                         Visit In Progress
                     </strong>
-
+    
                 </div>
-
-
+    
+    
                 <p>
-
+    
                     Your pet care provider checked in${
-
+    
                         checkedIn
-
+    
                             ? ` at ${escapeHtml(
                                 checkedIn
                             )}`
-
+    
                             : ""
-
+    
                     }.
-
+    
                 </p>
-
-
+    
+    
             </div>
-
+    
         `;
-
+    
     }
 
 
@@ -20482,10 +20592,34 @@ window.addEventListener(
     ) {
     
         // ========================================
-        // CLIENT REALTIME VISITS
+        // LOAD CURRENT LIVE WALK STATE
         // ========================================
     
+        await refreshClientLiveWalks();
+    
+        // ========================================
+        // CLIENT REALTIME VISITS + WALKS
+        // ========================================
+        
         subscribeToClientVisitRealtime();
+        
+        subscribeToClientWalkRealtime();
+        
+        
+        // ========================================
+        // START LIVE WALK TIMER
+        // ========================================
+        
+        startClientLiveWalkTimer();
+        
+        
+        // ========================================
+        // RENDER LIVE WALK STATE
+        // ========================================
+        
+        renderSelectedUpcomingServices();
+        
+        await renderMobileHomeDashboard();
     
     
         try {
@@ -25144,6 +25278,365 @@ async function clearAllClientNotifications() {
     renderClientNotifications();
 
 }
+
+// ========================================
+// CLIENT LIVE WALK TIMER
+// ========================================
+
+let clientLiveWalkTimerInterval =
+    null;
+
+
+// ========================================
+// UPDATE LIVE WALK TIMERS
+// ========================================
+
+function updateClientLiveWalkTimers() {
+
+    document
+        .querySelectorAll(
+            ".client-live-walk-summary"
+        )
+        .forEach(
+            element => {
+
+                const startedAt =
+                    element.dataset
+                        .liveWalkStartedAt;
+
+
+                const distanceMeters =
+                    Number(
+                        element.dataset
+                            .liveWalkDistanceMeters ||
+                        0
+                    );
+
+
+                if (
+                    !startedAt
+                ) {
+
+                    return;
+
+                }
+
+
+                const startDate =
+                    new Date(
+                        startedAt
+                    );
+
+
+                const elapsedMilliseconds =
+                    Date.now() -
+                    startDate.getTime();
+
+
+                if (
+                    !Number.isFinite(
+                        elapsedMilliseconds
+                    ) ||
+                    elapsedMilliseconds <
+                        0
+                ) {
+
+                    return;
+
+                }
+
+
+                const elapsedMinutes =
+                    Math.floor(
+                        elapsedMilliseconds /
+                        60000
+                    );
+
+
+                const distanceMiles =
+                    (
+                        distanceMeters /
+                        1609.344
+                    ).toFixed(
+                        2
+                    );
+
+
+                element.textContent =
+                    `${elapsedMinutes} ${
+                        elapsedMinutes === 1
+                            ? "minute"
+                            : "minutes"
+                    } · ${distanceMiles} mi`;
+
+            }
+        );
+
+}
+
+
+// ========================================
+// START LIVE WALK TIMER
+// ========================================
+
+function startClientLiveWalkTimer() {
+
+    if (
+        clientLiveWalkTimerInterval
+    ) {
+
+        return;
+
+    }
+
+
+    updateClientLiveWalkTimers();
+
+
+    clientLiveWalkTimerInterval =
+        window.setInterval(
+            updateClientLiveWalkTimers,
+            1000
+        );
+
+}
+
+
+// ========================================
+// CLIENT LIVE WALK DATA
+// ========================================
+
+let currentClientLiveWalks =
+    new Map();
+
+
+// ========================================
+// REFRESH CLIENT LIVE WALKS
+// ========================================
+
+async function refreshClientLiveWalks() {
+
+    if (
+        !currentUser?.id
+    ) {
+
+        return;
+
+    }
+
+
+    const visitIds =
+        currentVisits
+            .filter(
+                visit => {
+
+                    const status =
+                        String(
+                            visit.status ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    return (
+                        status !==
+                            "cancelled" &&
+                        status !==
+                            "completed"
+                    );
+
+                }
+            )
+            .map(
+                visit =>
+                    Number(
+                        visit.id
+                    )
+            )
+            .filter(
+                Number.isFinite
+            );
+
+
+    if (
+        visitIds.length ===
+        0
+    ) {
+
+        currentClientLiveWalks =
+            new Map();
+
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from(
+                "visit_walks"
+            )
+            .select(
+                "id, visit_id, status, started_at, ended_at, duration_seconds, distance_meters, updated_at"
+            )
+            .in(
+                "visit_id",
+                visitIds
+            )
+            .eq(
+                "status",
+                "in_progress"
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Client live walk refresh error:",
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    currentClientLiveWalks =
+        new Map(
+            (
+                data ||
+                []
+            ).map(
+                walk => [
+                    Number(
+                        walk.visit_id
+                    ),
+                    walk
+                ]
+            )
+        );
+
+}
+
+// ========================================
+// CLIENT WALK REALTIME
+// ========================================
+
+let clientWalkRealtimeChannel =
+    null;
+
+
+let clientWalkRealtimeRefreshTimer =
+    null;
+
+
+// ========================================
+// SCHEDULE CLIENT WALK REFRESH
+// ========================================
+
+function scheduleClientWalkRealtimeRefresh() {
+
+    if (
+        clientWalkRealtimeRefreshTimer
+    ) {
+
+        window.clearTimeout(
+            clientWalkRealtimeRefreshTimer
+        );
+
+    }
+
+
+    clientWalkRealtimeRefreshTimer =
+        window.setTimeout(
+            async () => {
+
+                clientWalkRealtimeRefreshTimer =
+                    null;
+
+
+                await refreshClientLiveWalks();
+
+
+                renderSelectedUpcomingServices();
+
+                renderMobileHomeDashboard();
+
+
+                console.log(
+                    "Client walk data refreshed from Realtime."
+                );
+
+            },
+            300
+        );
+
+}
+
+
+// ========================================
+// SUBSCRIBE TO CLIENT WALK REALTIME
+// ========================================
+
+function subscribeToClientWalkRealtime() {
+
+    if (
+        !currentUser?.id ||
+        clientWalkRealtimeChannel
+    ) {
+
+        return;
+
+    }
+
+
+    clientWalkRealtimeChannel =
+        supabaseClient
+            .channel(
+                `client-walks-${currentUser.id}`
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event:
+                        "*",
+
+                    schema:
+                        "public",
+
+                    table:
+                        "visit_walks"
+                },
+                () => {
+
+                    scheduleClientWalkRealtimeRefresh();
+
+                }
+            )
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "Client walk Realtime:",
+                        status
+                    );
+
+                }
+            );
+
+}
+
+// ========================================
+// CLIENT VISIT REALTIME
+// ========================================
 
 // ========================================
 // CLIENT VISIT REALTIME
