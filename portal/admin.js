@@ -21426,6 +21426,62 @@ async function getAdminPetDisplayUrl(
 }
 
 
+// ========================================
+// FORMAT ADMIN PET BIRTHDAY
+// ========================================
+
+function formatAdminClientPetBirthday(
+    birthday
+) {
+
+
+    if (
+        !birthday
+    ) {
+
+        return "Not added";
+
+    }
+
+
+    const date =
+        parseLocalDate(
+            birthday
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "Not added";
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month:
+                "long",
+
+            day:
+                "numeric",
+
+            year:
+                "numeric"
+        }
+    );
+
+}
+
+
+// ========================================
+// BUILD ADMIN PET PROFILE
+// ========================================
+
 async function buildAdminClientPetCard(
     pet
 ) {
@@ -21436,17 +21492,30 @@ async function buildAdminClientPetCard(
         "Pet";
 
 
-    const petDetails =
-        [
-            pet.breed,
-            pet.gender
-        ]
-            .filter(
-                Boolean
-            )
-            .join(
-                " • "
-            );
+    const breed =
+        pet.breed ||
+        "Not added";
+
+
+    const gender =
+        pet.gender ||
+        "Not added";
+
+
+    const birthday =
+        formatAdminClientPetBirthday(
+            pet.birthday
+        );
+
+
+    const feedingNotes =
+        pet.feeding_notes ||
+        "No feeding notes added.";
+
+
+    const careNotes =
+        pet.care_notes ||
+        "No care notes added.";
 
 
     const photoUrl =
@@ -21460,32 +21529,92 @@ async function buildAdminClientPetCard(
         <article class="admin-client-pet-card">
 
 
-            <img
-                src="${escapeHtml(
-                    photoUrl
-                )}"
-                alt="${escapeHtml(
-                    petName
-                )}"
-                class="admin-client-pet-photo"
-                data-admin-pet-photo
-            >
+            <div class="admin-client-pet-header">
 
 
-            <div class="admin-client-pet-copy">
-
-                <strong>
-                    ${escapeHtml(
+                <img
+                    src="${escapeHtml(
+                        photoUrl
+                    )}"
+                    alt="${escapeHtml(
                         petName
-                    )}
-                </strong>
+                    )}"
+                    class="admin-client-pet-photo"
+                    data-admin-pet-photo
+                >
 
-                <span>
-                    ${escapeHtml(
-                        petDetails ||
-                        "Pet profile"
-                    )}
-                </span>
+
+                <div class="admin-client-pet-copy">
+
+                    <strong>
+                        ${escapeHtml(
+                            petName
+                        )}
+                    </strong>
+
+                    <span>
+                        ${escapeHtml(
+                            breed
+                        )}
+                        ·
+                        ${escapeHtml(
+                            gender
+                        )}
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="admin-client-pet-details">
+
+
+                <div class="admin-client-pet-detail">
+
+                    <span>
+                        Birthday
+                    </span>
+
+                    <strong>
+                        ${escapeHtml(
+                            birthday
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="admin-client-pet-detail admin-client-pet-detail-wide">
+
+                    <span>
+                        Feeding Notes
+                    </span>
+
+                    <p>
+                        ${escapeHtml(
+                            feedingNotes
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="admin-client-pet-detail admin-client-pet-detail-wide">
+
+                    <span>
+                        Care Notes
+                    </span>
+
+                    <p>
+                        ${escapeHtml(
+                            careNotes
+                        )}
+                    </p>
+
+                </div>
+
 
             </div>
 
@@ -21495,7 +21624,6 @@ async function buildAdminClientPetCard(
     `;
 
 }
-
 
 // ========================================
 // BUILD HOUSEHOLD VISIT ITEM
@@ -21665,6 +21793,19 @@ async function openAdminClientHousehold(
         );
 
 
+    const propertyAccess =
+        allPropertyAccess.find(
+            item =>
+                String(
+                    item.client_id
+                ) ===
+                String(
+                    clientId
+                )
+        ) ||
+        null;
+
+
     const pets =
         getAdminClientPets(
             clientId
@@ -21679,25 +21820,7 @@ async function openAdminClientHousehold(
 
     const address =
         getAdminClientAddress(
-            household
-        );
-
-
-    const directoryHeading =
-        document.getElementById(
-            "admin-client-directory-heading"
-        );
-
-
-    const search =
-        document.getElementById(
-            "admin-client-search"
-        );
-
-
-    const list =
-        document.getElementById(
-            "admin-client-list"
+            clientId
         );
 
 
@@ -21708,41 +21831,51 @@ async function openAdminClientHousehold(
 
 
     if (
-        directoryHeading
+        !detail
     ) {
 
-        directoryHeading.hidden =
-            true;
+        return;
 
     }
 
 
+    // ========================================
+    // OPEN MODAL
+    // ========================================
+
+    detail.hidden =
+        false;
+
+
+    detail.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document.body.classList.add(
+        "admin-client-household-modal-open"
+    );
+
+
+    // ========================================
+    // CLIENT IDENTITY
+    // ========================================
+
+    const avatar =
+        document.getElementById(
+            "admin-client-household-avatar"
+        );
+
+
     if (
-        search
+        avatar
     ) {
 
-        search.hidden =
-            true;
-
-    }
-
-
-    if (
-        list
-    ) {
-
-        list.hidden =
-            true;
-
-    }
-
-
-    if (
-        detail
-    ) {
-
-        detail.hidden =
-            false;
+        avatar.textContent =
+            getAdminClientInitials(
+                profile
+            );
 
     }
 
@@ -21772,6 +21905,10 @@ async function openAdminClientHousehold(
 
             : "No pets added";
 
+
+    // ========================================
+    // CLIENT OVERVIEW
+    // ========================================
 
     document.getElementById(
         "admin-client-household-phone"
@@ -21805,6 +21942,108 @@ async function openAdminClientHousehold(
 
                 : "visits"
         }`;
+
+
+    // ========================================
+    // HOUSEHOLD DETAILS
+    // ========================================
+
+    const preferredContact =
+        household
+            ?.preferred_contact_method ||
+        "Not added";
+
+
+    const emergencyParts =
+        [
+            household
+                ?.emergency_contact_name,
+
+            household
+                ?.emergency_contact_phone
+        ]
+            .filter(
+                Boolean
+            );
+
+
+    document.getElementById(
+        "admin-client-household-preferred-contact"
+    ).textContent =
+        preferredContact;
+
+
+    document.getElementById(
+        "admin-client-household-emergency-contact"
+    ).textContent =
+        emergencyParts.length >
+        0
+
+            ? emergencyParts.join(
+                " · "
+            )
+
+            : "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-home-notes"
+    ).textContent =
+        household
+            ?.home_notes ||
+        "No home notes added.";
+
+
+    // ========================================
+    // PROPERTY ACCESS
+    // ========================================
+
+    document.getElementById(
+        "admin-client-household-gate-code"
+    ).textContent =
+        propertyAccess
+            ?.gate_code ||
+        "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-door-code"
+    ).textContent =
+        propertyAccess
+            ?.door_code ||
+        "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-key-instructions"
+    ).textContent =
+        propertyAccess
+            ?.key_instructions ||
+        "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-alarm-instructions"
+    ).textContent =
+        propertyAccess
+            ?.alarm_instructions ||
+        "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-parking-instructions"
+    ).textContent =
+        propertyAccess
+            ?.parking_instructions ||
+        "Not added";
+
+
+    document.getElementById(
+        "admin-client-household-other-access-notes"
+    ).textContent =
+        propertyAccess
+            ?.other_access_notes ||
+        "Not added";
 
 
     // ========================================
@@ -21964,6 +22203,7 @@ async function openAdminClientHousehold(
         const {
             data:
                 creditBalance,
+
             error:
                 creditBalanceError
         } =
@@ -22053,6 +22293,7 @@ async function openAdminClientHousehold(
 
     }
 
+
     // ========================================
     // HOUSEHOLD PETS
     // ========================================
@@ -22140,6 +22381,10 @@ async function openAdminClientHousehold(
     }
 
 
+    // ========================================
+    // SERVICE ACTIVITY
+    // ========================================
+
     const activityContainer =
         document.getElementById(
             "admin-client-household-activity"
@@ -22226,42 +22471,51 @@ async function openAdminClientHousehold(
     }
 
 
-    window.scrollTo({
-        top:
-            0,
+    // ========================================
+    // RESET MODAL SCROLL POSITION
+    // ========================================
 
-        left:
-            0,
+    const modalBody =
+        detail.querySelector(
+            ".admin-client-household-modal-body"
+        );
 
-        behavior:
-            "auto"
-    });
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.scrollTop =
+            0;
+
+    }
+
+
+    // ========================================
+    // FOCUS CLOSE BUTTON
+    // ========================================
+
+    window.setTimeout(
+        () => {
+
+            document
+                .getElementById(
+                    "admin-client-household-back"
+                )
+                ?.focus();
+
+        },
+        0
+    );
 
 }
+
 
 // ========================================
 // CLOSE CLIENT HOUSEHOLD
 // ========================================
 
 function closeAdminClientHousehold() {
-
-
-    const directoryHeading =
-        document.querySelector(
-            ".admin-client-directory-heading"
-        );
-
-
-    const search =
-        document.querySelector(
-            ".admin-client-search"
-        );
-
-
-    const list =
-        document.getElementById(
-            "admin-client-directory-list"
-        );
 
 
     const detail =
@@ -22271,58 +22525,26 @@ function closeAdminClientHousehold() {
 
 
     if (
-        directoryHeading
-    ) {
-
-        directoryHeading.hidden =
-            false;
-
-    }
-
-
-    if (
-        search
-    ) {
-
-        search.hidden =
-            false;
-
-    }
-
-
-    if (
-        list
-    ) {
-
-        list.hidden =
-            false;
-
-    }
-
-
-    if (
         detail
     ) {
 
         detail.hidden =
             true;
 
+
+        detail.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
     }
 
 
-    window.scrollTo({
-        top:
-            0,
-
-        left:
-            0,
-
-        behavior:
-            "auto"
-    });
+    document.body.classList.remove(
+        "admin-client-household-modal-open"
+    );
 
 }
-
 
 // ========================================
 // CLIENT SERVICE HISTORY
