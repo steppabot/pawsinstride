@@ -3803,313 +3803,485 @@
                         
                         
                         <!-- ========================================
-                             CLIENT HOUSEHOLD DETAIL
+                             CLIENT HOUSEHOLD DETAIL MODAL
                              ======================================== -->
                         
                         <section
                             id="admin-client-household-detail"
-                            class="admin-client-household-detail"
+                            class="admin-client-household-modal"
                             hidden
+                            aria-hidden="true"
                         >
                         
                         
-                            <!-- ========================================
-                                 HOUSEHOLD DETAIL HEADER
-                                 ======================================== -->
-                            
-                            <div class="admin-client-household-header">
-                            
-                            
-                                <button
-                                    type="button"
-                                    id="admin-client-household-back"
-                                    class="admin-client-household-close"
-                                    aria-label="Close household details"
-                                >
-                                    ×
-                                </button>
-                            
-                            
-                                <div class="admin-client-household-heading">
-                            
-                            
-                                    <span
-                                        id="admin-client-household-avatar"
-                                        class="admin-client-household-avatar"
-                                    >
-                                        C
-                                    </span>
-                            
-                            
-                                    <div>
-                            
-                                        <span class="admin-screen-eyebrow">
-                                            CLIENT HOUSEHOLD
-                                        </span>
-                            
-                                        <h2 id="admin-client-household-name">
-                                            Client
-                                        </h2>
-                            
-                                        <p id="admin-client-household-pets-summary">
-                                            Household details
-                                        </p>
-                            
-                                    </div>
-                            
-                            
-                                </div>
-                            
-                            
-                            </div>
-                            
-                            
-                            <!-- ========================================
-                                 HOUSEHOLD CONTACT DETAILS
-                                 ======================================== -->
-                            
-                            <div class="admin-client-household-grid">
-                            
-                            
-                                <article class="admin-client-household-info-card">
-                            
-                                    <span class="admin-client-household-info-label">
-                                        Phone
-                                    </span>
-                            
-                                    <strong id="admin-client-household-phone">
-                                        Not added
-                                    </strong>
-                            
-                                </article>
-                            
-                            
-                                <article class="admin-client-household-info-card">
-                            
-                                    <span class="admin-client-household-info-label">
-                                        Email
-                                    </span>
-                            
-                                    <strong id="admin-client-household-email">
-                                        Not added
-                                    </strong>
-                            
-                                </article>
-                            
-                            
-                                <article class="admin-client-household-info-card">
-                            
-                                    <span class="admin-client-household-info-label">
-                                        Home Address
-                                    </span>
-                            
-                                    <strong id="admin-client-household-address">
-                                        Not added
-                                    </strong>
-                            
-                                </article>
-                            
-                            
-                                <article class="admin-client-household-info-card">
-                            
-                                    <span class="admin-client-household-info-label">
-                                        Service History
-                                    </span>
-                            
-                                    <strong id="admin-client-household-visits">
-                                        0 visits
-                                    </strong>
-                            
-                                </article>
-                            
-                            
+                            <div
+                                class="admin-client-household-modal-panel"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby="admin-client-household-name"
+                            >
+                        
+                        
                                 <!-- ========================================
-                                     PRICING TIER
+                                     HOUSEHOLD MODAL HEADER
                                      ======================================== -->
-                            
-                                <article
-                                    class="admin-client-household-info-card admin-client-pricing-tier-card"
-                                >
-                            
-                                    <span class="admin-client-household-info-label">
-                                        Pricing Tier
-                                    </span>
-                            
-                            
-                                    <div class="admin-client-pricing-tier-display">
-                            
-                                        <strong id="admin-client-household-pricing-tier">
-                                            Standard
-                                        </strong>
-                            
-                            
-                                        <button
-                                            type="button"
-                                            id="admin-client-pricing-tier-edit"
-                                            class="admin-client-pricing-tier-edit-button"
+                        
+                                <div class="admin-client-household-header">
+                        
+                        
+                                    <div class="admin-client-household-heading">
+                        
+                        
+                                        <span
+                                            id="admin-client-household-avatar"
+                                            class="admin-client-household-avatar"
                                         >
-                                            Edit
-                                        </button>
-                            
-                                    </div>
-                            
-                            
-                                    <div
-                                        id="admin-client-pricing-tier-editor"
-                                        class="admin-client-pricing-tier-editor"
-                                        hidden
-                                    >
-                            
-                                        <select
-                                            id="admin-client-pricing-tier-select"
-                                            aria-label="Client pricing tier"
-                                        >
-                            
-                                            <option value="standard">
-                                                Standard
-                                            </option>
-                            
-                                            <option value="grandfathered">
-                                                Legacy
-                                            </option>
-                            
-                                            <option value="preferred">
-                                                Preferred
-                                            </option>
-                            
-                                        </select>
-                            
-                            
-                                        <div class="admin-client-pricing-tier-actions">
-                            
-                                            <button
-                                                type="button"
-                                                id="admin-client-pricing-tier-cancel"
-                                                class="secondary-button"
-                                            >
-                                                Cancel
-                                            </button>
-                            
-                                            <button
-                                                type="button"
-                                                id="admin-client-pricing-tier-save"
-                                                class="primary-button"
-                                            >
-                                                Save
-                                            </button>
-                            
+                                            C
+                                        </span>
+                        
+                        
+                                        <div>
+                        
+                                            <span class="admin-screen-eyebrow">
+                                                CLIENT HOUSEHOLD
+                                            </span>
+                        
+                                            <h2 id="admin-client-household-name">
+                                                Client
+                                            </h2>
+                        
+                                            <p id="admin-client-household-pets-summary">
+                                                Household details
+                                            </p>
+                        
                                         </div>
-                            
+                        
+                        
                                     </div>
-                            
-                                </article>
-                            
-                            
-                                <!-- ========================================
-                                     ACCOUNT CREDIT
-                                     ======================================== -->
-                            
-                                <article
-                                    class="admin-client-household-info-card admin-client-credit-card"
-                                >
-                            
-                                    <span class="admin-client-household-info-label">
-                                        Account Credit
-                                    </span>
-                            
-                            
-                                    <div class="admin-client-credit-display">
-                            
-                                        <strong id="admin-client-household-credit">
-                                            $0.00
-                                        </strong>
-                            
-                            
-                                        <button
-                                            type="button"
-                                            id="admin-client-credit-add"
-                                            class="admin-client-credit-add-button"
-                                        >
-                                            + Add Credit
-                                        </button>
-                            
-                                    </div>
-                            
-                            
-                                    <span
-                                        id="admin-client-credit-status"
-                                        class="admin-client-credit-status"
+                        
+                        
+                                    <button
+                                        type="button"
+                                        id="admin-client-household-back"
+                                        class="admin-client-household-close"
+                                        aria-label="Close household details"
                                     >
-                                        Available balance
-                                    </span>
-                            
-                                </article>
-                            
-                            
-                            </div>
-                            
-                            
-                            <!-- ========================================
-                                 HOUSEHOLD PETS
-                                 ======================================== -->
+                                        ×
+                                    </button>
                         
-                            <div class="admin-client-household-section">
-                        
-                        
-                                <div class="admin-client-household-section-heading">
-                        
-                                    <div>
-                        
-                                        <span class="admin-screen-eyebrow">
-                                            PET PROFILES
-                                        </span>
-                        
-                                        <h3>
-                                            Pets
-                                        </h3>
-                        
-                                    </div>
                         
                                 </div>
                         
                         
-                                <div
-                                    id="admin-client-household-pets"
-                                    class="admin-client-household-pets"
-                                ></div>
+                                <!-- ========================================
+                                     HOUSEHOLD MODAL BODY
+                                     ======================================== -->
+                        
+                                <div class="admin-client-household-modal-body">
                         
                         
-                            </div>
+                                    <!-- ========================================
+                                         CLIENT OVERVIEW
+                                         ======================================== -->
+                        
+                                    <div class="admin-client-household-grid">
                         
                         
-                            <!-- ========================================
-                                 HOUSEHOLD SERVICE ACTIVITY
-                                 ======================================== -->
+                                        <article class="admin-client-household-info-card">
                         
-                            <div class="admin-client-household-section">
+                                            <span class="admin-client-household-info-label">
+                                                Phone
+                                            </span>
+                        
+                                            <strong id="admin-client-household-phone">
+                                                Not added
+                                            </strong>
+                        
+                                        </article>
                         
                         
-                                <div class="admin-client-household-section-heading">
+                                        <article class="admin-client-household-info-card">
                         
-                                    <div>
+                                            <span class="admin-client-household-info-label">
+                                                Email
+                                            </span>
                         
-                                        <span class="admin-screen-eyebrow">
-                                            SERVICE ACTIVITY
-                                        </span>
+                                            <strong id="admin-client-household-email">
+                                                Not added
+                                            </strong>
                         
-                                        <h3>
-                                            Visits
-                                        </h3>
+                                        </article>
+                        
+                        
+                                        <article class="admin-client-household-info-card">
+                        
+                                            <span class="admin-client-household-info-label">
+                                                Home Address
+                                            </span>
+                        
+                                            <strong id="admin-client-household-address">
+                                                Not added
+                                            </strong>
+                        
+                                        </article>
+                        
+                        
+                                        <article class="admin-client-household-info-card">
+                        
+                                            <span class="admin-client-household-info-label">
+                                                Service History
+                                            </span>
+                        
+                                            <strong id="admin-client-household-visits">
+                                                0 visits
+                                            </strong>
+                        
+                                        </article>
+                        
+                        
+                                        <!-- ========================================
+                                             PRICING TIER
+                                             ======================================== -->
+                        
+                                        <article
+                                            class="admin-client-household-info-card admin-client-pricing-tier-card"
+                                        >
+                        
+                                            <span class="admin-client-household-info-label">
+                                                Pricing Tier
+                                            </span>
+                        
+                        
+                                            <div class="admin-client-pricing-tier-display">
+                        
+                                                <strong id="admin-client-household-pricing-tier">
+                                                    Standard
+                                                </strong>
+                        
+                        
+                                                <button
+                                                    type="button"
+                                                    id="admin-client-pricing-tier-edit"
+                                                    class="admin-client-pricing-tier-edit-button"
+                                                >
+                                                    Edit
+                                                </button>
+                        
+                                            </div>
+                        
+                        
+                                            <div
+                                                id="admin-client-pricing-tier-editor"
+                                                class="admin-client-pricing-tier-editor"
+                                                hidden
+                                            >
+                        
+                                                <select
+                                                    id="admin-client-pricing-tier-select"
+                                                    aria-label="Client pricing tier"
+                                                >
+                        
+                                                    <option value="standard">
+                                                        Standard
+                                                    </option>
+                        
+                                                    <option value="grandfathered">
+                                                        Legacy
+                                                    </option>
+                        
+                                                    <option value="preferred">
+                                                        Preferred
+                                                    </option>
+                        
+                                                </select>
+                        
+                        
+                                                <div class="admin-client-pricing-tier-actions">
+                        
+                                                    <button
+                                                        type="button"
+                                                        id="admin-client-pricing-tier-cancel"
+                                                        class="secondary-button"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                        
+                                                    <button
+                                                        type="button"
+                                                        id="admin-client-pricing-tier-save"
+                                                        class="primary-button"
+                                                    >
+                                                        Save
+                                                    </button>
+                        
+                                                </div>
+                        
+                                            </div>
+                        
+                                        </article>
+                        
+                        
+                                        <!-- ========================================
+                                             ACCOUNT CREDIT
+                                             ======================================== -->
+                        
+                                        <article
+                                            class="admin-client-household-info-card admin-client-credit-card"
+                                        >
+                        
+                                            <span class="admin-client-household-info-label">
+                                                Account Credit
+                                            </span>
+                        
+                        
+                                            <div class="admin-client-credit-display">
+                        
+                                                <strong id="admin-client-household-credit">
+                                                    $0.00
+                                                </strong>
+                        
+                        
+                                                <button
+                                                    type="button"
+                                                    id="admin-client-credit-add"
+                                                    class="admin-client-credit-add-button"
+                                                >
+                                                    + Add Credit
+                                                </button>
+                        
+                                            </div>
+                        
+                        
+                                            <span
+                                                id="admin-client-credit-status"
+                                                class="admin-client-credit-status"
+                                            >
+                                                Available balance
+                                            </span>
+                        
+                                        </article>
+                        
                         
                                     </div>
                         
+                        
+                                    <!-- ========================================
+                                         HOUSEHOLD + ACCESS DETAILS
+                                         ======================================== -->
+                        
+                                    <div class="admin-client-household-section">
+                        
+                        
+                                        <div class="admin-client-household-section-heading">
+                        
+                                            <div>
+                        
+                                                <span class="admin-screen-eyebrow">
+                                                    HOME & ACCESS
+                                                </span>
+                        
+                                                <h3>
+                                                    Household Details
+                                                </h3>
+                        
+                                            </div>
+                        
+                                        </div>
+                        
+                        
+                                        <div class="admin-client-household-notes-grid">
+                        
+                        
+                                            <article class="admin-client-household-note-card">
+                        
+                                                <span>
+                                                    Preferred Contact
+                                                </span>
+                        
+                                                <strong id="admin-client-household-preferred-contact">
+                                                    Not added
+                                                </strong>
+                        
+                                            </article>
+                        
+                        
+                                            <article class="admin-client-household-note-card">
+                        
+                                                <span>
+                                                    Emergency Contact
+                                                </span>
+                        
+                                                <strong id="admin-client-household-emergency-contact">
+                                                    Not added
+                                                </strong>
+                        
+                                            </article>
+                        
+                        
+                                            <article class="admin-client-household-note-card admin-client-household-note-wide">
+                        
+                                                <span>
+                                                    Home Notes
+                                                </span>
+                        
+                                                <p id="admin-client-household-home-notes">
+                                                    No home notes added.
+                                                </p>
+                        
+                                            </article>
+                        
+                        
+                                            <article class="admin-client-household-note-card">
+                        
+                                                <span>
+                                                    Gate Code
+                                                </span>
+                        
+                                                <strong id="admin-client-household-gate-code">
+                                                    Not added
+                                                </strong>
+                        
+                                            </article>
+                        
+                        
+                                            <article class="admin-client-household-note-card">
+                        
+                                                <span>
+                                                    Door Code
+                                                </span>
+                        
+                                                <strong id="admin-client-household-door-code">
+                                                    Not added
+                                                </strong>
+                        
+                                            </article>
+                        
+                        
+                                            <article class="admin-client-household-note-card admin-client-household-note-wide">
+                        
+                                                <span>
+                                                    Key Instructions
+                                                </span>
+                        
+                                                <p id="admin-client-household-key-instructions">
+                                                    Not added
+                                                </p>
+                        
+                                            </article>
+                        
+                        
+                                            <article class="admin-client-household-note-card admin-client-household-note-wide">
+                        
+                                                <span>
+                                                    Alarm Instructions
+                                                </span>
+                        
+                                                <p id="admin-client-household-alarm-instructions">
+                                                    Not added
+                                                </p>
+                        
+                                            </article>
+                        
+                        
+                                            <article class="admin-client-household-note-card admin-client-household-note-wide">
+                        
+                                                <span>
+                                                    Parking Instructions
+                                                </span>
+                        
+                                                <p id="admin-client-household-parking-instructions">
+                                                    Not added
+                                                </p>
+                        
+                                            </article>
+                        
+                        
+                                            <article class="admin-client-household-note-card admin-client-household-note-wide">
+                        
+                                                <span>
+                                                    Other Access Notes
+                                                </span>
+                        
+                                                <p id="admin-client-household-other-access-notes">
+                                                    Not added
+                                                </p>
+                        
+                                            </article>
+                        
+                        
+                                        </div>
+                        
+                        
+                                    </div>
+                        
+                        
+                                    <!-- ========================================
+                                         HOUSEHOLD PETS
+                                         ======================================== -->
+                        
+                                    <div class="admin-client-household-section">
+                        
+                        
+                                        <div class="admin-client-household-section-heading">
+                        
+                                            <div>
+                        
+                                                <span class="admin-screen-eyebrow">
+                                                    PET PROFILES
+                                                </span>
+                        
+                                                <h3>
+                                                    Pets
+                                                </h3>
+                        
+                                            </div>
+                        
+                                        </div>
+                        
+                        
+                                        <div
+                                            id="admin-client-household-pets"
+                                            class="admin-client-household-pets"
+                                        ></div>
+                        
+                        
+                                    </div>
+                        
+                        
+                                    <!-- ========================================
+                                         HOUSEHOLD SERVICE ACTIVITY
+                                         ======================================== -->
+                        
+                                    <div class="admin-client-household-section">
+                        
+                        
+                                        <div class="admin-client-household-section-heading">
+                        
+                                            <div>
+                        
+                                                <span class="admin-screen-eyebrow">
+                                                    SERVICE ACTIVITY
+                                                </span>
+                        
+                                                <h3>
+                                                    Visits
+                                                </h3>
+                        
+                                            </div>
+                        
+                                        </div>
+                        
+                        
+                                        <div
+                                            id="admin-client-household-activity"
+                                            class="admin-client-household-activity"
+                                        ></div>
+                        
+                        
+                                    </div>
+                        
+                        
                                 </div>
-                        
-                        
-                                <div
-                                    id="admin-client-household-activity"
-                                    class="admin-client-household-activity"
-                                ></div>
                         
                         
                             </div>
