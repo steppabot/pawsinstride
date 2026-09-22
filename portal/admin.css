@@ -4402,7 +4402,6 @@ p {
 
 }
 
-
 /* ========================================
    CLIENT CARDS
 ======================================== */
@@ -4420,6 +4419,9 @@ p {
     padding:
         16px;
 
+    overflow:
+        hidden;
+
     background:
         #ffffff;
 
@@ -4430,7 +4432,7 @@ p {
         16px;
 
     box-shadow:
-        0 5px 14px rgba(24,52,71,0.045);
+        0 6px 16px rgba(24,52,71,0.06);
 
     transition:
         transform 0.18s ease,
@@ -4444,10 +4446,10 @@ p {
         translateY(-2px);
 
     border-color:
-        #b9d7ea;
+        #9ed2f2;
 
     box-shadow:
-        0 9px 20px rgba(24,52,71,0.08);
+        0 10px 24px rgba(24,52,71,0.10);
 }
 
 
@@ -4468,10 +4470,36 @@ p {
     min-width:
         0;
 
-    margin-bottom:
+    margin:
+        -16px
+        -16px
         15px;
+
+    padding:
+        15px
+        16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.16
+        );
 }
 
+
+/* ========================================
+   CLIENT CARD AVATAR
+======================================== */
 
 .admin-client-avatar,
 .admin-client-avatar-image {
@@ -4490,7 +4518,15 @@ p {
         12px;
 
     box-shadow:
-        0 5px 12px rgba(31,123,194,0.18);
+        0
+        5px
+        12px
+        rgba(
+            18,
+            91,
+            142,
+            0.18
+        );
 }
 
 
@@ -4505,15 +4541,24 @@ p {
         center;
 
     background:
-        linear-gradient(
-            135deg,
-            #2890df 0%,
-            #1f7bc2 58%,
-            #1768aa 100%
+        rgba(
+            255,
+            255,
+            255,
+            0.18
         );
 
     color:
         #ffffff;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.34
+        );
 
     font-size:
         13px;
@@ -4540,9 +4585,19 @@ p {
         #eef5f8;
 
     border:
-        2px solid #ffffff;
+        2px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.92
+        );
 }
 
+
+/* ========================================
+   CLIENT CARD IDENTITY
+======================================== */
 
 .admin-client-card-identity {
     min-width:
@@ -4561,13 +4616,13 @@ p {
         hidden;
 
     color:
-        #183447;
+        #ffffff;
 
     font-size:
         14px;
 
     font-weight:
-        800;
+        850;
 
     line-height:
         1.25;
@@ -4591,13 +4646,18 @@ p {
         3px;
 
     color:
-        #6b7785;
+        rgba(
+            255,
+            255,
+            255,
+            0.80
+        );
 
     font-size:
         11px;
 
     font-weight:
-        600;
+        650;
 
     text-overflow:
         ellipsis;
@@ -4605,7 +4665,6 @@ p {
     white-space:
         nowrap;
 }
-
 
 /* ========================================
    CLIENT CARD DETAILS
@@ -6187,12 +6246,36 @@ body.admin-client-household-modal-open {
 
 }
 
-
 /* ========================================
    CLIENT HOUSEHOLD PET CARDS
 ======================================== */
 
 .admin-client-pet-card {
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #dce8ee;
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        0 5px 16px rgba(24,52,71,0.06);
+}
+
+
+/* ========================================
+   PET CARD HEADER
+======================================== */
+
+.admin-client-pet-header {
     display:
         flex;
 
@@ -6202,23 +6285,22 @@ body.admin-client-household-modal-open {
     gap:
         12px;
 
-    min-width:
-        0;
-
     padding:
-        8px
-        4px;
+        14px
+        16px;
 
     background:
-        transparent;
-
-    border:
-        0;
-
-    border-radius:
-        0;
+        linear-gradient(
+            135deg,
+            #47cee6 0%,
+            #2890df 100%
+        );
 }
 
+
+/* ========================================
+   PET PHOTO
+======================================== */
 
 .admin-client-pet-photo {
     display:
@@ -6227,13 +6309,13 @@ body.admin-client-household-modal-open {
     flex:
         0
         0
-        52px;
+        58px;
 
     width:
-        52px;
+        58px;
 
     height:
-        52px;
+        58px;
 
     object-fit:
         cover;
@@ -6245,15 +6327,33 @@ body.admin-client-household-modal-open {
         #eef5f8;
 
     border:
-        2px solid #ffffff;
+        2px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.88
+        );
 
     border-radius:
         50%;
 
     box-shadow:
-        0 3px 10px rgba(24,52,71,0.14);
+        0
+        5px
+        14px
+        rgba(
+            22,
+            94,
+            145,
+            0.20
+        );
 }
 
+
+/* ========================================
+   PET IDENTITY
+======================================== */
 
 .admin-client-pet-copy {
     min-width:
@@ -6272,13 +6372,13 @@ body.admin-client-household-modal-open {
         hidden;
 
     color:
-        #183447;
+        #ffffff;
 
     font-size:
-        13px;
+        15px;
 
     font-weight:
-        800;
+        850;
 
     line-height:
         1.25;
@@ -6299,19 +6399,24 @@ body.admin-client-household-modal-open {
         hidden;
 
     margin-top:
-        3px;
+        4px;
 
     color:
-        #6b7785;
+        rgba(
+            255,
+            255,
+            255,
+            0.82
+        );
 
     font-size:
         10px;
 
     font-weight:
-        600;
+        650;
 
     line-height:
-        1.35;
+        1.4;
 
     text-overflow:
         ellipsis;
@@ -6320,6 +6425,180 @@ body.admin-client-household-modal-open {
         nowrap;
 }
 
+
+/* ========================================
+   PET DETAILS
+======================================== */
+
+.admin-client-pet-details {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        10px;
+
+    padding:
+        14px;
+}
+
+
+/* ========================================
+   PET DETAIL BLOCK
+======================================== */
+
+.admin-client-pet-detail {
+    min-width:
+        0;
+
+    padding:
+        11px
+        12px;
+
+    background:
+        #f8fbfd;
+
+    border:
+        1px solid #e0ebf0;
+
+    border-radius:
+        10px;
+}
+
+
+.admin-client-pet-detail > span {
+    display:
+        block;
+
+    margin-bottom:
+        5px;
+
+    color:
+        #748995;
+
+    font-size:
+        8px;
+
+    font-weight:
+        850;
+
+    letter-spacing:
+        0.08em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.admin-client-pet-detail strong,
+.admin-client-pet-detail p {
+    display:
+        block;
+
+    margin:
+        0;
+
+    color:
+        #183447;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    line-height:
+        1.55;
+
+    white-space:
+        pre-wrap;
+
+    overflow-wrap:
+        anywhere;
+}
+
+
+.admin-client-pet-detail-wide {
+    grid-column:
+        1 /
+        -1;
+}
+
+
+/* ========================================
+   PET CARDS — TABLET
+======================================== */
+
+@media (max-width:1050px) {
+
+    .admin-client-household-pets {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+}
+
+
+/* ========================================
+   PET CARDS — MOBILE
+======================================== */
+
+@media (max-width:700px) {
+
+    .admin-client-household-pets {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .admin-client-pet-header {
+        padding:
+            13px
+            14px;
+    }
+
+
+    .admin-client-pet-photo {
+        flex-basis:
+            54px;
+
+        width:
+            54px;
+
+        height:
+            54px;
+    }
+
+
+    .admin-client-pet-details {
+        grid-template-columns:
+            1fr;
+
+        padding:
+            12px;
+    }
+
+
+    .admin-client-pet-detail-wide {
+        grid-column:
+            auto;
+    }
+
+}
 
 /* ========================================
    CLIENT HOUSEHOLD ACTIVITY ITEMS
