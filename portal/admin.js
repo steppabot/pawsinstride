@@ -23414,6 +23414,21 @@ document.addEventListener(
 
 
         // ========================================
+        // CLOSE HOUSEHOLD MODAL ON BACKDROP
+        // ========================================
+
+        if (
+            event.target?.id ===
+            "admin-client-household-detail"
+        ) {
+
+            closeAdminClientHousehold();
+
+            return;
+
+        }
+
+        // ========================================
         // ADD ACCOUNT CREDIT
         // ========================================
 
@@ -26414,7 +26429,6 @@ document.addEventListener(
 
 );
 
-
 // ========================================
 // ESCAPE KEY
 // ========================================
@@ -26430,6 +26444,24 @@ document.addEventListener(
             event.key !==
             "Escape"
         ) {
+
+            return;
+
+        }
+
+
+        const householdModal =
+            document.getElementById(
+                "admin-client-household-detail"
+            );
+
+
+        if (
+            householdModal &&
+            !householdModal.hidden
+        ) {
+
+            closeAdminClientHousehold();
 
             return;
 
