@@ -19728,33 +19728,85 @@ body.admin-page {
         grid-template-columns: 1fr;
     }
 
-    /* ========================================
-       MOBILE PAYMENT HEADER
-    ======================================== */
-
-    .payment-page-header {
-        position: sticky;
-        top: 0;
-        z-index: 900;
-        gap: 10px;
-        margin: 0 -3% 18px;
-        padding: max(12px,env(safe-area-inset-top)) 3% 12px;
-        border-top: 0;
-        border-right: 0;
-        border-left: 0;
-        border-radius: 0 0 16px 16px;
-        background: rgba(255,255,255,0.94);
-        box-shadow: 0 5px 18px rgba(35,93,125,0.08);
-    }
-
-    .payment-page-header::before {
-        left: 0;
-        right: 0;
-    }
-
-    /* ========================================
-       MOBILE HEADER BRAND
-    ======================================== */
+   /* ========================================
+      MOBILE PAYMENT HEADER
+   ======================================== */
+   
+   .payment-page-header {
+       position:
+           sticky;
+   
+       top:
+           0;
+   
+       z-index:
+           900;
+   
+       gap:
+           10px;
+   
+       margin:
+           0
+           -3%
+           18px;
+   
+       padding:
+           max(
+               12px,
+               env(
+                   safe-area-inset-top
+               )
+           )
+           3%
+           12px;
+   
+       border-top:
+           0;
+   
+       border-right:
+           0;
+   
+       border-left:
+           0;
+   
+       border-radius:
+           0
+           0
+           16px
+           16px;
+   
+       background:
+           linear-gradient(
+               135deg,
+               #47cee6 0%,
+               #2890df 100%
+           );
+   
+       box-shadow:
+           0
+           7px
+           20px
+           rgba(
+               31,
+               123,
+               194,
+               0.20
+           );
+   }
+   
+   
+   .payment-page-header::before {
+       left:
+           0;
+   
+       right:
+           0;
+   }
+   
+   
+   /* ========================================
+      MOBILE HEADER BRAND
+   ======================================== */
 
     .payment-header-brand {
         flex: 1 1 auto;
