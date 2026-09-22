@@ -11188,23 +11188,81 @@ body.admin-client-credit-modal-open {
 
 @media (max-width: 768px) {
 
-    .admin-client-household-grid,
-    .client-household-grid,
-    .admin-client-summary-grid,
-    .client-summary-grid {
-        display: grid;
-        grid-template-columns: 1fr !important;
-        gap: 12px;
+    /* ========================================
+       ADMIN HOUSEHOLD MODAL GRID
+       ======================================== */
+
+    .admin-client-household-grid {
+        display:
+            grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            ) !important;
+
+        gap:
+            8px;
     }
 
 
-    .admin-client-household-grid > *,
+    .admin-client-household-grid >
+    .admin-client-household-info-card {
+        grid-column:
+            auto !important;
+
+        width:
+            100% !important;
+
+        min-width:
+            0 !important;
+    }
+
+
+    .admin-client-household-grid >
+    .admin-client-pricing-tier-card,
+    .admin-client-household-grid >
+    .admin-client-credit-card {
+        grid-column:
+            1 /
+            -1 !important;
+    }
+
+
+    /* ========================================
+       EXISTING CLIENT HOUSEHOLD MOBILE FIX
+       ======================================== */
+
+    .client-household-grid,
+    .admin-client-summary-grid,
+    .client-summary-grid {
+        display:
+            grid;
+
+        grid-template-columns:
+            1fr !important;
+
+        gap:
+            12px;
+    }
+
+
     .client-household-grid > *,
     .admin-client-summary-grid > *,
     .client-summary-grid > * {
-        grid-column: 1 / -1 !important;
-        width: 100% !important;
-        min-width: 0 !important;
+        grid-column:
+            1 /
+            -1 !important;
+
+        width:
+            100% !important;
+
+        min-width:
+            0 !important;
     }
 
 
@@ -11212,16 +11270,24 @@ body.admin-client-credit-modal-open {
     .client-household-card,
     .admin-client-summary-card,
     .client-summary-card {
-        width: 100% !important;
-        min-height: auto !important;
+        width:
+            100% !important;
+
+        min-height:
+            auto !important;
     }
 
 
-    .admin-client-household-card .admin-card-value,
-    .client-household-card .admin-card-value,
-    .admin-client-summary-card .admin-card-value,
-    .client-summary-card .admin-card-value {
-        word-break: break-word;
+    .admin-client-household-card
+    .admin-card-value,
+    .client-household-card
+    .admin-card-value,
+    .admin-client-summary-card
+    .admin-card-value,
+    .client-summary-card
+    .admin-card-value {
+        word-break:
+            break-word;
     }
 
 
@@ -11229,7 +11295,8 @@ body.admin-client-credit-modal-open {
     .client-household-card button,
     .admin-client-summary-card button,
     .client-summary-card button {
-        width: 100%;
+        width:
+            100%;
     }
 
 }
