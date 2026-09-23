@@ -22728,24 +22728,29 @@ body.portal-intro-open {
         line-height: 1.45;
     }
 
-    /* next visit and upcoming stack on the left */
-    body.desktop-screen-home #mobile-home-next-visit-card {
-        grid-column: 1;
+    body.desktop-screen-home .mobile-home-greeting {
+        grid-row: 1;
     }
 
     body.desktop-screen-home .mobile-home-section:has(.mobile-home-quick-actions) {
         grid-column: 1 / -1;
-        order: -1;
+        grid-row: 2;
+    }
+
+    body.desktop-screen-home #mobile-home-next-visit-card {
+        grid-column: 1;
+        grid-row: 3;
     }
 
     body.desktop-screen-home .mobile-home-section:has(.mobile-home-upcoming-list) {
         grid-column: 1;
+        grid-row: 4;
     }
 
-    /* latest update fills the right column */
     body.desktop-screen-home .mobile-home-section:has(.mobile-home-latest-update) {
         grid-column: 2;
-        grid-row: 2 / span 3;
+        grid-row: 3 / span 2;
+        align-self: start;
     }
 
 
