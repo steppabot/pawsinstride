@@ -3288,64 +3288,25 @@ p {
    ADMIN VISIT REPORT LAYOUT
 ======================================== */
 
-.admin-page
-.admin-visit-report-content {
-    display:
-        grid;
-
+.admin-page .admin-visit-report-content {
+    display: grid;
     grid-template-columns:
-        minmax(
-            0,
-            1fr
-        )
-        minmax(
-            320px,
-            0.9fr
-        );
-
-    gap:
-        18px;
-
-    align-items:
-        start;
+        minmax(0, 1fr)
+        minmax(320px, 0.9fr);
+    gap: 18px;
+    align-items: start;
 }
 
-
-.admin-page
-.admin-visit-report-main,
-
-.admin-page
-.admin-visit-report-side {
-    min-width:
-        0;
+.admin-page .admin-visit-report-main,
+.admin-page .admin-visit-report-side {
+    min-width: 0;
+    display: grid;
+    gap: 16px;
 }
 
-
-.admin-page
-.admin-visit-report-main {
-    display:
-        grid;
-
-    gap:
-        16px;
-}
-
-
-.admin-page
-.admin-visit-report-side {
-    display:
-        grid;
-
-    gap:
-        16px;
-}
-
-
-.admin-page
-.admin-visit-report-content
+.admin-page .admin-visit-report-content
 .admin-visit-report-section {
-    margin:
-        0;
+    margin: 0;
 }
 
 
@@ -3353,40 +3314,19 @@ p {
    NON-WALK VISIT REPORT
 ======================================== */
 
-.admin-page
-.admin-visit-report-form-nonwalk
+.admin-page .admin-visit-report-form-nonwalk
 .admin-visit-report-side
 .admin-visit-report-photos-section {
-    height:
-        100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-
-.admin-page
-.admin-visit-report-form-nonwalk
-.admin-visit-report-side
-.admin-visit-report-photos-section {
-    display:
-        flex;
-
-    flex-direction:
-        column;
-}
-
-
-.admin-page
-.admin-visit-report-form-nonwalk
-.admin-visit-pending-media {
-    width:
-        100%;
-}
-
-
-.admin-page
-.admin-visit-report-form-nonwalk
+.admin-page .admin-visit-report-form-nonwalk
+.admin-visit-pending-media,
+.admin-page .admin-visit-report-form-nonwalk
 .admin-visit-existing-media {
-    width:
-        100%;
+    width: 100%;
 }
 
 
@@ -3394,27 +3334,13 @@ p {
    WALK VISIT REPORT
 ======================================== */
 
-.admin-page
-.admin-visit-report-form-walk
-.admin-walk-summary-section {
-    width:
-        100%;
-}
-
-
-.admin-page
-.admin-visit-report-form-walk
-.admin-walk-summary-card {
-    width:
-        100%;
-}
-
-
-.admin-page
-.admin-visit-report-form-walk
+.admin-page .admin-visit-report-form-walk
+.admin-walk-summary-section,
+.admin-page .admin-visit-report-form-walk
+.admin-walk-summary-card,
+.admin-page .admin-visit-report-form-walk
 .admin-walk-route-map {
-    width:
-        100%;
+    width: 100%;
 }
 
 
@@ -3422,49 +3348,369 @@ p {
    ADMIN VISIT REPORT — MOBILE
 ======================================== */
 
-@media (max-width:700px) {
+@media (max-width: 700px) {
 
-    .admin-page
-    .admin-visit-report-content {
-        grid-template-columns:
-            minmax(
-                0,
-                1fr
-            );
-
-        gap:
-            14px;
+    .admin-page .admin-visit-report-content {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
     }
 
+    .admin-page .admin-visit-report-main,
+    .admin-page .admin-visit-report-side {
+        width: 100%;
+        min-width: 0;
+    }
 
-    .admin-page
-    .admin-visit-report-main,
-
-    .admin-page
+    .admin-page .admin-visit-report-form-nonwalk
     .admin-visit-report-side {
-        width:
-            100%;
-
-        min-width:
-            0;
+        order: 2;
     }
 
-
-    .admin-page
-    .admin-visit-report-form-nonwalk
-    .admin-visit-report-side {
-        order:
-            2;
-    }
-
-
-    .admin-page
-    .admin-visit-report-form-nonwalk
+    .admin-page .admin-visit-report-form-nonwalk
     .admin-visit-report-photos-section {
-        height:
-            auto;
+        height: auto;
     }
 
+}
+
+
+/* ========================================
+   ADMIN CLIENT VISIT CARD
+======================================== */
+
+.admin-page .admin-service-card {
+    background: #eaf5fd;
+    border: 1px solid #c2def1;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(23, 104, 170, 0.06);
+}
+
+.admin-page .admin-service-top h5 {
+    color: #123c5a;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.admin-page .admin-service-detail > strong {
+    color: #123c5a;
+    font-size: 15px;
+}
+
+.admin-page .admin-completed-visit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.admin-page .admin-completed-visit-actions
+.admin-reopen-visit-button {
+    width: auto;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    box-shadow: none;
+    color: #395c77;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.admin-page .admin-completed-visit-actions
+.admin-reopen-visit-button:hover {
+    background: #dceefb;
+    color: #1768aa;
+    transform: none;
+}
+
+
+/* ========================================
+   ADMIN CLIENT REPORT PREVIEW
+======================================== */
+
+.admin-page .admin-client-report-preview {
+    margin-top: 16px;
+    padding: 0;
+    min-width: 0;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #bcd8ed;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(18, 60, 90, 0.08);
+    color: #17364d;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.admin-page .admin-client-report-preview,
+.admin-page .admin-client-report-preview * {
+    box-sizing: border-box;
+}
+
+.admin-page .admin-preview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px;
+    background: linear-gradient(
+        135deg,
+        #197db5 0%,
+        #1768aa 100%
+    );
+    color: #ffffff;
+}
+
+.admin-page .admin-preview-eyebrow {
+    display: block;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.admin-page .admin-preview-header h5 {
+    margin: 5px 0;
+    color: #ffffff;
+    font-size: 23px;
+    font-weight: 800;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.admin-page .admin-preview-header p {
+    margin: 0;
+    color: #ffffff;
+    font-size: 13px;
+}
+
+.admin-page .admin-preview-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font: inherit;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.admin-page .admin-preview-close:hover {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.admin-page .admin-preview-close:focus-visible,
+.admin-page .admin-preview-photo a:focus-visible {
+    outline: 3px solid #ffb54d;
+    outline-offset: 3px;
+}
+
+.admin-page .admin-preview-body {
+    padding: 16px;
+}
+
+.admin-page .admin-preview-times {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 12px 6px;
+    border-radius: 10px;
+    background: #eaf5fd;
+}
+
+.admin-page .admin-preview-times > div {
+    min-width: 0;
+    text-align: center;
+}
+
+.admin-page .admin-preview-times > div + div {
+    border-left: 1px solid #c2def1;
+}
+
+.admin-page .admin-preview-times span {
+    display: block;
+    margin-bottom: 4px;
+    color: #4b6478;
+    font-size: 11px;
+}
+
+.admin-page .admin-preview-times strong {
+    display: block;
+    color: #123c5a;
+    font-size: 13px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.admin-page .admin-preview-section {
+    margin: 0;
+    padding: 18px 0;
+    border-bottom: 1px solid #e5edf3;
+}
+
+.admin-page .admin-preview-section:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.admin-page .admin-preview-title {
+    margin: 0 0 12px;
+    color: #123c5a;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.admin-page .admin-preview-pet + .admin-preview-pet {
+    margin-top: 16px;
+}
+
+.admin-page .admin-preview-pet h6 {
+    margin: 0 0 8px;
+    color: #17364d;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.admin-page .admin-preview-care {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.admin-page .admin-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.admin-page .admin-preview-badge.is-complete {
+    background: #e2f5e9;
+    color: #17613a;
+}
+
+.admin-page .admin-preview-badge.is-unmarked {
+    background: #f0f3f6;
+    color: #566577;
+}
+
+.admin-page .admin-preview-help {
+    margin: 10px 0;
+    color: #566577;
+    font-size: 12px;
+}
+
+.admin-page .admin-preview-notes {
+    margin: 0;
+    color: #263f52;
+    font-size: 14px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.admin-page .admin-preview-section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.admin-page .admin-preview-section-heading > span {
+    color: #566577;
+    font-size: 12px;
+}
+
+.admin-page .admin-preview-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.admin-page .admin-preview-photo {
+    min-width: 0;
+    margin: 0;
+}
+
+.admin-page .admin-preview-photo a {
+    display: block;
+    border-radius: 10px;
+}
+
+.admin-page .admin-preview-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #eaf5fd;
+}
+
+.admin-page .admin-preview-photo figcaption {
+    margin-top: 5px;
+    color: #566577;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.admin-page .admin-preview-photo-missing {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    padding: 10px;
+    border-radius: 10px;
+    background: #f0f3f6;
+    color: #566577;
+    font-size: 12px;
+    text-align: center;
+}
+
+.admin-page .admin-preview-walk-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.admin-page .admin-preview-walk-stats small {
+    display: block;
+    color: #566577;
+    font-size: 12px;
+}
+
+.admin-page .admin-preview-walk-stats strong {
+    display: block;
+    color: #123c5a;
+    font-size: 17px;
+    overflow-wrap: anywhere;
+}
+
+.admin-page .admin-preview-map {
+    width: 100%;
+    height: 240px;
+    overflow: hidden;
+    border: 1px solid #d3e3ef;
+    border-radius: 12px;
+    background: #eaf5fd;
 }
 
 /* ========================================
