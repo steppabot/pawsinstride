@@ -22690,9 +22690,9 @@ body.portal-intro-open {
     ======================================== */
 
     body.desktop-screen-home .mobile-home-dashboard {
-        display: grid;
+        display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        align-items: start;
+        align-items: stretch;
         gap: 20px;
         margin: 0;
         padding: 0;
@@ -22702,6 +22702,7 @@ body.portal-intro-open {
 
     body.desktop-screen-home .mobile-home-greeting {
         grid-column: 1 / -1;
+        grid-row: 1;
         position: relative;
         overflow: hidden;
         display: block;
@@ -22728,12 +22729,22 @@ body.portal-intro-open {
         line-height: 1.45;
     }
 
-    body.desktop-screen-home .mobile-home-greeting {
-        grid-row: 1;
-    }
+
+    /* ========================================
+       GRID PLACEMENT
+
+       row 1  greeting (full width)
+       row 2  quick actions | latest update
+       row 3  next visit    | upcoming
+    ======================================== */
 
     body.desktop-screen-home .mobile-home-section:has(.mobile-home-quick-actions) {
-        grid-column: 1 / -1;
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    body.desktop-screen-home .mobile-home-section:has(.mobile-home-latest-update) {
+        grid-column: 2;
         grid-row: 2;
     }
 
@@ -22743,14 +22754,8 @@ body.portal-intro-open {
     }
 
     body.desktop-screen-home .mobile-home-section:has(.mobile-home-upcoming-list) {
-        grid-column: 1;
-        grid-row: 4;
-    }
-
-    body.desktop-screen-home .mobile-home-section:has(.mobile-home-latest-update) {
         grid-column: 2;
-        grid-row: 3 / span 2;
-        align-self: start;
+        grid-row: 3;
     }
 
 
@@ -22820,6 +22825,43 @@ body.portal-intro-open {
         height: 4px;
         background: linear-gradient(90deg, #f5ab40 0%, #ef602c 100%);
     }
+
+
+    /* ========================================
+       QUICK ACTIONS CARD
+    ======================================== */
+
+    body.desktop-screen-home .mobile-home-section:has(.mobile-home-quick-actions) {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 20px;
+        background: #ffffff;
+        border: 1px solid #d6e4eb;
+        border-radius: 16px;
+        box-shadow: 0 6px 16px rgba(24,52,71,0.06);
+    }
+
+
+    /* ========================================
+       CARDS FILL THEIR ROW
+    ======================================== */
+
+    body.desktop-screen-home .mobile-home-section:has(.mobile-home-latest-update),
+    body.desktop-screen-home .mobile-home-section:has(.mobile-home-upcoming-list) {
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.desktop-screen-home .mobile-home-latest-update,
+    body.desktop-screen-home .mobile-home-upcoming-list {
+        flex-grow: 1;
+    }
+
+
+    /* ========================================
+       NEXT VISIT
+    ======================================== */
 
     body.desktop-screen-home .mobile-home-card-eyebrow {
         display: block;
@@ -22892,7 +22934,6 @@ body.portal-intro-open {
         text-align: left;
         cursor: pointer;
     }
-
 
     /* ========================================
        QUICK ACTIONS
