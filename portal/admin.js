@@ -10850,7 +10850,6 @@ async function openAdminClientVisitReportPreview(
 
 }
 
-
 // ========================================
 // RENDER CLIENT REPORT PREVIEW
 // ========================================
@@ -10866,16 +10865,11 @@ function renderAdminClientVisitReportPreview(
 ) {
 
     const pets =
-        getAdminPetsForVisit(
-            visit
-        );
+        getAdminPetsForVisit(visit);
 
     const petNames =
         pets
-            .map(
-                pet =>
-                    pet.name || "Pet"
-            )
+            .map(pet => pet.name || "Pet")
             .join(" & ") ||
         "Visit Report";
 
@@ -10890,116 +10884,89 @@ function renderAdminClientVisitReportPreview(
             : "Not recorded";
 
     const visitMinutes =
-        getVisitDurationMinutes(
-            visit
-        );
+        getVisitDurationMinutes(visit);
 
     const careFields = [
         ["fed", "Fed"],
-        ["fresh_water", "Fresh Water"],
+        ["fresh_water", "Fresh water"],
         ["pee", "Pee"],
         ["poop", "Poop"]
     ];
 
     const careHtml =
-        pets
-            .map(
-                pet => {
+        pets.map(pet => {
 
-                    const savedCare =
-                        petCare.find(
-                            item =>
-                                Number(item.pet_id) === Number(pet.id)
-                        );
+            const savedCare =
+                petCare.find(
+                    item =>
+                        Number(item.pet_id) ===
+                        Number(pet.id)
+                );
 
-                    const care =
-                        savedCare ||
-                        (
-                            pets.length === 1
-                                ? report
-                                : {}
-                        );
+            const care =
+                savedCare ||
+                (pets.length === 1 ? report : {});
 
-                    return `
-                        <div class="admin-visit-pet-care-card">
+            return `
+                <div class="admin-preview-pet">
 
-                            <div class="admin-visit-pet-care-header">
-                                <strong>
-                                    ${escapeHtml(pet.name || "Pet")}
-                                </strong>
-                            </div>
+                    <h6>${escapeHtml(pet.name || "Pet")}</h6>
 
-                            <div class="admin-visit-care-grid">
-                                ${
-                                    careFields
-                                        .map(
-                                            ([field, label]) => `
-                                                <div class="admin-visit-care-option">
-                                                    <span>
-                                                        ${care[field] ? "✓" : "—"}
-                                                        ${label}
-                                                    </span>
-                                                </div>
-                                            `
-                                        )
-                                        .join("")
-                                }
-                            </div>
+                    <div class="admin-preview-care">
+                        ${
+                            careFields.map(([field, label]) => `
+                                <span
+                                    class="admin-preview-badge ${
+                                        care[field]
+                                            ? "is-complete"
+                                            : "is-unmarked"
+                                    }"
+                                >
+                                    ${care[field] ? "✓" : "—"}
+                                    ${label}
+                                </span>
+                            `).join("")
+                        }
+                    </div>
 
-                        </div>
-                    `;
+                </div>
+            `;
 
-                }
-            )
-            .join("");
+        }).join("");
 
     const renderPhotos =
-        items =>
-            items
-                .map(
-                    item => {
+        items => `
+            <div class="admin-preview-gallery">
+                ${
+                    items.map(item => {
 
-                        if (
-                            !item.signed_url
-                        ) {
-
+                        if (!item.signed_url) {
                             return `
-                                <p class="admin-visit-report-help">
-                                    Photo unavailable.
-                                </p>
+                                <div class="admin-preview-photo-missing">
+                                    Photo unavailable
+                                </div>
                             `;
-
                         }
 
                         const url =
-                            escapeHtml(
-                                item.signed_url
-                            );
+                            escapeHtml(item.signed_url);
 
                         const caption =
-                            escapeHtml(
-                                item.caption || ""
-                            );
+                            escapeHtml(item.caption || "");
 
                         return `
-                            <figure style="margin: 0 0 12px;">
+                            <figure class="admin-preview-photo">
 
                                 <a
                                     href="${url}"
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    aria-label="Open full-size photo"
                                 >
                                     <img
                                         src="${url}"
-                                        alt="${caption || "Visit report photo"}"
+                                        alt="${caption || "Visit photo"}"
                                         loading="lazy"
-                                        style="
-                                            display: block;
-                                            width: 100%;
-                                            max-height: 360px;
-                                            object-fit: contain;
-                                            border-radius: 12px;
-                                        "
                                     >
                                 </a>
 
@@ -11012,74 +10979,77 @@ function renderAdminClientVisitReportPreview(
                             </figure>
                         `;
 
-                    }
-                )
-                .join("");
+                    }).join("")
+                }
+            </div>
+        `;
 
     const visitPhotos =
         media.filter(
-            item =>
-                item.photo_type === "visit"
+            item => item.photo_type === "visit"
         );
 
     const routePhotos =
         media.filter(
-            item =>
-                item.photo_type === "route"
+            item => item.photo_type === "route"
         );
 
     const walkHtml =
         completedWalk || routePhotos.length
             ? `
-                <div class="admin-visit-report-section">
+                <section class="admin-preview-section">
 
-                    <span class="admin-visit-report-label">
-                        Walk Summary
-                    </span>
+                    <h6 class="admin-preview-title">
+                        Walk summary
+                    </h6>
 
                     ${
                         completedWalk
                             ? `
-                                <p>
-                                    ${escapeHtml(
-                                        formatWalkDuration(
-                                            Number(
-                                                completedWalk.duration_seconds || 0
-                                            )
-                                        )
-                                    )}
+                                <div class="admin-preview-walk-stats">
 
-                                    •
+                                    <span>
+                                        <small>Walking time</small>
+                                        <strong>
+                                            ${escapeHtml(
+                                                formatWalkDuration(
+                                                    Number(
+                                                        completedWalk.duration_seconds || 0
+                                                    )
+                                                )
+                                            )}
+                                        </strong>
+                                    </span>
 
-                                    ${
-                                        (
-                                            Number(
-                                                completedWalk.distance_meters || 0
-                                            ) / 1609.344
-                                        ).toFixed(2)
-                                    } mi
-                                </p>
+                                    <span>
+                                        <small>Distance</small>
+                                        <strong>
+                                            ${
+                                                (
+                                                    Number(
+                                                        completedWalk.distance_meters || 0
+                                                    ) / 1609.344
+                                                ).toFixed(2)
+                                            } mi
+                                        </strong>
+                                    </span>
+
+                                </div>
 
                                 ${
                                     walkPoints.length >= 2
                                         ? `
                                             <div
                                                 id="admin-client-walk-route-map-${visit.id}"
-                                                class="admin-walk-route-map"
-                                                style="
-                                                    height: 280px;
-                                                    width: 100%;
-                                                    border-radius: 12px;
-                                                    overflow: hidden;
-                                                "
+                                                class="admin-preview-map"
                                             >
-                                                <p class="admin-visit-report-help">
+                                                <p class="admin-preview-help">
                                                     Route map unavailable until Google Maps loads.
                                                 </p>
                                             </div>
                                         `
                                         : `
-                                            <p class="admin-visit-report-help">
+                                            <p class="admin-preview-help">
                                                 No recorded route available.
                                             </p>
                                         `
@@ -11088,121 +11058,121 @@ function renderAdminClientVisitReportPreview(
                             : ""
                     }
 
-                    ${renderPhotos(routePhotos)}
+                    ${
+                        routePhotos.length
+                            ? renderPhotos(routePhotos)
+                            : ""
+                    }
 
-                </div>
+                </section>
             `
             : "";
 
     mount.innerHTML = `
-        <div class="admin-visit-report-form">
+        <div class="admin-client-report-preview">
 
-            <div class="admin-visit-report-header">
+            <header class="admin-preview-header">
 
                 <div>
-
-                    <span class="admin-visit-report-eyebrow">
-                        CLIENT REPORT PREVIEW
+                    <span class="admin-preview-eyebrow">
+                        Visit report
                     </span>
 
-                    <h5>
-                        ${escapeHtml(petNames)}
-                    </h5>
+                    <h5>${escapeHtml(petNames)}</h5>
 
-                    <p>
-                        Saved care updates, notes, and photos.
-                    </p>
-
+                    <p>Care updates from this visit</p>
                 </div>
 
                 <button
                     type="button"
-                    class="admin-visit-report-close"
+                    class="admin-preview-close"
                     data-visit-report-close
-                    aria-label="Close client report preview"
+                    aria-label="Close visit report"
                 >
                     ×
                 </button>
 
-            </div>
+            </header>
 
-            <div class="admin-visit-report-section">
+            <div class="admin-preview-body">
 
-                <span class="admin-visit-report-label">
-                    Visit Times
-                </span>
+                <div class="admin-preview-times">
 
-                <p>
-                    <strong>Checked in at home:</strong>
-                    ${escapeHtml(checkedIn)}
-                </p>
+                    <div>
+                        <span>Checked in</span>
+                        <strong>${escapeHtml(checkedIn)}</strong>
+                    </div>
 
-                <p>
-                    <strong>Visit completed:</strong>
-                    ${escapeHtml(completed)}
-                </p>
+                    <div>
+                        <span>Completed</span>
+                        <strong>${escapeHtml(completed)}</strong>
+                    </div>
 
-                <p>
-                    <strong>Total visit time:</strong>
-                    ${
-                        visitMinutes !== null
-                            ? `${visitMinutes} ${
-                                visitMinutes === 1
-                                    ? "minute"
-                                    : "minutes"
-                            }`
-                            : "Not available"
-                    }
-                </p>
+                    <div>
+                        <span>Total visit</span>
+                        <strong>
+                            ${
+                                visitMinutes !== null
+                                    ? `${visitMinutes} min`
+                                    : "Not recorded"
+                            }
+                        </strong>
+                    </div>
 
-            </div>
+                </div>
 
-            <div class="admin-visit-report-section">
+                <section class="admin-preview-section">
 
-                <span class="admin-visit-report-label">
-                    Care Updates
-                </span>
+                    <h6 class="admin-preview-title">
+                        Care updates
+                    </h6>
+
+                    ${careHtml || "<p>No pets linked to this visit.</p>"}
+
+                    <p class="admin-preview-help">
+                        ✓ Completed · — Not marked
+                    </p>
+
+                </section>
+
+                <section class="admin-preview-section">
+
+                    <h6 class="admin-preview-title">
+                        Visit notes
+                    </h6>
+
+                    <p class="admin-preview-notes">${escapeHtml(
+                        report.notes || "No notes added."
+                    )}</p>
+
+                </section>
 
                 ${
-                    careHtml ||
-                    "<p>No pets linked to this visit.</p>"
+                    visitPhotos.length
+                        ? `
+                            <section class="admin-preview-section">
+
+                                <div class="admin-preview-section-heading">
+                                    <h6 class="admin-preview-title">
+                                        Visit photos
+                                    </h6>
+                                    <span>${visitPhotos.length} photos</span>
+                                </div>
+
+                                <p class="admin-preview-help">
+                                    Tap a photo to open full size.
+                                </p>
+
+                                ${renderPhotos(visitPhotos)}
+
+                            </section>
+                        `
+                        : ""
                 }
 
-                <p class="admin-visit-report-help">
-                    ✓ Completed · — Not marked
-                </p>
+                ${walkHtml}
 
             </div>
-
-            <div class="admin-visit-report-section">
-
-                <span class="admin-visit-report-label">
-                    Visit Notes
-                </span>
-
-                <p style="white-space: pre-wrap;">${escapeHtml(
-                    report.notes || "No notes added."
-                )}</p>
-
-            </div>
-
-            ${
-                visitPhotos.length
-                    ? `
-                        <div class="admin-visit-report-section">
-
-                            <span class="admin-visit-report-label">
-                                Visit Photos
-                            </span>
-
-                            ${renderPhotos(visitPhotos)}
-
-                        </div>
-                    `
-                    : ""
-            }
-
-            ${walkHtml}
 
         </div>
     `;
