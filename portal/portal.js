@@ -29203,8 +29203,47 @@ function syncDesktopLayoutState() {
         }
     );
 
-}
 
+    // ========================================
+    // HAND BACK TO THE MOBILE APP SCREENS
+    // ========================================
+    //
+    // Without this the body has no screen class
+    // at all below 1024px, so every section
+    // renders at once.
+    // ========================================
+
+    const hasMobileScreen =
+        [
+            "home",
+            "services",
+            "pets",
+            "profile"
+        ].some(
+            name =>
+                document.body.classList.contains(
+                    `mobile-app-screen-${name}`
+                )
+        );
+
+
+    if (
+        !hasMobileScreen &&
+        mobileAppNavigationQuery.matches
+    ) {
+
+        setMobileAppScreen(
+            "home"
+        );
+
+
+        setActiveMobileAppTab(
+            "home"
+        );
+
+    }
+
+}
 
 desktopLayoutQuery.addEventListener(
     "change",
@@ -29219,4 +29258,10 @@ desktopLayoutQuery.addEventListener(
 window.setTimeout(
     syncDesktopLayoutState,
     0
+);
+
+
+window.addEventListener(
+    "load",
+    syncDesktopLayoutState
 );
