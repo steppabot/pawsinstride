@@ -3773,6 +3773,43 @@ adminDayServicesContainer
             }
 
 
+            const previewButton =
+                event.target.closest(
+                    "[data-admin-client-report-view]"
+                );
+
+
+            if (
+                previewButton
+            ) {
+
+
+                const visitId =
+                    Number(
+                        previewButton.dataset
+                            .adminClientReportView
+                    );
+
+
+                if (
+                    !visitId
+                ) {
+
+                    return;
+
+                }
+
+
+                await openAdminClientVisitReportPreview(
+                    visitId
+                );
+
+
+                return;
+
+            }
+
+
             const openButton =
                 event.target.closest(
                     "[data-visit-report-open]"
@@ -9442,6 +9479,23 @@ function buildAdminVisitProgressSection(
                                     }
                                 </button>
     
+    
+                                ${
+                                    existingReport
+    
+                                        ? `
+                                            <button
+                                                type="button"
+                                                class="secondary-button admin-visit-report-preview-button"
+                                                data-admin-client-report-view="${visit.id}"
+                                            >
+                                                View Client Report
+                                            </button>
+                                        `
+    
+                                        : ""
+                                }
+    
                             `
     
                             : ""
@@ -9752,20 +9806,20 @@ function buildAdminVisitProgressSection(
             // ========================================
             // ACTIVE WALK
             // ========================================
-
+            
             const startedAt =
                 formatVisitTimestamp(
                     walk.started_at
                 );
-
-
+            
+            
             const elapsedSeconds =
                 Math.max(
-
+            
                     0,
-
+            
                     Math.floor(
-
+            
                         (
                             Date.now() -
                             new Date(
@@ -9773,46 +9827,61 @@ function buildAdminVisitProgressSection(
                             ).getTime()
                         ) /
                         1000
-
+            
                     )
-
+            
                 );
-
-
+            
+            
             const gpsActive =
                 isWalkGpsTracking(
                     walk.id
                 );
-
-
+            
+            
             return `
-
+            
                 <div class="admin-visit-progress admin-visit-progress-live">
-
-
+            
+            
                     <div class="admin-visit-progress-copy">
-
-
+            
+            
                         <strong>
                             🐾 Walk In Progress
                         </strong>
-
-
+            
+            
+                        ${
+                            checkedIn
+            
+                                ? `
+                                    <span>
+                                        Visit checked in at ${escapeHtml(
+                                            checkedIn
+                                        )}
+                                    </span>
+                                `
+            
+                                : ""
+                        }
+            
+            
                         <span>
                             ${
                                 startedAt
-
-                                    ? `Started at ${escapeHtml(
+            
+                                    ? `Walk started at ${escapeHtml(
                                         startedAt
                                     )}`
-
+            
                                     : "Walk tracking active"
                             }
                         </span>
-
-
+            
+            
                         <span>
-
+            
                             <span
                                 id="admin-walk-duration-${visit.id}"
                             >
@@ -9822,9 +9891,9 @@ function buildAdminVisitProgressSection(
                                     )
                                 )}
                             </span>
-
+            
                             •
-
+            
                             <span
                                 id="admin-walk-distance-${visit.id}"
                             >
@@ -9837,10 +9906,10 @@ function buildAdminVisitProgressSection(
                                 ).toFixed(2)}
                                 mi
                             </span>
-
+            
                         </span>
-
-
+            
+            
                         <span
                             id="admin-walk-points-${visit.id}"
                         >
@@ -9854,40 +9923,40 @@ function buildAdminVisitProgressSection(
                                     0
                                 ) ===
                                 1
-
+            
                                     ? "point"
-
+            
                                     : "points"
                             }
                         </span>
-
-
+            
+            
                         ${
                             gpsActive
-
+            
                                 ? `
                                     <span>
                                         GPS tracking active
                                     </span>
                                 `
-
+            
                                 : `
                                     <span>
                                         GPS tracking paused on this device
                                     </span>
                                 `
                         }
-
-
+            
+            
                     </div>
-
-
+            
+            
                     <div class="admin-completed-visit-actions">
-
-
+            
+            
                         ${
                             !gpsActive
-
+            
                                 ? `
                                     <button
                                         type="button"
@@ -9898,11 +9967,11 @@ function buildAdminVisitProgressSection(
                                         Resume GPS
                                     </button>
                                 `
-
+            
                                 : ""
                         }
-
-
+            
+            
                         <button
                             type="button"
                             class="${
@@ -9915,94 +9984,109 @@ function buildAdminVisitProgressSection(
                         >
                             Finish Walk
                         </button>
-
-
+            
+            
                     </div>
-
-
+            
+            
                 </div>
             `;
-
-        }
-
-
-        // ========================================
-        // WALK FINISHED / VISIT STILL OPEN
-        // ========================================
-
-        if (
-            walkingService &&
-            walk?.status ===
-            "completed"
-        ) {
-
-
-            const miles =
-                (
-                    Number(
-                        walk.distance_meters ||
-                        0
-                    ) /
-                    1609.344
-                )
-                    .toFixed(
-                        2
-                    );
-
-
-            return `
-
-                <div class="admin-visit-progress admin-visit-progress-live">
-
-
-                    <div class="admin-visit-progress-copy">
-
-
-                        <strong>
-                            ✓ Walk Complete
-                        </strong>
-
-
-                        <span>
-                            ${escapeHtml(
-                                formatWalkDuration(
-                                    walk.duration_seconds
-                                )
-                            )}
-                            •
-                            ${miles}
-                            mi
-                        </span>
-
-
-                        <span>
-                            Visit is still in progress.
-                        </span>
-
-
+            
+            }
+            
+            
+            // ========================================
+            // WALK FINISHED / VISIT STILL OPEN
+            // ========================================
+            
+            if (
+                walkingService &&
+                walk?.status ===
+                "completed"
+            ) {
+            
+            
+                const miles =
+                    (
+                        Number(
+                            walk.distance_meters ||
+                            0
+                        ) /
+                        1609.344
+                    )
+                        .toFixed(
+                            2
+                        );
+            
+            
+                return `
+            
+                    <div class="admin-visit-progress admin-visit-progress-live">
+            
+            
+                        <div class="admin-visit-progress-copy">
+            
+            
+                            <strong>
+                                ✓ Walk Complete
+                            </strong>
+            
+            
+                            ${
+                                checkedIn
+            
+                                    ? `
+                                        <span>
+                                            Visit checked in at ${escapeHtml(
+                                                checkedIn
+                                            )}
+                                        </span>
+                                    `
+            
+                                    : ""
+                            }
+            
+            
+                            <span>
+                                ${escapeHtml(
+                                    formatWalkDuration(
+                                        walk.duration_seconds
+                                    )
+                                )}
+                                •
+                                ${miles}
+                                mi
+                            </span>
+            
+            
+                            <span>
+                                Visit is still in progress.
+                            </span>
+            
+            
+                        </div>
+            
+            
+                        <button
+                            type="button"
+                            class="primary-button admin-visit-action-button admin-finish-visit-button"
+                            data-visit-action="finish"
+                            data-visit-id="${visit.id}"
+                        >
+                            Finish Visit
+                        </button>
+            
+            
                     </div>
-
-
-                    <button
-                        type="button"
-                        class="primary-button admin-visit-action-button admin-finish-visit-button"
-                        data-visit-action="finish"
-                        data-visit-id="${visit.id}"
-                    >
-                        Finish Visit
-                    </button>
-
-
-                </div>
-
-            `;
-
-        }
-
-
-        // ========================================
-        // CHECKED-IN WALK NOT STARTED
-        // ========================================
+            
+                `;
+            
+            }
+            
+            
+            // ========================================
+            // CHECKED-IN WALK NOT STARTED
+            // ========================================
 
         if (
             walkingService
@@ -10498,6 +10582,632 @@ function closeAdminVisitReport() {
 
 }
 
+
+// ========================================
+// OPEN CLIENT REPORT PREVIEW
+// ========================================
+
+async function openAdminClientVisitReportPreview(
+    visitId
+) {
+
+    const visit =
+        allVisits.find(
+            item =>
+                Number(item.id) === Number(visitId)
+        );
+
+    const mount =
+        document.getElementById(
+            `admin-visit-report-${visitId}`
+        );
+
+    if (
+        !visit ||
+        !mount
+    ) {
+
+        return;
+
+    }
+
+    closeAdminVisitReport();
+
+    activeVisitReportVisitId =
+        visitId;
+
+    mount.innerHTML = `
+        <div class="admin-visit-report-loading">
+            Loading client report preview...
+        </div>
+    `;
+
+    const loadingElement =
+        mount.firstElementChild;
+
+    const isCurrentPreview = () =>
+        mount.isConnected &&
+        mount.firstElementChild === loadingElement &&
+        Number(activeVisitReportVisitId) === Number(visitId);
+
+    try {
+
+        const report =
+            allVisitReports.find(
+                item =>
+                    Number(item.visit_id) === Number(visitId)
+            ) ||
+            null;
+
+        if (
+            !report
+        ) {
+
+            mount.innerHTML = `
+                <div class="admin-visit-report-error">
+                    No visit report has been added yet.
+                </div>
+            `;
+
+            return;
+
+        }
+
+        const [
+            petCareResult,
+            mediaResult,
+            walkResult
+        ] =
+            await Promise.all([
+
+                supabaseClient
+                    .from("visit_report_pet_care")
+                    .select(
+                        "visit_report_id, pet_id, fed, fresh_water, pee, poop"
+                    )
+                    .eq("visit_report_id", report.id),
+
+                supabaseClient
+                    .from("visit_photos")
+                    .select(
+                        "id, visit_id, storage_path, photo_type, caption, sort_order, created_at"
+                    )
+                    .eq("visit_id", visitId)
+                    .order(
+                        "sort_order",
+                        { ascending: true }
+                    )
+                    .order(
+                        "created_at",
+                        { ascending: true }
+                    ),
+
+                supabaseClient
+                    .from("visit_walks")
+                    .select(
+                        "id, visit_id, status, started_at, ended_at, duration_seconds, distance_meters"
+                    )
+                    .eq("visit_id", visitId)
+                    .eq("status", "completed")
+                    .maybeSingle()
+
+            ]);
+
+        if (petCareResult.error) {
+            throw petCareResult.error;
+        }
+
+        if (mediaResult.error) {
+            throw mediaResult.error;
+        }
+
+        if (walkResult.error) {
+            throw walkResult.error;
+        }
+
+        if (
+            !isCurrentPreview()
+        ) {
+
+            return;
+
+        }
+
+        const completedWalk =
+            walkResult.data ||
+            null;
+
+        let walkPoints =
+            [];
+
+        if (
+            completedWalk
+        ) {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("visit_walk_points")
+                    .select(
+                        "sequence_number, latitude, longitude, recorded_at"
+                    )
+                    .eq("walk_id", completedWalk.id)
+                    .order(
+                        "sequence_number",
+                        { ascending: true }
+                    );
+
+            if (
+                error
+            ) {
+
+                throw error;
+
+            }
+
+            walkPoints =
+                data ||
+                [];
+
+        }
+
+        const mediaWithUrls =
+            await Promise.all(
+                (mediaResult.data || [])
+                    .map(
+                        async item => {
+
+                            const {
+                                data,
+                                error
+                            } =
+                                await supabaseClient
+                                    .storage
+                                    .from(VISIT_MEDIA_BUCKET)
+                                    .createSignedUrl(
+                                        item.storage_path,
+                                        3600
+                                    );
+
+                            return {
+                                ...item,
+                                signed_url:
+                                    error
+                                        ? null
+                                        : data?.signedUrl || null
+                            };
+
+                        }
+                    )
+            );
+
+        if (
+            !isCurrentPreview()
+        ) {
+
+            return;
+
+        }
+
+        renderAdminClientVisitReportPreview(
+            mount,
+            visit,
+            report,
+            petCareResult.data || [],
+            mediaWithUrls,
+            completedWalk,
+            walkPoints
+        );
+
+        if (
+            completedWalk &&
+            walkPoints.length >= 2
+        ) {
+
+            const mapElement =
+                document.getElementById(
+                    `admin-client-walk-route-map-${visitId}`
+                );
+
+            if (
+                mapElement &&
+                window.google?.maps
+            ) {
+
+                renderAdminGoogleWalkRoute(
+                    mapElement,
+                    walkPoints
+                );
+
+            }
+
+        }
+
+    } catch (
+        error
+    ) {
+
+        console.error(
+            "Admin client report preview error:",
+            error
+        );
+
+        if (
+            isCurrentPreview()
+        ) {
+
+            mount.innerHTML = `
+                <div class="admin-visit-report-error">
+                    We couldn't load the client report preview.
+                </div>
+            `;
+
+        }
+
+    }
+
+}
+
+
+// ========================================
+// RENDER CLIENT REPORT PREVIEW
+// ========================================
+
+function renderAdminClientVisitReportPreview(
+    mount,
+    visit,
+    report,
+    petCare,
+    media,
+    completedWalk,
+    walkPoints
+) {
+
+    const pets =
+        getAdminPetsForVisit(
+            visit
+        );
+
+    const petNames =
+        pets
+            .map(
+                pet =>
+                    pet.name || "Pet"
+            )
+            .join(" & ") ||
+        "Visit Report";
+
+    const checkedIn =
+        visit.checked_in_at
+            ? formatVisitTimestamp(visit.checked_in_at)
+            : "Not recorded";
+
+    const completed =
+        visit.completed_at
+            ? formatVisitTimestamp(visit.completed_at)
+            : "Not recorded";
+
+    const visitMinutes =
+        getVisitDurationMinutes(
+            visit
+        );
+
+    const careFields = [
+        ["fed", "Fed"],
+        ["fresh_water", "Fresh Water"],
+        ["pee", "Pee"],
+        ["poop", "Poop"]
+    ];
+
+    const careHtml =
+        pets
+            .map(
+                pet => {
+
+                    const savedCare =
+                        petCare.find(
+                            item =>
+                                Number(item.pet_id) === Number(pet.id)
+                        );
+
+                    const care =
+                        savedCare ||
+                        (
+                            pets.length === 1
+                                ? report
+                                : {}
+                        );
+
+                    return `
+                        <div class="admin-visit-pet-care-card">
+
+                            <div class="admin-visit-pet-care-header">
+                                <strong>
+                                    ${escapeHtml(pet.name || "Pet")}
+                                </strong>
+                            </div>
+
+                            <div class="admin-visit-care-grid">
+                                ${
+                                    careFields
+                                        .map(
+                                            ([field, label]) => `
+                                                <div class="admin-visit-care-option">
+                                                    <span>
+                                                        ${care[field] ? "✓" : "—"}
+                                                        ${label}
+                                                    </span>
+                                                </div>
+                                            `
+                                        )
+                                        .join("")
+                                }
+                            </div>
+
+                        </div>
+                    `;
+
+                }
+            )
+            .join("");
+
+    const renderPhotos =
+        items =>
+            items
+                .map(
+                    item => {
+
+                        if (
+                            !item.signed_url
+                        ) {
+
+                            return `
+                                <p class="admin-visit-report-help">
+                                    Photo unavailable.
+                                </p>
+                            `;
+
+                        }
+
+                        const url =
+                            escapeHtml(
+                                item.signed_url
+                            );
+
+                        const caption =
+                            escapeHtml(
+                                item.caption || ""
+                            );
+
+                        return `
+                            <figure style="margin: 0 0 12px;">
+
+                                <a
+                                    href="${url}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <img
+                                        src="${url}"
+                                        alt="${caption || "Visit report photo"}"
+                                        loading="lazy"
+                                        style="
+                                            display: block;
+                                            width: 100%;
+                                            max-height: 360px;
+                                            object-fit: contain;
+                                            border-radius: 12px;
+                                        "
+                                    >
+                                </a>
+
+                                ${
+                                    caption
+                                        ? `<figcaption>${caption}</figcaption>`
+                                        : ""
+                                }
+
+                            </figure>
+                        `;
+
+                    }
+                )
+                .join("");
+
+    const visitPhotos =
+        media.filter(
+            item =>
+                item.photo_type === "visit"
+        );
+
+    const routePhotos =
+        media.filter(
+            item =>
+                item.photo_type === "route"
+        );
+
+    const walkHtml =
+        completedWalk || routePhotos.length
+            ? `
+                <div class="admin-visit-report-section">
+
+                    <span class="admin-visit-report-label">
+                        Walk Summary
+                    </span>
+
+                    ${
+                        completedWalk
+                            ? `
+                                <p>
+                                    ${escapeHtml(
+                                        formatWalkDuration(
+                                            Number(
+                                                completedWalk.duration_seconds || 0
+                                            )
+                                        )
+                                    )}
+
+                                    •
+
+                                    ${
+                                        (
+                                            Number(
+                                                completedWalk.distance_meters || 0
+                                            ) / 1609.344
+                                        ).toFixed(2)
+                                    } mi
+                                </p>
+
+                                ${
+                                    walkPoints.length >= 2
+                                        ? `
+                                            <div
+                                                id="admin-client-walk-route-map-${visit.id}"
+                                                class="admin-walk-route-map"
+                                                style="
+                                                    height: 280px;
+                                                    width: 100%;
+                                                    border-radius: 12px;
+                                                    overflow: hidden;
+                                                "
+                                            >
+                                                <p class="admin-visit-report-help">
+                                                    Route map unavailable until Google Maps loads.
+                                                </p>
+                                            </div>
+                                        `
+                                        : `
+                                            <p class="admin-visit-report-help">
+                                                No recorded route available.
+                                            </p>
+                                        `
+                                }
+                            `
+                            : ""
+                    }
+
+                    ${renderPhotos(routePhotos)}
+
+                </div>
+            `
+            : "";
+
+    mount.innerHTML = `
+        <div class="admin-visit-report-form">
+
+            <div class="admin-visit-report-header">
+
+                <div>
+
+                    <span class="admin-visit-report-eyebrow">
+                        CLIENT REPORT PREVIEW
+                    </span>
+
+                    <h5>
+                        ${escapeHtml(petNames)}
+                    </h5>
+
+                    <p>
+                        Saved care updates, notes, and photos.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="admin-visit-report-close"
+                    data-visit-report-close
+                    aria-label="Close client report preview"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div class="admin-visit-report-section">
+
+                <span class="admin-visit-report-label">
+                    Visit Times
+                </span>
+
+                <p>
+                    <strong>Checked in at home:</strong>
+                    ${escapeHtml(checkedIn)}
+                </p>
+
+                <p>
+                    <strong>Visit completed:</strong>
+                    ${escapeHtml(completed)}
+                </p>
+
+                <p>
+                    <strong>Total visit time:</strong>
+                    ${
+                        visitMinutes !== null
+                            ? `${visitMinutes} ${
+                                visitMinutes === 1
+                                    ? "minute"
+                                    : "minutes"
+                            }`
+                            : "Not available"
+                    }
+                </p>
+
+            </div>
+
+            <div class="admin-visit-report-section">
+
+                <span class="admin-visit-report-label">
+                    Care Updates
+                </span>
+
+                ${
+                    careHtml ||
+                    "<p>No pets linked to this visit.</p>"
+                }
+
+                <p class="admin-visit-report-help">
+                    ✓ Completed · — Not marked
+                </p>
+
+            </div>
+
+            <div class="admin-visit-report-section">
+
+                <span class="admin-visit-report-label">
+                    Visit Notes
+                </span>
+
+                <p style="white-space: pre-wrap;">${escapeHtml(
+                    report.notes || "No notes added."
+                )}</p>
+
+            </div>
+
+            ${
+                visitPhotos.length
+                    ? `
+                        <div class="admin-visit-report-section">
+
+                            <span class="admin-visit-report-label">
+                                Visit Photos
+                            </span>
+
+                            ${renderPhotos(visitPhotos)}
+
+                        </div>
+                    `
+                    : ""
+            }
+
+            ${walkHtml}
+
+        </div>
+    `;
+
+}
 
 // ========================================
 // LOAD WALK ROUTE MAP
