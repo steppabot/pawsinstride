@@ -28833,3 +28833,388 @@ function buildPetStatsHtml(
     `;
 
 }
+
+// ========================================
+// DESKTOP SECTION NAVIGATION
+// ========================================
+//
+// Paste this block at the BOTTOM of portal.js,
+// below the pet stats block.
+//
+// Desktop (1024px and up) shows one section at
+// a time from the sidebar, the same way the
+// mobile tabs already work.
+//
+// Mobile behaviour is untouched: every function
+// here exits immediately below 1024px.
+// ========================================
+
+
+const desktopLayoutQuery =
+    window.matchMedia(
+        "(min-width: 1024px)"
+    );
+
+
+const DESKTOP_SCREENS = [
+    "home",
+    "services",
+    "pets",
+    "profile"
+];
+
+
+let activeDesktopScreen =
+    "home";
+
+
+// ========================================
+// SET DESKTOP SCREEN
+// ========================================
+
+function setDesktopScreen(
+    screen
+) {
+
+    if (
+        !DESKTOP_SCREENS.includes(
+            screen
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    activeDesktopScreen =
+        screen;
+
+
+    DESKTOP_SCREENS.forEach(
+        name => {
+
+            document.body.classList.toggle(
+                `desktop-screen-${name}`,
+                name === screen
+            );
+
+        }
+    );
+
+
+    // ========================================
+    // SIDEBAR ACTIVE STATE
+    // ========================================
+
+    document
+        .querySelectorAll(
+            "[data-client-desktop-tab]"
+        )
+        .forEach(
+            button => {
+
+                const isActive =
+                    button.dataset
+                        .clientDesktopTab ===
+                    screen;
+
+
+                button.classList.toggle(
+                    "is-active",
+                    isActive
+                );
+
+
+                if (
+                    isActive
+                ) {
+
+                    button.setAttribute(
+                        "aria-current",
+                        "page"
+                    );
+
+                } else {
+
+                    button.removeAttribute(
+                        "aria-current"
+                    );
+
+                }
+
+            }
+        );
+
+
+    // ========================================
+    // CLOSE REQUEST SERVICE WHEN LEAVING
+    // ========================================
+
+    if (
+        screen !== "services" &&
+        bookingSection
+    ) {
+
+        bookingSection.style.display =
+            "none";
+
+    }
+
+
+    // ========================================
+    // REFRESH HOME CONTENT
+    // ========================================
+
+    if (
+        screen === "home"
+    ) {
+
+        renderMobileHomeDashboard();
+
+    }
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+// ========================================
+// SIDEBAR CLICKS
+// ========================================
+
+document
+    .getElementById(
+        "client-desktop-sidebar"
+    )
+    ?.addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    "[data-client-desktop-tab]"
+                );
+
+
+            if (
+                !button
+            ) {
+
+                return;
+
+            }
+
+
+            closeClientMessaging();
+
+
+            setDesktopScreen(
+                button.dataset
+                    .clientDesktopTab
+            );
+
+        }
+    );
+
+
+// ========================================
+// SIDEBAR CLIENT DETAILS
+// ========================================
+
+function updateDesktopSidebarClient() {
+
+    const nameElement =
+        document.getElementById(
+            "client-desktop-sidebar-name"
+        );
+
+
+    const creditElement =
+        document.getElementById(
+            "client-desktop-sidebar-credit"
+        );
+
+
+    if (
+        nameElement
+    ) {
+
+        nameElement.textContent =
+            currentProfile?.full_name ||
+            "Client";
+
+    }
+
+
+    if (
+        creditElement
+    ) {
+
+        const creditText =
+            document.getElementById(
+                "household-display-credit"
+            )?.textContent ||
+            "";
+
+
+        const creditCardVisible =
+            document.getElementById(
+                "household-credit-card"
+            )?.style.display !==
+            "none";
+
+
+        creditElement.textContent =
+            creditCardVisible &&
+            creditText
+
+                ? `Account credit ${creditText}`
+
+                : "";
+
+    }
+
+}
+
+
+// ========================================
+// ROUTE EXISTING TAB CALLS TO DESKTOP
+// ========================================
+//
+// handleMobileAppTab() is already called from
+// the notification center, the Home quick
+// actions, and the latest update card.
+//
+// On desktop those calls previously did
+// nothing. This wrapper sends them to the
+// matching desktop screen instead, so every
+// existing link keeps working.
+// ========================================
+
+const originalHandleMobileAppTab =
+    handleMobileAppTab;
+
+
+handleMobileAppTab =
+    async function (
+        tab
+    ) {
+
+        if (
+            !desktopLayoutQuery.matches
+        ) {
+
+            return originalHandleMobileAppTab(
+                tab
+            );
+
+        }
+
+
+        if (
+            tab === "messages"
+        ) {
+
+            await openClientMessaging();
+
+
+            return;
+
+        }
+
+
+        setDesktopScreen(
+            tab
+        );
+
+    };
+
+
+// ========================================
+// REQUEST SERVICE OPENS THE SERVICES SCREEN
+// ========================================
+
+document
+    .getElementById(
+        "request-walk-button"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            if (
+                !desktopLayoutQuery.matches
+            ) {
+
+                return;
+
+            }
+
+
+            setDesktopScreen(
+                "services"
+            );
+
+        }
+    );
+
+
+// ========================================
+// KEEP SCREENS TIDY ACROSS BREAKPOINTS
+// ========================================
+
+function syncDesktopLayoutState() {
+
+    if (
+        desktopLayoutQuery.matches
+    ) {
+
+        setDesktopScreen(
+            activeDesktopScreen
+        );
+
+
+        updateDesktopSidebarClient();
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // LEAVING DESKTOP — DROP THE CLASSES
+    // ========================================
+
+    DESKTOP_SCREENS.forEach(
+        name => {
+
+            document.body.classList.remove(
+                `desktop-screen-${name}`
+            );
+
+        }
+    );
+
+}
+
+
+desktopLayoutQuery.addEventListener(
+    "change",
+    syncDesktopLayoutState
+);
+
+
+// ========================================
+// START ON HOME
+// ========================================
+
+window.setTimeout(
+    syncDesktopLayoutState,
+    0
+);
