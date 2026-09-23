@@ -27496,3 +27496,649 @@ function startAdminPortalIntro() {
 
 
 })();
+
+// ========================================
+// VISIT PHOTO RESIZING
+// ========================================
+//
+// Paste this entire block at the BOTTOM of
+// admin.js.
+//
+// It redefines uploadVisitReportMedia(). In
+// JavaScript the LAST function declaration of
+// a name wins, so this version replaces the
+// original automatically -- the old one above
+// can stay exactly where it is.
+//
+// What changes:
+//
+// Before: the camera original (1-2 MB) was
+//         uploaded as-is.
+//
+// After:  two resized JPEGs are uploaded.
+//
+//         photo.jpg        ~1600px  ~250 KB
+//         photo-thumb.jpg  ~400px    ~35 KB
+//
+// The full-size original is never uploaded.
+// ========================================
+
+
+// ========================================
+// RESIZE SETTINGS
+// ========================================
+
+const VISIT_PHOTO_DISPLAY_MAX_EDGE =
+    1600;
+
+
+const VISIT_PHOTO_DISPLAY_QUALITY =
+    0.82;
+
+
+const VISIT_PHOTO_THUMB_MAX_EDGE =
+    400;
+
+
+const VISIT_PHOTO_THUMB_QUALITY =
+    0.7;
+
+
+// ========================================
+// THUMBNAIL PATH
+// ========================================
+//
+// The database stores one storage_path. The
+// thumbnail path is derived from it, so no
+// schema change is needed.
+//
+//   12/visit-abc123.jpg
+//   12/visit-abc123-thumb.jpg
+// ========================================
+
+function getVisitPhotoThumbPath(
+    storagePath
+) {
+
+    const path =
+        String(
+            storagePath ||
+            ""
+        );
+
+
+    const dotIndex =
+        path.lastIndexOf(
+            "."
+        );
+
+
+    if (
+        dotIndex <=
+        0
+    ) {
+
+        return `${path}-thumb`;
+
+    }
+
+
+    return (
+        `${path.slice(
+            0,
+            dotIndex
+        )}-thumb${path.slice(
+            dotIndex
+        )}`
+    );
+
+}
+
+
+// ========================================
+// LOAD FILE INTO AN IMAGE
+// ========================================
+
+function loadVisitPhotoImage(
+    file
+) {
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+
+            const objectUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+
+            const image =
+                new Image();
+
+
+            image.onload =
+                () => {
+
+                    URL.revokeObjectURL(
+                        objectUrl
+                    );
+
+
+                    resolve(
+                        image
+                    );
+
+                };
+
+
+            image.onerror =
+                () => {
+
+                    URL.revokeObjectURL(
+                        objectUrl
+                    );
+
+
+                    reject(
+                        new Error(
+                            "The photo could not be read."
+                        )
+                    );
+
+                };
+
+
+            image.src =
+                objectUrl;
+
+        }
+    );
+
+}
+
+
+// ========================================
+// RESIZE TO A JPEG BLOB
+// ========================================
+
+function resizeVisitPhotoImage(
+    image,
+    maxEdge,
+    quality
+) {
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+
+            const sourceWidth =
+                image.naturalWidth ||
+                image.width;
+
+
+            const sourceHeight =
+                image.naturalHeight ||
+                image.height;
+
+
+            if (
+                !sourceWidth ||
+                !sourceHeight
+            ) {
+
+                reject(
+                    new Error(
+                        "The photo has no readable size."
+                    )
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // NEVER UPSCALE
+            // ========================================
+
+            const scale =
+                Math.min(
+                    1,
+                    maxEdge /
+                    Math.max(
+                        sourceWidth,
+                        sourceHeight
+                    )
+                );
+
+
+            const targetWidth =
+                Math.round(
+                    sourceWidth *
+                    scale
+                );
+
+
+            const targetHeight =
+                Math.round(
+                    sourceHeight *
+                    scale
+                );
+
+
+            const canvas =
+                document.createElement(
+                    "canvas"
+                );
+
+
+            canvas.width =
+                targetWidth;
+
+
+            canvas.height =
+                targetHeight;
+
+
+            const context =
+                canvas.getContext(
+                    "2d"
+                );
+
+
+            if (
+                !context
+            ) {
+
+                reject(
+                    new Error(
+                        "This device could not process the photo."
+                    )
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // WHITE BACKGROUND
+            // ========================================
+            //
+            // JPEG has no transparency, so a PNG
+            // with a clear background would turn
+            // black without this.
+            // ========================================
+
+            context.fillStyle =
+                "#ffffff";
+
+
+            context.fillRect(
+                0,
+                0,
+                targetWidth,
+                targetHeight
+            );
+
+
+            context.imageSmoothingEnabled =
+                true;
+
+
+            context.imageSmoothingQuality =
+                "high";
+
+
+            context.drawImage(
+                image,
+                0,
+                0,
+                targetWidth,
+                targetHeight
+            );
+
+
+            canvas.toBlob(
+                blob => {
+
+
+                    if (
+                        !blob
+                    ) {
+
+                        reject(
+                            new Error(
+                                "The resized photo could not be created."
+                            )
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    resolve(
+                        blob
+                    );
+
+                },
+                "image/jpeg",
+                quality
+            );
+
+        }
+    );
+
+}
+
+
+// ========================================
+// BUILD DISPLAY + THUMBNAIL
+// ========================================
+
+async function buildVisitPhotoVersions(
+    file
+) {
+
+    const image =
+        await loadVisitPhotoImage(
+            file
+        );
+
+
+    const [
+        displayBlob,
+        thumbBlob
+    ] =
+        await Promise.all([
+
+            resizeVisitPhotoImage(
+                image,
+                VISIT_PHOTO_DISPLAY_MAX_EDGE,
+                VISIT_PHOTO_DISPLAY_QUALITY
+            ),
+
+            resizeVisitPhotoImage(
+                image,
+                VISIT_PHOTO_THUMB_MAX_EDGE,
+                VISIT_PHOTO_THUMB_QUALITY
+            )
+
+        ]);
+
+
+    console.log(
+        "Visit photo resized:",
+        `${Math.round(
+            file.size /
+            1024
+        )} KB`,
+        "→",
+        `${Math.round(
+            displayBlob.size /
+            1024
+        )} KB + ${Math.round(
+            thumbBlob.size /
+            1024
+        )} KB`
+    );
+
+
+    return {
+
+        displayBlob,
+
+        thumbBlob
+
+    };
+
+}
+
+
+// ========================================
+// UPLOAD VISIT PHOTO
+// ========================================
+//
+// Replaces the original uploadVisitReportMedia.
+// Same signature, same call sites.
+// ========================================
+
+async function uploadVisitReportMedia(
+    visitId,
+    file,
+    photoType,
+    sortOrder
+) {
+
+
+    // ========================================
+    // RESIZE BEFORE UPLOAD
+    // ========================================
+
+    let displayBlob =
+        null;
+
+
+    let thumbBlob =
+        null;
+
+
+    let extension =
+        "jpg";
+
+
+    let contentType =
+        "image/jpeg";
+
+
+    try {
+
+
+        const versions =
+            await buildVisitPhotoVersions(
+                file
+            );
+
+
+        displayBlob =
+            versions.displayBlob;
+
+
+        thumbBlob =
+            versions.thumbBlob;
+
+
+    } catch (
+        error
+    ) {
+
+
+        // ========================================
+        // RESIZE FAILED
+        // UPLOAD THE ORIGINAL SO THE VISIT
+        // REPORT IS NEVER BLOCKED
+        // ========================================
+
+        console.warn(
+            "Visit photo resize failed. Uploading the original file.",
+            error
+        );
+
+
+        displayBlob =
+            file;
+
+
+        thumbBlob =
+            null;
+
+
+        extension =
+            getFileExtensionForMime(
+                file.type
+            );
+
+
+        contentType =
+            file.type;
+
+    }
+
+
+    const storagePath =
+        `${visitId}/${photoType}-${crypto.randomUUID()}.${extension}`;
+
+
+    // ========================================
+    // UPLOAD DISPLAY VERSION
+    // ========================================
+
+    const {
+        error: uploadError
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                VISIT_MEDIA_BUCKET
+            )
+            .upload(
+                storagePath,
+                displayBlob,
+                {
+                    contentType:
+                        contentType,
+
+                    cacheControl:
+                        "3600",
+
+                    upsert:
+                        false
+                }
+            );
+
+
+    if (
+        uploadError
+    ) {
+
+        throw uploadError;
+
+    }
+
+
+    // ========================================
+    // UPLOAD THUMBNAIL
+    // ========================================
+    //
+    // A failed thumbnail is not fatal. The
+    // portal falls back to the display version.
+    // ========================================
+
+    if (
+        thumbBlob
+    ) {
+
+
+        const {
+            error: thumbUploadError
+        } =
+            await supabaseClient
+                .storage
+                .from(
+                    VISIT_MEDIA_BUCKET
+                )
+                .upload(
+                    getVisitPhotoThumbPath(
+                        storagePath
+                    ),
+                    thumbBlob,
+                    {
+                        contentType:
+                            "image/jpeg",
+
+                        cacheControl:
+                            "3600",
+
+                        upsert:
+                            false
+                    }
+                );
+
+
+        if (
+            thumbUploadError
+        ) {
+
+            console.warn(
+                "Visit photo thumbnail upload failed:",
+                thumbUploadError
+            );
+
+        }
+
+    }
+
+
+    // ========================================
+    // SAVE DATABASE RECORD
+    // ========================================
+
+    const {
+        error: databaseError
+    } =
+        await supabaseClient
+            .from("visit_photos")
+            .insert({
+
+                visit_id:
+                    visitId,
+
+                storage_path:
+                    storagePath,
+
+                photo_type:
+                    photoType,
+
+                sort_order:
+                    sortOrder
+
+            });
+
+
+    if (
+        databaseError
+    ) {
+
+
+        await supabaseClient
+            .storage
+            .from(
+                VISIT_MEDIA_BUCKET
+            )
+            .remove([
+
+                storagePath,
+
+                getVisitPhotoThumbPath(
+                    storagePath
+                )
+
+            ]);
+
+
+        throw databaseError;
+
+    }
+
+}
