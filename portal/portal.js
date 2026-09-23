@@ -2454,6 +2454,7 @@ async function loadDashboard() {
 
     }
 
+    await loadPetStats();
 
     const welcomeName =
         document.getElementById(
@@ -5611,6 +5612,7 @@ async function renderPets() {
 
                             </div>
 
+                            ${buildPetStatsHtml(pet)}
 
                             <div class="pet-profile-details">
 
@@ -6887,6 +6889,7 @@ async function refreshPets() {
 
     petPhotoUrlCache.clear();
 
+    await loadPetStats();
 
     await renderPets();
 
@@ -27876,5 +27879,957 @@ if (clientMessageBadge) {
     );
 
     syncClientNavigationMessageBadge();
+
+}
+
+// ========================================
+// PET WALK STATS
+// ========================================
+//
+// Paste this entire block at the BOTTOM of
+// portal.js.
+//
+// It reads from data the portal already loads
+// (currentPets, currentVisits, currentVisitPets)
+// plus two extra queries:
+//
+// - visit_walks   (completed GPS walks)
+// - visit_photos  (visit photo counts)
+//
+// Nothing new needs to be entered per pet.
+// ========================================
+
+
+// ========================================
+// DISTANCE MILESTONES
+// ========================================
+//
+// Measure your own local loops in Google Maps
+// and add them here. The biggest milestone the
+// pet has passed at least once is used, as long
+// as the count stays reasonable.
+// ========================================
+
+const PET_STAT_MILESTONES = [
+
+    {
+        single: "a football field",
+        plural: "football fields",
+        miles: 0.057
+    },
+
+    {
+        single: "a lap around a running track",
+        plural: "laps around a running track",
+        miles: 0.25
+    },
+
+    {
+        single: "a lap around Toyota Stadium",
+        plural: "laps around Toyota Stadium",
+        miles: 0.5
+    },
+
+    {
+        single: "a lap around Frisco Commons",
+        plural: "laps around Frisco Commons Park",
+        miles: 1.1
+    },
+
+    {
+        single: "the trip to downtown Dallas",
+        plural: "trips to downtown Dallas",
+        miles: 27
+    },
+
+    {
+        single: "a lap around the city of Frisco",
+        plural: "laps around the city of Frisco",
+        miles: 34
+    }
+
+];
+
+
+const METERS_PER_MILE =
+    1609.344;
+
+
+// ========================================
+// PET STATS STATE
+// ========================================
+
+let currentPetStats =
+    new Map();
+
+
+// ========================================
+// WALKING SERVICE CHECK
+// ========================================
+
+function isWalkingServiceVisit(
+    visit
+) {
+
+    const serviceType =
+        String(
+            visit?.service_type ||
+            ""
+        )
+            .trim()
+            .toLowerCase()
+            .replace(
+                /_/g,
+                " "
+            );
+
+
+    const serviceName =
+        String(
+            visit?.service_name ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    return (
+        serviceType ===
+            "dog walking" ||
+        serviceName.startsWith(
+            "dog walking"
+        )
+    );
+
+}
+
+
+// ========================================
+// COMPLETED VISIT CHECK
+// ========================================
+
+function isCompletedVisit(
+    visit
+) {
+
+    const status =
+        String(
+            visit?.status ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    return (
+        status ===
+            "completed" ||
+        Boolean(
+            visit?.completed_at
+        )
+    );
+
+}
+
+
+// ========================================
+// LOAD PET STATS
+// ========================================
+
+async function loadPetStats() {
+
+    currentPetStats =
+        new Map();
+
+
+    if (
+        !currentUser?.id ||
+        currentPets.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // COMPLETED VISITS ONLY
+    // ========================================
+
+    const completedVisits =
+        currentVisits.filter(
+            isCompletedVisit
+        );
+
+
+    if (
+        completedVisits.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const completedVisitIds =
+        completedVisits.map(
+            visit =>
+                Number(
+                    visit.id
+                )
+        );
+
+
+    // ========================================
+    // LOAD WALKS + PHOTOS
+    // ========================================
+
+    let walkRows =
+        [];
+
+
+    let photoRows =
+        [];
+
+
+    try {
+
+        const [
+            walkResult,
+            photoResult
+        ] =
+            await Promise.all([
+
+                supabaseClient
+                    .from(
+                        "visit_walks"
+                    )
+                    .select(
+                        "id, visit_id, status, duration_seconds, distance_meters, ended_at"
+                    )
+                    .in(
+                        "visit_id",
+                        completedVisitIds
+                    )
+                    .eq(
+                        "status",
+                        "completed"
+                    ),
+
+                supabaseClient
+                    .from(
+                        "visit_photos"
+                    )
+                    .select(
+                        "id, visit_id, photo_type"
+                    )
+                    .in(
+                        "visit_id",
+                        completedVisitIds
+                    )
+                    .eq(
+                        "photo_type",
+                        "visit"
+                    )
+
+            ]);
+
+
+        if (
+            walkResult.error
+        ) {
+
+            throw walkResult.error;
+
+        }
+
+
+        if (
+            photoResult.error
+        ) {
+
+            throw photoResult.error;
+
+        }
+
+
+        walkRows =
+            walkResult.data ||
+            [];
+
+
+        photoRows =
+            photoResult.data ||
+            [];
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Pet stats load error:",
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // INDEX VISITS
+    // ========================================
+
+    const visitsById =
+        new Map(
+            completedVisits.map(
+                visit => [
+                    Number(
+                        visit.id
+                    ),
+                    visit
+                ]
+            )
+        );
+
+
+    const walksByVisitId =
+        new Map(
+            walkRows.map(
+                walk => [
+                    Number(
+                        walk.visit_id
+                    ),
+                    walk
+                ]
+            )
+        );
+
+
+    const photoCountByVisitId =
+        new Map();
+
+
+    photoRows.forEach(
+        photo => {
+
+            const visitId =
+                Number(
+                    photo.visit_id
+                );
+
+
+            photoCountByVisitId.set(
+                visitId,
+                (
+                    photoCountByVisitId.get(
+                        visitId
+                    ) || 0
+                ) + 1
+            );
+
+        }
+    );
+
+
+    // ========================================
+    // CURRENT MONTH
+    // ========================================
+
+    const now =
+        new Date();
+
+
+    const monthPrefix =
+        `${now.getFullYear()}-${String(
+            now.getMonth() + 1
+        ).padStart(2, "0")}`;
+
+
+    // ========================================
+    // BUILD STATS PER PET
+    // ========================================
+
+    currentPets.forEach(
+        pet => {
+
+            const petId =
+                Number(
+                    pet.id
+                );
+
+
+            const petVisitIds =
+                currentVisitPets
+                    .filter(
+                        relation =>
+                            Number(
+                                relation.pet_id
+                            ) === petId
+                    )
+                    .map(
+                        relation =>
+                            Number(
+                                relation.visit_id
+                            )
+                    );
+
+
+            // ========================================
+            // LEGACY SINGLE-PET VISITS
+            // ========================================
+
+            completedVisits.forEach(
+                visit => {
+
+                    if (
+                        Number(
+                            visit.pet_id
+                        ) === petId &&
+                        !petVisitIds.includes(
+                            Number(
+                                visit.id
+                            )
+                        )
+                    ) {
+
+                        petVisitIds.push(
+                            Number(
+                                visit.id
+                            )
+                        );
+
+                    }
+
+                }
+            );
+
+
+            let walkCount =
+                0;
+
+            let walksThisMonth =
+                0;
+
+            let totalMeters =
+                0;
+
+            let totalSeconds =
+                0;
+
+            let photoCount =
+                0;
+
+            let longestWalk =
+                null;
+
+
+            petVisitIds.forEach(
+                visitId => {
+
+                    const visit =
+                        visitsById.get(
+                            visitId
+                        );
+
+
+                    if (
+                        !visit
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    photoCount +=
+                        photoCountByVisitId.get(
+                            visitId
+                        ) || 0;
+
+
+                    const walk =
+                        walksByVisitId.get(
+                            visitId
+                        );
+
+
+                    if (
+                        !walk ||
+                        !isWalkingServiceVisit(
+                            visit
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    walkCount += 1;
+
+
+                    const meters =
+                        Number(
+                            walk.distance_meters ||
+                            0
+                        );
+
+
+                    const seconds =
+                        Number(
+                            walk.duration_seconds ||
+                            0
+                        );
+
+
+                    totalMeters +=
+                        meters;
+
+
+                    totalSeconds +=
+                        seconds;
+
+
+                    if (
+                        String(
+                            visit.visit_date ||
+                            ""
+                        ).startsWith(
+                            monthPrefix
+                        )
+                    ) {
+
+                        walksThisMonth += 1;
+
+                    }
+
+
+                    if (
+                        !longestWalk ||
+                        meters >
+                            longestWalk.meters
+                    ) {
+
+                        longestWalk = {
+
+                            meters,
+
+                            visitDate:
+                                visit.visit_date
+
+                        };
+
+                    }
+
+                }
+            );
+
+
+            currentPetStats.set(
+                petId,
+                {
+
+                    walkCount,
+
+                    walksThisMonth,
+
+                    miles:
+                        totalMeters /
+                        METERS_PER_MILE,
+
+                    hours:
+                        totalSeconds /
+                        3600,
+
+                    photoCount,
+
+                    longestWalk,
+
+                    hasVisits:
+                        petVisitIds.some(
+                            visitId =>
+                                visitsById.has(
+                                    visitId
+                                )
+                        )
+
+                }
+            );
+
+        }
+    );
+
+
+    console.log(
+        "Pet stats loaded:",
+        currentPetStats.size
+    );
+
+}
+
+
+// ========================================
+// GET PET STATS
+// ========================================
+
+function getPetStats(
+    petId
+) {
+
+    return (
+        currentPetStats.get(
+            Number(
+                petId
+            )
+        ) ||
+        null
+    );
+
+}
+
+
+// ========================================
+// MILESTONE LINE
+// ========================================
+
+function getPetMilestoneText(
+    totalMiles
+) {
+
+    const miles =
+        Number(
+            totalMiles ||
+            0
+        );
+
+
+    const reached =
+        PET_STAT_MILESTONES.filter(
+            milestone =>
+                miles /
+                    milestone.miles >=
+                1
+        );
+
+
+    if (
+        reached.length === 0
+    ) {
+
+        return "";
+
+    }
+
+
+    const milestone =
+        reached
+            .slice()
+            .reverse()
+            .find(
+                item =>
+                    miles /
+                        item.miles <=
+                    25
+            ) ||
+        reached[0];
+
+
+    const count =
+        Math.floor(
+            miles /
+            milestone.miles
+        );
+
+
+    if (
+        count === 1
+    ) {
+
+        return `That's ${milestone.single} — done!`;
+
+    }
+
+
+    return `That's ${count} ${milestone.plural}.`;
+
+}
+
+
+// ========================================
+// STAT FORMATTERS
+// ========================================
+
+function formatPetStatMiles(
+    miles
+) {
+
+    const value =
+        Number(
+            miles ||
+            0
+        );
+
+
+    return value >= 100
+        ? String(
+            Math.round(
+                value
+            )
+        )
+        : value.toFixed(
+            1
+        );
+
+}
+
+
+function formatPetStatHours(
+    hours
+) {
+
+    const value =
+        Number(
+            hours ||
+            0
+        );
+
+
+    if (
+        value < 1
+    ) {
+
+        return `${Math.max(
+            1,
+            Math.round(
+                value * 60
+            )
+        )}m`;
+
+    }
+
+
+    return `${Math.round(
+        value
+    )}h`;
+
+}
+
+
+function formatPetStatDate(
+    dateString
+) {
+
+    if (
+        !dateString
+    ) {
+
+        return "";
+
+    }
+
+
+    return parseLocalDate(
+        dateString
+    ).toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+// ========================================
+// BUILD PET STATS HTML
+// ========================================
+//
+// Returns an empty string when the pet has no
+// recorded walks, so drop-in, pet sitting, and
+// boarding pets simply don't show this block.
+// ========================================
+
+function buildPetStatsHtml(
+    pet
+) {
+
+    const stats =
+        getPetStats(
+            pet?.id
+        );
+
+
+    if (
+        !stats ||
+        stats.walkCount === 0
+    ) {
+
+        return "";
+
+    }
+
+
+    const milestoneText =
+        getPetMilestoneText(
+            stats.miles
+        );
+
+
+    const longestWalkText =
+        stats.longestWalk
+
+            ? `${formatPetStatMiles(
+                stats.longestWalk.meters /
+                METERS_PER_MILE
+            )} mi &nbsp;·&nbsp; ${escapeHtml(
+                formatPetStatDate(
+                    stats.longestWalk.visitDate
+                )
+            )}`
+
+            : "—";
+
+
+    return `
+
+        <div class="pet-stats-block">
+
+
+            <div class="pet-stats-heading">
+
+                <span class="pet-stats-label">
+                    Walk Stats
+                </span>
+
+                <span class="pet-stats-scope">
+                    All time
+                </span>
+
+            </div>
+
+
+            <div class="pet-stats-tiles">
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${stats.walkCount}
+                    </strong>
+
+                    <span>
+                        Walks
+                    </span>
+
+                </div>
+
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${formatPetStatMiles(
+                            stats.miles
+                        )}
+                    </strong>
+
+                    <span>
+                        Miles
+                    </span>
+
+                </div>
+
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${formatPetStatHours(
+                            stats.hours
+                        )}
+                    </strong>
+
+                    <span>
+                        Together
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            ${
+                milestoneText
+
+                    ? `
+                        <div class="pet-stats-milestone">
+
+                            <span
+                                class="pet-stats-milestone-icon"
+                                aria-hidden="true"
+                            >
+                                🐾
+                            </span>
+
+                            <span>
+                                ${escapeHtml(
+                                    milestoneText
+                                )}
+                            </span>
+
+                        </div>
+                    `
+
+                    : ""
+            }
+
+
+            <div class="pet-stats-records">
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Walks this month
+                    </span>
+
+                    <strong>
+                        ${stats.walksThisMonth}
+                    </strong>
+
+                </div>
+
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Longest walk
+                    </span>
+
+                    <strong>
+                        ${longestWalkText}
+                    </strong>
+
+                </div>
+
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Photos received
+                    </span>
+
+                    <strong>
+                        ${stats.photoCount}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    `;
 
 }
