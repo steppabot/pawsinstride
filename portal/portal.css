@@ -22640,9 +22640,9 @@ body.portal-intro-open {
     }
 
     body.desktop-screen-home .mobile-home-dashboard {
-        display: block !important;
+        display: grid !important;
     }
-
+   
     /* SERVICES */
     body.desktop-screen-services #pets-section,
     body.desktop-screen-services #household-section,
@@ -22704,10 +22704,7 @@ body.portal-intro-open {
         grid-column: 1 / -1;
         position: relative;
         overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 24px;
+        display: block;
         margin: 0;
         padding: 22px 24px;
         background: linear-gradient(135deg, #174b68 0%, #1d6f98 55%, #268db2 100%);
