@@ -22264,3 +22264,193 @@ body.portal-intro-open {
     }
 
 }
+
+/* ========================================
+   PET WALK STATS
+   Append to the bottom of portal.css.
+======================================== */
+
+.client-portal-page .pet-stats-block {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e8eef2;
+}
+
+/* ========================================
+   STATS HEADING
+======================================== */
+
+.client-portal-page .pet-stats-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.client-portal-page .pet-stats-label {
+    color: #1f7bc2;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.client-portal-page .pet-stats-scope {
+    color: #8492a0;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ========================================
+   STAT TILES
+======================================== */
+
+.client-portal-page .pet-stats-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.client-portal-page .pet-stats-tile {
+    min-width: 0;
+    padding: 12px 6px;
+    background: #f4f9fc;
+    border: 1px solid #e3edf4;
+    border-radius: 11px;
+    text-align: center;
+}
+
+.client-portal-page .pet-stats-tile strong {
+    display: block;
+    color: #16374f;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.client-portal-page .pet-stats-tile span {
+    display: block;
+    margin-top: 3px;
+    color: #6c7a86;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* ========================================
+   MILESTONE LINE
+======================================== */
+
+.client-portal-page .pet-stats-milestone {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 12px;
+    background: #fdf4e8;
+    border: 1px solid #f6e0bd;
+    border-radius: 11px;
+    color: #7a5518;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.client-portal-page .pet-stats-milestone-icon {
+    flex: 0 0 auto;
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* ========================================
+   RECORDS LIST
+======================================== */
+
+.client-portal-page .pet-stats-records {
+    padding: 2px 12px;
+    background: #f8fbfd;
+    border: 1px solid #e6eef4;
+    border-radius: 11px;
+}
+
+.client-portal-page .pet-stats-record {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 44px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eaf0f5;
+}
+
+.client-portal-page .pet-stats-record:last-child {
+    border-bottom: 0;
+}
+
+.client-portal-page .pet-stats-record span {
+    color: #63727f;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.client-portal-page .pet-stats-record strong {
+    color: #24435c;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: right;
+}
+
+/* ========================================
+   PET WALK STATS — DESKTOP
+======================================== */
+
+@media (min-width: 701px) {
+
+    .client-portal-page .pet-stats-block {
+        gap: 13px;
+        margin-top: 18px;
+        padding-top: 18px;
+    }
+
+    .client-portal-page .pet-stats-tiles {
+        gap: 10px;
+    }
+
+    .client-portal-page .pet-stats-tile {
+        padding: 14px 8px;
+    }
+
+    .client-portal-page .pet-stats-tile strong {
+        font-size: 24px;
+    }
+
+    .client-portal-page .pet-stats-milestone {
+        font-size: 13px;
+    }
+
+    .client-portal-page .pet-stats-record span,
+    .client-portal-page .pet-stats-record strong {
+        font-size: 13px;
+    }
+
+}
+
+/* ========================================
+   PET WALK STATS — MOBILE PETS SCREEN
+======================================== */
+
+@media (max-width: 700px) {
+
+    body.mobile-app-screen-pets .pet-stats-tile strong {
+        font-size: 21px;
+    }
+
+    body.mobile-app-screen-pets .pet-stats-record span,
+    body.mobile-app-screen-pets .pet-stats-record strong {
+        font-size: 12px;
+    }
+
+}
