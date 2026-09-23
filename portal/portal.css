@@ -22830,8 +22830,9 @@ body.portal-intro-open {
     /* ========================================
        QUICK ACTIONS CARD
     ======================================== */
-
     body.desktop-screen-home .mobile-home-section:has(.mobile-home-quick-actions) {
+        position: relative;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -22840,6 +22841,17 @@ body.portal-intro-open {
         border: 1px solid #d6e4eb;
         border-radius: 16px;
         box-shadow: 0 6px 16px rgba(24,52,71,0.06);
+    }
+
+    body.desktop-screen-home .mobile-home-section:has(.mobile-home-quick-actions)::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f5ab40 0%, #ef602c 100%);
+        z-index: 1;
     }
 
 
