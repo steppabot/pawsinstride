@@ -22743,12 +22743,12 @@ body.portal-intro-open {
         grid-row: 2;
     }
 
-    body.desktop-screen-home .mobile-home-section:has(.mobile-home-latest-update) {
+    body.desktop-screen-home #mobile-home-next-visit-card {
         grid-column: 2;
         grid-row: 2;
     }
 
-    body.desktop-screen-home #mobile-home-next-visit-card {
+    body.desktop-screen-home .mobile-home-section:has(.mobile-home-latest-update) {
         grid-column: 1;
         grid-row: 3;
     }
@@ -22834,7 +22834,7 @@ body.portal-intro-open {
     body.desktop-screen-home .mobile-home-section:has(.mobile-home-quick-actions) {
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         padding: 20px;
         background: #ffffff;
         border: 1px solid #d6e4eb;
@@ -22941,7 +22941,18 @@ body.portal-intro-open {
 
     body.desktop-screen-home .mobile-home-section:has(.mobile-home-quick-actions)
     .mobile-home-section-heading {
-        display: none;
+        display: block;
+        margin: 0 0 10px;
+    }
+
+    body.desktop-screen-home .mobile-home-section:has(.mobile-home-quick-actions)
+    .mobile-home-section-heading h3 {
+        margin: 0;
+        color: #1f7bc2;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
     }
 
     body.desktop-screen-home .mobile-home-quick-actions {
