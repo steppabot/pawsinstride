@@ -2704,6 +2704,8 @@ async function renderHousehold() {
 
     renderHomeNotes();
 
+    updateDesktopSidebarClient();
+
 }
 
 
