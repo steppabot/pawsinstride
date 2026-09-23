@@ -3101,61 +3101,31 @@ p {
     }
 
 }
-
 /* ========================================
    ADMIN VISIT ACTION BUTTONS
 ======================================== */
 
-.admin-page
-.admin-visit-action-button,
+.admin-page .admin-visit-action-button,
+.admin-page .admin-visit-report-button,
+.admin-page .admin-visit-report-preview-button,
+.admin-page .admin-reopen-visit-button {
+    width: auto;
+    min-width: 150px;
+    min-height: 42px;
+    flex-shrink: 0;
 
-.admin-page
-.admin-visit-report-button,
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
 
-.admin-page
-.admin-reopen-visit-button {
-    width:
-        auto;
+    padding: 11px 16px;
+    border-radius: 8px;
 
-    min-width:
-        150px;
-
-    min-height:
-        42px;
-
-    flex-shrink:
-        0;
-
-    display:
-        inline-flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    gap:
-        7px;
-
-    padding:
-        11px
-        16px;
-
-    border-radius:
-        8px;
-
-    font-size:
-        12px;
-
-    font-weight:
-        800;
-
-    line-height:
-        1;
-
-    text-align:
-        center;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
 
     transition:
         background 0.18s ease,
@@ -3170,55 +3140,25 @@ p {
    PRIMARY VISIT ACTIONS
 ======================================== */
 
-.admin-page
-.admin-check-in-button,
+.admin-page .admin-check-in-button,
+.admin-page .admin-visit-report-button,
+.admin-page .admin-visit-action-button[data-visit-action="start-walk"],
+.admin-page .admin-visit-action-button[data-visit-action="resume-walk-gps"],
+.admin-page .admin-visit-action-button[data-visit-action="sync-visit"],
+.admin-page .admin-visit-action-button[data-visit-action="sync-walk"] {
+    background: linear-gradient(
+        135deg,
+        #2890df 0%,
+        #1f7bc2 58%,
+        #1768aa 100%
+    );
 
-.admin-page
-.admin-visit-report-button,
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="start-walk"
-],
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="resume-walk-gps"
-],
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="sync-visit"
-],
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="sync-walk"
-] {
-    background:
-        linear-gradient(
-            135deg,
-            #2890df 0%,
-            #1f7bc2 58%,
-            #1768aa 100%
-        );
-
-    color:
-        #ffffff;
-
-    border:
-        1px solid #1768aa;
-
-    border-radius:
-        8px;
+    color: #ffffff;
+    border: 1px solid #1768aa;
+    border-radius: 8px;
 
     box-shadow:
-        0 5px 12px rgba(
-            31,
-            123,
-            194,
-            0.18
-        );
+        0 5px 12px rgba(31, 123, 194, 0.18);
 }
 
 
@@ -3226,48 +3166,22 @@ p {
    PRIMARY VISIT ACTIONS — HOVER
 ======================================== */
 
-.admin-page
-.admin-check-in-button:hover,
+.admin-page .admin-check-in-button:hover,
+.admin-page .admin-visit-report-button:hover,
+.admin-page .admin-visit-action-button[data-visit-action="start-walk"]:hover,
+.admin-page .admin-visit-action-button[data-visit-action="resume-walk-gps"]:hover,
+.admin-page .admin-visit-action-button[data-visit-action="sync-visit"]:hover,
+.admin-page .admin-visit-action-button[data-visit-action="sync-walk"]:hover {
+    background: linear-gradient(
+        135deg,
+        #1f8ad4 0%,
+        #1768aa 100%
+    );
 
-.admin-page
-.admin-visit-report-button:hover,
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="start-walk"
-]:hover,
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="resume-walk-gps"
-]:hover,
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="sync-visit"
-]:hover,
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="sync-walk"
-]:hover {
-    background:
-        linear-gradient(
-            135deg,
-            #1f8ad4 0%,
-            #1768aa 100%
-        );
-
-    transform:
-        translateY(-1px);
+    transform: translateY(-1px);
 
     box-shadow:
-        0 7px 15px rgba(
-            31,
-            123,
-            194,
-            0.23
-        );
+        0 7px 15px rgba(31, 123, 194, 0.23);
 }
 
 
@@ -3275,41 +3189,21 @@ p {
    COMPLETE VISIT ACTIONS
 ======================================== */
 
-.admin-page
-.admin-finish-visit-button,
+.admin-page .admin-finish-visit-button,
+.admin-page .admin-visit-action-button[data-visit-action="finish"],
+.admin-page .admin-visit-action-button[data-visit-action="finish-walk"] {
+    background: linear-gradient(
+        135deg,
+        #22a447 0%,
+        #168a3a 100%
+    );
 
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="finish"
-],
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="finish-walk"
-] {
-    background:
-        linear-gradient(
-            135deg,
-            #22a447 0%,
-            #168a3a 100%
-        );
-
-    color:
-        #ffffff;
-
-    border:
-        1px solid #168a3a;
-
-    border-radius:
-        8px;
+    color: #ffffff;
+    border: 1px solid #168a3a;
+    border-radius: 8px;
 
     box-shadow:
-        0 5px 12px rgba(
-            22,
-            138,
-            58,
-            0.18
-        );
+        0 5px 12px rgba(22, 138, 58, 0.18);
 }
 
 
@@ -3317,35 +3211,19 @@ p {
    COMPLETE VISIT ACTIONS — HOVER
 ======================================== */
 
-.admin-page
-.admin-finish-visit-button:hover,
+.admin-page .admin-finish-visit-button:hover,
+.admin-page .admin-visit-action-button[data-visit-action="finish"]:hover,
+.admin-page .admin-visit-action-button[data-visit-action="finish-walk"]:hover {
+    background: linear-gradient(
+        135deg,
+        #209a45 0%,
+        #117934 100%
+    );
 
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="finish"
-]:hover,
-
-.admin-page
-.admin-visit-action-button[
-    data-visit-action="finish-walk"
-]:hover {
-    background:
-        linear-gradient(
-            135deg,
-            #209a45 0%,
-            #117934 100%
-        );
-
-    transform:
-        translateY(-1px);
+    transform: translateY(-1px);
 
     box-shadow:
-        0 7px 15px rgba(
-            22,
-            138,
-            58,
-            0.22
-        );
+        0 7px 15px rgba(22, 138, 58, 0.22);
 }
 
 
@@ -3353,38 +3231,25 @@ p {
    REOPEN VISIT ACTION
 ======================================== */
 
-.admin-page
-.admin-reopen-visit-button {
-    background:
-        #ffffff;
+.admin-page .admin-reopen-visit-button,
+.admin-page .admin-visit-report-preview-button {
+    background: #ffffff;
+    color: #1f7bc2;
 
-    color:
-        #1f7bc2;
+    border: 1px solid #b9d7ea;
+    border-radius: 8px;
 
-    border:
-        1px solid #b9d7ea;
-
-    border-radius:
-        8px;
-
-    box-shadow:
-        none;
+    box-shadow: none;
 }
 
+.admin-page .admin-reopen-visit-button:hover,
+.admin-page .admin-visit-report-preview-button:hover {
+    background: #eef7fd;
+    color: #1768aa;
 
-.admin-page
-.admin-reopen-visit-button:hover {
-    background:
-        #eef7fd;
+    border-color: #9ed2f2;
 
-    color:
-        #1768aa;
-
-    border-color:
-        #9ed2f2;
-
-    transform:
-        translateY(-1px);
+    transform: translateY(-1px);
 }
 
 
@@ -3392,50 +3257,32 @@ p {
    DISABLED VISIT ACTIONS
 ======================================== */
 
-.admin-page
-.admin-visit-action-button:disabled,
-
-.admin-page
-.admin-visit-report-button:disabled,
-
-.admin-page
-.admin-reopen-visit-button:disabled {
-    opacity:
-        0.55;
-
-    cursor:
-        wait;
-
-    transform:
-        none;
-
-    box-shadow:
-        none;
+.admin-page .admin-visit-action-button:disabled,
+.admin-page .admin-visit-report-button:disabled,
+.admin-page .admin-visit-report-preview-button:disabled,
+.admin-page .admin-reopen-visit-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+    transform: none;
+    box-shadow: none;
 }
+
 
 /* ========================================
    ADMIN VISIT ACTION BUTTONS — MOBILE
 ======================================== */
 
-@media (max-width:700px) {
+@media (max-width: 700px) {
 
-    .admin-page
-    .admin-visit-action-button,
-
-    .admin-page
-    .admin-visit-report-button,
-
-    .admin-page
-    .admin-reopen-visit-button {
-        width:
-            100%;
-
-        min-width:
-            0;
+    .admin-page .admin-visit-action-button,
+    .admin-page .admin-visit-report-button,
+    .admin-page .admin-visit-report-preview-button,
+    .admin-page .admin-reopen-visit-button {
+        width: 100%;
+        min-width: 0;
     }
 
 }
-
 
 /* ========================================
    ADMIN VISIT REPORT LAYOUT
