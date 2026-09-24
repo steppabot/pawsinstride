@@ -23551,3 +23551,11 @@ body.pet-gallery-open {
     }
 
 }
+
+/* ========================================
+   LIGHTBOX SITS ABOVE THE GALLERY
+======================================== */
+
+.client-report-lightbox {
+    z-index: 12000;
+}
