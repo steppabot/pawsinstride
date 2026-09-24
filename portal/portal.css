@@ -23559,3 +23559,137 @@ body.pet-gallery-open {
 .client-report-lightbox {
     z-index: 12000;
 }
+
+/* ========================================
+   DESKTOP HOME BANNER
+   Append to the VERY BOTTOM of portal.css.
+
+   Buttons sit inside the greeting banner.
+   Next Visit and Upcoming stack on the left.
+   Latest Update fills the right column.
+======================================== */
+
+@media (min-width: 1024px) {
+
+
+    /* ========================================
+       GREETING BANNER
+    ======================================== */
+
+    body.desktop-screen-home .mobile-home-greeting {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        padding: 24px 26px;
+    }
+
+    body.desktop-screen-home .mobile-home-greeting-copy {
+        min-width: 0;
+    }
+
+
+    /* ========================================
+       BUTTONS INSIDE THE BANNER
+    ======================================== */
+
+    body.desktop-screen-home
+    .mobile-home-greeting
+    .mobile-home-section {
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+
+    body.desktop-screen-home
+    .mobile-home-greeting
+    .mobile-home-section::before {
+        display: none;
+    }
+
+    body.desktop-screen-home
+    .mobile-home-greeting
+    .mobile-home-section-heading {
+        display: none;
+    }
+
+    body.desktop-screen-home
+    .mobile-home-greeting
+    .mobile-home-quick-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    body.desktop-screen-home
+    .mobile-home-greeting
+    .mobile-home-quick-action {
+        min-height: 46px;
+        padding: 0 20px;
+        background: #ffffff;
+        color: #16374f;
+        border: 0;
+        box-shadow: 0 4px 14px rgba(9,38,56,0.18);
+        white-space: nowrap;
+    }
+
+    body.desktop-screen-home
+    .mobile-home-greeting
+    .mobile-home-quick-action-primary {
+        background: linear-gradient(90deg, #f5ab40 0%, #ef602c 100%);
+        color: #ffffff;
+    }
+
+    body.desktop-screen-home
+    .mobile-home-greeting
+    .mobile-home-quick-action-icon {
+        color: inherit;
+    }
+
+
+    /* ========================================
+       GRID PLACEMENT
+
+       row 1  greeting (full width)
+       row 2  next visit | latest update
+       row 3  upcoming   | (latest update)
+    ======================================== */
+
+    body.desktop-screen-home #mobile-home-next-visit-card {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    body.desktop-screen-home
+    .mobile-home-dashboard
+    > .mobile-home-section:has(.mobile-home-upcoming-list) {
+        grid-column: 1;
+        grid-row: 3;
+    }
+
+    body.desktop-screen-home
+    .mobile-home-dashboard
+    > .mobile-home-section:has(.mobile-home-latest-update) {
+        grid-column: 2;
+        grid-row: 2 / span 2;
+    }
+
+
+    /* ========================================
+       LATEST UPDATE FILLS ITS COLUMN
+    ======================================== */
+
+    body.desktop-screen-home
+    .mobile-home-dashboard
+    > .mobile-home-section:has(.mobile-home-latest-update) {
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.desktop-screen-home .mobile-home-latest-update {
+        flex-grow: 1;
+    }
+
+}
