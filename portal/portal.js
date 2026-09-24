@@ -29265,3 +29265,202 @@ window.addEventListener(
     "load",
     syncDesktopLayoutState
 );
+
+// ========================================
+// VISIT PHOTO THUMBNAILS
+// ========================================
+//
+// Paste this block at the BOTTOM of portal.js.
+//
+// The photo grid in a visit report loads the
+// 400px thumbnail (~20 KB) instead of the
+// 1600px display photo (~250 KB).
+//
+// Tapping a photo still opens the full-size
+// version in the lightbox.
+//
+// Photos uploaded before thumbnails existed
+// fall back to the full-size file, so nothing
+// breaks for older visits.
+// ========================================
+
+
+// ========================================
+// THUMBNAIL STORAGE PATH
+// ========================================
+//
+//   12/visit-abc123.jpg
+//   12/visit-abc123-thumb.jpg
+//
+// Same rule the admin upload uses, so the two
+// always agree.
+// ========================================
+
+function getVisitPhotoThumbPath(
+    storagePath
+) {
+
+    const path =
+        String(
+            storagePath ||
+            ""
+        );
+
+
+    const dotIndex =
+        path.lastIndexOf(
+            "."
+        );
+
+
+    if (
+        dotIndex <=
+        0
+    ) {
+
+        return `${path}-thumb`;
+
+    }
+
+
+    return (
+        `${path.slice(
+            0,
+            dotIndex
+        )}-thumb${path.slice(
+            dotIndex
+        )}`
+    );
+
+}
+
+
+// ========================================
+// SIGNED THUMBNAIL URL
+// ========================================
+//
+// Returns null when no thumbnail exists, so
+// the caller can fall back to the full photo.
+// ========================================
+
+async function getVisitPhotoThumbUrl(
+    storagePath
+) {
+
+    if (
+        !storagePath
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .storage
+                .from(
+                    VISIT_MEDIA_BUCKET
+                )
+                .createSignedUrl(
+                    getVisitPhotoThumbPath(
+                        storagePath
+                    ),
+                    3600
+                );
+
+
+        if (
+            error ||
+            !data?.signedUrl
+        ) {
+
+            return null;
+
+        }
+
+
+        return data.signedUrl;
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.warn(
+            "Visit photo thumbnail URL error:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+// ========================================
+// ADD THUMBNAIL URLS TO PHOTOS
+// ========================================
+//
+// Takes the photo rows that already carry
+// signed_url and adds thumb_url to each.
+// ========================================
+
+async function attachVisitPhotoThumbUrls(
+    photos
+) {
+
+    const list =
+        Array.isArray(
+            photos
+        )
+
+            ? photos
+
+            : [];
+
+
+    if (
+        list.length ===
+        0
+    ) {
+
+        return list;
+
+    }
+
+
+    return Promise.all(
+        list.map(
+            async photo => {
+
+
+                const thumbUrl =
+                    await getVisitPhotoThumbUrl(
+                        photo.storage_path
+                    );
+
+
+                return {
+
+                    ...photo,
+
+                    thumb_url:
+                        thumbUrl
+
+                };
+
+            }
+        )
+    );
+
+}
