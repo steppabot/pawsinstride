@@ -24219,3 +24219,96 @@ body.pet-gallery-open {
     }
 
 }
+
+
+/* ========================================
+   DESKTOP REQUEST SERVICE — TIGHTER
+======================================== */
+
+@media (min-width: 1200px) {
+
+
+    /* ========================================
+       CALENDAR LEFT, SELECTED DATES RIGHT
+    ======================================== */
+
+    body.desktop-screen-services
+    #multi-date-booking {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+    }
+
+    body.desktop-screen-services
+    #multi-date-booking > label,
+
+    body.desktop-screen-services
+    #booking-date-help {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+    }
+
+    body.desktop-screen-services
+    #multi-date-booking .booking-calendar {
+        grid-column: 1;
+        margin: 0;
+        align-self: start;
+    }
+
+    body.desktop-screen-services
+    #selected-dates-container {
+        grid-column: 2;
+        margin: 0;
+        align-self: start;
+    }
+
+
+    /* ========================================
+       SMALLER BOOKING CELLS
+    ======================================== */
+
+    body.desktop-screen-services
+    .booking-calendar .calendar-grid {
+        gap: 6px;
+    }
+
+    body.desktop-screen-services
+    .booking-calendar .calendar-day,
+
+    body.desktop-screen-services
+    .booking-calendar .calendar-empty-day {
+        min-height: 80px;
+        height: 80px;
+        padding: 0;
+    }
+
+    body.desktop-screen-services
+    .booking-calendar .calendar-day {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    body.desktop-screen-services
+    .booking-calendar .calendar-day-number {
+        font-size: 15px;
+    }
+
+
+    /* ========================================
+       FORM FIELDS DON'T NEED FULL WIDTH
+    ======================================== */
+
+    body.desktop-screen-services
+    #booking-form > select,
+
+    body.desktop-screen-services
+    #service-option-wrapper select,
+
+    body.desktop-screen-services
+    #time-window-wrapper .booking-time-select {
+        max-width: 520px;
+    }
+
+}
