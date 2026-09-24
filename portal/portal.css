@@ -24235,7 +24235,7 @@ body.pet-gallery-open {
     body.desktop-screen-services
     #multi-date-booking {
         display: grid !important;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-columns: 620px minmax(0, 1fr);
         gap: 18px;
         align-items: start;
     }
