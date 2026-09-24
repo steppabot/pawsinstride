@@ -24234,7 +24234,7 @@ body.pet-gallery-open {
 
     body.desktop-screen-services
     #multi-date-booking {
-        display: grid;
+        display: grid !important;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 18px;
         align-items: start;
@@ -24252,6 +24252,7 @@ body.pet-gallery-open {
     body.desktop-screen-services
     #multi-date-booking .booking-calendar {
         grid-column: 1;
+        max-width: 620px;
         margin: 0;
         align-self: start;
     }
@@ -24278,16 +24279,16 @@ body.pet-gallery-open {
 
     body.desktop-screen-services
     .booking-calendar .calendar-empty-day {
-        min-height: 80px;
         height: 80px;
+        min-height: 0;
         padding: 0;
     }
 
     body.desktop-screen-services
     .booking-calendar .calendar-day {
-        height: auto;
-        min-height: 0;
-        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     body.desktop-screen-services
