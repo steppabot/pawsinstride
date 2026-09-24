@@ -5616,6 +5616,8 @@ async function renderPets() {
 
                             ${buildPetStatsHtml(pet)}
 
+                            ${buildPetPhotoStripHtml(pet)}
+
                             <div class="pet-profile-details">
 
                                 <div class="pet-detail-block">
