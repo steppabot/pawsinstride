@@ -32212,43 +32212,45 @@ function renderReviewCreditCard() {
                 0
             );
  
- 
-        card.classList.add(
-            "is-approved"
-        );
- 
- 
         card.innerHTML =
             `
- 
-                <div class="review-credit-heading">
- 
-                    <span class="review-credit-eyebrow review-credit-eyebrow-done">
-                        Thank You
+
+                <div class="review-strip-row">
+
+                    <span
+                        class="review-strip-icon review-strip-icon-done"
+                        aria-hidden="true"
+                    >
+                        ✓
                     </span>
- 
-                    <h3>
-                        Your review credit is applied
-                    </h3>
- 
-                    <p>
-                        ${
-                            amount > 0
- 
-                                ? `${amount.toLocaleString(
-                                    "en-US",
-                                    {
-                                        style: "currency",
-                                        currency: "USD"
-                                    }
-                                )} was added to your account credit. Thanks for taking the time.`
- 
-                                : "Thanks for taking the time to leave a review."
-                        }
-                    </p>
- 
+
+
+                    <div class="review-strip-copy">
+
+                        <strong>
+                            Thanks for your review!
+                        </strong>
+
+                        <span>
+                            ${
+                                amount > 0
+
+                                    ? `${amount.toLocaleString(
+                                        "en-US",
+                                        {
+                                            style: "currency",
+                                            currency: "USD"
+                                        }
+                                    )} added to your account credit.`
+
+                                    : "Credit added to your account."
+                            }
+                        </span>
+
+                    </div>
+
                 </div>
- 
+
             `;
  
  
