@@ -31619,3 +31619,203 @@ loadPetStats =
         loadPetCareStats();
 
     };
+
+// ========================================
+// DESKTOP HOME BANNER
+// ========================================
+//
+// On desktop, moves the Book Service and
+// Message Us buttons up into the greeting
+// banner. Below 1024px they go back where
+// they were, so mobile is unchanged.
+// ========================================
+
+
+let quickActionsHomeParent =
+    null;
+
+
+let quickActionsHomeNextSibling =
+    null;
+
+
+// ========================================
+// WRAP THE GREETING TEXT
+// ========================================
+
+function wrapDesktopGreetingCopy(
+    greeting
+) {
+
+    if (
+        greeting.querySelector(
+            ".mobile-home-greeting-copy"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const copy =
+        document.createElement(
+            "div"
+        );
+
+
+    copy.className =
+        "mobile-home-greeting-copy";
+
+
+    Array.from(
+        greeting.children
+    )
+        .filter(
+            child =>
+                child.tagName === "H2" ||
+                child.tagName === "P"
+        )
+        .forEach(
+            child => {
+
+                copy.appendChild(
+                    child
+                );
+
+            }
+        );
+
+
+    greeting.prepend(
+        copy
+    );
+
+}
+
+
+// ========================================
+// SYNC THE BANNER LAYOUT
+// ========================================
+
+function syncDesktopHomeBanner() {
+
+    const greeting =
+        document.querySelector(
+            ".mobile-home-greeting"
+        );
+
+
+    const quickActions =
+        document.querySelector(
+            ".mobile-home-section:has(.mobile-home-quick-actions)"
+        );
+
+
+    if (
+        !greeting ||
+        !quickActions
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !quickActionsHomeParent
+    ) {
+
+        quickActionsHomeParent =
+            quickActions.parentElement;
+
+
+        quickActionsHomeNextSibling =
+            quickActions.nextElementSibling;
+
+    }
+
+
+    // ========================================
+    // DESKTOP — MOVE INTO THE BANNER
+    // ========================================
+
+    if (
+        desktopLayoutQuery.matches
+    ) {
+
+        wrapDesktopGreetingCopy(
+            greeting
+        );
+
+
+        if (
+            quickActions.parentElement !==
+            greeting
+        ) {
+
+            greeting.appendChild(
+                quickActions
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // MOBILE — PUT IT BACK
+    // ========================================
+
+    if (
+        quickActions.parentElement ===
+            greeting &&
+        quickActionsHomeParent
+    ) {
+
+        quickActionsHomeParent.insertBefore(
+            quickActions,
+            quickActionsHomeNextSibling
+        );
+
+    }
+
+}
+
+
+// ========================================
+// RUN WITH THE HOME SCREEN
+// ========================================
+
+const originalRenderMobileHomeDashboardForBanner =
+    renderMobileHomeDashboard;
+
+
+renderMobileHomeDashboard =
+    async function () {
+
+        await originalRenderMobileHomeDashboardForBanner();
+
+
+        syncDesktopHomeBanner();
+
+    };
+
+
+// ========================================
+// RUN WHEN THE BREAKPOINT CHANGES
+// ========================================
+
+desktopLayoutQuery.addEventListener(
+    "change",
+    syncDesktopHomeBanner
+);
+
+
+window.setTimeout(
+    syncDesktopHomeBanner,
+    0
+);
