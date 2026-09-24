@@ -24285,30 +24285,14 @@ body.pet-gallery-open {
 
     body.desktop-screen-services
     .booking-calendar .calendar-day {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        height: auto;
+        min-height: 0;
+        aspect-ratio: 1 / 1;
     }
 
     body.desktop-screen-services
     .booking-calendar .calendar-day-number {
         font-size: 15px;
-    }
-
-
-    /* ========================================
-       FORM FIELDS DON'T NEED FULL WIDTH
-    ======================================== */
-
-    body.desktop-screen-services
-    #booking-form > select,
-
-    body.desktop-screen-services
-    #service-option-wrapper select,
-
-    body.desktop-screen-services
-    #time-window-wrapper .booking-time-select {
-        max-width: 520px;
     }
 
 }
