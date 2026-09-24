@@ -24138,3 +24138,84 @@ body.pet-gallery-open {
     margin: 0;
     padding: 0 16px 14px;
 }
+
+/* ========================================
+   DESKTOP SERVICES — TWO COLUMNS
+   Calendar left, selected day right.
+   Kicks in at 1200px so the columns have
+   room next to the sidebar.
+======================================== */
+
+@media (min-width: 1200px) {
+
+
+    body.desktop-screen-services
+    .upcoming-services-section {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+    }
+
+
+    /* header spans both columns */
+
+    body.desktop-screen-services
+    .upcoming-services-header {
+        grid-column: 1 / -1;
+        margin-bottom: 2px;
+    }
+
+
+    /* calendar sits left, sized to its content */
+
+    body.desktop-screen-services
+    .upcoming-calendar {
+        grid-column: 1;
+        margin: 0;
+        align-self: start;
+    }
+
+
+    /* selected day fills the right column */
+
+    body.desktop-screen-services
+    .selected-upcoming-day {
+        grid-column: 2;
+        margin: 0;
+        align-self: start;
+    }
+
+
+    /* ========================================
+       SMALLER CALENDAR CELLS
+    ======================================== */
+
+    body.desktop-screen-services
+    .upcoming-calendar-grid {
+        gap: 6px;
+    }
+
+    body.desktop-screen-services
+    .upcoming-calendar-day,
+
+    body.desktop-screen-services
+    .upcoming-calendar-empty {
+        min-height: 80px;
+        height: 80px;
+        padding: 0;
+    }
+
+    body.desktop-screen-services
+    .upcoming-calendar-day {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    body.desktop-screen-services
+    .upcoming-day-number {
+        font-size: 15px;
+    }
+
+}
