@@ -29476,3 +29476,1325 @@ async function attachVisitPhotoThumbUrls(
     );
 
 }
+
+// ========================================
+// PET PHOTO GALLERY
+// ========================================
+//
+// Paste this entire block at the BOTTOM of
+// portal.js, below the thumbnail block.
+//
+// Adds:
+//
+// - a photo strip on each pet card
+//   (PHOTOS · 34   |   View all ›)
+//
+// - a full gallery, grouped by visit date,
+//   12 photos per page
+//
+// No new database queries. The photo rows are
+// already loaded by loadPetStats(); this block
+// only creates signed URLs for what is on
+// screen.
+// ========================================
+
+
+// ========================================
+// SETTINGS
+// ========================================
+
+const PET_GALLERY_PAGE_SIZE =
+    12;
+
+
+const PET_CARD_PREVIEW_COUNT =
+    4;
+
+
+// ========================================
+// GALLERY STATE
+// ========================================
+
+let currentPetPhotos =
+    new Map();
+
+
+let petGalleryPetId =
+    null;
+
+
+let petGalleryPage =
+    0;
+
+
+// ========================================
+// LOAD PHOTOS PER PET
+// ========================================
+//
+// Runs automatically after loadPetStats().
+// See the wrapper at the bottom of this block.
+// ========================================
+
+async function loadPetPhotoPreviews() {
+
+    currentPetPhotos =
+        new Map();
+
+
+    if (
+        !currentUser?.id ||
+        currentPets.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // COMPLETED VISITS
+    // ========================================
+
+    const completedVisits =
+        currentVisits.filter(
+            isCompletedVisit
+        );
+
+
+    if (
+        completedVisits.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const visitsById =
+        new Map(
+            completedVisits.map(
+                visit => [
+                    Number(
+                        visit.id
+                    ),
+                    visit
+                ]
+            )
+        );
+
+
+    // ========================================
+    // LOAD PHOTO ROWS
+    // ========================================
+
+    let photoRows =
+        [];
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "visit_photos"
+                )
+                .select(
+                    "id, visit_id, storage_path, photo_type, created_at, sort_order"
+                )
+                .in(
+                    "visit_id",
+                    Array.from(
+                        visitsById.keys()
+                    )
+                )
+                .eq(
+                    "photo_type",
+                    "visit"
+                );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        photoRows =
+            data ||
+            [];
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Pet photo load error:",
+            error
+        );
+
+
+        return;
+
+    }
+
+
+    // ========================================
+    // GROUP PHOTOS BY PET
+    // ========================================
+
+    currentPets.forEach(
+        pet => {
+
+            const petId =
+                Number(
+                    pet.id
+                );
+
+
+            const petVisitIds =
+                new Set(
+                    currentVisitPets
+                        .filter(
+                            relation =>
+                                Number(
+                                    relation.pet_id
+                                ) === petId
+                        )
+                        .map(
+                            relation =>
+                                Number(
+                                    relation.visit_id
+                                )
+                        )
+                );
+
+
+            // ========================================
+            // LEGACY SINGLE-PET VISITS
+            // ========================================
+
+            completedVisits.forEach(
+                visit => {
+
+                    if (
+                        Number(
+                            visit.pet_id
+                        ) === petId
+                    ) {
+
+                        petVisitIds.add(
+                            Number(
+                                visit.id
+                            )
+                        );
+
+                    }
+
+                }
+            );
+
+
+            const petPhotos =
+                photoRows
+                    .filter(
+                        photo =>
+                            petVisitIds.has(
+                                Number(
+                                    photo.visit_id
+                                )
+                            )
+                    )
+                    .map(
+                        photo => {
+
+                            const visit =
+                                visitsById.get(
+                                    Number(
+                                        photo.visit_id
+                                    )
+                                );
+
+
+                            return {
+
+                                id:
+                                    photo.id,
+
+                                storagePath:
+                                    photo.storage_path,
+
+                                visitId:
+                                    Number(
+                                        photo.visit_id
+                                    ),
+
+                                visitDate:
+                                    visit?.visit_date ||
+                                    "",
+
+                                createdAt:
+                                    photo.created_at,
+
+                                sortOrder:
+                                    Number(
+                                        photo.sort_order ||
+                                        0
+                                    )
+
+                            };
+
+                        }
+                    )
+                    .sort(
+                        (
+                            first,
+                            second
+                        ) => {
+
+                            // newest visit first
+
+                            if (
+                                first.visitDate !==
+                                second.visitDate
+                            ) {
+
+                                return String(
+                                    second.visitDate
+                                ).localeCompare(
+                                    String(
+                                        first.visitDate
+                                    )
+                                );
+
+                            }
+
+
+                            return (
+                                first.sortOrder -
+                                second.sortOrder
+                            );
+
+                        }
+                    );
+
+
+            currentPetPhotos.set(
+                petId,
+                petPhotos
+            );
+
+        }
+    );
+
+
+    // ========================================
+    // SIGN THE PET CARD PREVIEWS
+    // ========================================
+
+    await Promise.all(
+        Array.from(
+            currentPetPhotos.entries()
+        ).map(
+            async (
+                [
+                    petId,
+                    photos
+                ]
+            ) => {
+
+                const previews =
+                    photos.slice(
+                        0,
+                        PET_CARD_PREVIEW_COUNT
+                    );
+
+
+                await Promise.all(
+                    previews.map(
+                        async photo => {
+
+                            photo.thumbUrl =
+                                await getVisitPhotoThumbUrl(
+                                    photo.storagePath
+                                ) ||
+                                await getVisitPhotoFullUrl(
+                                    photo.storagePath
+                                );
+
+                        }
+                    )
+                );
+
+            }
+        )
+    );
+
+
+    console.log(
+        "Pet photos loaded:",
+        currentPetPhotos.size
+    );
+
+}
+
+
+// ========================================
+// SIGNED FULL-SIZE URL
+// ========================================
+
+async function getVisitPhotoFullUrl(
+    storagePath
+) {
+
+    if (
+        !storagePath
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .storage
+                .from(
+                    VISIT_MEDIA_BUCKET
+                )
+                .createSignedUrl(
+                    storagePath,
+                    3600
+                );
+
+
+        if (
+            error ||
+            !data?.signedUrl
+        ) {
+
+            return null;
+
+        }
+
+
+        return data.signedUrl;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.warn(
+            "Visit photo URL error:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+// ========================================
+// GET PET PHOTOS
+// ========================================
+
+function getPetPhotos(
+    petId
+) {
+
+    return (
+        currentPetPhotos.get(
+            Number(
+                petId
+            )
+        ) ||
+        []
+    );
+
+}
+
+
+// ========================================
+// PET CARD PHOTO STRIP
+// ========================================
+//
+// Returns an empty string when the pet has no
+// photos yet.
+// ========================================
+
+function buildPetPhotoStripHtml(
+    pet
+) {
+
+    const photos =
+        getPetPhotos(
+            pet?.id
+        );
+
+
+    if (
+        photos.length === 0
+    ) {
+
+        return "";
+
+    }
+
+
+    const previews =
+        photos.slice(
+            0,
+            PET_CARD_PREVIEW_COUNT
+        );
+
+
+    const remaining =
+        photos.length -
+        previews.length;
+
+
+    const tiles =
+        previews
+            .map(
+                (
+                    photo,
+                    index
+                ) => {
+
+                    const isLastTile =
+                        index ===
+                        previews.length - 1;
+
+
+                    // ========================================
+                    // "+124" OVERLAY ON THE LAST TILE
+                    // ========================================
+
+                    if (
+                        isLastTile &&
+                        remaining > 0
+                    ) {
+
+                        return `
+                            <button
+                                type="button"
+                                class="pet-photo-tile pet-photo-tile-more"
+                                data-pet-gallery-open="${pet.id}"
+                                aria-label="View all ${photos.length} photos"
+                            >
+                                +${remaining}
+                            </button>
+                        `;
+
+                    }
+
+
+                    return `
+                        <button
+                            type="button"
+                            class="pet-photo-tile"
+                            data-pet-gallery-open="${pet.id}"
+                            aria-label="View all photos"
+                        >
+                            ${
+                                photo.thumbUrl
+
+                                    ? `
+                                        <img
+                                            src="${escapeHtml(
+                                                photo.thumbUrl
+                                            )}"
+                                            alt="Visit photo"
+                                            loading="lazy"
+                                        >
+                                    `
+
+                                    : ""
+                            }
+                        </button>
+                    `;
+
+                }
+            )
+            .join("");
+
+
+    return `
+
+        <div class="pet-photo-strip">
+
+
+            <div class="pet-photo-strip-heading">
+
+                <span class="pet-photo-strip-label">
+                    Photos &nbsp;·&nbsp; ${photos.length}
+                </span>
+
+                <button
+                    type="button"
+                    class="pet-photo-strip-link"
+                    data-pet-gallery-open="${pet.id}"
+                >
+                    View all &rsaquo;
+                </button>
+
+            </div>
+
+
+            <div class="pet-photo-tiles">
+                ${tiles}
+            </div>
+
+
+        </div>
+
+    `;
+
+}
+
+
+// ========================================
+// OPEN GALLERY
+// ========================================
+
+async function openPetGallery(
+    petId
+) {
+
+    const pet =
+        currentPets.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(
+                    petId
+                )
+        );
+
+
+    if (
+        !pet
+    ) {
+
+        return;
+
+    }
+
+
+    closePetGallery();
+
+
+    petGalleryPetId =
+        Number(
+            petId
+        );
+
+
+    petGalleryPage =
+        0;
+
+
+    const photos =
+        getPetPhotos(
+            petId
+        );
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                photos.length /
+                PET_GALLERY_PAGE_SIZE
+            )
+        );
+
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+
+    overlay.id =
+        "pet-gallery";
+
+
+    overlay.className =
+        "pet-gallery";
+
+
+    overlay.innerHTML =
+        `
+
+            <div
+                class="pet-gallery-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-label="${escapeHtml(
+                    `${pet.name || "Pet"} photos`
+                )}"
+            >
+
+
+                <div class="pet-gallery-header">
+
+                    <div>
+
+                        <span class="pet-gallery-eyebrow">
+                            Photos
+                        </span>
+
+                        <h3>
+                            ${escapeHtml(
+                                pet.name ||
+                                "Pet"
+                            )}
+                        </h3>
+
+                        <p>
+                            ${photos.length} ${
+                                photos.length === 1
+                                    ? "photo"
+                                    : "photos"
+                            }
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="pet-gallery-close"
+                        data-pet-gallery-close
+                        aria-label="Close photos"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="pet-gallery-body"
+                    id="pet-gallery-body"
+                >
+
+                    <div class="pet-gallery-loading">
+                        Loading photos...
+                    </div>
+
+                </div>
+
+
+                ${
+                    totalPages > 1
+
+                        ? `
+
+                            <div class="pet-gallery-footer">
+
+                                <button
+                                    type="button"
+                                    class="pet-gallery-page-button"
+                                    data-pet-gallery-previous
+                                    aria-label="Previous page"
+                                >
+                                    &lsaquo;
+                                </button>
+
+                                <span
+                                    class="pet-gallery-page-status"
+                                    id="pet-gallery-page-status"
+                                >
+                                    Page 1 of ${totalPages}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="pet-gallery-page-button"
+                                    data-pet-gallery-next
+                                    aria-label="Next page"
+                                >
+                                    &rsaquo;
+                                </button>
+
+                            </div>
+
+                        `
+
+                        : ""
+                }
+
+
+            </div>
+
+        `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    document.body.classList.add(
+        "pet-gallery-open"
+    );
+
+
+    // ========================================
+    // GALLERY EVENTS
+    // ========================================
+
+    overlay.addEventListener(
+        "click",
+        async event => {
+
+
+            if (
+                event.target === overlay ||
+                event.target.closest(
+                    "[data-pet-gallery-close]"
+                )
+            ) {
+
+                closePetGallery();
+
+
+                return;
+
+            }
+
+
+            if (
+                event.target.closest(
+                    "[data-pet-gallery-previous]"
+                )
+            ) {
+
+                await changePetGalleryPage(
+                    -1
+                );
+
+
+                return;
+
+            }
+
+
+            if (
+                event.target.closest(
+                    "[data-pet-gallery-next]"
+                )
+            ) {
+
+                await changePetGalleryPage(
+                    1
+                );
+
+
+                return;
+
+            }
+
+
+            // ========================================
+            // OPEN ONE PHOTO FULL SIZE
+            // ========================================
+
+            const photoButton =
+                event.target.closest(
+                    "[data-pet-gallery-photo]"
+                );
+
+
+            if (
+                photoButton
+            ) {
+
+                const storagePath =
+                    photoButton.dataset
+                        .petGalleryPhoto;
+
+
+                const fullUrl =
+                    await getVisitPhotoFullUrl(
+                        storagePath
+                    );
+
+
+                if (
+                    fullUrl
+                ) {
+
+                    openClientReportLightbox(
+                        fullUrl
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+
+    await renderPetGalleryPage();
+
+
+    overlay
+        .querySelector(
+            "[data-pet-gallery-close]"
+        )
+        ?.focus();
+
+}
+
+
+// ========================================
+// CLOSE GALLERY
+// ========================================
+
+function closePetGallery() {
+
+    document
+        .getElementById(
+            "pet-gallery"
+        )
+        ?.remove();
+
+
+    document.body.classList.remove(
+        "pet-gallery-open"
+    );
+
+
+    petGalleryPetId =
+        null;
+
+
+    petGalleryPage =
+        0;
+
+}
+
+
+// ========================================
+// CHANGE PAGE
+// ========================================
+
+async function changePetGalleryPage(
+    direction
+) {
+
+    const photos =
+        getPetPhotos(
+            petGalleryPetId
+        );
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                photos.length /
+                PET_GALLERY_PAGE_SIZE
+            )
+        );
+
+
+    const nextPage =
+        petGalleryPage +
+        direction;
+
+
+    if (
+        nextPage < 0 ||
+        nextPage > totalPages - 1
+    ) {
+
+        return;
+
+    }
+
+
+    petGalleryPage =
+        nextPage;
+
+
+    await renderPetGalleryPage();
+
+
+    document
+        .getElementById(
+            "pet-gallery-body"
+        )
+        ?.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+}
+
+
+// ========================================
+// RENDER ONE PAGE
+// ========================================
+
+async function renderPetGalleryPage() {
+
+    const body =
+        document.getElementById(
+            "pet-gallery-body"
+        );
+
+
+    if (
+        !body
+    ) {
+
+        return;
+
+    }
+
+
+    const photos =
+        getPetPhotos(
+            petGalleryPetId
+        );
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                photos.length /
+                PET_GALLERY_PAGE_SIZE
+            )
+        );
+
+
+    const pagePhotos =
+        photos.slice(
+            petGalleryPage *
+            PET_GALLERY_PAGE_SIZE,
+
+            (
+                petGalleryPage + 1
+            ) *
+            PET_GALLERY_PAGE_SIZE
+        );
+
+
+    // ========================================
+    // SIGN THIS PAGE ONLY
+    // ========================================
+
+    await Promise.all(
+        pagePhotos.map(
+            async photo => {
+
+                if (
+                    photo.thumbUrl
+                ) {
+
+                    return;
+
+                }
+
+
+                photo.thumbUrl =
+                    await getVisitPhotoThumbUrl(
+                        photo.storagePath
+                    ) ||
+                    await getVisitPhotoFullUrl(
+                        photo.storagePath
+                    );
+
+            }
+        )
+    );
+
+
+    // ========================================
+    // GROUP BY VISIT DATE
+    // ========================================
+
+    const photosByDate =
+        new Map();
+
+
+    pagePhotos.forEach(
+        photo => {
+
+            const date =
+                photo.visitDate ||
+                "";
+
+
+            if (
+                !photosByDate.has(
+                    date
+                )
+            ) {
+
+                photosByDate.set(
+                    date,
+                    []
+                );
+
+            }
+
+
+            photosByDate
+                .get(
+                    date
+                )
+                .push(
+                    photo
+                );
+
+        }
+    );
+
+
+    // ========================================
+    // BUILD PAGE
+    // ========================================
+
+    body.innerHTML =
+        Array.from(
+            photosByDate.entries()
+        )
+            .map(
+                (
+                    [
+                        date,
+                        datePhotos
+                    ]
+                ) => `
+
+                    <section class="pet-gallery-group">
+
+
+                        <h4 class="pet-gallery-group-date">
+                            ${escapeHtml(
+                                date
+                                    ? formatLongDate(
+                                        date
+                                    )
+                                    : "Visit"
+                            )}
+                        </h4>
+
+
+                        <div class="pet-gallery-grid">
+
+                            ${datePhotos
+                                .map(
+                                    photo => `
+
+                                        <button
+                                            type="button"
+                                            class="pet-gallery-photo"
+                                            data-pet-gallery-photo="${escapeHtml(
+                                                photo.storagePath
+                                            )}"
+                                            aria-label="Open photo full size"
+                                        >
+
+                                            ${
+                                                photo.thumbUrl
+
+                                                    ? `
+                                                        <img
+                                                            src="${escapeHtml(
+                                                                photo.thumbUrl
+                                                            )}"
+                                                            alt="Visit photo"
+                                                            loading="lazy"
+                                                        >
+                                                    `
+
+                                                    : `
+                                                        <span class="pet-gallery-photo-missing">
+                                                            Photo
+                                                        </span>
+                                                    `
+                                            }
+
+                                        </button>
+
+                                    `
+                                )
+                                .join("")}
+
+                        </div>
+
+
+                    </section>
+
+                `
+            )
+            .join("");
+
+
+    // ========================================
+    // UPDATE PAGER
+    // ========================================
+
+    const status =
+        document.getElementById(
+            "pet-gallery-page-status"
+        );
+
+
+    if (
+        status
+    ) {
+
+        status.textContent =
+            `Page ${petGalleryPage + 1} of ${totalPages}`;
+
+    }
+
+
+    document
+        .querySelector(
+            "[data-pet-gallery-previous]"
+        )
+        ?.toggleAttribute(
+            "disabled",
+            petGalleryPage === 0
+        );
+
+
+    document
+        .querySelector(
+            "[data-pet-gallery-next]"
+        )
+        ?.toggleAttribute(
+            "disabled",
+            petGalleryPage >=
+            totalPages - 1
+        );
+
+}
+
+
+// ========================================
+// OPEN GALLERY FROM THE PET CARD
+// ========================================
+
+document.addEventListener(
+    "click",
+    event => {
+
+        const openButton =
+            event.target.closest(
+                "[data-pet-gallery-open]"
+            );
+
+
+        if (
+            !openButton
+        ) {
+
+            return;
+
+        }
+
+
+        openPetGallery(
+            openButton.dataset
+                .petGalleryOpen
+        );
+
+    }
+);
+
+
+// ========================================
+// CLOSE GALLERY WITH ESCAPE
+// ========================================
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !== "Escape"
+        ) {
+
+            return;
+
+        }
+
+
+        // ========================================
+        // THE LIGHTBOX CLOSES FIRST
+        // ========================================
+
+        if (
+            document.querySelector(
+                ".client-report-lightbox"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            document.getElementById(
+                "pet-gallery"
+            )
+        ) {
+
+            closePetGallery();
+
+        }
+
+    }
+);
+
+
+// ========================================
+// LOAD PHOTOS WITH THE PET STATS
+// ========================================
+//
+// loadPetStats() is already called from
+// loadDashboard() and refreshPets(), so
+// wrapping it means no extra edits.
+// ========================================
+
+const originalLoadPetStats =
+    loadPetStats;
+
+
+loadPetStats =
+    async function () {
+
+        await originalLoadPetStats();
+
+
+        await loadPetPhotoPreviews();
+
+    };
