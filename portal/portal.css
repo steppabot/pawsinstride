@@ -23167,3 +23167,384 @@ body.portal-intro-open {
     }
 
 }
+
+/* ========================================
+   PET PHOTO STRIP + GALLERY
+   Append to the bottom of portal.css.
+======================================== */
+
+.client-portal-page .pet-photo-strip {
+    margin-top: 14px;
+    padding: 11px 12px;
+    border: 1px solid #e6eef4;
+    border-radius: 11px;
+}
+
+.client-portal-page .pet-photo-strip-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.client-portal-page .pet-photo-strip-label {
+    color: #1f7bc2;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.client-portal-page .pet-photo-strip-link {
+    width: auto;
+    min-height: 0;
+    padding: 4px 0;
+    background: transparent;
+    color: #1f7bc2;
+    border: 0;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.client-portal-page .pet-photo-strip-link:hover {
+    color: #176aa9;
+}
+
+/* ========================================
+   PHOTO TILES
+======================================== */
+
+.client-portal-page .pet-photo-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.client-portal-page .pet-photo-tile {
+    overflow: hidden;
+    width: 100%;
+    height: 62px;
+    padding: 0;
+    background: #edf2f5;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.client-portal-page .pet-photo-tile img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.client-portal-page .pet-photo-tile-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #24435c;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.client-portal-page .pet-photo-tile:active {
+    transform: scale(0.97);
+}
+
+/* ========================================
+   PHOTO STRIP — DESKTOP
+======================================== */
+
+@media (min-width: 701px) {
+
+    .client-portal-page .pet-photo-tile {
+        height: 74px;
+        border-radius: 9px;
+    }
+
+    .client-portal-page .pet-photo-tiles {
+        gap: 7px;
+    }
+
+    .client-portal-page .pet-photo-strip-label {
+        font-size: 10px;
+    }
+
+    .client-portal-page .pet-photo-strip-link {
+        font-size: 12px;
+    }
+
+}
+
+/* ========================================
+   GALLERY OVERLAY
+======================================== */
+
+body.pet-gallery-open {
+    overflow: hidden;
+}
+
+.pet-gallery {
+    position: fixed;
+    inset: 0;
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(10,27,39,0.62);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.pet-gallery-dialog {
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 760px);
+    max-height: calc(100vh - 48px);
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #d6e4eb;
+    border-radius: 20px;
+    box-shadow: 0 24px 70px rgba(9,38,56,0.28);
+}
+
+/* ========================================
+   GALLERY HEADER
+======================================== */
+
+.pet-gallery-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex: 0 0 auto;
+    padding: 20px 22px 18px;
+    background: linear-gradient(145deg, #f8fcfe 0%, #eef8fd 100%);
+    border-bottom: 1px solid #dce8ef;
+}
+
+.pet-gallery-eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    color: #2890df;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+}
+
+.pet-gallery-header h3 {
+    margin: 0;
+    color: #183447;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.pet-gallery-header p {
+    margin: 3px 0 0;
+    color: #667784;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.client-portal-page .pet-gallery-close {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    background: #ffffff;
+    color: #667784;
+    border: 1px solid #d6e4eb;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.client-portal-page .pet-gallery-close:hover {
+    background: #f4f9fc;
+    color: #183447;
+}
+
+/* ========================================
+   GALLERY BODY
+======================================== */
+
+.pet-gallery-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 18px 22px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pet-gallery-loading {
+    padding: 40px 0;
+    color: #6b7785;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* ========================================
+   DATE GROUPS
+======================================== */
+
+.pet-gallery-group {
+    margin-bottom: 22px;
+}
+
+.pet-gallery-group:last-child {
+    margin-bottom: 0;
+}
+
+.pet-gallery-group-date {
+    margin: 0 0 10px;
+    color: #245b78;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.pet-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.client-portal-page .pet-gallery-photo {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding: 0;
+    aspect-ratio: 1 / 1;
+    background: #edf2f5;
+    border: 1px solid #e2eaf0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.18s ease;
+}
+
+.client-portal-page .pet-gallery-photo:active {
+    transform: scale(0.98);
+}
+
+.pet-gallery-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pet-gallery-photo-missing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #8492a0;
+    font-size: 11px;
+}
+
+/* ========================================
+   GALLERY PAGER
+======================================== */
+
+.pet-gallery-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    flex: 0 0 auto;
+    padding: 14px 22px;
+    background: #fbfdfe;
+    border-top: 1px solid #e7eef2;
+}
+
+.client-portal-page .pet-gallery-page-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: #ffffff;
+    color: #1f7bc2;
+    border: 1px solid #c8dce8;
+    border-radius: 11px;
+    font-family: inherit;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.client-portal-page .pet-gallery-page-button:hover:not(:disabled) {
+    background: #eaf5fb;
+    border-color: #9fc7dd;
+}
+
+.client-portal-page .pet-gallery-page-button:disabled {
+    color: #b7c4cd;
+    border-color: #e3eaef;
+    cursor: not-allowed;
+}
+
+.pet-gallery-page-status {
+    color: #63727f;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 100px;
+    text-align: center;
+}
+
+/* ========================================
+   GALLERY — MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+    .pet-gallery {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .pet-gallery-dialog {
+        width: 100%;
+        max-height: none;
+        height: 100dvh;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .pet-gallery-header {
+        padding: max(16px, env(safe-area-inset-top)) 16px 14px;
+    }
+
+    .pet-gallery-header h3 {
+        font-size: 20px;
+    }
+
+    .pet-gallery-body {
+        padding: 16px;
+    }
+
+    .pet-gallery-grid {
+        gap: 7px;
+    }
+
+    .pet-gallery-footer {
+        padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+    }
+
+}
