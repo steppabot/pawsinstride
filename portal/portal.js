@@ -32196,7 +32196,7 @@ function renderReviewCreditCard() {
         if (
             !mountReviewCreditCard(
                 card,
-                false
+                true
             )
         ) {
 
