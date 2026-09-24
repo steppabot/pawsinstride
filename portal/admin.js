@@ -28142,3 +28142,695 @@ async function uploadVisitReportMedia(
     }
 
 }
+
+// ========================================
+// REVIEW CLAIM APPROVALS
+// ========================================
+//
+// Paste this entire block at the BOTTOM of
+// admin.js.
+//
+// Adds a "Review Credit" card to the admin
+// Home screen listing clients who say they
+// left a Google review, with Approve and
+// Deny buttons.
+//
+// Approving pays the credit through
+// add_manual_client_credit(), so it shows up
+// in the client's account credit immediately.
+// ========================================
+
+
+// ========================================
+// SETTINGS
+// ========================================
+
+const REVIEW_CREDIT_DEFAULT_AMOUNT =
+    10;
+
+
+// ========================================
+// STATE
+// ========================================
+
+let adminReviewClaims =
+    [];
+
+
+// ========================================
+// GET OR CREATE THE ADMIN CARD
+// ========================================
+
+function getAdminReviewClaimCard() {
+
+    let card =
+        document.getElementById(
+            "admin-review-claims"
+        );
+
+
+    if (
+        card
+    ) {
+
+        return card;
+
+    }
+
+
+    const homePanel =
+        document.querySelector(
+            '[data-admin-screen-panel="home"]'
+        );
+
+
+    if (
+        !homePanel
+    ) {
+
+        return null;
+
+    }
+
+
+    card =
+        document.createElement(
+            "section"
+        );
+
+
+    card.id =
+        "admin-review-claims";
+
+
+    card.className =
+        "admin-review-claims";
+
+
+    card.hidden =
+        true;
+
+
+    // ========================================
+    // SIT UNDER NEEDS ATTENTION
+    // ========================================
+
+    const needsAttention =
+        document.getElementById(
+            "admin-needs-attention"
+        );
+
+
+    if (
+        needsAttention
+    ) {
+
+        needsAttention.insertAdjacentElement(
+            "afterend",
+            card
+        );
+
+    } else {
+
+        homePanel.prepend(
+            card
+        );
+
+    }
+
+
+    return card;
+
+}
+
+
+// ========================================
+// LOAD CLAIMS
+// ========================================
+
+async function loadAdminReviewClaims() {
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .rpc(
+                    "admin_list_review_claims"
+                );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        adminReviewClaims =
+            data ||
+            [];
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Review claim load error:",
+            error
+        );
+
+
+        adminReviewClaims =
+            [];
+
+    }
+
+
+    renderAdminReviewClaims();
+
+}
+
+
+// ========================================
+// FORMAT CLAIM TIME
+// ========================================
+
+function formatReviewClaimTime(
+    timestamp
+) {
+
+    if (
+        !timestamp
+    ) {
+
+        return "";
+
+    }
+
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    return date.toLocaleString(
+        "en-US",
+        {
+            month:
+                "short",
+
+            day:
+                "numeric",
+
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit"
+        }
+    );
+
+}
+
+
+// ========================================
+// RENDER CLAIMS
+// ========================================
+
+function renderAdminReviewClaims() {
+
+    const card =
+        getAdminReviewClaimCard();
+
+
+    if (
+        !card
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // NOTHING WAITING
+    // ========================================
+
+    if (
+        adminReviewClaims.length === 0
+    ) {
+
+        card.hidden =
+            true;
+
+
+        card.innerHTML =
+            "";
+
+
+        return;
+
+    }
+
+
+    card.hidden =
+        false;
+
+
+    card.innerHTML =
+        `
+
+            <div class="admin-review-claims-heading">
+
+                <div>
+
+                    <span class="admin-screen-eyebrow">
+                        REVIEW CREDIT
+                    </span>
+
+                    <h3>
+                        Review claims
+                    </h3>
+
+                    <p>
+                        Check Google, then approve to pay
+                        the credit.
+                    </p>
+
+                </div>
+
+
+                <span class="admin-review-claims-count">
+                    ${adminReviewClaims.length}
+                </span>
+
+            </div>
+
+
+            <div class="admin-review-claim-list">
+
+                ${adminReviewClaims
+                    .map(
+                        claim => {
+
+
+                            const confirmed =
+                                String(
+                                    claim.status ||
+                                    ""
+                                ) === "confirmed";
+
+
+                            return `
+
+                                <article
+                                    class="admin-review-claim ${
+                                        confirmed
+                                            ? "is-confirmed"
+                                            : ""
+                                    }"
+                                    data-review-claim-id="${claim.id}"
+                                >
+
+
+                                    <div class="admin-review-claim-main">
+
+                                        <strong>
+                                            ${escapeHtml(
+                                                claim.client_name ||
+                                                claim.client_email ||
+                                                "Client"
+                                            )}
+                                        </strong>
+
+                                        <span>
+                                            ${
+                                                confirmed
+
+                                                    ? "Says they left a review"
+
+                                                    : "Opened Google, not confirmed yet"
+                                            }
+                                        </span>
+
+                                        <span>
+                                            Tapped ${escapeHtml(
+                                                formatReviewClaimTime(
+                                                    claim.clicked_at
+                                                )
+                                            )}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="admin-review-claim-actions">
+
+                                        <input
+                                            type="number"
+                                            class="admin-review-claim-amount"
+                                            value="${REVIEW_CREDIT_DEFAULT_AMOUNT}"
+                                            min="1"
+                                            step="1"
+                                            inputmode="decimal"
+                                            aria-label="Credit amount"
+                                        >
+
+
+                                        <button
+                                            type="button"
+                                            class="primary-button admin-review-claim-approve"
+                                            data-review-claim-approve="${claim.id}"
+                                        >
+                                            Approve
+                                        </button>
+
+
+                                        <button
+                                            type="button"
+                                            class="secondary-button admin-review-claim-deny"
+                                            data-review-claim-deny="${claim.id}"
+                                        >
+                                            Deny
+                                        </button>
+
+                                    </div>
+
+
+                                </article>
+
+                            `;
+
+                        }
+                    )
+                    .join("")}
+
+            </div>
+
+        `;
+
+}
+
+
+// ========================================
+// APPROVE A CLAIM
+// ========================================
+
+async function approveAdminReviewClaim(
+    claimId,
+    button
+) {
+
+    const claimElement =
+        button.closest(
+            "[data-review-claim-id]"
+        );
+
+
+    const amountInput =
+        claimElement?.querySelector(
+            ".admin-review-claim-amount"
+        );
+
+
+    const amount =
+        Number(
+            amountInput?.value ||
+            REVIEW_CREDIT_DEFAULT_AMOUNT
+        );
+
+
+    if (
+        !Number.isFinite(
+            amount
+        ) ||
+        amount <= 0
+    ) {
+
+        window.alert(
+            "Enter a credit amount greater than zero."
+        );
+
+
+        return;
+
+    }
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Approving...";
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .rpc(
+                    "admin_approve_review_claim",
+                    {
+                        p_claim_id:
+                            Number(
+                                claimId
+                            ),
+
+                        p_amount:
+                            amount
+                    }
+                );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        console.log(
+            "Review credit applied. New balance:",
+            data
+        );
+
+
+        await loadAdminReviewClaims();
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Review claim approve error:",
+            error
+        );
+
+
+        window.alert(
+            error?.message ||
+            "We couldn't approve that review claim."
+        );
+
+
+        button.disabled =
+            false;
+
+
+        button.textContent =
+            "Approve";
+
+    }
+
+}
+
+
+// ========================================
+// DENY A CLAIM
+// ========================================
+
+async function denyAdminReviewClaim(
+    claimId,
+    button
+) {
+
+    const reason =
+        window.prompt(
+            "Why are you denying this claim? (optional)",
+            "No matching review found"
+        );
+
+
+    if (
+        reason === null
+    ) {
+
+        return;
+
+    }
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Saving...";
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .rpc(
+                    "admin_deny_review_claim",
+                    {
+                        p_claim_id:
+                            Number(
+                                claimId
+                            ),
+
+                        p_reason:
+                            reason ||
+                            null
+                    }
+                );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        await loadAdminReviewClaims();
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Review claim deny error:",
+            error
+        );
+
+
+        window.alert(
+            error?.message ||
+            "We couldn't update that review claim."
+        );
+
+
+        button.disabled =
+            false;
+
+
+        button.textContent =
+            "Deny";
+
+    }
+
+}
+
+
+// ========================================
+// CLAIM ACTIONS
+// ========================================
+
+document.addEventListener(
+    "click",
+    async event => {
+
+
+        const approveButton =
+            event.target.closest(
+                "[data-review-claim-approve]"
+            );
+
+
+        if (
+            approveButton
+        ) {
+
+            await approveAdminReviewClaim(
+                approveButton.dataset
+                    .reviewClaimApprove,
+                approveButton
+            );
+
+
+            return;
+
+        }
+
+
+        const denyButton =
+            event.target.closest(
+                "[data-review-claim-deny]"
+            );
+
+
+        if (
+            denyButton
+        ) {
+
+            await denyAdminReviewClaim(
+                denyButton.dataset
+                    .reviewClaimDeny,
+                denyButton
+            );
+
+        }
+
+    }
+);
+
+
+// ========================================
+// LOAD WITH THE HOME SCREEN
+// ========================================
+
+const originalRenderAdminNeedsAttention =
+    renderAdminNeedsAttention;
+
+
+renderAdminNeedsAttention =
+    function () {
+
+        originalRenderAdminNeedsAttention();
+
+
+        loadAdminReviewClaims();
+
+    };
