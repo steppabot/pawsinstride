@@ -17823,6 +17823,16 @@ async function toggleClientVisitReport(
 
 
         // ========================================
+        // ADD THUMBNAIL URLS
+        // ========================================
+
+        const mediaWithThumbs =
+            await attachVisitPhotoThumbUrls(
+                mediaWithUrls
+            );
+
+
+        // ========================================
         // RENDER VISIT REPORT
         // ========================================
         
@@ -17830,7 +17840,7 @@ async function toggleClientVisitReport(
             mount,
             report,
             petCareRows,
-            mediaWithUrls,
+            mediaWithThumbs,
             completedWalk,
             walkPoints
         );
@@ -18384,10 +18394,12 @@ function renderClientVisitReport(
 
                                 <img
                                     src="${escapeHtml(
+                                        photo.thumb_url ||
                                         photo.signed_url
                                     )}"
                                     alt="Visit photo"
                                     class="client-visit-report-photo"
+                                    loading="lazy"
                                 >
 
                             </button>
