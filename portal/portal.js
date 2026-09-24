@@ -31820,7 +31820,6 @@ window.setTimeout(
     0
 );
 
-// ========================================
 // GOOGLE REVIEW CREDIT
 // ========================================
 //
@@ -31840,8 +31839,8 @@ window.setTimeout(
 //   excluded
 //       -> nowhere
 // ========================================
-
-
+ 
+ 
 // ========================================
 // SETTINGS
 // ========================================
@@ -31857,44 +31856,44 @@ window.setTimeout(
 //   so brand-new clients aren't asked to
 //   review a service they haven't had yet.
 // ========================================
-
+ 
 const GOOGLE_REVIEW_URL =
-    "https://g.page/r/CUIId14weH0HEBM/review";
-
-
+    "https://g.page/r/REPLACE_WITH_YOUR_LINK/review";
+ 
+ 
 const REVIEW_CREDIT_AMOUNT =
     10;
-
-
+ 
+ 
 const REVIEW_MIN_VISITS =
     2;
-
-
+ 
+ 
 // ========================================
 // STATE
 // ========================================
-
+ 
 let currentReviewClaim =
     null;
-
-
+ 
+ 
 // ========================================
 // LOAD MY CLAIM
 // ========================================
-
+ 
 async function loadMyReviewClaim() {
-
+ 
     if (
         !currentUser?.id
     ) {
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     try {
-
+ 
         const {
             data,
             error
@@ -31903,163 +31902,163 @@ async function loadMyReviewClaim() {
                 .rpc(
                     "get_my_review_claim"
                 );
-
-
+ 
+ 
         if (
             error
         ) {
-
+ 
             throw error;
-
+ 
         }
-
-
+ 
+ 
         currentReviewClaim =
             Array.isArray(
                 data
             )
                 ? data[0] || null
                 : data || null;
-
+ 
     }
     catch (
         error
     ) {
-
+ 
         console.error(
             "Review claim load error:",
             error
         );
-
-
+ 
+ 
         currentReviewClaim =
             null;
-
+ 
     }
-
-
+ 
+ 
     renderReviewCreditCard();
-
+ 
 }
-
-
+ 
+ 
 // ========================================
 // IS THIS CLIENT ELIGIBLE?
 // ========================================
-
+ 
 function isEligibleForReviewCredit() {
-
+ 
     const completedCount =
         currentVisits.filter(
             isCompletedVisit
         ).length;
-
-
+ 
+ 
     return (
         completedCount >=
         REVIEW_MIN_VISITS
     );
-
+ 
 }
-
-
+ 
+ 
 // ========================================
 // GET THE CARD ELEMENT
 // ========================================
-
+ 
 function getReviewCreditCard() {
-
+ 
     let card =
         document.getElementById(
             "client-review-credit-card"
         );
-
-
+ 
+ 
     if (
         !card
     ) {
-
+ 
         card =
             document.createElement(
                 "section"
             );
-
-
+ 
+ 
         card.id =
             "client-review-credit-card";
-
+ 
     }
-
-
+ 
+ 
     return card;
-
+ 
 }
-
-
+ 
+ 
 // ========================================
 // PUT THE CARD WHERE IT BELONGS
 // ========================================
-
+ 
 function mountReviewCreditCard(
     card,
     onHome
 ) {
-
+ 
     document.body.classList.toggle(
         "home-review-prompt",
         onHome
     );
-
-
+ 
+ 
     // ========================================
     // HOME — UNDER THE GREETING
     // ========================================
-
+ 
     if (
         onHome
     ) {
-
+ 
         const greeting =
             document.querySelector(
                 ".mobile-home-greeting"
             );
-
-
+ 
+ 
         if (
             !greeting
         ) {
-
+ 
             return false;
-
+ 
         }
-
-
+ 
+ 
         card.className =
             "client-review-credit-card client-review-credit-strip";
-
-
+ 
+ 
         if (
             card.previousElementSibling !==
             greeting
         ) {
-
+ 
             greeting.insertAdjacentElement(
                 "afterend",
                 card
             );
-
+ 
         }
-
-
+ 
+ 
         return true;
-
+ 
     }
-
-
+ 
+ 
     // ========================================
     // PROFILE — UNDER NOTIFICATIONS
     // ========================================
-
+ 
     const anchor =
         document.getElementById(
             "client-push-settings-card"
@@ -32067,49 +32066,54 @@ function mountReviewCreditCard(
         document.getElementById(
             "household-section"
         );
-
-
+ 
+ 
     if (
         !anchor
     ) {
-
+ 
         return false;
-
+ 
     }
-
-
+ 
+ 
     card.className =
         "client-review-credit-card";
-
-
+ 
+ 
     if (
         card.previousElementSibling !==
         anchor
     ) {
-
+ 
         anchor.insertAdjacentElement(
             "afterend",
             card
         );
-
+ 
     }
-
-
+ 
+ 
     return true;
-
+ 
 }
-
-
+ 
+ 
 // ========================================
 // RENDER THE CARD
 // ========================================
-
+//
+// Everything except the final thank-you stays
+// on Home, so the card never vanishes out from
+// under someone mid-flow.
+// ========================================
+ 
 function renderReviewCreditCard() {
-
+ 
     const card =
         getReviewCreditCard();
-
-
+ 
+ 
     const status =
         String(
             currentReviewClaim?.status ||
@@ -32117,174 +32121,79 @@ function renderReviewCreditCard() {
         )
             .trim()
             .toLowerCase();
-
-
+ 
+ 
     // ========================================
     // EXCLUDED — NEVER SHOW ANYTHING
     // ========================================
-
+ 
     if (
         status === "excluded"
     ) {
-
+ 
         card.remove();
-
-
+ 
+ 
         document.body.classList.remove(
             "home-review-prompt"
         );
-
-
+ 
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     // ========================================
-    // NO CLAIM YET
+    // PAID — QUIET CARD ON PROFILE
     // ========================================
-
-    if (
-        !status
-    ) {
-
-        // ========================================
-        // TOO EARLY TO ASK
-        // ========================================
-
-        if (
-            !isEligibleForReviewCredit()
-        ) {
-
-            card.remove();
-
-
-            document.body.classList.remove(
-                "home-review-prompt"
-            );
-
-
-            return;
-
-        }
-
-
-        if (
-            !mountReviewCreditCard(
-                card,
-                true
-            )
-        ) {
-
-            return;
-
-        }
-
-
-        card.innerHTML =
-            `
-
-                <div class="review-strip-row">
-
-                    <span
-                        class="review-strip-icon"
-                        aria-hidden="true"
-                    >
-                        ⭐
-                    </span>
-
-
-                    <div class="review-strip-copy">
-
-                        <strong>
-                            Leave a review, get $${REVIEW_CREDIT_AMOUNT}
-                        </strong>
-
-                        <span>
-                            Added to your account credit.
-                        </span>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="review-strip-button"
-                        data-review-open
-                    >
-                        Review
-                    </button>
-
-                </div>
-
-
-                <p
-                    class="review-credit-message"
-                    id="review-credit-message"
-                ></p>
-
-            `;
-
-
-        return;
-
-    }
-
-
-    // ========================================
-    // EVERY OTHER STATE LIVES ON PROFILE
-    // ========================================
-
-    if (
-        !mountReviewCreditCard(
-            card,
-            false
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    // ========================================
-    // PAID
-    // ========================================
-
+ 
     if (
         status === "approved"
     ) {
-
+ 
+        if (
+            !mountReviewCreditCard(
+                card,
+                false
+            )
+        ) {
+ 
+            return;
+ 
+        }
+ 
+ 
         const amount =
             Number(
                 currentReviewClaim
                     ?.credit_amount ||
                 0
             );
-
-
+ 
+ 
         card.classList.add(
             "is-approved"
         );
-
-
+ 
+ 
         card.innerHTML =
             `
-
+ 
                 <div class="review-credit-heading">
-
+ 
                     <span class="review-credit-eyebrow review-credit-eyebrow-done">
                         Thank You
                     </span>
-
+ 
                     <h3>
                         Your review credit is applied
                     </h3>
-
+ 
                     <p>
                         ${
                             amount > 0
-
+ 
                                 ? `${amount.toLocaleString(
                                     "en-US",
                                     {
@@ -32292,170 +32201,284 @@ function renderReviewCreditCard() {
                                         currency: "USD"
                                     }
                                 )} was added to your account credit. Thanks for taking the time.`
-
+ 
                                 : "Thanks for taking the time to leave a review."
                         }
                     </p>
-
+ 
                 </div>
-
+ 
             `;
-
-
+ 
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
+    // ========================================
+    // NOTHING YET — CHECK ELIGIBILITY
+    // ========================================
+ 
+    if (
+        !status &&
+        !isEligibleForReviewCredit()
+    ) {
+ 
+        card.remove();
+ 
+ 
+        document.body.classList.remove(
+            "home-review-prompt"
+        );
+ 
+ 
+        return;
+ 
+    }
+ 
+ 
+    // ========================================
+    // EVERY OTHER STATE LIVES ON HOME
+    // ========================================
+ 
+    if (
+        !mountReviewCreditCard(
+            card,
+            true
+        )
+    ) {
+ 
+        return;
+ 
+    }
+ 
+ 
     card.classList.remove(
         "is-approved"
     );
-
-
+ 
+ 
     // ========================================
     // WAITING ON VERIFICATION
     // ========================================
-
+ 
     if (
         status === "confirmed"
     ) {
-
+ 
         card.innerHTML =
             `
-
-                <div class="review-credit-heading">
-
-                    <span class="review-credit-eyebrow">
-                        Review Credit
+ 
+                <div class="review-strip-row">
+ 
+                    <span
+                        class="review-strip-icon review-strip-icon-done"
+                        aria-hidden="true"
+                    >
+                        ✓
                     </span>
-
-                    <h3>
-                        We're checking for your review
-                    </h3>
-
-                    <p>
-                        Thanks! Your credit will be added
-                        once we've matched your review.
-                        Google can take a little while to
-                        show new reviews.
-                    </p>
-
+ 
+ 
+                    <div class="review-strip-copy">
+ 
+                        <strong>
+                            Thanks! We're checking for your review
+                        </strong>
+ 
+                        <span>
+                            Your credit will be added once we find it.
+                        </span>
+ 
+                    </div>
+ 
                 </div>
-
+ 
             `;
-
-
+ 
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     // ========================================
     // DENIED
     // ========================================
-
+ 
     if (
         status === "denied"
     ) {
-
+ 
         card.innerHTML =
             `
-
-                <div class="review-credit-heading">
-
-                    <span class="review-credit-eyebrow">
-                        Review Credit
+ 
+                <div class="review-strip-row">
+ 
+                    <span
+                        class="review-strip-icon"
+                        aria-hidden="true"
+                    >
+                        ⭐
                     </span>
-
-                    <h3>
-                        We couldn't find your review
-                    </h3>
-
-                    <p>
-                        Send us a message and we'll sort it
-                        out. Google sometimes takes a day to
-                        publish a new review.
-                    </p>
-
+ 
+ 
+                    <div class="review-strip-copy">
+ 
+                        <strong>
+                            We couldn't find your review yet
+                        </strong>
+ 
+                        <span>
+                            Send us a message and we'll sort it out.
+                        </span>
+ 
+                    </div>
+ 
                 </div>
-
+ 
             `;
-
-
+ 
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     // ========================================
     // CLICKED, NOT YET CONFIRMED
     // ========================================
-
+ 
+    if (
+        status === "pending"
+    ) {
+ 
+        card.innerHTML =
+            `
+ 
+                <div class="review-strip-row">
+ 
+                    <span
+                        class="review-strip-icon"
+                        aria-hidden="true"
+                    >
+                        ⭐
+                    </span>
+ 
+ 
+                    <div class="review-strip-copy">
+ 
+                        <strong>
+                            Did you leave your review?
+                        </strong>
+ 
+                        <span>
+                            Let us know and we'll add your credit.
+                        </span>
+ 
+                    </div>
+ 
+ 
+                    <button
+                        type="button"
+                        class="review-strip-button"
+                        data-review-confirm="${currentReviewClaim.id}"
+                    >
+                        Yes
+                    </button>
+ 
+                </div>
+ 
+ 
+                <div class="review-strip-footer">
+ 
+                    <button
+                        type="button"
+                        class="review-strip-link"
+                        data-review-open
+                    >
+                        Open Google again
+                    </button>
+ 
+                </div>
+ 
+ 
+                <p
+                    class="review-credit-message"
+                    id="review-credit-message"
+                ></p>
+ 
+            `;
+ 
+ 
+        return;
+ 
+    }
+ 
+ 
+    // ========================================
+    // THE OFFER
+    // ========================================
+ 
     card.innerHTML =
         `
-
-            <div class="review-credit-heading">
-
-                <span class="review-credit-eyebrow">
-                    Review Credit
-                </span>
-
-                <h3>
-                    Did you leave your review?
-                </h3>
-
-                <p>
-                    Let us know and we'll add your credit
-                    after we find it on Google.
-                </p>
-
-            </div>
-
-
-            <div class="review-credit-actions">
-
-                <button
-                    type="button"
-                    class="primary-button"
-                    data-review-confirm="${currentReviewClaim.id}"
+ 
+            <div class="review-strip-row">
+ 
+                <span
+                    class="review-strip-icon"
+                    aria-hidden="true"
                 >
-                    Yes, I left a review
-                </button>
-
-
+                    ⭐
+                </span>
+ 
+ 
+                <div class="review-strip-copy">
+ 
+                    <strong>
+                        Leave a review, get $${REVIEW_CREDIT_AMOUNT}
+                    </strong>
+ 
+                    <span>
+                        Added to your account credit.
+                    </span>
+ 
+                </div>
+ 
+ 
                 <button
                     type="button"
-                    class="secondary-button"
+                    class="review-strip-button"
                     data-review-open
                 >
-                    Open Google again
+                    Review
                 </button>
-
+ 
             </div>
-
-
+ 
+ 
             <p
                 class="review-credit-message"
                 id="review-credit-message"
             ></p>
-
+ 
         `;
-
+ 
 }
-
-
+ 
+ 
 // ========================================
 // OPEN GOOGLE + LOG THE CLICK
 // ========================================
-
+ 
 async function startReviewClaim() {
-
+ 
     const message =
         document.getElementById(
             "review-credit-message"
         );
-
-
+ 
+ 
     // ========================================
     // OPEN THE TAB FIRST
     // ========================================
@@ -32463,17 +32486,17 @@ async function startReviewClaim() {
     // Opening it after the await would be
     // treated as a popup and blocked on iOS.
     // ========================================
-
+ 
     const reviewWindow =
         window.open(
             GOOGLE_REVIEW_URL,
             "_blank",
             "noopener,noreferrer"
         );
-
-
+ 
+ 
     try {
-
+ 
         const {
             data,
             error
@@ -32482,92 +32505,92 @@ async function startReviewClaim() {
                 .rpc(
                     "start_my_review_claim"
                 );
-
-
+ 
+ 
         if (
             error
         ) {
-
+ 
             throw error;
-
+ 
         }
-
-
+ 
+ 
         console.log(
             "Review claim started:",
             data
         );
-
-
+ 
+ 
         await loadMyReviewClaim();
-
+ 
     }
     catch (
         error
     ) {
-
+ 
         console.error(
             "Review claim start error:",
             error
         );
-
-
+ 
+ 
         if (
             message
         ) {
-
+ 
             message.textContent =
                 error?.message ||
                 "We couldn't start your review credit. Please try again.";
-
+ 
         }
-
+ 
     }
-
-
+ 
+ 
     if (
         !reviewWindow
     ) {
-
+ 
         window.location.href =
             GOOGLE_REVIEW_URL;
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 // ========================================
 // CONFIRM THE REVIEW
 // ========================================
-
+ 
 async function confirmReviewClaim(
     claimId,
     button
 ) {
-
+ 
     const message =
         document.getElementById(
             "review-credit-message"
         );
-
-
+ 
+ 
     if (
         button
     ) {
-
+ 
         button.disabled =
             true;
-
-
+ 
+ 
         button.textContent =
             "Saving...";
-
+ 
     }
-
-
+ 
+ 
     try {
-
+ 
         const {
             error
         } =
@@ -32581,142 +32604,143 @@ async function confirmReviewClaim(
                             )
                     }
                 );
-
-
+ 
+ 
         if (
             error
         ) {
-
+ 
             throw error;
-
+ 
         }
-
-
+ 
+ 
         await loadMyReviewClaim();
-
+ 
     }
     catch (
         error
     ) {
-
+ 
         console.error(
             "Review claim confirm error:",
             error
         );
-
-
+ 
+ 
         if (
             message
         ) {
-
+ 
             message.textContent =
                 "We couldn't save that. Please try again.";
-
+ 
         }
-
-
+ 
+ 
         if (
             button
         ) {
-
+ 
             button.disabled =
                 false;
-
-
+ 
+ 
             button.textContent =
                 "Yes, I left a review";
-
+ 
         }
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 // ========================================
 // CARD EVENTS
 // ========================================
-
+ 
 document.addEventListener(
     "click",
     async event => {
-
-
+ 
+ 
         if (
             event.target.closest(
                 "[data-review-open]"
             )
         ) {
-
+ 
             await startReviewClaim();
-
-
+ 
+ 
             return;
-
+ 
         }
-
-
+ 
+ 
         const confirmButton =
             event.target.closest(
                 "[data-review-confirm]"
             );
-
-
+ 
+ 
         if (
             confirmButton
         ) {
-
+ 
             await confirmReviewClaim(
                 confirmButton.dataset
                     .reviewConfirm,
                 confirmButton
             );
-
+ 
         }
-
+ 
     }
 );
-
-
+ 
+ 
 // ========================================
 // LOAD WITH THE HOUSEHOLD
 // ========================================
-
+ 
 const originalRenderHouseholdForReviews =
     renderHousehold;
-
-
+ 
+ 
 renderHousehold =
     async function () {
-
+ 
         await originalRenderHouseholdForReviews();
-
-
+ 
+ 
         await loadMyReviewClaim();
-
+ 
     };
-
-
+ 
+ 
 // ========================================
 // RE-PLACE THE CARD WHEN HOME REDRAWS
 // ========================================
-
+ 
 const originalRenderMobileHomeForReviews =
     renderMobileHomeDashboard;
-
-
+ 
+ 
 renderMobileHomeDashboard =
     async function () {
-
+ 
         await originalRenderMobileHomeForReviews();
-
-
+ 
+ 
         if (
             currentUser?.id
         ) {
-
+ 
             renderReviewCreditCard();
-
+ 
         }
-
+ 
     };
+
