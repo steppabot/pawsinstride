@@ -32151,16 +32151,57 @@ function renderReviewCreditCard() {
     if (
         status === "approved"
     ) {
- 
+
+        // ========================================
+        // HIDE THE THANK-YOU AFTER 30 DAYS
+        // ========================================
+        //
+        // The claim stays in the database, so the
+        // credit still can't be claimed twice.
+        // Only the card goes away.
+        // ========================================
+
+        const reviewedAt =
+            currentReviewClaim?.reviewed_at
+                ? new Date(
+                    currentReviewClaim.reviewed_at
+                ).getTime()
+                : null;
+
+
+        const thirtyDays =
+            30 * 24 * 60 * 60 * 1000;
+
+
+        if (
+            Number.isFinite(
+                reviewedAt
+            ) &&
+            Date.now() - reviewedAt > thirtyDays
+        ) {
+
+            card.remove();
+
+
+            document.body.classList.remove(
+                "home-review-prompt"
+            );
+
+
+            return;
+
+        }
+
+
         if (
             !mountReviewCreditCard(
                 card,
                 false
             )
         ) {
- 
+
             return;
- 
+
         }
  
  
