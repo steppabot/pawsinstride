@@ -24099,3 +24099,42 @@ body.pet-gallery-open {
     }
 
 }
+
+
+/* ========================================
+   REVIEW STRIP — EXTRA STATES
+======================================== */
+
+.review-strip-icon-done {
+    background: #eef9f1;
+    border-color: #b9dec3;
+    color: #18843d;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.review-strip-footer {
+    padding: 0 16px 14px;
+}
+
+.client-portal-page .review-strip-link {
+    width: auto;
+    min-height: 0;
+    padding: 0;
+    background: transparent;
+    color: #1f7bc2;
+    border: 0;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.client-portal-page .review-strip-link:hover {
+    color: #176aa9;
+}
+
+.client-portal-page .client-review-credit-strip .review-credit-message {
+    margin: 0;
+    padding: 0 16px 14px;
+}
