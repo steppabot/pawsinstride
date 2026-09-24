@@ -23262,13 +23262,16 @@ body.portal-intro-open {
 
 @media (min-width: 701px) {
 
-    .client-portal-page .pet-photo-tile {
-        height: 74px;
-        border-radius: 9px;
+    .client-portal-page .pet-photo-tiles {
+        grid-template-columns: repeat(4, minmax(0, 132px));
+        justify-content: start;
+        gap: 8px;
     }
 
-    .client-portal-page .pet-photo-tiles {
-        gap: 7px;
+    .client-portal-page .pet-photo-tile {
+        height: auto;
+        aspect-ratio: 1 / 1;
+        border-radius: 10px;
     }
 
     .client-portal-page .pet-photo-strip-label {
