@@ -30800,3 +30800,822 @@ loadPetStats =
         await loadPetPhotoPreviews();
 
     };
+
+
+// ========================================
+// DROP-IN VISIT STATS
+// ========================================
+//
+// Paste this entire block at the BOTTOM of
+// portal.js, below the gallery block.
+//
+// Adds care-visit stats for pets that don't
+// get walks:
+//
+//   VISITS  |  TOGETHER  |  PHOTOS
+//
+// and, for pets that get BOTH, adds a
+// "Drop-in visits" line to the walk records
+// so the other visits are still credited.
+//
+// It replaces buildPetStatsHtml(). The old
+// version stays where it is -- the last
+// function declaration wins.
+// ========================================
+
+
+// ========================================
+// NON-WALK VISIT CHECK
+// ========================================
+//
+// Anything completed that is NOT a recorded
+// walk: drop-ins, pet sitting, boarding.
+//
+// Meet & greets are left out, since those
+// aren't really care visits.
+// ========================================
+
+function isCareVisit(
+    visit
+) {
+
+    const serviceName =
+        String(
+            visit?.service_name ||
+            visit?.service_type ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    return !(
+        serviceName.includes(
+            "meet & greet"
+        ) ||
+        serviceName.includes(
+            "meet and greet"
+        )
+    );
+
+}
+
+
+// ========================================
+// LOAD CARE VISIT STATS
+// ========================================
+//
+// Runs after loadPetStats() and adds the
+// care-visit numbers onto the same entry.
+// ========================================
+
+function loadPetCareStats() {
+
+    if (
+        currentPets.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const completedVisits =
+        currentVisits.filter(
+            isCompletedVisit
+        );
+
+
+    const visitsById =
+        new Map(
+            completedVisits.map(
+                visit => [
+                    Number(
+                        visit.id
+                    ),
+                    visit
+                ]
+            )
+        );
+
+
+    // ========================================
+    // CURRENT MONTH
+    // ========================================
+
+    const now =
+        new Date();
+
+
+    const monthPrefix =
+        `${now.getFullYear()}-${String(
+            now.getMonth() + 1
+        ).padStart(2, "0")}`;
+
+
+    currentPets.forEach(
+        pet => {
+
+            const petId =
+                Number(
+                    pet.id
+                );
+
+
+            // ========================================
+            // VISIT IDS FOR THIS PET
+            // ========================================
+
+            const petVisitIds =
+                new Set(
+                    currentVisitPets
+                        .filter(
+                            relation =>
+                                Number(
+                                    relation.pet_id
+                                ) === petId
+                        )
+                        .map(
+                            relation =>
+                                Number(
+                                    relation.visit_id
+                                )
+                        )
+                );
+
+
+            completedVisits.forEach(
+                visit => {
+
+                    if (
+                        Number(
+                            visit.pet_id
+                        ) === petId
+                    ) {
+
+                        petVisitIds.add(
+                            Number(
+                                visit.id
+                            )
+                        );
+
+                    }
+
+                }
+            );
+
+
+            let careVisitCount =
+                0;
+
+            let careVisitsThisMonth =
+                0;
+
+            let careSeconds =
+                0;
+
+            let lastCareVisitDate =
+                null;
+
+            let longestCareMinutes =
+                0;
+
+
+            petVisitIds.forEach(
+                visitId => {
+
+                    const visit =
+                        visitsById.get(
+                            visitId
+                        );
+
+
+                    if (
+                        !visit ||
+                        !isCareVisit(
+                            visit
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    // ========================================
+                    // SKIP RECORDED WALKS
+                    // ========================================
+                    //
+                    // Those are already counted in the
+                    // walk stats block.
+                    // ========================================
+
+                    if (
+                        isWalkingServiceVisit(
+                            visit
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    careVisitCount += 1;
+
+
+                    if (
+                        String(
+                            visit.visit_date ||
+                            ""
+                        ).startsWith(
+                            monthPrefix
+                        )
+                    ) {
+
+                        careVisitsThisMonth += 1;
+
+                    }
+
+
+                    // ========================================
+                    // TIME TOGETHER
+                    // ========================================
+
+                    const checkedInAt =
+                        visit.checked_in_at
+                            ? new Date(
+                                visit.checked_in_at
+                            ).getTime()
+                            : null;
+
+
+                    const completedAt =
+                        visit.completed_at
+                            ? new Date(
+                                visit.completed_at
+                            ).getTime()
+                            : null;
+
+
+                    if (
+                        Number.isFinite(
+                            checkedInAt
+                        ) &&
+                        Number.isFinite(
+                            completedAt
+                        ) &&
+                        completedAt > checkedInAt
+                    ) {
+
+                        const visitSeconds =
+                            Math.floor(
+                                (
+                                    completedAt -
+                                    checkedInAt
+                                ) /
+                                1000
+                            );
+
+
+                        careSeconds +=
+                            visitSeconds;
+
+
+                        longestCareMinutes =
+                            Math.max(
+                                longestCareMinutes,
+                                Math.round(
+                                    visitSeconds /
+                                    60
+                                )
+                            );
+
+                    }
+
+
+                    // ========================================
+                    // MOST RECENT VISIT
+                    // ========================================
+
+                    if (
+                        !lastCareVisitDate ||
+                        String(
+                            visit.visit_date ||
+                            ""
+                        ) > lastCareVisitDate
+                    ) {
+
+                        lastCareVisitDate =
+                            visit.visit_date;
+
+                    }
+
+                }
+            );
+
+
+            // ========================================
+            // SAVE ONTO THE PET'S STATS
+            // ========================================
+
+            const existingStats =
+                currentPetStats.get(
+                    petId
+                ) ||
+                {
+
+                    walkCount: 0,
+
+                    walksThisMonth: 0,
+
+                    miles: 0,
+
+                    hours: 0,
+
+                    photoCount:
+                        getPetPhotos(
+                            petId
+                        ).length,
+
+                    longestWalk: null
+
+                };
+
+
+            currentPetStats.set(
+                petId,
+                {
+
+                    ...existingStats,
+
+                    careVisitCount,
+
+                    careVisitsThisMonth,
+
+                    careHours:
+                        careSeconds /
+                        3600,
+
+                    lastCareVisitDate,
+
+                    longestCareMinutes
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+// ========================================
+// CARE VISIT LABEL
+// ========================================
+
+function formatCareVisitCount(
+    count
+) {
+
+    return `${count} ${
+        count === 1
+            ? "visit"
+            : "visits"
+    }`;
+
+}
+
+
+// ========================================
+// BUILD PET STATS HTML
+// ========================================
+//
+// Replaces the original. Three cases:
+//
+// 1. walks recorded      -> walk stats
+//                           (+ drop-in line)
+//
+// 2. care visits only    -> care stats
+//
+// 3. neither             -> nothing
+// ========================================
+
+function buildPetStatsHtml(
+    pet
+) {
+
+    const stats =
+        getPetStats(
+            pet?.id
+        );
+
+
+    if (
+        !stats
+    ) {
+
+        return "";
+
+    }
+
+
+    // ========================================
+    // WALK STATS
+    // ========================================
+
+    if (
+        stats.walkCount > 0
+    ) {
+
+        return buildPetWalkStatsHtml(
+            stats
+        );
+
+    }
+
+
+    // ========================================
+    // CARE VISIT STATS
+    // ========================================
+
+    if (
+        Number(
+            stats.careVisitCount ||
+            0
+        ) > 0
+    ) {
+
+        return buildPetCareStatsHtml(
+            stats
+        );
+
+    }
+
+
+    return "";
+
+}
+
+
+// ========================================
+// WALK STATS BLOCK
+// ========================================
+
+function buildPetWalkStatsHtml(
+    stats
+) {
+
+    const milestoneText =
+        getPetMilestoneText(
+            stats.miles
+        );
+
+
+    const longestWalkText =
+        stats.longestWalk
+
+            ? `${formatPetStatMiles(
+                stats.longestWalk.meters /
+                METERS_PER_MILE
+            )} mi &nbsp;·&nbsp; ${escapeHtml(
+                formatPetStatDate(
+                    stats.longestWalk.visitDate
+                )
+            )}`
+
+            : "—";
+
+
+    const careVisitCount =
+        Number(
+            stats.careVisitCount ||
+            0
+        );
+
+
+    return `
+
+        <div class="pet-stats-block">
+
+
+            <div class="pet-stats-heading">
+
+                <span class="pet-stats-label">
+                    Walk Stats
+                </span>
+
+                <span class="pet-stats-scope">
+                    All time
+                </span>
+
+            </div>
+
+
+            <div class="pet-stats-tiles">
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${stats.walkCount}
+                    </strong>
+
+                    <span>
+                        Walks
+                    </span>
+
+                </div>
+
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${formatPetStatMiles(
+                            stats.miles
+                        )}
+                    </strong>
+
+                    <span>
+                        Miles
+                    </span>
+
+                </div>
+
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${formatPetStatHours(
+                            stats.hours
+                        )}
+                    </strong>
+
+                    <span>
+                        Together
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            ${
+                milestoneText
+
+                    ? `
+                        <div class="pet-stats-milestone">
+
+                            <span
+                                class="pet-stats-milestone-icon"
+                                aria-hidden="true"
+                            >
+                                🐾
+                            </span>
+
+                            <span>
+                                ${escapeHtml(
+                                    milestoneText
+                                )}
+                            </span>
+
+                        </div>
+                    `
+
+                    : ""
+            }
+
+
+            <div class="pet-stats-records">
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Walks this month
+                    </span>
+
+                    <strong>
+                        ${stats.walksThisMonth}
+                    </strong>
+
+                </div>
+
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Longest walk
+                    </span>
+
+                    <strong>
+                        ${longestWalkText}
+                    </strong>
+
+                </div>
+
+
+                ${
+                    careVisitCount > 0
+
+                        ? `
+                            <div class="pet-stats-record">
+
+                                <span>
+                                    Other visits
+                                </span>
+
+                                <strong>
+                                    ${formatCareVisitCount(
+                                        careVisitCount
+                                    )}
+                                </strong>
+
+                            </div>
+                        `
+
+                        : ""
+                }
+
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Photos received
+                    </span>
+
+                    <strong>
+                        ${stats.photoCount}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    `;
+
+}
+
+
+// ========================================
+// CARE VISIT STATS BLOCK
+// ========================================
+
+function buildPetCareStatsHtml(
+    stats
+) {
+
+    const lastVisitText =
+        stats.lastCareVisitDate
+
+            ? escapeHtml(
+                formatPetStatDate(
+                    stats.lastCareVisitDate
+                )
+            )
+
+            : "—";
+
+
+    const longestVisitText =
+        Number(
+            stats.longestCareMinutes ||
+            0
+        ) > 0
+
+            ? `${stats.longestCareMinutes} min`
+
+            : "—";
+
+
+    return `
+
+        <div class="pet-stats-block">
+
+
+            <div class="pet-stats-heading">
+
+                <span class="pet-stats-label">
+                    Visit Stats
+                </span>
+
+                <span class="pet-stats-scope">
+                    All time
+                </span>
+
+            </div>
+
+
+            <div class="pet-stats-tiles">
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${stats.careVisitCount}
+                    </strong>
+
+                    <span>
+                        Visits
+                    </span>
+
+                </div>
+
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${formatPetStatHours(
+                            stats.careHours
+                        )}
+                    </strong>
+
+                    <span>
+                        Together
+                    </span>
+
+                </div>
+
+
+                <div class="pet-stats-tile">
+
+                    <strong>
+                        ${stats.photoCount}
+                    </strong>
+
+                    <span>
+                        Photos
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="pet-stats-records">
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Visits this month
+                    </span>
+
+                    <strong>
+                        ${stats.careVisitsThisMonth}
+                    </strong>
+
+                </div>
+
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Longest visit
+                    </span>
+
+                    <strong>
+                        ${longestVisitText}
+                    </strong>
+
+                </div>
+
+
+                <div class="pet-stats-record">
+
+                    <span>
+                        Last visit
+                    </span>
+
+                    <strong>
+                        ${lastVisitText}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    `;
+
+}
+
+
+// ========================================
+// LOAD CARE STATS WITH THE PET STATS
+// ========================================
+
+const originalLoadPetStatsForCare =
+    loadPetStats;
+
+
+loadPetStats =
+    async function () {
+
+        await originalLoadPetStatsForCare();
+
+
+        loadPetCareStats();
+
+    };
