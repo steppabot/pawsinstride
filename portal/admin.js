@@ -3492,238 +3492,328 @@ function renderAdminDayServices() {
 // ========================================
 
 const adminDayServicesContainer =
-    document.getElementById(
-        "admin-day-services"
+    document.getElementById("admin-day-services");
+
+// Blocks repeated action taps while confirming or saving.
+let adminVisitActionBusy = false;
+
+const adminVisitConfirmationOptions = {
+
+    "check-in": {
+        title: "Start this visit?",
+        message:
+            "This will check you in and start the visit timer.",
+        confirmText: "Start Visit",
+        caution: false
+    },
+
+    "start-walk": {
+        title: "Start this walk?",
+        message:
+            "This will start the walk session and attempt to begin GPS tracking.",
+        confirmText: "Start Walk",
+        caution: false
+    },
+
+    "finish-walk": {
+        title: "Stop this walk?",
+        message:
+            "This will stop GPS tracking and save the walk’s duration and distance. Only confirm when the walk is finished.",
+        confirmText: "Stop Walk",
+        caution: true
+    },
+
+    "finish": {
+        title: "Finish this visit?",
+        message:
+            "This will record the completion time and mark the visit complete. Only confirm when you are finished with the visit.",
+        confirmText: "Finish Visit",
+        caution: true
+    },
+
+    "reopen": {
+        title: "Reopen this visit?",
+        message:
+            "This will remove the completion time and return the visit to checked-in or scheduled status. It will not restart a completed walk.",
+        confirmText: "Reopen Visit",
+        caution: true
+    }
+
+};
+
+
+// ========================================
+// SHOW VISIT ACTION CONFIRMATION
+// ========================================
+
+function confirmAdminVisitAction(action, visitId) {
+
+    const options = adminVisitConfirmationOptions[action];
+
+    // Sync and GPS recovery actions continue normally.
+    if (!options) {
+        return Promise.resolve(true);
+    }
+
+    const dialog =
+        document.getElementById("admin-visit-action-confirm");
+
+    const title =
+        document.getElementById("admin-visit-confirm-title");
+
+    const context =
+        document.getElementById("admin-visit-confirm-context");
+
+    const message =
+        document.getElementById("admin-visit-confirm-message");
+
+    const cancelButton =
+        document.getElementById("admin-visit-confirm-cancel");
+
+    const confirmButton =
+        document.getElementById("admin-visit-confirm-accept");
+
+    if (
+        !dialog ||
+        !title ||
+        !context ||
+        !message ||
+        !cancelButton ||
+        !confirmButton ||
+        typeof dialog.showModal !== "function"
+    ) {
+        throw new Error(
+            "The confirmation window could not open. Refresh the page and try again. No action was taken."
+        );
+    }
+
+    if (dialog.open) {
+        return Promise.resolve(false);
+    }
+
+    const visit = allVisits.find(
+        item => Number(item.id) === Number(visitId)
     );
 
+    if (!visit) {
+        throw new Error("Visit not found. Refresh and try again.");
+    }
 
-adminDayServicesContainer
-    ?.addEventListener(
-        "click",
-        async event => {
+    title.textContent = options.title;
+
+    context.textContent = [
+        visit.service_name,
+        visit.visit_date,
+        visit.time_window,
+        `Visit #${visitId}`
+    ].filter(Boolean).join(" · ");
+
+    message.textContent = options.message;
+    confirmButton.textContent = options.confirmText;
+
+    dialog.dataset.caution = String(options.caution);
+    dialog.returnValue = "";
+
+    return new Promise((resolve, reject) => {
+
+        function cleanup() {
+            cancelButton.removeEventListener("click", cancel);
+            confirmButton.removeEventListener("click", confirm);
+            dialog.removeEventListener("cancel", handleEscape);
+            dialog.removeEventListener("close", handleClose);
+        }
+
+        function cancel() {
+            dialog.close("cancelled");
+        }
+
+        function confirm() {
+            dialog.close("confirmed");
+        }
+
+        function handleEscape(event) {
+            event.preventDefault();
+            cancel();
+        }
+
+        function handleClose() {
+            const confirmed =
+                dialog.returnValue === "confirmed";
+
+            cleanup();
+            resolve(confirmed);
+        }
+
+        cancelButton.addEventListener("click", cancel);
+        confirmButton.addEventListener("click", confirm);
+        dialog.addEventListener("cancel", handleEscape);
+        dialog.addEventListener("close", handleClose);
+
+        try {
+
+            dialog.showModal();
+
+            // Enter initially activates Cancel, not Confirm.
+            cancelButton.focus({ preventScroll: true });
+
+        } catch (error) {
+
+            cleanup();
+            reject(error);
+
+        }
+
+    });
+
+}
 
 
-            const actionButton =
-                event.target.closest(
-                    "[data-visit-action]"
-                );
+// ========================================
+// HANDLE VISIT ACTION BUTTONS
+// ========================================
 
+adminDayServicesContainer?.addEventListener(
+    "click",
+    async event => {
 
-            if (
-                !actionButton
-            ) {
+        const actionButton =
+            event.target.closest("[data-visit-action]");
 
+        if (
+            !actionButton ||
+            actionButton.disabled ||
+            adminVisitActionBusy
+        ) {
+            return;
+        }
+
+        const visitId =
+            Number(actionButton.dataset.visitId);
+
+        const action =
+            actionButton.dataset.visitAction;
+
+        const supportedActions = [
+            "check-in",
+            "start-walk",
+            "resume-walk-gps",
+            "sync-walk",
+            "finish-walk",
+            "finish",
+            "sync-visit",
+            "reopen"
+        ];
+
+        if (
+            !visitId ||
+            !supportedActions.includes(action)
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        adminVisitActionBusy = true;
+        actionButton.disabled = true;
+
+        const originalText = actionButton.textContent;
+
+        try {
+
+            const confirmed =
+                await confirmAdminVisitAction(action, visitId);
+
+            if (!confirmed) {
                 return;
-
             }
 
+            if (action === "check-in") {
 
-            const visitId =
-                Number(
-                    actionButton.dataset
-                        .visitId
-                );
+                actionButton.textContent = "Checking In...";
 
+                await checkInVisit(visitId);
 
-            const action =
-                actionButton.dataset
-                    .visitAction;
+            } else if (action === "start-walk") {
 
+                actionButton.textContent = "Starting Walk...";
 
-            if (
-                !visitId ||
-                !action
-            ) {
+                await startVisitWalk(visitId);
 
-                return;
+            } else if (action === "resume-walk-gps") {
 
-            }
+                actionButton.textContent = "Starting GPS...";
 
+                const walk = getVisitWalk(visitId);
 
-            actionButton.disabled =
-                true;
-
-
-            const originalText =
-                actionButton.textContent;
-
-
-            try {
-
-
-                if (
-                    action ===
-                    "check-in"
-                ) {
-
-
-                    actionButton.textContent =
-                        "Checking In...";
-
-
-                    await checkInVisit(
-                        visitId
-                    );
-
-
-                } else if (
-                    action ===
-                    "start-walk"
-                ) {
-
-
-                    actionButton.textContent =
-                        "Starting Walk...";
-
-
-                    await startVisitWalk(
-                        visitId
-                    );
-
-
-                } else if (
-                    action ===
-                    "resume-walk-gps"
-                ) {
-
-
-                    actionButton.textContent =
-                        "Starting GPS...";
-
-
-                    const walk =
-                        getVisitWalk(
-                            visitId
-                        );
-
-
-                    if (
-                        !walk
-                    ) {
-
-                        throw new Error(
-                            "Walk session not found."
-                        );
-
-                    }
-
-
-                    await startWalkGpsTracking(
-                        walk
-                    );
-
-
-                    renderAdminDayServices();
-
-
-                    startWalkUiTimer();
-
-
-                } else if (
-                    action ===
-                    "sync-walk"
-                ) {
-
-
-                    actionButton.textContent =
-                        "Syncing...";
-
-
-                    await retryPendingWalkSync(
-                        visitId
-                    );
-
-
-                } else if (
-                    action ===
-                    "finish-walk"
-                ) {
-
-
-                    actionButton.textContent =
-                        "Saving Walk...";
-
-
-                    await finishVisitWalk(
-                        visitId
-                    );
-
-
-                } else if (
-                    action ===
-                    "finish"
-                ) {
-
-
-                    actionButton.textContent =
-                        "Saving Visit...";
-
-
-                    await finishVisit(
-                        visitId
-                    );
-
-
-                } else if (
-                    action ===
-                    "sync-visit"
-                ) {
-
-
-                    actionButton.textContent =
-                        "Syncing...";
-
-
-                    await retryPendingVisitSync(
-                        visitId
-                    );
-
-
-                } else if (
-                    action ===
-                    "reopen"
-                ) {
-
-
-                    actionButton.textContent =
-                        "Reopening...";
-
-
-                    await reopenVisit(
-                        visitId
-                    );
-
+                if (!walk) {
+                    throw new Error("Walk session not found.");
                 }
 
+                await startWalkGpsTracking(walk);
 
-            } catch (
+                renderAdminDayServices();
+                startWalkUiTimer();
+
+            } else if (action === "sync-walk") {
+
+                actionButton.textContent = "Syncing...";
+
+                await retryPendingWalkSync(visitId);
+
+            } else if (action === "finish-walk") {
+
+                actionButton.textContent = "Saving Walk...";
+
+                await finishVisitWalk(visitId);
+
+            } else if (action === "finish") {
+
+                actionButton.textContent = "Saving Visit...";
+
+                await finishVisit(visitId);
+
+            } else if (action === "sync-visit") {
+
+                actionButton.textContent = "Syncing...";
+
+                await retryPendingVisitSync(visitId);
+
+            } else if (action === "reopen") {
+
+                actionButton.textContent = "Reopening...";
+
+                await reopenVisit(visitId);
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Visit status update error:",
                 error
-            ) {
+            );
 
+            alert(
+                error?.message ||
+                "We couldn't update this visit. Please try again."
+            );
 
-                console.error(
-                    "Visit status update error:",
-                    error
-                );
+        } finally {
 
+            adminVisitActionBusy = false;
 
-                alert(
-                    error?.message ||
-                    "We couldn't update this visit. Please try again."
-                );
+            // The action may have already rebuilt the card.
+            if (actionButton.isConnected) {
 
-
-                actionButton.disabled =
-                    false;
-
-
-                actionButton.textContent =
-                    originalText;
+                actionButton.disabled = false;
+                actionButton.textContent = originalText;
 
             }
 
         }
-    );
+
+    }
+);
 
 // ========================================
 // VISIT REPORT ACTIONS
