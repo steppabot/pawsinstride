@@ -6847,3 +6847,71 @@ html {
 .site-header-v2 > .header-halloween[hidden] {
     display: none;
 }
+
+/* ========================================
+   THANKSGIVING HEADER DECORATIONS
+======================================== */
+
+.site-header-v2 > .header-thanksgiving {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+}
+
+.site-header-v2 > .header-thanksgiving[hidden] {
+    display: none;
+}
+
+.header-thanksgiving > svg {
+    position: absolute;
+    top: 0;
+    display: block;
+
+    width: clamp(
+        0px,
+        calc((100vw - 1100px) / 2 - 30px),
+        240px
+    );
+
+    height: auto;
+    max-height: 100%;
+    pointer-events: none;
+}
+
+.header-thanksgiving-left {
+    left: 0;
+}
+
+.header-thanksgiving-right {
+    right: 0;
+}
+
+/* Mobile decorations sit above the menu. */
+@media (max-width: 900px) {
+
+    .site-header-v2:has(> .header-thanksgiving:not([hidden]))
+    > .site-header-v2-inner {
+        padding-top: 46px;
+    }
+
+    .site-header-v2 > .header-thanksgiving {
+        height: 46px;
+        bottom: auto;
+    }
+
+    .header-thanksgiving > svg {
+        width: 100px;
+        height: auto;
+        max-height: none;
+    }
+
+}
+
+/* ========================================
+   END THANKSGIVING HEADER DECORATIONS
+======================================== */
+
