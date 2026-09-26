@@ -80,22 +80,20 @@ header {
     position: absolute;
     inset: 0;
     z-index: 1;
-
     overflow: hidden;
     pointer-events: none;
     user-select: none;
 }
 
+.site-header-v2 > .header-halloween[hidden] {
+    display: none;
+}
+
 .header-halloween > svg {
     position: absolute;
     top: 0;
-
     display: block;
 
-    /*
-       Decorations shrink as the empty space
-       beside the navigation gets narrower.
-    */
     width: clamp(
         0px,
         calc((100vw - 1100px) / 2 - 30px),
@@ -104,7 +102,6 @@ header {
 
     height: auto;
     max-height: 100%;
-
     pointer-events: none;
 }
 
@@ -116,8 +113,8 @@ header {
     right: 0;
 }
 
-/* Keep just tiny corner webs on narrower screens. */
-@media (max-width: 1200px) {
+/* Narrow desktop screens */
+@media (min-width: 901px) and (max-width: 1200px) {
 
     .header-halloween > svg {
         width: 130px;
@@ -134,20 +131,40 @@ header {
 
 }
 
-/* Mobile: small corner details, clear of the controls. */
+/* ========================================
+   HALLOWEEN HEADER — MOBILE
+======================================== */
+
 @media (max-width: 900px) {
 
+    /*
+       Reserve a small decoration area above
+       the logo and buttons during October.
+    */
+    .site-header-v2:has(> .header-halloween:not([hidden]))
+    > .site-header-v2-inner {
+        padding-top: 46px;
+    }
+
+    .site-header-v2 > .header-halloween {
+        height: 46px;
+        bottom: auto;
+    }
+
     .header-halloween > svg {
-        width: 95px;
-        opacity: .65;
+        width: 100px;
+        height: auto;
+        max-height: none;
+        opacity: 1;
+        clip-path: none;
     }
 
     .header-halloween-left {
-        clip-path: inset(0 calc(100% - 12px) 0 0);
+        left: 0;
     }
 
     .header-halloween-right {
-        clip-path: inset(0 0 0 calc(100% - 12px));
+        right: 0;
     }
 
 }
