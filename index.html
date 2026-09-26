@@ -1231,54 +1231,87 @@
     <script src="https://static.elfsight.com/platform/platform.js" async></script>
 
     <!-- ========================================
-         HALLOWEEN HEADER — OCTOBER 1–31
+         SEASONAL HEADER — OCTOBER / NOVEMBER
          ======================================== -->
     
     <script>
         (() => {
     
-            function updateHalloweenHeader() {
+            /*
+             * Leave empty for automatic dates.
+             * To preview, temporarily use:
+             * "halloween" or "thanksgiving"
+             */
+            const previewSeason = "thanksgiving";
     
-                const month = new Intl.DateTimeFormat(
-                    "en-US",
-                    {
-                        timeZone: "America/Chicago",
-                        month: "numeric"
-                    }
-                ).format(new Date());
+            const monthFormatter = new Intl.DateTimeFormat(
+                "en-US",
+                {
+                    timeZone: "America/Chicago",
+                    month: "numeric"
+                }
+            );
+    
+            function updateSeasonalHeader() {
+    
+                const month = Number(
+                    monthFormatter.format(new Date())
+                );
+    
+                const activeSeason =
+                    previewSeason ||
+                    (
+                        month === 10
+                            ? "halloween"
+                            : month === 11
+                                ? "thanksgiving"
+                                : ""
+                    );
     
                 document.querySelectorAll(
                     ".header-halloween"
                 ).forEach(decoration => {
     
-                    decoration.hidden = month !== "10";
+                    decoration.hidden =
+                        activeSeason !== "halloween";
+    
+                });
+    
+                document.querySelectorAll(
+                    ".header-thanksgiving"
+                ).forEach(decoration => {
+    
+                    decoration.hidden =
+                        activeSeason !== "thanksgiving";
     
                 });
     
             }
     
-            updateHalloweenHeader();
+            updateSeasonalHeader();
     
-            // Recheck when someone returns to this tab.
             document.addEventListener(
                 "visibilitychange",
                 () => {
     
                     if (!document.hidden) {
-                        updateHalloweenHeader();
+                        updateSeasonalHeader();
                     }
     
                 }
             );
     
-            // Handle the date changing while the page stays open.
             window.setInterval(
-                updateHalloweenHeader,
+                updateSeasonalHeader,
                 60000
             );
     
         })();
     </script>
+    
+    <!-- ========================================
+         END SEASONAL HEADER
+         ======================================== -->
     
 </body>
 </html>
