@@ -11393,3 +11393,160 @@ body.admin-client-credit-modal-open {
     }
 
 }
+
+/* ========================================
+   ADMIN VISIT ACTION CONFIRMATION
+======================================== */
+
+dialog.admin-visit-action-confirm {
+    position: fixed;
+    inset: 0;
+
+    width: min(440px, calc(100vw - 32px));
+    max-height: calc(100dvh - 40px);
+    margin: auto;
+    padding: 0;
+
+    overflow: auto;
+    overscroll-behavior: contain;
+
+    background: #ffffff;
+    color: #203447;
+    border: 1px solid #c9e0ee;
+    border-radius: 18px;
+
+    box-shadow: 0 24px 70px rgba(12, 40, 60, .28);
+
+    font-family: inherit;
+    text-align: left;
+}
+
+dialog.admin-visit-action-confirm::backdrop {
+    background: rgba(13, 31, 44, .58);
+}
+
+.admin-visit-confirm-heading {
+    padding: 22px 24px;
+
+    background: linear-gradient(
+        120deg,
+        #197db5,
+        #1768aa
+    );
+
+    color: #ffffff;
+}
+
+.admin-visit-confirm-eyebrow {
+    display: block;
+    margin-bottom: 7px;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.admin-visit-action-confirm
+.admin-visit-confirm-heading h2 {
+    margin: 0;
+    padding: 0;
+
+    color: #ffffff;
+    font-size: 23px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.admin-visit-confirm-body {
+    padding: 22px 24px 24px;
+}
+
+#admin-visit-confirm-context {
+    margin: 0 0 14px;
+    padding: 11px 13px;
+
+    background: #edf7fd;
+    border: 1px solid #d7eaf5;
+    border-radius: 10px;
+
+    color: #245b78;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+#admin-visit-confirm-message {
+    margin: 0;
+
+    color: #526574;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.admin-visit-confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.admin-visit-action-confirm
+.admin-visit-confirm-actions button {
+    width: 100%;
+    min-height: 48px;
+    margin: 0;
+    padding: 12px;
+
+    border: 1px solid #bed8e8;
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.3;
+
+    cursor: pointer;
+}
+
+#admin-visit-confirm-cancel {
+    background: #ffffff;
+    color: #245b78;
+    box-shadow: none;
+}
+
+#admin-visit-confirm-accept {
+    background: #197bb6;
+    color: #ffffff;
+    border-color: #197bb6;
+}
+
+/* Stop/reopen actions get a stronger visual cue. */
+.admin-visit-action-confirm[data-caution="true"]
+#admin-visit-confirm-accept {
+    background: #b9472d;
+    border-color: #b9472d;
+}
+
+.admin-visit-action-confirm
+.admin-visit-confirm-actions button:focus-visible {
+    outline: 3px solid #f3aa4c;
+    outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+
+    .admin-visit-confirm-heading {
+        padding: 20px;
+    }
+
+    .admin-visit-confirm-body {
+        padding: 20px;
+    }
+
+}
+
+/* ========================================
+   END ADMIN VISIT ACTION CONFIRMATION
+======================================== */
