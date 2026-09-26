@@ -161,6 +161,154 @@
 
 
         <!-- ========================================
+             CHRISTMAS HEADER DECORATIONS
+             ======================================== -->
+        
+        <div
+            class="header-christmas-holly"
+            aria-hidden="true"
+            hidden
+        >
+        
+            <svg
+                class="header-christmas-holly-left"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 128 84"
+                focusable="false"
+            >
+        
+                <defs>
+        
+                    <g id="pis-christmas-holly-art">
+        
+                        <g
+                            stroke="#203f39"
+                            stroke-width="1.8"
+                            stroke-linejoin="round"
+                            stroke-linecap="round"
+                        >
+        
+                            <!-- LEFT LEAF -->
+                            <path
+                                d="
+                                    M48 45
+                                    Q35 43 29 35
+                                    Q31 27 20 27
+                                    Q23 19 12 17
+                                    Q15 10 10 4
+                                    Q19 9 26 5
+                                    Q27 16 36 13
+                                    Q34 23 44 23
+                                    Q40 34 48 45Z
+                                "
+                                fill="#226d50"
+                            />
+        
+                            <!-- RIGHT LEAF -->
+                            <path
+                                d="
+                                    M50 44
+                                    Q53 30 62 23
+                                    Q70 27 73 16
+                                    Q80 20 85 10
+                                    Q91 15 99 12
+                                    Q94 20 99 26
+                                    Q87 27 90 36
+                                    Q80 33 77 43
+                                    Q65 38 50 44Z
+                                "
+                                fill="#287e58"
+                            />
+        
+                            <!-- LOWER LEAF -->
+                            <path
+                                d="
+                                    M46 46
+                                    Q33 44 25 51
+                                    Q28 59 17 60
+                                    Q20 67 10 72
+                                    Q20 71 25 78
+                                    Q29 68 37 72
+                                    Q36 63 46 62
+                                    Q40 55 46 46Z
+                                "
+                                fill="#226d50"
+                            />
+        
+                            <!-- LEAF VEINS -->
+                            <g
+                                fill="none"
+                                stroke="#164a39"
+                                stroke-width="1.2"
+                            >
+                                <path d="M46 43 L18 12"/>
+                                <path d="M52 43 L90 20"/>
+                                <path d="M44 49 L20 69"/>
+                            </g>
+        
+                            <!-- RED BERRIES -->
+                            <g fill="#d84542">
+                                <circle cx="43" cy="43" r="7"/>
+                                <circle cx="56" cy="45" r="7"/>
+                                <circle cx="48" cy="55" r="7"/>
+                            </g>
+        
+                        </g>
+        
+                        <!-- GOLD SPARKLES -->
+                        <g fill="#e5a037">
+        
+                            <path d="
+                                M113 9
+                                Q114 17 121 18
+                                Q114 19 113 27
+                                Q112 19 105 18
+                                Q112 17 113 9Z
+                            "/>
+        
+                            <path d="
+                                M105 42
+                                Q106 48 111 49
+                                Q106 50 105 56
+                                Q104 50 99 49
+                                Q104 48 105 42Z
+                            "/>
+        
+                        </g>
+        
+                    </g>
+        
+                </defs>
+        
+                <use href="#pis-christmas-holly-art"/>
+        
+            </svg>
+        
+            <svg
+                class="header-christmas-holly-right"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 128 84"
+                focusable="false"
+            >
+        
+                <use href="#pis-christmas-holly-art"/>
+        
+            </svg>
+        
+        </div>
+        
+        <!-- Bulbs are filled in by the seasonal script. -->
+        <div
+            class="header-christmas"
+            aria-hidden="true"
+            hidden
+        ></div>
+        
+        <!-- ========================================
+             END CHRISTMAS HEADER DECORATIONS
+             ======================================== -->
+
+        <!-- ========================================
              THANKSGIVING HEADER DECORATIONS
              ======================================== -->
         
@@ -1229,20 +1377,102 @@
     </script>
 
     <script src="https://static.elfsight.com/platform/platform.js" async></script>
-
+    
     <!-- ========================================
-         SEASONAL HEADER — OCTOBER / NOVEMBER
+         SEASONAL HEADER — OCTOBER / NOVEMBER / DECEMBER
          ======================================== -->
     
     <script>
         (() => {
     
             /*
-             * Leave empty for automatic dates.
-             * To preview, temporarily use:
-             * "halloween" or "thanksgiving"
+             * PREVIEW:
+             * "halloween", "thanksgiving", or "christmas"
+             *
+             * Use "" for automatic seasonal dates.
              */
-            const previewSeason = "";
+            const previewSeason = "christmas";
+    
+            const header = document.querySelector(
+                ".site-header-v2"
+            );
+    
+            if (!header) {
+                return;
+            }
+    
+            const christmasLights = header.querySelector(
+                ".header-christmas"
+            );
+    
+            // ========================================
+            // BUILD CHRISTMAS LIGHT BULBS
+            // ========================================
+    
+            const bulbColors = [
+                "#e95d64",
+                "#e6b344",
+                "#35b86a",
+                "#4b90db"
+            ];
+    
+            let previousLightLayout = "";
+    
+            function renderChristmasLights() {
+    
+                if (!christmasLights) {
+                    return;
+                }
+    
+                const spacing =
+                    window.innerWidth <= 900 ? 60 : 120;
+    
+                const bulbCount = Math.ceil(
+                    header.clientWidth / spacing
+                );
+    
+                const lightLayout =
+                    `${spacing}-${bulbCount}`;
+    
+                if (lightLayout === previousLightLayout) {
+                    return;
+                }
+    
+                previousLightLayout = lightLayout;
+    
+                christmasLights.style.setProperty(
+                    "--light-spacing",
+                    `${spacing}px`
+                );
+    
+                const bulbs = document.createDocumentFragment();
+    
+                for (let index = 0; index < bulbCount; index++) {
+    
+                    const bulb = document.createElement("span");
+    
+                    bulb.className =
+                        "header-christmas-bulb";
+    
+                    bulb.style.left =
+                        `${spacing / 2 + index * spacing}px`;
+    
+                    bulb.style.setProperty(
+                        "--bulb-color",
+                        bulbColors[index % bulbColors.length]
+                    );
+    
+                    bulbs.appendChild(bulb);
+    
+                }
+    
+                christmasLights.replaceChildren(bulbs);
+    
+            }
+    
+            // ========================================
+            // SEASONAL DATES — TEXAS TIME
+            // ========================================
     
             const monthFormatter = new Intl.DateTimeFormat(
                 "en-US",
@@ -1252,6 +1482,23 @@
                 }
             );
     
+            const seasonalMonths = {
+                10: "halloween",
+                11: "thanksgiving",
+                12: "christmas"
+            };
+    
+            const decorationSelectors = {
+                halloween:
+                    ".header-halloween",
+    
+                thanksgiving:
+                    ".header-thanksgiving",
+    
+                christmas:
+                    ".header-christmas, .header-christmas-holly"
+            };
+    
             function updateSeasonalHeader() {
     
                 const month = Number(
@@ -1260,36 +1507,48 @@
     
                 const activeSeason =
                     previewSeason ||
-                    (
-                        month === 10
-                            ? "halloween"
-                            : month === 11
-                                ? "thanksgiving"
-                                : ""
-                    );
+                    seasonalMonths[month] ||
+                    "";
     
-                document.querySelectorAll(
-                    ".header-halloween"
-                ).forEach(decoration => {
+                Object.entries(
+                    decorationSelectors
+                ).forEach(([season, selector]) => {
     
-                    decoration.hidden =
-                        activeSeason !== "halloween";
+                    header.querySelectorAll(
+                        selector
+                    ).forEach(decoration => {
     
-                });
+                        decoration.hidden =
+                            activeSeason !== season;
     
-                document.querySelectorAll(
-                    ".header-thanksgiving"
-                ).forEach(decoration => {
-    
-                    decoration.hidden =
-                        activeSeason !== "thanksgiving";
+                    });
     
                 });
+    
+                if (activeSeason === "christmas") {
+                    renderChristmasLights();
+                }
     
             }
     
             updateSeasonalHeader();
     
+            // Adjust bulb spacing when the screen changes.
+            window.addEventListener(
+                "resize",
+                () => {
+    
+                    if (
+                        christmasLights &&
+                        !christmasLights.hidden
+                    ) {
+                        renderChristmasLights();
+                    }
+    
+                }
+            );
+    
+            // Recheck when someone returns to the page.
             document.addEventListener(
                 "visibilitychange",
                 () => {
@@ -1301,6 +1560,7 @@
                 }
             );
     
+            // Handle a month changing while the page is open.
             window.setInterval(
                 updateSeasonalHeader,
                 60000
