@@ -163,7 +163,227 @@
         <!-- ========================================
              HEADER INNER
              ======================================== -->
-    
+        
+        <!-- Halloween decorations -->
+        <div class="header-halloween" aria-hidden="true">
+        
+            <!-- LEFT: WEB, SPIDERS AND SPARKLES -->
+            <svg
+                class="header-halloween-left"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 240 110"
+                focusable="false"
+            >
+                <defs>
+                    <g id="pis-halloween-web"
+                       fill="none"
+                       stroke="#506373"
+                       stroke-width="1"
+                       stroke-linecap="round">
+        
+                        <!-- Web spokes -->
+                        <path d="
+                            M0 0 H112
+                            M0 0 L108 29
+                            M0 0 L94 55
+                            M0 0 L76 78
+                            M0 0 L49 97
+                            M0 0 L24 108
+                            M0 0 V110
+                        "/>
+        
+                        <!-- Curved silk strands -->
+                        <path d="
+                            M18 0
+                            Q15 3 17 5
+                            Q14 6 15 9
+                            Q11 9 12 12
+                            Q8 12 8 16
+                            Q4 15 4 18
+                            Q1 17 0 18
+        
+                            M36 0
+                            Q29 5 35 9
+                            Q27 11 30 18
+                            Q23 18 24 25
+                            Q16 24 16 32
+                            Q8 30 8 36
+                            Q3 33 0 36
+        
+                            M54 0
+                            Q44 7 52 14
+                            Q42 17 45 27
+                            Q34 27 37 38
+                            Q25 37 24 48
+                            Q13 46 12 54
+                            Q5 50 0 54
+        
+                            M72 0
+                            Q59 10 69 19
+                            Q56 23 61 36
+                            Q46 36 49 50
+                            Q34 48 32 64
+                            Q18 61 16 72
+                            Q6 66 0 72
+        
+                            M90 0
+                            Q73 13 87 23
+                            Q70 29 76 45
+                            Q59 44 61 63
+                            Q43 61 40 80
+                            Q24 75 20 90
+                            Q8 83 0 90
+        
+                            M108 0
+                            Q89 15 104 28
+                            Q84 34 91 54
+                            Q70 54 74 76
+                            Q52 74 48 96
+                            Q28 91 24 108
+                            Q9 100 0 108
+                        "/>
+                    </g>
+        
+                    <g id="pis-halloween-spider">
+                        <!-- Eight legs -->
+                        <g
+                            fill="none"
+                            stroke="#203b4d"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        >
+                            <path d="
+                                M-7 -4 Q-15 -12 -17 -4
+                                M-9 0 Q-20 -5 -20 3
+                                M-9 4 Q-20 3 -19 11
+                                M-6 7 Q-13 12 -11 16
+        
+                                M7 -4 Q15 -12 17 -4
+                                M9 0 Q20 -5 20 3
+                                M9 4 Q20 3 19 11
+                                M6 7 Q13 12 11 16
+                            "/>
+                        </g>
+        
+                        <ellipse
+                            cx="0"
+                            cy="1"
+                            rx="11"
+                            ry="12"
+                            fill="#203b4d"
+                        />
+        
+                        <ellipse cx="-4" cy="-2" rx="3" ry="4" fill="#fff"/>
+                        <ellipse cx="4" cy="-2" rx="3" ry="4" fill="#fff"/>
+                        <circle cx="-3.5" cy="-1" r="1.5" fill="#203b4d"/>
+                        <circle cx="3.5" cy="-1" r="1.5" fill="#203b4d"/>
+        
+                        <path
+                            d="M-3 6 Q0 9 3 6"
+                            fill="none"
+                            stroke="#fff"
+                            stroke-width="1.2"
+                            stroke-linecap="round"
+                        />
+                    </g>
+        
+                    <path
+                        id="pis-halloween-sparkle"
+                        d="M0 -7 Q1 -1 6 0 Q1 1 0 7 Q-1 1 -6 0 Q-1 -1 0 -7Z"
+                        fill="#f3aa4c"
+                    />
+        
+                    <path
+                        id="pis-halloween-bat"
+                        d="
+                            M-4 -3
+                            L-5 -9 L0 -6 L5 -9 L4 -3
+                            Q13 -5 25 -16
+                            Q21 -5 27 0
+                            Q17 -3 16 6
+                            Q8 1 5 10
+                            L0 14 L-5 10
+                            Q-8 1 -16 6
+                            Q-17 -3 -27 0
+                            Q-21 -5 -25 -16
+                            Q-13 -5 -4 -3Z
+                        "
+                        fill="#203b4d"
+                    />
+                </defs>
+        
+                <use href="#pis-halloween-web" opacity=".65"/>
+        
+                <!-- Hanging threads -->
+                <g stroke="#71828e" stroke-width="1" opacity=".75">
+                    <path d="M130 0 V67"/>
+                    <path d="M192 0 V39"/>
+                </g>
+        
+                <use href="#pis-halloween-spider" transform="translate(130 77)"/>
+                <use href="#pis-halloween-spider" transform="translate(192 46) scale(.65)"/>
+        
+                <!-- Dew on the web -->
+                <g fill="#d7e6ed" stroke="#a7bac6" stroke-width=".6">
+                    <ellipse cx="24" cy="108" rx="2" ry="3"/>
+                    <ellipse cx="74" cy="77" rx="2" ry="3"/>
+                    <ellipse cx="104" cy="29" rx="1.5" ry="2.5"/>
+                </g>
+        
+                <use href="#pis-halloween-sparkle" transform="translate(65 88)"/>
+                <use href="#pis-halloween-sparkle" transform="translate(177 91) scale(.8)"/>
+                <use href="#pis-halloween-sparkle" transform="translate(215 28) scale(.65)"/>
+                <circle cx="94" cy="98" r="1.5" fill="#f3aa4c"/>
+                <circle cx="164" cy="73" r="1.5" fill="#f3aa4c"/>
+            </svg>
+        
+            <!-- RIGHT: WEB, BATS AND SPARKLES -->
+            <svg
+                class="header-halloween-right"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 240 110"
+                focusable="false"
+            >
+                <use
+                    href="#pis-halloween-web"
+                    transform="translate(240 0) scale(-.65 .65)"
+                    opacity=".5"
+                />
+        
+                <use href="#pis-halloween-bat"
+                     transform="translate(94 36) rotate(-18) scale(.85)"/>
+        
+                <use href="#pis-halloween-bat"
+                     transform="translate(168 55) rotate(15) scale(.62)"/>
+        
+                <use href="#pis-halloween-bat"
+                     transform="translate(129 87) rotate(12) scale(.6)"/>
+        
+                <use href="#pis-halloween-bat"
+                     transform="translate(48 81) rotate(-12) scale(.4)"/>
+        
+                <use href="#pis-halloween-bat"
+                     transform="translate(210 88) rotate(-16) scale(.38)"/>
+        
+                <use href="#pis-halloween-sparkle"
+                     transform="translate(23 47) scale(.8)"/>
+        
+                <use href="#pis-halloween-sparkle"
+                     transform="translate(83 94) scale(.7)"/>
+        
+                <use href="#pis-halloween-sparkle"
+                     transform="translate(190 24) scale(.55)"/>
+        
+                <use href="#pis-halloween-sparkle"
+                     transform="translate(176 98) scale(.55)"/>
+        
+                <circle cx="30" cy="66" r="1.5" fill="#f3aa4c"/>
+                <circle cx="154" cy="18" r="1.5" fill="#f3aa4c"/>
+                <circle cx="226" cy="102" r="1.5" fill="#f3aa4c"/>
+            </svg>
+        
+        </div>
+        
         <div class="site-header-v2-inner">
     
     
