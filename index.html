@@ -937,5 +937,56 @@
     </script>
 
     <script src="https://static.elfsight.com/platform/platform.js" async></script>
+
+    <!-- ========================================
+         HALLOWEEN HEADER — OCTOBER 1–31
+         ======================================== -->
+    
+    <script>
+        (() => {
+    
+            function updateHalloweenHeader() {
+    
+                const month = new Intl.DateTimeFormat(
+                    "en-US",
+                    {
+                        timeZone: "America/Chicago",
+                        month: "numeric"
+                    }
+                ).format(new Date());
+    
+                document.querySelectorAll(
+                    ".header-halloween"
+                ).forEach(decoration => {
+    
+                    decoration.hidden = month !== "10";
+    
+                });
+    
+            }
+    
+            updateHalloweenHeader();
+    
+            // Recheck when someone returns to this tab.
+            document.addEventListener(
+                "visibilitychange",
+                () => {
+    
+                    if (!document.hidden) {
+                        updateHalloweenHeader();
+                    }
+    
+                }
+            );
+    
+            // Handle the date changing while the page stays open.
+            window.setInterval(
+                updateHalloweenHeader,
+                60000
+            );
+    
+        })();
+    </script>
+    
 </body>
 </html>
