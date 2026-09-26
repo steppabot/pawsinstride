@@ -16500,592 +16500,244 @@ document
 // CLIENT CANCELLATION MODAL
 // ========================================
 
-async function openClientCancellationModal(
-    visit
-) {
-
+async function openClientCancellationModal(visit) {
+    const existing = document.getElementById("client-cancellation-modal");
+    if (existing?.dataset.processing === "true") return;
     closeClientCancellationModal();
 
+    const previousFocus = document.activeElement;
+    const overlay = document.createElement("div");
+    overlay.id = "client-cancellation-modal";
+    overlay.className = "client-cancellation-modal";
 
-    let cancellationPreview =
-        null;
+    let preview = null;
+    let busy = false;
+    let requestNumber = 0;
 
+    const money = value => Number(value || 0).toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD"
+    });
 
-    // ========================================
-    // LOAD SERVER-SIDE CREDIT PREVIEW
-    // ========================================
+    function closeModal() {
+        if (busy) return;
+        closeClientCancellationModal();
+        if (previousFocus?.isConnected) previousFocus.focus();
+    }
 
-    try {
+    function priceRow(label, value) {
+        return `<div class="client-cancellation-price">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+        </div>`;
+    }
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.rpc(
-                "preview_my_visit_cancellation",
-                {
-                    p_visit_id:
-                        Number(
-                            visit.id
-                        )
-                }
-            );
+    function renderPreview(errorMessage = "") {
+        const adjustment = Number(preview?.weekly_adjustment || 0);
+        const carry = Number(preview?.carry_before || 0);
+        const percent = Number(preview?.credit_percent || 0);
+        let explanation = "Loading your cancellation credit...";
 
+        if (errorMessage) {
+            explanation = errorMessage;
+        } else if (preview) {
+            explanation = percent === 100
+                ? "At least 24 hours' notice: 100% of the adjusted refundable amount becomes account credit."
+                : "Less than 24 hours' notice: 50% of the adjusted refundable amount becomes account credit.";
 
-        if (
-            error
-        ) {
-            throw error;
+            if (preview.discount_removed) {
+                explanation += " This cancellation leaves fewer than 5 service days in this booking week, so the remaining services return to their original rates.";
+            } else if (adjustment < 0) {
+                explanation += " The weekly discount was already removed, so this visit is now valued at its original rate for cancellation.";
+            }
+            if (Number(preview.carry_after) > 0) {
+                explanation += " The discount adjustment uses up this cancellation's value. No additional payment is taken; any remaining adjustment is applied to later cancellations in this booking week.";
+            }
         }
 
-
-        cancellationPreview =
-            Array.isArray(
-                data
-            )
-                ? data[0]
-                : data;
-
-    }
-    catch (error) {
-
-        console.error(
-            "Cancellation preview error:",
-            error
-        );
-
-    }
-
-
-    const price =
-        Number(
-            cancellationPreview
-                ?.original_price ??
-            visit.price ??
-            0
-        );
-
-
-    const estimatedCredit =
-        cancellationPreview
-            ? Number(
-                cancellationPreview
-                    .credit_amount ||
-                0
-            )
-            : null;
-
-
-    const creditPercent =
-        cancellationPreview
-            ? Number(
-                cancellationPreview
-                    .credit_percent ||
-                0
-            )
-            : null;
-
-
-    const formattedPrice =
-        price.toLocaleString(
-            "en-US",
-            {
-                style:
-                    "currency",
-
-                currency:
-                    "USD"
-            }
-        );
-
-
-    const formattedCredit =
-        estimatedCredit !==
-            null
-            ? estimatedCredit
-                .toLocaleString(
-                    "en-US",
-                    {
-                        style:
-                            "currency",
-
-                        currency:
-                            "USD"
-                    }
-                )
-            : null;
-
-
-    let creditExplanation =
-        "Your exact credit will be calculated when you confirm the cancellation.";
-
-
-    if (
-        creditPercent ===
-        100
-    ) {
-
-        creditExplanation =
-            "100% account credit — this cancellation is at least 24 hours before the scheduled service.";
-
-    }
-    else if (
-        creditPercent ===
-        50
-    ) {
-
-        creditExplanation =
-            "50% account credit — this cancellation is less than 24 hours before the scheduled service.";
-
-    }
-
-
-    const overlay =
-        document.createElement(
-            "div"
-        );
-
-
-    overlay.id =
-        "client-cancellation-modal";
-
-
-    overlay.className =
-        "client-cancellation-modal";
-
-
-    overlay.innerHTML =
-        `
-            <div
-                class="client-cancellation-dialog"
-                role="dialog"
-                aria-modal="true"
+        overlay.innerHTML = `
+            <div class="client-cancellation-dialog"
+                role="dialog" aria-modal="true"
                 aria-labelledby="client-cancellation-title"
-            >
-
+                aria-describedby="client-cancellation-message">
                 <div class="client-cancellation-header">
-
                     <div>
-
-                        <span class="client-cancellation-eyebrow">
-                            Cancellation
-                        </span>
-
-                        <h3 id="client-cancellation-title">
-                            Cancel this service?
-                        </h3>
-
+                        <span class="client-cancellation-eyebrow">Cancellation</span>
+                        <h3 id="client-cancellation-title">Cancel this service?</h3>
                     </div>
-
-
-                    <button
-                        type="button"
-                        class="client-cancellation-close"
-                        data-client-cancellation-close
-                        aria-label="Close cancellation window"
-                    >
-                        ×
-                    </button>
-
+                    <button type="button" class="client-cancellation-close"
+                        data-client-cancellation-close aria-label="Close cancellation window">×</button>
                 </div>
-
 
                 <div class="client-cancellation-service">
-
-                    <strong>
-                        ${escapeHtml(
-                            visit.service_name ||
-                            visit.service_type ||
-                            "Service"
-                        )}
-                    </strong>
-
-                    <span>
-                        ${escapeHtml(
-                            formatLongDate(
-                                visit.visit_date
-                            )
-                        )}
-                    </span>
-
-                    ${
-                        visit.time_window
-                            ? `
-                                <span>
-                                    ${escapeHtml(
-                                        visit.time_window
-                                    )}
-                                </span>
-                            `
-                            : ""
-                    }
-
+                    <strong>${escapeHtml(visit.service_name || visit.service_type || "Service")}</strong>
+                    <span>${escapeHtml(formatLongDate(visit.visit_date))}</span>
+                    ${visit.time_window ? `<span>${escapeHtml(visit.time_window)}</span>` : ""}
                 </div>
-
 
                 <div class="client-cancellation-policy">
-
-                    <strong>
-                        Cancellation Policy
-                    </strong>
-
-                    <p>
-                        Cancel at least 24 hours before your scheduled
-                        service to receive 100% of the service price
-                        back as Paws in Stride account credit.
-                    </p>
-
-                    <p>
-                        Cancellations made less than 24 hours before
-                        the scheduled service receive 50% account
-                        credit.
-                    </p>
-
+                    <strong>Cancellation Policy</strong>
+                    <p>Cancel at least 24 hours before your service to receive
+                        100% of the refundable amount as account credit.
+                        With less than 24 hours' notice, you receive 50%.</p>
+                    <p>For bookings with a weekly discount, we first recalculate
+                        the remaining services. The 12% discount requires at least
+                        5 distinct service days in the same Monday–Sunday booking week.
+                        The cancellation percentage is applied after this adjustment.</p>
                 </div>
 
+                ${preview ? `
+                    ${priceRow("Original paid service price", money(preview.original_price))}
+                    ${adjustment > 0 ? priceRow("Weekly discount adjustment", "−" + money(adjustment)) : ""}
+                    ${adjustment < 0 ? priceRow("Restored original-rate value", "+" + money(-adjustment)) : ""}
+                    ${carry > 0 ? priceRow("Remaining earlier discount adjustment", "−" + money(carry)) : ""}
+                    ${priceRow("Refundable amount before timing policy", money(preview.refundable_amount))}
+                    ${percent === 50 ? priceRow("Late cancellation deduction (50%)", "−" + money(preview.late_cancellation_retained)) : ""}
+                    ${priceRow("Account credit you will receive", money(preview.credit_amount))}
+                ` : ""}
 
-                <div class="client-cancellation-price">
-
-                    <span>
-                        Service Price
-                    </span>
-
-                    <strong>
-                        ${formattedPrice}
-                    </strong>
-
-                </div>
-
-
-                ${
-                    formattedCredit
-                        ? `
-                            <div class="client-cancellation-price">
-
-                                <span>
-                                    Estimated Account Credit
-                                </span>
-
-                                <strong>
-                                    ${formattedCredit}
-                                </strong>
-
-                            </div>
-                        `
-                        : ""
-                }
-
-
-                <p
-                    id="client-cancellation-message"
-                    class="client-cancellation-note"
-                >
-                    ${escapeHtml(
-                        creditExplanation
-                    )}
-                </p>
-
+                <p id="client-cancellation-message" class="client-cancellation-note"
+                    role="status" aria-live="polite">${escapeHtml(explanation)}</p>
 
                 <div class="client-cancellation-actions">
-
-                    <button
-                        type="button"
-                        class="secondary-button"
-                        data-client-cancellation-close
-                    >
-                        Keep Service
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="client-cancellation-confirm"
-                        data-client-cancellation-confirm="${Number(
-                            visit.id
-                        )}"
-                    >
-                        Confirm Cancellation
-                    </button>
-
+                    <button type="button" class="secondary-button"
+                        data-client-cancellation-close>Keep Service</button>
+                    ${errorMessage ? `
+                        <button type="button" class="client-cancellation-confirm"
+                            data-client-cancellation-retry>Retry Preview</button>
+                    ` : `
+                        <button type="button" class="client-cancellation-confirm"
+                            data-client-cancellation-confirm ${preview ? "" : "disabled"}>
+                            ${preview ? "Confirm Cancellation" : "Loading..."}
+                        </button>
+                    `}
                 </div>
+            </div>`;
+    }
 
-            </div>
-        `;
-
-
-    document.body.appendChild(
-        overlay
-    );
-
-
-    overlay.addEventListener(
-        "click",
-        async event => {
-
-
-            // ========================================
-            // CLICK OUTSIDE MODAL
-            // ========================================
-
-            if (
-                event.target ===
-                overlay
-            ) {
-
-                closeClientCancellationModal();
-
-                return;
-
+    async function loadPreview() {
+        const request = ++requestNumber;
+        preview = null;
+        renderPreview();
+        try {
+            const { data, error } = await supabaseClient.rpc(
+                "preview_my_visit_cancellation_v2",
+                { p_visit_id: Number(visit.id) }
+            );
+            if (error) throw error;
+            const result = Array.isArray(data) ? data[0] : data;
+            if (!result?.quote_token || !Number.isFinite(Number(result.credit_amount))) {
+                throw new Error("We couldn't verify the cancellation credit. Please retry.");
             }
-
-
-            // ========================================
-            // CLOSE / KEEP SERVICE
-            // ========================================
-
-            if (
-                event.target.closest(
-                    "[data-client-cancellation-close]"
-                )
-            ) {
-
-                closeClientCancellationModal();
-
-                return;
-
-            }
-
-
-            // ========================================
-            // CONFIRM CANCELLATION
-            // ========================================
-
-            const confirmButton =
-                event.target.closest(
-                    "[data-client-cancellation-confirm]"
-                );
-
-
-            if (
-                !confirmButton
-            ) {
-                return;
-            }
-
-
-            const visitId =
-                Number(
-                    confirmButton.dataset
-                        .clientCancellationConfirm
-                );
-
-
-            if (
-                !visitId
-            ) {
-                return;
-            }
-
-
-            const message =
-                overlay.querySelector(
-                    "#client-cancellation-message"
-                );
-
-
-            confirmButton.disabled =
-                true;
-
-
-            confirmButton.textContent =
-                "Cancelling...";
-
-
-            if (
-                message
-            ) {
-
-                message.textContent =
-                    "Processing your cancellation...";
-
-            }
-
-
-            try {
-
-                // ========================================
-                // SERVER-SIDE CANCELLATION
-                // ========================================
-
-                const {
-                    data,
-                    error
-                } =
-                    await supabaseClient.rpc(
-                        "cancel_my_visit",
-                        {
-                            p_visit_id:
-                                visitId
-                        }
-                    );
-
-
-                if (
-                    error
-                ) {
-                    throw error;
-                }
-
-
-                const result =
-                    Array.isArray(
-                        data
-                    )
-                        ? data[0]
-                        : data;
-
-
-                if (
-                    !result
-                ) {
-
-                    throw new Error(
-                        "Cancellation result was not returned."
-                    );
-
-                }
-
-
-                const creditAmount =
-                    Number(
-                        result.credit_amount ||
-                        0
-                    );
-
-
-                const creditPercent =
-                    Number(
-                        result.credit_percent ||
-                        0
-                    );
-
-
-                const newCreditBalance =
-                    Number(
-                        result.new_credit_balance ||
-                        0
-                    );
-
-
-                console.log(
-                    "Service cancelled:",
-                    {
-                        visitId,
-                        creditAmount,
-                        creditPercent,
-                        newCreditBalance
-                    }
-                );
-
-
-                // ========================================
-                // UPDATE LOCAL VISIT STATE
-                // ========================================
-
-                currentVisits =
-                    currentVisits.map(
-                        item => {
-
-                            if (
-                                Number(
-                                    item.id
-                                ) !==
-                                visitId
-                            ) {
-                                return item;
-                            }
-
-
-                            return {
-                                ...item,
-
-                                status:
-                                    "cancelled",
-
-                                refund_status:
-                                    "not_required",
-
-                                cancellation_reason:
-                                    creditPercent ===
-                                        100
-                                        ? "Client cancelled 24 or more hours before scheduled service"
-                                        : "Client cancelled less than 24 hours before scheduled service"
-                            };
-
-                        }
-                    );
-
-
-                // ========================================
-                // CLOSE MODAL
-                // ========================================
-
-                closeClientCancellationModal();
-
-
-                // ========================================
-                // REFRESH UPCOMING SERVICES
-                // ========================================
-
-                renderUpcomingCalendar();
-
-
-                renderSelectedUpcomingServices();
-
-
-                // ========================================
-                // REFRESH ACCOUNT CREDIT
-                // ========================================
-
-                await renderAccountCredit();
-
-            }
-            catch (error) {
-
-                console.error(
-                    "Service cancellation error:",
-                    error
-                );
-
-
-                if (
-                    message
-                ) {
-
-                    message.textContent =
-                        error?.message ||
-                        "We couldn't cancel this service. Please try again.";
-
-                }
-
-
-                confirmButton.disabled =
-                    false;
-
-
-                confirmButton.textContent =
-                    "Confirm Cancellation";
-
-            }
-
+            if (!overlay.isConnected || request !== requestNumber) return;
+            preview = result;
+            renderPreview();
+        } catch (error) {
+            console.error("Cancellation preview error:", error);
+            if (!overlay.isConnected || request !== requestNumber) return;
+            renderPreview(error?.message || "We couldn't load your cancellation credit. Please retry.");
         }
-    );
+        if (overlay.isConnected) {
+            overlay.querySelector(".client-cancellation-actions [data-client-cancellation-close]")?.focus();
+        }
+    }
 
+    overlay.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeModal();
+        }
+        if (event.key === "Tab") {
+            const buttons = [...overlay.querySelectorAll("button:not([disabled])")];
+            const first = buttons[0];
+            const last = buttons[buttons.length - 1];
+            if (!first) { event.preventDefault(); return; }
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault(); last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault(); first.focus();
+            }
+        }
+    });
 
-    document.body.classList.add(
-        "client-modal-open"
-    );
+    overlay.addEventListener("click", async event => {
+        if (busy) return;
+        if (event.target === overlay || event.target.closest("[data-client-cancellation-close]")) {
+            closeModal();
+            return;
+        }
+        if (event.target.closest("[data-client-cancellation-retry]")) {
+            await loadPreview();
+            return;
+        }
+        const button = event.target.closest("[data-client-cancellation-confirm]");
+        if (!button || button.disabled || !preview) return;
 
+        busy = true;
+        overlay.dataset.processing = "true";
+        overlay.querySelectorAll("button").forEach(item => { item.disabled = true; });
+        button.textContent = "Cancelling...";
+        const message = overlay.querySelector("#client-cancellation-message");
+        message.textContent = "Processing your cancellation...";
+
+        let result;
+        try {
+            const { data, error } = await supabaseClient.rpc(
+                "confirm_my_visit_cancellation_v2",
+                { p_visit_id: Number(visit.id), p_quote_token: preview.quote_token }
+            );
+            if (error) throw error;
+            result = Array.isArray(data) ? data[0] : data;
+            if (!result) throw new Error("Cancellation result was not returned. Refresh your services to check the status.");
+        } catch (error) {
+            console.error("Service cancellation error:", error);
+            busy = false;
+            overlay.dataset.processing = "false";
+
+            if (error?.message?.includes("CANCELLATION_QUOTE_CHANGED")) {
+                await loadPreview();
+                if (preview && overlay.isConnected) {
+                    const note = overlay.querySelector("#client-cancellation-message");
+                    note.textContent = "Your cancellation amount changed. Review the updated credit above, then confirm again. " + note.textContent;
+                }
+            } else {
+                preview = null;
+                renderPreview(error?.message || "We couldn't confirm the cancellation. Retry the preview to check its current status.");
+            }
+            return;
+        }
+
+        currentVisits = currentVisits.map(item => Number(item.id) === Number(visit.id)
+            ? {
+                ...item,
+                status: "cancelled",
+                refund_status: "not_required",
+                cancellation_reason: Number(result.credit_percent) === 100
+                    ? "Client cancelled 24 or more hours before scheduled service"
+                    : "Client cancelled less than 24 hours before scheduled service"
+            }
+            : item
+        );
+
+        busy = false;
+        overlay.dataset.processing = "false";
+        closeModal();
+        // The cancellation has succeeded. A refresh error must not invite another cancellation.
+        try {
+            renderUpcomingCalendar();
+            renderSelectedUpcomingServices();
+            await renderAccountCredit();
+        } catch (error) {
+            console.error("Service cancelled, but the display could not refresh:", error);
+            window.alert("Your service was cancelled and the account credit was saved. Refresh the page to update your services.");
+        }
+    });
+
+    renderPreview();
+    document.body.appendChild(overlay);
+    document.body.classList.add("client-modal-open");
+    overlay.querySelector(".client-cancellation-actions [data-client-cancellation-close]")?.focus();
+    await loadPreview();
 }
 
 // ========================================
