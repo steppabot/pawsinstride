@@ -6915,3 +6915,155 @@ html {
    END THANKSGIVING HEADER DECORATIONS
 ======================================== */
 
+/* ========================================
+   CHRISTMAS HEADER LIGHTS
+======================================== */
+
+.site-header-v2 > .header-christmas[hidden],
+.site-header-v2 > .header-christmas-holly[hidden] {
+    display: none;
+}
+
+/* Allow the bulbs to hang below the header. */
+.site-header-v2:has(> .header-christmas:not([hidden])) {
+    overflow: visible;
+    padding-bottom: 0;
+}
+
+/* Lights sit across the white-to-blue boundary. */
+.site-header-v2 > .header-christmas {
+    position: absolute;
+    top: calc(100% - 6px);
+    bottom: auto;
+    left: 0;
+    right: 0;
+    height: 34px;
+    z-index: 3;
+
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Thin green wire with a gentle curve. */
+.header-christmas::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 34'%3E%3Cpath d='M0 6 Q60 16 120 6' fill='none' stroke='%232e5144' stroke-width='1.3'/%3E%3C/svg%3E");
+
+    background-repeat: repeat-x;
+    background-size: var(--light-spacing, 120px) 34px;
+}
+
+.header-christmas-bulb {
+    position: absolute;
+    top: 15px;
+    width: 7px;
+    height: 11px;
+
+    border-radius: 45% 45% 50% 50%;
+    background: var(--bulb-color);
+
+    box-shadow: 0 0 4px var(--bulb-color);
+
+    transform: translateX(-50%);
+}
+
+/* Green socket meets the wire. */
+.header-christmas-bulb::before {
+    content: "";
+    position: absolute;
+    left: 1px;
+    top: -4px;
+    width: 5px;
+    height: 5px;
+
+    border-radius: 1px;
+    background: #2e5144;
+}
+
+/* Small glass highlight. */
+.header-christmas-bulb::after {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 2px;
+    height: 4px;
+
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .7);
+}
+
+/* ========================================
+   CHRISTMAS HOLLY CORNERS
+======================================== */
+
+.site-header-v2 > .header-christmas-holly {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+}
+
+.header-christmas-holly > svg {
+    position: absolute;
+    top: 6px;
+
+    display: block;
+    width: clamp(
+        0px,
+        calc((100vw - 1100px) / 2 - 30px),
+        110px
+    );
+    height: auto;
+    max-height: calc(100% - 12px);
+}
+
+.header-christmas-holly-left {
+    left: 10px;
+}
+
+.header-christmas-holly-right {
+    right: 10px;
+    transform: scaleX(-1);
+}
+
+/* ========================================
+   CHRISTMAS HEADER — MOBILE
+======================================== */
+
+@media (max-width: 900px) {
+
+    /* Holly above the menu, lights below it. */
+    .site-header-v2:has(> .header-christmas:not([hidden]))
+    > .site-header-v2-inner {
+        padding-top: 38px;
+    }
+
+    .site-header-v2 > .header-christmas-holly {
+        height: 38px;
+        bottom: auto;
+    }
+
+    .header-christmas-holly > svg {
+        top: 2px;
+        width: 58px;
+        height: 35px;
+        max-height: none;
+    }
+
+    .header-christmas-holly-left {
+        left: 8px;
+    }
+
+    .header-christmas-holly-right {
+        right: 8px;
+    }
+
+}
