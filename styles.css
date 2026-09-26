@@ -6839,3 +6839,11 @@ html {
     }
 
 }
+
+/* ========================================
+   HALLOWEEN HEADER — SEASONAL VISIBILITY
+======================================== */
+
+.site-header-v2 > .header-halloween[hidden] {
+    display: none;
+}
