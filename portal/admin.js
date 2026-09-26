@@ -18196,52 +18196,49 @@ function renderAdminNeedsAttention() {
 
                     const status =
                         String(
-                            visit.status ||
-                            ""
+                            visit.status || ""
                         )
                             .trim()
                             .toLowerCase();
 
+                    const serviceType =
+                        String(
+                            visit.service_type || ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+                    // Meet & Greets do not require visit reports.
 
                     if (
-                        visit.visit_date !==
-                            today ||
-                        status ===
-                            "cancelled"
+                        isMeetAndGreetService(visit) ||
+                        serviceType === "meet_greet"
                     ) {
-
                         return false;
-
                     }
 
+                    if (
+                        visit.visit_date !== today ||
+                        status === "cancelled"
+                    ) {
+                        return false;
+                    }
 
                     const progress =
-                        getVisitProgressInfo(
-                            visit
-                        );
-
+                        getVisitProgressInfo(visit);
 
                     if (
-                        progress.state !==
-                        "completed"
+                        progress.state !== "completed"
                     ) {
-
                         return false;
-
                     }
-
 
                     const hasReport =
                         allVisitReports.some(
                             report =>
-                                Number(
-                                    report.visit_id
-                                ) ===
-                                Number(
-                                    visit.id
-                                )
+                                Number(report.visit_id) ===
+                                Number(visit.id)
                         );
-
 
                     return !hasReport;
 
