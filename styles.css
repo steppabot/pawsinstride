@@ -26,12 +26,9 @@ header {
 .site-header-v2 {
     position: relative;
     z-index: 1000;
-
     width: 100%;
-
     margin: 0;
     padding: 0;
-
     overflow: hidden;
 
     background:
@@ -53,57 +50,106 @@ header {
             #fbfdff 100%
         );
 
-    border-bottom:
-        4px solid #47cee6;
-
-    box-shadow:
-        0 8px 28px rgba(22, 72, 108, 0.08);
+    border-bottom: 4px solid #47cee6;
+    box-shadow: 0 8px 28px rgba(22, 72, 108, 0.08);
 }
 
-
 .site-header-v2-inner {
-    position:
-        relative;
+    position: relative;
+    z-index: 2;
 
-    z-index:
-        2;
+    width: min(1360px, calc(100% - 40px));
+    min-height: 88px;
+    margin: 0 auto;
+    transform: translateX(-16px);
 
-    width:
-        min(
-            1360px,
-            calc(100% - 40px)
-        );
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
 
-    min-height:
-        88px;
+    font-family: "Manrope", sans-serif;
+}
 
-    margin:
-        0 auto;
-    
-    transform:
-        translateX(-16px);
-    
-    display:
-        grid;
+/* ========================================
+   HALLOWEEN HEADER DECORATIONS
+======================================== */
 
-    grid-template-columns:
-        auto
-        auto
-        auto
-        auto;
+.site-header-v2 > .header-halloween {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
 
-    align-items:
-        center;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+}
 
-    justify-content:
-        center;
+.header-halloween > svg {
+    position: absolute;
+    top: 0;
 
-    gap:
-        26px;
+    display: block;
 
-    font-family:
-        "Manrope",
-        sans-serif;
+    /*
+       Decorations shrink as the empty space
+       beside the navigation gets narrower.
+    */
+    width: clamp(
+        0px,
+        calc((100vw - 1100px) / 2 - 30px),
+        240px
+    );
+
+    height: auto;
+    max-height: 100%;
+
+    pointer-events: none;
+}
+
+.header-halloween-left {
+    left: 0;
+}
+
+.header-halloween-right {
+    right: 0;
+}
+
+/* Keep just tiny corner webs on narrower screens. */
+@media (max-width: 1200px) {
+
+    .header-halloween > svg {
+        width: 130px;
+        max-height: none;
+    }
+
+    .header-halloween-left {
+        clip-path: inset(0 calc(100% - 24px) 0 0);
+    }
+
+    .header-halloween-right {
+        clip-path: inset(0 0 0 calc(100% - 24px));
+    }
+
+}
+
+/* Mobile: small corner details, clear of the controls. */
+@media (max-width: 900px) {
+
+    .header-halloween > svg {
+        width: 95px;
+        opacity: .65;
+    }
+
+    .header-halloween-left {
+        clip-path: inset(0 calc(100% - 12px) 0 0);
+    }
+
+    .header-halloween-right {
+        clip-path: inset(0 0 0 calc(100% - 12px));
+    }
+
 }
 
 /* ========================================
