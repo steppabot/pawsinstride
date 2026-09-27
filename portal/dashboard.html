@@ -333,6 +333,72 @@
 
     </video>
 
+    <script>
+    
+    // ========================================
+    // SELECT SEASONAL PORTAL INTRO
+    // ========================================
+    
+    (function () {
+    
+        const today =
+            new Date();
+    
+        const isHalloweenSeason =
+            today.getMonth() === 8 &&
+            today.getDate() >= 1 &&
+            today.getDate() <= 31;
+    
+        const intro =
+            document.getElementById(
+                "mobile-portal-intro"
+            );
+    
+        const video =
+            document.getElementById(
+                "mobile-portal-intro-video"
+            );
+    
+        const source =
+            video?.querySelector(
+                "source"
+            );
+    
+    
+        if (
+            !video ||
+            !source
+        ) {
+    
+            return;
+    
+        }
+    
+    
+        source.src =
+            isHalloweenSeason
+                ? "/portal/assets/paws-in-stride-intro-halloween.mp4"
+                : "/portal/assets/paws-in-stride-intro.mp4";
+    
+    
+        if (
+            isHalloweenSeason &&
+            intro
+        ) {
+    
+            intro.classList.add(
+                "halloween-intro"
+            );
+    
+        }
+    
+    
+        video.load();
+    
+    })();
+    
+    </script>
+
 
     <div class="mobile-portal-intro-loading">
 
@@ -3827,82 +3893,6 @@
     src="portal.js"
 ></script>
 
-<script>
-
-// ========================================
-// SEASONAL PORTAL INTRO VIDEO
-// ========================================
-
-const portalIntro =
-    document.getElementById(
-        "mobile-portal-intro"
-    );
-
-const portalIntroVideo =
-    document.getElementById(
-        "mobile-portal-intro-video"
-    );
-
-
-if (
-    portalIntro &&
-    portalIntroVideo
-) {
-
-    const today =
-        new Date();
-
-    const month =
-        today.getMonth();
-
-    const day =
-        today.getDate();
-
-    const isHalloweenSeason =
-        month === 8 &&
-        day >= 1 &&
-        day <= 31;
-
-    const introSource =
-        portalIntroVideo.querySelector(
-            "source"
-        );
-
-
-    if (
-        isHalloweenSeason
-    ) {
-
-        portalIntro.classList.add(
-            "halloween-intro"
-        );
-
-    }
-    else {
-
-        portalIntro.classList.remove(
-            "halloween-intro"
-        );
-
-    }
-
-
-    if (
-        introSource
-    ) {
-
-        introSource.src =
-            isHalloweenSeason
-                ? "/portal/assets/paws-in-stride-intro-halloween.mp4"
-                : "/portal/assets/paws-in-stride-intro.mp4";
-
-        portalIntroVideo.load();
-
-    }
-
-}
-
-</script>
 
 </body>
 </html>
