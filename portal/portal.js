@@ -16783,50 +16783,54 @@ document
                     "[data-client-cancel-visit]"
                 );
 
-
-            if (
-                cancelButton
-            ) {
+            if (cancelButton) {
 
                 const visitId =
                     Number(
-                        cancelButton.dataset
-                            .clientCancelVisit
+                        cancelButton.dataset.clientCancelVisit
                     );
 
-
-                if (
-                    !visitId
-                ) {
+                if (!visitId) {
                     return;
                 }
-
 
                 const visit =
                     currentVisits.find(
                         item =>
-                            Number(
-                                item.id
-                            ) ===
-                            visitId
+                            Number(item.id) === visitId
                     );
 
-
-                if (
-                    !visit
-                ) {
+                if (!visit) {
                     return;
                 }
 
+                const serviceType =
+                    String(visit.service_type || "")
+                        .trim()
+                        .toLowerCase();
 
-                openClientCancellationModal(
-                    visit
-                );
+                const isMeetGreet =
+                    serviceType === "meet_greet" ||
+                    serviceType === "meet & greet";
 
+                if (isMeetGreet) {
+
+                    openClientMeetGreetCancellationModal(
+                        visit
+                    );
+
+                } else {
+
+                    openClientCancellationModal(
+                        visit
+                    );
+
+                }
 
                 return;
 
             }
+
 
 
             // ========================================
@@ -16903,6 +16907,348 @@ document
 
         }
     );
+
+// ========================================
+// MEET & GREET CANCELLATION MODAL
+// ========================================
+
+function openClientMeetGreetCancellationModal(visit) {
+
+    const existing =
+        document.getElementById(
+            "client-cancellation-modal"
+        );
+
+    if (existing?.dataset.processing === "true") {
+        return;
+    }
+
+    closeClientCancellationModal();
+
+    const previousFocus =
+        document.activeElement;
+
+    const overlay =
+        document.createElement("div");
+
+    overlay.id =
+        "client-cancellation-modal";
+
+    overlay.className =
+        "client-cancellation-modal";
+
+    let busy = false;
+
+    overlay.innerHTML = `
+        <div
+            class="client-cancellation-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="client-cancellation-title"
+            aria-describedby="client-cancellation-message"
+        >
+            <div class="client-cancellation-header">
+                <div>
+                    <span class="client-cancellation-eyebrow">
+                        Cancellation
+                    </span>
+
+                    <h3 id="client-cancellation-title">
+                        Cancel this service?
+                    </h3>
+                </div>
+
+                <button
+                    type="button"
+                    class="client-cancellation-close"
+                    data-client-cancellation-close
+                    aria-label="Close cancellation window"
+                >×</button>
+            </div>
+
+            <div class="client-cancellation-service">
+                <strong>
+                    ${escapeHtml(
+                        visit.service_name || "Meet & Greet"
+                    )}
+                </strong>
+
+                <span>
+                    ${escapeHtml(
+                        formatLongDate(visit.visit_date)
+                    )}
+                </span>
+
+                ${
+                    visit.time_window
+                        ? `<span>${escapeHtml(
+                            visit.time_window
+                        )}</span>`
+                        : ""
+                }
+            </div>
+
+            <p
+                id="client-cancellation-message"
+                class="client-cancellation-note"
+                role="status"
+                aria-live="polite"
+            >
+                Are you sure you want to cancel your
+                Meet & Greet? There is no cancellation fee.
+            </p>
+
+            <div class="client-cancellation-actions">
+                <button
+                    type="button"
+                    class="secondary-button"
+                    data-client-cancellation-close
+                >
+                    Keep Service
+                </button>
+
+                <button
+                    type="button"
+                    class="client-cancellation-confirm"
+                    data-client-cancellation-confirm
+                >
+                    Confirm Cancellation
+                </button>
+            </div>
+        </div>
+    `;
+
+    function closeModal() {
+
+        if (busy) {
+            return;
+        }
+
+        closeClientCancellationModal();
+
+        if (previousFocus?.isConnected) {
+            previousFocus.focus();
+        }
+
+    }
+
+    overlay.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Escape") {
+                event.preventDefault();
+                closeModal();
+                return;
+            }
+
+            if (event.key !== "Tab") {
+                return;
+            }
+
+            const buttons = [
+                ...overlay.querySelectorAll(
+                    "button:not([disabled])"
+                )
+            ];
+
+            const first = buttons[0];
+            const last = buttons[buttons.length - 1];
+
+            if (!first) {
+                event.preventDefault();
+                return;
+            }
+
+            if (
+                event.shiftKey &&
+                document.activeElement === first
+            ) {
+                event.preventDefault();
+                last.focus();
+            } else if (
+                !event.shiftKey &&
+                document.activeElement === last
+            ) {
+                event.preventDefault();
+                first.focus();
+            }
+
+        }
+    );
+
+    overlay.addEventListener(
+        "click",
+        async event => {
+
+            if (busy) {
+                return;
+            }
+
+            if (
+                event.target === overlay ||
+                event.target.closest(
+                    "[data-client-cancellation-close]"
+                )
+            ) {
+                closeModal();
+                return;
+            }
+
+            const button =
+                event.target.closest(
+                    "[data-client-cancellation-confirm]"
+                );
+
+            if (!button || button.disabled) {
+                return;
+            }
+
+            busy = true;
+
+            overlay.dataset.processing =
+                "true";
+
+            overlay.querySelectorAll("button")
+                .forEach(item => {
+                    item.disabled = true;
+                });
+
+            button.textContent =
+                "Cancelling...";
+
+            const message =
+                overlay.querySelector(
+                    "#client-cancellation-message"
+                );
+
+            message.textContent =
+                "Processing your cancellation...";
+
+            // ========================================
+            // CANCEL FREE APPOINTMENT
+            // ========================================
+
+            try {
+
+                const { data, error } =
+                    await supabaseClient.rpc(
+                        "cancel_my_meet_greet",
+                        {
+                            p_visit_id:
+                                Number(visit.id)
+                        }
+                    );
+
+                if (error) {
+                    throw error;
+                }
+
+                if (
+                    Number(data) !== Number(visit.id)
+                ) {
+                    throw new Error(
+                        "We couldn't verify the cancellation. Refresh the calendar to check its status."
+                    );
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Meet & Greet cancellation error:",
+                    error
+                );
+
+                busy = false;
+
+                overlay.dataset.processing =
+                    "false";
+
+                overlay.querySelectorAll("button")
+                    .forEach(item => {
+                        item.disabled = false;
+                    });
+
+                button.textContent =
+                    "Confirm Cancellation";
+
+                message.textContent =
+                    error?.message ||
+                    "We couldn't cancel the appointment. Please try again.";
+
+                return;
+
+            }
+
+            // ========================================
+            // UPDATE LOCAL APPOINTMENT
+            // ========================================
+
+            currentVisits =
+                currentVisits.map(
+                    item =>
+                        Number(item.id) === Number(visit.id)
+                            ? {
+                                ...item,
+                                status: "cancelled",
+                                cancelled_at:
+                                    new Date().toISOString(),
+                                cancellation_reason:
+                                    "Client cancelled Meet & Greet",
+                                refund_status:
+                                    "not_required"
+                            }
+                            : item
+                );
+
+            busy = false;
+
+            overlay.dataset.processing =
+                "false";
+
+            closeModal();
+
+            // ========================================
+            // REFRESH CALENDAR AND HOME
+            // ========================================
+
+            try {
+
+                renderUpcomingCalendar();
+
+                renderSelectedUpcomingServices();
+
+                await renderMobileHomeDashboard();
+
+            } catch (error) {
+
+                console.error(
+                    "Appointment cancelled, but display refresh failed:",
+                    error
+                );
+
+                window.alert(
+                    "Your Meet & Greet was cancelled. Refresh the page to update your calendar."
+                );
+
+            }
+
+        }
+    );
+
+    document.body.appendChild(
+        overlay
+    );
+
+    document.body.classList.add(
+        "client-modal-open"
+    );
+
+    overlay.querySelector(
+        ".client-cancellation-actions [data-client-cancellation-close]"
+    )?.focus();
+
+}
 
 // ========================================
 // CLIENT CANCELLATION MODAL
