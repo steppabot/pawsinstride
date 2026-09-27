@@ -15004,6 +15004,271 @@ async function refreshUpcomingVisits() {
 
 
 // ========================================
+// CLIENT BOARDING DATA AND UPDATES
+// ========================================
+
+const clientBoardingData = {
+    userId: null, stays: [], latest: null, loaded: false,
+    loadedAt: 0, request: null, error: null
+};
+let clientBoardingViewer = null;
+let clientBoardingOpenPromise = null;
+let clientHomeRenderVersion = 0;
+
+function isClientBoardingService(visit) {
+    return ["dog boarding", "dog_boarding"].includes(
+        String(visit?.service_type || "").trim().toLowerCase()
+    );
+}
+
+function clientBoardingDate(date) {
+    return new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US", {
+        timeZone: "UTC", month: "short", day: "numeric", year: "numeric"
+    });
+}
+
+function clientBoardingTimestamp(value) {
+    return new Date(value).toLocaleString("en-US", {
+        timeZone: "America/Chicago", month: "short", day: "numeric",
+        hour: "numeric", minute: "2-digit"
+    });
+}
+
+function getClientBoardingStay(visit) {
+    if (clientBoardingData.userId !== currentUser?.id) return null;
+    return clientBoardingData.stays.find(stay => stay.booking_group_id === visit.booking_group_id) || null;
+}
+
+function getClientBoardingPetNames(stay) {
+    const visit = currentVisits.find(v => Number(v.id) === Number(stay.primary_visit_id));
+    return visit ? getPetsForVisit(visit).map(pet => pet.name || "Pet").join(" & ") || "Your pet" : "Your pet";
+}
+
+async function loadClientBoardingData(force = false) {
+    const userId = currentUser?.id;
+    if (!userId) return;
+    if (clientBoardingData.request) {
+        await clientBoardingData.request;
+        if (clientBoardingData.userId !== userId || force) return loadClientBoardingData(force);
+        return;
+    }
+    if (!force && clientBoardingData.userId === userId &&
+        Date.now() - clientBoardingData.loadedAt < 30000) return;
+
+    if (clientBoardingData.userId !== userId) {
+        clientBoardingData.stays = [];
+        clientBoardingData.latest = null;
+        clientBoardingData.loaded = false;
+    }
+    clientBoardingData.userId = userId;
+    clientBoardingData.request = (async () => {
+        try {
+            const result = await supabaseClient.from("boarding_stays").select("*").eq("client_id", userId);
+            if (result.error) throw result.error;
+            let latest = null;
+            const stays = result.data || [];
+            if (stays.length) {
+                const updates = await supabaseClient.from("boarding_updates")
+                    .select("id, stay_id, update_date, notes, published_at, boarding_update_photos(storage_path, sort_order)")
+                    .in("stay_id", stays.map(s => s.id)).not("published_at", "is", null)
+                    .order("published_at", { ascending: false }).order("id", { ascending: false })
+                    .limit(1).maybeSingle();
+                if (updates.error) throw updates.error;
+                latest = updates.data;
+            }
+            if (currentUser?.id !== userId) return;
+            clientBoardingData.stays = stays;
+            clientBoardingData.latest = latest;
+            clientBoardingData.error = null;
+            clientBoardingData.loaded = true;
+        } catch (error) {
+            if (currentUser?.id === userId) {
+                clientBoardingData.error = error;
+                clientBoardingData.loaded = false;
+            }
+            console.error("Boarding updates could not be loaded:", error);
+        } finally {
+            clientBoardingData.loadedAt = Date.now();
+        }
+    })();
+    try { await clientBoardingData.request; }
+    finally { clientBoardingData.request = null; }
+}
+
+function getClientBoardingCalendarEntries() {
+    const entries = [...currentVisits];
+    const groups = new Set();
+    for (const visit of currentVisits) {
+        if (!isClientBoardingService(visit) || !visit.booking_group_id || groups.has(visit.booking_group_id)) continue;
+        groups.add(visit.booking_group_id);
+        const stay = getClientBoardingStay(visit);
+        if (stay?.status === "cancelled") continue;
+        const nights = currentVisits.filter(v => v.booking_group_id === visit.booking_group_id &&
+            String(v.status || "").toLowerCase() !== "cancelled")
+            .sort((a, b) => String(a.visit_date).localeCompare(String(b.visit_date)));
+        if (!nights.length) continue;
+        const last = nights[nights.length - 1];
+        const nextDay = new Date(`${last.visit_date}T12:00:00Z`);
+        nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+        const pickupDate = stay?.started_at ? stay.pickup_date : nextDay.toISOString().slice(0, 10);
+        entries.push({ ...last, visit_date: pickupDate, boarding_pickup_display_only: true });
+    }
+    return entries;
+}
+
+function isClientCalendarVisitComplete(visit) {
+    if (isClientBoardingService(visit)) return getClientBoardingStay(visit)?.status === "completed";
+    return String(visit.status || "").toLowerCase() === "completed" || Boolean(visit.completed_at);
+}
+
+function buildClientBoardingServiceCard(visit) {
+    const stay = getClientBoardingStay(visit);
+    const pickup = Boolean(visit.boarding_pickup_display_only);
+    const status = !clientBoardingData.loaded ? "Status temporarily unavailable" :
+        stay?.status === "active" ? "Boarding with us" :
+        stay?.status === "completed" ? "Boarding complete" : "Booked";
+    const pets = getPetsForVisit(visit);
+    const canCancel = clientBoardingData.loaded && !stay?.started_at && !pickup &&
+        !["completed", "checked_in", "cancelled"].includes(String(visit.status || "").toLowerCase()) &&
+        !visit.checked_in_at && !visit.completed_at;
+    return `<div class="upcoming-service-card ${stay?.status === "active" ? "upcoming-service-card-in-progress" :
+        stay?.status === "completed" ? "upcoming-service-card-completed" : ""}">
+        <div class="upcoming-service-card-header"><strong>${pickup ? "Boarding pickup" : "Dog Boarding"}</strong>
+            <span class="service-status">${escapeHtml(status)}</span></div>
+        <div class="service-pet-chips">${pets.map(p => `<span class="service-pet-chip">${escapeHtml(p.name)}</span>`).join("")}</div>
+        ${stay ? `<p>${escapeHtml(clientBoardingDate(stay.dropoff_date))} → ${escapeHtml(clientBoardingDate(stay.pickup_date))}</p>` : ""}
+        <div class="upcoming-service-row"><span>${pickup ? "Pickup window" : "Reserved night"}</span>
+            <strong>${pickup ? escapeHtml(stay?.pickup_window || visit.time_window || "Arrange with us") : `$${Number(visit.price || 0).toFixed(2)}`}</strong></div>
+        ${pickup ? "" : `<div class="upcoming-service-row"><span>Payment</span><strong>${escapeHtml(formatStatus(visit.payment_status))}</strong></div>`}
+        ${stay?.started_at ? `<p>${stay.status === "active" ? "Your pet is boarding with us. Photos and updates appear below." : "Thank you for boarding with us."}</p>
+            <button type="button" class="secondary-button client-boarding-view-button" data-client-boarding-view="${escapeHtml(stay.id)}">View Boarding Updates</button>` :
+            "<p>Photos and care updates will appear here during your pet’s stay.</p>"}
+        ${canCancel ? `<div class="upcoming-service-actions"><button type="button" class="client-cancel-service-button"
+            data-client-cancel-visit="${Number(visit.id)}">Cancel Service</button></div>` : ""}
+    </div>`;
+}
+
+async function signedClientBoardingPhoto(path) {
+    if (!path) return null;
+    const result = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET).createSignedUrl(path, 3600);
+    return result.error ? null : result.data?.signedUrl || null;
+}
+
+async function openClientBoardingUpdates(stayId) {
+    if (clientBoardingOpenPromise) return clientBoardingOpenPromise;
+    clientBoardingOpenPromise = loadAndOpenClientBoardingUpdates(stayId);
+    try { await clientBoardingOpenPromise; }
+    catch (error) { console.error(error); alert("Boarding updates could not be loaded. Please try again."); }
+    finally { clientBoardingOpenPromise = null; }
+}
+
+async function loadAndOpenClientBoardingUpdates(stayId) {
+    if (clientBoardingViewer) {
+        clientBoardingViewer.dialog.close();
+    }
+    await loadClientBoardingData(true);
+    const stay = clientBoardingData.stays.find(s => s.id === stayId);
+    if (!clientBoardingData.loaded || !stay) {
+        alert("Boarding updates could not be loaded. Please try again."); return;
+    }
+    const dialog = document.createElement("dialog");
+    dialog.className = "client-boarding-dialog";
+    dialog.setAttribute("aria-labelledby", "client-boarding-dialog-title");
+    dialog.innerHTML = `<header class="client-boarding-dialog-header">
+        <div><small>BOARDING UPDATES</small><h2 id="client-boarding-dialog-title">${escapeHtml(getClientBoardingPetNames(stay))}</h2>
+        <p>${escapeHtml(clientBoardingDate(stay.dropoff_date))} → ${escapeHtml(clientBoardingDate(stay.pickup_date))}</p></div>
+        <button type="button" data-boarding-view-close aria-label="Close boarding updates">×</button></header>
+        <div class="client-boarding-dialog-body"><p>${stay.status === "active" ? "Boarding with us" : "Boarding complete"}</p>
+        <div data-client-boarding-feed></div><p data-client-boarding-feed-message role="status"></p>
+        <button type="button" class="secondary-button" data-client-boarding-more>Load updates</button></div>`;
+    const state = { dialog, stay, offset: 0, seen: new Set(), busy: false };
+    clientBoardingViewer = state;
+    document.body.appendChild(dialog);
+    dialog.querySelector("[data-boarding-view-close]").onclick = () => dialog.close();
+    dialog.addEventListener("close", () => {
+        dialog.remove();
+        if (clientBoardingViewer === state) clientBoardingViewer = null;
+    });
+    dialog.querySelector("[data-client-boarding-more]").onclick = () => void loadClientBoardingFeed(state);
+    try { dialog.showModal(); await loadClientBoardingFeed(state); }
+    catch (error) {
+        dialog.remove(); clientBoardingViewer = null;
+        console.error(error); alert("Boarding updates could not be opened. Please refresh and try again.");
+    }
+}
+
+async function loadClientBoardingFeed(state) {
+    if (state.busy || clientBoardingViewer !== state) return;
+    state.busy = true;
+    const button = state.dialog.querySelector("[data-client-boarding-more]");
+    const message = state.dialog.querySelector("[data-client-boarding-feed-message]");
+    button.disabled = true;
+    message.textContent = "Loading updates…";
+    try {
+        const { data, error } = await supabaseClient.from("boarding_updates")
+            .select("id, update_date, notes, published_at, boarding_update_photos(storage_path, caption, sort_order), boarding_update_pet_care(pet_id, fed, fresh_water, pee, poop)")
+            .eq("stay_id", state.stay.id).not("published_at", "is", null)
+            .order("published_at", { ascending: false }).order("id", { ascending: false })
+            .range(state.offset, state.offset + 19);
+        if (error) throw error;
+        const rows = data || [];
+        const cards = await Promise.all(rows.filter(row => !state.seen.has(row.id)).map(async row => {
+            const photos = await Promise.all((row.boarding_update_photos || [])
+                .sort((a, b) => a.sort_order - b.sort_order)
+                .map(async photo => ({ ...photo, url: await signedClientBoardingPhoto(photo.storage_path) })));
+            return `<article class="client-boarding-update">
+                <h3>${escapeHtml(clientBoardingDate(row.update_date))}</h3>
+                <small>Shared ${escapeHtml(clientBoardingTimestamp(row.published_at))}</small>
+                ${row.notes ? `<p class="client-boarding-note">${escapeHtml(row.notes)}</p>` : ""}
+                ${(row.boarding_update_pet_care || []).map(care => {
+                    const labels = [["fed", "Fed"], ["fresh_water", "Fresh water"], ["pee", "Pee"], ["poop", "Poop"]]
+                        .filter(([key]) => care[key]).map(([, label]) => label);
+                    return labels.length ? `<p><strong>${escapeHtml(currentPets.find(p => Number(p.id) === Number(care.pet_id))?.name || "Pet")}:</strong>
+                        ${escapeHtml(labels.join(" · "))}</p>` : "";
+                }).join("")}
+                <div class="client-boarding-photo-grid">${photos.map(photo => photo.url ?
+                    `<a href="${escapeHtml(photo.url)}" target="_blank" rel="noopener noreferrer"><img
+                        src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.caption || "Boarding photo")}" loading="lazy"></a>` :
+                    "<span>Photo temporarily unavailable</span>").join("")}</div>
+            </article>`;
+        }));
+        if (clientBoardingViewer !== state) return;
+        state.dialog.querySelector("[data-client-boarding-feed]").insertAdjacentHTML("beforeend", cards.join(""));
+        rows.forEach(row => state.seen.add(row.id));
+        state.offset += rows.length;
+        button.hidden = rows.length < 20;
+        button.textContent = "Load More";
+        message.textContent = state.seen.size ? "Tap a photo to view it full size." : "We’ll share photos and updates here during your pet’s stay.";
+    } catch (error) {
+        console.error("Boarding feed error:", error);
+        message.textContent = "Updates could not be loaded. Please try again.";
+        button.textContent = "Retry";
+    } finally { state.busy = false; button.disabled = false; }
+}
+
+document.addEventListener("click", event => {
+    const button = event.target.closest("[data-client-boarding-view]");
+    if (!button || button.disabled) return;
+    event.preventDefault();
+    void openClientBoardingUpdates(button.dataset.clientBoardingView);
+});
+
+// These reads work even when the new tables have not been added to Realtime.
+// They refresh while the portal is visible; push delivery is wired separately.
+function refreshVisibleClientBoarding() {
+    if (!currentUser?.id || document.hidden || currentProfile?.role === "admin") return;
+    clientBoardingData.loadedAt = 0;
+    void renderMobileHomeDashboard();
+}
+window.addEventListener("focus", refreshVisibleClientBoarding);
+window.addEventListener("online", refreshVisibleClientBoarding);
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refreshVisibleClientBoarding();
+});
+window.setInterval(refreshVisibleClientBoarding, 45000);
+
+
+// ========================================
 // UPCOMING CALENDAR
 // ========================================
 
@@ -15205,7 +15470,7 @@ function renderUpcomingCalendar() {
         // ========================================
 
         const visitsForDate =
-            currentVisits.filter(
+            getClientBoardingCalendarEntries().filter(
                 visit => {
 
                     const status =
@@ -15241,6 +15506,8 @@ function renderUpcomingCalendar() {
             serviceCount > 0 &&
             visitsForDate.every(
                 visit => {
+
+                    if (isClientBoardingService(visit)) return isClientCalendarVisitComplete(visit);
 
                     const status =
                         String(
@@ -15488,7 +15755,7 @@ function renderSelectedUpcomingServices() {
 
 
     const services =
-        currentVisits
+        getClientBoardingCalendarEntries()
             .filter(
                 visit =>
                     visit.visit_date ===
@@ -15523,6 +15790,8 @@ function renderSelectedUpcomingServices() {
         services
             .map(
                 visit => {
+
+                    if (isClientBoardingService(visit)) return buildClientBoardingServiceCard(visit);
 
                     const pets =
                         getPetsForVisit(
@@ -15704,7 +15973,6 @@ function renderSelectedUpcomingServices() {
             .join("");
 
 }
-
 
 // ========================================
 // CLIENT SERVICE SORTING
@@ -22191,1415 +22459,207 @@ function scrollToMobileAppSection(
 // MOBILE HOME DASHBOARD
 // ========================================
 
-async function renderMobileHomeDashboard() {
-
-    const greeting =
-        document.getElementById(
-            "mobile-home-greeting"
-        );
-
-    const nextVisitDate =
-        document.getElementById(
-            "mobile-home-next-visit-date"
-        );
-
-    const nextVisitPets =
-        document.getElementById(
-            "mobile-home-next-visit-pets"
-        );
-
-    const nextVisitService =
-        document.getElementById(
-            "mobile-home-next-visit-service"
-        );
-
-    const nextVisitStatus =
-        document.getElementById(
-            "mobile-home-next-visit-status"
-        );
-
-    const nextVisitButton =
-        document.getElementById(
-            "mobile-home-next-visit-button"
-        );
-
-    const upcomingList =
-        document.getElementById(
-            "mobile-home-upcoming-list"
-        );
-
-
-// ========================================
-// LATEST UPDATE ELEMENTS
-// ========================================
-
-
-// ========================================
-// MOBILE LATEST UPDATE
-// ========================================
-
-const latestUpdateEmpty =
-    document.getElementById(
-        "mobile-home-latest-update-empty"
-    );
-
-const latestUpdateContent =
-    document.getElementById(
-        "mobile-home-latest-update-content"
-    );
-
-const latestUpdateTitle =
-    document.getElementById(
-        "mobile-home-latest-update-title"
-    );
-
-const latestUpdateMeta =
-    document.getElementById(
-        "mobile-home-latest-update-meta"
-    );
-
-const latestUpdatePhoto =
-    document.getElementById(
-        "mobile-home-latest-update-photo"
-    );
-
-const latestUpdateNote =
-    document.getElementById(
-        "mobile-home-latest-update-note"
-    );
-
-const latestUpdateButton =
-    document.getElementById(
-        "mobile-home-latest-update-button"
-    );
-
-
-// ========================================
-// DESKTOP LATEST UPDATE
-// ========================================
-
-const desktopLatestUpdateEmpty =
-    document.getElementById(
-        "desktop-latest-update-empty"
-    );
-
-const desktopLatestUpdateContent =
-    document.getElementById(
-        "desktop-latest-update-content"
-    );
-
-const desktopLatestUpdateTitle =
-    document.getElementById(
-        "desktop-latest-update-title"
-    );
-
-const desktopLatestUpdateMeta =
-    document.getElementById(
-        "desktop-latest-update-meta"
-    );
-
-const desktopLatestUpdatePhoto =
-    document.getElementById(
-        "desktop-latest-update-photo"
-    );
-
-const desktopLatestUpdateNote =
-    document.getElementById(
-        "desktop-latest-update-note"
-    );
-
-const desktopLatestUpdateButton =
-    document.getElementById(
-        "desktop-latest-update-button"
-    );
-
-
-if (
-    !greeting ||
-    !nextVisitDate ||
-    !nextVisitPets ||
-    !nextVisitService ||
-    !nextVisitStatus ||
-    !nextVisitButton ||
-    !upcomingList
-) {
-    return;
+function openClientServiceDate(visit) {
+    selectedUpcomingDate = visit.visit_date;
+    const date = parseLocalDate(visit.visit_date);
+    upcomingCalendarYear = date.getFullYear();
+    upcomingCalendarMonth = date.getMonth();
+    renderUpcomingCalendar();
+    renderSelectedUpcomingServices();
+    void handleMobileAppTab("services");
 }
 
-    // ========================================
-    // DYNAMIC GREETING
-    // ========================================
-
-    const currentHour =
-        new Date().getHours();
-
-
-    let greetingText =
-        "Good morning";
-
-
-    if (
-        currentHour >= 12 &&
-        currentHour < 18
-    ) {
-
-        greetingText =
-            "Good afternoon";
-
-    } else if (
-        currentHour >= 18
-    ) {
-
-        greetingText =
-            "Good evening";
-
-    }
-
-
-    const fullName =
-        String(
-            currentProfile?.full_name ||
-            "Client"
-        )
-            .trim();
-
-
-    const firstName =
-        fullName
-            .split(/\s+/)
-            .filter(Boolean)[0] ||
-        "there";
-
-
-    greeting.textContent =
-        `${greetingText}, ${firstName} 👋`;
-
-
-    // ========================================
-    // UPCOMING VISITS
-    // ========================================
-
-    const today =
-        getLocalDateString();
-
-
-    const upcomingVisits =
-        currentVisits
-            .filter(
-                visit => {
-
-                    const status =
-                        String(
-                            visit.status || ""
-                        )
-                            .trim()
-                            .toLowerCase();
-
-
-                    return (
-                        visit.visit_date >=
-                            today &&
-                        status !==
-                            "cancelled" &&
-                        status !==
-                            "completed"
-                    );
-
-                }
-            )
-            .sort(
-                (a, b) => {
-
-                    if (
-                        a.visit_date !==
-                        b.visit_date
-                    ) {
-
-                        return String(
-                            a.visit_date
-                        ).localeCompare(
-                            String(
-                                b.visit_date
-                            )
-                        );
-
-                    }
-
-
-                    return compareClientVisits(
-                        a,
-                        b
-                    );
-
-                }
-            );
-
-
-    // ========================================
-    // NEXT VISIT
-    // ========================================
-
-    const nextVisit =
-        upcomingVisits[0] ||
-        null;
-
-
-    if (!nextVisit) {
-
-        nextVisitDate.textContent =
-            "No upcoming visit";
-
-        nextVisitPets.textContent =
-            "You're all caught up";
-
-        nextVisitService.textContent =
-            "Your next scheduled service will appear here.";
-
-        nextVisitStatus.style.display =
-            "none";
-
-        nextVisitButton.style.display =
-            "none";
-
+async function openClientHomeVisitReport(visit) {
+    selectedUpcomingDate = visit.visit_date;
+    const date = parseLocalDate(visit.visit_date);
+    upcomingCalendarYear = date.getFullYear();
+    upcomingCalendarMonth = date.getMonth();
+    renderUpcomingCalendar();
+    renderSelectedUpcomingServices();
+    closeClientMessaging();
+    if (window.matchMedia("(max-width: 700px)").matches) {
+        setMobileAppScreen("services");
+        setActiveMobileAppTab("services");
     } else {
-
-        const visitDate =
-            parseLocalDate(
-                nextVisit.visit_date
-            );
-
-
-        const dateText =
-            visitDate
-                .toLocaleDateString(
-                    "en-US",
-                    {
-                        weekday:
-                            "long",
-
-                        month:
-                            "short",
-
-                        day:
-                            "numeric"
-                    }
-                );
-
-
-        const pets =
-            getPetsForVisit(
-                nextVisit
-            );
-
-
-        const petNames =
-            pets.length
-
-                ? pets
-                    .map(
-                        pet =>
-                            pet.name ||
-                            "Pet"
-                    )
-                    .join(", ")
-
-                : "Your Pet";
-
-
-        const serviceName =
-            nextVisit.service_name ||
-            nextVisit.service_type ||
-            "Service";
-
-
-        const timeWindow =
-            nextVisit.time_window ||
-            "";
-
-
-        const progress =
-            getClientVisitProgressInfo(
-                nextVisit
-            );
-
-
-        const statusLabel =
-            getClientVisitStatusLabel(
-                nextVisit,
-                progress
-            );
-
-
-        nextVisitDate.textContent =
-            timeWindow
-
-                ? `${dateText} · ${timeWindow}`
-
-                : dateText;
-
-
-        nextVisitPets.textContent =
-            petNames;
-
-
-        nextVisitService.textContent =
-            serviceName;
-
-
-        nextVisitStatus.textContent =
-            statusLabel;
-
-
-        nextVisitStatus.style.display =
-            "inline-flex";
-
-
-        nextVisitButton.style.display =
-            "flex";
-
-
-        nextVisitButton.onclick =
-            () => {
-
-                selectedUpcomingDate =
-                    nextVisit.visit_date;
-
-
-                const selectedDate =
-                    parseLocalDate(
-                        nextVisit.visit_date
-                    );
-
-
-                upcomingCalendarYear =
-                    selectedDate
-                        .getFullYear();
-
-
-                upcomingCalendarMonth =
-                    selectedDate
-                        .getMonth();
-
-
-                renderUpcomingCalendar();
-
-                renderSelectedUpcomingServices();
-
-
-                handleMobileAppTab(
-                    "services"
-                );
-
-            };
-
+        document.getElementById("services-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-
-
-    // ========================================
-    // UPCOMING SNAPSHOT
-    // ========================================
-
-    upcomingList.innerHTML =
-        "";
-
-
-    const snapshotVisits =
-        upcomingVisits.slice(
-            0,
-            3
-        );
-
-
-    if (
-        snapshotVisits.length ===
-        0
-    ) {
-
-        upcomingList.innerHTML =
-            `
-                <div class="mobile-home-empty-state">
-                    <span>
-                        Upcoming services will appear here.
-                    </span>
-                </div>
-            `;
-
-    } else {
-
-        snapshotVisits.forEach(
-            visit => {
-
-                const date =
-                    parseLocalDate(
-                        visit.visit_date
-                    );
-
-
-                const month =
-                    date
-                        .toLocaleDateString(
-                            "en-US",
-                            {
-                                month:
-                                    "short"
-                            }
-                        );
-
-
-                const day =
-                    date.getDate();
-
-
-                const pets =
-                    getPetsForVisit(
-                        visit
-                    );
-
-
-                const petNames =
-                    pets.length
-
-                        ? pets
-                            .map(
-                                pet =>
-                                    pet.name ||
-                                    "Pet"
-                            )
-                            .join(", ")
-
-                        : "Your Pet";
-
-
-                const serviceName =
-                    visit.service_name ||
-                    visit.service_type ||
-                    "Service";
-
-
-                const timeWindow =
-                    visit.time_window ||
-                    "";
-
-
-                const button =
-                    document.createElement(
-                        "button"
-                    );
-
-
-                button.type =
-                    "button";
-
-
-                button.className =
-                    "mobile-home-upcoming-item";
-
-
-                button.innerHTML =
-                    `
-                        <span class="mobile-home-upcoming-date">
-
-                            <span class="mobile-home-upcoming-month">
-                                ${escapeHtml(
-                                    month
-                                )}
-                            </span>
-
-                            <span class="mobile-home-upcoming-day">
-                                ${day}
-                            </span>
-
-                        </span>
-
-
-                        <span class="mobile-home-upcoming-info">
-
-                            <strong>
-                                ${escapeHtml(
-                                    `${petNames} · ${serviceName}`
-                                )}
-                            </strong>
-
-                            <span>
-                                ${
-                                    timeWindow
-
-                                        ? escapeHtml(
-                                            timeWindow
-                                        )
-
-                                        : "Scheduled visit"
-                                }
-                            </span>
-
-                        </span>
-
-
-                        <span
-                            class="mobile-home-upcoming-chevron"
-                            aria-hidden="true"
-                        >
-                            ›
-                        </span>
-                    `;
-
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        selectedUpcomingDate =
-                            visit.visit_date;
-
-
-                        upcomingCalendarYear =
-                            date.getFullYear();
-
-
-                        upcomingCalendarMonth =
-                            date.getMonth();
-
-
-                        renderUpcomingCalendar();
-
-                        renderSelectedUpcomingServices();
-
-
-                        handleMobileAppTab(
-                            "services"
-                        );
-
-                    }
-                );
-
-
-                upcomingList.appendChild(
-                    button
-                );
-
-            }
-        );
-
-    }
-
-
-    // ========================================
-    // LATEST COMPLETED VISIT
-    // ========================================
-    
-    const latestUpdateTargets = [
-        {
-            empty: latestUpdateEmpty,
-            content: latestUpdateContent,
-            title: latestUpdateTitle,
-            meta: latestUpdateMeta,
-            photo: latestUpdatePhoto,
-            note: latestUpdateNote,
-            button: latestUpdateButton
-        },
-        {
-            empty: desktopLatestUpdateEmpty,
-            content: desktopLatestUpdateContent,
-            title: desktopLatestUpdateTitle,
-            meta: desktopLatestUpdateMeta,
-            photo: desktopLatestUpdatePhoto,
-            note: desktopLatestUpdateNote,
-            button: desktopLatestUpdateButton
+    const button = document.querySelector(`[data-client-visit-report-open="${visit.id}"]`);
+    if (!button) return;
+    await toggleClientVisitReport(visit.id, button);
+    getClientVisitReportMount(visit.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function renderClientHomeLatestUpdate(version) {
+    const targets = ["mobile-home-latest-update", "desktop-latest-update"].map(prefix => {
+        const target = {};
+        for (const key of ["empty", "content", "title", "meta", "photo", "note", "button"]) {
+            target[key] = document.getElementById(`${prefix}-${key}`);
         }
-    ].filter(
-        target =>
-            target.empty &&
-            target.content &&
-            target.title &&
-            target.meta &&
-            target.photo &&
-            target.note &&
-            target.button
-    );
-    
-    
-    if (
-        latestUpdateTargets.length ===
-        0
-    ) {
-        return;
-    }
-    
-    
-    latestUpdateTargets.forEach(
-        target => {
-    
-            target.empty.style.display =
-                "block";
-    
-            target.content.style.display =
-                "none";
-    
-            target.photo.style.display =
-                "none";
-    
-            target.photo.innerHTML =
-                "";
-    
-            target.note.textContent =
-                "";
-    
-            target.button.onclick =
-                null;
-    
-        }
-    );
-
-    // ========================================
-    // ONLY COMPLETED VISITS THROUGH TODAY
-    // ========================================
-
-    const completedVisits =
-        currentVisits
-            .filter(
-                visit => {
-
-                    const status =
-                        String(
-                            visit.status || ""
-                        )
-                            .trim()
-                            .toLowerCase();
-
-
-                    const isCompleted =
-                        status ===
-                            "completed" ||
-                        Boolean(
-                            visit.completed_at
-                        );
-
-
-                    const isTodayOrEarlier =
-                        String(
-                            visit.visit_date ||
-                            ""
-                        ) <=
-                        today;
-
-
-                    return (
-                        isCompleted &&
-                        isTodayOrEarlier
-                    );
-
-                }
-            )
-            .sort(
-                (a, b) => {
-
-                    // ========================================
-                    // NEWEST SERVICE DATE FIRST
-                    // ========================================
-
-                    if (
-                        a.visit_date !==
-                        b.visit_date
-                    ) {
-
-                        return String(
-                            b.visit_date
-                        ).localeCompare(
-                            String(
-                                a.visit_date
-                            )
-                        );
-
-                    }
-
-
-                    // ========================================
-                    // SAME DATE = MOST RECENT COMPLETION FIRST
-                    // ========================================
-
-                    const aCompleted =
-                        a.completed_at
-                            ? new Date(
-                                a.completed_at
-                            ).getTime()
-                            : 0;
-
-
-                    const bCompleted =
-                        b.completed_at
-                            ? new Date(
-                                b.completed_at
-                            ).getTime()
-                            : 0;
-
-
-                    return (
-                        bCompleted -
-                        aCompleted
-                    );
-
-                }
-            );
-
-
-    if (
-        completedVisits.length ===
-        0
-    ) {
-
-        latestUpdateEmpty.innerHTML =
-            `
-                <span>
-                    Your latest completed visit update will appear here.
-                </span>
-            `;
-
-        return;
-    }
-
+        return target;
+    }).filter(target => Object.values(target).every(Boolean));
+    if (!targets.length) return;
+    const userId = currentUser?.id;
+    const stillCurrent = () => version === clientHomeRenderVersion && userId === currentUser?.id;
+    const completed = currentVisits.filter(visit => !isClientBoardingService(visit) &&
+        (String(visit.status || "").toLowerCase() === "completed" || visit.completed_at) &&
+        String(visit.visit_date || "") <= getLocalDateString())
+        .sort((a, b) => String(b.visit_date).localeCompare(String(a.visit_date)) ||
+            (new Date(b.completed_at || 0).getTime() - new Date(a.completed_at || 0).getTime()));
 
     try {
-
-
-        // ========================================
-        // FIND MOST RECENT VISIT WITH REPORT
-        // ========================================
-
-        const completedVisitIds =
-            completedVisits.map(
-                visit =>
-                    visit.id
-            );
-
-
-        const {
-            data:
-                reportRows,
-            error:
-                reportRowsError
-        } =
-            await supabaseClient
-                .from(
-                    "visit_reports"
-                )
-                .select(
-                    "id, visit_id, notes, fed, fresh_water, pee, poop, created_at, updated_at"
-                )
-                .in(
-                    "visit_id",
-                    completedVisitIds
-                );
-
-
-        if (
-            reportRowsError
-        ) {
-
-            throw reportRowsError;
-
+        let ordinary = null;
+        if (completed.length) {
+            const result = await supabaseClient.from("visit_reports")
+                .select("id, visit_id, notes, created_at, published_at")
+                .in("visit_id", completed.map(v => v.id));
+            if (result.error) throw result.error;
+            const visit = completed.find(v => (result.data || []).some(r => Number(r.visit_id) === Number(v.id)));
+            if (visit) ordinary = { visit, report: result.data.find(r => Number(r.visit_id) === Number(visit.id)) };
         }
-
-
-        const reportsByVisitId =
-            new Map(
-                (
-                    reportRows ||
-                    []
-                ).map(
-                    report => [
-                        Number(
-                            report.visit_id
-                        ),
-                        report
-                    ]
-                )
-            );
-
-
-        const latestVisit =
-            completedVisits.find(
-                visit =>
-                    reportsByVisitId.has(
-                        Number(
-                            visit.id
-                        )
-                    )
-            ) ||
-            null;
-
-
-        if (
-            !latestVisit
-        ) {
-
-            latestUpdateEmpty.innerHTML =
-                `
-                    <span>
-                        Your latest completed visit update will appear here.
-                    </span>
-                `;
-
-            return;
-
-        }
-
-
-        const latestReport =
-            reportsByVisitId.get(
-                Number(
-                    latestVisit.id
-                )
-            );
-
-
-        // ========================================
-        // LOAD LATEST WALK + FIRST PHOTO
-        // ========================================
-
-        const [
-            walkResult,
-            photoResult
-        ] =
-            await Promise.all([
-
-                supabaseClient
-                    .from(
-                        "visit_walks"
-                    )
-                    .select(
-                        "id, visit_id, status, started_at, ended_at, duration_seconds, distance_meters"
-                    )
-                    .eq(
-                        "visit_id",
-                        latestVisit.id
-                    )
-                    .eq(
-                        "status",
-                        "completed"
-                    )
-                    .maybeSingle(),
-
-
-                supabaseClient
-                    .from(
-                        "visit_photos"
-                    )
-                    .select(
-                        "id, storage_path, photo_type, sort_order, created_at"
-                    )
-                    .eq(
-                        "visit_id",
-                        latestVisit.id
-                    )
-                    .eq(
-                        "photo_type",
-                        "visit"
-                    )
-                    .order(
-                        "sort_order",
-                        {
-                            ascending:
-                                true
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending:
-                                true
-                        }
-                    )
-                    .limit(
-                        1
-                    )
-                    .maybeSingle()
-
+        const boarding = clientBoardingData.loaded ? clientBoardingData.latest : null;
+        const boardingWins = boarding && (!ordinary || new Date(boarding.published_at).getTime() >=
+            new Date(ordinary.report.published_at || ordinary.visit.completed_at || ordinary.report.created_at).getTime());
+        let title, meta, note, path, open, buttonText;
+        if (boardingWins) {
+            const stay = clientBoardingData.stays.find(s => s.id === boarding.stay_id);
+            title = `${stay ? getClientBoardingPetNames(stay) : "Your pet"} · Boarding Update`;
+            meta = `Shared ${clientBoardingTimestamp(boarding.published_at)}`;
+            note = boarding.notes || "New photos and care updates from your pet’s stay.";
+            path = [...(boarding.boarding_update_photos || [])].sort((a, b) => a.sort_order - b.sort_order)[0]?.storage_path;
+            open = () => void openClientBoardingUpdates(boarding.stay_id);
+            buttonText = "View Boarding Updates";
+        } else if (ordinary) {
+            const { visit, report } = ordinary;
+            const [walk, photo] = await Promise.all([
+                supabaseClient.from("visit_walks").select("duration_seconds, distance_meters")
+                    .eq("visit_id", visit.id).eq("status", "completed").maybeSingle(),
+                supabaseClient.from("visit_photos").select("storage_path")
+                    .eq("visit_id", visit.id).eq("photo_type", "visit")
+                    .order("sort_order", { ascending: true }).order("created_at", { ascending: true }).limit(1).maybeSingle()
             ]);
-
-
-        if (
-            walkResult.error
-        ) {
-
-            throw walkResult.error;
-
-        }
-
-
-        if (
-            photoResult.error
-        ) {
-
-            throw photoResult.error;
-
-        }
-
-
-        const completedWalk =
-            walkResult.data ||
-            null;
-
-
-        const firstPhoto =
-            photoResult.data ||
-            null;
-
-
-        // ========================================
-        // PET + SERVICE INFORMATION
-        // ========================================
-
-        const pets =
-            getPetsForVisit(
-                latestVisit
-            );
-
-
-        const petNames =
-            pets.length
-
-                ? pets
-                    .map(
-                        pet =>
-                            pet.name ||
-                            "Pet"
-                    )
-                    .join(", ")
-
-                : "Your Pet";
-
-
-        const serviceName =
-            latestVisit.service_name ||
-            latestVisit.service_type ||
-            "Visit";
-
-
-        // ========================================
-        // UPDATE DATE / TIME
-        // ========================================
-
-        const visitDate =
-            parseLocalDate(
-                latestVisit.visit_date
-            );
-
-
-        const dateText =
-            visitDate
-                .toLocaleDateString(
-                    "en-US",
-                    {
-                        weekday:
-                            "long",
-
-                        month:
-                            "short",
-
-                        day:
-                            "numeric"
-                    }
-                );
-
-
-        const completedTime =
-            latestVisit.completed_at
-
-                ? new Date(
-                    latestVisit.completed_at
-                )
-                    .toLocaleTimeString(
-                        "en-US",
-                        {
-                            hour:
-                                "numeric",
-
-                            minute:
-                                "2-digit"
-                        }
-                    )
-
-                : "";
-
-
-        // ========================================
-        // WALK SUMMARY
-        // ========================================
-
-        let walkSummary =
-            "";
-
-
-        if (
-            completedWalk
-        ) {
-
-            const walkDuration =
-                formatClientWalkDuration(
-                    completedWalk
-                        .duration_seconds
-                );
-
-
-            const distanceMiles =
-                (
-                    Number(
-                        completedWalk
-                            .distance_meters ||
-                        0
-                    ) /
-                    1609.344
-                ).toFixed(
-                    2
-                );
-
-
-            walkSummary =
-                `🐾 Walk recorded · ${distanceMiles} mi · ${walkDuration}`;
-
-        }
-
-
-        // ========================================
-        // RENDER LATEST UPDATE
-        // ========================================
-        
-        const latestUpdateTitleText =
-            `${petNames} · ${serviceName}`;
-        
-        
-        const latestUpdateMetaText =
-            completedTime
-        
-                ? `${dateText} · Completed ${completedTime}`
-        
-                : `${dateText} · Visit Complete`;
-        
-        
-        const noteParts =
-            [];
-        
-        
-        if (
-            latestReport?.notes
-        ) {
-        
-            noteParts.push(
-                latestReport.notes
-            );
-        
-        }
-        
-        
-        if (
-            walkSummary
-        ) {
-        
-            noteParts.push(
-                walkSummary
-            );
-        
-        }
-        
-        
-        const latestUpdateNoteText =
-            noteParts.length
-        
-                ? noteParts.join(
-                    "\n\n"
-                )
-        
-                : "Your visit report is ready to view.";
-        
-        
-        latestUpdateTargets.forEach(
-            target => {
-        
-                target.title.textContent =
-                    latestUpdateTitleText;
-        
-                target.meta.textContent =
-                    latestUpdateMetaText;
-        
-                target.note.textContent =
-                    latestUpdateNoteText;
-        
-                target.note.style.whiteSpace =
-                    "pre-line";
-        
+            if (walk.error) throw walk.error;
+            if (photo.error) throw photo.error;
+            const names = getPetsForVisit(visit).map(p => p.name || "Pet").join(", ") || "Your Pet";
+            title = `${names} · ${visit.service_name || visit.service_type || "Visit"}`;
+            meta = visit.completed_at ? `Completed ${clientBoardingTimestamp(visit.completed_at)}` :
+                `${clientBoardingDate(visit.visit_date)} · Visit Complete`;
+            const summary = walk.data ? `🐾 Walk recorded · ${(Number(walk.data.distance_meters || 0) / 1609.344).toFixed(2)} mi · ${formatClientWalkDuration(walk.data.duration_seconds)}` : "";
+            note = [report.notes, summary].filter(Boolean).join("\n\n") || "Your visit report is ready to view.";
+            path = photo.data?.storage_path;
+            open = () => void openClientHomeVisitReport(visit);
+            buttonText = "View Visit Report";
+        } else {
+            if (!stillCurrent()) return;
+            for (const target of targets) {
+                target.empty.textContent = clientBoardingData.error ? "Updates are temporarily unavailable. Please try again." :
+                    "Your latest visit or boarding update will appear here.";
+                target.empty.style.display = "block";
+                target.content.style.display = "none";
+                target.button.onclick = null;
             }
-        );
+            return;
+        }
 
-        // ========================================
-        // LATEST VISIT PHOTO
-        // ========================================
-        
-        if (
-            firstPhoto?.storage_path
-        ) {
-        
-            const {
-                data:
-                    signedPhotoData,
-                error:
-                    signedPhotoError
-            } =
-                await supabaseClient
-                    .storage
-                    .from(
-                        VISIT_MEDIA_BUCKET
-                    )
-                    .createSignedUrl(
-                        firstPhoto
-                            .storage_path,
-                        3600
-                    );
-        
-        
-            if (
-                !signedPhotoError &&
-                signedPhotoData
-                    ?.signedUrl
-            ) {
-        
-                const latestUpdatePhotoHtml =
-                    `
-                        <img
-                            src="${escapeHtml(
-                                signedPhotoData
-                                    .signedUrl
-                            )}"
-                            alt="${escapeHtml(
-                                `${petNames} visit update`
-                            )}"
-                        >
-                    `;
-        
-        
-                latestUpdateTargets.forEach(
-                    target => {
-        
-                        target.photo.innerHTML =
-                            latestUpdatePhotoHtml;
-        
-                        target.photo.style.display =
-                            "block";
-        
-                    }
-                );
-        
-            }
-        
+        const url = await signedClientBoardingPhoto(path);
+        if (!stillCurrent()) return;
+        for (const target of targets) {
+            target.title.textContent = title;
+            target.meta.textContent = meta;
+            target.note.textContent = note;
+            target.note.style.whiteSpace = "pre-line";
+            target.photo.innerHTML = url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)}">` : "";
+            target.photo.style.display = url ? "block" : "none";
+            target.button.innerHTML = `${escapeHtml(buttonText)} <span aria-hidden="true">→</span>`;
+            target.button.onclick = open;
+            target.empty.style.display = "none";
+            target.content.style.display = "block";
         }
-        
-        
-        // ========================================
-        // SHOW LATEST UPDATE
-        // ========================================
-        
-        latestUpdateTargets.forEach(
-            target => {
-        
-                target.empty.style.display =
-                    "none";
-        
-                target.content.style.display =
-                    "block";
-        
-            }
-        );
+    } catch (error) {
+        console.error("Latest update error:", error);
+        if (!stillCurrent()) return;
+        for (const target of targets) {
+            target.empty.textContent = "Your latest update is temporarily unavailable. Please try again.";
+            target.empty.style.display = "block";
+            target.content.style.display = "none";
+            target.button.onclick = null;
+        }
+    }
+}
 
+async function renderMobileHomeDashboard() {
+    const version = ++clientHomeRenderVersion;
+    await loadClientBoardingData();
+    if (version !== clientHomeRenderVersion || !currentUser?.id) return;
+    renderUpcomingCalendar();
+    if (!activeClientVisitReportId) renderSelectedUpcomingServices();
+    const get = id => document.getElementById(id);
+    const greeting = get("mobile-home-greeting");
+    const dateLabel = get("mobile-home-next-visit-date");
+    const petsLabel = get("mobile-home-next-visit-pets");
+    const serviceLabel = get("mobile-home-next-visit-service");
+    const statusLabel = get("mobile-home-next-visit-status");
+    const nextButton = get("mobile-home-next-visit-button");
+    const list = get("mobile-home-upcoming-list");
+    if (!greeting || !dateLabel || !petsLabel || !serviceLabel || !statusLabel || !nextButton || !list) return;
 
-        // ========================================
-        // OPEN EXACT VISIT REPORT
-        // ========================================
-        
-        const openLatestUpdateReport =
-            async () => {
-        
-                selectedUpcomingDate =
-                    latestVisit.visit_date;
-        
-        
-                const selectedDate =
-                    parseLocalDate(
-                        latestVisit.visit_date
-                    );
-        
-        
-                upcomingCalendarYear =
-                    selectedDate
-                        .getFullYear();
-        
-        
-                upcomingCalendarMonth =
-                    selectedDate
-                        .getMonth();
-        
-        
-                renderUpcomingCalendar();
-        
-                renderSelectedUpcomingServices();
-        
-        
-                const isMobileLayout =
-                    window.matchMedia(
-                        "(max-width: 700px)"
-                    ).matches;
-        
-        
-                // ========================================
-                // OPEN CORRECT SERVICES VIEW
-                // ========================================
-        
-                closeClientMessaging();
-        
-        
-                if (
-                    isMobileLayout
-                ) {
-        
-                    setMobileAppScreen(
-                        "services"
-                    );
-        
-        
-                    setActiveMobileAppTab(
-                        "services"
-                    );
-        
-                } else {
-        
-                    document
-                        .getElementById(
-                            "services-section"
-                        )
-                        ?.scrollIntoView({
-                            behavior:
-                                "smooth",
-        
-                            block:
-                                "start"
-                        });
-        
-                }
-        
-        
-                // ========================================
-                // FIND EXACT VISIT REPORT BUTTON
-                // ========================================
-        
-                window.setTimeout(
-                    async () => {
-        
-                        const reportButton =
-                            document.querySelector(
-                                `[data-client-visit-report-open="${latestVisit.id}"]`
-                            );
-        
-        
-                        if (
-                            !reportButton
-                        ) {
-        
-                            return;
-        
-                        }
-        
-        
-                        // ========================================
-                        // OPEN EXACT REPORT
-                        // ========================================
-        
-                        await toggleClientVisitReport(
-                            latestVisit.id,
-                            reportButton
-                        );
-        
-        
-                        // ========================================
-                        // SCROLL DIRECTLY TO EXACT REPORT
-                        // ========================================
-        
-                        window.setTimeout(
-                            () => {
-        
-                                const reportMount =
-                                    getClientVisitReportMount(
-                                        latestVisit.id
-                                    );
-        
-        
-                                if (
-                                    !reportMount
-                                ) {
-        
-                                    return;
-        
-                                }
-        
-        
-                                reportMount.scrollIntoView({
-                                    behavior:
-                                        "smooth",
-        
-                                    block:
-                                        "start"
-                                });
-        
-                            },
-                            100
-                        );
-        
-                    },
-                    150
-                );
-        
-            };
-        
-        
-        latestUpdateTargets.forEach(
-            target => {
-        
-                target.button.onclick =
-                    openLatestUpdateReport;
-        
-            }
-        );
-        
-        }
-        catch (
-            error
-        ) {
-        
-            console.error(
-                "Latest update error:",
-                error
-            );
-        
-        
-            latestUpdateTargets.forEach(
-                target => {
-        
-                    target.empty.style.display =
-                        "block";
-        
-                    target.content.style.display =
-                        "none";
-        
-                    target.empty.innerHTML =
-                        `
-                            <span>
-                                Your latest completed visit update is temporarily unavailable.
-                            </span>
-                        `;
-        
-                }
-            );
-        
-        }
-        
-        }
+    const hour = new Date().getHours();
+    const first = String(currentProfile?.full_name || "Client").trim().split(/\s+/)[0] || "there";
+    greeting.textContent = `${hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening"}, ${first} 👋`;
+    const today = getLocalDateString();
+    const upcoming = currentVisits.filter(visit => visit.visit_date >= today &&
+        !["cancelled", "completed"].includes(String(visit.status || "").trim().toLowerCase()) &&
+        !(isClientBoardingService(visit) && getClientBoardingStay(visit)?.started_at))
+        .sort((a, b) => String(a.visit_date).localeCompare(String(b.visit_date)) || compareClientVisits(a, b));
+    const active = clientBoardingData.loaded ? clientBoardingData.stays.find(s => s.status === "active") : null;
+    const eyebrow = get("mobile-home-next-visit-card")?.querySelector(".mobile-home-card-eyebrow");
+    if (eyebrow) eyebrow.textContent = active ? "Current Boarding" : "Next Visit";
+
+    if (active) {
+        dateLabel.textContent = `${clientBoardingDate(active.dropoff_date)} → ${clientBoardingDate(active.pickup_date)}`;
+        petsLabel.textContent = getClientBoardingPetNames(active);
+        serviceLabel.textContent = "Photos and care updates throughout your pet’s stay.";
+        statusLabel.textContent = "Boarding with us";
+        statusLabel.style.display = "inline-flex";
+        nextButton.style.display = "flex";
+        nextButton.innerHTML = 'View Boarding Updates <span aria-hidden="true">→</span>';
+        nextButton.onclick = () => void openClientBoardingUpdates(active.id);
+    } else if (upcoming[0]) {
+        const visit = upcoming[0];
+        const date = parseLocalDate(visit.visit_date).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+        dateLabel.textContent = visit.time_window ? `${date} · ${visit.time_window}` : date;
+        petsLabel.textContent = getPetsForVisit(visit).map(p => p.name || "Pet").join(", ") || "Your Pet";
+        serviceLabel.textContent = visit.service_name || visit.service_type || "Service";
+        statusLabel.textContent = getClientVisitStatusLabel(visit, getClientVisitProgressInfo(visit));
+        statusLabel.style.display = "inline-flex";
+        nextButton.style.display = "flex";
+        nextButton.innerHTML = 'View Visit <span aria-hidden="true">→</span>';
+        nextButton.onclick = () => openClientServiceDate(visit);
+    } else {
+        dateLabel.textContent = "No upcoming visit";
+        petsLabel.textContent = "You're all caught up";
+        serviceLabel.textContent = "Your next scheduled service will appear here.";
+        statusLabel.style.display = "none";
+        nextButton.style.display = "none";
+        nextButton.onclick = null;
+    }
+
+    list.innerHTML = "";
+    if (!upcoming.length) list.innerHTML = '<div class="mobile-home-empty-state"><span>Upcoming services will appear here.</span></div>';
+    for (const visit of upcoming.slice(0, 3)) {
+        const date = parseLocalDate(visit.visit_date);
+        const names = getPetsForVisit(visit).map(p => p.name || "Pet").join(", ") || "Your Pet";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "mobile-home-upcoming-item";
+        button.innerHTML = `<span class="mobile-home-upcoming-date"><span class="mobile-home-upcoming-month">${escapeHtml(date.toLocaleDateString("en-US", { month: "short" }))}</span>
+            <span class="mobile-home-upcoming-day">${date.getDate()}</span></span>
+            <span class="mobile-home-upcoming-info"><strong>${escapeHtml(`${names} · ${visit.service_name || visit.service_type || "Service"}`)}</strong>
+            <span>${escapeHtml(visit.time_window || "Scheduled visit")}</span></span><span class="mobile-home-upcoming-chevron" aria-hidden="true">›</span>`;
+        button.onclick = () => openClientServiceDate(visit);
+        list.appendChild(button);
+    }
+    await renderClientHomeLatestUpdate(version);
+}
 
 // ========================================
 // MOBILE HOME QUICK ACTIONS
