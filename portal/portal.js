@@ -15001,11 +15001,83 @@ async function refreshUpcomingVisits() {
     renderMobileHomeDashboard();
 
 }
-
-
 // ========================================
 // CLIENT BOARDING DATA AND UPDATES
 // ========================================
+
+// ========================================
+// CLIENT BOARDING WALK HISTORY
+// ========================================
+
+async function loadClientBoardingWalks(state, reset = false) {
+    if (state.walkBusy || clientBoardingViewer !== state) return;
+    state.walkBusy = true;
+    const mount = state.dialog.querySelector("[data-client-boarding-walks]");
+    const message = state.dialog.querySelector("[data-client-boarding-walk-message]");
+    const more = state.dialog.querySelector("[data-client-boarding-walk-more]");
+    const refresh = state.dialog.querySelector("[data-client-boarding-walk-refresh]");
+    more.disabled = refresh.disabled = true;
+    if (reset) { state.walkOffset = 0; state.walkSeen = new Set(); mount.innerHTML = ""; }
+    message.textContent = "Loading walks…";
+    try {
+        const { data, error } = await supabaseClient.from("visit_walks")
+            .select("id, boarding_stay_id, boarding_date, started_at, ended_at, duration_seconds, distance_meters, point_count")
+            .eq("boarding_stay_id", state.stay.id).eq("status", "completed")
+            .order("started_at", { ascending: false }).order("id", { ascending: false })
+            .range(state.walkOffset || 0, (state.walkOffset || 0) + 19);
+        if (error) throw error;
+        if (clientBoardingViewer !== state) return;
+        state.walkSeen ||= new Set();
+        const rows = data || [];
+        const newRows = rows.filter(w => !state.walkSeen.has(w.id));
+        mount.insertAdjacentHTML("beforeend", newRows.map(walk => `<article class="client-boarding-walk">
+            <strong>${escapeHtml(clientBoardingTimestamp(walk.started_at))}</strong>
+            <p>${escapeHtml(formatClientWalkDuration(walk.duration_seconds || 0))} · ${(Number(walk.distance_meters || 0) / 1609.344).toFixed(2)} mi</p>
+            <button type="button" class="secondary-button" data-client-boarding-walk-route="${walk.id}">View Walk Route</button>
+            <div id="client-walk-route-map-boarding-${walk.id}" class="boarding-walk-map" data-client-boarding-walk-map="${walk.id}" hidden></div>
+        </article>`).join(""));
+        rows.forEach(w => state.walkSeen.add(w.id));
+        state.walkOffset = (state.walkOffset || 0) + rows.length;
+        more.hidden = rows.length < 20;
+        more.textContent = "Load More Walks";
+        message.textContent = state.walkSeen.size ? "Completed walks during this stay." : "Completed walks will appear here when available.";
+    } catch (error) {
+        console.error("Boarding walks error:", error);
+        message.textContent = "Walks could not be loaded. Tap Refresh Walks to try again.";
+    } finally { state.walkBusy = false; more.disabled = refresh.disabled = false; }
+}
+
+async function showClientBoardingWalkRoute(state, button) {
+    const id = button.dataset.clientBoardingWalkRoute;
+    const mount = state.dialog.querySelector(`[data-client-boarding-walk-map="${id}"]`);
+    if (!mount || button.disabled) return;
+    button.disabled = true; mount.hidden = false; mount.textContent = "Loading route…";
+    try {
+        const points = [];
+        let sequence = -1;
+        while (true) {
+            const { data, error } = await supabaseClient.from("visit_walk_points")
+                .select("sequence_number, latitude, longitude")
+                .eq("walk_id", Number(id)).gt("sequence_number", sequence)
+                .order("sequence_number", { ascending: true }).limit(1000);
+            if (error) throw error;
+            if (clientBoardingViewer !== state) return;
+            if (!data?.length) break;
+            points.push(...data); sequence = data.at(-1).sequence_number;
+            if (data.length < 1000) break;
+        }
+        if (!mount.isConnected) return;
+        if (points.length < 2) { mount.textContent = "Not enough GPS points to display this route."; return; }
+        if (!window.google?.maps) { mount.textContent = "The map could not load. Refresh the page and try again."; return; }
+        mount.textContent = "";
+        renderClientGoogleWalkRoute(`boarding-${id}`, points);
+    } catch (error) {
+        console.error("Boarding walk route error:", error);
+        mount.textContent = "This route could not be loaded. Please try again.";
+    } finally { button.disabled = false; }
+}
+
+
 
 const clientBoardingData = {
     userId: null, stays: [], latest: null, loaded: false,
@@ -15179,6 +15251,10 @@ async function loadAndOpenClientBoardingUpdates(stayId) {
         <p>${escapeHtml(clientBoardingDate(stay.dropoff_date))} → ${escapeHtml(clientBoardingDate(stay.pickup_date))}</p></div>
         <button type="button" data-boarding-view-close aria-label="Close boarding updates">×</button></header>
         <div class="client-boarding-dialog-body"><p>${stay.status === "active" ? "Boarding with us" : "Boarding complete"}</p>
+        <section class="client-boarding-walk-section"><h3>Boarding walks</h3>
+        <div data-client-boarding-walks></div><p data-client-boarding-walk-message role="status"></p>
+        <button type="button" class="secondary-button" data-client-boarding-walk-refresh>Refresh Walks</button>
+        <button type="button" class="secondary-button" data-client-boarding-walk-more hidden>Load More Walks</button></section>
         <div data-client-boarding-feed></div><p data-client-boarding-feed-message role="status"></p>
         <button type="button" class="secondary-button" data-client-boarding-more>Load updates</button></div>`;
     const state = { dialog, stay, offset: 0, seen: new Set(), busy: false };
@@ -15190,7 +15266,16 @@ async function loadAndOpenClientBoardingUpdates(stayId) {
         if (clientBoardingViewer === state) clientBoardingViewer = null;
     });
     dialog.querySelector("[data-client-boarding-more]").onclick = () => void loadClientBoardingFeed(state);
-    try { dialog.showModal(); await loadClientBoardingFeed(state); }
+    dialog.querySelector("[data-client-boarding-walk-refresh]").onclick = () => void loadClientBoardingWalks(state, true);
+    dialog.querySelector("[data-client-boarding-walk-more]").onclick = () => void loadClientBoardingWalks(state);
+    dialog.querySelector("[data-client-boarding-walks]").addEventListener("click", event => {
+        const button = event.target.closest("[data-client-boarding-walk-route]");
+        if (button) void showClientBoardingWalkRoute(state, button);
+    });
+    try {
+        dialog.showModal();
+        await Promise.all([loadClientBoardingFeed(state), loadClientBoardingWalks(state, true)]);
+    }
     catch (error) {
         dialog.remove(); clientBoardingViewer = null;
         console.error(error); alert("Boarding updates could not be opened. Please refresh and try again.");
@@ -15266,7 +15351,6 @@ document.addEventListener("visibilitychange", () => {
     if (!document.hidden) refreshVisibleClientBoarding();
 });
 window.setInterval(refreshVisibleClientBoarding, 45000);
-
 
 // ========================================
 // UPCOMING CALENDAR
