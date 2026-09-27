@@ -9336,58 +9336,66 @@ function handleServiceTypeChange() {
     // ========================================
     // RESET BOOKING UI
     // ========================================
-    
+
+    multiDate.hidden =
+        false;
+
+
     renderSelectedDates();
-    
+
     renderBookingCalendar();
-    
-    
+
+
     optionWrapper.style.display =
         "none";
-    
-    
+
+
     timeWrapper.style.display =
         "none";
-    
-    
+
+
     multiDate.style.display =
         "none";
-    
-    
+
+
     boarding.style.display =
         "none";
-    
-    
+
+
     serviceOptionSelect.innerHTML =
         `
             <option value="">
                 Select an option
             </option>
         `;
-    
-    
+
+
     bookingTime.innerHTML =
         `
             <option value="">
                 Select a time
             </option>
         `;
-    
-    
+
+
     bookingTime.dataset.previousValue =
         "";
-    
-    
+
+
     renderAdditionalPets();
-    
-    
-    if (!serviceType) {
-    
+
+
+    if (
+        !serviceType
+    ) {
+
         updateBookingTotal();
-    
+
         return;
-    
+
     }
+
+
     // ========================================
     // DOG BOARDING
     // ========================================
@@ -9415,16 +9423,28 @@ function handleServiceTypeChange() {
             );
 
 
-        if (boardingPolicyPrice) {
+        if (
+            boardingPolicyPrice
+        ) {
 
             boardingPolicyPrice.textContent =
                 nightlyPrice > 0
+
                     ? `VIP Overnight Boarding — $${formatServicePrice(
                         nightlyPrice
                     )} per pet / night`
+
                     : "VIP Overnight Boarding";
 
         }
+
+
+        multiDate.style.display =
+            "none";
+
+
+        multiDate.hidden =
+            true;
 
 
         boarding.style.display =
