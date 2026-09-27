@@ -3291,6 +3291,13 @@ function buildAdminBoardingCard(visit) {
     } else if (adminBoardingState.error) {
         description += " Boarding status could not be loaded. Try refreshing it.";
     }
+    if (!cancelled && canAddAdminBoardingUpdate(stay, visit.visit_date)) {
+        actions += `<button type="button" class="primary-button admin-visit-action-button"
+            data-boarding-update-visit="${stay.primary_visit_id}"
+            data-boarding-update-date="${escapeHtml(visit.visit_date)}"
+            ${ready ? "" : "disabled"}>Send Boarding Update</button>`;
+    }
+
     actions += `<button type="button" class="secondary-button admin-visit-action-button"
         data-boarding-action="refresh" ${navigator.onLine ? "" : "disabled"}>
         Refresh Boarding Status</button>`;
@@ -3340,6 +3347,401 @@ function buildAdminBoardingCard(visit) {
         </article>
     `;
 }
+
+// ========================================
+// BOARDING UPDATE EDITOR
+// ========================================
+
+let adminBoardingEditor = null;
+
+function getAdminBoardingDateFromTimestamp(value) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(new Date(value));
+    const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    return `${values.year}-${values.month}-${values.day}`;
+}
+
+function canAddAdminBoardingUpdate(stay, date) {
+    return Boolean(stay?.id && stay.started_at &&
+        ["active", "completed"].includes(stay.status) &&
+        date >= getAdminBoardingDateFromTimestamp(stay.started_at) &&
+        date <= adminBoardingToday() &&
+        (!stay.ended_at || date <= getAdminBoardingDateFromTimestamp(stay.ended_at)));
+}
+
+// IndexedDB keeps the notes AND photo blobs on this device until published.
+function boardingDraftStore(action, key, value) {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("paws-in-stride-boarding-drafts", 1);
+        request.onupgradeneeded = () => request.result.createObjectStore("drafts", { keyPath: "key" });
+        request.onerror = () => reject(new Error("The boarding draft could not be saved on this device."));
+        request.onblocked = () => reject(new Error("Close other portal tabs and try opening this draft again."));
+        request.onsuccess = () => {
+            const db = request.result;
+            const tx = db.transaction("drafts", action === "get" ? "readonly" : "readwrite");
+            const store = tx.objectStore("drafts");
+            const operation = action === "get" ? store.get(key)
+                : action === "delete" ? store.delete(key) : store.put(value);
+            tx.oncomplete = () => { db.close(); resolve(operation.result); };
+            tx.onerror = tx.onabort = () => {
+                db.close();
+                reject(new Error("The boarding draft could not be saved. Check available storage on this device."));
+            };
+        };
+    });
+}
+
+function newAdminBoardingDraft(state) {
+    return {
+        key: `${currentUser.id}:${state.stay.id}:${state.date}`,
+        request_id: crypto.randomUUID(),
+        stay_id: state.stay.id,
+        visit_id: state.stay.primary_visit_id,
+        date: state.date,
+        notes: "",
+        care: getAdminPetsForVisit(state.visit).map(pet => ({
+            pet_id: Number(pet.id), fed: false, fresh_water: false, pee: false, poop: false
+        })),
+        photos: [],
+        locked: false
+    };
+}
+
+function saveAdminBoardingDraft(state) {
+    const snapshot = structuredClone(state.draft);
+    state.saveChain = (state.saveChain || Promise.resolve()).catch(() => {}).then(
+        () => boardingDraftStore("put", snapshot.key, snapshot)
+    );
+    return state.saveChain;
+}
+
+function setAdminBoardingEditorMessage(state, text) {
+    const target = state.dialog.querySelector("[data-boarding-message]");
+    if (target) target.textContent = text;
+}
+
+function collectAdminBoardingDraft(state) {
+    if (state.draft.locked) return;
+    state.draft.notes = state.dialog.querySelector("[data-boarding-notes]").value;
+    for (const care of state.draft.care) {
+        for (const flag of ["fed", "fresh_water", "pee", "poop"]) {
+            care[flag] = state.dialog.querySelector(
+                `[data-boarding-pet="${care.pet_id}"][data-boarding-care="${flag}"]`
+            )?.checked || false;
+        }
+    }
+}
+
+function updateAdminBoardingEditorControls(state) {
+    state.dialog.querySelector("[data-boarding-fields]").disabled = state.busy || state.draft.locked;
+    state.dialog.querySelector("[data-boarding-close]").disabled = state.busy;
+    const send = state.dialog.querySelector("[data-boarding-send]");
+    send.disabled = state.busy || state.published;
+    send.textContent = state.busy ? "Sending…" : state.published ? "Saved ✓"
+        : state.draft.locked ? "Retry Send" : "Send Boarding Update";
+}
+
+function renderAdminBoardingPhotoDrafts(state) {
+    for (const url of state.previewUrls || []) URL.revokeObjectURL(url);
+    state.previewUrls = [];
+    state.dialog.querySelector("[data-boarding-photo-previews]").innerHTML = state.draft.photos.map(photo => {
+        const url = URL.createObjectURL(photo.blob);
+        state.previewUrls.push(url);
+        return `<div class="boarding-photo-preview">
+            <img src="${escapeHtml(url)}" alt="Selected boarding photo">
+            <button type="button" data-boarding-remove-photo="${photo.id}"
+                aria-label="Remove photo" ${state.draft.locked ? "disabled" : ""}>×</button>
+        </div>`;
+    }).join("");
+}
+
+function renderAdminBoardingDraftForm(state) {
+    const form = state.dialog.querySelector("[data-boarding-compose]");
+    const pets = getAdminPetsForVisit(state.visit);
+    form.innerHTML = `
+        <fieldset data-boarding-fields>
+            <label class="boarding-field-label" for="boarding-update-notes">Update notes</label>
+            <textarea id="boarding-update-notes" data-boarding-notes maxlength="5000" rows="4"
+                placeholder="How is their pet doing?">${escapeHtml(state.draft.notes)}</textarea>
+            <details class="boarding-care-details">
+                <summary>Care details (optional)</summary>
+                ${state.draft.care.map(care => `<div class="boarding-care-pet">
+                    <strong>${escapeHtml(pets.find(p => Number(p.id) === care.pet_id)?.name || "Pet")}</strong>
+                    <div class="boarding-care-options">
+                        ${[["fed", "Fed"], ["fresh_water", "Fresh water"], ["pee", "Pee"], ["poop", "Poop"]]
+                            .map(([flag, label]) => `<label><input type="checkbox"
+                                data-boarding-pet="${care.pet_id}" data-boarding-care="${flag}"
+                                ${care[flag] ? "checked" : ""}> ${label}</label>`).join("")}
+                    </div>
+                </div>`).join("") || "<p>No pets are attached to this booking.</p>"}
+            </details>
+            <label class="boarding-field-label" for="boarding-update-photos">Photos</label>
+            <input id="boarding-update-photos" data-boarding-photo-input type="file"
+                accept="image/jpeg,image/png,image/webp" multiple>
+            <small>Up to 12 photos, 10 MB each. JPEG, PNG or WebP.</small>
+            <div class="boarding-photo-grid" data-boarding-photo-previews></div>
+        </fieldset>
+        <p class="boarding-editor-message" data-boarding-message role="status" aria-live="polite"></p>
+        <button type="submit" class="primary-button" data-boarding-send>Send Boarding Update</button>
+    `;
+    renderAdminBoardingPhotoDrafts(state);
+    updateAdminBoardingEditorControls(state);
+    if (state.draft.locked) {
+        setAdminBoardingEditorMessage(state,
+            "An earlier send needs to be retried. Its content is kept unchanged so retrying cannot create a second copy.");
+    }
+}
+
+async function loadAdminBoardingUpdateHistory(state) {
+    const mount = state.dialog.querySelector("[data-boarding-history]");
+    mount.textContent = "Loading updates…";
+    try {
+        const { data, error } = await supabaseClient.from("boarding_updates")
+            .select("id, notes, created_at, published_at, boarding_update_photos(id, storage_path, caption, sort_order), boarding_update_pet_care(pet_id, fed, fresh_water, pee, poop)")
+            .eq("stay_id", state.stay.id).eq("update_date", state.date)
+            .not("published_at", "is", null).order("created_at", { ascending: false });
+        if (error) throw error;
+        const updates = await Promise.all((data || []).map(async update => {
+            const photos = await Promise.all((update.boarding_update_photos || [])
+                .sort((a, b) => a.sort_order - b.sort_order).map(async photo => {
+                    const result = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
+                        .createSignedUrl(photo.storage_path, 3600);
+                    return { ...photo, url: result.error ? null : result.data?.signedUrl };
+                }));
+            return { ...update, photos };
+        }));
+        if (adminBoardingEditor !== state) return;
+        mount.innerHTML = updates.map(update => `
+            <article class="boarding-saved-update">
+                <strong>${escapeHtml(formatAdminBoardingTimestamp(update.published_at))}</strong>
+                ${update.notes ? `<p class="boarding-update-note">${escapeHtml(update.notes)}</p>` : ""}
+                ${(update.boarding_update_pet_care || []).map(care => {
+                    const flags = [["fed", "Fed"], ["fresh_water", "Fresh water"], ["pee", "Pee"], ["poop", "Poop"]]
+                        .filter(([key]) => care[key]).map(([, label]) => label);
+                    return flags.length ? `<p><strong>${escapeHtml(allPets.find(p => Number(p.id) === Number(care.pet_id))?.name || "Pet")}:</strong>
+                        ${escapeHtml(flags.join(" · "))}</p>` : "";
+                }).join("")}
+                <div class="boarding-photo-grid">${update.photos.map(photo => photo.url
+                    ? `<a href="${escapeHtml(photo.url)}" target="_blank" rel="noopener noreferrer">
+                        <img src="${escapeHtml(photo.url)}" alt="Boarding photo" loading="lazy"></a>`
+                    : "<span>Photo unavailable</span>").join("")}</div>
+            </article>
+        `).join("") || "<p>No updates sent for this day yet.</p>";
+    } catch (error) {
+        console.error("Boarding update history error:", error);
+        if (adminBoardingEditor === state) mount.textContent = "Updates could not be loaded. Close and reopen this window to retry.";
+    }
+}
+
+async function closeAdminBoardingEditor(state) {
+    if (state.busy) return;
+    try {
+        collectAdminBoardingDraft(state);
+        await saveAdminBoardingDraft(state);
+        state.dialog.close();
+        state.dialog.remove();
+        for (const url of state.previewUrls || []) URL.revokeObjectURL(url);
+        if (adminBoardingEditor === state) adminBoardingEditor = null;
+    } catch (error) {
+        setAdminBoardingEditorMessage(state, error.message);
+    }
+}
+
+async function addAdminBoardingPhotos(state, files) {
+    if (state.busy || state.draft.locked) return;
+    collectAdminBoardingDraft(state);
+    state.busy = true;
+    updateAdminBoardingEditorControls(state);
+    try {
+        if (state.draft.photos.length + files.length > 12) throw new Error("Use up to 12 photos per update.");
+        for (const file of files) {
+            if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) {
+                throw new Error("Choose JPEG, PNG or WebP photos no larger than 10 MB each.");
+            }
+        }
+        for (const file of files) {
+            setAdminBoardingEditorMessage(state, `Preparing ${file.name}…`);
+            const { displayBlob } = await buildVisitPhotoVersions(file);
+            const id = crypto.randomUUID();
+            state.draft.photos.push({
+                id, name: file.name, blob: displayBlob,
+                path: `${state.draft.visit_id}/boarding-${state.draft.request_id}-${id}.jpg`,
+                uploaded: false
+            });
+            await saveAdminBoardingDraft(state);
+        }
+        setAdminBoardingEditorMessage(state, "Photos added to your draft.");
+    } catch (error) {
+        setAdminBoardingEditorMessage(state, error.message || "A photo could not be prepared. Try another image.");
+    } finally {
+        state.busy = false;
+        state.dialog.querySelector("[data-boarding-photo-input]").value = "";
+        renderAdminBoardingPhotoDrafts(state);
+        updateAdminBoardingEditorControls(state);
+    }
+}
+
+function boardingPublishPayload(draft) {
+    return {
+        p_stay_id: draft.stay_id,
+        p_request_id: draft.request_id,
+        p_update_date: draft.date,
+        p_notes: draft.notes.trim(),
+        p_pet_care: draft.care,
+        p_photos: draft.photos.map(photo => ({ storage_path: photo.path, caption: "" }))
+    };
+}
+
+async function sendAdminBoardingUpdate(state) {
+    if (state.busy || state.published) return;
+    collectAdminBoardingDraft(state);
+    state.busy = true;
+    updateAdminBoardingEditorControls(state);
+    try {
+        if (!navigator.onLine) throw new Error("You're offline. Your draft stays on this device; reconnect and send it again.");
+        if (!state.draft.notes.trim() && !state.draft.photos.length &&
+            !state.draft.care.some(c => c.fed || c.fresh_water || c.pee || c.poop)) {
+            throw new Error("Add a note, photo or care update first.");
+        }
+
+        // Freeze content before the first upload. A retry uses identical IDs,
+        // blobs and payload even if the first server response was lost.
+        state.draft.locked = true;
+        await saveAdminBoardingDraft(state);
+        for (let index = 0; index < state.draft.photos.length; index++) {
+            const photo = state.draft.photos[index];
+            if (photo.uploaded) continue;
+            setAdminBoardingEditorMessage(state, `Uploading photo ${index + 1} of ${state.draft.photos.length}…`);
+            const { error } = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
+                .upload(photo.path, photo.blob, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
+            if (error && String(error.statusCode || error.status) !== "409" &&
+                !/already exists|duplicate/i.test(error.message || "")) throw error;
+            photo.uploaded = true;
+            await saveAdminBoardingDraft(state);
+        }
+        setAdminBoardingEditorMessage(state, "Saving boarding update…");
+        const { data, error } = await supabaseClient.rpc(
+            "admin_publish_boarding_update", boardingPublishPayload(state.draft)
+        );
+        if (error) throw error;
+        if (!data?.id || !data.published_at) throw new Error("The save could not be confirmed. Retry Send to check it safely.");
+        state.published = true;
+
+        await boardingDraftStore("delete", state.draft.key);
+        state.draft = newAdminBoardingDraft(state);
+        await saveAdminBoardingDraft(state);
+        state.published = false;
+        renderAdminBoardingDraftForm(state);
+        setAdminBoardingEditorMessage(state, "Boarding update saved ✓ You can add another update for this day.");
+        await loadAdminBoardingUpdateHistory(state);
+    } catch (error) {
+        console.error("Boarding update save error:", error);
+        setAdminBoardingEditorMessage(state, state.published
+            ? "Your update was saved, but the local draft could not be reset. Close and reopen this window before creating another update."
+            : `${error.message || "The update could not be sent."} Your draft is kept on this device.`);
+    } finally {
+        state.busy = false;
+        updateAdminBoardingEditorControls(state);
+    }
+}
+
+async function openAdminBoardingEditor(visitId, date) {
+    if (adminBoardingEditor) { adminBoardingEditor.dialog.focus(); return; }
+    const visit = allVisits.find(item => Number(item.id) === Number(visitId));
+    if (!visit || !isAdminBoardingService(visit)) throw new Error("Boarding booking not found.");
+    if (!navigator.onLine) throw new Error("Reconnect to open boarding updates. Saved drafts remain on this device.");
+    const { data: stay, error } = await supabaseClient.rpc("admin_prepare_boarding_stay", { p_visit_id: visit.id });
+    if (error) throw error;
+    if (!canAddAdminBoardingUpdate(stay, date)) throw new Error("Choose a day when the pet was boarding, up to today.");
+
+    const dialog = document.createElement("dialog");
+    dialog.className = "boarding-update-dialog";
+    dialog.setAttribute("aria-labelledby", "boarding-editor-title");
+    const state = { dialog, stay, visit, date, busy: false, published: false, previewUrls: [] };
+    const draftKey = `${currentUser.id}:${stay.id}:${date}`;
+    state.draft = await boardingDraftStore("get", draftKey) || newAdminBoardingDraft(state);
+
+    // If a response was lost, recognize the already-published request before
+    // opening a new editable draft. The original update remains in history.
+    if (state.draft.locked) {
+        const check = await supabaseClient.from("boarding_updates").select("id, published_at")
+            .eq("request_id", state.draft.request_id).eq("stay_id", stay.id).maybeSingle();
+        if (check.error) throw check.error;
+        if (check.data?.published_at) {
+            state.draft = newAdminBoardingDraft(state);
+            await saveAdminBoardingDraft(state);
+        }
+    }
+
+    dialog.innerHTML = `
+        <header class="boarding-editor-header">
+            <div><small>PAWS IN STRIDE</small><h2 id="boarding-editor-title">Boarding update</h2>
+                <p>${escapeHtml(getAdminPetsForVisit(visit).map(pet => pet.name).join(" & ") || "Pet update")}
+                    · ${escapeHtml(formatAdminBoardingDate(date))}</p></div>
+            <button type="button" data-boarding-close aria-label="Close boarding updates">×</button>
+        </header>
+        <div class="boarding-editor-body">
+            <p class="boarding-draft-help">Drafts stay on this device until sent. Add as many updates throughout the day as you like.</p>
+            <form data-boarding-compose></form>
+            <h3>Updates for this day</h3>
+            <div data-boarding-history></div>
+        </div>`;
+    document.body.appendChild(dialog);
+    adminBoardingEditor = state;
+    renderAdminBoardingDraftForm(state);
+    dialog.addEventListener("cancel", event => { event.preventDefault(); void closeAdminBoardingEditor(state); });
+    dialog.querySelector("[data-boarding-close]").addEventListener("click", () => void closeAdminBoardingEditor(state));
+    dialog.querySelector("[data-boarding-compose]").addEventListener("submit", event => {
+        event.preventDefault(); void sendAdminBoardingUpdate(state);
+    });
+    dialog.addEventListener("input", event => {
+        if (!event.target.matches("[data-boarding-notes], [data-boarding-care]")) return;
+        collectAdminBoardingDraft(state);
+        void saveAdminBoardingDraft(state).catch(error => setAdminBoardingEditorMessage(state, error.message));
+    });
+    dialog.addEventListener("change", event => {
+        if (event.target.matches("[data-boarding-photo-input]")) {
+            void addAdminBoardingPhotos(state, Array.from(event.target.files || []));
+        }
+    });
+    dialog.addEventListener("click", async event => {
+        const remove = event.target.closest("[data-boarding-remove-photo]");
+        if (!remove || state.busy || state.draft.locked) return;
+        collectAdminBoardingDraft(state);
+        state.draft.photos = state.draft.photos.filter(photo => photo.id !== remove.dataset.boardingRemovePhoto);
+        renderAdminBoardingPhotoDrafts(state);
+        try { await saveAdminBoardingDraft(state); }
+        catch (error) { setAdminBoardingEditorMessage(state, error.message); }
+    });
+    try {
+        dialog.showModal();
+        dialog.querySelector("[data-boarding-notes]").focus();
+        void loadAdminBoardingUpdateHistory(state);
+    } catch (error) {
+        dialog.remove();
+        for (const url of state.previewUrls) URL.revokeObjectURL(url);
+        adminBoardingEditor = null;
+        throw error;
+    }
+}
+
+document.getElementById("admin-day-services")?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-boarding-update-visit]");
+    if (!button || button.disabled || adminVisitActionBusy) return;
+    event.preventDefault();
+    adminVisitActionBusy = true;
+    button.disabled = true;
+    try {
+        await openAdminBoardingEditor(button.dataset.boardingUpdateVisit, button.dataset.boardingUpdateDate);
+    } catch (error) {
+        console.error("Boarding editor error:", error);
+        alert(error.message || "Boarding updates could not be opened.");
+    } finally {
+        adminVisitActionBusy = false;
+        if (button.isConnected) button.disabled = false;
+    }
+});
 
 // ========================================
 // BOARDING ACTION CONFIRMATION
