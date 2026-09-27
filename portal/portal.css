@@ -24526,3 +24526,83 @@ dialog.client-report-lightbox[data-boarding-photo-modal]::backdrop {
 /* ========================================
    END CLIENT BOARDING PHOTO LIGHTBOX
    ======================================== */
+
+/* ========================================
+   BOARDING BOOKING DATE FIELDS
+   ======================================== */
+
+#boarding-booking {
+    min-width: 0;
+}
+
+#boarding-booking > label {
+    display: block;
+    margin: 14px 0 7px;
+    color: #17354f;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+#boarding-booking input[type="date"],
+#boarding-booking select {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #c6ddeb;
+    border-radius: 12px;
+    background: #fbfdff;
+    color: #17354f;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.25;
+    color-scheme: light;
+}
+
+#boarding-booking input[type="date"] {
+    text-align: left;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+#boarding-booking input[type="date"]::-webkit-date-and-time-value {
+    margin: 0;
+    text-align: left;
+}
+
+#boarding-booking input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
+    text-align: left;
+}
+
+#boarding-booking input[type="date"]::-webkit-calendar-picker-indicator {
+    width: 18px;
+    height: 18px;
+    margin-left: 8px;
+    opacity: .7;
+    cursor: pointer;
+}
+
+#boarding-booking input[type="date"]:focus,
+#boarding-booking select:focus {
+    outline: 3px solid rgb(245 167 56 / 28%);
+    outline-offset: 1px;
+    border-color: #2797df;
+}
+
+@media (max-width: 600px) {
+    #boarding-booking input[type="date"],
+    #boarding-booking select {
+        width: 100%;
+        min-height: 52px;
+        font-size: 16px;
+    }
+}
+
+/* ========================================
+   END BOARDING BOOKING DATE FIELDS
+   ========================================
+   */
