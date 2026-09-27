@@ -199,14 +199,39 @@ editBookingButton
         "click",
         () => {
 
+            const referrer =
+                document.referrer || "";
 
-            // ========================================
-            // RETURN TO SAVED BOOKING DRAFT
-            // ========================================
+
+            const sameSiteReferrer =
+                referrer &&
+                new URL(
+                    referrer,
+                    window.location.href
+                ).origin ===
+                    window.location.origin;
+
+
+            // Return to the exact booking page/state
+            // when the client came from the booking flow.
+
+            if (
+                sameSiteReferrer &&
+                window.history.length >
+                    1
+            ) {
+
+                window.history.back();
+
+                return;
+
+            }
+
+
+            // Fallback if the payment page was opened directly.
 
             window.location.href =
                 "./dashboard.html?editBooking=1";
-
 
         }
     );
