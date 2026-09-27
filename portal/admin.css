@@ -11550,3 +11550,88 @@ dialog.admin-visit-action-confirm::backdrop {
 /* ========================================
    END ADMIN VISIT ACTION CONFIRMATION
 ======================================== */
+
+/* ========================================
+   BOARDING UPDATE EDITOR
+   ======================================== */
+
+.boarding-update-dialog {
+    width: min(640px, calc(100vw - 24px));
+    max-height: 88dvh;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #c9e1ef;
+    border-radius: 18px;
+    background: #fff;
+    color: #15384d;
+    box-shadow: 0 20px 70px #102e4b40;
+    overflow-y: auto;
+    font-family: inherit;
+}
+.boarding-update-dialog::backdrop { background: #17354f99; }
+.boarding-update-dialog *, .boarding-update-dialog *::before,
+.boarding-update-dialog *::after { box-sizing: border-box; }
+.boarding-editor-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px;
+    color: #fff;
+    background: linear-gradient(110deg, #1886b9, #2366a8);
+}
+.boarding-editor-header small { font-size: 10px; letter-spacing: .12em; font-weight: 800; }
+.boarding-editor-header h2 { margin: 7px 0; color: #fff; font-size: 23px; }
+.boarding-editor-header p { margin: 0; font-size: 13px; line-height: 1.5; }
+.boarding-editor-header button {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border: 1px solid #ffffff70;
+    border-radius: 9px;
+    background: #ffffff15;
+    color: #fff;
+    font: inherit;
+    font-size: 25px;
+    cursor: pointer;
+}
+.boarding-editor-body { padding: 20px; }
+.boarding-draft-help { margin: 0 0 20px; color: #5e7182; font-size: 13px; line-height: 1.6; }
+.boarding-update-dialog fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
+.boarding-field-label { display: block; margin: 14px 0 8px; font-size: 14px; font-weight: 700; }
+.boarding-update-dialog textarea {
+    width: 100%; min-height: 115px; resize: vertical;
+    padding: 12px; border: 1px solid #c6ddeb; border-radius: 10px;
+    background: #fbfdff; color: #17354f; font: inherit; font-size: 16px;
+}
+.boarding-update-dialog input[type="file"] { max-width: 100%; font-size: 14px; margin: 0 0 8px; }
+.boarding-update-dialog fieldset > small { display: block; color: #617383; font-size: 12px; }
+.boarding-care-details { margin: 16px 0; border: 1px solid #dbe8f0; border-radius: 10px; padding: 12px; }
+.boarding-care-details summary { cursor: pointer; font-size: 14px; font-weight: 700; }
+.boarding-care-pet { margin-top: 14px; }
+.boarding-care-options { display: flex; flex-wrap: wrap; gap: 9px 16px; margin-top: 9px; }
+.boarding-care-options label { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+.boarding-photo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 14px; }
+.boarding-photo-grid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; }
+.boarding-photo-preview { position: relative; }
+.boarding-photo-preview button {
+    position: absolute; top: 5px; right: 5px; width: 30px; height: 30px;
+    padding: 0; border: 0; border-radius: 50%; background: #18364ddb;
+    color: #fff; font-size: 21px; cursor: pointer;
+}
+.boarding-editor-message { min-height: 20px; color: #375a71; font-size: 13px; line-height: 1.5; }
+.boarding-update-dialog [data-boarding-send] { width: 100%; min-height: 44px; }
+.boarding-update-dialog button:disabled { cursor: default; opacity: .55; }
+.boarding-update-dialog :focus-visible { outline: 3px solid #f5a738; outline-offset: 3px; }
+.boarding-editor-body h3 { margin: 28px 0 12px; font-size: 17px; }
+.boarding-saved-update { padding: 16px 0; border-top: 1px solid #e0eaf1; font-size: 13px; }
+.boarding-saved-update p { line-height: 1.6; }
+.boarding-update-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+    .boarding-editor-header, .boarding-editor-body { padding: 16px; }
+    .boarding-photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ========================================
+   END BOARDING UPDATE EDITOR
+   ======================================== */
