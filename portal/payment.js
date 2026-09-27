@@ -199,42 +199,38 @@ editBookingButton
         "click",
         () => {
 
-            const referrer =
-                document.referrer || "";
+            const checkoutId =
+                getCheckoutIdFromUrl();
 
 
-            const sameSiteReferrer =
-                referrer &&
-                new URL(
-                    referrer,
-                    window.location.href
-                ).origin ===
-                    window.location.origin;
+            const params =
+                new URLSearchParams();
 
 
-            // Return to the exact booking page/state
-            // when the client came from the booking flow.
+            params.set(
+                "editBooking",
+                "1"
+            );
+
 
             if (
-                sameSiteReferrer &&
-                window.history.length >
-                    1
+                checkoutId
             ) {
 
-                window.history.back();
-
-                return;
+                params.set(
+                    "checkout",
+                    checkoutId
+                );
 
             }
 
 
-            // Fallback if the payment page was opened directly.
-
             window.location.href =
-                "./dashboard.html?editBooking=1";
+                `./dashboard.html?${params.toString()}`;
 
         }
     );
+
 
 // ========================================
 // FORMAT MONEY
