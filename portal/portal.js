@@ -9336,134 +9336,144 @@ function handleServiceTypeChange() {
     // ========================================
     // RESET BOOKING UI
     // ========================================
-
+    
+    multiDate.classList.remove(
+        "boarding-calendar-hidden"
+    );
+    
+    
     multiDate.hidden =
         false;
-
-
+    
+    
     renderSelectedDates();
-
+    
     renderBookingCalendar();
-
-
+    
+    
     optionWrapper.style.display =
         "none";
-
-
+    
+    
     timeWrapper.style.display =
         "none";
-
-
+    
+    
     multiDate.style.display =
         "none";
-
-
+    
+    
     boarding.style.display =
         "none";
-
-
+    
+    
     serviceOptionSelect.innerHTML =
         `
             <option value="">
                 Select an option
             </option>
         `;
-
-
+    
+    
     bookingTime.innerHTML =
         `
             <option value="">
                 Select a time
             </option>
         `;
-
-
+    
+    
     bookingTime.dataset.previousValue =
         "";
-
-
+    
+    
     renderAdditionalPets();
-
-
+    
+    
     if (
         !serviceType
     ) {
-
+    
         updateBookingTotal();
-
+    
         return;
-
+    
     }
-
-
+    
+    
     // ========================================
     // DOG BOARDING
     // ========================================
-
+    
     if (
         serviceType ===
         "Dog Boarding"
     ) {
-
+    
         const pricing =
             getServicePrice(
                 "Dog Boarding"
             );
-
-
+    
+    
         const nightlyPrice =
             Number(
                 pricing?.base_price
             ) || 0;
-
-
+    
+    
         const boardingPolicyPrice =
             document.getElementById(
                 "boarding-policy-price"
             );
-
-
+    
+    
         if (
             boardingPolicyPrice
         ) {
-
+    
             boardingPolicyPrice.textContent =
                 nightlyPrice > 0
-
+    
                     ? `VIP Overnight Boarding — $${formatServicePrice(
                         nightlyPrice
                     )} per pet / night`
-
+    
                     : "VIP Overnight Boarding";
-
+    
         }
-
-
-        multiDate.style.display =
-            "none";
-
-
+    
+    
+        multiDate.classList.add(
+            "boarding-calendar-hidden"
+        );
+    
+    
         multiDate.hidden =
             true;
-
-
+    
+    
+        multiDate.style.display =
+            "none";
+    
+    
         boarding.style.display =
             "block";
-
-
+    
+    
         resetBoardingDates();
-
-
+    
+    
         renderAdditionalPets();
-
+    
         updateBookingTotal();
-
-
+    
+    
         return;
-
+    
     }
-
-
+    
+    
     // ========================================
     // STANDARD SERVICES
     // ========================================
