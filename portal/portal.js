@@ -20505,31 +20505,50 @@ async function restoreSavedBookingDraft(
 
 
         // ========================================
+        // OPEN REQUEST SERVICE ON DESKTOP
+        // ========================================
+        
+        const editRequestServiceButton =
+            document.getElementById(
+                "request-walk-button"
+            );
+        
+        
+        if (
+            editRequestServiceButton
+        ) {
+        
+            editRequestServiceButton.click();
+        
+        }
+        
+        
+        // ========================================
         // POSITION RESTORED FORM
         // ========================================
-
+        
         window.requestAnimationFrame(
             () => {
-
+        
                 window.requestAnimationFrame(
                     () => {
-
+        
                         bookingSection
                             ?.scrollIntoView({
                                 behavior:
                                     "auto",
-
+        
                                 block:
                                     "start"
                             });
-
+        
                     }
                 );
-
+        
             }
         );
-
-
+        
+        
         return true;
 
     }
