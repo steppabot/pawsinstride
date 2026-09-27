@@ -13520,10 +13520,11 @@ function getWeekKey(
         date.getDay();
 
 
+    // Sunday is the first day of the booking week.
+    // Sunday = 0, Monday = 1, ..., Saturday = 6.
+
     const difference =
-        day === 0
-            ? -6
-            : 1 - day;
+        -day;
 
 
     date.setDate(
@@ -13539,7 +13540,6 @@ function getWeekKey(
     );
 
 }
-
 
 async function validateThreePerWeek(
     serviceType
@@ -14493,26 +14493,35 @@ if (bookingForm) {
 
                 };
 
-
                 try {
-
-                    window.sessionStorage.setItem(
-                        "paws-in-stride-booking-draft",
+                
+                    const serializedBookingDraft =
                         JSON.stringify(
                             bookingDraft
-                        )
+                        );
+                
+                
+                    window.sessionStorage.setItem(
+                        "paws-in-stride-booking-draft",
+                        serializedBookingDraft
                     );
-
+                
+                
+                    window.localStorage.setItem(
+                        "paws-in-stride-booking-draft",
+                        serializedBookingDraft
+                    );
+                
                 }
                 catch (
                     draftError
                 ) {
-
+                
                     console.warn(
                         "Booking draft could not be saved:",
                         draftError
                     );
-
+                
                 }
 
 
@@ -20032,6 +20041,10 @@ async function restoreSavedBookingDraft(
 
         rawDraft =
             window.sessionStorage
+                .getItem(
+                    "paws-in-stride-booking-draft"
+                ) ||
+            window.localStorage
                 .getItem(
                     "paws-in-stride-booking-draft"
                 );
