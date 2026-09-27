@@ -31657,3 +31657,102 @@ renderMobileHomeDashboard =
  
     };
 
+// ========================================
+// CLIENT BOARDING PHOTO LIGHTBOX
+// ========================================
+
+function openClientBoardingPhotoLightbox(link) {
+    const owner = link.closest('.client-boarding-dialog');
+    const grid = link.closest('.client-boarding-photo-grid');
+    if (!owner || !grid || document.querySelector('.client-boarding-lightbox')) return;
+    const links = Array.from(grid.querySelectorAll('a[href]'));
+    let index = links.indexOf(link);
+    if (index < 0) return;
+
+    const viewer = document.createElement('dialog');
+    viewer.className = 'client-boarding-lightbox';
+    viewer.setAttribute('aria-label', 'Boarding photos');
+    viewer.innerHTML = `
+        <div class="boarding-lightbox-toolbar">
+            <span data-photo-count role="status" aria-live="polite"></span>
+            <button type="button" data-photo-close aria-label="Close photo">×</button>
+        </div>
+        <div class="boarding-lightbox-stage">
+            <img alt="Boarding photo" draggable="false">
+        </div>
+        <p data-photo-error role="status" hidden>Photo could not load. Close and reopen boarding updates to refresh it.</p>
+        <div class="boarding-lightbox-navigation">
+            <button type="button" data-photo-prev aria-label="Previous photo">‹</button>
+            <button type="button" data-photo-next aria-label="Next photo">›</button>
+        </div>`;
+    const photo = viewer.querySelector('img');
+    const error = viewer.querySelector('[data-photo-error]');
+    const previous = viewer.querySelector('[data-photo-prev]');
+    const next = viewer.querySelector('[data-photo-next]');
+    const close = () => viewer.close();
+    const render = () => {
+        error.hidden = true;
+        photo.src = links[index].href;
+        photo.alt = links[index].querySelector('img')?.alt || 'Boarding photo';
+        viewer.querySelector('[data-photo-count]').textContent = `${index + 1} / ${links.length}`;
+        previous.hidden = next.hidden = links.length < 2;
+    };
+    const move = step => { index = (index + step + links.length) % links.length; render(); };
+    photo.addEventListener('error', () => { error.hidden = false; });
+    viewer.querySelector('[data-photo-close]').addEventListener('click', close);
+    previous.addEventListener('click', () => move(-1));
+    next.addEventListener('click', () => move(1));
+    viewer.addEventListener('click', event => {
+        if (event.target === viewer || event.target.classList.contains('boarding-lightbox-stage')) close();
+    });
+    viewer.addEventListener('cancel', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        close();
+    });
+    viewer.addEventListener('keydown', event => {
+        if (!['Escape', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.key === 'Escape') close();
+        else move(event.key === 'ArrowLeft' ? -1 : 1);
+    });
+    let touchStart = null;
+    const stage = viewer.querySelector('.boarding-lightbox-stage');
+    stage.addEventListener('touchstart', event => {
+        touchStart = event.touches.length === 1
+            ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
+    }, { passive: true });
+    stage.addEventListener('touchend', event => {
+        if (!touchStart || event.touches.length || !event.changedTouches.length) return;
+        const dx = event.changedTouches[0].clientX - touchStart.x;
+        const dy = event.changedTouches[0].clientY - touchStart.y;
+        touchStart = null;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) move(dx < 0 ? 1 : -1);
+    }, { passive: true });
+    stage.addEventListener('touchcancel', () => { touchStart = null; });
+    owner.addEventListener('close', close);
+    viewer.addEventListener('close', () => {
+        owner.removeEventListener('close', close);
+        viewer.remove();
+        if (owner.open && link.isConnected) link.focus({ preventScroll: true });
+    }, { once: true });
+    document.body.appendChild(viewer);
+    render();
+    viewer.showModal();
+    viewer.querySelector('[data-photo-close]').focus();
+}
+
+// Capture photo clicks before the browser follows the existing image link.
+// Delegation also covers photos added with Load More.
+document.addEventListener('click', event => {
+    const link = event.target.closest?.('.client-boarding-dialog .client-boarding-photo-grid a[href]');
+    if (!link) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openClientBoardingPhotoLightbox(link);
+}, true);
+
+// ========================================
+// END CLIENT BOARDING PHOTO LIGHTBOX
+// ========================================
