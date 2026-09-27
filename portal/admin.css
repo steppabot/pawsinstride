@@ -11583,7 +11583,19 @@ dialog.admin-visit-action-confirm::backdrop {
 .boarding-editor-header small { font-size: 10px; letter-spacing: .12em; font-weight: 800; }
 .boarding-editor-header h2 { margin: 7px 0; color: #fff; font-size: 23px; }
 .boarding-editor-header p { margin: 0; font-size: 13px; line-height: 1.5; }
-.boarding-editor-header button {
+.boarding-update-dialog .boarding-editor-header button[data-boarding-close] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    min-width: 38px;
+    min-height: 38px;
+    line-height: 1;
+    box-shadow: none;
+    letter-spacing: 0;
     flex-shrink: 0;
     width: 38px;
     height: 38px;
@@ -11609,8 +11621,69 @@ dialog.admin-visit-action-confirm::backdrop {
 .boarding-care-details { margin: 16px 0; border: 1px solid #dbe8f0; border-radius: 10px; padding: 12px; }
 .boarding-care-details summary { cursor: pointer; font-size: 14px; font-weight: 700; }
 .boarding-care-pet { margin-top: 14px; }
-.boarding-care-options { display: flex; flex-wrap: wrap; gap: 9px 16px; margin-top: 9px; }
-.boarding-care-options label { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+.boarding-update-dialog .boarding-care-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 9px;
+}
+.boarding-update-dialog .boarding-care-options label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 46px;
+    margin: 0;
+    padding: 10px 12px;
+    background: #fff;
+    color: #263d4c;
+    border: 1px solid #d6e4eb;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.boarding-update-dialog .boarding-care-options input[type="checkbox"] {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: #22a447;
+    cursor: pointer;
+}
+.boarding-update-dialog .boarding-care-options label:has(input:checked) {
+    background: #eef9f1;
+    color: #168a3a;
+    border-color: #8fd19e;
+    box-shadow: 0 2px 8px rgb(34 164 71 / 8%);
+}
+.boarding-update-dialog input[type="file"]::file-selector-button {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 10px 14px;
+    margin: 0 10px 0 0;
+    min-height: 44px;
+    background: #111;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+/* Safari fallback kept separate from the standard selector. */
+.boarding-update-dialog input[type="file"]::-webkit-file-upload-button {
+    -webkit-appearance: none;
+    padding: 10px 14px;
+    margin: 0 10px 0 0;
+    min-height: 44px;
+    background: #111;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
 .boarding-photo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 14px; }
 .boarding-photo-grid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; }
 .boarding-photo-preview { position: relative; }
@@ -11635,3 +11708,4 @@ dialog.admin-visit-action-confirm::backdrop {
 /* ========================================
    END BOARDING UPDATE EDITOR
    ======================================== */
+
