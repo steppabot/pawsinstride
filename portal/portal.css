@@ -24379,3 +24379,46 @@ body.pet-gallery-open {
 }
 .boarding-walk-map[hidden] { display: none; }
 .client-boarding-walk-section .secondary-button { margin: 5px 5px 5px 0; }
+
+/* ========================================
+   CLIENT BOARDING CLOSE BUTTON AND CARE PILLS
+   ======================================== */
+
+.client-boarding-dialog .client-boarding-dialog-header [data-boarding-view-close] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #ffffff70;
+    border-radius: 9px;
+    background: #ffffff15;
+    color: #fff;
+    font-family: inherit;
+    font-size: 25px;
+    line-height: 1;
+    letter-spacing: 0;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.client-boarding-care-pet {
+    margin: 16px 0;
+}
+
+.client-boarding-care-pet > strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+/* ========================================
+   END CLIENT BOARDING CLOSE BUTTON AND CARE PILLS
+   ======================================== */
