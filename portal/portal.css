@@ -24621,3 +24621,16 @@ body.desktop-screen-services
 #multi-date-booking.boarding-calendar-hidden {
     display: none !important;
 }
+
+/* ========================================
+   HALLOWEEN PORTAL INTRO
+   ======================================== */
+
+.mobile-portal-intro.halloween-intro {
+    background:
+        linear-gradient(
+            135deg,
+            #b55215 0%,
+            #7f2f12 100%
+        );
+}
