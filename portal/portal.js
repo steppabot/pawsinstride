@@ -22659,6 +22659,7 @@ async function renderMobileHomeDashboard() {
         list.appendChild(button);
     }
     await renderClientHomeLatestUpdate(version);
+    if (version === clientHomeRenderVersion) await openClientBoardingNotificationLink();
 }
 
 // ========================================
@@ -24487,6 +24488,41 @@ let clientNotificationRealtimeChannel =
 // REFRESH DATA FOR NEW NOTIFICATION
 // ========================================
 
+function isClientBoardingNotification(type) {
+    return ["client_boarding_update", "client_boarding_started", "client_boarding_completed"]
+        .includes(String(type || "").trim().toLowerCase());
+}
+
+let clientBoardingNotificationLinkBusy = false;
+let clientBoardingNotificationLinkAttempt = "";
+
+async function openClientBoardingNotificationLink() {
+    if (!currentUser?.id || !clientBoardingData.loaded ||
+        clientBoardingData.userId !== currentUser.id || clientBoardingNotificationLinkBusy) return;
+    const url = new URL(window.location.href);
+    const stayId = url.searchParams.get("boarding_stay");
+    if (!stayId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stayId)) return;
+    const attempt = `${currentUser.id}:${stayId}`;
+    if (clientBoardingNotificationLinkAttempt === attempt) return;
+    clientBoardingNotificationLinkBusy = true;
+    clientBoardingNotificationLinkAttempt = attempt;
+    try {
+        closeClientNotificationCenter();
+        closeClientMessaging();
+        await openClientBoardingUpdates(stayId);
+        if (clientBoardingViewer?.stay.id === stayId &&
+            new URL(window.location.href).searchParams.get("boarding_stay") === stayId) {
+            const cleaned = new URL(window.location.href);
+            cleaned.searchParams.delete("boarding_stay");
+            window.history.replaceState(window.history.state, "", cleaned.toString());
+        }
+    } finally {
+        clientBoardingNotificationLinkBusy = false;
+    }
+}
+
+
+
 async function refreshClientDataForNotification(
     notification
 ) {
@@ -24506,6 +24542,12 @@ async function refreshClientDataForNotification(
             ""
         );
 
+
+    if (isClientBoardingNotification(notificationType)) {
+        await loadClientBoardingData(true);
+        await renderMobileHomeDashboard();
+        return;
+    }
 
     // ========================================
     // VISIT / BOOKING / REPORT UPDATES
@@ -24555,7 +24597,6 @@ async function refreshClientDataForNotification(
     }
 
 }
-
 
 // ========================================
 // ADD REALTIME NOTIFICATION
@@ -24803,6 +24844,17 @@ async function handleClientNotificationAction(
 
 
     closeClientNotificationCenter();
+
+    if (isClientBoardingNotification(notificationType) || entityType === "boarding_stay") {
+        const stayId = String(notification.metadata?.boarding_stay_id || notification.entity_id || "");
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stayId)) {
+            alert("This boarding notification is missing its stay. Please open Boarding Updates from your calendar.");
+            return;
+        }
+        closeClientMessaging();
+        await openClientBoardingUpdates(stayId);
+        return;
+    }
 
     // ========================================
     // CANCELLATION / ACCOUNT CREDIT
