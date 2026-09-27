@@ -13516,20 +13516,15 @@ function getWeekKey(
         );
 
 
+    // Sunday is day 0, so Sunday becomes
+    // the first day of the booking week.
     const day =
         date.getDay();
 
 
-    // Sunday is the first day of the booking week.
-    // Sunday = 0, Monday = 1, ..., Saturday = 6.
-
-    const difference =
-        -day;
-
-
     date.setDate(
-        date.getDate() +
-        difference
+        date.getDate() -
+        day
     );
 
 
