@@ -15306,10 +15306,32 @@ async function loadClientBoardingFeed(state) {
                 <small>Shared ${escapeHtml(clientBoardingTimestamp(row.published_at))}</small>
                 ${row.notes ? `<p class="client-boarding-note">${escapeHtml(row.notes)}</p>` : ""}
                 ${(row.boarding_update_pet_care || []).map(care => {
-                    const labels = [["fed", "Fed"], ["fresh_water", "Fresh water"], ["pee", "Pee"], ["poop", "Poop"]]
-                        .filter(([key]) => care[key]).map(([, label]) => label);
-                    return labels.length ? `<p><strong>${escapeHtml(currentPets.find(p => Number(p.id) === Number(care.pet_id))?.name || "Pet")}:</strong>
-                        ${escapeHtml(labels.join(" · "))}</p>` : "";
+                    const labels = [
+                        ["fed", "Fed"],
+                        ["fresh_water", "Fresh Water"],
+                        ["pee", "Pee"],
+                        ["poop", "Poop"]
+                    ].filter(([key]) => care[key]).map(([, label]) => label);
+
+                    if (!labels.length) return "";
+
+                    const petName = currentPets.find(
+                        pet => Number(pet.id) === Number(care.pet_id)
+                    )?.name || "Pet";
+
+                    return `
+                        <div class="client-boarding-care-pet">
+                            <strong>${escapeHtml(petName)}</strong>
+                            <div class="client-visit-report-care-grid">
+                                ${labels.map(label => `
+                                    <span class="client-visit-report-care-item">
+                                        <span class="client-visit-report-care-check" aria-hidden="true">✓</span>
+                                        ${escapeHtml(label)}
+                                    </span>
+                                `).join("")}
+                            </div>
+                        </div>
+                    `;
                 }).join("")}
                 <div class="client-boarding-photo-grid">${photos.map(photo => photo.url ?
                     `<a href="${escapeHtml(photo.url)}" target="_blank" rel="noopener noreferrer"><img
