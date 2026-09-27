@@ -2997,494 +2997,526 @@ document.getElementById(
 // RENDER ADMIN CALENDAR
 // ========================================
 
-function renderAdminCalendar() {
-
-
-    const grid =
-        document.getElementById(
-            "admin-calendar-grid"
-        );
-
-
-    const label =
-        document.getElementById(
-            "admin-calendar-month-label"
-        );
-
-
-    if (
-        !grid ||
-        !label
-    ) {
-
-        return;
-
-    }
-
-
-    label.textContent =
-        new Date(
-
-            adminCalendarYear,
-            adminCalendarMonth,
-            1
-
-        )
-            .toLocaleDateString(
-
-                "en-US",
-
-                {
-
-                    month:
-                        "long",
-
-                    year:
-                        "numeric"
-
-                }
-
-            );
-
-
-    const monthPrefix =
-        `${adminCalendarYear}-${String(
-
-            adminCalendarMonth +
-            1
-
-        ).padStart(
-
-            2,
-            "0"
-
-        )}-`;
-
-
-    const monthVisits =
-        allVisits.filter(
-            visit => {
-
-                const status =
-                    String(
-                        visit.status ||
-                        ""
-                    )
-                        .trim()
-                        .toLowerCase();
-
-
-                return (
-                    String(
-                        visit.visit_date
-                    )
-                        .startsWith(
-                            monthPrefix
-                        ) &&
-                    status !==
-                        "cancelled"
-                );
-
-            }
-        );
-
-
-    document.getElementById(
-        "admin-month-service-count"
-    ).textContent =
-        monthVisits.length;
-
-
-    grid.innerHTML =
-        "";
-
-
-    const firstDay =
-        new Date(
-
-            adminCalendarYear,
-            adminCalendarMonth,
-            1
-
-        );
-
-
-    let blanks =
-        firstDay.getDay();
-
-
-    for (
-        let i = 0;
-        i < blanks;
-        i++
-    ) {
-
-
-        const blank =
-            document.createElement(
-                "div"
-            );
-
-
-        blank.className =
-            "upcoming-calendar-empty";
-
-
-        grid.appendChild(
-            blank
-        );
-
-    }
-
-
-    const days =
-        new Date(
-
-            adminCalendarYear,
-            adminCalendarMonth + 1,
-            0
-
-        )
-            .getDate();
-
-
-    const today =
-        getLocalDateString();
-
-
-    for (
-        let day = 1;
-        day <= days;
-        day++
-    ) {
-
-
-        const date =
-            makeDateString(
-
-                adminCalendarYear,
-                adminCalendarMonth,
-                day
-
-            );
-
-
-        // ========================================
-        // VISITS FOR THIS DATE
-        // ========================================
-
-        const visitsForDate =
-            allVisits.filter(
-                visit => {
-
-                    const status =
-                        String(
-                            visit.status ||
-                            ""
-                        )
-                            .trim()
-                            .toLowerCase();
-
-
-                    return (
-                        visit.visit_date ===
-                            date &&
-                        status !==
-                            "cancelled"
-                    );
-
-                }
-            );
-
-
-        const serviceCount =
-            visitsForDate.length;
-
-
-        // ========================================
-        // COMPLETED DATE
-        // ========================================
-
-        const completedDate =
-            date <= today &&
-            serviceCount > 0 &&
-            visitsForDate.every(
-                visit => {
-
-                    const status =
-                        String(
-                            visit.status ||
-                            ""
-                        )
-                            .trim()
-                            .toLowerCase();
-
-
-                    return (
-                        status ===
-                            "completed" ||
-                        Boolean(
-                            visit.completed_at
-                        )
-                    );
-
-                }
-            );
-
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-
-        button.type =
-            "button";
-
-
-        button.className =
-            "upcoming-calendar-day admin-calendar-day";
-
-
-        if (
-            serviceCount >
-            0
-        ) {
-
-
-            button.classList.add(
-                "upcoming-calendar-booked"
-            );
-
-        }
-
-
-        if (
-            completedDate
-        ) {
-
-
-            button.classList.add(
-                "upcoming-calendar-completed"
-            );
-
-        }
-
-
-        if (
-            date ===
-            today
-        ) {
-
-
-            button.classList.add(
-                "upcoming-calendar-today"
-            );
-
-        }
-
-
-        if (
-            date ===
-            selectedAdminDate
-        ) {
-
-
-            button.classList.add(
-                "upcoming-calendar-selected"
-            );
-
-        }
-
-
-        button.innerHTML =
-            `
-
-                <span class="upcoming-day-number">
-                    ${day}
-                </span>
-
-                ${
-                    serviceCount > 0
-
-                        ? `
-
-                            <span
-                                class="
-                                    upcoming-service-count
-                                    ${
-                                        completedDate
-                                            ? "upcoming-service-count-completed"
-                                            : ""
-                                    }
-                                "
-                            >
-                                ${serviceCount}
-                            </span>
-
-                        `
-
-                        : ""
-                }
-
-            `;
-
-
-        button.addEventListener(
-
-            "click",
-
-            () => {
-
-
-                selectedAdminDate =
-                    date;
-
-
-                renderAdminCalendar();
-
-
-                renderAdminDayServices();
-
-            }
-
-        );
-
-
-        grid.appendChild(
-            button
-        );
-
-    }
-
+// Boarding stays have their own lifecycle. Nightly visit records remain
+// untouched so billing and cancellation history keep their original values.
+const adminBoardingState = {
+    stays: [],
+    loaded: false,
+    error: null,
+    request: null,
+    visitsReference: null,
+    loadedAt: 0
+};
+
+function isAdminBoardingService(visit) {
+    return ["dog boarding", "dog_boarding"].includes(
+        String(visit?.service_type || "").trim().toLowerCase()
+    );
 }
 
+function adminBoardingToday() {
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(new Date());
+    const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    return `${values.year}-${values.month}-${values.day}`;
+}
+
+function addAdminBoardingDay(date, days = 1) {
+    const value = new Date(`${date}T12:00:00Z`);
+    value.setUTCDate(value.getUTCDate() + days);
+    return value.toISOString().slice(0, 10);
+}
+
+function formatAdminBoardingDate(date) {
+    return new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US", {
+        timeZone: "UTC", month: "short", day: "numeric", year: "numeric"
+    });
+}
+
+function formatAdminBoardingTimestamp(value) {
+    return new Date(value).toLocaleString("en-US", {
+        timeZone: "America/Chicago", month: "short", day: "numeric",
+        hour: "numeric", minute: "2-digit"
+    });
+}
+
+function getAdminBoardingReservation(visit) {
+    if (!visit.booking_group_id) {
+        return { issue: "This boarding booking needs a booking group before it can be started." };
+    }
+
+    const stay = adminBoardingState.stays.find(
+        item => item.booking_group_id === visit.booking_group_id
+    );
+
+    if (stay?.started_at) {
+        return { ...stay, issue: "" };
+    }
+
+    const group = allVisits.filter(
+        item => item.booking_group_id === visit.booking_group_id
+    );
+
+    if (group.some(item => !isAdminBoardingService(item) ||
+        item.client_id !== visit.client_id ||
+        (item.checkout_id || null) !== (visit.checkout_id || null))) {
+        return { issue: "This boarding booking has conflicting records and needs review." };
+    }
+
+    const nights = group.filter(
+        item => String(item.status || "").toLowerCase() !== "cancelled"
+    ).sort((a, b) => String(a.visit_date).localeCompare(String(b.visit_date)));
+
+    if (!nights.length) {
+        return { ...(stay || {}), status: "cancelled", issue: "" };
+    }
+
+    if (group.some(item => item.checked_in_at || item.completed_at ||
+        ["checked_in", "in_progress", "completed"].includes(
+            String(item.status || "").toLowerCase()
+        ))) {
+        return { issue: "This booking used the old boarding check-in flow. Review it before converting it to a stay." };
+    }
+
+    const dates = nights.map(item => item.visit_date);
+    if (dates.some((date, index) => index > 0 && date !== addAdminBoardingDay(dates[index - 1]))) {
+        return { issue: "This boarding booking has duplicate or missing nights. Review its dates before starting it." };
+    }
+
+    return {
+        ...(stay || {}),
+        client_id: visit.client_id,
+        booking_group_id: visit.booking_group_id,
+        primary_visit_id: nights[0].id,
+        dropoff_date: dates[0],
+        pickup_date: addAdminBoardingDay(dates[dates.length - 1]),
+        pickup_window: nights[nights.length - 1].time_window,
+        status: "scheduled",
+        issue: nights.some(item => String(item.payment_status || "").toLowerCase() !== "paid")
+            ? "All boarding nights must be paid before the stay can start."
+            : ""
+    };
+}
+
+async function loadAdminBoardingStays(force = false) {
+    if (adminBoardingState.request) {
+        await adminBoardingState.request;
+        if (force) return loadAdminBoardingStays(true);
+        return;
+    }
+
+    if (!navigator.onLine) return;
+    if (!force && adminBoardingState.visitsReference === allVisits &&
+        Date.now() - adminBoardingState.loadedAt < 30000) return;
+
+    const visitsReference = allVisits;
+    adminBoardingState.error = null;
+    adminBoardingState.request = (async () => {
+        try {
+            const { data, error } = await supabaseClient
+                .from("boarding_stays").select("*");
+            if (error) throw error;
+            adminBoardingState.stays = data || [];
+            adminBoardingState.loaded = true;
+        } catch (error) {
+            adminBoardingState.error = error;
+            adminBoardingState.loaded = false;
+            console.error("Boarding stays could not be loaded:", error);
+        } finally {
+            adminBoardingState.visitsReference = visitsReference;
+            adminBoardingState.loadedAt = Date.now();
+        }
+    })();
+
+    try {
+        await adminBoardingState.request;
+    } finally {
+        adminBoardingState.request = null;
+        renderAdminCalendar(false);
+        if (!activeVisitReportVisitId) renderAdminDayServices();
+    }
+}
+
+function getAdminCalendarEntries() {
+    const entries = [...allVisits];
+    const seenGroups = new Set();
+
+    for (const visit of allVisits) {
+        if (!isAdminBoardingService(visit) || !visit.booking_group_id ||
+            seenGroups.has(visit.booking_group_id)) continue;
+        seenGroups.add(visit.booking_group_id);
+        const stay = getAdminBoardingReservation(visit);
+        if (stay.issue || !stay.pickup_date || stay.status === "cancelled") continue;
+
+        const primary = allVisits.find(
+            item => Number(item.id) === Number(stay.primary_visit_id)
+        ) || visit;
+
+        // Display-only pickup entry. Never insert this into allVisits or the DB.
+        entries.push({
+            ...primary,
+            visit_date: stay.pickup_date,
+            time_window: stay.pickup_window || "Pickup",
+            boarding_pickup_display_only: true
+        });
+    }
+
+    return entries;
+}
+
+function isAdminCalendarEntryCompleted(visit) {
+    if (isAdminBoardingService(visit)) {
+        return adminBoardingState.loaded &&
+            getAdminBoardingReservation(visit).status === "completed";
+    }
+    return String(visit.status || "").trim().toLowerCase() === "completed" ||
+        Boolean(visit.completed_at);
+}
+
+function renderAdminCalendar(refreshBoarding = true) {
+    const grid = document.getElementById("admin-calendar-grid");
+    const label = document.getElementById("admin-calendar-month-label");
+    if (!grid || !label) return;
+
+    if (refreshBoarding && allVisits.some(isAdminBoardingService)) {
+        void loadAdminBoardingStays();
+    }
+
+    label.textContent = new Date(adminCalendarYear, adminCalendarMonth, 1)
+        .toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+    const monthPrefix = `${adminCalendarYear}-${String(adminCalendarMonth + 1).padStart(2, "0")}-`;
+    const entries = getAdminCalendarEntries().filter(
+        visit => String(visit.status || "").trim().toLowerCase() !== "cancelled"
+    );
+    const monthCount = document.getElementById("admin-month-service-count");
+    if (monthCount) monthCount.textContent = entries.filter(
+        visit => String(visit.visit_date).startsWith(monthPrefix)
+    ).length;
+
+    grid.innerHTML = "";
+    const blanks = new Date(adminCalendarYear, adminCalendarMonth, 1).getDay();
+    for (let index = 0; index < blanks; index++) {
+        const blank = document.createElement("div");
+        blank.className = "upcoming-calendar-empty";
+        grid.appendChild(blank);
+    }
+
+    const days = new Date(adminCalendarYear, adminCalendarMonth + 1, 0).getDate();
+    const today = getLocalDateString();
+    for (let day = 1; day <= days; day++) {
+        const date = makeDateString(adminCalendarYear, adminCalendarMonth, day);
+        const visitsForDate = entries.filter(visit => visit.visit_date === date);
+        const serviceCount = visitsForDate.length;
+        const completedDate = date <= today && serviceCount > 0 &&
+            visitsForDate.every(isAdminCalendarEntryCompleted);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "upcoming-calendar-day admin-calendar-day";
+        if (serviceCount > 0) button.classList.add("upcoming-calendar-booked");
+        if (completedDate) button.classList.add("upcoming-calendar-completed");
+        if (date === today) button.classList.add("upcoming-calendar-today");
+        if (date === selectedAdminDate) button.classList.add("upcoming-calendar-selected");
+        button.innerHTML = `
+            <span class="upcoming-day-number">${day}</span>
+            ${serviceCount > 0 ? `
+                <span class="upcoming-service-count ${completedDate ? "upcoming-service-count-completed" : ""}">
+                    ${serviceCount}
+                </span>` : ""}
+        `;
+        button.addEventListener("click", () => {
+            selectedAdminDate = date;
+            renderAdminCalendar();
+            renderAdminDayServices();
+        });
+        grid.appendChild(button);
+    }
+}
+
+// ========================================
+// BOARDING CALENDAR CARD
+// ========================================
+
+function buildAdminBoardingCard(visit) {
+    const stay = getAdminBoardingReservation(visit);
+    const client = allProfiles.find(item => item.id === visit.client_id);
+    const pets = getAdminPetsForVisit(visit);
+    const cancelled = !visit.boarding_pickup_display_only &&
+        String(visit.status || "").toLowerCase() === "cancelled";
+    const pickup = Boolean(visit.boarding_pickup_display_only);
+    const today = adminBoardingToday();
+    const ready = adminBoardingState.loaded && !adminBoardingState.error &&
+        !adminBoardingState.request && navigator.onLine;
+
+    let status = cancelled ? "Cancelled night" : {
+        active: "Boarding with us",
+        completed: "Boarding complete",
+        cancelled: "Cancelled",
+        scheduled: "Scheduled"
+    }[stay.status] || "Needs review";
+    if (!cancelled && !adminBoardingState.loaded && !stay.issue) {
+        status = adminBoardingState.error ? "Unable to load stay" :
+            navigator.onLine ? "Loading stay…" : "Offline";
+    }
+
+    const dateLabel = stay.dropoff_date && stay.pickup_date
+        ? `${formatAdminBoardingDate(stay.dropoff_date)} → ${formatAdminBoardingDate(stay.pickup_date)}`
+        : formatAdminBoardingDate(visit.visit_date);
+    let description = stay.issue || "Start boarding once when the pet arrives.";
+    if (stay.status === "active") {
+        description = pickup
+            ? "End boarding when the pet has been picked up."
+            : `Boarding is in progress. Pickup is ${formatAdminBoardingDate(stay.pickup_date)}.`;
+    } else if (stay.status === "completed") {
+        description = "This boarding stay has ended.";
+    }
+    if (cancelled) description = "This reserved night was cancelled.";
+
+    let actions = "";
+    if (!cancelled && !stay.issue && stay.status === "scheduled" &&
+        selectedAdminDate === today && today >= stay.dropoff_date && today <= stay.pickup_date) {
+        actions = `<button type="button" class="primary-button admin-visit-action-button"
+            data-boarding-action="start" data-boarding-visit-id="${visit.id}"
+            ${ready ? "" : "disabled"}>Start Boarding</button>`;
+    } else if (!cancelled && !stay.issue && stay.status === "active" && pickup) {
+        actions = `<button type="button" class="primary-button admin-visit-action-button admin-finish-visit-button"
+            data-boarding-action="end" data-boarding-visit-id="${stay.primary_visit_id}"
+            ${ready && today >= stay.pickup_date ? "" : "disabled"}>End Boarding</button>`;
+    }
+
+    if (!navigator.onLine) {
+        description += " Connect to the internet to update boarding status.";
+    } else if (adminBoardingState.error) {
+        description += " Boarding status could not be loaded. Try refreshing it.";
+    }
+    actions += `<button type="button" class="secondary-button admin-visit-action-button"
+        data-boarding-action="refresh" ${navigator.onLine ? "" : "disabled"}>
+        Refresh Boarding Status</button>`;
+
+    const cardClass = !cancelled && stay.status === "active"
+        ? "admin-service-card-in-progress"
+        : !cancelled && stay.status === "completed" ? "admin-service-card-completed" : "";
+    return `
+        <article class="admin-service-card ${cardClass}">
+            <div class="admin-service-top">
+                <div>
+                    <div class="admin-service-time">${escapeHtml(dateLabel)}</div>
+                    <h5>${pickup ? "Boarding Pickup" : "Dog Boarding"}</h5>
+                </div>
+                <div class="admin-service-statuses">
+                    <span class="service-status">${escapeHtml(status)}</span>
+                    ${pickup ? "" : `<span class="service-status admin-payment-status">${escapeHtml(formatStatus(visit.payment_status))}</span>`}
+                </div>
+            </div>
+            <div class="admin-service-main-grid">
+                <div class="admin-service-detail">
+                    <span>Client</span>
+                    <strong>${escapeHtml(client?.full_name || client?.email || "Client")}</strong>
+                    ${client?.phone ? `<small>${escapeHtml(client.phone)}</small>` : ""}
+                </div>
+                <div class="admin-service-detail">
+                    <span>Pets</span>
+                    <div class="service-pet-chips admin-service-pet-chips">
+                        ${pets.map(pet => `<span class="service-pet-chip">${escapeHtml(pet.name)}</span>`).join("") || "Pet not assigned"}
+                    </div>
+                </div>
+                <div class="admin-service-detail">
+                    <span>${pickup ? "Pickup window" : "Reserved night"}</span>
+                    <strong>${pickup ? escapeHtml(stay.pickup_window || "Arrange with client") : `$${Number(visit.price || 0).toFixed(2)}`}</strong>
+                    ${pickup ? "<small>Pickup day</small>" : `<small>${escapeHtml(formatAdminBoardingDate(visit.visit_date))}</small>`}
+                </div>
+            </div>
+            <div class="admin-visit-progress ${stay.status === "active" ? "admin-visit-progress-live" : ""}">
+                <div class="admin-visit-progress-copy">
+                    <strong>${escapeHtml(status)}</strong>
+                    <span>${escapeHtml(description)}</span>
+                    ${stay.started_at ? `<span>Arrived: ${escapeHtml(formatAdminBoardingTimestamp(stay.started_at))}</span>` : ""}
+                    ${stay.ended_at ? `<span>Picked up: ${escapeHtml(formatAdminBoardingTimestamp(stay.ended_at))}</span>` : ""}
+                </div>
+                <div class="admin-completed-visit-actions">${actions}</div>
+            </div>
+        </article>
+    `;
+}
+
+// ========================================
+// BOARDING ACTION CONFIRMATION
+// ========================================
+
+function confirmAdminBoardingAction(action, visit, stay) {
+    const starting = action === "start";
+    const dialog = document.getElementById("admin-visit-action-confirm");
+    const title = document.getElementById("admin-visit-confirm-title");
+    const context = document.getElementById("admin-visit-confirm-context");
+    const message = document.getElementById("admin-visit-confirm-message");
+    const cancel = document.getElementById("admin-visit-confirm-cancel");
+    const accept = document.getElementById("admin-visit-confirm-accept");
+    if (!dialog || !title || !context || !message || !cancel || !accept ||
+        typeof dialog.showModal !== "function") {
+        throw new Error("The confirmation window could not open. No boarding action was taken.");
+    }
+    if (dialog.open) return Promise.resolve(false);
+
+    const client = allProfiles.find(item => item.id === visit.client_id);
+    title.textContent = starting ? "Start this boarding stay?" : "End this boarding stay?";
+    context.textContent = [client?.full_name || client?.email || "Client",
+        getAdminPetsForVisit(visit).map(pet => pet.name).join(" & "),
+        `${formatAdminBoardingDate(stay.dropoff_date)} → ${formatAdminBoardingDate(stay.pickup_date)}`
+    ].filter(Boolean).join(" · ");
+    message.textContent = starting
+        ? "Confirm that the pet has arrived. This records one arrival for the entire boarding stay."
+        : "Confirm that the pet has been picked up. This records departure and ends the entire boarding stay.";
+    accept.textContent = starting ? "Start Boarding" : "End Boarding";
+    dialog.dataset.caution = String(!starting);
+    dialog.returnValue = "";
+
+    return new Promise((resolve, reject) => {
+        function cleanup() {
+            cancel.removeEventListener("click", cancelAction);
+            accept.removeEventListener("click", acceptAction);
+            dialog.removeEventListener("cancel", escapeAction);
+            dialog.removeEventListener("close", closed);
+        }
+        function cancelAction() { dialog.close("cancelled"); }
+        function acceptAction() { dialog.close("confirmed"); }
+        function escapeAction(event) { event.preventDefault(); cancelAction(); }
+        function closed() {
+            cleanup();
+            resolve(dialog.returnValue === "confirmed");
+        }
+        cancel.addEventListener("click", cancelAction);
+        accept.addEventListener("click", acceptAction);
+        dialog.addEventListener("cancel", escapeAction);
+        dialog.addEventListener("close", closed);
+        try {
+            dialog.showModal();
+            cancel.focus({ preventScroll: true });
+        } catch (error) {
+            cleanup();
+            reject(error);
+        }
+    });
+}
+
+function checkAdminBoardingWalksSynced(stay) {
+    const visits = allVisits.filter(item => item.booking_group_id === stay.booking_group_id);
+    const ids = new Set(visits.map(item => Number(item.id)));
+    const walks = allVisitWalks.filter(item => ids.has(Number(item.visit_id)));
+    for (const visit of visits) {
+        const local = loadLocalVisitWalk(visit.id);
+        if (local) walks.push(local);
+    }
+    for (const walk of walks) {
+        if (walk.status === "in_progress" || loadPendingWalkFinish(walk.id) ||
+            loadPendingWalkGpsQueue(walk.id).length > 0) {
+            throw new Error("Finish and sync the boarding walk before ending this stay.");
+        }
+    }
+}
+
+document.getElementById("admin-day-services")?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-boarding-action]");
+    if (!button || button.disabled || adminVisitActionBusy) return;
+    const action = button.dataset.boardingAction;
+    if (!["start", "end", "refresh"].includes(action)) return;
+    event.preventDefault();
+    adminVisitActionBusy = true;
+    button.disabled = true;
+
+    try {
+        if (!navigator.onLine) throw new Error("Connect to the internet to update boarding status.");
+        if (action === "refresh") {
+            await loadAdminBoardingStays(true);
+            if (adminBoardingState.error) throw adminBoardingState.error;
+            return;
+        }
+
+        // Finish older reads before saving a new arrival/departure.
+        await loadAdminBoardingStays(true);
+        if (adminBoardingState.error) throw adminBoardingState.error;
+        const visit = allVisits.find(item => Number(item.id) === Number(button.dataset.boardingVisitId));
+        if (!visit || !isAdminBoardingService(visit)) throw new Error("Boarding booking not found.");
+        const { data: stay, error: prepareError } = await supabaseClient.rpc(
+            "admin_prepare_boarding_stay", { p_visit_id: visit.id }
+        );
+        if (prepareError) throw prepareError;
+        if (!stay?.id) throw new Error("Boarding stay could not be loaded.");
+
+        if (action === "start" && stay.status !== "scheduled") {
+            throw new Error("This stay is no longer scheduled. Refresh its status before continuing.");
+        }
+        if (action === "end" && stay.status !== "active") {
+            throw new Error("This stay is no longer active. Refresh its status before continuing.");
+        }
+        if (action === "end") {
+            if (adminBoardingToday() < stay.pickup_date) {
+                throw new Error("End Boarding becomes available on the pickup date.");
+            }
+            checkAdminBoardingWalksSynced(stay);
+        }
+
+        if (!await confirmAdminBoardingAction(action, visit, stay)) return;
+
+        const { data: saved, error } = action === "start"
+            ? await supabaseClient.rpc("admin_start_boarding", { p_visit_id: visit.id })
+            : await supabaseClient.rpc("admin_end_boarding", { p_stay_id: stay.id });
+        if (error) throw error;
+        if (!saved?.id) throw new Error("Boarding status was not returned. Refresh before trying again.");
+        adminBoardingState.stays = adminBoardingState.stays.filter(item => item.id !== saved.id);
+        adminBoardingState.stays.push(saved);
+        adminBoardingState.loaded = true;
+        adminBoardingState.error = null;
+    } catch (error) {
+        console.error("Boarding action error:", error);
+        alert(error?.message || "Boarding could not be updated. Refresh its status and try again.");
+    } finally {
+        adminVisitActionBusy = false;
+        renderAdminCalendar(false);
+        renderAdminDayServices();
+    }
+});
+
+window.addEventListener("online", () => {
+    if (currentUser && allVisits.some(isAdminBoardingService)) void loadAdminBoardingStays(true);
+});
+window.addEventListener("offline", () => {
+    if (currentUser && !activeVisitReportVisitId) renderAdminDayServices();
+});
+window.addEventListener("focus", () => {
+    if (currentUser && activeAdminScreen === "schedule" && allVisits.some(isAdminBoardingService)) {
+        void loadAdminBoardingStays(true);
+    }
+});
 
 // ========================================
 // RENDER DAY SERVICES
 // ========================================
 
 function renderAdminDayServices() {
+    const heading = document.getElementById("admin-selected-date");
+    const count = document.getElementById("admin-selected-service-count");
+    const container = document.getElementById("admin-day-services");
+    if (!heading || !count || !container) return;
 
-
-    const heading =
-        document.getElementById(
-            "admin-selected-date"
-        );
-
-
-    const count =
-        document.getElementById(
-            "admin-selected-service-count"
-        );
-
-
-    const container =
-        document.getElementById(
-            "admin-day-services"
-        );
-
-
-
-    if (
-        !selectedAdminDate
-    ) {
-
-
-        heading.textContent =
-            "Select a date";
-
-
-        count.textContent =
-            "0 services";
-
-
-        container.innerHTML =
-            `
-
-                <p class="empty-upcoming-message">
-                    Select a date on the calendar to view booked services.
-                </p>
-
-            `;
-
-
+    if (!selectedAdminDate) {
+        heading.textContent = "Select a date";
+        count.textContent = "0 services";
+        container.innerHTML = `<p class="empty-upcoming-message">Select a date on the calendar to view booked services.</p>`;
         return;
-
     }
 
-
-
-    heading.textContent =
-        formatLongDate(
-            selectedAdminDate
-        );
-
-
-
-    const services =
-        allVisits
-            .filter(
-
-                visit =>
-
-                    visit.visit_date ===
-                    selectedAdminDate
-
-            )
-            .sort(
-                compareAdminVisits
-            );
-
-
-
-    count.textContent =
-        `${services.length} ${
-
-            services.length === 1
-
-                ? "service"
-
-                : "services"
-
-        }`;
-
-
-
-    if (
-        services.length ===
-        0
-    ) {
-
-
-        container.innerHTML =
-            `
-
-                <p class="empty-upcoming-message">
-                    No client services booked for this date.
-                </p>
-
-            `;
-
-
-        return;
-
-    }
-
-
-
-    container.innerHTML =
-        services
-            .map(
-
-                visit =>
-                    buildAdminServiceCard(
-                        visit
-                    )
-
-            )
-            .join("");
-
+    heading.textContent = formatLongDate(selectedAdminDate);
+    const services = getAdminCalendarEntries()
+        .filter(visit => visit.visit_date === selectedAdminDate)
+        .sort(compareAdminVisits);
+    count.textContent = `${services.length} ${services.length === 1 ? "service" : "services"}`;
+    container.innerHTML = services.length
+        ? services.map(visit => isAdminBoardingService(visit)
+            ? buildAdminBoardingCard(visit)
+            : buildAdminServiceCard(visit)).join("")
+        : `<p class="empty-upcoming-message">No client services booked for this date.</p>`;
 }
 
 // ========================================
@@ -18208,9 +18240,10 @@ function renderAdminNeedsAttention() {
                             .trim()
                             .toLowerCase();
 
-                    // Meet & Greets do not require visit reports.
+                    // Meet & Greets and boarding do not require ordinary visit reports.
 
                     if (
+                        isAdminBoardingService(visit) ||
                         isMeetAndGreetService(visit) ||
                         serviceType === "meet_greet"
                     ) {
@@ -18247,8 +18280,7 @@ function renderAdminNeedsAttention() {
             .sort(
                 compareAdminVisits
             );
-
-
+    
     // ========================================
     // NOTHING NEEDS ATTENTION
     // ========================================
