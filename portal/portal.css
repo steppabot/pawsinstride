@@ -24606,3 +24606,18 @@ dialog.client-report-lightbox[data-boarding-photo-modal]::backdrop {
    END BOARDING BOOKING DATE FIELDS
    ========================================
    */
+
+/* ========================================
+   HIDE STANDARD CALENDAR FOR BOARDING
+   ======================================== */
+
+body.desktop-screen-services
+#multi-date-booking[hidden] {
+    display: none !important;
+}
+
+/* Also protect it if another rule changes inline display. */
+body.desktop-screen-services
+#multi-date-booking.boarding-calendar-hidden {
+    display: none !important;
+}
