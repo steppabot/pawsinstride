@@ -3344,9 +3344,235 @@ function buildAdminBoardingCard(visit) {
                 </div>
                 <div class="admin-completed-visit-actions">${actions}</div>
             </div>
+            ${!cancelled && !stay.issue ? buildAdminBoardingWalkPanel(stay, visit.visit_date) : ""}
         </article>
     `;
 }
+
+// ========================================
+// BOARDING WALK CONTROLS
+// ========================================
+
+const adminBoardingWalkMessages = new Map();
+
+function getAdminBoardingWalks(stayId) {
+    return allVisitWalks.filter(walk => walk.boarding_stay_id === stayId)
+        .sort((a, b) => new Date(b.started_at) - new Date(a.started_at) || Number(b.id) - Number(a.id));
+}
+
+function boardingWalkStopKey(id) { return `paws-in-stride-boarding-walk-stop-${id}`; }
+function getAdminBoardingWalkFinish(walk) {
+    const value = localStorage.getItem(boardingWalkStopKey(walk.id));
+    return value ? JSON.parse(value) : loadPendingWalkFinish(walk.id);
+}
+
+function buildAdminBoardingWalkPanel(stay, date) {
+    if (!stay?.id || !stay.started_at) return "";
+    const walks = getAdminBoardingWalks(stay.id);
+    const active = walks.find(walk => walk.status === "in_progress" || getAdminBoardingWalkFinish(walk));
+    const completed = walks.filter(walk => walk.status === "completed" && walk.boarding_date === date);
+    const today = date === adminBoardingToday();
+    const locked = adminVisitActionBusy ? "disabled" : "";
+    const button = (action, label, walk, disabled = false) => `<button type="button"
+        class="secondary-button admin-visit-action-button" data-boarding-walk-action="${action}"
+        data-boarding-walk-stay="${stay.id}" data-boarding-walk-id="${walk?.id || ""}"
+        ${disabled ? "disabled" : locked}>${label}</button>`;
+    let controls = "";
+    let summary = "";
+    if (active) {
+        const finish = getAdminBoardingWalkFinish(active);
+        const tracking = isWalkGpsTracking(active.id) && !activeWalkGpsTracker?.permissionErrorShown;
+        const elapsed = finish?.duration_seconds ?? Math.max(0, Math.floor((Date.now() - new Date(active.started_at).getTime()) / 1000));
+        const distance = finish?.distance_meters ?? (tracking ? activeWalkGpsTracker.distanceMeters : active.distance_meters);
+        summary = `<p><strong>${finish ? "Walk finished — waiting to sync" : "Walk in progress"}</strong></p>
+            <div class="boarding-walk-totals">
+                <span>Time <strong id="admin-walk-duration-${active.visit_id}">${formatWalkDuration(elapsed)}</strong></span>
+                <span>Distance <strong id="admin-walk-distance-${active.visit_id}">${(Number(distance || 0) / 1609.344).toFixed(2)} mi</strong></span>
+            </div><p>${escapeHtml(formatAdminBoardingTimestamp(active.started_at))}</p>`;
+        controls = finish ? button("sync", "Sync Finished Walk", active, !navigator.onLine)
+            : `${!tracking ? button("resume", "Resume GPS", active, !navigator.onLine) : ""}${button("finish", "Finish Boarding Walk", active)}`;
+        if (!finish && !tracking) summary += '<p>GPS is not recording on this device. Resume here only if this walk is no longer being tracked on another device.</p>';
+    } else if (stay.status === "active" && today) {
+        controls = button("start", "Start Boarding Walk", null, !navigator.onLine);
+    }
+    return `<section class="admin-boarding-walk-panel"><h6>Boarding walks</h6>
+        ${summary}<div class="admin-completed-visit-actions">${controls}${button("refresh", "Refresh Walks", null, !navigator.onLine)}</div>
+        <p class="boarding-walk-message" role="status">${escapeHtml(adminBoardingWalkMessages.get(stay.id) || "")}</p>
+        ${!navigator.onLine ? '<p>Connect to start or resume GPS. A walk already recording can continue, and its finish can be saved on this device.</p>' : ""}
+        <div class="boarding-walk-history">${completed.map(walk => `<article>
+            <strong>${escapeHtml(formatAdminBoardingTimestamp(walk.started_at))}</strong>
+            <p>${formatWalkDuration(walk.duration_seconds)} · ${(Number(walk.distance_meters || 0) / 1609.344).toFixed(2)} mi</p>
+            ${button("route", "View Walk Route", walk, !navigator.onLine)}
+            <div id="admin-boarding-walk-map-${walk.id}" class="boarding-walk-map" hidden></div>
+        </article>`).join("") || '<p>No completed walks for this day yet.</p>'}</div>
+    </section>`;
+}
+
+async function refreshAdminBoardingWalks(stayId) {
+    const { data, error } = await supabaseClient.from("visit_walks").select("*")
+        .eq("boarding_stay_id", stayId).order("started_at", { ascending: false });
+    if (error) throw error;
+    for (const walk of data || []) replaceAdminVisitWalk(walk);
+    // A finish already saved by this device is an authorized retry.
+    for (const walk of getAdminBoardingWalks(stayId)) {
+        if (getAdminBoardingWalkFinish(walk)) await finishAdminBoardingWalk(walk);
+    }
+    return getAdminBoardingWalks(stayId);
+}
+
+function requestAdminBoardingWalkLocation() {
+    if (!navigator.geolocation) return Promise.reject(new Error("This device does not support GPS."));
+    return new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve,
+        () => reject(new Error("Allow precise location access and try again before starting the walk.")),
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }));
+}
+
+async function startAdminBoardingWalk(stay) {
+    if (!navigator.onLine) throw new Error("Connect to the internet to start a boarding walk.");
+    if (activeWalkGpsTracker) throw new Error("Finish the walk being tracked on this device first.");
+    const walks = await refreshAdminBoardingWalks(stay.id);
+    if (walks.some(w => w.status === "in_progress" || getAdminBoardingWalkFinish(w) || loadPendingWalkGpsQueue(w.id).length)) {
+        throw new Error("Resume or finish and sync the existing walk before starting another.");
+    }
+    await requestAdminBoardingWalkLocation();
+    const key = `paws-in-stride-boarding-walk-request-${currentUser.id}-${stay.id}`;
+    let token = localStorage.getItem(key);
+    if (token && walks.some(w => w.tracking_session_id === token && w.status !== "in_progress")) {
+        localStorage.removeItem(key); token = null;
+    }
+    if (!token) {
+        token = createWalkTrackingSessionId();
+        // Save BEFORE the request so a lost response can be retried safely.
+        localStorage.setItem(key, token);
+    }
+    const { data: walk, error } = await supabaseClient.rpc("admin_start_boarding_walk", {
+        p_stay_id: stay.id, p_tracking_session_id: token
+    });
+    if (error) throw error;
+    if (!walk?.id || walk.boarding_stay_id !== stay.id) throw new Error("The walk could not be confirmed. Refresh Walks before retrying.");
+    replaceAdminVisitWalk(walk);
+    if (walk.status !== "in_progress") throw new Error("That walk has already finished. Refresh Walks to start a new one.");
+    await startWalkGpsTracking(walk);
+    startWalkUiTimer();
+}
+
+async function finishAdminBoardingWalk(walk) {
+    if (!walk?.boarding_stay_id) throw new Error("Boarding walk not found.");
+    let finish = getAdminBoardingWalkFinish(walk);
+    let tracker = activeWalkGpsTracker && Number(activeWalkGpsTracker.walkId) === Number(walk.id)
+        ? activeWalkGpsTracker : null;
+    if (!finish) {
+        if (walk.status !== "in_progress") throw new Error("This walk has already finished.");
+        const queue = tracker?.pendingQueue || loadPendingWalkGpsQueue(walk.id);
+        const ended = new Date();
+        finish = {
+            ended_at: ended.toISOString(),
+            duration_seconds: Math.max(0, Math.round((ended.getTime() - new Date(walk.started_at).getTime()) / 1000)),
+            distance_meters: Number(tracker?.distanceMeters ?? queue.at(-1)?.distance_meters_total ?? walk.distance_meters ?? 0).toFixed(2),
+            point_count: Number(tracker?.pointCount ?? queue.at(-1)?.point_count_total ?? walk.point_count ?? 0),
+            saved_at: ended.toISOString()
+        };
+        // Strict writes: if storage is full, do not silently discard the finish.
+        localStorage.setItem(getWalkGpsQueueStorageKey(walk.id), JSON.stringify(queue));
+        localStorage.setItem(boardingWalkStopKey(walk.id), JSON.stringify(finish));
+    }
+    if (tracker) {
+        stopWalkGpsTracking(walk.id);
+        // Let the existing writer finish before the finish-sync writer starts.
+        if (tracker.flushPromise) await tracker.flushPromise;
+        localStorage.setItem(getWalkGpsQueueStorageKey(walk.id), JSON.stringify(tracker.pendingQueue));
+    }
+    savePendingWalkFinish(walk.id, finish);
+    localStorage.removeItem(boardingWalkStopKey(walk.id));
+    if (!navigator.onLine) return false;
+    return await syncPendingWalkFinish(walk.id, false);
+}
+
+async function showAdminBoardingWalkRoute(walk) {
+    const mount = document.getElementById(`admin-boarding-walk-map-${walk.id}`);
+    if (!mount) return;
+    mount.hidden = false;
+    mount.textContent = "Loading route…";
+    const points = [];
+    let sequence = -1;
+    while (true) {
+        const { data, error } = await supabaseClient.from("visit_walk_points")
+            .select("sequence_number, latitude, longitude")
+            .eq("walk_id", walk.id).gt("sequence_number", sequence)
+            .order("sequence_number", { ascending: true }).limit(1000);
+        if (error) throw error;
+        if (!data?.length) break;
+        points.push(...data); sequence = data.at(-1).sequence_number;
+        if (data.length < 1000) break;
+    }
+    if (!mount.isConnected) return;
+    if (points.length < 2) { mount.textContent = "Not enough GPS points to draw this route."; return; }
+    if (!window.google?.maps) { mount.textContent = "The map could not load. Refresh the page and try again."; return; }
+    mount.textContent = "";
+    renderAdminGoogleWalkRoute(mount, points);
+}
+
+async function handleAdminBoardingWalkAction(button) {
+    if (button.disabled || adminVisitActionBusy) return;
+    const action = button.dataset.boardingWalkAction;
+    const stayId = button.dataset.boardingWalkStay;
+    if (!["start", "resume", "finish", "sync", "refresh", "route"].includes(action)) return;
+    adminVisitActionBusy = true; button.disabled = true;
+    let preserveRoute = false;
+    try {
+        const stay = adminBoardingState.stays.find(s => s.id === stayId);
+        const visit = allVisits.find(v => Number(v.id) === Number(stay?.primary_visit_id));
+        if (!stay || !visit) throw new Error("Refresh boarding status before continuing.");
+        let walk = getAdminBoardingWalks(stayId).find(w => Number(w.id) === Number(button.dataset.boardingWalkId));
+        adminBoardingWalkMessages.delete(stayId);
+        if (action === "route") {
+            if (!walk || walk.status !== "completed") throw new Error("Completed walk not found.");
+            await showAdminBoardingWalkRoute(walk); preserveRoute = true; return;
+        }
+        if (action === "refresh") { await refreshAdminBoardingWalks(stayId); return; }
+        if (action === "start") {
+            if (!await confirmAdminBoardingAction("walk-start", visit, stay)) return;
+            await startAdminBoardingWalk(stay);
+            adminBoardingWalkMessages.set(stayId, "Walk started. Keep this page open while tracking.");
+            return;
+        }
+        if (!walk) throw new Error("Walk not found. Refresh Walks and try again.");
+        if (action === "sync" || getAdminBoardingWalkFinish(walk)) {
+            const synced = await finishAdminBoardingWalk(walk);
+            adminBoardingWalkMessages.set(stayId, synced ? "Walk saved. Boarding is still active unless already ended." : "Finish saved on this device. Connect and tap Sync Finished Walk.");
+            return;
+        }
+        if (!await confirmAdminBoardingAction(action === "finish" ? "walk-finish" : "walk-resume", visit, stay)) return;
+        if (action === "finish") {
+            const synced = await finishAdminBoardingWalk(walk);
+            adminBoardingWalkMessages.set(stayId, synced ? "Walk saved. Boarding is still active." : "Finish saved on this device. Connect and tap Sync Finished Walk.");
+        } else {
+            if (!navigator.onLine) throw new Error("Connect to resume GPS tracking.");
+            if (activeWalkGpsTracker && Number(activeWalkGpsTracker.walkId) !== Number(walk.id)) throw new Error("Another walk is being tracked on this device.");
+            await refreshAdminBoardingWalks(stayId);
+            walk = getAdminBoardingWalks(stayId).find(w => Number(w.id) === Number(button.dataset.boardingWalkId));
+            if (!walk || walk.status !== "in_progress" || getAdminBoardingWalkFinish(walk)) throw new Error("This walk is no longer active.");
+            await requestAdminBoardingWalkLocation();
+            if (activeWalkGpsTracker?.permissionErrorShown) stopWalkGpsTracking(walk.id);
+            await startWalkGpsTracking(walk); startWalkUiTimer();
+            adminBoardingWalkMessages.set(stayId, "GPS resumed. Tracking gaps cannot be recreated.");
+        }
+    } catch (error) {
+        console.error("Boarding walk error:", error);
+        adminBoardingWalkMessages.set(stayId, error?.message || "The walk could not be updated. Try refreshing walks.");
+    } finally {
+        adminVisitActionBusy = false;
+        if (!preserveRoute) renderAdminDayServices();
+        else button.disabled = false;
+    }
+}
+
+document.getElementById("admin-day-services")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-boarding-walk-action]");
+    if (!button) return;
+    event.preventDefault();
+    void handleAdminBoardingWalkAction(button);
+});
 
 // ========================================
 // BOARDING UPDATE EDITOR
@@ -3748,7 +3974,15 @@ document.getElementById("admin-day-services")?.addEventListener("click", async e
 // ========================================
 
 function confirmAdminBoardingAction(action, visit, stay) {
-    const starting = action === "start";
+    const choices = {
+        start: ["Start this boarding stay?", "Confirm that the pet has arrived. This records one arrival for the entire boarding stay.", "Start Boarding", false],
+        end: ["End this boarding stay?", "Confirm that the pet has been picked up. This records departure and ends the entire boarding stay.", "End Boarding", true],
+        "walk-start": ["Start this boarding walk?", "This starts a separate GPS walk during boarding. Keep this page open while tracking.", "Start Walk", false],
+        "walk-finish": ["Finish this boarding walk?", "This stops GPS and saves this walk. The boarding stay will remain active.", "Finish Walk", true],
+        "walk-resume": ["Resume GPS on this device?", "Only resume here if this walk is no longer being tracked on another device. Tracking gaps cannot be recreated.", "Resume GPS", false]
+    };
+    const choice = choices[action];
+    if (!choice) throw new Error("Unknown boarding action.");
     const dialog = document.getElementById("admin-visit-action-confirm");
     const title = document.getElementById("admin-visit-confirm-title");
     const context = document.getElementById("admin-visit-confirm-context");
@@ -3762,16 +3996,14 @@ function confirmAdminBoardingAction(action, visit, stay) {
     if (dialog.open) return Promise.resolve(false);
 
     const client = allProfiles.find(item => item.id === visit.client_id);
-    title.textContent = starting ? "Start this boarding stay?" : "End this boarding stay?";
+    title.textContent = choice[0];
     context.textContent = [client?.full_name || client?.email || "Client",
         getAdminPetsForVisit(visit).map(pet => pet.name).join(" & "),
         `${formatAdminBoardingDate(stay.dropoff_date)} → ${formatAdminBoardingDate(stay.pickup_date)}`
     ].filter(Boolean).join(" · ");
-    message.textContent = starting
-        ? "Confirm that the pet has arrived. This records one arrival for the entire boarding stay."
-        : "Confirm that the pet has been picked up. This records departure and ends the entire boarding stay.";
-    accept.textContent = starting ? "Start Boarding" : "End Boarding";
-    dialog.dataset.caution = String(!starting);
+    message.textContent = choice[1];
+    accept.textContent = choice[2];
+    dialog.dataset.caution = String(choice[3]);
     dialog.returnValue = "";
 
     return new Promise((resolve, reject) => {
@@ -3812,6 +4044,7 @@ function checkAdminBoardingWalksSynced(stay) {
     }
     for (const walk of walks) {
         if (walk.status === "in_progress" || loadPendingWalkFinish(walk.id) ||
+            (walk.boarding_stay_id && getAdminBoardingWalkFinish(walk)) ||
             loadPendingWalkGpsQueue(walk.id).length > 0) {
             throw new Error("Finish and sync the boarding walk before ending this stay.");
         }
