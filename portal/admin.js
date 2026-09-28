@@ -19937,52 +19937,67 @@ function getAdminRoutePreferredWindow(
 
 function getAdminRemainingRouteVisits() {
 
-
     const today =
         getLocalDateString();
 
+    function normalizeService(value) {
+
+        return String(value || "")
+            .trim()
+            .toLowerCase()
+            .replace(/[_-]+/g, " ")
+            .replace(/&/g, " and ")
+            .replace(/\s+/g, " ");
+
+    }
 
     return allVisits
-        .filter(
-            visit => {
+        .filter(visit => {
 
+            const status =
+                String(visit.status || "")
+                    .trim()
+                    .toLowerCase();
 
-                const status =
-                    String(
-                        visit.status ||
-                        ""
-                    )
-                        .trim()
-                        .toLowerCase();
+            if (
+                visit.visit_date !== today ||
+                status === "cancelled" ||
+                status === "completed" ||
+                visit.completed_at
+            ) {
+                return false;
+            }
 
-
-                if (
-                    visit.visit_date !==
-                        today ||
-                    status ===
-                        "cancelled"
-                ) {
-
-                    return false;
-
-                }
-
-
-                const progress =
-                    getVisitProgressInfo(
-                        visit
-                    );
-
-
-                return (
-                    progress.state ===
-                        "scheduled" ||
-                    progress.state ===
-                        "checked_in"
+            const serviceType =
+                normalizeService(
+                    visit.service_type
                 );
 
-            }
-        )
+            const serviceName =
+                normalizeService(
+                    visit.service_name
+                );
+
+            const eligibleTypes = [
+                "dog walking",
+                "drop in",
+                "drop in visit",
+                "meet greet",
+                "meet and greet"
+            ];
+
+            const eligibleName =
+                /^(dog walking|drop in(?: visit)?|meet(?: and)? greet)(?:\s|$)/
+                    .test(serviceName);
+
+            return (
+                eligibleTypes.includes(
+                    serviceType
+                ) ||
+                eligibleName
+            );
+
+        })
         .sort(
             compareAdminVisits
         );
@@ -20104,195 +20119,138 @@ function formatAdminRouteScheduledTime(
 
 async function calculateAdminBestVisitRoute() {
 
-
-    if (
-        adminBestRouteLoading
-    ) {
-
+    if (adminBestRouteLoading) {
         return;
-
     }
-
-
-    // ========================================
-    // ROUTE START ADDRESS
-    // ========================================
 
     const startAddress =
         getAdminRouteStartAddress();
 
-
-    if (
-        !startAddress
-    ) {
+    if (!startAddress) {
 
         window.alert(
             "Add your address to your admin profile before calculating a route."
         );
 
-
         return;
 
     }
-
 
     const remainingVisits =
         getAdminRemainingRouteVisits();
 
+    // Clear the previous plan so a failed calculation
+    // cannot leave an older route available to start.
+    adminBestRoutePlan = null;
 
-    if (
-        remainingVisits.length ===
-        0
-    ) {
-
-        adminBestRoutePlan =
-            null;
-
+    if (remainingVisits.length === 0) {
 
         renderAdminBestVisitRoute();
-
         renderAdminFinancialSnapshot();
-
 
         return;
 
     }
 
-
-    const missingAddresses =
-        [];
-
+    const missingAddresses = [];
 
     const routeVisits =
         remainingVisits
-            .map(
-                visit => {
+            .map(visit => {
 
+                const clientName =
+                    getAdminRouteClientName(
+                        visit
+                    );
 
-                    const clientName =
-                        getAdminRouteClientName(
-                            visit
-                        );
+                const address =
+                    getAdminRouteVisitAddress(
+                        visit
+                    );
 
+                if (!address) {
 
-                    const address =
-                        getAdminRouteVisitAddress(
-                            visit
-                        );
+                    missingAddresses.push(
+                        clientName
+                    );
 
-
-                    if (
-                        !address
-                    ) {
-
-                        missingAddresses.push(
-                            clientName
-                        );
-
-
-                        return null;
-
-                    }
-
-
-                    return {
-
-                        id:
-                            visit.id,
-
-                        label:
-                            clientName,
-
-                        address,
-
-                        visit_date:
-                            visit.visit_date,
-
-                        time_window:
-                            visit.time_window,
-
-                        preferred_time_window:
-                            getAdminRoutePreferredWindow(
-                                visit
-                            ),
-
-                        duration_minutes:
-                            getAdminRouteDurationMinutes(
-                                visit
-                            )
-
-                    };
+                    return null;
 
                 }
-            )
-            .filter(
-                Boolean
-            );
 
+                return {
 
-    if (
-        missingAddresses.length >
-        0
-    ) {
+                    id:
+                        visit.id,
+
+                    label:
+                        clientName,
+
+                    address,
+
+                    visit_date:
+                        visit.visit_date,
+
+                    time_window:
+                        visit.time_window,
+
+                    preferred_time_window:
+                        getAdminRoutePreferredWindow(
+                            visit
+                        ),
+
+                    duration_minutes:
+                        getAdminRouteDurationMinutes(
+                            visit
+                        )
+
+                };
+
+            })
+            .filter(Boolean);
+
+    if (missingAddresses.length > 0) {
+
+        renderAdminBestVisitRoute();
 
         window.alert(
             `Missing an address for: ${
-                missingAddresses.join(
-                    ", "
-                )
-            }`
+                missingAddresses.join(", ")
+            }. Add the address before recalculating.`
         );
-
 
         return;
 
     }
 
-
-    adminBestRouteLoading =
-        true;
-
+    adminBestRouteLoading = true;
 
     renderAdminBestVisitRoute();
 
-
     try {
 
+        // ========================================
+        // REQUEST OPTIMIZED ROUTE
+        // ========================================
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .functions
-                .invoke(
-                    "route-optimizer",
-                    {
-                        body: {
-
-                            start_address:
-                                startAddress,
-
-                            visits:
-                                routeVisits
-
-                        }
+        const { data, error } =
+            await supabaseClient.functions.invoke(
+                "route-optimizer",
+                {
+                    body: {
+                        start_address:
+                            startAddress,
+                        visits:
+                            routeVisits
                     }
-                );
+                }
+            );
 
-
-        if (
-            error
-        ) {
-
+        if (error) {
             throw error;
-
         }
 
-
-        if (
-            !data?.success
-        ) {
+        if (!data?.success) {
 
             throw new Error(
                 data?.error ||
@@ -20301,34 +20259,147 @@ async function calculateAdminBestVisitRoute() {
 
         }
 
+        // ========================================
+        // REQUIRE EVERY REQUESTED STOP
+        // ========================================
 
-        adminBestRoutePlan =
-            data;
+        const stops =
+            Array.isArray(data.stops)
+                ? data.stops
+                : [];
 
+        const requestedIds =
+            new Set(
+                routeVisits.map(
+                    visit => String(visit.id)
+                )
+            );
 
-    } catch (
-        error
-    ) {
+        const returnedIds =
+            new Set(
+                stops.map(
+                    stop => String(stop.id)
+                )
+            );
 
+        const missingVisits =
+            routeVisits.filter(
+                visit =>
+                    !returnedIds.has(
+                        String(visit.id)
+                    )
+            );
+
+        if (missingVisits.length > 0) {
+
+            const missingNames =
+                missingVisits.map(
+                    visit =>
+                        `${visit.label} (${visit.time_window})`
+                );
+
+            console.error(
+                "Route omitted requested visits:",
+                {
+                    missingVisits,
+                    skippedShipments:
+                        data.skipped_shipments || []
+                }
+            );
+
+            throw new Error(
+                `The optimizer left out: ${
+                    missingNames.join(", ")
+                }. This route has not been accepted. Check the appointment times and travel time before recalculating.`
+            );
+
+        }
+
+        const hasUnexpectedStops =
+            stops.some(
+                stop =>
+                    !requestedIds.has(
+                        String(stop.id)
+                    )
+            );
+
+        const hasDuplicateStops =
+            returnedIds.size !== stops.length;
+
+        const hasSkippedShipments =
+            Array.isArray(
+                data.skipped_shipments
+            ) &&
+            data.skipped_shipments.length > 0;
+
+        if (
+            hasUnexpectedStops ||
+            hasDuplicateStops ||
+            hasSkippedShipments
+        ) {
+
+            console.error(
+                "Unexpected route result:",
+                data
+            );
+
+            throw new Error(
+                "The optimizer returned an inconsistent stop list. This route has not been accepted. Please recalculate."
+            );
+
+        }
+
+        // ========================================
+        // CHECK FOR CHANGES DURING CALCULATION
+        // ========================================
+
+        const currentRouteIds =
+            new Set(
+                getAdminRemainingRouteVisits()
+                    .map(
+                        visit =>
+                            String(visit.id)
+                    )
+            );
+
+        if (
+            currentRouteIds.size !==
+                requestedIds.size ||
+            [...requestedIds].some(
+                id =>
+                    !currentRouteIds.has(id)
+            )
+        ) {
+
+            throw new Error(
+                "Your remaining visits changed while the route was calculating. Please recalculate."
+            );
+
+        }
+
+        // ========================================
+        // ACCEPT COMPLETE ROUTE
+        // ========================================
+
+        adminBestRoutePlan = data;
+
+    } catch (error) {
+
+        adminBestRoutePlan = null;
 
         console.error(
             "Admin route optimization error:",
             error
         );
 
-
         window.alert(
             error?.message ||
             "Unable to calculate the route."
         );
 
-
     } finally {
 
-
-        adminBestRouteLoading =
-            false;
-
+        adminBestRouteLoading = false;
 
         renderAdminBestVisitRoute();
 
@@ -20337,6 +20408,7 @@ async function calculateAdminBestVisitRoute() {
     }
 
 }
+
 
 // ========================================
 // DECODE GOOGLE ROUTE POLYLINE
