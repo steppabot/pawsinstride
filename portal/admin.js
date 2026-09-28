@@ -4132,20 +4132,35 @@ window.addEventListener("focus", () => {
 function renderAdminDayServices() {
 
     const heading =
-        document.getElementById("admin-selected-date");
+        document.getElementById(
+            "admin-selected-date"
+        );
 
     const count =
-        document.getElementById("admin-selected-service-count");
+        document.getElementById(
+            "admin-selected-service-count"
+        );
 
     const container =
-        document.getElementById("admin-day-services");
+        document.getElementById(
+            "admin-day-services"
+        );
 
-    if (!heading || !count || !container) return;
+    if (
+        !heading ||
+        !count ||
+        !container
+    ) {
+        return;
+    }
 
     if (!selectedAdminDate) {
 
-        heading.textContent = "Select a date";
-        count.textContent = "0 services";
+        heading.textContent =
+            "Select a date";
+
+        count.textContent =
+            "0 services";
 
         container.innerHTML = `
             <p class="empty-upcoming-message">
@@ -4158,29 +4173,45 @@ function renderAdminDayServices() {
     }
 
     heading.textContent =
-        formatLongDate(selectedAdminDate);
+        formatLongDate(
+            selectedAdminDate
+        );
 
     const services =
         getAdminCalendarEntries()
             .filter(
                 visit =>
-                    visit.visit_date === selectedAdminDate
+                    visit.visit_date ===
+                    selectedAdminDate
             )
-            .sort(compareAdminVisits);
+            .sort(
+                compareAdminVisits
+            );
 
     count.textContent =
         `${services.length} ${
-            services.length === 1 ? "service" : "services"
+            services.length === 1
+                ? "service"
+                : "services"
         }`;
 
     container.innerHTML =
         services.length
-            ? services.map(
-                visit =>
-                    isAdminBoardingService(visit)
-                        ? buildAdminBoardingCard(visit)
-                        : buildAdminServiceCard(visit)
-            ).join("")
+            ? services
+                .map(
+                    visit =>
+                        isAdminBoardingService(
+                            visit
+                        )
+                            ? buildAdminBoardingCard(
+                                visit
+                            )
+                            : buildAdminServiceCard(
+                                visit
+                            )
+                )
+                .join("")
+
             : `
                 <p class="empty-upcoming-message">
                     No client services booked for this date.
@@ -4192,174 +4223,143 @@ function renderAdminDayServices() {
             ":scope > .admin-service-card"
         );
 
-    cards.forEach((card, index) => {
+    cards.forEach(
+        (
+            card,
+            index
+        ) => {
 
-        const visit = services[index];
+            const visit =
+                services[index];
 
-        if (!visit) return;
+            if (!visit) {
+                return;
+            }
 
-        card.dataset.scheduleVisitId =
-            String(visit.id);
+            card.dataset.scheduleVisitId =
+                String(
+                    visit.id
+                );
 
-        card.style.scrollMarginTop = "180px";
+            card.style.scrollMarginTop =
+                "180px";
 
-        const client =
-            allProfiles.find(
-                profile =>
-                    String(profile.id) ===
-                    String(visit.client_id)
-            );
+            const client =
+                allProfiles.find(
+                    profile =>
+                        String(profile.id) ===
+                        String(visit.client_id)
+                );
 
-        if (!client) return;
+            if (!client) {
+                return;
+            }
 
-        const clientSection =
-            card.querySelector(
-                ".admin-service-main-grid .admin-service-detail"
-            );
+            const clientSection =
+                card.querySelector(
+                    ".admin-service-main-grid .admin-service-detail"
+                );
 
-        if (!clientSection) return;
+            if (!clientSection) {
+                return;
+            }
 
-        const nameElement =
-            clientSection.querySelector("strong");
+            const nameElement =
+                clientSection.querySelector(
+                    "strong"
+                );
 
-        if (nameElement) {
+            if (nameElement) {
 
-            const nameButton =
-                document.createElement("button");
-
-            nameButton.type = "button";
-
-            nameButton.textContent =
-                client.full_name ||
-                client.email ||
-                "Client";
-
-            nameButton.style.cssText = `
-                appearance: none;
-                background: none;
-                border: 0;
-                padding: 0;
-                margin: 0;
-                color: inherit;
-                font: inherit;
-                text-align: left;
-                text-decoration: underline;
-                text-underline-offset: 3px;
-                cursor: pointer;
-            `;
-
-            nameButton.addEventListener(
-                "click",
-                async () => {
-
-                    showAdminAppScreen("clients");
-
-                    await openAdminClientHousehold(
-                        client.id
+                const nameButton =
+                    document.createElement(
+                        "button"
                     );
 
-                }
-            );
+                nameButton.type =
+                    "button";
 
-            nameElement.replaceChildren(nameButton);
+                nameButton.className =
+                    "admin-schedule-client-link";
 
-        }
+                nameButton.textContent =
+                    client.full_name ||
+                    client.email ||
+                    "Client";
 
-        const phone =
-            String(client.phone || "").trim();
+                nameButton.addEventListener(
+                    "click",
+                    async () => {
 
-        if (!phone) return;
+                        showAdminAppScreen(
+                            "clients"
+                        );
 
-        const phoneElement =
-            Array.from(
-                clientSection.querySelectorAll("small")
-            ).find(
-                element =>
-                    element.textContent.trim() === phone
-            );
+                        await openAdminClientHousehold(
+                            client.id
+                        );
 
-        if (!phoneElement) return;
+                    }
+                );
 
-        const phoneLink =
-            document.createElement("a");
-
-        phoneLink.href =
-            `tel:${phone.replace(/[^\d+]/g, "")}`;
-
-        phoneLink.textContent = phone;
-
-        phoneLink.style.cssText = `
-            color: inherit;
-            text-decoration: underline;
-            text-underline-offset: 3px;
-            user-select: text;
-            -webkit-user-select: text;
-        `;
-
-        const copyButton =
-            document.createElement("button");
-
-        copyButton.type = "button";
-        copyButton.textContent = "Copy";
-
-        copyButton.setAttribute(
-            "aria-label",
-            `Copy phone number for ${
-                client.full_name || "client"
-            }`
-        );
-
-        copyButton.style.cssText = `
-            appearance: none;
-            margin-left: 8px;
-            padding: 4px 8px;
-            border: 1px solid #c7dfed;
-            border-radius: 6px;
-            background: #f3faff;
-            color: #176b9b;
-            font: inherit;
-            cursor: pointer;
-        `;
-
-        copyButton.addEventListener(
-            "click",
-            async () => {
-
-                try {
-
-                    await navigator.clipboard.writeText(
-                        phone
-                    );
-
-                    copyButton.textContent = "Copied";
-
-                    setTimeout(
-                        () => {
-                            copyButton.textContent = "Copy";
-                        },
-                        1800
-                    );
-
-                } catch {
-
-                    window.prompt(
-                        "Copy this phone number:",
-                        phone
-                    );
-
-                }
+                nameElement.replaceChildren(
+                    nameButton
+                );
 
             }
-        );
 
-        phoneElement.replaceChildren(
-            phoneLink,
-            copyButton
-        );
+            const phone =
+                String(
+                    client.phone ||
+                    ""
+                ).trim();
 
-    });
+            if (!phone) {
+                return;
+            }
+
+            const phoneElement =
+                Array.from(
+                    clientSection.querySelectorAll(
+                        "small"
+                    )
+                ).find(
+                    element =>
+                        element.textContent.trim() ===
+                        phone
+                );
+
+            if (!phoneElement) {
+                return;
+            }
+
+            const phoneLink =
+                document.createElement(
+                    "a"
+                );
+
+            phoneLink.className =
+                "admin-schedule-phone-link";
+
+            phoneLink.href =
+                `tel:${phone.replace(
+                    /[^\d+]/g,
+                    ""
+                )}`;
+
+            phoneLink.textContent =
+                phone;
+
+            phoneElement.replaceChildren(
+                phoneLink
+            );
+
+        }
+    );
 
 }
+
+// ========================================
 
 // ========================================
 // VISIT CHECK-IN ACTIONS
