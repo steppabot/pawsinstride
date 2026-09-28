@@ -4130,28 +4130,235 @@ window.addEventListener("focus", () => {
 // ========================================
 
 function renderAdminDayServices() {
-    const heading = document.getElementById("admin-selected-date");
-    const count = document.getElementById("admin-selected-service-count");
-    const container = document.getElementById("admin-day-services");
+
+    const heading =
+        document.getElementById("admin-selected-date");
+
+    const count =
+        document.getElementById("admin-selected-service-count");
+
+    const container =
+        document.getElementById("admin-day-services");
+
     if (!heading || !count || !container) return;
 
     if (!selectedAdminDate) {
+
         heading.textContent = "Select a date";
         count.textContent = "0 services";
-        container.innerHTML = `<p class="empty-upcoming-message">Select a date on the calendar to view booked services.</p>`;
+
+        container.innerHTML = `
+            <p class="empty-upcoming-message">
+                Select a date on the calendar to view booked services.
+            </p>
+        `;
+
         return;
+
     }
 
-    heading.textContent = formatLongDate(selectedAdminDate);
-    const services = getAdminCalendarEntries()
-        .filter(visit => visit.visit_date === selectedAdminDate)
-        .sort(compareAdminVisits);
-    count.textContent = `${services.length} ${services.length === 1 ? "service" : "services"}`;
-    container.innerHTML = services.length
-        ? services.map(visit => isAdminBoardingService(visit)
-            ? buildAdminBoardingCard(visit)
-            : buildAdminServiceCard(visit)).join("")
-        : `<p class="empty-upcoming-message">No client services booked for this date.</p>`;
+    heading.textContent =
+        formatLongDate(selectedAdminDate);
+
+    const services =
+        getAdminCalendarEntries()
+            .filter(
+                visit =>
+                    visit.visit_date === selectedAdminDate
+            )
+            .sort(compareAdminVisits);
+
+    count.textContent =
+        `${services.length} ${
+            services.length === 1 ? "service" : "services"
+        }`;
+
+    container.innerHTML =
+        services.length
+            ? services.map(
+                visit =>
+                    isAdminBoardingService(visit)
+                        ? buildAdminBoardingCard(visit)
+                        : buildAdminServiceCard(visit)
+            ).join("")
+            : `
+                <p class="empty-upcoming-message">
+                    No client services booked for this date.
+                </p>
+            `;
+
+    const cards =
+        container.querySelectorAll(
+            ":scope > .admin-service-card"
+        );
+
+    cards.forEach((card, index) => {
+
+        const visit = services[index];
+
+        if (!visit) return;
+
+        card.dataset.scheduleVisitId =
+            String(visit.id);
+
+        card.style.scrollMarginTop = "180px";
+
+        const client =
+            allProfiles.find(
+                profile =>
+                    String(profile.id) ===
+                    String(visit.client_id)
+            );
+
+        if (!client) return;
+
+        const clientSection =
+            card.querySelector(
+                ".admin-service-main-grid .admin-service-detail"
+            );
+
+        if (!clientSection) return;
+
+        const nameElement =
+            clientSection.querySelector("strong");
+
+        if (nameElement) {
+
+            const nameButton =
+                document.createElement("button");
+
+            nameButton.type = "button";
+
+            nameButton.textContent =
+                client.full_name ||
+                client.email ||
+                "Client";
+
+            nameButton.style.cssText = `
+                appearance: none;
+                background: none;
+                border: 0;
+                padding: 0;
+                margin: 0;
+                color: inherit;
+                font: inherit;
+                text-align: left;
+                text-decoration: underline;
+                text-underline-offset: 3px;
+                cursor: pointer;
+            `;
+
+            nameButton.addEventListener(
+                "click",
+                async () => {
+
+                    showAdminAppScreen("clients");
+
+                    await openAdminClientHousehold(
+                        client.id
+                    );
+
+                }
+            );
+
+            nameElement.replaceChildren(nameButton);
+
+        }
+
+        const phone =
+            String(client.phone || "").trim();
+
+        if (!phone) return;
+
+        const phoneElement =
+            Array.from(
+                clientSection.querySelectorAll("small")
+            ).find(
+                element =>
+                    element.textContent.trim() === phone
+            );
+
+        if (!phoneElement) return;
+
+        const phoneLink =
+            document.createElement("a");
+
+        phoneLink.href =
+            `tel:${phone.replace(/[^\d+]/g, "")}`;
+
+        phoneLink.textContent = phone;
+
+        phoneLink.style.cssText = `
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            user-select: text;
+            -webkit-user-select: text;
+        `;
+
+        const copyButton =
+            document.createElement("button");
+
+        copyButton.type = "button";
+        copyButton.textContent = "Copy";
+
+        copyButton.setAttribute(
+            "aria-label",
+            `Copy phone number for ${
+                client.full_name || "client"
+            }`
+        );
+
+        copyButton.style.cssText = `
+            appearance: none;
+            margin-left: 8px;
+            padding: 4px 8px;
+            border: 1px solid #c7dfed;
+            border-radius: 6px;
+            background: #f3faff;
+            color: #176b9b;
+            font: inherit;
+            cursor: pointer;
+        `;
+
+        copyButton.addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    await navigator.clipboard.writeText(
+                        phone
+                    );
+
+                    copyButton.textContent = "Copied";
+
+                    setTimeout(
+                        () => {
+                            copyButton.textContent = "Copy";
+                        },
+                        1800
+                    );
+
+                } catch {
+
+                    window.prompt(
+                        "Copy this phone number:",
+                        phone
+                    );
+
+                }
+
+            }
+        );
+
+        phoneElement.replaceChildren(
+            phoneLink,
+            copyButton
+        );
+
+    });
+
 }
 
 // ========================================
@@ -21591,118 +21798,183 @@ function renderAdminBestVisitRoute() {
 
 // ========================================
 // ROUTE STOP MAP FOCUS
+// Route cards now open their Schedule visit.
+// Map markers retain their existing behavior.
 // ========================================
 
 const adminRouteStopList =
-    document.getElementById(
-        "admin-route-stop-list"
-    );
+    document.getElementById("admin-route-stop-list");
 
+function openAdminRouteVisitInSchedule(visitId) {
 
-adminRouteStopList
-    ?.addEventListener(
-        "click",
-        event => {
+    const visit =
+        allVisits.find(
+            item =>
+                String(item.id) === String(visitId)
+        );
 
+    if (!visit) {
 
-            const stopCard =
-                event.target.closest(
-                    "[data-route-visit-id]"
-                );
+        window.alert(
+            "This visit could not be found. Refresh and try again."
+        );
 
+        return;
 
-            if (
-                !stopCard ||
-                !adminBestRouteMap
-            ) {
+    }
 
-                return;
+    const visitDate =
+        parseLocalDate(visit.visit_date);
 
+    selectedAdminDate =
+        visit.visit_date;
+
+    adminCalendarYear =
+        visitDate.getFullYear();
+
+    adminCalendarMonth =
+        visitDate.getMonth();
+
+    showAdminAppScreen("schedule");
+
+    requestAnimationFrame(() => {
+
+        const card =
+            Array.from(
+                document.querySelectorAll(
+                    "#admin-day-services [data-schedule-visit-id]"
+                )
+            ).find(
+                element =>
+                    element.dataset.scheduleVisitId ===
+                    String(visit.id)
+            );
+
+        if (!card) return;
+
+        card.tabIndex = -1;
+
+        card.focus({
+            preventScroll: true
+        });
+
+        card.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+        card.animate(
+            [
+                {
+                    outline: "3px solid #f3a333",
+                    outlineOffset: "4px"
+                },
+                {
+                    outline: "3px solid transparent",
+                    outlineOffset: "4px"
+                }
+            ],
+            {
+                duration: 2200
             }
+        );
 
+    });
 
-            const visitId =
-                Number(
-                    stopCard.dataset
-                        .routeVisitId
-                );
+}
 
+function prepareAdminRouteStopLinks() {
 
-            const marker =
-                adminBestRouteMarkers.get(
-                    visitId
-                );
+    adminRouteStopList
+        ?.querySelectorAll("[data-route-visit-id]")
+        .forEach(card => {
 
+            card.tabIndex = 0;
 
-            const infoWindow =
-                adminBestRouteInfoWindows.get(
-                    visitId
-                );
+            card.setAttribute(
+                "role",
+                "button"
+            );
 
+            const clientName =
+                card.querySelector("strong")
+                    ?.textContent.trim() ||
+                "this visit";
 
-            if (
-                !marker ||
-                !infoWindow
-            ) {
+            card.setAttribute(
+                "aria-label",
+                `Open ${clientName} in Schedule`
+            );
 
-                return;
+            card.style.cursor = "pointer";
 
-            }
+        });
 
+}
 
-            // ========================================
-            // CLOSE OTHER INFO WINDOWS
-            // ========================================
+adminRouteStopList?.addEventListener(
+    "click",
+    event => {
 
-            adminBestRouteInfoWindows
-                .forEach(
-                    windowItem => {
+        const card =
+            event.target.closest(
+                "[data-route-visit-id]"
+            );
 
-                        windowItem.close();
+        if (!card) return;
 
-                    }
-                );
+        openAdminRouteVisitInSchedule(
+            card.dataset.routeVisitId
+        );
 
+    }
+);
 
-            // ========================================
-            // FOCUS SELECTED STOP
-            // ========================================
+adminRouteStopList?.addEventListener(
+    "keydown",
+    event => {
 
-            const position =
-                marker.getPosition();
+        if (
+            event.key !== "Enter" &&
+            event.key !== " "
+        ) {
+            return;
+        }
 
+        const card =
+            event.target.closest(
+                "[data-route-visit-id]"
+            );
 
-            if (
-                position
-            ) {
+        if (!card) return;
 
-                adminBestRouteMap.panTo(
-                    position
-                );
+        event.preventDefault();
 
+        openAdminRouteVisitInSchedule(
+            card.dataset.routeVisitId
+        );
 
-                adminBestRouteMap.setZoom(
-                    14
-                );
+    }
+);
 
-            }
+if (adminRouteStopList) {
 
+    const adminRouteStopLinkObserver =
+        new MutationObserver(
+            prepareAdminRouteStopLinks
+        );
 
-            // ========================================
-            // OPEN SELECTED STOP INFO
-            // ========================================
-
-            infoWindow.open({
-                map:
-                    adminBestRouteMap,
-
-                anchor:
-                    marker
-            });
-
+    adminRouteStopLinkObserver.observe(
+        adminRouteStopList,
+        {
+            childList: true,
+            subtree: true
         }
     );
 
+    prepareAdminRouteStopLinks();
+
+}
 
 // ========================================
 // RECALCULATE BEST VISIT ROUTE
