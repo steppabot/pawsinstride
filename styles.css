@@ -7678,6 +7678,13 @@ html {
         object-position: center bottom;
     }
 
+    /* Restaurant guide's hero photo is square with the dog's face near the
+       top, unlike the Ruff Range photo above (which needs "bottom"). This
+       override only applies to the image carrying this class. */
+    .gd-hero-media img.restaurant-hero-photo {
+        object-position: center 15%;
+    }
+
     .gd-hero-text {
         padding: 30px 26px 26px;
     }
