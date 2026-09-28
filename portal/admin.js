@@ -9387,49 +9387,21 @@ async function reopenVisit(
 // REPLACE VISIT IN LOCAL STATE
 // ========================================
 
-function replaceAdminVisit(
-    updatedVisit
-) {
-
-
-    allVisits =
-        allVisits.map(
-
-            visit =>
-
-                Number(
-                    visit.id
-                ) ===
-                Number(
-                    updatedVisit.id
-                )
-
-                    ? updatedVisit
-
-                    : visit
-
-        );
-
-
-    // ========================================
-    // REFRESH HOME LIVE SECTIONS
-    // ========================================
-
-    if (
-        activeAdminScreen ===
-        "home"
-    ) {
-
-        renderAdminTodaySummary();
-
-        renderAdminNeedsAttention();
-
-        renderAdminBestVisitRoute();
-
-        renderAdminFinancialSnapshot();
-
+function replaceAdminVisit(updatedVisit) {
+    const previous = allVisits.find(visit => String(visit.id) === String(updatedVisit.id));
+    allVisits = allVisits.map(visit => String(visit.id) === String(updatedVisit.id) ? updatedVisit : visit);
+    if (!previous || previous.status !== updatedVisit.status ||
+        previous.checked_in_at !== updatedVisit.checked_in_at ||
+        previous.completed_at !== updatedVisit.completed_at) {
+        adminBestRoutePlan = null;
     }
-
+    void refreshAdminDriveEstimates(true);
+    if (activeAdminScreen === 'home') {
+        renderAdminTodaySummary();
+        renderAdminNeedsAttention();
+        renderAdminBestVisitRoute();
+        renderAdminFinancialSnapshot();
+    }
 }
 
 // ========================================
@@ -19394,434 +19366,181 @@ adminNeedsAttentionList
 // FINANCIAL SNAPSHOT
 // ========================================
 
-function getAdminFinancialVisitMinutes(
-    visit
-) {
-
-
-    const actualMinutes =
-        getVisitDurationMinutes(
-            visit
-        );
-
-
-    if (
-        Number.isFinite(
-            actualMinutes
-        ) &&
-        actualMinutes >
-        0
-    ) {
-
-        return actualMinutes;
-
-    }
-
-
-    const serviceText =
-        [
-            visit.service_name,
-            visit.service_type,
-            visit.service_option,
-            visit.service_duration
-        ]
-            .filter(
-                Boolean
-            )
-            .join(
-                " "
-            )
-            .toLowerCase();
-
-
-    if (
-        serviceText.includes(
-            "60"
-        )
-    ) {
-
-        return 60;
-
-    }
-
-
-    if (
-        serviceText.includes(
-            "30"
-        )
-    ) {
-
-        return 30;
-
-    }
-
-
+function getAdminFinancialVisitMinutes(visit) {
+    const actual = getVisitDurationMinutes(visit);
+    if (Number.isFinite(actual) && actual >= 0) return actual;
+    const text = [visit.service_name, visit.service_type, visit.service_option]
+        .filter(Boolean).join(' ').replace(/[_-]+/g, ' ').toLowerCase();
+    if (/\bmeet\s*(?:&|and)?\s*greet\b/.test(text)) return 15;
+    if (text.includes('60')) return 60;
+    if (text.includes('30')) return 30;
     return 15;
-
 }
-
 
 function getAdminWeekDateRange() {
-
-
-    const today =
-        parseLocalDate(
-            getLocalDateString()
-        );
-
-
-    const day =
-        today.getDay();
-
-
-    const daysSinceMonday =
-        day ===
-        0
-
-            ? 6
-
-            : day - 1;
-
-
-    const monday =
-        new Date(
-            today
-        );
-
-
-    monday.setDate(
-        monday.getDate() -
-        daysSinceMonday
-    );
-
-
-    const sunday =
-        new Date(
-            monday
-        );
-
-
-    sunday.setDate(
-        sunday.getDate() +
-        6
-    );
-
-
-    return {
-
-        start:
-            makeDateString(
-                monday.getFullYear(),
-                monday.getMonth(),
-                monday.getDate()
-            ),
-
-        end:
-            makeDateString(
-                sunday.getFullYear(),
-                sunday.getMonth(),
-                sunday.getDate()
-            )
-
-    };
-
+    const today = parseLocalDate(getLocalDateString());
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const key = date => makeDateString(date.getFullYear(), date.getMonth(), date.getDate());
+    return { start: key(monday), end: key(sunday) };
 }
 
-
-function getAdminFinancialVisits(
-    startDate,
-    endDate
-) {
-
-
-    return allVisits
-        .filter(
-            visit => {
-
-
-                const status =
-                    String(
-                        visit.status ||
-                        ""
-                    )
-                        .trim()
-                        .toLowerCase();
-
-
-                return (
-                    visit.visit_date >=
-                        startDate &&
-                    visit.visit_date <=
-                        endDate &&
-                    status !==
-                        "cancelled"
-                );
-
-            }
-        );
-
+function getAdminFinancialVisits(startDate, endDate) {
+    return allVisits.filter(visit => visit.visit_date >= startDate &&
+        visit.visit_date <= endDate &&
+        String(visit.status || '').toLowerCase() !== 'cancelled');
 }
 
-
-function getAdminFinancialRevenue(
-    visits
-) {
-
-
-    return visits.reduce(
-        (
-            total,
-            visit
-        ) => {
-
-            return (
-                total +
-                Number(
-                    visit.price ||
-                    0
-                )
-            );
-
-        },
-        0
-    );
-
+function getAdminFinancialRevenue(visits) {
+    return visits.reduce((total, visit) => total + Number(visit.price || 0), 0);
 }
 
-
-function formatAdminFinancialCurrency(
-    amount
-) {
-
-
-    return Number(
-        amount ||
-        0
-    )
-        .toLocaleString(
-            "en-US",
-            {
-                style:
-                    "currency",
-
-                currency:
-                    "USD",
-
-                minimumFractionDigits:
-                    0,
-
-                maximumFractionDigits:
-                    0
-            }
-        );
-
+function formatAdminFinancialCurrency(amount) {
+    return Number(amount || 0).toLocaleString('en-US', {
+        style: 'currency', currency: 'USD', maximumFractionDigits: 0,
+        minimumFractionDigits: 0
+    });
 }
 
+function formatAdminFinancialTime(totalMinutes) {
+    const minutes = Math.max(0, Math.round(Number(totalMinutes) || 0));
+    const hours = Math.floor(minutes / 60);
+    return hours ? `${hours}h ${minutes % 60}m` : `${minutes}m`;
+}
 
-function formatAdminFinancialTime(
-    totalMinutes
-) {
+function isAdminDrivingService(visit) {
+    const normalize = value => String(value || '').toLowerCase()
+        .replace(/[_-]+/g, ' ').replace(/&/g, ' and ').replace(/\s+/g, ' ').trim();
+    return [visit.service_type, visit.service_name].some(value =>
+        /^(dog walking|drop in(?: visit)?|meet(?: and)? greet)(?:\s|$)/.test(normalize(value)));
+}
 
+let adminDriveEstimateCache = {
+    key: '', rows: [], ready: false, error: '', fetchedAt: 0, request: null
+};
 
-    const minutes =
-        Math.max(
-            0,
-            Math.round(
-                Number(
-                    totalMinutes ||
-                    0
-                )
-            )
-        );
-
-
-    const hours =
-        Math.floor(
-            minutes /
-            60
-        );
-
-
-    const remainingMinutes =
-        minutes %
-        60;
-
-
-    if (
-        hours ===
-        0
-    ) {
-
-        return `${remainingMinutes}m`;
-
+function refreshAdminDriveEstimates(force = false) {
+    if (!currentUser?.id) return Promise.resolve();
+    const today = getLocalDateString();
+    const key = `${currentUser.id}:${today}`;
+    if (adminDriveEstimateCache.key !== key) {
+        adminDriveEstimateCache = {
+            key, rows: [], ready: false, error: '', fetchedAt: 0, request: null
+        };
     }
-
-
-    return `${hours}h ${remainingMinutes}m`;
-
+    const cache = adminDriveEstimateCache;
+    if (cache.request) return cache.request;
+    if (!force && Date.now() - cache.fetchedAt < 15000) return Promise.resolve();
+    cache.fetchedAt = Date.now();
+    cache.request = (async () => {
+        try {
+            const { data, error } = await supabaseClient
+                .from('admin_route_drive_estimates')
+                .select('visit_id, visit_date, drive_seconds, locked_at')
+                .eq('admin_id', currentUser.id)
+                .eq('visit_date', today);
+            if (error) throw error;
+            cache.rows = data || [];
+            cache.ready = true;
+            cache.error = '';
+        } catch (error) {
+            cache.ready = false;
+            cache.error = error?.message || 'Unable to load driving estimates.';
+            console.error('Saved route estimates:', error);
+        } finally {
+            cache.request = null;
+            cache.fetchedAt = Date.now();
+            if (adminDriveEstimateCache === cache) renderAdminFinancialSnapshot();
+        }
+    })();
+    return cache.request;
 }
-
 
 function renderAdminFinancialSnapshot() {
+    const revenueElement = document.getElementById('admin-financial-today-revenue');
+    const weekElement = document.getElementById('admin-financial-week-revenue');
+    const rateElement = document.getElementById('admin-financial-hourly-rate');
+    const detailElement = document.getElementById('admin-financial-hourly-detail');
+    if (!revenueElement || !weekElement || !rateElement || !detailElement) return;
 
+    void refreshAdminDriveEstimates();
+    const today = getLocalDateString();
+    const visits = getAdminFinancialVisits(today, today);
+    const week = getAdminWeekDateRange();
+    revenueElement.textContent = formatAdminFinancialCurrency(getAdminFinancialRevenue(visits));
+    weekElement.textContent = formatAdminFinancialCurrency(
+        getAdminFinancialRevenue(getAdminFinancialVisits(week.start, week.end)));
 
-    const todayRevenueElement =
-        document.getElementById(
-            "admin-financial-today-revenue"
-        );
-
-
-    const weekRevenueElement =
-        document.getElementById(
-            "admin-financial-week-revenue"
-        );
-
-
-    const hourlyRateElement =
-        document.getElementById(
-            "admin-financial-hourly-rate"
-        );
-
-
-    const hourlyDetailElement =
-        document.getElementById(
-            "admin-financial-hourly-detail"
-        );
-
-
-    if (
-        !todayRevenueElement ||
-        !weekRevenueElement ||
-        !hourlyRateElement ||
-        !hourlyDetailElement
-    ) {
-
-        return;
-
+    // Hourly rate uses completed revenue, not money from visits still ahead.
+    // Overnight boarding is excluded from this mobile-service hourly metric.
+    const worked = visits.filter(visit => !isAdminBoardingService(visit) &&
+        (visit.checked_in_at || visit.completed_at ||
+            String(visit.status || '').toLowerCase() === 'completed'));
+    const completed = worked.filter(visit => visit.completed_at ||
+        String(visit.status || '').toLowerCase() === 'completed');
+    const earned = getAdminFinancialRevenue(completed);
+    let actualMinutes = 0;
+    let estimatedMinutes = 0;
+    for (const visit of worked) {
+        const start = Date.parse(visit.checked_in_at || '');
+        const done = completed.includes(visit);
+        const end = done ? Date.parse(visit.completed_at || '') : Date.now();
+        if (Number.isFinite(start) && Number.isFinite(end) && end >= start) {
+            actualMinutes += (end - start) / 60000;
+        } else if (done) {
+            estimatedMinutes += getAdminFinancialVisitMinutes(visit);
+        }
     }
 
+    const cache = adminDriveEstimateCache;
+    const rows = new Map(cache.rows.map(row => [String(row.visit_id), row]));
+    const reached = worked.filter(isAdminDrivingService);
+    let driveSeconds = 0;
+    let missing = 0;
+    for (const visit of reached) {
+        const row = rows.get(String(visit.id));
+        if (!row?.locked_at || !Number.isFinite(Number(row.drive_seconds))) {
+            missing++;
+        } else {
+            driveSeconds += Number(row.drive_seconds);
+        }
+    }
+    const visitMinutes = actualMinutes + estimatedMinutes;
+    const totalMinutes = visitMinutes + driveSeconds / 60;
+    const timeText = `${formatAdminFinancialTime(visitMinutes)} visits` +
+        (estimatedMinutes ? ` (${formatAdminFinancialTime(estimatedMinutes)} estimated)` : '') +
+        ` • ${formatAdminFinancialTime(driveSeconds / 60)} estimated driving`;
 
-    const today =
-        getLocalDateString();
-
-
-    const todayVisits =
-        getAdminFinancialVisits(
-            today,
-            today
-        );
-
-
-    const weekRange =
-        getAdminWeekDateRange();
-
-
-    const weekVisits =
-        getAdminFinancialVisits(
-            weekRange.start,
-            weekRange.end
-        );
-
-
-    const todayRevenue =
-        getAdminFinancialRevenue(
-            todayVisits
-        );
-
-
-    const weekRevenue =
-        getAdminFinancialRevenue(
-            weekVisits
-        );
-
-
-    const visitMinutes =
-        todayVisits.reduce(
-            (
-                total,
-                visit
-            ) => {
-
-                return (
-                    total +
-                    getAdminFinancialVisitMinutes(
-                        visit
-                    )
-                );
-
-            },
-            0
-        );
-
-
-    const driveSeconds =
-        Number(
-            adminBestRoutePlan
-                ?.metrics
-                ?.travel_seconds ||
-            0
-        );
-
-
-    const driveMinutes =
-        driveSeconds /
-        60;
-
-
-    const workingMinutes =
-        visitMinutes +
-        driveMinutes;
-
-
-    const hourlyRate =
-        workingMinutes >
-        0
-
-            ? (
-                todayRevenue /
-                (
-                    workingMinutes /
-                    60
-                )
-            )
-
-            : 0;
-
-
-    todayRevenueElement.textContent =
-        formatAdminFinancialCurrency(
-            todayRevenue
-        );
-
-
-    weekRevenueElement.textContent =
-        formatAdminFinancialCurrency(
-            weekRevenue
-        );
-
-
-    hourlyRateElement.textContent =
-        `${formatAdminFinancialCurrency(
-            hourlyRate
-        )}/hr`;
-
-
-    hourlyDetailElement.textContent =
-        driveMinutes >
-        0
-
-            ? `${formatAdminFinancialTime(
-                visitMinutes
-            )} visits • ${formatAdminFinancialTime(
-                driveMinutes
-            )} estimated driving`
-
-            : `${formatAdminFinancialTime(
-                visitMinutes
-            )} visits • Optimize route for drive time`;
-
+    if (!worked.length) {
+        rateElement.textContent = '—';
+        detailElement.textContent = 'Your hourly rate will appear after completing a visit.';
+    } else if (reached.length && !cache.ready) {
+        rateElement.textContent = '—';
+        detailElement.textContent = cache.error ?
+            'Unable to load saved driving time. Refresh to retry.' : 'Loading saved driving time…';
+    } else if (missing) {
+        rateElement.textContent = '—';
+        detailElement.textContent = `${timeText} • Missing driving estimates for ${missing} reached ${missing === 1 ? 'visit' : 'visits'}.`;
+    } else if (!completed.length || totalMinutes <= 0) {
+        rateElement.textContent = '—';
+        detailElement.textContent = `${timeText} • First visit in progress`;
+    } else {
+        rateElement.textContent = `${formatAdminFinancialCurrency(earned / (totalMinutes / 60))}/hr`;
+        detailElement.textContent = `${formatAdminFinancialCurrency(earned)} completed revenue • ${timeText}`;
+    }
 }
 
+// Refresh the rate while Home is visible, including after returning from Maps.
+window.addEventListener('focus', () => {
+    if (currentUser?.id) void refreshAdminDriveEstimates(true);
+});
+setInterval(() => {
+    if (currentUser?.id && activeAdminScreen === 'home' && !document.hidden) {
+        renderAdminFinancialSnapshot();
+    }
+}, 15000);
 
 // ========================================
 // BEST VISIT ROUTE STATE
@@ -20313,298 +20032,130 @@ function formatAdminRouteScheduledTime(
 // CALCULATE BEST VISIT ROUTE
 // ========================================
 
-async function calculateAdminBestVisitRoute() {
-
-    if (adminBestRouteLoading) {
-        return;
-    }
-
-    const startAddress =
-        getAdminRouteStartAddress();
-
-    if (!startAddress) {
-
-        window.alert(
-            "Add your address to your admin profile before calculating a route."
-        );
-
-        return;
-
-    }
-
-    const remainingVisits =
-        getAdminRemainingRouteVisits();
-
-    // Clear the previous plan so a failed calculation
-    // cannot leave an older route available to start.
-    adminBestRoutePlan = null;
-
-    if (remainingVisits.length === 0) {
-
-        renderAdminBestVisitRoute();
-        renderAdminFinancialSnapshot();
-
-        return;
-
-    }
-
-    const missingAddresses = [];
-
-    const routeVisits =
-        remainingVisits
-            .map(visit => {
-
-                const clientName =
-                    getAdminRouteClientName(
-                        visit
-                    );
-
-                const address =
-                    getAdminRouteVisitAddress(
-                        visit
-                    );
-
-                if (!address) {
-
-                    missingAddresses.push(
-                        clientName
-                    );
-
-                    return null;
-
-                }
-
-                return {
-
-                    id:
-                        visit.id,
-
-                    label:
-                        clientName,
-
-                    address,
-
-                    visit_date:
-                        visit.visit_date,
-
-                    time_window:
-                        visit.time_window,
-
-                    preferred_time_window:
-                        getAdminRoutePreferredWindow(
-                            visit
-                        ),
-
-                    duration_minutes:
-                        getAdminRouteDurationMinutes(
-                            visit
-                        )
-
-                };
-
-            })
-            .filter(Boolean);
-
-    if (missingAddresses.length > 0) {
-
-        renderAdminBestVisitRoute();
-
-        window.alert(
-            `Missing an address for: ${
-                missingAddresses.join(", ")
-            }. Add the address before recalculating.`
-        );
-
-        return;
-
-    }
-
-    adminBestRouteLoading = true;
-
-    renderAdminBestVisitRoute();
-
+async function getAdminCurrentRouteOrigin() {
     try {
-
-        // ========================================
-        // REQUEST OPTIMIZED ROUTE
-        // ========================================
-
-        const { data, error } =
-            await supabaseClient.functions.invoke(
-                "route-optimizer",
-                {
-                    body: {
-                        start_address:
-                            startAddress,
-                        visits:
-                            routeVisits
-                    }
-                }
-            );
-
-        if (error) {
-            throw error;
-        }
-
-        if (!data?.success) {
-
-            throw new Error(
-                data?.error ||
-                "Route optimization failed."
-            );
-
-        }
-
-        // ========================================
-        // REQUIRE EVERY REQUESTED STOP
-        // ========================================
-
-        const stops =
-            Array.isArray(data.stops)
-                ? data.stops
-                : [];
-
-        const requestedIds =
-            new Set(
-                routeVisits.map(
-                    visit => String(visit.id)
-                )
-            );
-
-        const returnedIds =
-            new Set(
-                stops.map(
-                    stop => String(stop.id)
-                )
-            );
-
-        const missingVisits =
-            routeVisits.filter(
-                visit =>
-                    !returnedIds.has(
-                        String(visit.id)
-                    )
-            );
-
-        if (missingVisits.length > 0) {
-
-            const missingNames =
-                missingVisits.map(
-                    visit =>
-                        `${visit.label} (${visit.time_window})`
-                );
-
-            console.error(
-                "Route omitted requested visits:",
-                {
-                    missingVisits,
-                    skippedShipments:
-                        data.skipped_shipments || []
-                }
-            );
-
-            throw new Error(
-                `The optimizer left out: ${
-                    missingNames.join(", ")
-                }. This route has not been accepted. Check the appointment times and travel time before recalculating.`
-            );
-
-        }
-
-        const hasUnexpectedStops =
-            stops.some(
-                stop =>
-                    !requestedIds.has(
-                        String(stop.id)
-                    )
-            );
-
-        const hasDuplicateStops =
-            returnedIds.size !== stops.length;
-
-        const hasSkippedShipments =
-            Array.isArray(
-                data.skipped_shipments
-            ) &&
-            data.skipped_shipments.length > 0;
-
-        if (
-            hasUnexpectedStops ||
-            hasDuplicateStops ||
-            hasSkippedShipments
-        ) {
-
-            console.error(
-                "Unexpected route result:",
-                data
-            );
-
-            throw new Error(
-                "The optimizer returned an inconsistent stop list. This route has not been accepted. Please recalculate."
-            );
-
-        }
-
-        // ========================================
-        // CHECK FOR CHANGES DURING CALCULATION
-        // ========================================
-
-        const currentRouteIds =
-            new Set(
-                getAdminRemainingRouteVisits()
-                    .map(
-                        visit =>
-                            String(visit.id)
-                    )
-            );
-
-        if (
-            currentRouteIds.size !==
-                requestedIds.size ||
-            [...requestedIds].some(
-                id =>
-                    !currentRouteIds.has(id)
-            )
-        ) {
-
-            throw new Error(
-                "Your remaining visits changed while the route was calculating. Please recalculate."
-            );
-
-        }
-
-        // ========================================
-        // ACCEPT COMPLETE ROUTE
-        // ========================================
-
-        adminBestRoutePlan = data;
-
+        const position = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Location is unavailable.'));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true, maximumAge: 0, timeout: 12000
+            });
+        });
+        const { latitude, longitude, accuracy } = position.coords;
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+            accuracy > 250) throw new Error('Location accuracy is too low.');
+        return {
+            start_address: 'Current location',
+            start_location: { latitude, longitude }
+        };
     } catch (error) {
-
-        adminBestRoutePlan = null;
-
-        console.error(
-            "Admin route optimization error:",
-            error
-        );
-
-        window.alert(
-            error?.message ||
-            "Unable to calculate the route."
-        );
-
-    } finally {
-
-        adminBestRouteLoading = false;
-
-        renderAdminBestVisitRoute();
-
-        renderAdminFinancialSnapshot();
-
+        const today = getLocalDateString();
+        const lastVisit = allVisits.filter(visit =>
+            visit.visit_date === today && isAdminDrivingService(visit) &&
+            visit.completed_at && String(visit.status || '').toLowerCase() !== 'cancelled')
+            .sort((a, b) => Date.parse(b.completed_at) - Date.parse(a.completed_at))[0];
+        const address = lastVisit ? getAdminRouteVisitAddress(lastVisit) : getAdminRouteStartAddress();
+        const label = lastVisit ? `your last completed visit (${getAdminRouteClientName(lastVisit)})` : 'your saved home address';
+        if (address && window.confirm(`Your current location is unavailable. Use ${label} as the starting point?\n\n${address}`)) {
+            return { start_address: address };
+        }
+        throw new Error('Route not calculated. Allow location access and try again.');
     }
-
 }
 
+function getAdminRemainingRouteSignature() {
+    return JSON.stringify(getAdminRemainingRouteVisits().map(visit => [
+        String(visit.id), visit.visit_date, visit.time_window,
+        visit.checked_in_at, visit.completed_at, visit.status,
+        getAdminRouteVisitAddress(visit), getAdminRouteDurationMinutes(visit)
+    ]));
+}
+
+async function calculateAdminBestVisitRoute() {
+    if (adminBestRouteLoading) return;
+    const remaining = getAdminRemainingRouteVisits();
+    adminBestRoutePlan = null;
+    if (!remaining.length) {
+        renderAdminBestVisitRoute();
+        void refreshAdminDriveEstimates(true);
+        return;
+    }
+    if (remaining.some(visit => visit.checked_in_at ||
+        String(visit.status || '').toLowerCase() === 'checked_in')) {
+        window.alert('Finish your current visit before recalculating the remaining route.');
+        renderAdminBestVisitRoute();
+        return;
+    }
+    const signature = getAdminRemainingRouteSignature();
+    adminBestRouteLoading = true;
+    renderAdminBestVisitRoute();
+    try {
+        const routeVisits = remaining.map(visit => {
+            const address = getAdminRouteVisitAddress(visit);
+            if (!address) throw new Error(`Add an address for ${getAdminRouteClientName(visit)} first.`);
+            return {
+                id: visit.id, label: getAdminRouteClientName(visit), address,
+                visit_date: visit.visit_date, time_window: visit.time_window,
+                preferred_time_window: getAdminRoutePreferredWindow(visit),
+                duration_minutes: getAdminRouteDurationMinutes(visit)
+            };
+        });
+        const origin = await getAdminCurrentRouteOrigin();
+        const { data, error } = await supabaseClient.functions.invoke('route-optimizer', {
+            body: { ...origin, visits: routeVisits }
+        });
+        if (error) {
+            let message = error.message;
+            try {
+                const details = await error.context.json();
+                message = details.error || message;
+            } catch {}
+            throw new Error(message || 'Route optimization failed.');
+        }
+        if (!data?.success) throw new Error(data?.error || 'Route optimization failed.');
+        const stops = Array.isArray(data.stops) ? data.stops : [];
+        const requested = new Set(routeVisits.map(visit => String(visit.id)));
+        const returned = new Set(stops.map(stop => String(stop.id)));
+        if (stops.length !== requested.size || returned.size !== requested.size ||
+            stops.some(stop => !requested.has(String(stop.id))) ||
+            (data.skipped_shipments || []).length) {
+            throw new Error('Google did not return every visit exactly once. No incomplete route was accepted.');
+        }
+        if (signature !== getAdminRemainingRouteSignature()) {
+            throw new Error('Your visits changed during calculation. Please recalculate.');
+        }
+
+        const legs = stops.map(stop => {
+            const seconds = Number(stop.drive_seconds_from_previous);
+            const meters = Number(stop.drive_distance_meters_from_previous);
+            if (!Number.isFinite(seconds) || seconds < 0 ||
+                !Number.isFinite(meters) || meters < 0) {
+                throw new Error('Google returned an invalid driving estimate.');
+            }
+            return {
+                visit_id: stop.id, drive_seconds: Math.round(seconds),
+                drive_distance_meters: Math.round(meters)
+            };
+        });
+        const saved = await supabaseClient.rpc('save_admin_route_drive_estimates', { p_legs: legs });
+        if (saved.error) throw new Error(`Could not save driving estimates: ${saved.error.message}`);
+        if (signature !== getAdminRemainingRouteSignature()) {
+            throw new Error('Your visits changed while saving the route. Please recalculate.');
+        }
+        adminBestRoutePlan = { ...data, calculated_at: Date.now(), visit_signature: signature };
+        await refreshAdminDriveEstimates(true);
+    } catch (error) {
+        adminBestRoutePlan = null;
+        console.error('Admin route optimization error:', error);
+        window.alert(error?.message || 'Unable to calculate the route.');
+    } finally {
+        adminBestRouteLoading = false;
+        renderAdminBestVisitRoute();
+        renderAdminFinancialSnapshot();
+    }
+}
 
 // ========================================
 // DECODE GOOGLE ROUTE POLYLINE
@@ -21411,22 +20962,17 @@ function renderAdminBestVisitRoute() {
     // ========================================
     // ROUTE SUMMARY
     // ========================================
-
-    stopCountElement.textContent =
-        remainingVisits.length;
-
-
-    recalculateButton.disabled =
-        adminBestRouteLoading ||
-        remainingVisits.length ===
-            0;
-
-
-    startButton.disabled =
-        adminBestRouteLoading ||
-        remainingVisits.length ===
-            0;
-
+    
+    // A check-in, completion, cancellation, or schedule edit invalidates
+    // the remaining plan. Saved historical drive estimates stay in Supabase.
+    if (adminBestRoutePlan?.success &&
+        adminBestRoutePlan.visit_signature !== getAdminRemainingRouteSignature()) {
+        adminBestRoutePlan = null;
+    }
+    
+    stopCountElement.textContent = remainingVisits.length;
+    recalculateButton.disabled = adminBestRouteLoading || remainingVisits.length === 0;
+    startButton.disabled = adminBestRouteLoading || remainingVisits.length === 0;
 
     // ========================================
     // NO REMAINING VISITS
@@ -22000,182 +21546,40 @@ adminRouteRecalculateButton
 // START ROUTE ACTION
 // ========================================
 
-const adminRouteStartButton =
-    document.getElementById(
-        "admin-route-start-button"
-    );
+const adminRouteStartButton = document.getElementById('admin-route-start-button');
 
-
-adminRouteStartButton
-    ?.addEventListener(
-        "click",
-        async () => {
-
-
-            // ========================================
-            // ROUTE START ADDRESS
-            // ========================================
-
-            const startAddress =
-                getAdminRouteStartAddress();
-
-
-            if (
-                !startAddress
-            ) {
-
-                window.alert(
-                    "Add your address to your admin profile before starting a route."
-                );
-
-
-                return;
-
-            }
-
-
-            // ========================================
-            // REQUIRE OPTIMIZED ROUTE
-            // ========================================
-
-            if (
-                !adminBestRoutePlan?.success ||
-                !Array.isArray(
-                    adminBestRoutePlan.stops
-                ) ||
-                adminBestRoutePlan.stops.length ===
-                    0
-            ) {
-
-
-                await calculateAdminBestVisitRoute();
-
-
-                if (
-                    !adminBestRoutePlan?.success ||
-                    !Array.isArray(
-                        adminBestRoutePlan.stops
-                    ) ||
-                    adminBestRoutePlan.stops.length ===
-                        0
-                ) {
-
-                    return;
-
-                }
-
-            }
-
-
-            // ========================================
-            // BUILD OPTIMIZED ROUTE ADDRESSES
-            // ========================================
-
-            const routeAddresses =
-                adminBestRoutePlan
-                    .stops
-                    .map(
-                        stop =>
-                            stop.formatted_address ||
-                            stop.address ||
-                            ""
-                    )
-                    .filter(
-                        Boolean
-                    );
-
-
-            if (
-                routeAddresses.length ===
-                0
-            ) {
-
-                return;
-
-            }
-
-
-            const destination =
-                routeAddresses[
-                    routeAddresses.length -
-                    1
-                ];
-
-
-            const waypoints =
-                routeAddresses.slice(
-                    0,
-                    -1
-                );
-
-
-            // ========================================
-            // GOOGLE MAPS ROUTE
-            // ========================================
-
-            const routeUrl =
-                new URL(
-                    "https://www.google.com/maps/dir/"
-                );
-
-
-            routeUrl.searchParams.set(
-                "api",
-                "1"
-            );
-
-
-            routeUrl.searchParams.set(
-                "origin",
-                startAddress
-            );
-
-
-            routeUrl.searchParams.set(
-                "destination",
-                destination
-            );
-
-
-            routeUrl.searchParams.set(
-                "travelmode",
-                "driving"
-            );
-
-
-            routeUrl.searchParams.set(
-                "dir_action",
-                "navigate"
-            );
-
-
-            if (
-                waypoints.length >
-                0
-            ) {
-
-                routeUrl.searchParams.set(
-                    "waypoints",
-                    waypoints.join(
-                        "|"
-                    )
-                );
-
-            }
-
-
-            // ========================================
-            // OPEN GOOGLE MAPS
-            // ========================================
-
-            window.open(
-                routeUrl.toString(),
-                "_blank",
-                "noopener,noreferrer"
-            );
-
+adminRouteStartButton?.addEventListener('click', async () => {
+    if (adminBestRouteLoading) return;
+    // Open synchronously so a mobile popup blocker does not discard the tab
+    // while location and route requests are running.
+    const mapTab = window.open('about:blank', '_blank');
+    if (mapTab) mapTab.opener = null;
+    try {
+        if (!adminBestRoutePlan?.success ||
+            adminBestRoutePlan.visit_signature !== getAdminRemainingRouteSignature() ||
+            Date.now() - Number(adminBestRoutePlan.calculated_at || 0) > 120000) {
+            await calculateAdminBestVisitRoute();
         }
-    );
+        const plan = adminBestRoutePlan;
+        if (!plan?.success || !plan.stops?.length) {
+            mapTab?.close();
+            return;
+        }
+        const addresses = plan.stops.map(stop => stop.formatted_address || stop.address);
+        const url = new URL('https://www.google.com/maps/dir/');
+        url.searchParams.set('api', '1');
+        url.searchParams.set('origin', `${plan.start.latitude},${plan.start.longitude}`);
+        url.searchParams.set('destination', addresses[addresses.length - 1]);
+        url.searchParams.set('travelmode', 'driving');
+        url.searchParams.set('dir_action', 'navigate');
+        if (addresses.length > 1) url.searchParams.set('waypoints', addresses.slice(0, -1).join('|'));
+        if (mapTab) mapTab.location.href = url.toString();
+        else window.location.assign(url.toString());
+    } catch (error) {
+        mapTab?.close();
+        window.alert(error?.message || 'Unable to open navigation.');
+    }
+});
 
 // ========================================
 // CLIENT DIRECTORY
