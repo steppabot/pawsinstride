@@ -7682,7 +7682,7 @@ html {
        top, unlike the Ruff Range photo above (which needs "bottom"). This
        override only applies to the image carrying this class. */
     .gd-hero-media img.restaurant-hero-photo {
-        object-position: center 15%;
+        object-position: center 15 !important;
     }
 
     .gd-hero-text {
