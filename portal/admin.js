@@ -19722,10 +19722,7 @@ function getAdminRouteStartAddress() {
 // ROUTE SERVICE DURATION
 // ========================================
 
-function getAdminRouteDurationMinutes(
-    visit
-) {
-
+function getAdminRouteDurationMinutes(visit) {
 
     const serviceText =
         [
@@ -19734,41 +19731,33 @@ function getAdminRouteDurationMinutes(
             visit.service_option,
             visit.service_duration
         ]
-            .filter(
-                Boolean
-            )
-            .join(
-                " "
-            )
+            .filter(Boolean)
+            .join(" ")
+            .replace(/[_-]+/g, " ")
             .toLowerCase();
 
-
+    // Meet & Greets: 15 minutes, no extra buffer.
     if (
-        serviceText.includes(
-            "60"
+        /\bmeet\s*(?:&|and)?\s*greet\b/.test(
+            serviceText
         )
     ) {
+        return 15;
+    }
 
+    // Walking and drop-in durations include
+    // the existing 10-minute buffer.
+    if (serviceText.includes("60")) {
         return 70;
-
     }
 
-
-    if (
-        serviceText.includes(
-            "30"
-        )
-    ) {
-
+    if (serviceText.includes("30")) {
         return 40;
-
     }
-
 
     return 25;
 
 }
-
 
 // ========================================
 // ROUTE CLIENT NAME
