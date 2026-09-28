@@ -8335,6 +8335,7 @@ html {
 
     .gd-hero-media img {
         height: auto;
+        max-height: 320px;
         aspect-ratio: 16 / 10;
         object-position: center 35%;
     }
@@ -8353,6 +8354,10 @@ html {
 
     .gd-hero {
         margin-top: 18px;
+    }
+
+    .gd-hero-media img {
+        max-height: 240px;
     }
 
     .gd-card,
