@@ -3939,6 +3939,10 @@
                                         </article>
                         
                         
+                                    <!-- ========================================
+                                         CLIENT BILLING CARDS
+                                         ======================================== -->
+                                    <div class="admin-client-billing-grid">
                                         <!-- ========================================
                                              PRICING TIER
                                              ======================================== -->
@@ -4022,6 +4026,27 @@
                         
                         
                                         <!-- ========================================
+                                             LEGACY DISCOUNT
+                                             ======================================== -->
+                                        <article class="admin-client-household-info-card admin-client-legacy-discount-card">
+                                            <span class="admin-client-household-info-label">Legacy Discount</span>
+                                            <div class="admin-client-legacy-discount-display">
+                                                <strong>24% weekly</strong>
+                                                <button type="button"
+                                                    id="admin-client-legacy-discount-toggle"
+                                                    class="admin-client-legacy-discount-toggle"
+                                                    role="switch" aria-checked="false"
+                                                    aria-label="Enable 24% legacy weekly discount"
+                                                    aria-describedby="admin-client-legacy-discount-status">
+                                                    Off
+                                                </button>
+                                            </div>
+                                            <span id="admin-client-legacy-discount-status" role="status" aria-live="polite">
+                                                12% off with 5+ qualifying days per week. Applies to new bookings.
+                                            </span>
+                                        </article>
+
+                                        <!-- ========================================
                                              ACCOUNT CREDIT
                                              ======================================== -->
                         
@@ -4062,8 +4087,9 @@
                                         </article>
                         
                         
+                                                                        </div>
+
                                     </div>
-                        
                         
                                     <!-- ========================================
                                          HOUSEHOLD + ACCESS DETAILS
