@@ -11871,3 +11871,33 @@ dialog.admin-visit-action-confirm::backdrop {
     font-weight: 800;
     line-height: 1.2;
 }
+
+/* ========================================
+   ROUTE SUMMARY — LEAVE BY
+   ======================================== */
+
+.admin-route-summary:has(.admin-route-departure) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-route-departure {
+    background: #fff7ec;
+    border-color: #f4c78e;
+}
+
+.admin-route-departure > strong {
+    color: #a95412;
+}
+
+.admin-route-departure > small {
+    color: #6b7785;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .admin-route-summary:has(.admin-route-departure) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
