@@ -550,7 +550,7 @@ async function loadAdminDashboard() {
             supabaseClient
                 .from("profiles")
                 .select(
-                    "id, full_name, email, phone, role, profile_photo_path, pricing_tier"
+                    "id, full_name, email, phone, role, profile_photo_path, pricing_tier, legacy_discount_active, legacy_discount_percent"
                 ),
     
     
@@ -594,7 +594,6 @@ async function loadAdminDashboard() {
                 )
     
         ]);
-    
     
     // ========================================
     // SERVER VISITS AVAILABLE
@@ -1312,7 +1311,7 @@ async function refreshAdminBusinessData() {
                         "profiles"
                     )
                     .select(
-                        "id, full_name, email, phone, role, profile_photo_path, pricing_tier"
+                        "id, full_name, email, phone, role, profile_photo_path, pricing_tier, legacy_discount_active, legacy_discount_percent"
                     ),
 
                 supabaseClient
@@ -23316,6 +23315,12 @@ async function openAdminClientHousehold(
 
 
     // ========================================
+    // LEGACY DISCOUNT
+    // ========================================
+
+    renderAdminClientLegacyDiscount(profile);
+
+    // ========================================
     // ACCOUNT CREDIT
     // ========================================
 
@@ -23843,6 +23848,72 @@ function renderAdminClientVisitHistory(
 }
 
 // ========================================
+// CLIENT LEGACY DISCOUNT
+// ========================================
+
+const adminLegacyDiscountSaves = new Set();
+
+function renderAdminClientLegacyDiscount(profile) {
+    const button = document.getElementById("admin-client-legacy-discount-toggle");
+    const status = document.getElementById("admin-client-legacy-discount-status");
+    if (!button || !status || !profile) return;
+
+    const clientId = String(profile.id);
+    const active = profile.legacy_discount_active === true;
+    const percent = active ? Number(profile.legacy_discount_percent) : 12;
+    const busy = adminLegacyDiscountSaves.has(clientId);
+    button.dataset.clientId = clientId;
+    button.setAttribute("aria-checked", String(active));
+    button.disabled = busy || !navigator.onLine;
+    button.textContent = busy ? "Saving…" : active ? "On" : "Off";
+    status.textContent = !navigator.onLine
+        ? "Reconnect to change the discount."
+        : `${percent}% off with 5+ qualifying days per week. Applies to new bookings.`;
+}
+
+document.addEventListener("click", async event => {
+    const button = event.target.closest?.("#admin-client-legacy-discount-toggle");
+    if (!button || button.disabled) return;
+    const clientId = button.dataset.clientId;
+    const profile = allProfiles.find(item => String(item.id) === clientId);
+    if (!profile || adminLegacyDiscountSaves.has(clientId)) return;
+
+    const active = profile.legacy_discount_active !== true;
+    adminLegacyDiscountSaves.add(clientId);
+    renderAdminClientLegacyDiscount(profile);
+    let saveError = null;
+    try {
+        const { error } = await supabaseClient.rpc(
+            "update_admin_client_legacy_discount",
+            { p_client_id: clientId, p_active: active, p_discount_percent: 24 }
+        );
+        if (error) throw error;
+        // A realtime refresh may have replaced the profile object while saving.
+        const latest = allProfiles.find(item => String(item.id) === clientId);
+        if (latest) {
+            latest.legacy_discount_active = active;
+            latest.legacy_discount_percent = 24;
+        }
+        profile.legacy_discount_active = active;
+        profile.legacy_discount_percent = 24;
+    } catch (error) {
+        console.error("Unable to save legacy discount:", error);
+        saveError = error?.message || "Unable to save. Please try again.";
+    } finally {
+        adminLegacyDiscountSaves.delete(clientId);
+        // Do not overwrite a different household opened during this request.
+        if (button.dataset.clientId === clientId) {
+            const latest = allProfiles.find(item => String(item.id) === clientId);
+            renderAdminClientLegacyDiscount(latest || profile);
+            if (saveError) {
+                document.getElementById("admin-client-legacy-discount-status").textContent = saveError;
+            }
+        }
+    }
+});
+
+
+// ========================================
 // CLIENT PRICING TIER LABEL
 // ========================================
 
@@ -23874,7 +23945,6 @@ function getAdminClientPricingTierLabel(
     return "Standard";
 
 }
-
 
 // ========================================
 // NORMALIZE CLIENT PRICING TIER
