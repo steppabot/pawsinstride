@@ -11736,3 +11736,68 @@ dialog.admin-visit-action-confirm::backdrop {
     user-select: text;
     -webkit-user-select: text;
 }
+
+
+/* ========================================
+   CLIENT BILLING CARDS — LEGACY DISCOUNT
+   ======================================== */
+.admin-client-household-grid > .admin-client-billing-grid {
+    grid-column: 1 / -1 !important;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    min-width: 0;
+}
+.admin-client-billing-grid > .admin-client-household-info-card {
+    grid-column: auto !important;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+.admin-client-legacy-discount-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.admin-client-legacy-discount-display > strong {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+}
+.admin-client-legacy-discount-toggle {
+    appearance: none;
+    border: 1px solid #b9d2e3;
+    border-radius: 999px;
+    background: #edf4f9;
+    color: #254c64;
+    padding: 9px 17px;
+    min-height: 44px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.admin-client-legacy-discount-toggle[aria-checked="true"] {
+    background: #e6f5ec;
+    border-color: #91caa5;
+    color: #21643b;
+}
+.admin-client-legacy-discount-toggle:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+}
+.admin-client-legacy-discount-toggle:disabled { opacity: .65; cursor: wait; }
+#admin-client-legacy-discount-status {
+    display: block;
+    margin-top: 9px;
+    color: rgba(255, 255, 255, .88);
+    font-size: 11px;
+    line-height: 1.5;
+}
+@media (max-width: 768px) {
+    .admin-client-household-grid > .admin-client-billing-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+}
