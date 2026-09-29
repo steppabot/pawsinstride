@@ -11856,3 +11856,18 @@ dialog.admin-visit-action-confirm::backdrop {
         gap: 8px;
     }
 }
+
+/* ========================================
+   ALIGN CLIENT BILLING CARD CONTENT
+   ======================================== */
+
+.admin-client-billing-grid > .admin-client-household-info-card {
+    justify-content: flex-start;
+}
+
+.admin-client-billing-grid
+.admin-client-pricing-tier-display > strong {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.2;
+}
