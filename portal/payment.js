@@ -708,11 +708,23 @@ async function loadCheckout() {
     }
 
 
-    checkoutData =
-        data;
+    const { data: terms, error: termsError } = await supabaseClient
+        .from("booking_checkout_discount_terms")
+        .select("weekly_discount_percent")
+        .eq("checkout_id", checkoutId)
+        .maybeSingle();
+
+    if (termsError) {
+        throw new Error("We couldn't load this booking's discount. Please refresh and try again.");
+    }
+
+    // Historical checkouts without saved terms used the original 12% rate.
+    checkoutData = {
+        ...data,
+        weekly_discount_percent: Number(terms?.weekly_discount_percent ?? 12)
+    };
 
 }
-
 
 // ========================================
 // APPLY ACCOUNT CREDIT TO CHECKOUT
@@ -1855,7 +1867,7 @@ function renderCheckoutSummary() {
     
     
         discountLabel.textContent =
-            "Weekly Service Discount (12%)";
+            `Weekly Service Discount (${checkoutData.weekly_discount_percent}%)`;
     
     
         const discountAmount =
@@ -1886,7 +1898,6 @@ function renderCheckoutSummary() {
         );
     
     }
-    
     
     // ========================================
     // SERVICE TOTAL
