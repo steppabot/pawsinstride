@@ -20957,22 +20957,89 @@ function renderAdminBestVisitRoute() {
     const remainingVisits =
         getAdminRemainingRouteVisits();
 
-
     // ========================================
     // ROUTE SUMMARY
     // ========================================
-    
-    // A check-in, completion, cancellation, or schedule edit invalidates
-    // the remaining plan. Saved historical drive estimates stay in Supabase.
-    if (adminBestRoutePlan?.success &&
-        adminBestRoutePlan.visit_signature !== getAdminRemainingRouteSignature()) {
+
+    // Invalidate the remaining plan when the schedule changes.
+    // Saved historical drive estimates stay in Supabase.
+    if (
+        adminBestRoutePlan?.success &&
+        adminBestRoutePlan.visit_signature !==
+            getAdminRemainingRouteSignature()
+    ) {
         adminBestRoutePlan = null;
     }
-    
-    stopCountElement.textContent = remainingVisits.length;
-    recalculateButton.disabled = adminBestRouteLoading || remainingVisits.length === 0;
-    startButton.disabled = adminBestRouteLoading || remainingVisits.length === 0;
 
+    stopCountElement.textContent =
+        remainingVisits.length;
+
+    recalculateButton.disabled =
+        adminBestRouteLoading ||
+        remainingVisits.length === 0;
+
+    startButton.disabled =
+        adminBestRouteLoading ||
+        remainingVisits.length === 0;
+
+    const leaveByElement =
+        document.getElementById(
+            "admin-route-leave-by"
+        );
+
+    const leaveByNoteElement =
+        document.getElementById(
+            "admin-route-leave-by-note"
+        );
+
+    if (
+        leaveByElement &&
+        leaveByNoteElement
+    ) {
+        leaveByElement.textContent = "—";
+        leaveByNoteElement.textContent =
+            "Calculate route first";
+
+        if (remainingVisits.length === 0) {
+            leaveByNoteElement.textContent =
+                "Route complete";
+
+        } else if (adminBestRouteLoading) {
+            leaveByNoteElement.textContent =
+                "Calculating departure…";
+
+        } else if (
+            adminBestRoutePlan?.success &&
+            Array.isArray(adminBestRoutePlan.stops) &&
+            adminBestRoutePlan.stops.length > 0
+        ) {
+            const departureTime =
+                formatAdminRouteScheduledTime(
+                    adminBestRoutePlan.vehicle_start_time
+                );
+
+            const firstArrivalTime =
+                formatAdminRouteScheduledTime(
+                    adminBestRoutePlan.stops[0]
+                        .scheduled_start
+                );
+
+            if (departureTime) {
+                leaveByElement.textContent =
+                    departureTime;
+
+                leaveByNoteElement.textContent =
+                    firstArrivalTime
+                        ? `First stop: ${firstArrivalTime}`
+                        : "Planned route departure";
+            } else {
+                leaveByNoteElement.textContent =
+                    "Departure unavailable";
+            }
+        }
+    }
+
+    
     // ========================================
     // NO REMAINING VISITS
     // ========================================
