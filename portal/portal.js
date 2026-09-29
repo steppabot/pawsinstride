@@ -13081,7 +13081,7 @@ function updateBookingTotal() {
 // ========================================
 //
 // 5+ UNIQUE service days inside the same
-// Monday-Sunday week receives 12% off.
+// Sunday-Saturday week receives the client’s weekly discount.
 //
 // Multiple visits on the same date still
 // count as ONE service day.
@@ -13127,6 +13127,16 @@ selectedVisits.forEach(
     }
 );
 
+
+
+const configuredWeeklyDiscountPercent = Number(currentProfile?.legacy_discount_percent);
+const weeklyDiscountPercent = currentProfile?.legacy_discount_active === true
+    && Number.isFinite(configuredWeeklyDiscountPercent)
+    && configuredWeeklyDiscountPercent >= 0
+    && configuredWeeklyDiscountPercent <= 100
+        ? configuredWeeklyDiscountPercent
+        : 12;
+const weeklyDiscountRate = weeklyDiscountPercent / 100;
 
     // ========================================
     // CALCULATE EACH SELECTED VISIT
@@ -13228,7 +13238,7 @@ selectedVisits.forEach(
                         ? Math.round(
                             (
                                 discountableBase *
-                                0.12
+                                weeklyDiscountRate
                             ) *
                             100
                         ) / 100
@@ -13264,7 +13274,6 @@ selectedVisits.forEach(
     
             }
         );
-    
     
     // ========================================
     // TOTAL PRICE
@@ -13393,7 +13402,7 @@ selectedVisits.forEach(
     ) {
     
         pieces.push(
-            `12% weekly discount -$${formatServicePrice(
+            `${weeklyDiscountPercent}% weekly discount -$${formatServicePrice(
                 weeklyDiscountTotal
             )}`
         );
@@ -17335,8 +17344,8 @@ async function openClientCancellationModal(visit) {
                         100% of the refundable amount as account credit.
                         With less than 24 hours' notice, you receive 50%.</p>
                     <p>For bookings with a weekly discount, we first recalculate
-                        the remaining services. The 12% discount requires at least
-                        5 distinct service days in the same Monday–Sunday booking week.
+                        the remaining services. The ${preview ? escapeHtml(String(Number(preview.weekly_discount_percent ?? 12))) + "% " : ""}weekly discount requires at least
+                        5 distinct service days in the same booking week.
                         The cancellation percentage is applied after this adjustment.</p>
                 </div>
 
