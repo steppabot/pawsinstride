@@ -13086,7 +13086,7 @@ function updateBookingTotal() {
 // Multiple visits on the same date still
 // count as ONE service day.
 //
-// Only Dog Walking + Drop-In qualify.
+// Dog Walking, Drop-In and Pet Sitting qualify.
 // ========================================
 
 const weeklyServiceDays =
@@ -13222,7 +13222,9 @@ const weeklyDiscountRate = weeklyDiscountPercent / 100;
                         serviceType ===
                             "Dog Walking" ||
                         serviceType ===
-                            "Drop-In Visit"
+                            "Drop-In Visit" ||
+                        serviceType ===
+                            "Pet Sitting"
                     ) &&
                     weekServiceDayCount >=
                         5;
