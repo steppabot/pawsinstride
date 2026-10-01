@@ -13,6 +13,7 @@
     let driveKey = '';
     let driveState = 'idle'; // idle | loading | ready | error
     let selectedMonth = null;
+    let period = null; // 'month' | 'year'
     let pushedHistory = false;
 
     const money = n => Number(n || 0).toLocaleString('en-US', {
@@ -56,14 +57,21 @@
         driveKey = k;
         driveState = 'loading';
         try {
-            const { data, error } = await supabaseClient
-                .from('admin_route_drive_estimates')
-                .select('visit_id, visit_date, drive_seconds, locked_at')
-                .eq('admin_id', currentUser.id)
-                .gte('visit_date', start)
-                .lte('visit_date', end);
-            if (error) throw error;
-            driveRows = data || [];
+            const out = [];
+            for (let from = 0; from < 20000; from += 1000) {
+                const { data, error } = await supabaseClient
+                    .from('admin_route_drive_estimates')
+                    .select('visit_id, visit_date, drive_seconds, locked_at')
+                    .eq('admin_id', currentUser.id)
+                    .gte('visit_date', start)
+                    .lte('visit_date', end)
+                    .order('visit_date', { ascending: true })
+                    .range(from, from + 999);
+                if (error) throw error;
+                out.push(...(data || []));
+                if (!data || data.length < 1000) break;
+            }
+            driveRows = out;
             driveState = 'ready';
         } catch (e) {
             console.error('Financials drive estimates:', e);
@@ -92,10 +100,16 @@
         const lStart = key(ly, lm, 1), lEnd = key(ly, lm, Math.min(d, daysIn(ly, lm)));
         const lastSoFar = sum(live.filter(v => v.visit_date >= lStart && v.visit_date <= lEnd && isDone(v, today)));
         const thisSoFar = sum(monthDone.filter(v => v.visit_date <= today));
-        const change = lastSoFar > 0 ? (thisSoFar - lastSoFar) / lastSoFar : null;
+        const change = lastSoFar > 0 && thisSoFar > 0 ? (thisSoFar - lastSoFar) / lastSoFar : null;
 
-        // Work time + hourly rate (boarding excluded, same as the Today rate)
-        const work = monthDone.filter(v => !isBoarding(v) && v.visit_date <= today);
+        // Work time + hourly rate (boarding excluded, same as the Today rate).
+        // Month or whole year so far; defaults to the year until this month has a finished visit.
+        const yStart = key(y, 0, 1);
+        const doneIn = start => live.filter(v => v.visit_date >= start && v.visit_date <= today && isDone(v, today));
+        const monthHasWork = doneIn(mStart).some(v => !isBoarding(v));
+        const per = period || (monthHasWork ? 'month' : 'year');
+        const periodDone = doneIn(per === 'month' ? mStart : yStart);
+        const work = periodDone.filter(v => !isBoarding(v));
         const rows = new Map(driveRows.map(r => [String(r.visit_id), r]));
         const locked = v => {
             const r = rows.get(String(v.id));
@@ -118,9 +132,12 @@
             rateEarned += sum(list);
             rateMin += list.reduce((t, v) => t + minutesOf(v) + ((drives(v) ? locked(v) : 0) || 0) / 60, 0);
         }
-        const rate = rateMin > 0 ? rateEarned / (rateMin / 60) : null;
+        let rate = rateMin > 0 ? rateEarned / (rateMin / 60) : null;
+        // No saved driving time at all for this period: fall back to visit time only.
+        const visitOnly = rate === null && visitMin > 0 && rateDays === 0;
+        if (visitOnly) rate = sum(work) / (visitMin / 60);
 
-        const nights = monthDone.filter(isBoarding).length;
+        const nights = periodDone.filter(isBoarding).length;
         const avg = work.length ? sum(work) / work.length : null;
 
         // This year, month by month
@@ -134,8 +151,8 @@
         const yearScheduled = yearBars.reduce((t, b) => t + b.scheduled, 0);
 
         return {
-            y, m, d, mStart, mEnd, lm, monthTotal, monthEarned, change, lastSoFar,
-            visitMin, driveMin, rate, rateDays, workDays: byDay.size,
+            thisSoFar, y, m, d, mStart, mEnd, lm, monthTotal, monthEarned, change, lastSoFar,
+            visitMin, driveMin, rate, rateDays, workDays: byDay.size, visitOnly, per, yStart,
             work, nights, avg, yearBars, yearEarned, yearScheduled
         };
     }
@@ -153,18 +170,22 @@
         if (s.change !== null) {
             const up = s.change >= 0;
             changeHtml = `<span class="pfin-change ${up ? 'is-up' : 'is-down'}">${up ? '▲' : '▼'} ${Math.abs(Math.round(s.change * 100))}%</span>
-                <span class="pfin-change-note">vs. ${MONTHS[s.lm].slice(0, 3)} 1–${s.d} (${money(s.lastSoFar)})</span>`;
+                <span class="pfin-change-note">vs. ${MONTHS[s.lm].slice(0, 3)} 1${s.d > 1 ? '–' + s.d : ''} (${money(s.lastSoFar)})</span>`;
         } else {
-            changeHtml = `<span class="pfin-change-note">No ${MONTHS[s.lm]} revenue to compare yet</span>`;
+            changeHtml = `<span class="pfin-change-note">${s.thisSoFar > 0 ? `Nothing from ${MONTHS[s.lm].slice(0, 3)} 1${s.d > 1 ? '–' + s.d : ''} to compare to` : `Compares to ${MONTHS[s.lm]} after your first finished visit`}</span>`;
         }
 
         let rateValue = '—', rateNote;
         if (driveState === 'loading' || driveState === 'idle') rateNote = 'Loading saved driving time…';
-        else if (driveState === 'error') rateNote = 'Couldn’t load driving time. Close and reopen to retry.';
-        else if (s.rate === null) rateNote = s.work.length ? 'Waiting on driving estimates for this month’s visits.' : 'Appears after your first finished visit this month.';
-        else {
+        else if (s.rate === null) rateNote = s.per === 'month' ? 'Appears after your first finished visit this month.' : 'Appears after your first finished visit.';
+        else if (s.visitOnly) {
             rateValue = `${money(s.rate)}/hr`;
-            rateNote = `Visit time + driving · based on ${s.rateDays} of ${s.workDays} work ${s.workDays === 1 ? 'day' : 'days'}`;
+            rateNote = driveState === 'error' ? 'Visit time only · couldn’t load driving time (reopen to retry)'
+                : 'Visit time only · no saved driving time for these days';
+        } else {
+            rateValue = `${money(s.rate)}/hr`;
+            rateNote = s.rateDays === s.workDays ? `Visit time + driving · ${s.workDays} work ${s.workDays === 1 ? 'day' : 'days'}`
+                : `Visit time + driving · ${s.rateDays} of ${s.workDays} work days (the rest are missing driving time)`;
         }
 
         const max = Math.max(1, ...s.yearBars.map(b => b.earned + b.scheduled));
@@ -187,8 +208,13 @@
             <div class="pfin-change-row">${changeHtml}</div>
         </section>
 
+        <div class="pfin-toggle" role="tablist">
+            <button type="button" data-pfin-period="month" class="${s.per === 'month' ? 'is-on' : ''}">${MONTHS[s.m]}</button>
+            <button type="button" data-pfin-period="year" class="${s.per === 'year' ? 'is-on' : ''}">${s.y} so far</button>
+        </div>
+
         <section class="pfin-card pfin-rate">
-            <span class="pfin-label">Effective Hourly Rate · ${MONTHS[s.m]}</span>
+            <span class="pfin-label">Effective Hourly Rate</span>
             <strong class="pfin-value">${rateValue}</strong>
             <span class="pfin-note">${esc(rateNote)}</span>
         </section>
@@ -225,6 +251,7 @@
     function open() {
         if (document.getElementById('pfin-modal')) return;
         selectedMonth = null;
+        period = null;
         const wrap = document.createElement('div');
         wrap.id = 'pfin-modal';
         wrap.className = 'pfin';
@@ -244,13 +271,15 @@
         document.body.classList.add('pfin-open');
         wrap.addEventListener('click', e => {
             if (e.target === wrap || e.target.closest('.pfin-close')) return close();
+            const tog = e.target.closest('[data-pfin-period]');
+            if (tog) { period = tog.dataset.pfinPeriod; render(); return; }
             const bar = e.target.closest('[data-pfin-month]');
             if (bar) { selectedMonth = Number(bar.dataset.pfinMonth); render(); }
         });
         try { history.pushState({ pfin: true }, ''); pushedHistory = true; } catch (e) { pushedHistory = false; }
         render();
         const s = compute();
-        void loadDrive(s.mStart, s.mEnd);
+        void loadDrive(s.yStart, s.mEnd);
     }
 
     function close(fromPop) {
@@ -309,6 +338,9 @@
     .pfin-change{font-size:13px;font-weight:800;border-radius:999px;padding:4px 10px;background:rgba(255,255,255,.95)}
     .pfin-change.is-up{color:#168a3a}.pfin-change.is-down{color:#c0392b}
     .pfin-change-note{font-size:12px;font-weight:600;color:rgba(255,255,255,.85)}
+    .pfin-toggle{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:#e3edf6}
+    .pfin-toggle button{all:unset;display:flex !important;align-items:center !important;justify-content:center !important;height:38px !important;width:auto !important;padding:0 !important;margin:0 !important;border-radius:11px !important;font-family:inherit !important;font-size:14px !important;font-weight:800 !important;color:#46617d !important;background:transparent !important;box-shadow:none !important;cursor:pointer}
+    .pfin-toggle button.is-on{background:#fff !important;color:#1f63b8 !important;box-shadow:0 2px 6px rgba(24,52,71,.12) !important}
     .pfin-rate{border-color:#b9d8ef;background:linear-gradient(180deg,#fff 0%,#f2f8fd 100%)}
     .pfin-rate .pfin-value{color:#1768aa;font-size:30px}
     .pfin-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
