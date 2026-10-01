@@ -62,6 +62,7 @@
   house: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>',
   people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.4c2.6.2 4.7 2.2 4.7 4.9"/></svg>',
   moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><path d="M17 3v3M15.5 4.5h3"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>',
   dot: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="5"/></svg>',
   nav: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>'
  };
@@ -92,13 +93,15 @@
  function shortService(visit) {
   return String(visit.service_name || visit.service_type || 'Service')
    .replace(/\s+-\s+/g, ' \u00b7 ')
-   .replace(/(\d+)\s*Minutes?/i, '$1 min');
+   .replace(/(\d+)\s*Minutes?/i, '$1 min')
+   .replace(/Pet Sitting\s*\u00b7\s*[^\u00b7]*?Sit\s*\u00b7\s*(\d+)\s*Hours?/i, 'Pet Sitting \u00b7 $1 hrs');
  }
 
  function serviceKind(visit) {
   const name = `${visit.service_name || ''} ${visit.service_type || ''}`.toLowerCase();
   if (/meet\s*(&|and)?\s*greet/.test(name)) return 'meet';
   if (/drop/.test(name)) return 'dropin';
+  if (/pet[\s_-]*sit/.test(name)) return 'sit';
   if (/walk/.test(name)) return 'walk';
   return 'other';
  }
@@ -266,6 +269,7 @@
    #admin-day-services .pis-row.kind-walk .pis-row-icon { background: #e1edfc !important; color: #1f63b8 !important; }
    #admin-day-services .pis-row.kind-dropin .pis-row-icon { background: #d9f2ef !important; color: #0e7a72 !important; }
    #admin-day-services .pis-row.kind-meet .pis-row-icon { background: #ebe5fb !important; color: #6a45c2 !important; }
+   #admin-day-services .pis-row.kind-sit .pis-row-icon { background: #fbe4ef !important; color: #b8336a !important; }
    #admin-day-services .pis-row.kind-boarding .pis-row-icon { background: #fdebd9 !important; color: #c0610c !important; }
    #admin-day-services .pis-group-boarding .pis-group-count { color: #c0610c !important; background: #fdebd9 !important; }
    #admin-day-services .pis-row.kind-other .pis-row-icon { background: #e8f0f9 !important; color: #46617d !important; }
@@ -746,7 +750,7 @@
    const time = visit.time_window || 'Time not set';
 
    const kind = serviceKind(visit);
-   const kindIcon = { walk: ICONS.paw, dropin: ICONS.house, meet: ICONS.people }[kind] || ICONS.dot;
+   const kindIcon = { walk: ICONS.paw, dropin: ICONS.house, meet: ICONS.people, sit: ICONS.heart }[kind] || ICONS.dot;
    const statusBadge = { completed: ICONS.check, checked_in: ICONS.clock, cancelled: ICONS.x }[state] || '';
    let rowClass = '', meta = esc(time), sub = esc([clientName, pets.join(', ')].filter(Boolean).join(' \u00b7 '));
    if (state === 'completed') { rowClass = 'is-done'; meta += ' <span class="pis-badge pis-badge-done">Completed</span>'; }
