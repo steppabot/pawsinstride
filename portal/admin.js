@@ -19378,12 +19378,12 @@ function getAdminFinancialVisitMinutes(visit) {
 
 function getAdminWeekDateRange() {
     const today = parseLocalDate(getLocalDateString());
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - today.getDay());
+    const saturday = new Date(sunday);
+    saturday.setDate(sunday.getDate() + 6);
     const key = date => makeDateString(date.getFullYear(), date.getMonth(), date.getDate());
-    return { start: key(monday), end: key(sunday) };
+    return { start: key(sunday), end: key(saturday) };
 }
 
 function getAdminFinancialVisits(startDate, endDate) {
