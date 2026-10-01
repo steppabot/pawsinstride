@@ -42,6 +42,7 @@
  };
 
  let focusedVisitId = null;
+ let focusedIsPickup = false;
  let timerHandle = null;
  let historyPushed = false;
  let modal, body, timerEl, titleEl;
@@ -60,6 +61,7 @@
   paw: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="7" cy="9" rx="2" ry="2.6"/><ellipse cx="12" cy="6.5" rx="2" ry="2.6"/><ellipse cx="17" cy="9" rx="2" ry="2.6"/><ellipse cx="4.6" cy="13.6" rx="1.7" ry="2.2"/><ellipse cx="19.4" cy="13.6" rx="1.7" ry="2.2"/><path d="M12 11.5c-2.6 0-5.2 3.4-5.2 5.6 0 1.6 1.3 2.4 2.8 2.4 1 0 1.6-.5 2.4-.5s1.4.5 2.4.5c1.5 0 2.8-.8 2.8-2.4 0-2.2-2.6-5.6-5.2-5.6z"/></svg>',
   house: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>',
   people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.4c2.6.2 4.7 2.2 4.7 4.9"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><path d="M17 3v3M15.5 4.5h3"/></svg>',
   dot: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="5"/></svg>',
   nav: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>'
  };
@@ -127,9 +129,16 @@
  }
 
  function canFocus(visit) {
-  if (!visit || isCancelled(visit)) return false;
-  try { if (typeof isAdminBoardingService === 'function' && isAdminBoardingService(visit)) return false; } catch { /* ignore */ }
-  return true;
+  return Boolean(visit && !isCancelled(visit));
+ }
+
+ const isPickupCard = card => /pickup/i.test(card?.querySelector('.admin-service-top h5')?.textContent || '');
+
+ function findListCard(visitId, pickup) {
+  const container = document.getElementById('admin-day-services');
+  if (!container) return null;
+  const cards = [...container.querySelectorAll(`:scope > .admin-service-card[data-schedule-visit-id="${visitId}"]`)];
+  return cards.find(card => isPickupCard(card) === Boolean(pickup)) || cards[0] || null;
  }
 
 
@@ -182,6 +191,11 @@
    .vfm-body > * { flex-shrink: 0 !important; }   /* never squash content: let the popup scroll instead */
    .vfm-body > .admin-service-card { margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
    .vfm-body > .admin-service-card > .admin-visit-progress { margin: 0 !important; border-top: 0 !important; padding: 18px !important; }
+   .vfm-body > .admin-service-card > .admin-boarding-walk-panel {
+    margin: 0 !important; padding: 18px !important; border: 0 !important; border-top: 1px solid #e3ebf3 !important;
+    border-radius: 0 !important; box-shadow: none !important; background: #ffffff !important;
+   }
+   .vfm-body > .admin-service-card .admin-completed-visit-actions:empty { display: none !important; }
    html.vfm-lock, html.vfm-lock body { overflow: hidden; }
 
    /* ----- popup: summary, quick actions, pinned buttons ----- */
@@ -252,6 +266,8 @@
    #admin-day-services .pis-row.kind-walk .pis-row-icon { background: #e1edfc !important; color: #1f63b8 !important; }
    #admin-day-services .pis-row.kind-dropin .pis-row-icon { background: #d9f2ef !important; color: #0e7a72 !important; }
    #admin-day-services .pis-row.kind-meet .pis-row-icon { background: #ebe5fb !important; color: #6a45c2 !important; }
+   #admin-day-services .pis-row.kind-boarding .pis-row-icon { background: #fdebd9 !important; color: #c0610c !important; }
+   #admin-day-services .pis-group-boarding .pis-group-count { color: #c0610c !important; background: #fdebd9 !important; }
    #admin-day-services .pis-row.kind-other .pis-row-icon { background: #e8f0f9 !important; color: #46617d !important; }
    #admin-day-services .pis-row-status {
     position: absolute !important; right: -5px !important; bottom: -5px !important;
@@ -396,11 +412,14 @@
   if (!visit) return;
   body.replaceChildren();
 
-  const container = document.getElementById('admin-day-services');
-  const listCard = container?.querySelector(`:scope > .admin-service-card[data-schedule-visit-id="${visit.id}"]`);
+  const listCard = findListCard(visit.id, focusedIsPickup);
 
   if (listCard) {
    body.appendChild(listCard);           // move (not copy) -> no duplicate IDs
+  } else if (isBoarding(visit) && typeof buildAdminBoardingCard === 'function') {
+   body.innerHTML = buildAdminBoardingCard(visit);
+   const card = body.querySelector('.admin-service-card');
+   if (card) card.dataset.scheduleVisitId = String(visit.id);
   } else if (typeof buildAdminServiceCard === 'function') {
    body.innerHTML = buildAdminServiceCard(visit);
    const card = body.querySelector('.admin-service-card');
@@ -415,7 +434,8 @@
   updateHeader();
  }
 
- function buildSummary(visit) {
+ function buildSummary(visit, card) {
+  const boarding = isBoarding(visit);
   const client = clientOf(visit);
   const name = client?.full_name || client?.email || 'Client';
   const phone = String(client?.phone || '').trim();
@@ -435,10 +455,12 @@
    <div class="pis-sum-top">
     <div>
      <strong class="pis-sum-name">${esc(name)}</strong>
-     <span class="pis-sum-time">${esc(visit.time_window || 'Time not set')}</span>
+     <span class="pis-sum-time">${esc(boarding ? (card?.querySelector('.admin-service-time')?.textContent.trim() || '') : (visit.time_window || 'Time not set'))}</span>
     </div>
     <div class="pis-pills">
-     <span class="pis-pill pis-pill-${esc(p.state)}">${esc(fmtStatus(visit.status))}</span>
+     ${boarding
+      ? `<span class="pis-pill pis-pill-${esc(boardingState(card))}">${esc(card?.querySelector('.admin-service-statuses .service-status')?.textContent.trim() || 'Boarding')}</span>`
+      : `<span class="pis-pill pis-pill-${esc(p.state)}">${esc(fmtStatus(visit.status))}</span>`}
      ${visit.payment_status ? `<span class="pis-pill">${esc(fmtStatus(visit.payment_status))}</span>` : ''}
     </div>
    </div>
@@ -448,20 +470,28 @@
     ${quick(Boolean(phoneDigits), `sms:${phoneDigits}`, ICONS.text, 'Text')}
     ${quick(Boolean(address), `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`, ICONS.nav, 'Navigate', true)}
    </div>
-   <span class="pis-sum-foot">${esc([address || 'Address not added', `$${price.toFixed(2)}`].join(' \u00b7 '))}</span>`;
+   <span class="pis-sum-foot">${esc(boarding ? (address || 'Address not added') : [address || 'Address not added', `$${price.toFixed(2)}`].join(' \u00b7 '))}</span>`;
   return section;
+ }
+
+ function boardingState(card) {
+  if (!card) return 'scheduled';
+  if (card.classList.contains('admin-service-card-completed')) return 'completed';
+  if (card.classList.contains('admin-service-card-in-progress')) return 'checked_in';
+  return 'scheduled';
  }
 
  function decoratePopup(visit, card) {
   body.querySelectorAll(':scope > .pis-summary, :scope > .pis-footer').forEach(el => el.remove());
-  body.insertBefore(buildSummary(visit), card);
+  body.insertBefore(buildSummary(visit, card), card);
 
   // Pin the visit's action buttons to the bottom of the popup.
   const footer = document.createElement('div');
   footer.className = 'pis-footer';
   const mount = document.getElementById(`admin-visit-report-${visit.id}`);
-  card.querySelectorAll('button[data-visit-action], button[data-visit-report-open], button[data-admin-client-report-view]')
+  card.querySelectorAll('button[data-visit-action], button[data-visit-report-open], button[data-admin-client-report-view], button[data-boarding-action="start"], button[data-boarding-action="end"], button[data-boarding-walk-action="start"], button[data-boarding-walk-action="finish"], button[data-boarding-walk-action="resume"], button[data-boarding-walk-action="sync"], button[data-boarding-update-visit]')
    .forEach(button => { if (!mount || !mount.contains(button)) footer.appendChild(button); });
+  footer.querySelectorAll('button[data-boarding-walk-action]').forEach(button => footer.prepend(button));
   body.appendChild(footer);
  }
 
@@ -503,11 +533,14 @@
  function updateHeader() {
   const visit = findVisit(focusedVisitId);
   if (!visit || !titleEl) return;
-  const serviceName = shortService(visit);
+  const serviceName = isBoarding(visit)
+   ? (focusedIsPickup ? 'Boarding Pickup' : 'Dog Boarding')
+   : shortService(visit);
   const eyebrow = modal.querySelector('.vfm-eyebrow');
   eyebrow.textContent =
    reportModeActive === 'edit' ? 'VISIT REPORT' :
-   reportModeActive === 'preview' ? 'CLIENT REPORT' : 'CURRENT VISIT';
+   reportModeActive === 'preview' ? 'CLIENT REPORT' :
+   isBoarding(visit) ? 'BOARDING STAY' : 'CURRENT VISIT';
   titleEl.textContent = serviceName;
  }
 
@@ -524,6 +557,15 @@
   applyReportMode();
   const p = progressOf(visit);
   timerEl.classList.remove('is-live');
+  if (isBoarding(visit)) {
+   const card = body.querySelector('.admin-service-card');
+   const walkLive = card?.querySelector('[id^="admin-walk-duration-"]');
+   timerEl.textContent = walkLive
+    ? `Boarding walk ${walkLive.textContent.trim()}`
+    : (card?.querySelector('.admin-service-statuses .service-status')?.textContent.trim() || 'Boarding');
+   if (walkLive || boardingState(card) === 'checked_in') timerEl.classList.add('is-live');
+   return;
+  }
   if (p.state === 'checked_in' && visit.checked_in_at) {
    timerEl.textContent = `Visit time ${formatClock((Date.now() - Date.parse(visit.checked_in_at)) / 1000)}`;
    timerEl.classList.add('is-live');
@@ -536,12 +578,15 @@
  }
 
  // ---------- 5. Open / close ----------
- function openFocus(visitId) {
+ function openFocus(visitId, pickup = null) {
   const visit = findVisit(visitId);
   if (!canFocus(visit)) return false;
   buildModal();
 
-  const alreadyOpen = Number(focusedVisitId) === Number(visitId) && !modal.hidden;
+  const samePickup = pickup === null || Boolean(pickup) === focusedIsPickup;
+  const alreadyOpen = Number(focusedVisitId) === Number(visitId) && samePickup && !modal.hidden;
+  if (pickup !== null) focusedIsPickup = Boolean(pickup);
+  else if (Number(focusedVisitId) !== Number(visitId)) focusedIsPickup = false;
   focusedVisitId = Number(visitId);
   if (!alreadyOpen) mountCard();
 
@@ -631,6 +676,56 @@
   });
  }
 
+ function buildBoardingRow(card, visit) {
+  const pickup = isPickupCard(card);
+  const cancelled = !pickup && isCancelled(visit);
+  const state = cancelled ? 'cancelled' : boardingState(card);
+  const client = clientOf(visit);
+  const clientName = client?.full_name || client?.email || 'Client';
+  const pets = petNamesOf(visit);
+  const dates = card.querySelector('.admin-service-time')?.textContent.trim() || '';
+  const statusText = card.querySelector('.admin-service-statuses .service-status')?.textContent.trim() || '';
+  const walkLive = card.querySelector('button[data-boarding-walk-action="finish"]');
+
+  let rowClass = '', meta = esc(dates);
+  if (state === 'checked_in') { rowClass = 'is-live'; if (walkLive) meta = `${esc(dates)} \u00b7 walk in progress`; }
+  if (state === 'completed') { rowClass = 'is-done'; meta += ' <span class="pis-badge pis-badge-done">Complete</span>'; }
+  if (state === 'cancelled') { rowClass = 'is-cancelled'; meta += ' <span class="pis-badge pis-badge-cancelled">Cancelled</span>'; }
+  const sub = state === 'cancelled'
+   ? 'This reserved night was cancelled.'
+   : [clientName, pets.join(', ')].filter(Boolean).join(' \u00b7 ');
+  const statusBadge = { completed: ICONS.check, checked_in: ICONS.clock, cancelled: ICONS.x }[state] || '';
+
+  // One button that matches the stay's state.
+  let action = null;
+  const startBtn = card.querySelector('button[data-boarding-action="start"]');
+  const endBtn = card.querySelector('button[data-boarding-action="end"]');
+  if (!cancelled) {
+   if (startBtn && !startBtn.disabled) action = { label: 'Start Boarding', run: () => startBtn.click() };
+   else if (endBtn && !endBtn.disabled) action = { label: 'End Boarding', run: () => endBtn.click() };
+   else if (state === 'completed') action = { label: 'View', secondary: true, run: () => openFocus(visit.id, pickup) };
+   else action = { label: 'Open', run: () => openFocus(visit.id, pickup) };
+  }
+
+  const title = pickup ? 'Boarding Pickup' : 'Dog Boarding';
+  const row = document.createElement('div');
+  row.className = `pis-row ${rowClass} kind-boarding`;
+  row.innerHTML = `
+   <div class="pis-row-icon" aria-hidden="true">${ICONS.moon}${statusBadge ? `<span class="pis-row-status">${statusBadge}</span>` : ''}</div>
+   <button type="button" class="pis-row-main"${cancelled ? ' disabled' : ''} aria-label="Open ${esc(title)} for ${esc(clientName)}">
+    <span class="pis-row-meta">${meta}</span>
+    <span class="pis-row-title">${esc(title)}</span>
+    <span class="pis-row-sub">${esc(sub)}</span>
+   </button>
+   ${action ? `<button type="button" class="pis-row-action${action.secondary ? ' is-secondary' : ''}">${esc(action.label)}</button>` : ''}`;
+
+  if (!cancelled) row.querySelector('.pis-row-main').addEventListener('click', () => openFocus(visit.id, pickup));
+  if (action) row.querySelector('.pis-row-action').addEventListener('click', event => { event.stopPropagation(); action.run(); });
+
+  card.classList.add('pis-compact');
+  card.prepend(row);
+ }
+
  function compactSchedule() {
   const container = document.getElementById('admin-day-services');
   if (!container) return;
@@ -638,9 +733,10 @@
 
   container.querySelectorAll(':scope > .admin-service-card[data-schedule-visit-id]').forEach(card => {
    const visit = findVisit(card.dataset.scheduleVisitId);
-   if (!visit || isBoarding(visit)) return;
+   if (!visit) return;
 
    card.querySelector(':scope > .pis-row')?.remove();
+   if (isBoarding(visit)) { buildBoardingRow(card, visit); return; }
    const cancelled = isCancelled(visit);
    const state = cancelled ? 'cancelled' : progressOf(visit).state;
 
@@ -702,10 +798,17 @@
   // Morning / Afternoon / Evening headers (cancelled visits get their own at the bottom).
   let lastGroup = null;
   const counts = {};
+  // All-day boarding goes to the top of the day (cancelled nights stay at the bottom).
+  [...container.querySelectorAll(':scope > .admin-service-card.pis-compact')]
+   .filter(card => { const v = findVisit(card.dataset.scheduleVisitId); return isBoarding(v) && !(isCancelled(v) && !isPickupCard(card)); })
+   .reverse()
+   .forEach(card => container.insertBefore(card, container.querySelector(':scope > .admin-service-card.pis-compact')));
+
   const cards = [...container.querySelectorAll(':scope > .admin-service-card.pis-compact')];
   const groupOf = card => {
    const v = findVisit(card.dataset.scheduleVisitId);
-   return isCancelled(v) ? 'Cancelled' : dayPart(v);
+   if (isCancelled(v) && !isPickupCard(card)) return 'Cancelled';
+   return isBoarding(v) ? 'Boarding' : dayPart(v);
   };
   cards.forEach(card => { const g = groupOf(card); counts[g] = (counts[g] || 0) + 1; });
   if (cards.length > 1) {
