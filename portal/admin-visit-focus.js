@@ -169,6 +169,30 @@
     background: #ffffff; border-bottom: 1px solid #dbe7f3;
    }
    .vfm-eyebrow { display: block; font-size: 12px; font-weight: 800; letter-spacing: .12em; color: #2a7fd4; }
+   .vfm-head-text { flex: 1 1 auto; min-width: 0; }
+   .vfm-kind-icon { flex: none; display: none; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 16px;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); color: #fff; }
+   .vfm-kind-icon svg { width: 27px; height: 27px; display: block; }
+   .vfm[data-kind="walk"], .admin-client-report-preview[data-kind="walk"] { --vk: linear-gradient(135deg,#2f7fd6,#1f63b8); }
+   .vfm[data-kind="dropin"], .admin-client-report-preview[data-kind="dropin"] { --vk: linear-gradient(135deg,#22c6e0,#0aa5c2); }
+   .vfm[data-kind="sit"], .admin-client-report-preview[data-kind="sit"] { --vk: linear-gradient(135deg,#d6467f,#b8336a); }
+   .vfm[data-kind="boarding"], .admin-client-report-preview[data-kind="boarding"] { --vk: linear-gradient(135deg,#e07a1f,#c0610c); }
+   .vfm[data-kind="meet"], .admin-client-report-preview[data-kind="meet"] { --vk: linear-gradient(135deg,#8160d6,#6a45c2); }
+   .vfm[data-kind="walk"] .vfm-header, .vfm[data-kind="dropin"] .vfm-header, .vfm[data-kind="sit"] .vfm-header,
+   .vfm[data-kind="boarding"] .vfm-header, .vfm[data-kind="meet"] .vfm-header { background: var(--vk); border-bottom: 0; }
+   .vfm[data-kind] .vfm-header .vfm-kind-icon { display: inline-flex; }
+   .vfm[data-kind="other"] .vfm-header .vfm-kind-icon { display: none; }
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-eyebrow,
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-title,
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-timer,
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-timer.is-live { color: #fff; }
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-eyebrow, .vfm[data-kind]:not([data-kind="other"]) .vfm-timer { opacity: .92; }
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-close { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.45); color: #fff; }
+   .admin-client-report-preview[data-kind] .admin-preview-header { background: var(--vk) !important; display: flex !important; align-items: center !important; gap: 14px !important; }
+   .admin-client-report-preview[data-kind] .admin-preview-header > div { flex: 1 1 auto; min-width: 0; }
+   .pis-preview-icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 16px;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); color: #fff; }
+   .pis-preview-icon svg { width: 27px; height: 27px; display: block; }
    .vfm-title { display: block; font-size: 17px; font-weight: 700; color: #16324f; margin-top: 2px; }
    .vfm-timer { display: block; font-size: 15px; font-weight: 600; color: #46617d; margin-top: 4px; font-variant-numeric: tabular-nums; }
    .vfm-timer.is-live { color: #1f7a3a; }
@@ -267,11 +291,11 @@
    #admin-day-services .pis-row-icon { position: relative !important; border-radius: 12px !important; flex-basis: 40px !important; width: 40px !important; height: 40px !important; }
    #admin-day-services .pis-row-icon > svg { width: 20px !important; height: 20px !important; display: block !important; }
    #admin-day-services .pis-row.kind-walk .pis-row-icon { background: #e1edfc !important; color: #1f63b8 !important; }
-   #admin-day-services .pis-row.kind-dropin .pis-row-icon { background: #d8f1fa !important; color: #0b7fa8 !important; }
+   #admin-day-services .pis-row.kind-dropin .pis-row-icon { background: #cdf5fb !important; color: #0aa5c2 !important; }
    #admin-day-services .pis-row.kind-walk, #admin-day-services .pis-row.kind-dropin, #admin-day-services .pis-row.kind-sit,
    #admin-day-services .pis-row.kind-meet, #admin-day-services .pis-row.kind-boarding { border-left-width: 6px !important; padding-left: 10px !important; }
    #admin-day-services .pis-row.pis-row.kind-walk { border-left-color: #1f63b8 !important; }
-   #admin-day-services .pis-row.pis-row.kind-dropin { border-left-color: #0b7fa8 !important; }
+   #admin-day-services .pis-row.pis-row.kind-dropin { border-left-color: #14c0dc !important; }
    #admin-day-services .pis-row.pis-row.kind-sit { border-left-color: #b8336a !important; }
    #admin-day-services .pis-row.pis-row.kind-meet { border-left-color: #6a45c2 !important; }
    #admin-day-services .pis-row.pis-row.kind-boarding { border-left-color: #c0610c !important; }
@@ -378,7 +402,8 @@
    <div class="vfm-backdrop"></div>
    <section class="vfm-sheet" role="dialog" aria-modal="true" aria-labelledby="vfm-title">
     <header class="vfm-header">
-     <div>
+     <span class="vfm-kind-icon" aria-hidden="true"></span>
+     <div class="vfm-head-text">
       <span class="vfm-eyebrow">CURRENT VISIT</span>
       <strong class="vfm-title" id="vfm-title"></strong>
       <span class="vfm-timer"></span>
@@ -516,6 +541,7 @@
 
  function applyReportMode() {
   if (!body || !focusedVisitId) return;
+  decoratePreview();
   const card = body.querySelector('.admin-service-card');
   const reportOpen =
    typeof activeVisitReportVisitId !== 'undefined' &&
@@ -558,6 +584,29 @@
    reportModeActive === 'preview' ? 'CLIENT REPORT' :
    isBoarding(visit) ? 'BOARDING STAY' : 'CURRENT VISIT';
   titleEl.textContent = serviceName;
+  const kind = isBoarding(visit) ? 'boarding' : serviceKind(visit);
+  if (modal.dataset.kind !== kind) {
+   modal.dataset.kind = kind;
+   const slot = modal.querySelector('.vfm-kind-icon');
+   if (slot) slot.innerHTML = { walk: ICONS.paw, dropin: ICONS.house, meet: ICONS.people, sit: ICONS.heart, boarding: ICONS.moon }[kind] || '';
+  }
+ }
+
+ // Theme the admin "View Client Report" preview header with the service color + icon.
+ function decoratePreview() {
+  const visit = findVisit(focusedVisitId);
+  const preview = body && body.querySelector('.admin-client-report-preview');
+  if (!visit || !preview) return;
+  const kind = isBoarding(visit) ? 'boarding' : serviceKind(visit);
+  if (preview.dataset.kind !== kind) preview.dataset.kind = kind;
+  const header = preview.querySelector('.admin-preview-header');
+  if (header && !header.querySelector('.pis-preview-icon')) {
+   const icon = document.createElement('span');
+   icon.className = 'pis-preview-icon';
+   icon.setAttribute('aria-hidden', 'true');
+   icon.innerHTML = { walk: ICONS.paw, dropin: ICONS.house, meet: ICONS.people, sit: ICONS.heart, boarding: ICONS.moon }[kind] || ICONS.dot;
+   header.prepend(icon);
+  }
  }
 
  // ---------- 4. Visit timer ----------
