@@ -16095,6 +16095,10 @@ function renderSelectedUpcomingServices() {
                                 progress
                             )}
 
+                            ${typeof buildClientSitUpdatesSection === "function"
+                                ? buildClientSitUpdatesSection(visit, progress)
+                                : ""}
+
 
                             ${
                                 canCancel
@@ -23180,6 +23184,9 @@ async function renderMobileHomeDashboard() {
     }
     await renderClientHomeLatestUpdate(version);
     if (version === clientHomeRenderVersion) await openClientBoardingNotificationLink();
+    if (version === clientHomeRenderVersion && typeof openClientSitNotificationLink === "function") {
+        await openClientSitNotificationLink();
+    }
 }
 
 // ========================================
@@ -25364,6 +25371,12 @@ async function handleClientNotificationAction(
 
 
     closeClientNotificationCenter();
+
+    if (notificationType === "client_sit_update" && typeof openClientSitUpdates === "function") {
+        closeClientMessaging();
+        await openClientSitUpdates(notification.metadata?.visit_id || notification.entity_id);
+        return;
+    }
 
     if (isClientBoardingNotification(notificationType) || entityType === "boarding_stay") {
         const stayId = String(notification.metadata?.boarding_stay_id || notification.entity_id || "");
