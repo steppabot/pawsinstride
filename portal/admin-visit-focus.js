@@ -194,6 +194,19 @@
     background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); color: #fff; }
    .pis-preview-icon svg { width: 27px; height: 27px; display: block; }
    /* Popup + list buttons follow the service color (finish buttons stay green, sit update stays pink) */
+   /* Visit report editor: Save button + Add Photos follow the service color, square corners like the other buttons */
+   .vfm .admin-save-visit-report-button { width: 100% !important; min-height: 52px !important; border-radius: 10px !important; border: 0 !important; color: #fff !important; font-weight: 800 !important; }
+   .vfm .admin-visit-media-upload-button { border-radius: 10px !important; }
+   .vfm[data-kind="walk"] .admin-save-visit-report-button { background: linear-gradient(135deg,#2f7fd6,#1f63b8) !important; box-shadow: none !important; }
+   .vfm[data-kind="walk"] .admin-visit-media-upload-button { background: #f2f7fd !important; color: #1f63b8 !important; border: 1px dashed #1f63b8 !important; }
+   .vfm[data-kind="dropin"] .admin-save-visit-report-button { background: linear-gradient(135deg,#22c6e0,#0aa5c2) !important; box-shadow: none !important; }
+   .vfm[data-kind="dropin"] .admin-visit-media-upload-button { background: #effbfd !important; color: #0a9ab6 !important; border: 1px dashed #0a9ab6 !important; }
+   .vfm[data-kind="sit"] .admin-save-visit-report-button { background: linear-gradient(135deg,#d6467f,#b8336a) !important; box-shadow: none !important; }
+   .vfm[data-kind="sit"] .admin-visit-media-upload-button { background: #fdf3f7 !important; color: #b8336a !important; border: 1px dashed #b8336a !important; }
+   .vfm[data-kind="meet"] .admin-save-visit-report-button { background: linear-gradient(135deg,#8160d6,#6a45c2) !important; box-shadow: none !important; }
+   .vfm[data-kind="meet"] .admin-visit-media-upload-button { background: #f6f3fd !important; color: #6a45c2 !important; border: 1px dashed #6a45c2 !important; }
+   .vfm[data-kind="boarding"] .admin-save-visit-report-button { background: linear-gradient(135deg,#e07a1f,#c0610c) !important; box-shadow: none !important; }
+   .vfm[data-kind="boarding"] .admin-visit-media-upload-button { background: #fdf6ef !important; color: #c0610c !important; border: 1px dashed #c0610c !important; }
    .vfm[data-kind="walk"] .pis-footer button:is([data-visit-report-open],[data-visit-action="check-in"],[data-visit-action="start-walk"],[data-boarding-action="start"],[data-boarding-update-visit],[data-boarding-walk-action="start"]) { background: linear-gradient(135deg,#2f7fd6,#1f63b8) !important; border-color: transparent !important; color: #fff !important; box-shadow: none !important; }
    .vfm[data-kind="walk"] .pis-footer button:is([data-admin-client-report-view],[data-visit-action="reopen"],[data-visit-action="resume-walk-gps"],[data-visit-action="sync-visit"],[data-visit-action="sync-walk"],[data-boarding-walk-action="resume"],[data-boarding-walk-action="sync"]) { background: #fff !important; color: #1f63b8 !important; border: 1px solid #c9dcf3 !important; }
    #admin-day-services .pis-row.kind-walk button.pis-row-action:not(.is-secondary) { background: linear-gradient(135deg,#2f7fd6,#1f63b8) !important; color: #fff !important; }
