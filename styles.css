@@ -7768,3 +7768,48 @@ html {
         width: 100%;
     }
 }
+
+/* ---------- Footer faith verse ---------- */
+.pis-faith {
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 22px 0 26px;
+    border-top: 1px solid #e6ecf1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.pis-cross {
+    display: block;
+    flex: none;
+    width: 18px;
+    height: 24px;
+}
+
+.pis-faith-verse {
+    margin: 0;
+}
+
+.pis-faith-verse p {
+    margin: 0;
+    color: #243949;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.pis-faith-verse cite {
+    display: block;
+    margin-top: 4px;
+    color: #d9780f;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
