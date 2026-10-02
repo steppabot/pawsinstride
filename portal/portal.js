@@ -15249,8 +15249,8 @@ function buildClientBoardingServiceCard(visit) {
         !["completed", "checked_in", "cancelled"].includes(String(visit.status || "").toLowerCase()) &&
         !visit.checked_in_at && !visit.completed_at;
     return `<div class="upcoming-service-card ${stay?.status === "active" ? "upcoming-service-card-in-progress" :
-        stay?.status === "completed" ? "upcoming-service-card-completed" : ""}">
-        <div class="upcoming-service-card-header"><strong>${pickup ? "Boarding pickup" : "Dog Boarding"}</strong>
+        stay?.status === "completed" ? "upcoming-service-card-completed" : ""} ${(typeof pisKindClass === "function" ? pisKindClass(visit) : "")}">
+        <div class="upcoming-service-card-header"><div class="pis-card-head">${(typeof pisKindIconHtml === "function" ? pisKindIconHtml(visit) : "")}<strong>${pickup ? "Boarding pickup" : "Dog Boarding"}</strong></div>
             <span class="service-status">${escapeHtml(status)}</span></div>
         <div class="service-pet-chips">${pets.map(p => `<span class="service-pet-chip">${escapeHtml(p.name)}</span>`).join("")}</div>
         ${stay ? `<p>${escapeHtml(clientBoardingDate(stay.dropoff_date))} → ${escapeHtml(clientBoardingDate(stay.pickup_date))}</p>` : ""}
@@ -15292,6 +15292,7 @@ async function loadAndOpenClientBoardingUpdates(stayId) {
     dialog.className = "client-boarding-dialog";
     dialog.setAttribute("aria-labelledby", "client-boarding-dialog-title");
     dialog.innerHTML = `<header class="client-boarding-dialog-header">
+        ${typeof pisKindIconHtml === "function" ? pisKindIconHtml({ service_type: "Dog Boarding" }, "pis-head-icon") : ""}
         <div><small>BOARDING UPDATES</small><h2 id="client-boarding-dialog-title">${escapeHtml(getClientBoardingPetNames(stay))}</h2>
         <p>${escapeHtml(clientBoardingDate(stay.dropoff_date))} → ${escapeHtml(clientBoardingDate(stay.pickup_date))}</p></div>
         <button type="button" data-boarding-view-close aria-label="Close boarding updates">×</button></header>
@@ -15992,7 +15993,7 @@ function renderSelectedUpcomingServices() {
 
 
                     return `
-                        <div class="upcoming-service-card ${cardStateClass}">
+                        <div class="upcoming-service-card ${cardStateClass} ${(typeof pisKindClass === "function" ? pisKindClass(visit) : "")}">
 
                             ${buildClientVisitProgressIcon(
                                 progress
@@ -16000,13 +16001,13 @@ function renderSelectedUpcomingServices() {
 
                             <div class="upcoming-service-card-header">
 
-                                <strong>
+                                <div class="pis-card-head">${(typeof pisKindIconHtml === "function" ? pisKindIconHtml(visit) : "")}<strong>
                                     ${escapeHtml(
-                                        visit.service_name ||
-                                        visit.service_type ||
-                                        "Service"
+                                        typeof pisShortServiceName === "function"
+                                            ? pisShortServiceName(visit)
+                                            : (visit.service_name || visit.service_type || "Service")
                                     )}
-                                </strong>
+                                </strong></div>
 
                                 <span class="service-status">
                                     ${escapeHtml(
@@ -19180,11 +19181,13 @@ function renderClientVisitReport(
                     walkingService
                         ? "client-visit-report-walk"
                         : "client-visit-report-nonwalk"
-                }"
+                } ${typeof pisKindClass === "function" ? pisKindClass(reportVisit) : ""}"
             >
 
 
                 <div class="client-visit-report-header">
+
+                    ${typeof pisKindIconHtml === "function" ? pisKindIconHtml(reportVisit, "pis-head-icon") : ""}
 
                     <div>
 
