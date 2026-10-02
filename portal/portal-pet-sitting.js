@@ -229,6 +229,7 @@
         dialog.setAttribute('aria-labelledby', 'client-sit-dialog-title');
         const live = visit && (visit.checked_in_at && !visit.completed_at && lower(visit.status) !== 'completed');
         dialog.innerHTML = `<header class="client-boarding-dialog-header">
+            ${typeof pisKindIconHtml === 'function' ? pisKindIconHtml({ service_type: 'Pet Sitting' }, 'pis-head-icon') : ''}
             <div><small>PET SITTING UPDATES</small><h2 id="client-sit-dialog-title">${escapeHtml(visit ? petNames(visit) : 'Your pet')}</h2>
             <p>${escapeHtml(visit ? [typeof clientBoardingDate === 'function' ? clientBoardingDate(visit.visit_date) : visit.visit_date, visit.time_window].filter(Boolean).join(' · ') : '')}</p></div>
             <button type="button" data-boarding-view-close data-sit-view-close aria-label="Close sit updates">×</button></header>
@@ -286,4 +287,78 @@
         .client-sit-updates-hint{margin:10px 0 0;color:#6b7785;font-size:13px}
         .client-sit-dialog .client-boarding-dialog-header{background:linear-gradient(135deg,#d6467f,#b8336a) !important}`;
     document.head.appendChild(style);
+})();
+
+
+/* ============================================================
+   Service themes — icon + color per service type (client portal).
+   Walk = blue paw, Drop-In = cyan house, Pet Sitting = pink heart,
+   Boarding = orange moon, Meet & Greet = purple people.
+   Card backgrounds keep showing status (yellow live, green done).
+   ============================================================ */
+(function () {
+    'use strict';
+    const ICONS = {
+        walk: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="7" cy="9" rx="2" ry="2.6"/><ellipse cx="12" cy="6.5" rx="2" ry="2.6"/><ellipse cx="17" cy="9" rx="2" ry="2.6"/><ellipse cx="4.6" cy="13.6" rx="1.7" ry="2.2"/><ellipse cx="19.4" cy="13.6" rx="1.7" ry="2.2"/><path d="M12 11.5c-2.6 0-5.2 3.4-5.2 5.6 0 1.6 1.3 2.4 2.8 2.4 1 0 1.6-.5 2.4-.5s1.4.5 2.4.5c1.5 0 2.8-.8 2.8-2.4 0-2.2-2.6-5.6-5.2-5.6z"/></svg>',
+        drop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>',
+        sit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>',
+        board: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><path d="M17 3v3M15.5 4.5h3"/></svg>',
+        meet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.4c2.6.2 4.7 2.2 4.7 4.9"/></svg>'
+    };
+    function kind(visit) {
+        const t = `${visit?.service_type || ''} ${visit?.service_name || ''}`.toLowerCase();
+        if (/meet\s*(&|and)?\s*greet/.test(t)) return 'meet';
+        if (/board/.test(t)) return 'board';
+        if (/drop/.test(t)) return 'drop';
+        if (/pet[\s_-]*sit/.test(t)) return 'sit';
+        if (/walk/.test(t)) return 'walk';
+        return '';
+    }
+    window.pisKind = kind;
+    window.pisKindClass = visit => { const k = kind(visit); return k ? `pis-kind pis-kind-${k}` : ''; };
+    window.pisKindIconHtml = (visit, extra) => {
+        const k = kind(visit);
+        return k ? `<span class="pis-kind-icon ${extra || ''}">${ICONS[k]}</span>` : '';
+    };
+    window.pisShortServiceName = visit => String(visit?.service_name || visit?.service_type || 'Service')
+        .replace(/^Pet Sitting\s*-\s*[^-]*?Sit\s*-\s*(\d+)\s*Hours?$/i, 'Pet Sitting · $1 hrs')
+        .replace(/\s+-\s+(\d+)\s*Minutes?$/i, ' · $1 min');
+
+    const css = `
+    .pis-kind-walk{--pk:#1f63b8;--pkb:#e1edfc;--pkg:linear-gradient(135deg,#2f7fd6,#1f63b8)}
+    .pis-kind-drop{--pk:#0b7fa8;--pkb:#d8f1fa;--pkg:linear-gradient(135deg,#1597c4,#0b7fa8)}
+    .pis-kind-sit{--pk:#b8336a;--pkb:#fbe4ef;--pkg:linear-gradient(135deg,#d6467f,#b8336a)}
+    .pis-kind-board{--pk:#c0610c;--pkb:#fdebd9;--pkg:linear-gradient(135deg,#e07a1f,#c0610c)}
+    .pis-kind-meet{--pk:#6a45c2;--pkb:#ebe5fb;--pkg:linear-gradient(135deg,#8160d6,#6a45c2)}
+
+    /* Cards */
+    .upcoming-service-card.pis-kind{box-shadow:inset 6px 0 0 var(--pk),0 4px 12px rgba(24,52,71,.05) !important;padding-left:22px !important}
+    .upcoming-service-card.pis-kind::before{display:none !important}
+    .upcoming-service-card.pis-kind .client-visit-progress-icon{display:none !important}
+    .upcoming-service-card.pis-kind .upcoming-service-card-header{display:flex !important;flex-direction:row !important;flex-wrap:nowrap !important;align-items:center !important;justify-content:space-between !important;gap:10px !important;padding-right:0 !important;text-align:left !important}
+    .pis-card-head{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 auto;text-align:left}
+    .pis-card-head strong{line-height:1.25}
+    .upcoming-service-card.pis-kind .service-status{flex:none;white-space:nowrap}
+    .pis-kind-icon{flex:none;width:42px;height:42px;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;background:var(--pkb);color:var(--pk)}
+    .pis-kind-icon svg{width:22px;height:22px}
+    .upcoming-service-card.pis-kind.upcoming-service-card-in-progress{background:#fff8e8 !important;border-color:#ecd28f !important}
+    .upcoming-service-card.pis-kind.upcoming-service-card-completed{background:#f3faf4 !important;border-color:#cfe7d4 !important}
+    .upcoming-service-card.pis-kind.upcoming-service-card-in-progress .service-status{background:#fbe3b8 !important;color:#8a5200 !important}
+    .upcoming-service-card.pis-kind.upcoming-service-card-completed .service-status{background:#e3f3e6 !important;color:#1f7a3a !important}
+
+    /* Report headers */
+    .client-visit-report.pis-kind .client-visit-report-header{display:flex;align-items:center;gap:14px;background:var(--pkg) !important;border-bottom:0 !important}
+    .client-visit-report.pis-kind .client-visit-report-header h5,
+    .client-visit-report.pis-kind .client-visit-report-header p,
+    .client-visit-report.pis-kind .client-visit-report-eyebrow{color:#fff !important}
+    .client-visit-report.pis-kind .client-visit-report-header p{opacity:.92}
+    .pis-head-icon{width:50px;height:50px;border-radius:16px;background:rgba(255,255,255,.2) !important;border:1px solid rgba(255,255,255,.35);color:#fff !important}
+    .pis-head-icon svg{width:27px;height:27px}
+    .client-boarding-dialog .client-boarding-dialog-header{align-items:center !important}
+    .client-boarding-dialog .client-boarding-dialog-header > div{flex:1 1 auto;min-width:0}
+    .client-boarding-dialog:not(.client-sit-dialog) .client-boarding-dialog-header{background:linear-gradient(135deg,#e07a1f,#c0610c) !important}
+    .upcoming-service-card.pis-kind .client-sit-updates{background:#fff !important}`;
+    const st = document.createElement('style');
+    st.textContent = css;
+    document.head.appendChild(st);
 })();
