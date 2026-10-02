@@ -267,7 +267,15 @@
    #admin-day-services .pis-row-icon { position: relative !important; border-radius: 12px !important; flex-basis: 40px !important; width: 40px !important; height: 40px !important; }
    #admin-day-services .pis-row-icon > svg { width: 20px !important; height: 20px !important; display: block !important; }
    #admin-day-services .pis-row.kind-walk .pis-row-icon { background: #e1edfc !important; color: #1f63b8 !important; }
-   #admin-day-services .pis-row.kind-dropin .pis-row-icon { background: #d9f2ef !important; color: #0e7a72 !important; }
+   #admin-day-services .pis-row.kind-dropin .pis-row-icon { background: #d8f1fa !important; color: #0b7fa8 !important; }
+   #admin-day-services .pis-row.kind-walk, #admin-day-services .pis-row.kind-dropin, #admin-day-services .pis-row.kind-sit,
+   #admin-day-services .pis-row.kind-meet, #admin-day-services .pis-row.kind-boarding { border-left-width: 6px !important; padding-left: 10px !important; }
+   #admin-day-services .pis-row.pis-row.kind-walk { border-left-color: #1f63b8 !important; }
+   #admin-day-services .pis-row.pis-row.kind-dropin { border-left-color: #0b7fa8 !important; }
+   #admin-day-services .pis-row.pis-row.kind-sit { border-left-color: #b8336a !important; }
+   #admin-day-services .pis-row.pis-row.kind-meet { border-left-color: #6a45c2 !important; }
+   #admin-day-services .pis-row.pis-row.kind-boarding { border-left-color: #c0610c !important; }
+   #admin-day-services .pis-row.pis-row.pis-row.is-cancelled { border-left-color: #e3a19b !important; }
    #admin-day-services .pis-row.kind-meet .pis-row-icon { background: #ebe5fb !important; color: #6a45c2 !important; }
    #admin-day-services .pis-row.kind-sit .pis-row-icon { background: #fbe4ef !important; color: #b8336a !important; }
    #admin-day-services .pis-row.kind-boarding .pis-row-icon { background: #fdebd9 !important; color: #c0610c !important; }
