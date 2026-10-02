@@ -496,6 +496,10 @@
   card.querySelectorAll('button[data-visit-action], button[data-visit-report-open], button[data-admin-client-report-view], button[data-boarding-action="start"], button[data-boarding-action="end"], button[data-boarding-walk-action="start"], button[data-boarding-walk-action="finish"], button[data-boarding-walk-action="resume"], button[data-boarding-walk-action="sync"], button[data-boarding-update-visit]')
    .forEach(button => { if (!mount || !mount.contains(button)) footer.appendChild(button); });
   footer.querySelectorAll('button[data-boarding-walk-action]').forEach(button => footer.prepend(button));
+  if (typeof window.buildAdminSitUpdateButton === 'function') {
+   const sitButton = window.buildAdminSitUpdateButton(visit);
+   if (sitButton) footer.prepend(sitButton);
+  }
   body.appendChild(footer);
  }
 
