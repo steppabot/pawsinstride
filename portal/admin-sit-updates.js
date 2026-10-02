@@ -24,6 +24,11 @@
         if (!visit.completed_at) return true;
         return Date.now() - Date.parse(visit.completed_at) < 12 * 3600 * 1000;
     }
+    // Finished sits keep a "View Sit Updates" button so you can look back at what the client got.
+    function canView(visit) {
+        return !!visit && isSit(visit) && lower(visit.status) !== 'cancelled' && !!visit.checked_in_at;
+    }
+    const isDone = visit => !!visit?.completed_at || lower(visit?.status) === 'completed';
 
     /* ---------- drafts on this device (IndexedDB keeps photo blobs) ---------- */
     function store(action, key, value) {
@@ -64,7 +69,7 @@
         if (t) t.textContent = text;
     }
     function collect(state) {
-        if (state.draft.locked) return;
+        if (!state.composing || state.draft.locked) return;
         state.draft.notes = state.dialog.querySelector('[data-boarding-notes]').value;
         for (const care of state.draft.care) {
             for (const flag of ['fed', 'fresh_water', 'pee', 'poop']) {
@@ -139,7 +144,7 @@
                 ${row.notes ? `<p class="boarding-update-note">${esc(row.notes)}</p>` : ''}
                 ${(row.visit_update_pet_care || []).map(care => {
                     const flags = [['fed', 'Fed'], ['fresh_water', 'Fresh water'], ['pee', 'Pee'], ['poop', 'Poop']].filter(([k]) => care[k]).map(([, l]) => l);
-                    return flags.length ? `<p><strong>${esc((allPets || []).find(p => Number(p.id) === Number(care.pet_id))?.name || 'Pet')}:</strong> ${esc(flags.join(' · '))}</p>` : '';
+                    return flags.length ? `<p><strong>${esc([...petsOf(state.visit), ...(typeof allPets !== 'undefined' ? allPets || [] : [])].find(p => Number(p.id) === Number(care.pet_id))?.name || 'Pet')}:</strong> ${esc(flags.join(' · '))}</p>` : '';
                 }).join('')}
                 <div class="boarding-photo-grid">${row.photos.map(p => p.url
                     ? `<a href="${esc(p.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(p.url)}" alt="Sit photo" loading="lazy"></a>`
@@ -252,12 +257,14 @@
     async function open(visitId) {
         if (editor) { editor.dialog.focus(); return; }
         const visit = findVisit(visitId);
-        if (!canUpdate(visit)) throw new Error('Check in to the sit first. Updates can be sent during the sit and up to 12 hours after.');
+        if (!canView(visit)) throw new Error('Check in to the sit first. Updates can be sent during the sit and up to 12 hours after.');
+        const viewOnly = isDone(visit);
+        const canAdd = canUpdate(visit);
 
         const dialog = document.createElement('dialog');
         dialog.className = 'boarding-update-dialog pis-sit-dialog';
         dialog.setAttribute('aria-labelledby', 'sit-editor-title');
-        const state = { dialog, visit, busy: false, urls: [] };
+        const state = { dialog, visit, busy: false, urls: [], composing: !viewOnly };
         state.draft = await store('get', `${currentUser.id}:sit:${visit.id}`) || newDraft(state);
 
         // A lost response may have published the locked draft already.
@@ -272,19 +279,28 @@
 
         dialog.innerHTML = `
             <header class="boarding-editor-header">
-                <div><small>PAWS IN STRIDE</small><h2 id="sit-editor-title">Pet sitting update</h2>
+                <div><small>PAWS IN STRIDE</small><h2 id="sit-editor-title">${viewOnly ? 'Pet sitting updates' : 'Pet sitting update'}</h2>
                     <p>${esc(petsOf(visit).map(p => p.name).join(' & ') || 'Pet update')} · ${esc(visit.time_window || '')}</p></div>
                 <button type="button" data-boarding-close aria-label="Close sit updates">×</button>
             </header>
             <div class="boarding-editor-body">
-                <p class="boarding-draft-help">Drafts stay on this device until sent. Send as many updates during the sit as you like. Each one notifies the client.</p>
-                <form data-boarding-compose></form>
+                ${viewOnly ? `<p class="boarding-draft-help">This sit is finished. These are the updates the client can see in their portal.</p>
+                ${canAdd ? '<button type="button" class="pis-sit-add-final" data-sit-add-final>+ Send one more update</button>' : ''}` :
+                '<p class="boarding-draft-help">Drafts stay on this device until sent. Send as many updates during the sit as you like. Each one notifies the client.</p>'}
+                <form data-boarding-compose ${viewOnly ? 'hidden' : ''}></form>
                 <h3>Updates for this sit</h3>
                 <div data-boarding-history></div>
             </div>`;
         document.body.appendChild(dialog);
         editor = state;
-        renderForm(state);
+        if (state.composing) renderForm(state);
+        dialog.querySelector('[data-sit-add-final]')?.addEventListener('click', e => {
+            e.currentTarget.remove();
+            state.composing = true;
+            dialog.querySelector('[data-boarding-compose]').hidden = false;
+            renderForm(state);
+            dialog.querySelector('[data-boarding-notes]')?.focus();
+        });
         dialog.addEventListener('cancel', e => { e.preventDefault(); void close(state); });
         dialog.querySelector('[data-boarding-close]').addEventListener('click', () => void close(state));
         dialog.querySelector('[data-boarding-compose]').addEventListener('submit', e => { e.preventDefault(); void send(state); });
@@ -311,11 +327,22 @@
 
     /* ---------- the button (used by the visit popup and the classic card) ---------- */
     window.buildAdminSitUpdateButton = function (visit) {
-        if (!canUpdate(visit)) return null;
+        if (!canView(visit)) return null;
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'primary-button admin-visit-action-button pis-sit-update-button';
         b.dataset.sitUpdateVisit = String(visit.id);
+        if (isDone(visit)) {
+            b.className = 'secondary-button admin-visit-action-button pis-sit-view-button';
+            b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg> View Sit Updates';
+            // Sit under the primary report button instead of on top of it.
+            requestAnimationFrame(() => {
+                const report = b.parentElement?.querySelector('[data-visit-report-open]');
+                if (report && report.parentElement === b.parentElement) report.after(b);
+            });
+            return b;
+        }
+        if (!canUpdate(visit)) return null;
+        b.className = 'primary-button admin-visit-action-button pis-sit-update-button';
         b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Send Sit Update';
         return b;
     };
@@ -335,6 +362,8 @@
     const style = document.createElement('style');
     style.textContent = `
         .pis-sit-update-button{display:flex !important;align-items:center !important;justify-content:center !important;gap:8px !important;background:linear-gradient(135deg,#d6467f,#b8336a) !important;border:0 !important;color:#fff !important}
+        .pis-sit-view-button{display:flex !important;align-items:center !important;justify-content:center !important;gap:8px !important;background:#fff !important;color:#b8336a !important;border:1px solid #f1c3d6 !important;box-shadow:none !important}
+        .pis-sit-add-final{display:block;width:100%;margin:0 0 16px;padding:12px;border:1px dashed #b8336a;border-radius:10px;background:#fdf3f7;color:#b8336a;font:inherit;font-weight:800;cursor:pointer}
         .pis-sit-dialog .boarding-editor-header{background:linear-gradient(135deg,#d6467f,#b8336a) !important}
         .pis-sit-dialog [data-boarding-send]{background:linear-gradient(135deg,#d6467f,#b8336a) !important;border-color:#b8336a !important;box-shadow:0 8px 18px rgba(184,51,106,.22) !important}`;
     document.head.appendChild(style);
