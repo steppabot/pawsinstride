@@ -4145,6 +4145,10 @@ async function setupGooglePay(
     const googlePayButton =
         paymentsClient
             .createButton({
+
+                buttonSizeMode:
+                    "fill",
+                
                 buttonType:
                     "pay",
 
