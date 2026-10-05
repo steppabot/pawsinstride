@@ -75,13 +75,17 @@
     }
 
     function compute() {
-        const visits = (typeof allVisits !== 'undefined' && Array.isArray(allVisits)) ? allVisits : [];
+        const me = typeof currentUser !== 'undefined' ? currentUser?.id : null;
+        // Your own work only (visits assigned to an employee are theirs).
+        const visits = ((typeof allVisits !== 'undefined' && Array.isArray(allVisits)) ? allVisits : [])
+            .filter(v => !v.assigned_to || v.assigned_to === me);
         const walksAll = (typeof allVisitWalks !== 'undefined' && Array.isArray(allVisitWalks)) ? allVisitWalks : [];
 
         // Finished GPS walks, one per id (a walk can briefly exist locally and on the server).
         const seen = new Set();
         const walks = walksAll.filter(w => {
             if (lower(w.status) !== 'completed') return false;
+            if (w.walker_id && me && w.walker_id !== me) return false;
             const k = String(w.id);
             if (seen.has(k)) return false;
             seen.add(k);
