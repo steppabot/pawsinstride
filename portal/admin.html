@@ -4623,11 +4623,17 @@
 
         <!-- Supabase -->
 
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="../vendor/supabase.js"></script>
+    <script>
+        // Website or app: use the bundled copy; fall back to the internet copy if it's missing.
+        window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
+    </script>
 
 
         <!-- Admin -->
 
+        <script src="./native-walk.js"></script>
+        <script src="./native-push.js"></script>
         <script src="./admin-visit-focus.js"></script>
         <script src="./admin-team.js"></script>
         <script src="./admin.js"></script>
