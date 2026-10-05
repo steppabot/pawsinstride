@@ -275,7 +275,11 @@ async function loadAdminDashboard() {
             id:
                 currentUser.id,
             role:
-                "admin",
+                window.localStorage.getItem(
+                    "paws-in-stride-staff-role"
+                ) === "employee"
+                    ? "employee"
+                    : "admin",
             full_name:
                 "Admin",
             email:
@@ -340,18 +344,23 @@ async function loadAdminDashboard() {
         // ADMIN SECURITY CHECK
         // ========================================
     
-        if (
+        const staffRole =
             String(
                 profile.role ||
                 ""
             )
                 .trim()
-                .toLowerCase() !==
-            "admin"
+                .toLowerCase();
+
+        if (
+            staffRole !== "admin" &&
+            staffRole !== "employee"
         ) {
-    
             window.localStorage.removeItem(
                 "paws-in-stride-admin-device"
+            );
+            window.localStorage.removeItem(
+                "paws-in-stride-staff-role"
             );
     
     
@@ -372,6 +381,11 @@ async function loadAdminDashboard() {
             "paws-in-stride-admin-device",
             "true"
         );
+
+        window.localStorage.setItem(
+            "paws-in-stride-staff-role",
+            staffRole
+        );
     
     
         await ensureAdminPushSubscription();
@@ -385,6 +399,18 @@ async function loadAdminDashboard() {
     
     currentProfile =
         profile;
+
+    // Team accounts: "admin" sees everything, "employee" only their
+    // assigned visits (the database enforces this too).
+    window.PIS_STAFF_ROLE =
+        String(profile.role || "admin").trim().toLowerCase() === "employee"
+            ? "employee"
+            : "admin";
+
+    document.body.classList.toggle(
+        "pis-employee",
+        window.PIS_STAFF_ROLE === "employee"
+    );
 
     
     // ========================================
@@ -3427,6 +3453,7 @@ function requestAdminBoardingWalkLocation() {
 }
 
 async function startAdminBoardingWalk(stay) {
+    if (window.PawsNative) await window.PawsNative.prepare();
     if (!navigator.onLine) throw new Error("Connect to the internet to start a boarding walk.");
     if (activeWalkGpsTracker) throw new Error("Finish the walk being tracked on this device first.");
     const walks = await refreshAdminBoardingWalks(stay.id);
@@ -3456,6 +3483,7 @@ async function startAdminBoardingWalk(stay) {
 }
 
 async function finishAdminBoardingWalk(walk) {
+    if (window.PawsNative) await window.PawsNative.beforeFinish(walk);
     if (!walk?.boarding_stay_id) throw new Error("Boarding walk not found.");
     let finish = getAdminBoardingWalkFinish(walk);
     let tracker = activeWalkGpsTracker && Number(activeWalkGpsTracker.walkId) === Number(walk.id)
@@ -3476,7 +3504,7 @@ async function finishAdminBoardingWalk(walk) {
         localStorage.setItem(boardingWalkStopKey(walk.id), JSON.stringify(finish));
     }
     if (tracker) {
-        stopWalkGpsTracking(walk.id);
+        await stopWalkGpsTracking(walk.id);
         // Let the existing writer finish before the finish-sync writer starts.
         if (tracker.flushPromise) await tracker.flushPromise;
         localStorage.setItem(getWalkGpsQueueStorageKey(walk.id), JSON.stringify(tracker.pendingQueue));
@@ -3552,7 +3580,7 @@ async function handleAdminBoardingWalkAction(button) {
             walk = getAdminBoardingWalks(stayId).find(w => Number(w.id) === Number(button.dataset.boardingWalkId));
             if (!walk || walk.status !== "in_progress" || getAdminBoardingWalkFinish(walk)) throw new Error("This walk is no longer active.");
             await requestAdminBoardingWalkLocation();
-            if (activeWalkGpsTracker?.permissionErrorShown) stopWalkGpsTracking(walk.id);
+            if (activeWalkGpsTracker?.permissionErrorShown) await stopWalkGpsTracking(walk.id);
             await startWalkGpsTracking(walk); startWalkUiTimer();
             adminBoardingWalkMessages.set(stayId, "GPS resumed. Tracking gaps cannot be recreated.");
         }
@@ -6488,7 +6516,7 @@ async function startWalkGpsTracking(
     // ========================================
 
     if (
-        !isLocalWalk
+        !isLocalWalk && !window.PawsNative
     ) {
 
 
@@ -6534,6 +6562,17 @@ async function startWalkGpsTracking(
 
     }
 
+
+    if (window.PawsNative) {
+        const nativeState = await window.Capacitor.Plugins.WalkRecorder.snapshot();
+        if (Number(nativeState.state.walkId) !== Number(walk.id)) {
+            const result = await supabaseClient.from('visit_walk_points')
+                .select('sequence_number, recorded_at, latitude, longitude, accuracy_meters')
+                .eq('walk_id', walk.id).order('sequence_number', {ascending: false}).limit(1);
+            if (result.error) throw result.error;
+            latestSavedPoint = result.data?.[0] || null;
+        }
+    }
 
     const pendingQueue =
         loadPendingWalkGpsQueue(
@@ -6713,6 +6752,17 @@ async function startWalkGpsTracking(
         tracker;
 
 
+    if (window.PawsNative) {
+        try {
+            await window.PawsNative.start(tracker, walk);
+            updateWalkLiveUi();
+            return;
+        } catch (error) {
+            activeWalkGpsTracker = null;
+            throw error;
+        }
+    }
+
     tracker.watchId =
         navigator.geolocation
             .watchPosition(
@@ -6770,7 +6820,7 @@ async function startWalkGpsTracking(
 // STOP WALK GPS TRACKING
 // ========================================
 
-function stopWalkGpsTracking(
+async function stopWalkGpsTracking(
     walkId
 ) {
 
@@ -6794,10 +6844,10 @@ function stopWalkGpsTracking(
     }
 
 
-    if (
-        tracker.watchId !==
-        null
-    ) {
+    if (tracker.native) {
+        await window.PawsNative.stop(tracker);
+    }
+    if (!tracker.native && tracker.watchId !== null) {
 
 
         navigator.geolocation
@@ -8104,6 +8154,8 @@ function createLocalVisitWalk(
 async function startVisitWalk(
     visitId
 ) {
+    if (window.PawsNative) await window.PawsNative.prepare();
+
 
 
     const visit =
@@ -8503,6 +8555,8 @@ async function finishVisitWalk(
     }
 
 
+    if (window.PawsNative) await window.PawsNative.beforeFinish(walk);
+
     // ========================================
     // ALREADY SAVED LOCALLY
     // JUST TRY TO SYNC AGAIN
@@ -8561,7 +8615,7 @@ async function finishVisitWalk(
 
 
         tracker =
-            stopWalkGpsTracking(
+            await stopWalkGpsTracking(
                 walk.id
             );
 
@@ -15190,6 +15244,7 @@ function clearAdminPhotoPreviewUrl() {
 // ========================================
 
 async function registerAdminServiceWorker() {
+    if (window.Capacitor?.isNativePlatform()) return;
 
     if (
         !(
@@ -15555,6 +15610,53 @@ async function saveAdminPushPreference(
 
 async function updateAdminPushNotificationUI() {
 
+    // ========================================
+    // ANDROID APP (NATIVE PUSH)
+    // ========================================
+
+    if (
+        window.Capacitor?.isNativePlatform?.() &&
+        window.Capacitor.Plugins?.PushNotifications
+    ) {
+
+        const nativePermission =
+            await window.Capacitor.Plugins.PushNotifications
+                .checkPermissions()
+                .catch(() => ({ receive: "denied" }));
+
+        const nativeEnabled =
+            nativePermission.receive === "granted";
+
+        const nativeText =
+            nativeEnabled
+                ? "Notifications are enabled in this app."
+                : "Notifications are turned off for this app in Android settings.";
+
+        if (adminPushNotificationStatus) {
+            adminPushNotificationStatus.textContent = nativeText;
+        }
+
+        if (adminPushNotificationAction) {
+            adminPushNotificationAction.textContent = nativeEnabled ? "\u2713" : "!";
+        }
+
+        if (adminPushModalStatus) {
+            adminPushModalStatus.textContent = nativeText;
+        }
+
+        if (adminPushModalEnableButton) {
+            adminPushModalEnableButton.disabled = true;
+            adminPushModalEnableButton.textContent =
+                nativeEnabled
+                    ? "Notifications Enabled"
+                    : "Turn On in Android Settings";
+        }
+
+        return;
+
+    }
+
+
     const pushSupported =
         (
             "serviceWorker" in navigator &&
@@ -15567,52 +15669,26 @@ async function updateAdminPushNotificationUI() {
     // UNSUPPORTED
     // ========================================
 
-    if (
-        !pushSupported
-    ) {
+    if (!pushSupported) {
 
-        if (
-            adminPushNotificationStatus
-        ) {
-
+        if (adminPushNotificationStatus) {
             adminPushNotificationStatus.textContent =
                 "Push notifications are not supported on this device.";
-
         }
 
-
-        if (
-            adminPushNotificationAction
-        ) {
-
-            adminPushNotificationAction.textContent =
-                "—";
-
+        if (adminPushNotificationAction) {
+            adminPushNotificationAction.textContent = "\u2014";
         }
 
-
-        if (
-            adminPushModalStatus
-        ) {
-
+        if (adminPushModalStatus) {
             adminPushModalStatus.textContent =
                 "Push notifications are not supported on this device.";
-
         }
 
-
-        if (
-            adminPushModalEnableButton
-        ) {
-
-            adminPushModalEnableButton.disabled =
-                true;
-
-            adminPushModalEnableButton.textContent =
-                "Not Supported";
-
+        if (adminPushModalEnableButton) {
+            adminPushModalEnableButton.disabled = true;
+            adminPushModalEnableButton.textContent = "Not Supported";
         }
-
 
         return;
 
@@ -15623,53 +15699,26 @@ async function updateAdminPushNotificationUI() {
     // BLOCKED
     // ========================================
 
-    if (
-        Notification.permission ===
-        "denied"
-    ) {
+    if (Notification.permission === "denied") {
 
-        if (
-            adminPushNotificationStatus
-        ) {
-
+        if (adminPushNotificationStatus) {
             adminPushNotificationStatus.textContent =
                 "Notifications are blocked on this device.";
-
         }
 
-
-        if (
-            adminPushNotificationAction
-        ) {
-
-            adminPushNotificationAction.textContent =
-                "!";
-
+        if (adminPushNotificationAction) {
+            adminPushNotificationAction.textContent = "!";
         }
 
-
-        if (
-            adminPushModalStatus
-        ) {
-
+        if (adminPushModalStatus) {
             adminPushModalStatus.textContent =
                 "Notifications are blocked in your browser or device settings.";
-
         }
 
-
-        if (
-            adminPushModalEnableButton
-        ) {
-
-            adminPushModalEnableButton.disabled =
-                true;
-
-            adminPushModalEnableButton.textContent =
-                "Blocked";
-
+        if (adminPushModalEnableButton) {
+            adminPushModalEnableButton.disabled = true;
+            adminPushModalEnableButton.textContent = "Blocked";
         }
-
 
         return;
 
@@ -15680,53 +15729,26 @@ async function updateAdminPushNotificationUI() {
     // NOT ENABLED YET
     // ========================================
 
-    if (
-        Notification.permission !==
-        "granted"
-    ) {
+    if (Notification.permission !== "granted") {
 
-        if (
-            adminPushNotificationStatus
-        ) {
-
+        if (adminPushNotificationStatus) {
             adminPushNotificationStatus.textContent =
                 "Configure notification alerts for this device.";
-
         }
 
-
-        if (
-            adminPushNotificationAction
-        ) {
-
-            adminPushNotificationAction.textContent =
-                "›";
-
+        if (adminPushNotificationAction) {
+            adminPushNotificationAction.textContent = "\u2192";
         }
 
-
-        if (
-            adminPushModalStatus
-        ) {
-
+        if (adminPushModalStatus) {
             adminPushModalStatus.textContent =
                 "Notifications have not been enabled on this device yet.";
-
         }
 
-
-        if (
-            adminPushModalEnableButton
-        ) {
-
-            adminPushModalEnableButton.disabled =
-                false;
-
-            adminPushModalEnableButton.textContent =
-                "Enable Notifications";
-
+        if (adminPushModalEnableButton) {
+            adminPushModalEnableButton.disabled = false;
+            adminPushModalEnableButton.textContent = "Enable Notifications";
         }
-
 
         return;
 
@@ -15740,63 +15762,31 @@ async function updateAdminPushNotificationUI() {
     try {
 
         const registration =
-            await navigator
-                .serviceWorker
-                .ready;
-
+            await navigator.serviceWorker.ready;
 
         const subscription =
-            await registration
-                .pushManager
-                .getSubscription();
+            await registration.pushManager.getSubscription();
 
+        if (subscription) {
 
-        if (
-            subscription
-        ) {
-
-            if (
-                adminPushNotificationStatus
-            ) {
-
+            if (adminPushNotificationStatus) {
                 adminPushNotificationStatus.textContent =
                     "Notifications are enabled on this device.";
-
             }
 
-
-            if (
-                adminPushNotificationAction
-            ) {
-
-                adminPushNotificationAction.textContent =
-                    "✓";
-
+            if (adminPushNotificationAction) {
+                adminPushNotificationAction.textContent = "\u2713";
             }
 
-
-            if (
-                adminPushModalStatus
-            ) {
-
+            if (adminPushModalStatus) {
                 adminPushModalStatus.textContent =
                     "Notifications are enabled on this device.";
-
             }
 
-
-            if (
-                adminPushModalEnableButton
-            ) {
-
-                adminPushModalEnableButton.disabled =
-                    true;
-
-                adminPushModalEnableButton.textContent =
-                    "Notifications Enabled";
-
+            if (adminPushModalEnableButton) {
+                adminPushModalEnableButton.disabled = true;
+                adminPushModalEnableButton.textContent = "Notifications Enabled";
             }
-
 
             return;
 
@@ -15817,50 +15807,26 @@ async function updateAdminPushNotificationUI() {
     // PERMISSION GRANTED BUT NO SUBSCRIPTION
     // ========================================
 
-    if (
-        adminPushNotificationStatus
-    ) {
-
+    if (adminPushNotificationStatus) {
         adminPushNotificationStatus.textContent =
             "This device still needs to be registered for notifications.";
-
     }
 
-
-    if (
-        adminPushNotificationAction
-    ) {
-
-        adminPushNotificationAction.textContent =
-            "›";
-
+    if (adminPushNotificationAction) {
+        adminPushNotificationAction.textContent = "\u2192";
     }
 
-
-    if (
-        adminPushModalStatus
-    ) {
-
+    if (adminPushModalStatus) {
         adminPushModalStatus.textContent =
             "Notification permission is enabled, but this device still needs to be registered.";
-
     }
 
-
-    if (
-        adminPushModalEnableButton
-    ) {
-
-        adminPushModalEnableButton.disabled =
-            false;
-
-        adminPushModalEnableButton.textContent =
-            "Register Device";
-
+    if (adminPushModalEnableButton) {
+        adminPushModalEnableButton.disabled = false;
+        adminPushModalEnableButton.textContent = "Register Device";
     }
 
 }
-
 
 // ========================================
 // CONVERT BASE64URL TO UINT8ARRAY
@@ -16346,6 +16312,11 @@ document.getElementById(
     async () => {
 
 
+        if (window.PawsNative) {
+            try { await window.PawsNative.canLogout(); }
+            catch (error) { window.alert(error.message); return; }
+        }
+
         await supabaseClient
             .auth
             .signOut();
@@ -16517,7 +16488,8 @@ async function loadAdminConversations() {
                     `
                     id,
                     conversation_id,
-                    sender_id,
+sender_id,
+                    sender_name,
                     body,
                     read_at,
                     created_at
@@ -16595,8 +16567,8 @@ async function loadAdminConversations() {
                     const unreadCount =
                         conversationMessages.filter(
                             message =>
-                                message.sender_id !==
-                                    currentUser.id &&
+                                message.sender_id ===
+                                    conversation.client_id &&
                                 !message.read_at
                         )
                         .length;
@@ -17338,8 +17310,9 @@ async function loadActiveAdminMessages() {
                 `
                 id,
                 conversation_id,
-                sender_id,
-                body,
+sender_id,
+                    sender_name,
+                    body,
                 read_at,
                 created_at
                 `
@@ -17444,9 +17417,18 @@ function renderActiveAdminMessages() {
         .forEach(
             message => {
 
-                const sentByAdmin =
+                const sentByMe =
                     message.sender_id ===
                     currentUser.id;
+
+                // Anyone who isn't the client is the team (you or an employee).
+                const sentByAdmin =
+                    sentByMe ||
+                    Boolean(
+                        clientId &&
+                        message.sender_id !==
+                            clientId
+                    );
 
 
                 const row =
@@ -17474,8 +17456,13 @@ function renderActiveAdminMessages() {
 
 
                 sender.textContent =
-                    sentByAdmin
+                    sentByMe
                         ? "You"
+                        : sentByAdmin
+                            ? (
+                                message.sender_name ||
+                                "Paws in Stride"
+                            )
                         : (
                             conversation
                                 ?.client
@@ -17622,7 +17609,8 @@ async function sendAdminMessage(
                     `
                     id,
                     conversation_id,
-                    sender_id,
+sender_id,
+                    sender_name,
                     body,
                     read_at,
                     created_at
@@ -17838,11 +17826,18 @@ async function markAdminMessagesRead() {
     }
 
 
+    const activeClientId =
+        adminConversations.find(
+            item =>
+                Number(item.id) ===
+                Number(activeAdminConversationId)
+        )?.client_id;
+
     const unreadMessages =
         adminConversationMessages.filter(
             message =>
-                message.sender_id !==
-                    currentUser.id &&
+                message.sender_id ===
+                    activeClientId &&
                 !message.read_at
         );
 
@@ -17877,9 +17872,9 @@ async function markAdminMessagesRead() {
                 "conversation_id",
                 activeAdminConversationId
             )
-            .neq(
+            .eq(
                 "sender_id",
-                currentUser.id
+                activeClientId
             )
             .is(
                 "read_at",
@@ -17904,11 +17899,10 @@ async function markAdminMessagesRead() {
             message => {
 
                 if (
-                    message.sender_id !==
-                        currentUser.id &&
+                    message.sender_id ===
+                        activeClientId &&
                     !message.read_at
                 ) {
-
                     return {
                         ...message,
                         read_at:
@@ -19378,12 +19372,12 @@ function getAdminFinancialVisitMinutes(visit) {
 
 function getAdminWeekDateRange() {
     const today = parseLocalDate(getLocalDateString());
-    const sunday = new Date(today);
-    sunday.setDate(today.getDate() - today.getDay());
-    const saturday = new Date(sunday);
-    saturday.setDate(sunday.getDate() + 6);
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
     const key = date => makeDateString(date.getFullYear(), date.getMonth(), date.getDate());
-    return { start: key(sunday), end: key(saturday) };
+    return { start: key(monday), end: key(sunday) };
 }
 
 function getAdminFinancialVisits(startDate, endDate) {
@@ -19474,7 +19468,9 @@ function renderAdminFinancialSnapshot() {
 
     // Hourly rate uses completed revenue, not money from visits still ahead.
     // Overnight boarding is excluded from this mobile-service hourly metric.
+    // Your own hourly rate: visits assigned to an employee are their time.
     const worked = visits.filter(visit => !isAdminBoardingService(visit) &&
+        (!visit.assigned_to || visit.assigned_to === currentUser?.id) &&
         (visit.checked_in_at || visit.completed_at ||
             String(visit.status || '').toLowerCase() === 'completed'));
     const completed = worked.filter(visit => visit.completed_at ||
@@ -19878,6 +19874,14 @@ function getAdminRemainingRouteVisits() {
                 status === "cancelled" ||
                 status === "completed" ||
                 visit.completed_at
+            ) {
+                return false;
+            }
+
+            // Visits assigned to an employee are on their route, not yours.
+            if (
+                visit.assigned_to &&
+                visit.assigned_to !== currentUser?.id
             ) {
                 return false;
             }
@@ -21669,7 +21673,9 @@ function getAdminClientDirectoryProfiles() {
 
 
                 return role !==
-                    "admin";
+                    "admin" &&
+                    role !==
+                    "employee";
 
             }
         )
