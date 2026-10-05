@@ -13082,8 +13082,8 @@ function updateBookingTotal() {
 // CALCULATE WEEKLY SERVICE DAYS
 // ========================================
 //
-// 5+ UNIQUE service days inside the same
-// Sunday-Saturday week receives the client’s weekly discount.
+// 5+ UNIQUE service days within any 7 days in a row
+// (e.g. Mon-Fri or Thu-Mon) receives the client’s weekly discount.
 //
 // Multiple visits on the same date still
 // count as ONE service day.
@@ -13205,18 +13205,13 @@ const weeklyDiscountRate = weeklyDiscountPercent / 100;
                 // 5+ DAY WEEKLY DISCOUNT
                 // ========================================
     
-                const weekKey =
-                    getWeekKey(
-                        visit.date
-                    );
-    
-    
+                // 5+ different days within any 7 days in a row
+                // around this visit (matches the database).
                 const weekServiceDayCount =
-                    weeklyServiceDays
-                        .get(
-                            weekKey
-                        )
-                        ?.size || 0;
+                    getRollingServiceDayCount(
+                        visit.date,
+                        selectedVisits.map(item => item.date)
+                    );
     
     
                 const qualifiesForWeeklyDiscount =
@@ -13548,6 +13543,20 @@ function getWeekKey(
     );
 
 }
+
+// Most different service days in any 7-days-in-a-row stretch that
+// includes the given date. Same rule as pis_rolling_service_days().
+function getRollingServiceDayCount(date, dates) {
+    const unique = Array.from(new Set(dates));
+    let best = 0;
+    for (let offset = -6; offset <= 0; offset++) {
+        const start = addDaysToDateString(date, offset);
+        const end = addDaysToDateString(start, 6);
+        best = Math.max(best, unique.filter(d => d >= start && d <= end).length);
+    }
+    return best;
+}
+
 
 async function validateThreePerWeek(
     serviceType
@@ -17167,7 +17176,7 @@ async function openClientCancellationModal(visit) {
                         With less than 24 hours' notice, you receive 50%.</p>
                     <p>For bookings with a weekly discount, we first recalculate
                         the remaining services. The ${preview ? escapeHtml(String(Number(preview.weekly_discount_percent ?? 12))) + "% " : ""}weekly discount requires at least
-                        5 distinct service days in the same booking week.
+5 distinct service days within any 7 days in a row.
                         The cancellation percentage is applied after this adjustment.</p>
                 </div>
 
