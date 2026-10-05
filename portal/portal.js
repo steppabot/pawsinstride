@@ -1278,9 +1278,10 @@ if (loginForm) {
             
             if (
                 role ===
-                "admin"
+                    "admin" ||
+                role ===
+                    "employee"
             ) {
-            
                 // ========================================
                 // REMEMBER ADMIN DEVICE
                 // ========================================
@@ -2255,9 +2256,10 @@ async function loadDashboard() {
 
     if (
         currentRole ===
-        "admin"
+            "admin" ||
+        currentRole ===
+            "employee"
     ) {
-
         window.location.replace(
             "./admin.html"
         );
@@ -21205,6 +21207,7 @@ async function loadClientMessages() {
                 id,
                 conversation_id,
                 sender_id,
+                sender_name,
                 body,
                 read_at,
                 created_at
@@ -21721,7 +21724,9 @@ function renderClientMessages() {
                 sender.textContent =
                     isClient
                         ? "You"
-                        : "Paws in Stride";
+                        : message.sender_name
+                            ? `${String(message.sender_name).trim().split(/\s+/)[0]} \u00b7 Paws in Stride`
+                            : "Paws in Stride";
 
 
                 const bubble =
