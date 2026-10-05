@@ -532,7 +532,7 @@
      ${boarding
       ? `<span class="pis-pill pis-pill-${esc(boardingState(card))}">${esc(card?.querySelector('.admin-service-statuses .service-status')?.textContent.trim() || 'Boarding')}</span>`
       : `<span class="pis-pill pis-pill-${esc(p.state)}">${esc(fmtStatus(visit.status))}</span>`}
-     ${visit.payment_status ? `<span class="pis-pill">${esc(fmtStatus(visit.payment_status))}</span>` : ''}
+     ${visit.payment_status && !window.pisTeam?.isEmployee() ? `<span class="pis-pill pis-pill-payment">${esc(fmtStatus(visit.payment_status))}</span>` : ''}
     </div>
    </div>
    ${pets.length ? `<div class="pis-pets">${pets.map(n => `<span class="pis-pet">${esc(n)}</span>`).join('')}</div>` : ''}
@@ -541,7 +541,10 @@
     ${quick(Boolean(phoneDigits), `sms:${phoneDigits}`, ICONS.text, 'Text')}
     ${quick(Boolean(address), `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`, ICONS.nav, 'Navigate', true)}
    </div>
-   <span class="pis-sum-foot">${esc(boarding ? (address || 'Address not added') : [address || 'Address not added', `$${price.toFixed(2)}`].join(' \u00b7 '))}</span>`;
+   <span class="pis-sum-foot">${esc(boarding || window.pisTeam?.isEmployee() ? (address || 'Address not added') : [address || 'Address not added', `$${price.toFixed(2)}`].join(' \u00b7 '))}</span>`;
+  // Main admin: "Assigned to" picker (admin-team.js).
+  const assign = window.pisTeam?.buildAssignControl?.(visit);
+  if (assign) section.appendChild(assign);
   return section;
  }
 
@@ -849,12 +852,14 @@
    const statusBadge = { completed: ICONS.check, checked_in: ICONS.clock, cancelled: ICONS.x }[state] || '';
    let rowClass = '', meta = esc(time), sub = esc([clientName, pets.join(', ')].filter(Boolean).join(' \u00b7 '));
    if (state === 'completed') { rowClass = 'is-done'; meta += ' <span class="pis-badge pis-badge-done">Completed</span>'; }
+   const assignee = window.pisTeam?.assigneeName?.(visit);
    if (state === 'checked_in') {
     rowClass = 'is-live';
     meta = visit.checked_in_at
      ? `In progress \u00b7 <span class="pis-live-timer" data-since="${esc(visit.checked_in_at)}"></span>`
      : 'In progress';
    }
+   if (assignee && state !== 'cancelled') meta += ` <span class="pis-badge pis-badge-assignee">${esc(assignee)}</span>`;
    if (state === 'cancelled') {
     rowClass = 'is-cancelled'; meta += ' <span class="pis-badge pis-badge-cancelled">Cancelled</span>';
     sub = esc(String(visit.cancellation_reason || '').trim() || `${clientName} \u00b7 cancelled`);
