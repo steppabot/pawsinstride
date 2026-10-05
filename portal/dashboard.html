@@ -312,6 +312,14 @@
      MOBILE PORTAL INTRO
      ======================================== -->
 
+<style>
+    /* Let the orange intro background show until the video's first frame. */
+    .mobile-portal-intro-video { background: transparent; }
+    .mobile-portal-intro-video::-webkit-media-controls,
+    .mobile-portal-intro-video::-webkit-media-controls-start-playback-button,
+    .mobile-portal-intro-video::-webkit-media-controls-overlay-play-button { display: none !important; -webkit-appearance: none; }
+</style>
+
 <div
     id="mobile-portal-intro"
     class="mobile-portal-intro"
@@ -324,6 +332,7 @@
         muted
         playsinline
         preload="auto"
+        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
     >
 
         <source
@@ -397,6 +406,53 @@
     
     })();
     
+    </script>
+
+    <script>
+    // ========================================
+    // SKIP THE INTRO WHEN COMING RIGHT BACK
+    // ========================================
+    // The intro video only plays if the portal hasn't been
+    // used in the last few hours. Otherwise it goes straight
+    // to the dashboard.
+    (function () {
+        var KEY = "pis-portal-last-active";
+        var SKIP_IF_USED_WITHIN_MS = 3 * 60 * 60 * 1000;
+        var intro = document.getElementById("mobile-portal-intro");
+
+        function markActive() {
+            try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {}
+        }
+
+        var lastActive = 0;
+        try { lastActive = Number(localStorage.getItem(KEY)) || 0; } catch (e) {}
+
+        var recentlyUsed = lastActive && Date.now() - lastActive < SKIP_IF_USED_WITHIN_MS;
+        var isMobile = window.matchMedia("(max-width: 700px)").matches;
+        var isInstalled = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+        var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        if (intro) {
+            if (recentlyUsed || (!isMobile && !isInstalled) || reducedMotion) {
+                intro.remove();
+            } else {
+                // Show the orange intro screen right away (no blank flash).
+                intro.classList.add("is-active");
+                document.body.classList.add("portal-intro-open");
+                // Never leave the intro stuck on screen.
+                setTimeout(function () {
+                    var stuck = document.getElementById("mobile-portal-intro");
+                    if (stuck) stuck.remove();
+                    document.body.classList.remove("portal-intro-open");
+                }, 20000);
+            }
+        }
+
+        markActive();
+        document.addEventListener("visibilitychange", function () { if (document.hidden) markActive(); });
+        window.addEventListener("pagehide", markActive);
+        setInterval(function () { if (!document.hidden) markActive(); }, 60000);
+    })();
     </script>
 
 
