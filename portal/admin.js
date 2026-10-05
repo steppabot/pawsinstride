@@ -16508,6 +16508,10 @@ document.getElementById(
             catch (error) { window.alert(error.message); return; }
         }
 
+        // Android app: stop sending this account's alerts to this phone.
+        if (window.PisNativePush) {
+            await window.PisNativePush.release();
+        }
         await supabaseClient
             .auth
             .signOut();
