@@ -105,7 +105,9 @@
         // Work time + hourly rate (boarding excluded, same as the Today rate).
         // Month or whole year so far; defaults to the year until this month has a finished visit.
         const yStart = key(y, 0, 1);
-        const doneIn = start => live.filter(v => v.visit_date >= start && v.visit_date <= today && isDone(v, today));
+        // Your own work only: visits assigned to an employee are their time, not yours.
+        const mine = v => !v.assigned_to || v.assigned_to === (typeof currentUser !== 'undefined' ? currentUser?.id : null);
+        const doneIn = start => live.filter(v => v.visit_date >= start && v.visit_date <= today && isDone(v, today) && mine(v));
         const monthHasWork = doneIn(mStart).some(v => !isBoarding(v));
         const per = period || (monthHasWork ? 'month' : 'year');
         const periodDone = doneIn(per === 'month' ? mStart : yStart);
