@@ -160,7 +160,12 @@ const adminProfilePhotoUrlCache =
 // LOAD ADMIN DASHBOARD
 // ========================================
 
-async function loadAdminDashboard() {
+async function loadAdminDashboard(options = {}) {
+
+    // background = the screen is already showing saved data (fast start);
+    // this run only refreshes it from the server.
+    const background =
+        Boolean(options.background);
 
 
     const content =
@@ -451,6 +456,22 @@ async function loadAdminDashboard() {
         household ||
         null;
 
+    // Remember who is signed in so the next app start can show the
+    // dashboard instantly from this device's saved copy.
+    try {
+        localStorage.setItem(
+            ADMIN_FAST_START_KEY,
+            JSON.stringify({
+                user_id: currentUser.id,
+                profile: currentProfile,
+                household: currentHousehold,
+                saved_at: new Date().toISOString()
+            })
+        );
+    } catch (error) {
+        console.warn("Fast start profile not saved:", error);
+    }
+
 
     // ========================================
     // LOAD BUSINESS DATA
@@ -531,7 +552,12 @@ async function loadAdminDashboard() {
     
                     visitReports:
                         allVisitReports,
-    
+                    visitWalks:
+                        allVisitWalks,
+                    visitPets:
+                        allVisitPets,
+                    owner_id:
+                        currentUser?.id || null,
                     saved_at:
                         new Date()
                             .toISOString()
@@ -1080,10 +1106,8 @@ async function loadAdminDashboard() {
     // LOAD PETS ATTACHED TO VISITS
     // ========================================
 
-    allVisitPets =
+    let freshVisitPets =
         [];
-
-
     const visitIds =
         allVisits.map(
             visit =>
@@ -1129,17 +1153,19 @@ async function loadAdminDashboard() {
 
 
         } else {
-
-
-            allVisitPets =
+            freshVisitPets =
                 visitPets ||
                 [];
-
         }
 
     }
 
 
+
+    allVisitPets =
+        freshVisitPets.length || !visitIds.length
+            ? freshVisitPets
+            : allVisitPets;
 
     // ========================================
     // DEFAULT CALENDAR DATE
@@ -1147,14 +1173,11 @@ async function loadAdminDashboard() {
 
     if (
         allVisits.length >
-        0
+        0 &&
+        !(background && selectedAdminDate)
     ) {
-
-
         const today =
             getLocalDateString();
-
-
         const firstUpcoming =
             allVisits.find(
 
@@ -1221,21 +1244,143 @@ async function loadAdminDashboard() {
 
     await renderAdminProfile();
 
+    // Don't wipe an open visit report while refreshing in the background.
+    if (
+        !background ||
+        !activeVisitReportVisitId
+    ) {
+        renderAdminCalendar();
+        renderAdminDayServices();
+    }
 
-    renderAdminCalendar();
-
-
-    renderAdminDayServices();
-
-
+    if (background && activeAdminScreen === "home") {
+        renderAdminTodaySummary();
+        renderAdminNeedsAttention();
+        renderAdminBestVisitRoute();
+        renderAdminFinancialSnapshot();
+    }
 
     loading.style.display =
         "none";
-
-
     content.style.display =
         "block";
 
+    // Save the fresh copy (with walks and visit pets) for the next fast start.
+    saveAdminOfflineData();
+}
+
+// ========================================
+// FAST START FROM THIS DEVICE'S SAVED COPY
+// ========================================
+//
+// Android often closes the app in the background. Instead of a
+// "Loading dashboard" wait on every return, show the last saved
+// data right away, then refresh from the server in the background.
+// ========================================
+
+const ADMIN_FAST_START_KEY =
+    "paws-in-stride-admin-fast-start";
+
+const ADMIN_FAST_START_MAX_AGE_MS =
+    7 * 24 * 60 * 60 * 1000;
+
+async function fastStartAdminFromCache() {
+    try {
+        const snapshot =
+            JSON.parse(localStorage.getItem(ADMIN_FAST_START_KEY) || "null");
+        const saved =
+            JSON.parse(localStorage.getItem("paws-in-stride-admin-offline-data") || "null");
+
+        if (
+            !snapshot?.user_id ||
+            !snapshot.profile ||
+            !saved ||
+            saved.owner_id !== snapshot.user_id ||
+            !Array.isArray(saved.visits) ||
+            Date.now() - Date.parse(saved.saved_at || 0) > ADMIN_FAST_START_MAX_AGE_MS
+        ) {
+            return false;
+        }
+
+        const role =
+            String(snapshot.profile.role || "").trim().toLowerCase();
+        if (role !== "admin" && role !== "employee") {
+            return false;
+        }
+
+        // The login session is read from the phone, not the internet.
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+        if (!session || session.user.id !== snapshot.user_id) {
+            return false;
+        }
+
+        const content = document.getElementById("admin-content");
+        const loading = document.getElementById("admin-loading");
+        if (!content || !loading) return false;
+
+        currentUser = session.user;
+        currentProfile = snapshot.profile;
+        currentHousehold = snapshot.household || null;
+        window.PIS_STAFF_ROLE = role === "employee" ? "employee" : "admin";
+        document.body.classList.toggle("pis-employee", role === "employee");
+
+        const list = value => (Array.isArray(value) ? value : []);
+        allProfiles = list(saved.profiles);
+        allPets = list(saved.pets);
+        allVisits = saved.visits;
+        allHouseholds = list(saved.households);
+        allPropertyAccess = list(saved.propertyAccess);
+        allVisitReports = list(saved.visitReports);
+        allVisitWalks = list(saved.visitWalks);
+        allVisitPets = list(saved.visitPets);
+
+        // Re-apply anything done on this phone that hasn't synced yet.
+        for (const visit of allVisits) {
+            const pendingCheckIn = loadPendingVisitCheckIn(visit.id);
+            if (pendingCheckIn) {
+                visit.status = "checked_in";
+                visit.checked_in_at = pendingCheckIn.checked_in_at;
+                visit.completed_at = null;
+            }
+            const pendingVisitFinish = loadPendingVisitFinish(visit.id);
+            if (pendingVisitFinish) {
+                visit.status = "completed";
+                visit.completed_at = pendingVisitFinish.completed_at;
+            }
+            const localWalk = loadLocalVisitWalk(visit.id);
+            if (
+                localWalk &&
+                (localWalk.status === "in_progress" || loadPendingWalkFinish(localWalk.id))
+            ) {
+                replaceAdminVisitWalk(localWalk);
+            }
+        }
+
+        if (!selectedAdminDate) {
+            const today = getLocalDateString();
+            const firstUpcoming = allVisits.find(visit => visit.visit_date >= today);
+            const startingVisit = firstUpcoming || allVisits[allVisits.length - 1];
+            selectedAdminDate = startingVisit?.visit_date || today;
+            const firstDate = parseLocalDate(selectedAdminDate);
+            adminCalendarYear = firstDate.getFullYear();
+            adminCalendarMonth = firstDate.getMonth();
+        }
+
+        void renderAdminProfile();
+        renderAdminCalendar();
+        renderAdminDayServices();
+
+        loading.style.display = "none";
+        content.style.display = "block";
+
+        console.log("Admin dashboard shown instantly from saved data:", saved.saved_at);
+        return true;
+    } catch (error) {
+        console.warn("Fast start skipped:", error);
+        return false;
+    }
 }
 
 // ========================================
@@ -1441,16 +1586,23 @@ async function refreshAdminBusinessData() {
         // ========================================
         // REFRESH ACTIVE ADMIN SCREEN
         // ========================================
+        //
+        // The visit popup lives in the day list, so keep it current
+        // from any screen. Skip while a visit report is open so a
+        // refresh never wipes what you're typing.
+        // ========================================
 
         if (
             activeAdminScreen ===
             "schedule"
         ) {
-
             renderAdminCalendar();
+        }
 
+        if (
+            !activeVisitReportVisitId
+        ) {
             renderAdminDayServices();
-
         }
 
 
@@ -1516,6 +1668,45 @@ async function refreshAdminBusinessData() {
     }
 
 }
+
+// ========================================
+// CATCH UP WHEN YOU COME BACK TO THE APP
+// ========================================
+//
+// Phones pause the live connection while the app is in the
+// background, and changes made during that time (like an
+// employee finishing a visit) are never re-sent. Reload the
+// latest data whenever the app comes back to the front or
+// the internet comes back.
+// ========================================
+
+let adminLastCatchUpAt =
+    0;
+
+function catchUpAdminBusinessData() {
+    if (
+        document.hidden ||
+        !currentUser ||
+        Date.now() - adminLastCatchUpAt < 10000
+    ) {
+        return;
+    }
+
+    adminLastCatchUpAt =
+        Date.now();
+
+    void refreshAdminBusinessData();
+}
+
+document.addEventListener(
+    "visibilitychange",
+    catchUpAdminBusinessData
+);
+
+window.addEventListener(
+    "online",
+    catchUpAdminBusinessData
+);
 
 // ========================================
 // SUBSCRIBE TO ADMIN BUSINESS DATA
@@ -28079,10 +28270,21 @@ function startAdminPortalIntro() {
     let dashboardReady =
         false;
 
+    // Show saved data right away when possible; refresh below.
+    const fastStarted =
+        await fastStartAdminFromCache();
+
+    if (fastStarted) {
+        dashboardReady = true;
+        adminIntro.dashboardFinished(true);
+        setupAdminAppNavigation();
+    }
 
     try {
 
-        await loadAdminDashboard();
+        await loadAdminDashboard({
+            background: fastStarted
+        });
 
 
         const adminContent =
@@ -28092,6 +28294,7 @@ function startAdminPortalIntro() {
 
 
         dashboardReady =
+            fastStarted ||
             adminContent?.style.display ===
             "block";
 
@@ -28111,7 +28314,9 @@ function startAdminPortalIntro() {
         // ADMIN APP NAVIGATION
         // ========================================
 
-        setupAdminAppNavigation();
+        if (!fastStarted) {
+            setupAdminAppNavigation();
+        }
 
     } catch (error) {
 
@@ -28121,11 +28326,11 @@ function startAdminPortalIntro() {
         );
 
     } finally {
-
-        adminIntro.dashboardFinished(
-            dashboardReady
-        );
-
+        if (!fastStarted) {
+            adminIntro.dashboardFinished(
+                dashboardReady
+            );
+        }
     }
 
 
