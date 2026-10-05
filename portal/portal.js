@@ -2112,10 +2112,171 @@ if (resetPasswordForm) {
 }
 
 // ========================================
+// INSTANT START FROM THIS DEVICE'S SAVED COPY
+// ========================================
+//
+// Phones often close the portal in the background. Instead of a
+// loading screen on every return, show the last saved copy right
+// away, then refresh everything from the server in the background.
+// ========================================
+
+const CLIENT_FAST_START_KEY =
+    "paws-in-stride-client-fast-start";
+
+const CLIENT_FAST_START_MAX_AGE_MS =
+    7 * 24 * 60 * 60 * 1000;
+
+function saveClientFastStart() {
+    if (!currentUser?.id || !currentProfile) return;
+    const role = String(currentProfile.role || "").trim().toLowerCase();
+    if (role === "admin" || role === "employee") return;
+
+    const snapshot = {
+        user_id: currentUser.id,
+        saved_at: new Date().toISOString(),
+        profile: currentProfile,
+        household: currentHousehold,
+        propertyAccess: currentPropertyAccess,
+        pets: currentPets,
+        visits: currentVisits,
+        visitPets: currentVisitPets,
+        petStats: currentPetStats instanceof Map ? Array.from(currentPetStats.entries()) : [],
+        boarding: clientBoardingData.userId === currentUser.id && clientBoardingData.loaded
+            ? { stays: clientBoardingData.stays, latest: clientBoardingData.latest }
+            : null
+    };
+
+    try {
+        localStorage.setItem(CLIENT_FAST_START_KEY, JSON.stringify(snapshot));
+    } catch (error) {
+        // Too big for this device: save it without the extras.
+        try {
+            snapshot.petStats = [];
+            snapshot.boarding = null;
+            localStorage.setItem(CLIENT_FAST_START_KEY, JSON.stringify(snapshot));
+        } catch (secondError) {
+            console.warn("Instant start copy not saved:", secondError);
+            try { localStorage.removeItem(CLIENT_FAST_START_KEY); } catch (e) { /* ignore */ }
+        }
+    }
+}
+
+function clearClientFastStart() {
+    try {
+        localStorage.removeItem(CLIENT_FAST_START_KEY);
+        localStorage.removeItem("pis-client-last-view");
+    } catch (error) { /* ignore */ }
+}
+
+async function fastStartClientFromCache() {
+    const dashboardContent = document.getElementById("dashboard-content");
+    const loading = document.getElementById("loading");
+    if (!dashboardContent || !loading) return false;
+
+    try {
+        const snapshot = JSON.parse(localStorage.getItem(CLIENT_FAST_START_KEY) || "null");
+        if (
+            !snapshot?.user_id ||
+            !snapshot.profile ||
+            !Array.isArray(snapshot.visits) ||
+            Date.now() - Date.parse(snapshot.saved_at || 0) > CLIENT_FAST_START_MAX_AGE_MS
+        ) {
+            return false;
+        }
+
+        const role = String(snapshot.profile.role || "").trim().toLowerCase();
+        if (role === "admin" || role === "employee") return false;
+
+        // The login is read from the phone, not the internet.
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session || session.user.id !== snapshot.user_id) return false;
+
+        const list = value => (Array.isArray(value) ? value : []);
+        currentUser = session.user;
+        currentProfile = snapshot.profile;
+        currentHousehold = snapshot.household || null;
+        currentPropertyAccess = snapshot.propertyAccess || null;
+        currentPets = list(snapshot.pets);
+        currentVisits = snapshot.visits;
+        currentVisitPets = list(snapshot.visitPets);
+        currentPetStats = new Map(list(snapshot.petStats));
+
+        if (snapshot.boarding) {
+            clientBoardingData.userId = currentUser.id;
+            clientBoardingData.stays = list(snapshot.boarding.stays);
+            clientBoardingData.latest = snapshot.boarding.latest || null;
+            clientBoardingData.loaded = true;
+            clientBoardingData.error = null;
+            clientBoardingData.loadedAt = Date.now();
+        }
+
+        // One broken section shouldn't block the rest of the screen.
+        const safely = (label, work) => {
+            try {
+                const result = work();
+                if (result && typeof result.catch === "function") {
+                    result.catch(error => console.warn(`Instant start: ${label}`, error));
+                }
+            } catch (error) {
+                console.warn(`Instant start: ${label}`, error);
+            }
+        };
+
+        const welcomeName = document.getElementById("welcome-name");
+        if (welcomeName) {
+            welcomeName.textContent = `Welcome, ${currentProfile.full_name || "Client"}`;
+        }
+
+        safely("household", () => renderHousehold());
+        safely("pets", () => renderPets());
+        safely("booking pets", () => { populateBookingPets(); renderAdditionalPets(); });
+
+        if (!selectedUpcomingDate) {
+            const today = getLocalDateString();
+            const hasToday = currentVisits.some(visit => visit.visit_date === today);
+            const firstFutureVisit = currentVisits.find(visit => visit.visit_date > today);
+            const startingDate = hasToday || !firstFutureVisit ? today : firstFutureVisit.visit_date;
+            const startDate = parseLocalDate(startingDate);
+            upcomingCalendarYear = startDate.getFullYear();
+            upcomingCalendarMonth = startDate.getMonth();
+            selectedUpcomingDate = startingDate;
+        }
+
+        safely("upcoming calendar", () => renderUpcomingCalendar());
+        safely("upcoming services", () => renderSelectedUpcomingServices());
+        safely("booking calendar", () => renderBookingCalendar());
+
+        loading.style.display = "none";
+        dashboardContent.style.display = "block";
+
+        if (window.matchMedia("(max-width: 700px)").matches) {
+            safely("home screen", () => {
+                setMobileAppScreen("home");
+                setActiveMobileAppTab("home");
+            });
+        } else {
+            safely("home", () => renderMobileHomeDashboard());
+        }
+
+        console.log("Portal shown instantly from saved copy:", snapshot.saved_at);
+        return true;
+    } catch (error) {
+        console.warn("Instant start skipped:", error);
+        return false;
+    }
+}
+
+// ========================================
 // DASHBOARD
 // ========================================
 
-async function loadDashboard() {
+async function loadDashboard(options = {}) {
+
+    // background = the screen is already showing this phone's saved
+    // copy (instant start); this run only refreshes it from the server.
+    const background =
+        Boolean(options.background);
+
 
     // ========================================
     // OFFLINE ADMIN DEVICE ROUTING
@@ -2364,6 +2525,10 @@ async function loadDashboard() {
     }
     
     
+const clientPetsChanged =
+        JSON.stringify(currentPets) !==
+        JSON.stringify(pets || []);
+
     currentPets =
         pets || [];
     
@@ -2476,9 +2641,13 @@ async function loadDashboard() {
 
     await renderPets();
 
-    populateBookingPets();
-
-    renderAdditionalPets();
+if (
+        !background ||
+        clientPetsChanged
+    ) {
+        populateBookingPets();
+        renderAdditionalPets();
+    }
 
 
     if (
@@ -2542,9 +2711,15 @@ async function loadDashboard() {
     }
 
 
-    renderUpcomingCalendar();
+renderUpcomingCalendar();
 
-    renderSelectedUpcomingServices();
+    // Don't wipe an open visit report during a background refresh.
+    if (
+        !background ||
+        !activeClientVisitReportId
+    ) {
+        renderSelectedUpcomingServices();
+    }
 
     renderBookingCalendar();
 
@@ -2569,26 +2744,30 @@ subscribeToClientNotifications();
 // INITIAL LATEST UPDATE / MOBILE APP HOME
 // ========================================
 
+// Instant start showed saved boarding info; get the latest now.
+if (background) {
+    clientBoardingData.loadedAt = 0;
+}
+
 renderMobileHomeDashboard();
 
-
+// Only jump to Home on a fresh start, never during a background refresh.
 if (
+    !background &&
     window.matchMedia(
         "(max-width: 700px)"
     ).matches
 ) {
-
     setMobileAppScreen(
         "home"
     );
-
-
     setActiveMobileAppTab(
         "home"
     );
-
 }
 
+// Save a copy on this phone for the next instant start.
+saveClientFastStart();
 }
 
 // ========================================
@@ -20800,13 +20979,29 @@ window.addEventListener(
         startMobilePortalIntro();
 
 
-    let dashboardReady =
+let dashboardReady =
         false;
+
+    // Show this phone's saved copy right away when possible.
+    const fastStarted =
+        await fastStartClientFromCache();
+
+    if (fastStarted) {
+        dashboardReady = true;
+        portalIntro.dashboardFinished(true);
+        // Connect messages now so an open conversation comes back quickly.
+        initializeClientMessaging().catch(error =>
+            console.error("Client messaging initialization failed:", error)
+        );
+        void restoreClientView();
+    }
 
 
     try {
 
-        await loadDashboard();
+await loadDashboard({
+            background: fastStarted
+        });
 
 
         const dashboardContent =
@@ -20815,7 +21010,8 @@ window.addEventListener(
             );
 
 
-        dashboardReady =
+dashboardReady =
+            fastStarted ||
             dashboardContent
                 ?.style
                 .display ===
@@ -20851,7 +21047,7 @@ window.addEventListener(
             );
 
 
-        if (loading) {
+if (loading && !fastStarted) {
 
             loading.textContent =
                 "We couldn't load your portal. Please refresh to try again.";
@@ -20859,11 +21055,19 @@ window.addEventListener(
         }
 
     }
-    finally {
+finally {
 
-        portalIntro.dashboardFinished(
-            dashboardReady
-        );
+        if (!fastStarted) {
+
+            portalIntro.dashboardFinished(
+                dashboardReady
+            );
+
+            if (dashboardReady) {
+                void restoreClientView();
+            }
+
+        }
 
     }
 
@@ -20937,6 +21141,9 @@ window.addEventListener(
 // ========================================
 
 async function logoutClient() {
+
+    // Don't leave this account's saved copy on a shared device.
+    clearClientFastStart();
 
     try {
 
@@ -31977,3 +32184,175 @@ document.addEventListener('click', event => {
 // ========================================
 // END CLIENT BOARDING PHOTO LIGHTBOX
 // ========================================
+
+
+// ========================================
+// PICK UP WHERE YOU LEFT OFF
+// ========================================
+//
+// Phones often throw away a backgrounded page. This remembers the
+// screen, scroll position, selected date and open messages, and
+// puts the client back there after a reload (within 2 hours).
+// ========================================
+
+const CLIENT_VIEW_KEY =
+    "pis-client-last-view";
+
+const CLIENT_VIEW_RESTORE_MS =
+    2 * 60 * 60 * 1000;
+
+const CLIENT_VIEW_SCREENS =
+    ["home", "services", "pets", "profile"];
+
+let clientViewReady =
+    false;
+
+let clientViewRestoring =
+    false;
+
+function getCurrentClientScreen() {
+    if (desktopLayoutQuery.matches) {
+        return CLIENT_VIEW_SCREENS.includes(activeDesktopScreen) ? activeDesktopScreen : "home";
+    }
+    return CLIENT_VIEW_SCREENS.find(screen =>
+        document.body.classList.contains(`mobile-app-screen-${screen}`)
+    ) || "home";
+}
+
+function saveClientView() {
+    if (!clientViewReady || clientViewRestoring || !currentUser?.id) return;
+    try {
+        const drawer = document.getElementById("client-message-drawer");
+        localStorage.setItem(CLIENT_VIEW_KEY, JSON.stringify({
+            userId: currentUser.id,
+            savedAt: Date.now(),
+            screen: getCurrentClientScreen(),
+            scrollY: Math.round(window.scrollY || 0),
+            date: selectedUpcomingDate || null,
+            year: upcomingCalendarYear,
+            month: upcomingCalendarMonth,
+            messagesOpen: Boolean(drawer?.classList.contains("is-open"))
+        }));
+    } catch (error) { /* storage unavailable */ }
+}
+
+function waitForClientView(ms) {
+    return new Promise(resolve => window.setTimeout(resolve, ms));
+}
+
+async function restoreClientView() {
+    if (clientViewReady || clientViewRestoring) return;
+    clientViewRestoring = true;
+
+    try {
+        // A push notification link decides where to go instead.
+        if (window.location.search) return;
+
+        const saved = JSON.parse(localStorage.getItem(CLIENT_VIEW_KEY) || "null");
+        if (
+            !saved ||
+            !currentUser?.id ||
+            saved.userId !== currentUser.id ||
+            Date.now() - Number(saved.savedAt || 0) > CLIENT_VIEW_RESTORE_MS
+        ) {
+            return;
+        }
+
+        if (saved.date && /^\d{4}-\d{2}-\d{2}$/.test(saved.date)) {
+            selectedUpcomingDate = saved.date;
+            if (Number.isInteger(saved.year)) upcomingCalendarYear = saved.year;
+            if (Number.isInteger(saved.month)) upcomingCalendarMonth = saved.month;
+            renderUpcomingCalendar();
+            if (!activeClientVisitReportId) renderSelectedUpcomingServices();
+        }
+
+        const screen = CLIENT_VIEW_SCREENS.includes(saved.screen) ? saved.screen : "home";
+
+        if (screen !== "home") {
+            if (desktopLayoutQuery.matches) {
+                setDesktopScreen(screen);
+            } else {
+                await handleMobileAppTab(screen);
+            }
+        }
+
+        await waitForClientView(350);
+
+        if (saved.scrollY > 0) {
+            window.scrollTo({ top: saved.scrollY, left: 0, behavior: "auto" });
+        }
+
+        if (saved.messagesOpen) {
+            // Messages connect after the background refresh; wait up to 15 seconds.
+            for (let i = 0; i < 60 && !clientConversation; i++) {
+                await waitForClientView(250);
+            }
+            if (clientConversation) {
+                if (!desktopLayoutQuery.matches) setActiveMobileAppTab("messages");
+                await openClientMessaging();
+                // Don't pop the keyboard up on its own.
+                window.setTimeout(() => document.activeElement?.blur?.(), 250);
+            }
+        }
+    } catch (error) {
+        console.error("Restoring the last screen failed:", error);
+    } finally {
+        clientViewRestoring = false;
+        clientViewReady = true;
+        saveClientView();
+    }
+}
+
+// ========================================
+// CATCH UP WHEN THE APP COMES BACK
+// ========================================
+//
+// Phones pause the live connection while the portal is in the
+// background, and changes made during that time (a walk starting
+// or finishing, a new report, a message) are never re-sent.
+// Reload the latest whenever the portal comes back to the front
+// or the internet comes back.
+// ========================================
+
+let clientLastCatchUpAt =
+    0;
+
+async function catchUpClientPortal() {
+    if (
+        document.hidden ||
+        !currentUser?.id ||
+        !document.getElementById("dashboard-content") ||
+        Date.now() - clientLastCatchUpAt < 10000
+    ) {
+        return;
+    }
+
+    clientLastCatchUpAt = Date.now();
+
+    try {
+        await refreshUpcomingVisits();
+        await refreshClientLiveWalks();
+        if (!activeClientVisitReportId) renderSelectedUpcomingServices();
+        void renderMobileHomeDashboard();
+        void loadClientNotifications();
+        if (clientConversation) {
+            loadClientMessages().catch(error => console.error("Message catch-up failed:", error));
+        }
+        renderAccountCredit().catch(() => {});
+        saveClientFastStart();
+        console.log("Portal caught up after coming back.");
+    } catch (error) {
+        console.error("Portal catch-up failed:", error);
+    }
+}
+
+if (document.getElementById("dashboard-content")) {
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) saveClientView();
+        else void catchUpClientPortal();
+    });
+    window.addEventListener("online", () => { void catchUpClientPortal(); });
+    window.addEventListener("pagehide", saveClientView);
+    document.addEventListener("click", () => window.setTimeout(saveClientView, 400), true);
+    window.setInterval(() => { if (!document.hidden) saveClientView(); }, 5000);
+}
