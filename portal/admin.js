@@ -1285,6 +1285,8 @@ const ADMIN_FAST_START_MAX_AGE_MS =
     7 * 24 * 60 * 60 * 1000;
 
 async function fastStartAdminFromCache() {
+    // Let the rest of admin.js finish loading first.
+    await null;
     try {
         const snapshot =
             JSON.parse(localStorage.getItem(ADMIN_FAST_START_KEY) || "null");
@@ -1308,13 +1310,22 @@ async function fastStartAdminFromCache() {
             return false;
         }
 
-        // The login session is read from the phone, not the internet.
-        const {
-            data: { session }
-        } = await supabaseClient.auth.getSession();
-        if (!session || session.user.id !== snapshot.user_id) {
+        // Read who is signed in straight from this phone, without
+        // waiting on the internet to renew the login (it expires every
+        // hour). The background refresh still checks it properly.
+        let storedUser = null;
+        try {
+            const stored = JSON.parse(
+                localStorage.getItem("sb-xyhndwopvlmnxjkthtkl-auth-token") || "null"
+            );
+            storedUser = stored?.user || stored?.currentSession?.user || null;
+        } catch (error) {
+            storedUser = null;
+        }
+        if (!storedUser?.id || storedUser.id !== snapshot.user_id) {
             return false;
         }
+        const session = { user: storedUser };
 
         const content = document.getElementById("admin-content");
         const loading = document.getElementById("admin-loading");
@@ -28277,6 +28288,11 @@ function startAdminPortalIntro() {
     // Show saved data right away when possible; refresh below.
     const fastStarted =
         await fastStartAdminFromCache();
+
+    // Instant start not possible: show the normal loading screen.
+    if (!fastStarted) {
+        document.documentElement.classList.remove("pis-instant-start");
+    }
 
     if (fastStarted) {
         dashboardReady = true;
