@@ -57,7 +57,19 @@
         <!-- Instant start: no "Loading" flash while the saved copy is about to show -->
         <style>
             html.pis-instant-start #admin-loading { visibility: hidden !important; }
+            /* Used in the last 3 hours: never paint the blue intro at all */
+            html.pis-skip-intro #admin-portal-intro { display: none !important; }
         </style>
+        <script>
+            (function () {
+                try {
+                    var last = Number(localStorage.getItem("pis-admin-last-active")) || 0;
+                    if (last && Date.now() - last < 3 * 60 * 60 * 1000) {
+                        document.documentElement.classList.add("pis-skip-intro");
+                    }
+                } catch (e) { /* nothing saved */ }
+            })();
+        </script>
         <script>
             (function () {
                 try {
