@@ -44,6 +44,10 @@
     /* ---------- already installed? ---------- */
 
     function isStandalone() {
+        // Inside the Android app: it's already installed.
+        if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+            return true;
+        }
         return (
             (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
             window.navigator.standalone === true
