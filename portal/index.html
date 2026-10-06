@@ -288,9 +288,11 @@
          SUPABASE
     ======================================== -->
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    ></script>
+    <script src="../vendor/supabase.js"></script>
+    <script>
+        // Website or app: use the bundled copy; fall back to the internet copy if it's missing.
+        window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
+    </script>
 
 
     <!-- ========================================
@@ -359,6 +361,22 @@
         // SEND USER TO LOGIN
         // ========================================
 
+        // WHERE THIS ACCOUNT WENT LAST TIME ON THIS PHONE
+        function rememberedPortalFor(userId) {
+            try {
+                const admin = JSON.parse(localStorage.getItem("paws-in-stride-admin-fast-start") || "null");
+                const staffRole = localStorage.getItem("paws-in-stride-staff-role");
+                if (admin?.user_id === userId && (staffRole === "admin" || staffRole === "employee")) {
+                    return "/portal/admin.html";
+                }
+                const client = JSON.parse(localStorage.getItem("paws-in-stride-client-fast-start") || "null");
+                if (client?.user_id === userId) {
+                    return "/portal/dashboard.html";
+                }
+            } catch (error) { /* nothing saved */ }
+            return null;
+        }
+
         function goToLogin() {
 
             window.location.replace(
@@ -388,6 +406,16 @@
             setLaunchStatus(
                 "Loading your portal..."
             );
+
+            // Signed in on this phone before? Go straight there
+            // (that page double-checks the account itself).
+            const remembered =
+                rememberedPortalFor(user.id);
+
+            if (remembered) {
+                window.location.replace(remembered);
+                return;
+            }
 
 
             const {
@@ -428,8 +456,10 @@
             // ========================================
 
             if (
-                profile?.role ===
-                "admin"
+                (
+                    profile?.role === "admin" ||
+                    profile?.role === "employee"
+                )
             ) {
 
                 window.location.replace(
