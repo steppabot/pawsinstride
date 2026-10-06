@@ -162,7 +162,37 @@
     
         </div>
 
-        <script>(function(){try{var s=JSON.parse(localStorage.getItem('pis-admin-last-view')||'null');if(s&&Date.now()-s.savedAt<1800000){var i=document.getElementById('admin-portal-intro');if(i)i.remove();return;}}catch(e){}setTimeout(function(){var i=document.getElementById('admin-portal-intro');if(i)i.remove();document.body.classList.remove('admin-portal-intro-open');},20000);})();</script>
+        <script>
+        // ========================================
+        // SKIP THE INTRO WHEN COMING RIGHT BACK
+        // ========================================
+        // The intro video only plays if the app hasn't been used in
+        // the last 3 hours. Otherwise it goes straight to the dashboard.
+        (function () {
+            var KEY = "pis-admin-last-active";
+            var SKIP_IF_USED_WITHIN_MS = 3 * 60 * 60 * 1000;
+            function markActive() {
+                try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {}
+            }
+            var lastActive = 0;
+            try { lastActive = Number(localStorage.getItem(KEY)) || 0; } catch (e) {}
+            var intro = document.getElementById("admin-portal-intro");
+            if (intro && lastActive && Date.now() - lastActive < SKIP_IF_USED_WITHIN_MS) {
+                intro.remove();
+            } else {
+                // Never leave the intro stuck on screen.
+                setTimeout(function () {
+                    var stuck = document.getElementById("admin-portal-intro");
+                    if (stuck) stuck.remove();
+                    document.body.classList.remove("admin-portal-intro-open");
+                }, 20000);
+            }
+            markActive();
+            document.addEventListener("visibilitychange", function () { if (document.hidden) markActive(); });
+            window.addEventListener("pagehide", markActive);
+            setInterval(function () { if (!document.hidden) markActive(); }, 60000);
+        })();
+        </script>
 
         <main class="dashboard-container admin-dashboard-container">
 
