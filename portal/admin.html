@@ -54,6 +54,26 @@
             href="admin.css"
         >
 
+        <!-- Instant start: no "Loading" flash while the saved copy is about to show -->
+        <style>
+            html.pis-instant-start #admin-loading { visibility: hidden !important; }
+        </style>
+        <script>
+            (function () {
+                try {
+                    var auth = JSON.parse(localStorage.getItem("sb-xyhndwopvlmnxjkthtkl-auth-token") || "null");
+                    var saved = JSON.parse(localStorage.getItem("paws-in-stride-admin-fast-start") || "null");
+                    var userId = auth && auth.user && auth.user.id;
+                    if (userId && saved && saved.user_id === userId) {
+                        document.documentElement.classList.add("pis-instant-start");
+                        setTimeout(function () {
+                            document.documentElement.classList.remove("pis-instant-start");
+                        }, 4000);
+                    }
+                } catch (e) { /* nothing saved */ }
+            })();
+        </script>
+
 
         <!-- ========================================
              GOOGLE MAPS
