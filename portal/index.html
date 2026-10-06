@@ -191,7 +191,8 @@
 
         .app-launcher img {
 
-            width: min(300px, 72vw);
+            width: 112px;
+            border-radius: 26px;
             height: auto;
 
             display: block;
@@ -249,6 +250,15 @@
 
             }
 
+        }
+
+
+        /* Launch screen: just the logo, like other apps. The status
+           text stays in the page for screen readers only. */
+        .app-launcher-spinner { display: none !important; }
+        .app-launcher-status {
+            position: absolute !important; width: 1px; height: 1px;
+            overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
         }
 
     </style>
@@ -583,6 +593,11 @@
 
         }
 
+
+        // Android app: the launcher screen only shows if this takes a while.
+        setTimeout(function () {
+            try { window.Capacitor?.Plugins?.SplashScreen?.hide?.({ fadeOutDuration: 250 }); } catch (e) {}
+        }, 2500);
 
         launchPawsInStride();
 
