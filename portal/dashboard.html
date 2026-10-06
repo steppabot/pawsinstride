@@ -46,6 +46,32 @@
     >
 
     <!-- ========================================
+         INSTANT START: NO LOADING SCREEN FLASH
+         If this phone has a saved copy for the signed-in client, keep
+         the loading screen hidden while the app starts; the saved
+         dashboard appears a moment later. Shows it again after 4
+         seconds just in case.
+    ======================================== -->
+    <style>
+        html.pis-instant-start #loading { visibility: hidden !important; }
+    </style>
+    <script>
+        (function () {
+            try {
+                var auth = JSON.parse(localStorage.getItem("sb-xyhndwopvlmnxjkthtkl-auth-token") || "null");
+                var saved = JSON.parse(localStorage.getItem("paws-in-stride-client-fast-start") || "null");
+                var userId = auth && auth.user && auth.user.id;
+                if (userId && saved && saved.user_id === userId) {
+                    document.documentElement.classList.add("pis-instant-start");
+                    setTimeout(function () {
+                        document.documentElement.classList.remove("pis-instant-start");
+                    }, 4000);
+                }
+            } catch (e) { /* nothing saved */ }
+        })();
+    </script>
+
+    <!-- ========================================
          INSTALLED PWA — EDGE-TO-EDGE VIEWPORT
     ======================================== -->
 
