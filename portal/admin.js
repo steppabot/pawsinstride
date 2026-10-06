@@ -28274,6 +28274,18 @@ function startAdminPortalIntro() {
 
 
 // ========================================
+// ANDROID APP SPLASH SCREEN
+// ========================================
+// The app keeps its orange logo splash on screen until the first
+// screen is ready, so there's no flash in between. Does nothing
+// on the website.
+function hidePawsSplash() {
+    try {
+        window.Capacitor?.Plugins?.SplashScreen?.hide?.({ fadeOutDuration: 250 });
+    } catch (error) { /* not in the app */ }
+}
+
+// ========================================
 // START
 // ========================================
 
@@ -28281,6 +28293,14 @@ function startAdminPortalIntro() {
 
     const adminIntro =
         startAdminPortalIntro();
+
+    // Never keep the splash up for more than 4 seconds.
+    window.setTimeout(hidePawsSplash, 4000);
+
+    // The intro video is playing: show it now.
+    if (document.getElementById("admin-portal-intro")) {
+        hidePawsSplash();
+    }
 
     let dashboardReady =
         false;
@@ -28298,6 +28318,7 @@ function startAdminPortalIntro() {
         dashboardReady = true;
         adminIntro.dashboardFinished(true);
         setupAdminAppNavigation();
+        hidePawsSplash();
     }
 
     try {
@@ -28351,6 +28372,7 @@ function startAdminPortalIntro() {
                 dashboardReady
             );
         }
+        hidePawsSplash();
     }
 
 
