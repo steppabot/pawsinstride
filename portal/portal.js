@@ -20990,6 +20990,18 @@ window.addEventListener(
 
 
 // ========================================
+// ANDROID APP SPLASH SCREEN
+// ========================================
+// The app keeps its orange logo splash on screen until the first
+// screen is ready, so there's no flash in between. Does nothing
+// on the website.
+function hidePawsSplash() {
+    try {
+        window.Capacitor?.Plugins?.SplashScreen?.hide?.({ fadeOutDuration: 250 });
+    } catch (error) { /* not in the app */ }
+}
+
+// ========================================
 // LOAD
 // ========================================
 
@@ -20997,6 +21009,14 @@ window.addEventListener(
 
     const portalIntro =
         startMobilePortalIntro();
+
+    // Never keep the splash up for more than 4 seconds.
+    window.setTimeout(hidePawsSplash, 4000);
+
+    // The intro video is playing: show it now.
+    if (document.getElementById("mobile-portal-intro")) {
+        hidePawsSplash();
+    }
 
 
 let dashboardReady =
@@ -21014,6 +21034,7 @@ let dashboardReady =
     if (fastStarted) {
         dashboardReady = true;
         portalIntro.dashboardFinished(true);
+        hidePawsSplash();
         // Connect messages now so an open conversation comes back quickly.
         initializeClientMessaging().catch(error =>
             console.error("Client messaging initialization failed:", error)
@@ -21087,6 +21108,8 @@ finally {
             portalIntro.dashboardFinished(
                 dashboardReady
             );
+
+            hidePawsSplash();
 
             if (dashboardReady) {
                 void restoreClientView();
@@ -32463,4 +32486,9 @@ if (document.getElementById("dashboard-content")) {
     window.addEventListener("pagehide", saveClientView);
     document.addEventListener("click", () => window.setTimeout(saveClientView, 400), true);
     window.setInterval(() => { if (!document.hidden) saveClientView(); }, 5000);
+}
+
+// Login, sign-up and other pages without the dashboard: show them right away.
+if (!document.getElementById("dashboard-content")) {
+    hidePawsSplash();
 }
