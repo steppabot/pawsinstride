@@ -3926,9 +3926,14 @@
 <!-- ========================================
      SUPABASE
      ======================================== -->
-<script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-></script>
+<script src="../vendor/supabase.js"></script>
+    <script>
+        // Website or app: use the bundled copy; fall back to the internet copy if it's missing.
+        window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
+    </script>
+
+<!-- Android app notifications (does nothing on the website) -->
+<script src="native-push.js"></script>
 
 
 <!-- ========================================
