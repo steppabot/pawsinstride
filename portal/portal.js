@@ -2168,7 +2168,22 @@ function clearClientFastStart() {
     } catch (error) { /* ignore */ }
 }
 
+function readStoredPortalUser() {
+    try {
+        const stored = JSON.parse(
+            localStorage.getItem("sb-xyhndwopvlmnxjkthtkl-auth-token") || "null"
+        );
+        const user = stored?.user || stored?.currentSession?.user || null;
+        return user?.id ? user : null;
+    } catch (error) {
+        return null;
+    }
+}
+
 async function fastStartClientFromCache() {
+    // Let the rest of portal.js finish loading first.
+    await null;
+
     const dashboardContent = document.getElementById("dashboard-content");
     const loading = document.getElementById("loading");
     if (!dashboardContent || !loading) return false;
@@ -2187,9 +2202,14 @@ async function fastStartClientFromCache() {
         const role = String(snapshot.profile.role || "").trim().toLowerCase();
         if (role === "admin" || role === "employee") return false;
 
-        // The login is read from the phone, not the internet.
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session || session.user.id !== snapshot.user_id) return false;
+        // Read who is signed in straight from this phone. Asking
+        // Supabase can wait on the internet to renew the login (it
+        // expires every hour), which would bring the loading screen
+        // back. The background refresh still checks it properly and
+        // sends anyone signed out to the login page.
+        const storedUser = readStoredPortalUser();
+        if (!storedUser || storedUser.id !== snapshot.user_id) return false;
+        const session = { user: storedUser };
 
         const list = value => (Array.isArray(value) ? value : []);
         currentUser = session.user;
@@ -20985,6 +21005,11 @@ let dashboardReady =
     // Show this phone's saved copy right away when possible.
     const fastStarted =
         await fastStartClientFromCache();
+
+    // Instant start not possible: show the normal loading screen.
+    if (!fastStarted) {
+        document.documentElement.classList.remove("pis-instant-start");
+    }
 
     if (fastStarted) {
         dashboardReady = true;
