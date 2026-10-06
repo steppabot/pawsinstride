@@ -28279,10 +28279,22 @@ function startAdminPortalIntro() {
 // The app keeps its orange logo splash on screen until the first
 // screen is ready, so there's no flash in between. Does nothing
 // on the website.
+let pawsSplashRetriesStarted = false;
+
 function hidePawsSplash() {
-    try {
-        window.Capacitor?.Plugins?.SplashScreen?.hide?.({ fadeOutDuration: 250 });
-    } catch (error) { /* not in the app */ }
+    const hideNow = () => {
+        try {
+            window.Capacitor?.Plugins?.SplashScreen?.hide?.({ fadeOutDuration: 250 });
+        } catch (error) { /* not in the app */ }
+    };
+    hideNow();
+    // Android can still be putting the splash up when the page is
+    // already ready (e.g. coming back from the camera), so ask again
+    // a few times. Hiding an already-hidden splash does nothing.
+    if (!pawsSplashRetriesStarted) {
+        pawsSplashRetriesStarted = true;
+        [300, 800, 1500].forEach(ms => window.setTimeout(hideNow, ms));
+    }
 }
 
 // ========================================
