@@ -21142,8 +21142,13 @@ finally {
 
 async function logoutClient() {
 
-    // Don't leave this account's saved copy on a shared device.
+// Don't leave this account's saved copy on a shared device.
     clearClientFastStart();
+
+    // Android app: stop sending this account's alerts to this phone.
+    if (window.PisNativePush) {
+        await window.PisNativePush.release();
+    }
 
     try {
 
@@ -26387,6 +26392,10 @@ function isInstalledPawsInStridePWA() {
 
 function shouldUseMobilePushNotifications() {
 
+    if (isPawsInStrideNativeApp()) {
+        return true;
+    }
+
     return (
         isMobileDeviceForPush() &&
         isInstalledPawsInStridePWA()
@@ -26416,12 +26425,13 @@ function updateClientPushSettingsCardVisibility() {
     }
 
 
-    const isMobileDevice =
+const isMobileDevice =
         isMobileDeviceForPush();
 
-
+    // The Android app counts as installed.
     const isInstalledPWA =
-        isInstalledPawsInStridePWA();
+        isInstalledPawsInStridePWA() ||
+        isPawsInStrideNativeApp();
 
 
     const shouldShowPushSettings =
@@ -26437,8 +26447,70 @@ function updateClientPushSettingsCardVisibility() {
 // ========================================
 // UPDATE PUSH NOTIFICATION UI
 // ========================================
+// ========================================
+// ANDROID APP (NATIVE PUSH)
+// ========================================
+//
+// Inside the Android app, notifications come through the phone
+// (Firebase), not the browser. native-push.js provides
+// window.PisNativePush; these helpers drive the settings card.
+// ========================================
+
+function isPawsInStrideNativeApp() {
+    return Boolean(
+        window.Capacitor?.isNativePlatform?.()
+    );
+}
+
+async function updateNativePushNotificationUI() {
+    if (!enablePushNotificationsButton || !pushNotificationStatus) return;
+    if (!window.PisNativePush) {
+        enablePushNotificationsButton.disabled = true;
+        enablePushNotificationsButton.textContent = "Not Available";
+        setPushNotificationStatus("Notifications aren't set up in this version of the app yet.");
+        return;
+    }
+    const status = await window.PisNativePush.status();
+    if (status === "granted") {
+        enablePushNotificationsButton.disabled = true;
+        enablePushNotificationsButton.textContent = "Notifications Enabled";
+        setPushNotificationStatus("Push notifications are enabled on this phone.");
+        return;
+    }
+    if (status === "denied") {
+        enablePushNotificationsButton.disabled = true;
+        enablePushNotificationsButton.textContent = "Notifications Blocked";
+        setPushNotificationStatus("Notifications are turned off for Paws in Stride. Turn them on in your phone's Settings > Apps > Paws in Stride > Notifications.");
+        return;
+    }
+    enablePushNotificationsButton.disabled = false;
+    enablePushNotificationsButton.textContent = "Enable Notifications";
+    setPushNotificationStatus("Enable alerts for visit updates, messages, reports, and booking activity.");
+}
+
+// Refresh the card when the phone finishes registering.
+window.addEventListener("pis-native-push-change", () => {
+    void updatePushNotificationUI();
+});
+
+async function enableNativePushNotifications() {
+    if (!enablePushNotificationsButton || !window.PisNativePush) return;
+    enablePushNotificationsButton.disabled = true;
+    enablePushNotificationsButton.textContent = "Enabling...";
+    try {
+        await window.PisNativePush.enable();
+    } catch (error) {
+        console.error("Native push setup error:", error);
+    }
+    await updateNativePushNotificationUI();
+}
 
 async function updatePushNotificationUI() {
+
+    if (isPawsInStrideNativeApp()) {
+        return updateNativePushNotificationUI();
+    }
+
 
     if (
         !enablePushNotificationsButton ||
@@ -26589,6 +26661,11 @@ async function updatePushNotificationUI() {
 // ========================================
 
 async function enablePushNotifications() {
+
+    if (isPawsInStrideNativeApp()) {
+        return enableNativePushNotifications();
+    }
+
 
     if (
         !enablePushNotificationsButton
@@ -27127,6 +27204,12 @@ if (
 // ========================================
 
 async function registerPawsInStrideServiceWorker() {
+
+    // The Android app ships its own files; no service worker needed.
+    if (isPawsInStrideNativeApp()) {
+        return;
+    }
+
 
     if (
         !(
