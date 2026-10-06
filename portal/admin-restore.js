@@ -57,7 +57,10 @@
 
  function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+ let restoreStarted = false;
  async function restore() {
+  if (restoreStarted) return;   // only once per app start
+  restoreStarted = true;
   const s = readSaved();
   restoring = true;
   try {
@@ -112,6 +115,13 @@
   };
  } else {
   ready = true;
+ }
+
+ // If the dashboard was already showing before this file loaded
+ // (instant start), run the restore now instead of waiting.
+ if (!ready && document.getElementById('admin-content')?.style.display === 'block' &&
+     typeof currentUser !== 'undefined' && currentUser?.id) {
+  void restore();
  }
 
  // Save whenever you leave the app, and every few seconds while using it.
