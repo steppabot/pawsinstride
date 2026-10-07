@@ -28301,29 +28301,26 @@ function hidePawsSplash() {
 // START
 // ========================================
 
-(async function initializeAdminPortal() {
+async function initializeAdminPortal() {
 
     const adminIntro =
         startAdminPortalIntro();
 
-    // Never keep the splash up for more than 4 seconds.
     window.setTimeout(hidePawsSplash, 4000);
 
-    // The intro video is playing: show it now.
     if (document.getElementById("admin-portal-intro")) {
         hidePawsSplash();
     }
 
-    let dashboardReady =
-        false;
+    let dashboardReady = false;
 
-    // Show saved data right away when possible; refresh below.
     const fastStarted =
         await fastStartAdminFromCache();
 
-    // Instant start not possible: show the normal loading screen.
     if (!fastStarted) {
-        document.documentElement.classList.remove("pis-instant-start");
+        document.documentElement.classList.remove(
+            "pis-instant-start"
+        );
     }
 
     if (fastStarted) {
@@ -28339,33 +28336,17 @@ function hidePawsSplash() {
             background: fastStarted
         });
 
-
         const adminContent =
-            document.getElementById(
-                "admin-content"
-            );
-
+            document.getElementById("admin-content");
 
         dashboardReady =
             fastStarted ||
-            adminContent?.style.display ===
-            "block";
+            adminContent?.style.display === "block";
 
-        if (
-            currentUser &&
-            currentProfile
-        ) {
-        
+        if (currentUser && currentProfile) {
             await initializeAdminMessaging();
-        
             setupAdminBusinessRealtime();
-        
         }
-
-
-        // ========================================
-        // ADMIN APP NAVIGATION
-        // ========================================
 
         if (!fastStarted) {
             setupAdminAppNavigation();
@@ -28379,16 +28360,57 @@ function hidePawsSplash() {
         );
 
     } finally {
+
         if (!fastStarted) {
             adminIntro.dashboardFinished(
                 dashboardReady
             );
         }
+
         hidePawsSplash();
     }
+}
 
+// Allow the page's startup listeners to install
+// the service layout and other enhancements
+// before rendering the cached dashboard.
 
-})();
+let adminPortalStartQueued = false;
+
+function queueAdminPortalStart() {
+
+    if (adminPortalStartQueued) {
+        return;
+    }
+
+    adminPortalStartQueued = true;
+
+    window.setTimeout(() => {
+
+        initializeAdminPortal().catch(error => {
+
+            console.error(
+                "Admin portal startup failed:",
+                error
+            );
+
+        });
+
+    }, 0);
+}
+
+if (document.readyState === "loading") {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        queueAdminPortalStart,
+        { once: true }
+    );
+
+} else {
+
+    queueAdminPortalStart();
+}
 
 // ========================================
 // VISIT PHOTO RESIZING
