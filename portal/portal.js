@@ -7051,7 +7051,7 @@ async function uploadPetPhoto(
 // REFRESH PETS
 // ========================================
 
-async function refreshPets() {
+async function refreshPets(background = false) {
 
     const {
         data,
@@ -7096,7 +7096,12 @@ async function refreshPets() {
 
     await loadPetStats();
 
+    if (background && window.PawsLiveSync?.deferForms('#pet-form-panel', 'pets')) return;
+
     await renderPets();
+
+    // Recheck after the async render: a booking may have opened meanwhile.
+    if (background && window.PawsLiveSync?.deferForms('#booking-form', 'pets')) return;
 
     populateBookingPets();
 
@@ -15907,6 +15912,8 @@ function getPetsForVisit(
 
 
 function renderSelectedUpcomingServices() {
+    if (window.PawsLiveSync?.deferVisible('.client-cancellation-modal, .client-report-lightbox-visible', 'visits')) return;
+
 
     const heading =
         document.getElementById(
@@ -26977,7 +26984,7 @@ function renderClientNotificationPreferences(
 // LOAD CLIENT NOTIFICATION PREFERENCES
 // ========================================
 
-async function loadClientNotificationPreferences() {
+async function loadClientNotificationPreferences(background = false) {
 
     if (
         !currentUser?.id
@@ -27085,6 +27092,7 @@ async function loadClientNotificationPreferences() {
             }
 
 
+            if (background && window.PawsLiveSync?.deferForms('#client-notifications-modal', 'client_notification_preferences')) return;
             renderClientNotificationPreferences(
                 createdPreferences
             );
@@ -27095,6 +27103,7 @@ async function loadClientNotificationPreferences() {
         }
 
 
+        if (background && window.PawsLiveSync?.deferForms('#client-notifications-modal', 'client_notification_preferences')) return;
         renderClientNotificationPreferences(
             data
         );
@@ -27119,7 +27128,6 @@ async function loadClientNotificationPreferences() {
     }
 
 }
-
 
 // ========================================
 // SAVE CLIENT NOTIFICATION PREFERENCE
