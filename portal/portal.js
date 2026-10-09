@@ -32504,3 +32504,458 @@ if (document.getElementById("dashboard-content")) {
 if (!document.getElementById("dashboard-content")) {
     hidePawsSplash();
 }
+
+// ========================================
+// CLIENT SERVICES — COMPACT CARDS + MODALS
+// Paste ONCE at the bottom of portal.js.
+// ========================================
+
+(() => {
+    if (window.pisClientServiceModalsInstalled) return;
+
+    window.pisClientServiceModalsInstalled = true;
+
+    let activeModal = null;
+    let previousFocus = null;
+    let inertElements = [];
+    let resumeKey = null;
+    let resumeScroll = 0;
+
+    // ========================================
+    // OPEN / CLOSE SERVICE DETAILS
+    // ========================================
+
+    function closeDetails(restoreFocus = true) {
+        if (activeModal) {
+            activeModal.hidden = true;
+        }
+
+        activeModal = null;
+
+        document.body.classList.remove("csd-open");
+
+        inertElements.forEach(element => {
+            element.inert = false;
+        });
+
+        inertElements = [];
+
+        if (restoreFocus && previousFocus?.isConnected) {
+            previousFocus.focus({
+                preventScroll: true
+            });
+        }
+    }
+
+    function openDetails(modal, focus = true) {
+        if (!modal || activeModal === modal) return;
+
+        closeDetails(false);
+
+        previousFocus = document.activeElement;
+        activeModal = modal;
+
+        modal.hidden = false;
+
+        document.body.classList.add("csd-open");
+
+        // Keep existing delegated service actions connected.
+        // Disable only the background around the open details.
+        let branch = modal;
+
+        while (
+            branch.parentElement &&
+            branch !== document.body
+        ) {
+            for (const sibling of branch.parentElement.children) {
+                if (
+                    sibling === branch ||
+                    sibling.inert ||
+                    sibling.matches(
+                        "script, style, link, dialog, " +
+                        ".client-report-lightbox, " +
+                        ".client-cancellation-modal"
+                    )
+                ) {
+                    continue;
+                }
+
+                sibling.inert = true;
+                inertElements.push(sibling);
+            }
+
+            branch = branch.parentElement;
+        }
+
+        if (focus) {
+            modal.querySelector(".csd-close").focus({
+                preventScroll: true
+            });
+        }
+    }
+
+    // ========================================
+    // BUILD COMPACT CARDS
+    // ========================================
+
+    function compactCards(container, visits) {
+        const cards = [...container.children].filter(
+            element => element.matches(".upcoming-service-card")
+        );
+
+        cards.forEach((card, index) => {
+            const visit = visits[index];
+
+            if (!visit) return;
+
+            const key =
+                `${visit.id}:` +
+                (
+                    visit.boarding_pickup_display_only
+                        ? "pickup"
+                        : "visit"
+                );
+
+            const title =
+                card.querySelector(
+                    ".pis-card-head strong, " +
+                    ".upcoming-service-card-header strong"
+                )?.textContent.trim() || "Service details";
+
+            const status =
+                card.querySelector(".service-status")
+                    ?.textContent.trim() || "";
+
+            const pets = [
+                ...card.querySelectorAll(".service-pet-chip")
+            ]
+                .map(element => element.textContent.trim())
+                .join(", ");
+
+            const icon =
+                card.querySelector(".pis-kind-icon");
+
+            const themeClasses = [...card.classList].filter(
+                name => name.startsWith("pis-kind")
+            );
+
+            const summary = document.createElement("button");
+
+            summary.type = "button";
+
+            summary.className = [
+                "csd-summary",
+                ...themeClasses
+            ].join(" ");
+
+            summary.setAttribute("aria-haspopup", "dialog");
+
+            if (
+                card.classList.contains(
+                    "upcoming-service-card-completed"
+                )
+            ) {
+                summary.classList.add("csd-complete");
+            }
+
+            if (
+                card.classList.contains(
+                    "upcoming-service-card-in-progress"
+                )
+            ) {
+                summary.classList.add("csd-live");
+            }
+
+            summary.append(
+                icon
+                    ? icon.cloneNode(true)
+                    : document.createElement("span")
+            );
+
+            const copy = document.createElement("span");
+            copy.className = "csd-copy";
+
+            const name = document.createElement("strong");
+            name.textContent = title;
+
+            const time = document.createElement("small");
+
+            const boardingDates =
+                card.querySelector(":scope > p");
+
+            time.textContent =
+                /board/i.test(visit.service_type || "") &&
+                boardingDates
+                    ? boardingDates.textContent
+                    : visit.time_window || "Time arranged with you";
+
+            const petLine = document.createElement("small");
+            petLine.textContent = pets || "Pet not assigned";
+
+            const badge = document.createElement("span");
+            badge.className = "csd-status";
+            badge.textContent = status;
+
+            copy.append(name, time, petLine, badge);
+
+            const arrow = document.createElement("span");
+            arrow.className = "csd-arrow";
+            arrow.textContent = "View";
+            arrow.setAttribute("aria-hidden", "true");
+
+            summary.append(copy, arrow);
+
+            // ========================================
+            // FULL DETAILS MODAL
+            // ========================================
+
+            const modal = document.createElement("div");
+
+            modal.className = [
+                "csd-overlay",
+                ...themeClasses
+            ].join(" ");
+
+            modal.hidden = true;
+            modal.dataset.csdKey = key;
+
+            modal.innerHTML = `
+                <section
+                    class="csd-sheet"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <header class="csd-header">
+                        <div class="csd-header-copy">
+                            <span class="csd-eyebrow">SERVICE DETAILS</span>
+                            <h2></h2>
+                            <p></p>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="csd-close"
+                            aria-label="Close service details"
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M6 6l12 12M18 6L6 18"/>
+                            </svg>
+                        </button>
+                    </header>
+
+                    <div class="csd-body"></div>
+                </section>
+            `;
+
+            const heading = modal.querySelector("h2");
+
+            heading.id =
+                `csd-title-${visit.id}-${index}`;
+
+            heading.textContent = title;
+
+            modal.querySelector("[role='dialog']")
+                .setAttribute(
+                    "aria-labelledby",
+                    heading.id
+                );
+
+            modal.querySelector(".csd-header p").textContent = [
+                formatLongDate(visit.visit_date),
+                status
+            ]
+                .filter(Boolean)
+                .join(" \u00b7 ");
+
+            if (icon) {
+                modal.querySelector(".csd-header")
+                    .prepend(icon.cloneNode(true));
+            }
+
+            // Group only the original summary fields. Existing report mounts,
+            // buttons and delegated handlers stay inside the original card.
+            const detailCard = document.createElement("div");
+            detailCard.className = "csd-detail-card";
+
+            [...card.children].forEach(element => {
+                if (element.matches(
+                    ".upcoming-service-pets, .service-pet-chips, " +
+                    ".upcoming-service-row, p"
+                )) {
+                    detailCard.appendChild(element);
+                }
+            });
+
+            if (detailCard.children.length) {
+                card.prepend(detailCard);
+            }
+
+            // Move the existing card instead of duplicating
+            // report IDs or recreating its action buttons.
+            card.before(summary, modal);
+
+            modal.querySelector(".csd-body").append(card);
+
+            summary.addEventListener("click", () => {
+                openDetails(modal);
+            });
+
+            modal.querySelector(".csd-close")
+                .addEventListener("click", () => {
+                    closeDetails();
+                });
+
+            modal.addEventListener("click", event => {
+                if (event.target === modal) {
+                    closeDetails();
+                }
+            });
+
+            // Keep the selected service open after a refresh.
+            if (key === resumeKey) {
+                openDetails(modal, false);
+
+                previousFocus = summary;
+
+                modal.querySelector(".csd-body").scrollTop =
+                    resumeScroll;
+            }
+        });
+
+        resumeKey = null;
+    }
+
+    // ========================================
+    // KEYBOARD SUPPORT
+    // ========================================
+
+    document.addEventListener("keydown", event => {
+        if (!activeModal) return;
+
+        // Let an existing confirmation/photo/update popup
+        // handle its own keyboard controls.
+        if (
+            document.querySelector(
+                ".client-cancellation-modal, " +
+                "dialog[open], " +
+                ".client-report-lightbox-visible"
+            )
+        ) {
+            return;
+        }
+
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeDetails();
+            return;
+        }
+
+        if (event.key !== "Tab") return;
+
+        const controls = [
+            ...activeModal.querySelectorAll(
+                "button, a[href], input, select, " +
+                "textarea, [tabindex='0']"
+            )
+        ].filter(
+            element =>
+                !element.disabled &&
+                element.getClientRects().length
+        );
+
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+
+        if (
+            event.shiftKey &&
+            document.activeElement === first
+        ) {
+            event.preventDefault();
+            last?.focus();
+        } else if (
+            !event.shiftKey &&
+            document.activeElement === last
+        ) {
+            event.preventDefault();
+            first?.focus();
+        }
+    });
+
+    // ========================================
+    // CONNECT TO EXISTING SERVICE RENDERING
+    // ========================================
+
+    const originalRender =
+        renderSelectedUpcomingServices;
+
+    const originalReportMount =
+        getClientVisitReportMount;
+
+    function selectedVisits() {
+        return getClientBoardingCalendarEntries()
+            .filter(
+                visit =>
+                    visit.visit_date === selectedUpcomingDate &&
+                    String(visit.status || "")
+                        .toLowerCase() !== "cancelled"
+            )
+            .sort(compareClientVisits);
+    }
+
+    renderSelectedUpcomingServices = function (...args) {
+        resumeKey =
+            activeModal?.dataset.csdKey || null;
+
+        resumeScroll =
+            activeModal?.querySelector(".csd-body")
+                .scrollTop || 0;
+
+        closeDetails(false);
+
+        const result =
+            originalRender.apply(this, args);
+
+        const container = document.getElementById(
+            "selected-upcoming-services"
+        );
+
+        if (container) {
+            compactCards(container, selectedVisits());
+        }
+
+        return result;
+    };
+
+    // Reports opened from Home or notifications also
+    // open the correct service details automatically.
+    getClientVisitReportMount = function (visitId) {
+        const mount = document.getElementById(
+            `client-visit-report-${Number(visitId)}`
+        );
+
+        const modal = mount?.closest(".csd-overlay");
+
+        if (modal) {
+            openDetails(modal);
+            return mount;
+        }
+
+        return originalReportMount(visitId);
+    };
+
+    // Handle cards already rendered during startup.
+    const existingContainer = document.getElementById(
+        "selected-upcoming-services"
+    );
+
+    if (existingContainer) {
+        compactCards(existingContainer, selectedVisits());
+    }
+})();
