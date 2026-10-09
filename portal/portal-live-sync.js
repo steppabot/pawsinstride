@@ -15,18 +15,37 @@
     let channel = null, owner = null, timer = null, running = false, stopped = false;
     let pending = new Set(), generation = 0, errors = 0, lastFinished = 0;
     const views = new Map();
+    const deferred = new Map();
     const visible = el => !!el && !el.hidden && el.getClientRects().length > 0;
     const userId = () => typeof currentUser !== 'undefined' ? currentUser?.id : null;
     const isAdmin = () => document.body.classList.contains('admin-page');
-    function editing() {
-        if (document.querySelector('.client-report-lightbox-visible, .client-cancellation-modal')) return true;
-        if (typeof activeVisitReportVisitId !== 'undefined' && activeVisitReportVisitId) return true;
-        // Read-only views remain live. Forms are deferred until closed/saved.
-        return [...document.querySelectorAll('input:not([type="hidden"]), textarea, select, [contenteditable="true"]')]
-            .some(el => visible(el) && !el.disabled && !el.readOnly &&
-                !el.matches('[type="search"], [data-live-filter]') &&
-                !(el.id === 'admin-client-household-pricing-tier' && document.activeElement !== el) &&
-                !/search|filter/i.test(el.id || ''));
+    function editing(selector = null) {
+        if (!selector && typeof activeVisitReportVisitId !== 'undefined' && activeVisitReportVisitId) return true;
+        const roots = selector ? [...document.querySelectorAll(selector)] : [document];
+        return roots.some(root => [...root.querySelectorAll('input:not([type="hidden"]), textarea, select, [contenteditable="true"]')]
+            .some(el => visible(el) && !el.readOnly &&
+                !el.matches('[type="search"], [data-live-filter], #client-message-input, #admin-message-input') &&
+                !/search|filter/i.test(el.id || '')));
+    }
+    function deferForms(selector = null, topic = '*') {
+        if (!editing(selector)) return false;
+        deferred.set(JSON.stringify(['forms', selector, topic]), {kind: 'forms', selector, topic});
+        return true;
+    }
+    function deferVisible(selector, topic = '*') {
+        if (![...document.querySelectorAll(selector)].some(visible)) return false;
+        deferred.set(JSON.stringify(['visible', selector, topic]), {kind: 'visible', selector, topic});
+        return true;
+    }
+    function releaseDeferred() {
+        for (const [key, item] of deferred) {
+            const blocked = item.kind === 'forms' ? editing(item.selector) :
+                [...document.querySelectorAll(item.selector)].some(visible);
+            if (!blocked) {
+                deferred.delete(key);
+                queue(item.topic);
+            }
+        }
     }
     function queue(topic = '*') {
         pending.add(topic);
@@ -42,7 +61,6 @@
         if (running || stopped || document.hidden || !navigator.onLine || !userId()) return;
         const content = document.getElementById?.(isAdmin() ? 'admin-content' : 'dashboard-content');
         if (content && !visible(content)) return;
-        if (editing()) return; // Pending topics retained; foreground tick retries.
         running = true;
         const batch = new Set(pending); pending.clear();
         const id = userId(), epoch = generation;
@@ -77,7 +95,7 @@
                 }
             };
             for (const [name, view] of views) {
-                if (!stillCurrent() || editing()) { batch.forEach(t => pending.add(t)); break; }
+                if (!stillCurrent()) { batch.forEach(t => pending.add(t)); break; }
                 try { await view(context); }
                 catch (error) { batch.forEach(t => pending.add(t)); console.error(`Live refresh (${name}):`, error); errors++; }
             }
@@ -92,27 +110,28 @@
     }
     window.PawsLiveSync = {
         register(name, fn) { views.set(name, fn); queue('*'); },
-        queue, editing,
+        queue, editing, deferForms, deferVisible,
         status: () => ({owner, running, pending: [...pending], errors, lastFinished,
-            channelState: channel?.state || 'not connected', deferredForForm: editing()})
+            channelState: channel?.state || 'not connected', deferredForForm: deferred.size > 0})
     };
     window.addEventListener('online', () => queue('*'));
     window.addEventListener('focus', () => queue('*'));
     window.addEventListener('pageshow', () => queue('*'));
     document.addEventListener('visibilitychange', () => { if (!document.hidden) queue('*'); });
-    document.addEventListener('focusout', () => { if (pending.size) queue('resume'); });
-    document.addEventListener('click', () => { if (pending.size && !timer && !running) timer = setTimeout(flush, 600); });
+    document.addEventListener('focusout', () => { releaseDeferred(); if (pending.size) queue('resume'); });
+    document.addEventListener('click', () => { releaseDeferred(); if (pending.size && !timer && !running) timer = setTimeout(flush, 600); });
     setInterval(() => {
         if (!document.hidden && navigator.onLine && userId()) {
+            releaseDeferred();
             if (Date.now() - lastFinished >= 30000) queue('*');
-            else if (pending.size && !editing()) queue('resume');
+            else if (pending.size) queue('resume');
         }
     }, 3000);
     if (typeof supabaseClient !== 'undefined') {
         supabaseClient.auth.onAuthStateChange((event) => {
             // Do not await Supabase calls inside its auth callback.
             if (event === 'SIGNED_OUT') {
-                generation++; owner = null; pending.clear();
+                generation++; owner = null; pending.clear(); deferred.clear();
                 setTimeout(() => { void dropChannel(); }, 0);
             } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') queue('*');
         });
@@ -130,96 +149,119 @@
     const call = async (name, ...args) => {
         if (typeof window[name] === 'function') return await window[name](...args);
     };
+    // Separate jobs: a failed/deferred view cannot stop the other views.
+    const on = (name, topics, action) => sync.register(name, async c => {
+        if (c.has(...topics)) await action(c);
+    });
+
     if (admin) {
-        sync.register('admin data', async c => {
+        on('admin business data', ['profiles', 'pets', 'households', 'property_access',
+            'visits', 'visit_pets', 'visit_reports', 'visit_walks'], async () => {
             await refreshAdminBusinessData();
+        });
+        on('admin boarding stays', ['boarding_stays', 'visits'], async () => {
+            await loadAdminBoardingStays(true);
+        });
+        on('admin driving and financials', ['admin_route_drive_estimates', 'visits', 'visit_walks'], async c => {
+            await refreshAdminDriveEstimates(true);
             if (!c.stillCurrent()) return;
-            if (c.has('boarding_stays', 'visits')) await loadAdminBoardingStays(true);
-            if (c.has('admin_route_drive_estimates', 'visits', 'visit_walks')) {
-                await refreshAdminDriveEstimates(true);
-                await call('refreshAdminLiveFinancials');
-                await call('refreshAdminLiveLifetimeStats');
+            await call('refreshAdminLiveFinancials');
+            if (!c.stillCurrent()) return;
+            await call('refreshAdminLiveLifetimeStats');
+        });
+        on('admin messages', ['messages', 'conversations', 'profiles'], async c => {
+            await loadAdminConversations();
+            if (c.stillCurrent() && activeAdminConversationId) await loadActiveAdminMessages();
+        });
+        on('admin boarding history', ['boarding_updates', 'boarding_update_photos', 'boarding_update_pet_care'], async c => {
+            if (typeof adminBoardingEditor !== 'undefined' && adminBoardingEditor && !adminBoardingEditor.busy) {
+                await c.preserveScroll(adminBoardingEditor.dialog.querySelector('.boarding-editor-body'),
+                    () => loadAdminBoardingUpdateHistory(adminBoardingEditor));
             }
-            if (c.has('messages', 'conversations', 'profiles')) {
-                await loadAdminConversations();
-                if (activeAdminConversationId) await loadActiveAdminMessages();
+        });
+        on('admin sitting history', ['visit_updates', 'visit_update_photos', 'visit_update_pet_care'], async () => {
+            await call('refreshAdminLiveSitHistory');
+        });
+        on('admin client credit', ['client_credit_ledger'], async c => {
+            const button = document.getElementById('admin-client-credit-add');
+            const detail = document.getElementById('admin-client-household-detail');
+            const id = button?.dataset.clientId;
+            if (!id || !c.visible(detail)) return;
+            const {data, error} = await supabaseClient.rpc('get_admin_client_credit_balance', {p_client_id: id});
+            if (error) throw error;
+            if (c.stillCurrent() && button.dataset.clientId === id) {
+                const amount = document.getElementById('admin-client-household-credit');
+                if (amount) amount.textContent = Number(data || 0).toLocaleString('en-US', {style:'currency', currency:'USD'});
             }
-            if (c.has('boarding_updates', 'boarding_update_photos', 'boarding_update_pet_care')) {
-                if (typeof adminBoardingEditor !== 'undefined' && adminBoardingEditor && !adminBoardingEditor.busy) {
-                    await c.preserveScroll(adminBoardingEditor.dialog.querySelector('.boarding-editor-body'),
-                        () => loadAdminBoardingUpdateHistory(adminBoardingEditor));
-                }
-            }
-            if (c.has('visit_updates', 'visit_update_photos', 'visit_update_pet_care')) await call('refreshAdminLiveSitHistory');
-            if (c.has('client_credit_ledger')) {
-                const button = document.getElementById('admin-client-credit-add');
-                const detail = document.getElementById('admin-client-household-detail');
-                const id = button?.dataset.clientId;
-                if (id && c.visible(detail)) {
-                    const {data, error} = await supabaseClient.rpc('get_admin_client_credit_balance', {p_client_id: id});
-                    if (error) throw error;
-                    if (c.stillCurrent() && button.dataset.clientId === id) {
-                        const amount = document.getElementById('admin-client-household-credit');
-                        if (amount) amount.textContent = Number(data || 0).toLocaleString('en-US', {style:'currency',currency:'USD'});
-                    }
-                }
-            }
-            if (c.has('service_prices')) await loadAdminServicePricing();
-            if (c.has('admin_notification_preferences')) await loadAdminPushPreferences();
+        });
+        on('admin pricing', ['service_prices'], async () => {
+            if (!sync.deferForms('#admin-services-pricing-modal', 'service_prices')) await loadAdminServicePricing(true);
+        });
+        on('admin preferences', ['admin_notification_preferences'], async () => {
+            if (!sync.deferForms('#admin-push-notifications-modal', 'admin_notification_preferences')) await loadAdminPushPreferences(true);
         });
     } else if (document.getElementById('dashboard-content')) {
-        // Existing channels keep their normal setup. Their callbacks enter one
-        // serialized queue instead of rebuilding the same screen concurrently.
         scheduleClientVisitRealtimeRefresh = () => sync.queue('visits');
         scheduleClientWalkRealtimeRefresh = () => sync.queue('visit_walks');
         catchUpClientPortal = () => sync.queue('*');
         refreshClientDataForNotification = async () => { sync.queue('*'); };
-        sync.register('client data', async c => {
-            if (c.has('profiles', 'households', 'property_access')) await refreshHousehold();
-            if (!c.stillCurrent()) return;
-            if (c.has('visits', 'visit_pets', 'boarding_stays', 'visit_reports')) await refreshUpcomingVisits();
-            if (!c.stillCurrent()) return;
-            if (c.has('visit_walks', 'visits')) await refreshClientLiveWalks();
-            if (c.has('pets', 'visits', 'visit_pets', 'visit_walks', 'visit_photos', 'visit_reports', 'visit_report_pet_care')) {
-                await refreshPets();
-                if (document.getElementById('pet-gallery') && petGalleryPetId != null) {
-                    petGalleryPage = Math.min(petGalleryPage, Math.max(0,
-                        Math.ceil(getPetPhotos(petGalleryPetId).length / PET_GALLERY_PAGE_SIZE) - 1));
-                    await c.preserveScroll(document.getElementById('pet-gallery-body'), renderPetGalleryPage);
-                }
+
+        on('client household display', ['profiles', 'households', 'property_access'], async () => {
+            await refreshHousehold(); // Updates display elements, not household form inputs.
+        });
+        on('client visits', ['visits', 'visit_pets', 'boarding_stays', 'visit_reports'], async () => {
+            await refreshUpcomingVisits();
+        });
+        on('client live walks', ['visit_walks', 'visits'], async () => {
+            await refreshClientLiveWalks();
+        });
+        on('client pets', ['pets', 'visits', 'visit_pets', 'visit_walks', 'visit_photos', 'visit_reports', 'visit_report_pet_care'], async c => {
+            await refreshPets(true);
+            if (!c.stillCurrent() || sync.deferVisible('.client-report-lightbox-visible', 'visit_photos')) return;
+            if (document.getElementById('pet-gallery') && petGalleryPetId != null) {
+                petGalleryPage = Math.min(petGalleryPage, Math.max(0,
+                    Math.ceil(getPetPhotos(petGalleryPetId).length / PET_GALLERY_PAGE_SIZE) - 1));
+                await c.preserveScroll(document.getElementById('pet-gallery-body'), renderPetGalleryPage);
             }
-            if (!c.stillCurrent()) return;
-            if (c.has('client_credit_ledger', 'profiles')) await renderAccountCredit();
-            if (c.has('client_notifications')) await loadClientNotifications();
-            if (c.has('service_prices', 'profiles')) await loadMyServicePrices();
-            if (c.has('client_notification_preferences')) await loadClientNotificationPreferences();
-            if (c.has('messages', 'conversations') && clientConversation) await loadClientMessages();
-            if (c.has('boarding_stays', 'boarding_updates', 'boarding_update_photos', 'boarding_update_pet_care', 'visit_walks')) {
-                await loadClientBoardingData(true);
-                const state = clientBoardingViewer;
-                if (state && !state.busy && !state.walkBusy) {
-                    const current = clientBoardingData.stays.find(s => s.id === state.stay.id);
-                    if (current) state.stay = current;
-                    const status = state.dialog.querySelector('.client-boarding-dialog-body > p');
-                    if (status) status.textContent = state.stay.status === 'active' ? 'Boarding with us' :
-                        state.stay.status === 'completed' ? 'Boarding complete' : 'Boarding scheduled';
-                    await c.preserveScroll(state.dialog.querySelector('.client-boarding-dialog-body'), async () => {
-                        await loadClientBoardingFeed(state, true);
-                        if (c.has('visit_walks', 'boarding_stays')) await loadClientBoardingWalks(state, true);
-                    });
-                }
-            }
-            if (c.has('visit_updates', 'visit_update_photos', 'visit_update_pet_care', 'visits')) await call('refreshClientLiveSitFeed');
-            if (c.has('visit_reports', 'visit_report_pet_care', 'visit_photos', 'visit_walks', 'visits') && activeClientVisitReportId) {
-                const id = activeClientVisitReportId;
-                const button = document.querySelector(`[data-client-visit-report-open="${Number(id)}"]`);
-                if (button) await c.preserveScroll(button.closest('.csd-body'),
-                    () => toggleClientVisitReport(id, button, {refresh: true}));
-            }
-            if (c.stillCurrent()) {
-                await renderMobileHomeDashboard();
-                if (typeof saveClientFastStart === 'function') saveClientFastStart();
-            }
+        });
+        on('client account credit', ['client_credit_ledger', 'profiles'], async () => { await renderAccountCredit(); });
+        on('client notifications', ['client_notifications'], async () => { await loadClientNotifications(); });
+        on('client pricing', ['service_prices', 'profiles'], async () => { await loadMyServicePrices(); });
+        on('client preferences', ['client_notification_preferences'], async () => {
+            if (!sync.deferForms('#client-notifications-modal', 'client_notification_preferences')) await loadClientNotificationPreferences(true);
+        });
+        on('client messages', ['messages', 'conversations'], async () => {
+            if (clientConversation) await loadClientMessages(); // Message list only; keep the draft textarea.
+        });
+        on('client boarding updates', ['boarding_stays', 'boarding_updates', 'boarding_update_photos', 'boarding_update_pet_care', 'visit_walks'], async c => {
+            await loadClientBoardingData(true);
+            if (!c.stillCurrent() || sync.deferVisible('.client-report-lightbox-visible', 'boarding_updates')) return;
+            const state = clientBoardingViewer;
+            if (!state || state.busy || state.walkBusy) return;
+            const current = clientBoardingData.stays.find(s => s.id === state.stay.id);
+            if (current) state.stay = current;
+            const status = state.dialog.querySelector('.client-boarding-dialog-body > p');
+            if (status) status.textContent = state.stay.status === 'active' ? 'Boarding with us' :
+                state.stay.status === 'completed' ? 'Boarding complete' : 'Boarding scheduled';
+            await c.preserveScroll(state.dialog.querySelector('.client-boarding-dialog-body'), async () => {
+                await loadClientBoardingFeed(state, true);
+                if (c.stillCurrent() && c.has('visit_walks', 'boarding_stays')) await loadClientBoardingWalks(state, true);
+            });
+        });
+        on('client sitting updates', ['visit_updates', 'visit_update_photos', 'visit_update_pet_care', 'visits'], async () => {
+            if (!sync.deferVisible('.client-report-lightbox-visible', 'visit_updates')) await call('refreshClientLiveSitFeed');
+        });
+        on('client report viewer', ['visit_reports', 'visit_report_pet_care', 'visit_photos', 'visit_walks', 'visits'], async c => {
+            if (sync.deferVisible('.client-report-lightbox-visible, .client-cancellation-modal', 'visit_reports')) return;
+            if (!activeClientVisitReportId) return;
+            const id = activeClientVisitReportId;
+            const button = document.querySelector(`[data-client-visit-report-open="${Number(id)}"]`);
+            if (button) await c.preserveScroll(button.closest('.csd-body'),
+                () => toggleClientVisitReport(id, button, {refresh: true}));
+        });
+        sync.register('client home and cache', async c => {
+            await renderMobileHomeDashboard();
+            if (c.stillCurrent() && typeof saveClientFastStart === 'function') saveClientFastStart();
         });
     }
 })();
