@@ -1398,399 +1398,172 @@ async function fastStartAdminFromCache() {
 // ADMIN BUSINESS DATA REALTIME
 // ========================================
 
-let adminBusinessRealtimeChannel =
-    null;
-
-
-let adminBusinessRefreshTimer =
-    null;
-
-
-let adminBusinessRefreshInFlight =
-    false;
-
-
-let adminBusinessRefreshQueued =
-    false;
-
+let adminBusinessRealtimeChannel = null;
+let adminBusinessRefreshTimer = null;
+let adminBusinessRefreshInFlight = false;
+let adminBusinessRefreshQueued = false;
+let adminLastCatchUpAt = 0;
+let adminBusinessFallbackTimer = null;
 
 // ========================================
 // SCHEDULE REALTIME DATA REFRESH
 // ========================================
 
 function scheduleAdminBusinessDataRefresh() {
-
-    if (
-        adminBusinessRefreshTimer
-    ) {
-
-        window.clearTimeout(
-            adminBusinessRefreshTimer
-        );
-
-    }
-
-
-    adminBusinessRefreshTimer =
-        window.setTimeout(
-            () => {
-
-                refreshAdminBusinessData();
-
-            },
-            500
-        );
-
+    window.PawsLiveSync?.queue('visits');
 }
 
-// ========================================
-// REFRESH ADMIN BUSINESS DATA
-// ========================================
-
 async function refreshAdminBusinessData() {
-
-    if (
-        !navigator.onLine
-    ) {
-
+    if (!navigator.onLine || document.hidden || !currentUser?.id || window.PawsLiveSync?.editing()) {
         return;
-
     }
 
-
-    if (
-        adminBusinessRefreshInFlight
-    ) {
-
-        adminBusinessRefreshQueued =
-            true;
-
+    if (adminBusinessRefreshInFlight) {
+        adminBusinessRefreshQueued = true;
         return;
-
     }
 
-
-    adminBusinessRefreshInFlight =
-        true;
-
+    adminBusinessRefreshInFlight = true;
+    const userId = currentUser.id;
 
     try {
+        const { data: authData, error: authError } =
+            await supabaseClient.auth.getSession();
 
-        const [
+        if (authError) throw authError;
 
-            profilesResult,
-            petsResult,
-            visitsResult,
-            householdsResult,
-            propertyAccessResult,
-            visitPetsResult
-
-        ] =
-            await Promise.all([
-
-                supabaseClient
-                    .from(
-                        "profiles"
-                    )
-                    .select(
-                        "id, full_name, email, phone, role, profile_photo_path, pricing_tier, legacy_discount_active, legacy_discount_percent"
-                    ),
-
-                supabaseClient
-                    .from(
-                        "pets"
-                    )
-                    .select(
-                        "id, client_id, name, breed, gender, birthday, feeding_notes, care_notes, photo_path"
-                    ),
-
-                supabaseClient
-                    .from(
-                        "visits"
-                    )
-                    .select(
-                        "*"
-                    )
-                    .order(
-                        "visit_date",
-                        {
-                            ascending:
-                                true
-                        }
-                    ),
-
-                supabaseClient
-                    .from(
-                        "households"
-                    )
-                    .select(
-                        "client_id, street_address, address_line_2, city, state, zip_code, preferred_contact_method, emergency_contact_name, emergency_contact_phone, home_notes"
-                    ),
-
-                supabaseClient
-                    .from(
-                        "property_access"
-                    )
-                    .select(
-                        "client_id, gate_code, door_code, key_instructions, alarm_instructions, parking_instructions, other_access_notes"
-                    ),
-
-                supabaseClient
-                    .from(
-                        "visit_pets"
-                    )
-                    .select(
-                        "visit_id, pet_id, is_primary, additional_pet_fee"
-                    )
-
-            ]);
-
-
-        const firstError =
-            profilesResult.error ||
-            petsResult.error ||
-            visitsResult.error ||
-            householdsResult.error ||
-            propertyAccessResult.error ||
-            visitPetsResult.error;
-
-
-        if (
-            firstError
-        ) {
-
-            throw firstError;
-
+        if (authData?.session?.user?.id !== userId) {
+            return;
         }
 
+        const results = await Promise.all([
+            supabaseClient.from("profiles").select(
+                "id, full_name, email, phone, role, profile_photo_path, pricing_tier, legacy_discount_active, legacy_discount_percent"
+            ),
 
-        allProfiles =
-            profilesResult.data ||
-            [];
+            supabaseClient.from("pets").select(
+                "id, client_id, name, breed, gender, birthday, feeding_notes, care_notes, photo_path"
+            ),
 
+            supabaseClient.from("visits")
+                .select("*")
+                .order("visit_date", { ascending: true }),
 
-        allPets =
-            petsResult.data ||
-            [];
+            supabaseClient.from("households").select(
+                "client_id, street_address, address_line_2, city, state, zip_code, preferred_contact_method, emergency_contact_name, emergency_contact_phone, home_notes"
+            ),
 
+            supabaseClient.from("property_access").select(
+                "client_id, gate_code, door_code, key_instructions, alarm_instructions, parking_instructions, other_access_notes"
+            ),
 
-        allVisits =
-            visitsResult.data ||
-            [];
+            supabaseClient.from("visit_pets").select(
+                "visit_id, pet_id, is_primary, additional_pet_fee"
+            ),
 
+            supabaseClient.from("visit_reports").select(
+                "id, visit_id, created_by, notes, fed, fresh_water, pee, poop, created_at, updated_at, published_at"
+            )
+        ]);
 
-        allHouseholds =
-            householdsResult.data ||
-            [];
+        const failed = results.find(result => result.error);
 
+        if (failed) throw failed.error;
 
-        allPropertyAccess =
-            propertyAccessResult.data ||
-            [];
+        if (currentUser?.id !== userId) return;
 
+        [
+            allProfiles,
+            allPets,
+            allVisits,
+            allHouseholds,
+            allPropertyAccess,
+            allVisitPets,
+            allVisitReports
+        ] = results.map(result => result.data || []);
 
-        allVisitPets =
-            visitPetsResult.data ||
-            [];
+        const walkResult = await supabaseClient.from('visit_walks').select('*');
+        if (walkResult.error) throw walkResult.error;
+        if (currentUser?.id !== userId) return;
+        const preserved = allVisitWalks.filter(walk =>
+            (activeWalkGpsTracker && String(activeWalkGpsTracker.walkId) === String(walk.id)) ||
+            (typeof loadLocalVisitWalk === 'function' && loadLocalVisitWalk(walk.visit_id)) ||
+            (typeof loadPendingWalkFinish === 'function' && loadPendingWalkFinish(walk.id)));
+        allVisitWalks = (walkResult.data || []).filter(walk =>
+            !preserved.some(local => String(local.id) === String(walk.id)));
+        allVisitWalks.push(...preserved);
 
+        // Update the saved copy without replacing local walk data.
+        try {
+            const key = "paws-in-stride-admin-offline-data";
 
-        // ========================================
-        // REFRESH ACTIVE ADMIN SCREEN
-        // ========================================
-        //
-        // The visit popup lives in the day list, so keep it current
-        // from any screen. Skip while a visit report is open so a
-        // refresh never wipes what you're typing.
-        // ========================================
+            const saved = JSON.parse(
+                localStorage.getItem(key) || "null"
+            );
 
-        if (
-            activeAdminScreen ===
-            "schedule"
-        ) {
-            renderAdminCalendar();
+            if (saved?.owner_id === userId) {
+                Object.assign(saved, {
+                    profiles: allProfiles,
+                    pets: allPets,
+                    visits: allVisits,
+                    households: allHouseholds,
+                    propertyAccess: allPropertyAccess,
+                    visitPets: allVisitPets,
+                    visitReports: allVisitReports,
+                    saved_at: new Date().toISOString()
+                });
+
+                localStorage.setItem(key, JSON.stringify(saved));
+            }
+        } catch (error) {
+            console.warn("Admin cache refresh failed:", error);
         }
 
-        if (
-            !activeVisitReportVisitId
-        ) {
+        // Rebuilding the day list also rebuilds the visit popup.
+        // Keep an open report intact so typed notes/photos survive.
+        if (!activeVisitReportVisitId) {
+            if (activeAdminScreen === "schedule") {
+                renderAdminCalendar();
+            }
+
             renderAdminDayServices();
         }
 
-
-        if (
-            activeAdminScreen ===
-            "clients"
-        ) {
-
+        if (activeAdminScreen === "clients") {
             setupAdminClientDirectory();
-
         }
 
-
-        if (
-            activeAdminScreen ===
-            "home"
-        ) {
-
+        if (activeAdminScreen === "home") {
             renderAdminTodaySummary();
-
             renderAdminNeedsAttention();
-
             renderAdminBestVisitRoute();
-
             renderAdminFinancialSnapshot();
-
         }
+    } catch (error) {
+        console.error("Admin live refresh failed:", error);
+        throw error;
+    } finally {
+        adminBusinessRefreshInFlight = false;
 
-
-        console.log(
-            "Admin business data refreshed from Realtime."
-        );
-
-    }
-    catch (
-        error
-    ) {
-
-        console.error(
-            "Admin realtime business data refresh failed:",
-            error
-        );
-
-    }
-    finally {
-
-        adminBusinessRefreshInFlight =
-            false;
-
-
-        if (
-            adminBusinessRefreshQueued
-        ) {
-
-            adminBusinessRefreshQueued =
-                false;
-
-
+        if (adminBusinessRefreshQueued) {
+            adminBusinessRefreshQueued = false;
             scheduleAdminBusinessDataRefresh();
-
         }
-
     }
-
 }
 
 // ========================================
-// CATCH UP WHEN YOU COME BACK TO THE APP
+// START / RESUME ADMIN LIVE DATA
 // ========================================
-//
-// Phones pause the live connection while the app is in the
-// background, and changes made during that time (like an
-// employee finishing a visit) are never re-sent. Reload the
-// latest data whenever the app comes back to the front or
-// the internet comes back.
-// ========================================
-
-let adminLastCatchUpAt =
-    0;
 
 function catchUpAdminBusinessData() {
-    if (
-        document.hidden ||
-        !currentUser ||
-        Date.now() - adminLastCatchUpAt < 10000
-    ) {
-        return;
-    }
-
-    adminLastCatchUpAt =
-        Date.now();
-
-    void refreshAdminBusinessData();
+    window.PawsLiveSync?.queue('*');
 }
-
-document.addEventListener(
-    "visibilitychange",
-    catchUpAdminBusinessData
-);
-
-window.addEventListener(
-    "online",
-    catchUpAdminBusinessData
-);
-
-// ========================================
-// SUBSCRIBE TO ADMIN BUSINESS DATA
-// ========================================
 
 function setupAdminBusinessRealtime() {
-
-    if (
-        adminBusinessRealtimeChannel
-    ) {
-
-        return;
-
-    }
-
-
-    const realtimeTables = [
-
-        "profiles",
-        "pets",
-        "visits",
-        "households",
-        "property_access",
-        "visit_pets"
-
-    ];
-
-
-    const channel =
-        supabaseClient.channel(
-            "admin-business-data"
-        );
-
-
-    realtimeTables.forEach(
-        tableName => {
-
-            channel.on(
-                "postgres_changes",
-                {
-                    event:
-                        "*",
-
-                    schema:
-                        "public",
-
-                    table:
-                        tableName
-                },
-                () => {
-
-                    scheduleAdminBusinessDataRefresh();
-
-                }
-            );
-
-        }
-    );
-
-
-    adminBusinessRealtimeChannel =
-        channel.subscribe(
-            status => {
-
-                console.log(
-                    "Admin business Realtime:",
-                    status
-                );
-
-            }
-        );
-
+    window.PawsLiveSync?.queue('*');
 }
+
 
 // ========================================
 // ADMIN PROFILE
