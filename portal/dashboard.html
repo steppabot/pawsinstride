@@ -7,7 +7,8 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+
     >
 
     <title>
@@ -72,6 +73,61 @@
             } catch (e) { /* nothing saved */ }
         })();
     </script>
+
+
+    <!-- ========================================
+         DELETE ACCOUNT
+    ======================================== -->
+    <style>
+        .pis-delete-account-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .pis-delete-account-copy p { margin: 6px 0 0; color: #667784; font-size: 14px; line-height: 1.45; }
+        .pis-delete-account-button {
+            flex: 0 0 auto; min-height: 42px; padding: 0 18px; border: 1.5px solid #d93838; border-radius: 10px;
+            background: #fff; color: #c62828; font: inherit; font-weight: 700; cursor: pointer;
+        }
+        .pis-delete-account-button:hover, .pis-delete-account-button:focus-visible { background: #fdecec; }
+
+        .pis-delete-modal { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .pis-delete-modal[hidden] { display: none; }
+        .pis-delete-modal-backdrop { position: absolute; inset: 0; background: rgba(20, 30, 40, .55); }
+        .pis-delete-modal-card {
+            position: relative; width: 100%; max-width: 440px; max-height: calc(100dvh - 32px); overflow-y: auto;
+            padding: 26px 22px 22px; border-radius: 18px; background: #fff; color: #243746;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .25); box-sizing: border-box;
+        }
+        .pis-delete-modal-x {
+            position: absolute; top: 10px; right: 12px; width: 36px; height: 36px; border: 0; border-radius: 50%;
+            background: transparent; color: #667784; font-size: 26px; line-height: 1; cursor: pointer;
+        }
+        .pis-delete-modal-icon {
+            width: 46px; height: 46px; margin: 0 auto 12px; border-radius: 50%; background: #fdecec; color: #c62828;
+            display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800;
+        }
+        .pis-delete-modal-card h3 { margin: 0; text-align: center; font-size: 20px; }
+        .pis-delete-modal-lead { margin: 6px 0 14px; text-align: center; color: #c62828; font-weight: 700; }
+        .pis-delete-modal-list { margin: 0 0 16px; padding-left: 20px; color: #46617d; font-size: 14px; line-height: 1.5; }
+        .pis-delete-modal-list li + li { margin-top: 6px; }
+        .pis-delete-modal-blocked {
+            margin: 0 0 14px; padding: 12px 14px; border-radius: 10px; background: #fff6e5; border: 1px solid #f1d29a;
+            color: #7a4a00; font-size: 14px; line-height: 1.45;
+        }
+        .pis-delete-modal-label { display: block; margin-bottom: 6px; font-size: 14px; color: #243746; }
+        .pis-delete-modal-input {
+            width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid #c9d9ea; border-radius: 10px;
+            font: inherit; font-size: 16px; letter-spacing: .08em; box-sizing: border-box;
+        }
+        .pis-delete-modal-input:focus { outline: 2px solid #d93838; outline-offset: 1px; border-color: #d93838; }
+        .pis-delete-modal-message { min-height: 1em; margin: 10px 0 0; font-size: 14px; color: #c62828; }
+        .pis-delete-modal-message.is-success { color: #2e6b3f; font-weight: 700; }
+        .pis-delete-modal-actions { display: flex; gap: 10px; margin-top: 14px; }
+        .pis-delete-modal-cancel, .pis-delete-modal-final {
+            flex: 1 1 0; min-height: 46px; border-radius: 10px; font: inherit; font-weight: 700; cursor: pointer;
+        }
+        .pis-delete-modal-cancel { border: 1px solid #c9d9ea; background: #fff; color: #243746; }
+        .pis-delete-modal-final { border: 0; background: #d93838; color: #fff; }
+        .pis-delete-modal-final:disabled { background: #efb3b3; cursor: not-allowed; }
+        body.pis-delete-modal-open { overflow: hidden; }
+    </style>
 
     <!-- ========================================
          INSTALLED PWA — EDGE-TO-EDGE VIEWPORT
@@ -359,12 +415,12 @@
         class="mobile-portal-intro-video"
         muted
         playsinline
-        preload="auto"
+        preload="none"
         poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
     >
 
         <source
-            src="/portal/assets/paws-in-stride-intro.mp4"
+            data-src="/portal/assets/paws-in-stride-intro.mp4"
             type="video/mp4"
         >
 
@@ -412,7 +468,7 @@
         }
     
     
-        source.src =
+        source.dataset.src =
             isHalloweenSeason
                 ? "/portal/assets/paws-in-stride-intro-halloween.mp4"
                 : "/portal/assets/paws-in-stride-intro.mp4";
@@ -430,7 +486,7 @@
         }
     
     
-        video.load();
+        // Source is attached only if this intro will actually play.
     
     })();
     
@@ -444,6 +500,21 @@
     // used in the last few hours. Otherwise it goes straight
     // to the dashboard.
     (function () {
+        
+        function releaseIntro(element) {
+            if (!element) return;
+            var video = element.querySelector("video");
+            if (video) {
+                video.pause();
+                video.removeAttribute("src");
+                video.querySelectorAll("source").forEach(function (source) {
+                    source.removeAttribute("src");
+                });
+                video.load();
+            }
+            element.remove();
+        }
+
         var KEY = "pis-portal-last-active";
         var SKIP_IF_USED_WITHIN_MS = 3 * 60 * 60 * 1000;
         var intro = document.getElementById("mobile-portal-intro");
@@ -462,7 +533,7 @@
 
         if (intro) {
             if (recentlyUsed || (!isMobile && !isInstalled) || reducedMotion) {
-                intro.remove();
+                releaseIntro(intro);
             } else {
                 // Show the orange intro screen right away (no blank flash).
                 intro.classList.add("is-active");
@@ -470,7 +541,7 @@
                 // Never leave the intro stuck on screen.
                 setTimeout(function () {
                     var stuck = document.getElementById("mobile-portal-intro");
-                    if (stuck) stuck.remove();
+                    releaseIntro(stuck);
                     document.body.classList.remove("portal-intro-open");
                 }, 20000);
             }
@@ -2757,6 +2828,37 @@
                                 </div>
 
                             </div>
+
+
+                            <!-- ========================================
+                                 DELETE ACCOUNT
+                                 ======================================== -->
+
+                            <div class="household-detail-card household-detail-card-full pis-delete-account-card">
+
+                                <div class="pis-delete-account-copy">
+
+                                    <span class="household-detail-label">
+                                        Delete Account
+                                    </span>
+
+                                    <p>
+                                        Permanently delete your Paws in Stride account and personal information.
+                                    </p>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    id="delete-account-open"
+                                    class="pis-delete-account-button"
+                                    aria-haspopup="dialog"
+                                    aria-controls="delete-account-modal"
+                                >
+                                    Delete Account
+                                </button>
+
+                            </div>
                             
                                                     </div>
                             
@@ -3945,6 +4047,96 @@
             </label>
 
         </section>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================
+     DELETE ACCOUNT CONFIRMATION
+     ======================================== -->
+
+<div
+    id="delete-account-modal"
+    class="pis-delete-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-account-title"
+    hidden
+>
+
+    <div class="pis-delete-modal-backdrop" data-delete-account-close></div>
+
+    <div class="pis-delete-modal-card">
+
+        <button
+            type="button"
+            class="pis-delete-modal-x"
+            aria-label="Close"
+            data-delete-account-close
+        >
+            ×
+        </button>
+
+        <div class="pis-delete-modal-icon" aria-hidden="true">!</div>
+
+        <h3 id="delete-account-title">
+            Delete your account?
+        </h3>
+
+        <p class="pis-delete-modal-lead">
+            This is permanent and can't be undone.
+        </p>
+
+        <ul class="pis-delete-modal-list">
+            <li>Your name, email, phone, address, home access codes, pet details, photos and messages are erased.</li>
+            <li>You'll be signed out and won't be able to log in again with this account.</li>
+            <li>Past visits and payments are kept without your personal information, for our business records.</li>
+            <li id="delete-account-credit-line" hidden></li>
+        </ul>
+
+        <div id="delete-account-blocked" class="pis-delete-modal-blocked" hidden></div>
+
+        <div id="delete-account-confirm-area">
+
+            <label for="delete-account-confirm-input" class="pis-delete-modal-label">
+                Type <strong>DELETE</strong> to confirm
+            </label>
+
+            <input
+                type="text"
+                id="delete-account-confirm-input"
+                class="pis-delete-modal-input"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+            >
+
+        </div>
+
+        <p id="delete-account-message" class="pis-delete-modal-message" role="status" aria-live="polite"></p>
+
+        <div class="pis-delete-modal-actions">
+
+            <button
+                type="button"
+                class="pis-delete-modal-cancel"
+                data-delete-account-close
+            >
+                Cancel
+            </button>
+
+            <button
+                type="button"
+                id="delete-account-final"
+                class="pis-delete-modal-final"
+                disabled
+            >
+                Permanently Delete Account
+            </button>
+
+        </div>
 
     </div>
 
