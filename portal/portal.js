@@ -14977,6 +14977,7 @@ function resetBookingForm() {
 
 }
 
+
 // ========================================
 // REFRESH UPCOMING
 // ========================================
@@ -15455,6 +15456,7 @@ document.addEventListener("visibilitychange", () => {
     if (!document.hidden) refreshVisibleClientBoarding();
 });
 window.setInterval(refreshVisibleClientBoarding, 45000);
+
 
 // ========================================
 // UPCOMING CALENDAR
@@ -18388,6 +18390,7 @@ async function toggleClientVisitReport(
 
 }
 
+
 // ========================================
 // CLOSE OPEN CLIENT VISIT REPORT
 // ========================================
@@ -20238,6 +20241,14 @@ function startMobilePortalIntro() {
     const video =
         document.getElementById("mobile-portal-intro-video");
 
+    function releaseIntroVideo() {
+        if (!video) return;
+        video.pause();
+        video.removeAttribute("src");
+        video.querySelectorAll("source").forEach(source => source.removeAttribute("src"));
+        video.load();
+    }
+
     const inactiveIntro = {
         dashboardFinished() {}
     };
@@ -20259,6 +20270,7 @@ function startMobilePortalIntro() {
         ).matches;
 
     if ((!isMobile && !isInstalled) || reducedMotion) {
+        releaseIntroVideo();
         intro.remove();
         return inactiveIntro;
     }
@@ -20296,7 +20308,7 @@ function startMobilePortalIntro() {
 
         window.setTimeout(() => {
 
-            video.pause();
+            releaseIntroVideo();
             intro.remove();
 
         }, 400);
@@ -20367,6 +20379,12 @@ function startMobilePortalIntro() {
     );
 
     try {
+
+        const source = video.querySelector("source[data-src]");
+        if (source && !source.hasAttribute("src")) {
+            source.src = source.dataset.src;
+            video.load();
+        }
 
         const playback =
             video.play();
@@ -21045,106 +21063,92 @@ function hidePawsSplash() {
 // LOAD
 // ========================================
 
-(async function initializeClientPortal() {
+async function initializeClientPortal() {
 
     const portalIntro =
         startMobilePortalIntro();
 
-    // Never keep the splash up for more than 4 seconds.
-    window.setTimeout(hidePawsSplash, 4000);
+    window.setTimeout(
+        hidePawsSplash,
+        4000
+    );
 
-    // The intro video is playing: show it now.
-    if (document.getElementById("mobile-portal-intro")) {
+    if (
+        document.getElementById(
+            "mobile-portal-intro"
+        )
+    ) {
         hidePawsSplash();
     }
 
+    let dashboardReady = false;
 
-let dashboardReady =
-        false;
-
-    // Show this phone's saved copy right away when possible.
     const fastStarted =
         await fastStartClientFromCache();
 
-    // Instant start not possible: show the normal loading screen.
     if (!fastStarted) {
-        document.documentElement.classList.remove("pis-instant-start");
+        document.documentElement.classList.remove(
+            "pis-instant-start"
+        );
     }
 
     if (fastStarted) {
         dashboardReady = true;
+
         portalIntro.dashboardFinished(true);
+
         hidePawsSplash();
-        // Connect messages now so an open conversation comes back quickly.
-        initializeClientMessaging().catch(error =>
-            console.error("Client messaging initialization failed:", error)
-        );
+
+        initializeClientMessaging().catch(error => {
+            console.error(
+                "Client messaging initialization failed:",
+                error
+            );
+        });
+
         void restoreClientView();
     }
 
-
     try {
-
-await loadDashboard({
+        await loadDashboard({
             background: fastStarted
         });
-
 
         const dashboardContent =
             document.getElementById(
                 "dashboard-content"
             );
 
-
-dashboardReady =
+        dashboardReady =
             fastStarted ||
-            dashboardContent
-                ?.style
-                .display ===
-            "block";
-
+            dashboardContent?.style.display === "block";
 
         // ========================================
         // RESTORE CHECKOUT EDIT DRAFT
         // ========================================
 
-        if (
-            dashboardReady
-        ) {
-
+        if (dashboardReady) {
             await restoreSavedBookingDraft();
-
         }
 
-    }
-    catch (
-        error
-    ) {
-
+    } catch (error) {
         console.error(
             "Client dashboard initialization failed:",
             error
         );
-
 
         const loading =
             document.getElementById(
                 "loading"
             );
 
-
-if (loading && !fastStarted) {
-
+        if (loading && !fastStarted) {
             loading.textContent =
                 "We couldn't load your portal. Please refresh to try again.";
-
         }
 
-    }
-finally {
-
+    } finally {
         if (!fastStarted) {
-
             portalIntro.dashboardFinished(
                 dashboardReady
             );
@@ -21154,75 +21158,91 @@ finally {
             if (dashboardReady) {
                 void restoreClientView();
             }
-
         }
-
     }
-
 
     if (
         dashboardReady &&
         currentUser &&
         currentProfile &&
-        String(
-            currentProfile.role ||
-            ""
-        )
+        String(currentProfile.role || "")
             .trim()
-            .toLowerCase() !==
-            "admin"
+            .toLowerCase() !== "admin"
     ) {
-    
+
         // ========================================
         // LOAD CURRENT LIVE WALK STATE
         // ========================================
-    
+
         await refreshClientLiveWalks();
-    
+
         // ========================================
         // CLIENT REALTIME VISITS + WALKS
         // ========================================
-        
+
         subscribeToClientVisitRealtime();
-        
+
         subscribeToClientWalkRealtime();
-        
-        
+
         // ========================================
         // START LIVE WALK TIMER
         // ========================================
-        
+
         startClientLiveWalkTimer();
-        
-        
+
         // ========================================
         // RENDER LIVE WALK STATE
         // ========================================
-        
+
         renderSelectedUpcomingServices();
-        
+
         await renderMobileHomeDashboard();
-    
-    
+
         try {
-    
             await initializeClientMessaging();
-    
-        }
-        catch (
-            error
-        ) {
-    
+
+        } catch (error) {
             console.error(
                 "Client messaging initialization failed:",
                 error
             );
-    
         }
-    
+    }
+}
+
+// ========================================
+// START AFTER CLIENT PATCHES ARE READY
+// ========================================
+
+let clientPortalStartQueued = false;
+
+function queueClientPortalStart() {
+
+    if (clientPortalStartQueued) {
+        return;
     }
 
-})();
+    clientPortalStartQueued = true;
+
+    window.setTimeout(() => {
+        initializeClientPortal().catch(error => {
+            console.error(
+                "Client portal startup failed:",
+                error
+            );
+        });
+    }, 0);
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        queueClientPortalStart,
+        { once: true }
+    );
+} else {
+    queueClientPortalStart();
+}
 
 // ========================================
 // LOGOUT
@@ -28857,74 +28877,78 @@ function getVisitPhotoThumbPath(
 // ========================================
 // SIGNED THUMBNAIL URL
 // ========================================
-//
-// Returns null when no thumbnail exists, so
-// the caller can fall back to the full photo.
-// ========================================
 
-async function getVisitPhotoThumbUrl(
-    storagePath
-) {
+async function getVisitPhotoThumbUrl(storagePath) {
 
-    if (
-        !storagePath
-    ) {
-
+    if (!storagePath) {
         return null;
-
     }
-
 
     try {
 
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .storage
-                .from(
-                    VISIT_MEDIA_BUCKET
-                )
+        const { data, error } =
+            await supabaseClient.storage
+                .from(VISIT_MEDIA_BUCKET)
                 .createSignedUrl(
-                    getVisitPhotoThumbPath(
-                        storagePath
-                    ),
+                    getVisitPhotoThumbPath(storagePath),
                     3600
                 );
 
-
-        if (
-            error ||
-            !data?.signedUrl
-        ) {
-
+        if (error || !data?.signedUrl) {
             return null;
-
         }
 
+        const thumbnailLoads = await new Promise(resolve => {
 
-        return data.signedUrl;
+            const image = new Image();
+            let settled = false;
 
+            const finish = success => {
 
-    } catch (
-        error
-    ) {
+                if (settled) {
+                    return;
+                }
 
+                settled = true;
+
+                clearTimeout(timeout);
+
+                image.onload = null;
+                image.onerror = null;
+
+                resolve(success);
+            };
+
+            const timeout = setTimeout(
+                () => finish(false),
+                5000
+            );
+
+            image.onload = () => finish(
+                image.naturalWidth > 0
+            );
+
+            image.onerror = () => finish(false);
+
+            image.src = data.signedUrl;
+        });
+
+        // Returning null lets the existing caller
+        // request the original photo instead.
+        return thumbnailLoads
+            ? data.signedUrl
+            : null;
+
+    } catch (error) {
 
         console.warn(
             "Visit photo thumbnail URL error:",
             error
         );
 
-
         return null;
-
     }
-
 }
-
 
 // ========================================
 // ADD THUMBNAIL URLS TO PHOTOS
@@ -32986,4 +33010,187 @@ if (!document.getElementById("dashboard-content")) {
     if (existingContainer) {
         compactCards(existingContainer, selectedVisits());
     }
+})();
+
+// ========================================
+// DELETE ACCOUNT
+// ========================================
+//
+// "Delete Account" (under Account Security) opens a confirmation.
+// The client must type DELETE before the final button unlocks.
+// Upcoming visits must be cancelled first; remaining credit is
+// forfeited. The server (delete_my_account) erases personal info,
+// keeps anonymized visit/payment history, and locks the login.
+// ========================================
+
+(function setupDeleteAccount() {
+
+    const openButton = document.getElementById("delete-account-open");
+    const modal = document.getElementById("delete-account-modal");
+    if (!openButton || !modal) return;
+
+    const input = document.getElementById("delete-account-confirm-input");
+    const finalButton = document.getElementById("delete-account-final");
+    const message = document.getElementById("delete-account-message");
+    const blocked = document.getElementById("delete-account-blocked");
+    const confirmArea = document.getElementById("delete-account-confirm-area");
+    const creditLine = document.getElementById("delete-account-credit-line");
+
+    let busy = false;
+    let isBlocked = false;
+
+    function upcomingVisitCount() {
+        const today = getLocalDateString();
+        return (Array.isArray(currentVisits) ? currentVisits : []).filter(visit => {
+            const status = String(visit.status || "").trim().toLowerCase();
+            return String(visit.visit_date || "") >= today &&
+                !visit.cancelled_at &&
+                !visit.completed_at &&
+                status !== "cancelled" &&
+                status !== "completed";
+        }).length;
+    }
+
+    function updateFinalButton() {
+        finalButton.disabled =
+            busy ||
+            isBlocked ||
+            String(input.value || "").trim().toUpperCase() !== "DELETE";
+    }
+
+    function setMessage(text, success = false) {
+        message.textContent = text || "";
+        message.classList.toggle("is-success", Boolean(success));
+    }
+
+    async function showCredit() {
+        creditLine.hidden = true;
+        try {
+            const { data, error } = await supabaseClient.rpc("get_my_credit_balance");
+            if (error) throw error;
+            const balance = Number(data || 0);
+            if (balance > 0 && !modal.hidden) {
+                creditLine.textContent =
+                    `Your remaining account credit of ${balance.toLocaleString("en-US", { style: "currency", currency: "USD" })} will be forfeited.`;
+                creditLine.hidden = false;
+            }
+        } catch (error) {
+            console.error("Delete account: credit check failed", error);
+        }
+    }
+
+    function openModal() {
+        busy = false;
+        input.value = "";
+        setMessage("");
+
+        const upcoming = upcomingVisitCount();
+        isBlocked = upcoming > 0;
+        blocked.hidden = !isBlocked;
+        confirmArea.hidden = isBlocked;
+        if (isBlocked) {
+            blocked.textContent =
+                `You have ${upcoming} upcoming visit${upcoming === 1 ? "" : "s"}. ` +
+                "Please cancel them first (Services → your visit → Cancel), then come back to delete your account.";
+        }
+
+        modal.hidden = false;
+        document.body.classList.add("pis-delete-modal-open");
+        updateFinalButton();
+        void showCredit();
+
+        window.setTimeout(() => {
+            if (!isBlocked) input.focus();
+            else modal.querySelector(".pis-delete-modal-cancel")?.focus();
+        }, 50);
+    }
+
+    function closeModal() {
+        if (busy) return;
+        modal.hidden = true;
+        document.body.classList.remove("pis-delete-modal-open");
+        input.value = "";
+        setMessage("");
+        openButton.focus();
+    }
+
+    // Photo files are removed through Storage (best effort) before the
+    // account is erased; the database rows are cleared by the server.
+    async function removeOwnPhotos() {
+        try {
+            const profilePath = currentProfile?.profile_photo_path;
+            if (profilePath) {
+                await supabaseClient.storage.from(PROFILE_PHOTO_BUCKET).remove([profilePath]);
+            }
+            const petPaths = (Array.isArray(currentPets) ? currentPets : [])
+                .map(pet => pet.photo_path)
+                .filter(Boolean);
+            if (petPaths.length) {
+                await supabaseClient.storage.from(PET_PHOTO_BUCKET).remove(petPaths);
+            }
+        } catch (error) {
+            console.warn("Delete account: some photos could not be removed", error);
+        }
+    }
+
+    async function deleteAccount() {
+        if (finalButton.disabled || busy) return;
+
+        if (upcomingVisitCount() > 0) {
+            openModal();
+            return;
+        }
+
+        busy = true;
+        updateFinalButton();
+        input.disabled = true;
+        modal.querySelectorAll("[data-delete-account-close]").forEach(el => { el.disabled = true; });
+        setMessage("Deleting your account…");
+
+        try {
+            if (!navigator.onLine) throw new Error("You're offline. Connect to the internet and try again.");
+
+            await removeOwnPhotos();
+
+            const { error } = await supabaseClient.rpc("delete_my_account");
+            if (error) throw error;
+
+            setMessage("Your account has been deleted.", true);
+
+            // Clear everything this phone saved for the account, then sign out here.
+            try { clearClientFastStart(); } catch (e) { /* ignore */ }
+            try {
+                localStorage.removeItem("pis-native-push-token");
+                localStorage.removeItem("pis-portal-last-active");
+            } catch (e) { /* ignore */ }
+            try { await supabaseClient.auth.signOut({ scope: "local" }); } catch (e) { /* already signed out */ }
+
+            window.setTimeout(() => {
+                window.location.replace("./login.html");
+            }, 1600);
+
+        } catch (error) {
+            console.error("Delete account error:", error);
+            busy = false;
+            input.disabled = false;
+            modal.querySelectorAll("[data-delete-account-close]").forEach(el => { el.disabled = false; });
+            setMessage(error?.message || "Your account could not be deleted. Please try again.");
+            updateFinalButton();
+        }
+    }
+
+    openButton.addEventListener("click", openModal);
+    input.addEventListener("input", updateFinalButton);
+    input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            void deleteAccount();
+        }
+    });
+    finalButton.addEventListener("click", () => { void deleteAccount(); });
+    modal.querySelectorAll("[data-delete-account-close]").forEach(el => el.addEventListener("click", closeModal));
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !modal.hidden) closeModal();
+    });
+
 })();
