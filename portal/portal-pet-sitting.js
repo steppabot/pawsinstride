@@ -180,16 +180,18 @@
         return '<p class="client-sit-updates-hint">Photos and care updates will appear here during the sit.</p>';
     };
 
-    async function loadFeed(state) {
+    async function loadFeed(state, silent = false) {
         const feed = state.dialog.querySelector('[data-sit-feed]');
         const message = state.dialog.querySelector('[data-sit-feed-message]');
-        message.textContent = 'Loading updates…';
+        if (!silent) message.textContent = 'Loading updates…';
         try {
             const { data, error } = await supabaseClient.from('visit_updates')
                 .select('id, notes, published_at, visit_update_photos(storage_path, caption, sort_order), visit_update_pet_care(pet_id, fed, fresh_water, pee, poop)')
                 .eq('visit_id', state.visitId).not('published_at', 'is', null)
                 .order('published_at', { ascending: false }).order('id', { ascending: false });
             if (error) throw error;
+            const signature = JSON.stringify(data || []);
+            if (silent && state.liveSignature === signature) return;
             const cards = await Promise.all((data || []).map(async row => {
                 const photos = await Promise.all((row.visit_update_photos || []).sort((a, b) => a.sort_order - b.sort_order).map(async photo => {
                     const r = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET).createSignedUrl(photo.storage_path, 3600);
@@ -212,12 +214,31 @@
             }));
             if (viewer !== state) return;
             feed.innerHTML = cards.join('');
+            state.liveSignature = signature;
             message.textContent = cards.length ? 'Tap a photo to view it full size.' : 'Your sitter will share photos and updates here during the sit.';
         } catch (error) {
             console.error('Sit updates error:', error);
             message.textContent = 'Updates could not be loaded. Please try again.';
         }
     }
+
+    window.refreshClientLiveSitFeed = async function () {
+        const state = viewer;
+        if (!state || state.liveBusy) return;
+        state.liveBusy = true;
+        const body = state.dialog.querySelector('.client-boarding-dialog-body');
+        const top = body?.scrollTop;
+        try {
+            await loadFeed(state, true);
+            const visit = findVisit(state.visitId);
+            const status = body?.querySelector(':scope > p');
+            if (status && visit) status.textContent = visit.checked_in_at && !visit.completed_at
+                ? 'Your sitter is with your pet now' : 'Pet sitting updates';
+        } finally {
+            state.liveBusy = false;
+            if (body?.isConnected) body.scrollTop = top;
+        }
+    };
 
     async function openViewer(visitId) {
         visitId = Number(visitId);
