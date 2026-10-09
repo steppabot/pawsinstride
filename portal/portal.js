@@ -33131,25 +33131,6 @@ if (!document.getElementById("dashboard-content")) {
         openButton.focus();
     }
 
-    // Photo files are removed through Storage (best effort) before the
-    // account is erased; the database rows are cleared by the server.
-    async function removeOwnPhotos() {
-        try {
-            const profilePath = currentProfile?.profile_photo_path;
-            if (profilePath) {
-                await supabaseClient.storage.from(PROFILE_PHOTO_BUCKET).remove([profilePath]);
-            }
-            const petPaths = (Array.isArray(currentPets) ? currentPets : [])
-                .map(pet => pet.photo_path)
-                .filter(Boolean);
-            if (petPaths.length) {
-                await supabaseClient.storage.from(PET_PHOTO_BUCKET).remove(petPaths);
-            }
-        } catch (error) {
-            console.warn("Delete account: some photos could not be removed", error);
-        }
-    }
-
     async function deleteAccount() {
         if (finalButton.disabled || busy) return;
 
@@ -33167,24 +33148,39 @@ if (!document.getElementById("dashboard-content")) {
         try {
             if (!navigator.onLine) throw new Error("You're offline. Connect to the internet and try again.");
 
-            await removeOwnPhotos();
-
-            const { error } = await supabaseClient.rpc("delete_my_account");
+            // The server commits the account change and photo cleanup jobs
+            // together. Never delete files from the browser before this call.
+            const { data, error } = await supabaseClient.rpc("delete_my_account");
             if (error) throw error;
+            if (data?.deleted !== true) {
+                throw new Error("Deletion could not be confirmed. Please try again.");
+            }
 
             setMessage("Your account has been deleted.", true);
 
-            // Clear everything this phone saved for the account, then sign out here.
-            try { clearClientFastStart(); } catch (e) { /* ignore */ }
+            // Stop this page treating the erased account as an active client.
+            currentUser = null;
+            currentProfile = null;
+            currentPets = [];
+            currentVisits = [];
             try {
-                localStorage.removeItem("pis-native-push-token");
-                localStorage.removeItem("pis-portal-last-active");
-            } catch (e) { /* ignore */ }
-            try { await supabaseClient.auth.signOut({ scope: "local" }); } catch (e) { /* already signed out */ }
+                const signedOut = await supabaseClient.auth.signOut({ scope: "local" });
+                if (signedOut.error) throw signedOut.error;
+            }
+            catch (e) { console.warn("Local sign-out could not be confirmed."); }
 
-            window.setTimeout(() => {
-                window.location.replace("./login.html");
-            }, 1600);
+            try { clearClientFastStart(); } catch (e) { /* unavailable storage */ }
+            const keys = [
+                "pis-native-push-token", "pis-portal-last-active",
+                "paws-in-stride-booking-draft", "pis-client-last-view",
+                "sb-xyhndwopvlmnxjkthtkl-auth-token"
+            ];
+            for (const key of keys) {
+                try { localStorage.removeItem(key); } catch (e) { /* unavailable storage */ }
+                try { sessionStorage.removeItem(key); } catch (e) { /* unavailable storage */ }
+            }
+            // Cleanup continues on the server after this phone leaves.
+            window.location.replace("./login.html");
 
         } catch (error) {
             console.error("Delete account error:", error);
