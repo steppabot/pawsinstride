@@ -249,5 +249,10 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 
+    window.refreshAdminLiveLifetimeStats = async function () {
+        driveLoadedAt = 0;
+        const more = document.getElementById('admin-screen-more');
+        if (more && !more.hidden) { render(); await loadDrive(true); }
+    };
     window.refreshAdminLifetimeStats = refresh;
 })();
