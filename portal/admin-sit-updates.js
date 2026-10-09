@@ -122,15 +122,17 @@
         if (state.draft.locked) msg(state, 'An earlier send needs to be retried. Its content is kept unchanged so retrying cannot create a second copy.');
     }
 
-    async function loadHistory(state) {
+    async function loadHistory(state, silent = false) {
         const mount = state.dialog.querySelector('[data-boarding-history]');
-        mount.textContent = 'Loading updates…';
+        if (!silent) mount.textContent = 'Loading updates…';
         try {
             const { data, error } = await supabaseClient.from('visit_updates')
                 .select('id, notes, published_at, visit_update_photos(id, storage_path, sort_order), visit_update_pet_care(pet_id, fed, fresh_water, pee, poop)')
                 .eq('visit_id', state.visit.id).not('published_at', 'is', null)
                 .order('published_at', { ascending: false });
             if (error) throw error;
+            const signature = JSON.stringify(data || []);
+            if (silent && state.liveSignature === signature) return;
             const rows = await Promise.all((data || []).map(async row => ({
                 ...row,
                 photos: await Promise.all((row.visit_update_photos || []).sort((a, b) => a.sort_order - b.sort_order).map(async photo => {
@@ -139,6 +141,7 @@
                 }))
             })));
             if (editor !== state) return;
+            state.liveSignature = signature;
             mount.innerHTML = rows.map(row => `<article class="boarding-saved-update">
                 <strong>${esc(stamp(row.published_at))}</strong>
                 ${row.notes ? `<p class="boarding-update-note">${esc(row.notes)}</p>` : ''}
@@ -155,6 +158,14 @@
             if (editor === state) mount.textContent = 'Updates could not be loaded. Close and reopen this window to retry.';
         }
     }
+
+    window.refreshAdminLiveSitHistory = async function () {
+        const state = editor;
+        if (!state || state.busy || state.liveBusy) return;
+        state.liveBusy = true;
+        try { await loadHistory(state, true); }
+        finally { state.liveBusy = false; }
+    };
 
     async function close(state) {
         if (state.busy) return;
