@@ -371,5 +371,15 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 
+    window.refreshAdminLiveFinancials = async function () {
+        if (driveState === 'loading') return;
+        driveKey = ''; // Invalidate even when the panel is closed.
+        if (!document.getElementById('pfin-modal')) return;
+        const body = document.querySelector('.pfin-body');
+        const top = body?.scrollTop;
+        const s = compute();
+        await loadDrive(s.yStart, s.mEnd);
+        if (body?.isConnected) body.scrollTop = top;
+    };
     window.openAdminFullFinancials = open;
 })();
