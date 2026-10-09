@@ -9416,13 +9416,10 @@ async function reopenVisit(
 // ========================================
 
 function replaceAdminVisit(updatedVisit) {
-    const previous = allVisits.find(visit => String(visit.id) === String(updatedVisit.id));
-    allVisits = allVisits.map(visit => String(visit.id) === String(updatedVisit.id) ? updatedVisit : visit);
-    if (!previous || previous.status !== updatedVisit.status ||
-        previous.checked_in_at !== updatedVisit.checked_in_at ||
-        previous.completed_at !== updatedVisit.completed_at) {
-        adminBestRoutePlan = null;
-    }
+    allVisits = allVisits.map(visit =>
+        String(visit.id) === String(updatedVisit.id) ? updatedVisit : visit
+    );
+    syncAdminSavedRoute();
     void refreshAdminDriveEstimates(true);
     if (activeAdminScreen === 'home') {
         renderAdminTodaySummary();
@@ -19540,6 +19537,141 @@ let adminBestRouteInfoWindows =
     new Map();
 
 // ========================================
+// SAVED DAILY ROUTE
+// ========================================
+
+let adminSavedRoute = null;
+let adminSavedRouteKey = null;
+
+function getAdminSavedRouteKey() {
+    return currentUser?.id
+        ? `pis-admin-route-v1:${currentUser.id}:${getLocalDateString()}`
+        : null;
+}
+
+function getAdminRouteVisitFingerprint(visit) {
+    return JSON.stringify([
+        visit.visit_date, visit.time_window,
+        getAdminRouteVisitAddress(visit), getAdminRouteDurationMinutes(visit)
+    ]);
+}
+
+function readAdminSavedRoute() {
+    const key = getAdminSavedRouteKey();
+    if (key !== adminSavedRouteKey) {
+        adminSavedRouteKey = key;
+        adminSavedRoute = null;
+        if (key) {
+            try {
+                const saved = JSON.parse(localStorage.getItem(key) || 'null');
+                if (saved?.success && Array.isArray(saved.stops) &&
+                    saved.owner_id === currentUser.id &&
+                    saved.route_date === getLocalDateString()) {
+                    adminSavedRoute = saved;
+                }
+            } catch (error) {
+                console.warn('Saved route could not be read:', error);
+            }
+        }
+    }
+    return adminSavedRoute;
+}
+
+function saveAdminDailyRoute(plan) {
+    const key = getAdminSavedRouteKey();
+    if (!key) return;
+    adminSavedRouteKey = key;
+    adminSavedRoute = {
+        ...plan,
+        owner_id: currentUser.id,
+        route_date: getLocalDateString(),
+        visit_fingerprints: Object.fromEntries(
+            getAdminRemainingRouteVisits().map(v => [
+                String(v.id), getAdminRouteVisitFingerprint(v)
+            ])
+        )
+    };
+    try {
+        localStorage.setItem(key, JSON.stringify(adminSavedRoute));
+    } catch (error) {
+        console.error('Route could not be saved on this device:', error);
+        window.alert('The route is ready, but this phone could not save it for reopening.');
+    }
+}
+
+function syncAdminSavedRoute() {
+    const saved = readAdminSavedRoute();
+    if (!saved) {
+        adminBestRoutePlan = null;
+        return;
+    }
+    const remaining = getAdminRemainingRouteVisits();
+    const byId = new Map(remaining.map(v => [String(v.id), v]));
+    const known = new Set(saved.stops.map(s => String(s.id)));
+    const retained = saved.stops.filter(s => byId.has(String(s.id)));
+    const added = remaining.filter(v => !known.has(String(v.id)));
+    const changed = retained.some(s =>
+        saved.visit_fingerprints?.[String(s.id)] !==
+            getAdminRouteVisitFingerprint(byId.get(String(s.id)))
+    );
+    const firstIndex = retained.length ? saved.stops.indexOf(retained[0]) : saved.stops.length;
+    const suffix = saved.stops.slice(firstIndex);
+    const consecutive = suffix.length === retained.length &&
+        suffix.every((s, i) => String(s.id) === String(retained[i].id));
+    const progressed = retained.length !== saved.stops.length;
+    const prefixCompleted = saved.stops.slice(0, firstIndex).every(stop => {
+        const visit = allVisits.find(v => String(v.id) === String(stop.id));
+        return Boolean(visit?.completed_at || visit?.status === 'completed');
+    });
+    const estimatesValid = consecutive && prefixCompleted && !changed && !added.length;
+    const stops = retained.map(s => {
+        const visit = byId.get(String(s.id));
+        const edited = saved.visit_fingerprints?.[String(s.id)] !==
+            getAdminRouteVisitFingerprint(visit);
+        return {
+            ...s, label: getAdminRouteClientName(visit),
+            address: getAdminRouteVisitAddress(visit),
+            formatted_address: getAdminRouteVisitAddress(visit),
+            time_window: visit.time_window,
+            scheduled_start: edited ? null : s.scheduled_start,
+            latitude: edited ? null : s.latitude,
+            longitude: edited ? null : s.longitude
+        };
+    });
+    for (const visit of added) {
+        stops.push({
+            id: visit.id, label: getAdminRouteClientName(visit),
+            address: getAdminRouteVisitAddress(visit),
+            time_window: visit.time_window, not_optimized: true
+        });
+    }
+    let start = saved.start;
+    if (firstIndex > 0 && consecutive) {
+        const previous = saved.stops[firstIndex - 1];
+        const visit = allVisits.find(v => String(v.id) === String(previous.id));
+        if ((visit?.completed_at || visit?.status === 'completed') &&
+            previous.latitude != null && previous.longitude != null) {
+            start = { latitude: previous.latitude, longitude: previous.longitude };
+        }
+    }
+    adminBestRoutePlan = {
+        ...saved, start,
+        stops: stops.map((s, i) => ({ ...s, order: i + 1 })),
+        route_polyline: progressed || changed || added.length ? '' : saved.route_polyline,
+        vehicle_start_time: progressed || changed || added.length ? null : saved.vehicle_start_time,
+        metrics: estimatesValid ? {
+            ...saved.metrics,
+            travel_seconds: retained.reduce((sum, s) => sum + Number(s.drive_seconds_from_previous || 0), 0),
+            distance_miles: retained.reduce((sum, s) => sum + Number(s.drive_distance_meters_from_previous || 0), 0) / 1609.344
+        } : null,
+        saved_route_changed: changed || added.length > 0 || !consecutive || !prefixCompleted,
+        saved_route_progressed: progressed,
+        visit_signature: getAdminRemainingRouteSignature()
+    };
+}
+
+
+// ========================================
 // ROUTE START ADDRESS
 // ========================================
 
@@ -20058,7 +20190,7 @@ function getAdminRemainingRouteSignature() {
 async function calculateAdminBestVisitRoute() {
     if (adminBestRouteLoading) return;
     const remaining = getAdminRemainingRouteVisits();
-    adminBestRoutePlan = null;
+    syncAdminSavedRoute();
     if (!remaining.length) {
         renderAdminBestVisitRoute();
         void refreshAdminDriveEstimates(true);
@@ -20070,6 +20202,8 @@ async function calculateAdminBestVisitRoute() {
         renderAdminBestVisitRoute();
         return;
     }
+    const routeOwner = currentUser?.id;
+    const routeDate = getLocalDateString();
     const signature = getAdminRemainingRouteSignature();
     adminBestRouteLoading = true;
     renderAdminBestVisitRoute();
@@ -20105,7 +20239,8 @@ async function calculateAdminBestVisitRoute() {
             (data.skipped_shipments || []).length) {
             throw new Error('Google did not return every visit exactly once. No incomplete route was accepted.');
         }
-        if (signature !== getAdminRemainingRouteSignature()) {
+        if (currentUser?.id !== routeOwner || getLocalDateString() !== routeDate ||
+            signature !== getAdminRemainingRouteSignature()) {
             throw new Error('Your visits changed during calculation. Please recalculate.');
         }
 
@@ -20123,13 +20258,15 @@ async function calculateAdminBestVisitRoute() {
         });
         const saved = await supabaseClient.rpc('save_admin_route_drive_estimates', { p_legs: legs });
         if (saved.error) throw new Error(`Could not save driving estimates: ${saved.error.message}`);
-        if (signature !== getAdminRemainingRouteSignature()) {
+        if (currentUser?.id !== routeOwner || getLocalDateString() !== routeDate ||
+            signature !== getAdminRemainingRouteSignature()) {
             throw new Error('Your visits changed while saving the route. Please recalculate.');
         }
-        adminBestRoutePlan = { ...data, calculated_at: Date.now(), visit_signature: signature };
+        saveAdminDailyRoute({ ...data, calculated_at: Date.now(), visit_signature: signature });
+        syncAdminSavedRoute();
         await refreshAdminDriveEstimates(true);
     } catch (error) {
-        adminBestRoutePlan = null;
+        syncAdminSavedRoute();
         console.error('Admin route optimization error:', error);
         window.alert(error?.message || 'Unable to calculate the route.');
     } finally {
@@ -20669,6 +20806,7 @@ function renderAdminOptimizedRouteMap() {
 
 
                 if (
+                    stop.latitude == null || stop.longitude == null ||
                     !Number.isFinite(
                         latitude
                     ) ||
@@ -20944,15 +21082,7 @@ function renderAdminBestVisitRoute() {
     // ROUTE SUMMARY
     // ========================================
 
-    // Invalidate the remaining plan when the schedule changes.
-    // Saved historical drive estimates stay in Supabase.
-    if (
-        adminBestRoutePlan?.success &&
-        adminBestRoutePlan.visit_signature !==
-            getAdminRemainingRouteSignature()
-    ) {
-        adminBestRoutePlan = null;
-    }
+    syncAdminSavedRoute();
 
     stopCountElement.textContent =
         remainingVisits.length;
@@ -21017,7 +21147,9 @@ function renderAdminBestVisitRoute() {
                         : "Planned route departure";
             } else {
                 leaveByNoteElement.textContent =
-                    "Departure unavailable";
+                    adminBestRoutePlan.saved_route_progressed
+                        ? "Continue saved route"
+                        : "Departure unavailable";
             }
         }
     }
@@ -21141,11 +21273,9 @@ function renderAdminBestVisitRoute() {
 
 
         driveTimeElement.textContent =
-            formatAdminRouteDriveTime(
-                adminBestRoutePlan
-                    .metrics
-                    ?.travel_seconds
-            );
+            adminBestRoutePlan.metrics
+                ? formatAdminRouteDriveTime(adminBestRoutePlan.metrics.travel_seconds)
+                : "—";
 
 
         const miles =
@@ -21158,22 +21288,17 @@ function renderAdminBestVisitRoute() {
 
 
         distanceElement.textContent =
-            `${miles.toFixed(
-                1
-            )} mi`;
+            adminBestRoutePlan.metrics ? `${miles.toFixed(1)} mi` : "—";
 
 
         statusElement.textContent =
-            "Optimized";
+            "Saved";
 
 
         subtitleElement.textContent =
-            `${optimizedStops.length} optimized ${
-                optimizedStops.length ===
-                1
-                    ? "stop"
-                    : "stops"
-            }`;
+            adminBestRoutePlan.saved_route_changed
+                ? `${optimizedStops.length} stops • Schedule changed; Recalculate for updated estimates`
+                : `${optimizedStops.length} remaining stops • Saved order and planned times`;
 
 
         stopList.innerHTML =
@@ -21240,9 +21365,7 @@ function renderAdminBestVisitRoute() {
                                 <span class="admin-route-stop-time">
                                     ${
                                         scheduledTime
-                                            ? escapeHtml(
-                                                scheduledTime
-                                            )
+                                            ? `Planned ${escapeHtml(scheduledTime)}`
                                             : escapeHtml(
                                                 stop.time_window ||
                                                 ""
@@ -21604,9 +21727,8 @@ adminRouteStartButton?.addEventListener('click', async () => {
     const mapTab = window.open('about:blank', '_blank');
     if (mapTab) mapTab.opener = null;
     try {
-        if (!adminBestRoutePlan?.success ||
-            adminBestRoutePlan.visit_signature !== getAdminRemainingRouteSignature() ||
-            Date.now() - Number(adminBestRoutePlan.calculated_at || 0) > 120000) {
+        syncAdminSavedRoute();
+        if (!adminBestRoutePlan?.success) {
             await calculateAdminBestVisitRoute();
         }
         const plan = adminBestRoutePlan;
@@ -21615,9 +21737,9 @@ adminRouteStartButton?.addEventListener('click', async () => {
             return;
         }
         const addresses = plan.stops.map(stop => stop.formatted_address || stop.address);
+        if (addresses.some(address => !address)) throw new Error('A remaining visit is missing its address.');
         const url = new URL('https://www.google.com/maps/dir/');
         url.searchParams.set('api', '1');
-        url.searchParams.set('origin', `${plan.start.latitude},${plan.start.longitude}`);
         url.searchParams.set('destination', addresses[addresses.length - 1]);
         url.searchParams.set('travelmode', 'driving');
         url.searchParams.set('dir_action', 'navigate');
