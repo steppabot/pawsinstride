@@ -33039,6 +33039,15 @@ if (!document.getElementById("dashboard-content")) {
     let busy = false;
     let isBlocked = false;
 
+    // Collapsible card, same as Account Security.
+    const toggle = document.getElementById("delete-account-toggle");
+    const content = document.getElementById("delete-account-content");
+    toggle?.addEventListener("click", () => {
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!expanded));
+        if (content) content.hidden = expanded;
+    });
+
     function upcomingVisitCount() {
         const today = getLocalDateString();
         return (Array.isArray(currentVisits) ? currentVisits : []).filter(visit => {
