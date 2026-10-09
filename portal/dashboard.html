@@ -79,8 +79,8 @@
          DELETE ACCOUNT
     ======================================== -->
     <style>
-        .pis-delete-account-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-        .pis-delete-account-copy p { margin: 6px 0 0; color: #667784; font-size: 14px; line-height: 1.45; }
+        .pis-delete-account-body { padding-top: 12px; }
+        .pis-delete-account-body p { margin: 0 0 14px; color: #667784; font-size: 14px; line-height: 1.5; }
         .pis-delete-account-button {
             flex: 0 0 auto; min-height: 42px; padding: 0 18px; border: 1.5px solid #d93838; border-radius: 10px;
             background: #fff; color: #c62828; font: inherit; font-weight: 700; cursor: pointer;
@@ -2836,27 +2836,62 @@
 
                             <div class="household-detail-card household-detail-card-full pis-delete-account-card">
 
-                                <div class="pis-delete-account-copy">
-
-                                    <span class="household-detail-label">
-                                        Delete Account
-                                    </span>
-
-                                    <p>
-                                        Permanently delete your Paws in Stride account and personal information.
-                                    </p>
-
-                                </div>
-
                                 <button
                                     type="button"
-                                    id="delete-account-open"
-                                    class="pis-delete-account-button"
-                                    aria-haspopup="dialog"
-                                    aria-controls="delete-account-modal"
+                                    id="delete-account-toggle"
+                                    class="detail-collapse-toggle"
+                                    aria-expanded="false"
+                                    aria-controls="delete-account-content"
                                 >
-                                    Delete Account
+
+                                    <span class="detail-collapse-heading">
+
+                                        <span class="household-detail-label">
+                                            Delete Account
+                                        </span>
+
+                                        <span class="detail-collapse-status">
+                                            Permanently delete your account
+                                        </span>
+
+                                    </span>
+
+
+                                    <span
+                                        class="detail-collapse-chevron"
+                                        aria-hidden="true"
+                                    >
+                                        ›
+                                    </span>
+
                                 </button>
+
+
+                                <div
+                                    id="delete-account-content"
+                                    class="detail-collapse-content"
+                                    hidden
+                                >
+
+                                    <div class="pis-delete-account-body">
+
+                                        <p>
+                                            Deleting your account erases your personal information and signs you out for good. Upcoming visits must be cancelled first.
+                                        </p>
+
+                                        <button
+                                            type="button"
+                                            id="delete-account-open"
+                                            class="pis-delete-account-button"
+                                            aria-haspopup="dialog"
+                                            aria-controls="delete-account-modal"
+                                        >
+                                            Delete Account
+                                        </button>
+
+                                    </div>
+
+                                </div>
 
                             </div>
                             
