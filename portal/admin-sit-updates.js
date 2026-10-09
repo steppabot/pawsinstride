@@ -64,6 +64,41 @@
         state.chain = (state.chain || Promise.resolve()).catch(() => {}).then(() => store('put', snap.key, snap));
         return state.chain;
     }
+    // The server said no (the database rolled back), so nothing was published.
+    const serverRejected = e => /^[0-9A-Z]{5}$/.test(String(e?.code || '')) ||
+        /^4\d\d$/.test(String(e?.statusCode || e?.status || ''));
+
+    // Make a stuck draft editable again. Nothing was published under its request ID.
+    function unlockDraft(state, newRequest) {
+        state.draft.locked = false;
+        if (newRequest) {
+            state.draft.request_id = crypto.randomUUID();
+            for (const photo of state.draft.photos) {
+                photo.path = `${state.draft.visit_id}/sit-${state.draft.request_id}-${photo.id}.jpg`;
+                photo.uploaded = false;
+            }
+        }
+    }
+
+    async function discardDraft(state) {
+        if (state.busy) return;
+        const d = state.draft;
+        const hasContent = d.notes.trim() || d.photos.length || d.care.some(c => c.fed || c.fresh_water || c.pee || c.poop);
+        if (hasContent && !confirm('Discard this draft? Its notes and photos will be removed from this device.')) return;
+        const uploaded = d.photos.filter(p => p.uploaded).map(p => p.path);
+        // A locked draft might already be published, so leave its photos alone.
+        if (!d.locked && uploaded.length && navigator.onLine) {
+            try { await supabaseClient.storage.from(VISIT_MEDIA_BUCKET).remove(uploaded); } catch (e) { /* ignore */ }
+        }
+        try {
+            await store('delete', d.key);
+            state.draft = newDraft(state);
+            await save(state);
+            renderForm(state);
+            msg(state, 'Draft discarded.');
+        } catch (error) { msg(state, error.message); }
+    }
+
     function msg(state, text) {
         const t = state.dialog.querySelector('[data-boarding-message]');
         if (t) t.textContent = text;
@@ -83,6 +118,8 @@
         const send = state.dialog.querySelector('[data-boarding-send]');
         send.disabled = state.busy;
         send.textContent = state.busy ? 'Sending…' : state.draft.locked ? 'Retry Send' : 'Send Sit Update';
+        const discard = state.dialog.querySelector('[data-sit-discard]');
+        if (discard) discard.disabled = state.busy;
     }
     function renderPhotos(state) {
         for (const url of state.urls || []) URL.revokeObjectURL(url);
@@ -116,23 +153,22 @@
                 <div class="boarding-photo-grid" data-boarding-photo-previews></div>
             </fieldset>
             <p class="boarding-editor-message" data-boarding-message role="status" aria-live="polite"></p>
-            <button type="submit" class="primary-button" data-boarding-send>Send Sit Update</button>`;
+            <button type="submit" class="primary-button" data-boarding-send>Send Sit Update</button>
+            <button type="button" class="pis-sit-discard" data-sit-discard>Discard draft</button>`;
         renderPhotos(state);
         controls(state);
         if (state.draft.locked) msg(state, 'An earlier send needs to be retried. Its content is kept unchanged so retrying cannot create a second copy.');
     }
 
-    async function loadHistory(state, silent = false) {
+    async function loadHistory(state) {
         const mount = state.dialog.querySelector('[data-boarding-history]');
-        if (!silent) mount.textContent = 'Loading updates…';
+        mount.textContent = 'Loading updates…';
         try {
             const { data, error } = await supabaseClient.from('visit_updates')
                 .select('id, notes, published_at, visit_update_photos(id, storage_path, sort_order), visit_update_pet_care(pet_id, fed, fresh_water, pee, poop)')
                 .eq('visit_id', state.visit.id).not('published_at', 'is', null)
                 .order('published_at', { ascending: false });
             if (error) throw error;
-            const signature = JSON.stringify(data || []);
-            if (silent && state.liveSignature === signature) return;
             const rows = await Promise.all((data || []).map(async row => ({
                 ...row,
                 photos: await Promise.all((row.visit_update_photos || []).sort((a, b) => a.sort_order - b.sort_order).map(async photo => {
@@ -141,7 +177,6 @@
                 }))
             })));
             if (editor !== state) return;
-            state.liveSignature = signature;
             mount.innerHTML = rows.map(row => `<article class="boarding-saved-update">
                 <strong>${esc(stamp(row.published_at))}</strong>
                 ${row.notes ? `<p class="boarding-update-note">${esc(row.notes)}</p>` : ''}
@@ -158,14 +193,6 @@
             if (editor === state) mount.textContent = 'Updates could not be loaded. Close and reopen this window to retry.';
         }
     }
-
-    window.refreshAdminLiveSitHistory = async function () {
-        const state = editor;
-        if (!state || state.busy || state.liveBusy) return;
-        state.liveBusy = true;
-        try { await loadHistory(state, true); }
-        finally { state.liveBusy = false; }
-    };
 
     async function close(state) {
         if (state.busy) return;
@@ -218,6 +245,7 @@
         state.busy = true;
         controls(state);
         let published = false;
+        let rpcSent = false;
         try {
             if (!navigator.onLine) throw new Error("You're offline. Your draft stays on this device; reconnect and send it again.");
             if (!state.draft.notes.trim() && !state.draft.photos.length &&
@@ -238,7 +266,8 @@
                 await save(state);
             }
             msg(state, 'Saving sit update…');
-            const { data, error } = await supabaseClient.rpc('admin_publish_sit_update', {
+            rpcSent = true;
+            const { data, error } =await supabaseClient.rpc('admin_publish_sit_update', {
                 p_visit_id: state.draft.visit_id,
                 p_request_id: state.draft.request_id,
                 p_notes: state.draft.notes.trim(),
@@ -256,9 +285,19 @@
             await loadHistory(state);
         } catch (error) {
             console.error('Sit update save error:', error);
-            msg(state, published
-                ? 'Your update was sent, but the local draft could not be reset. Close and reopen this window before the next update.'
-                : `${error.message || 'The update could not be sent.'} Your draft is kept on this device.`);
+            const text = error?.message || 'The update could not be sent.';
+            if (published) {
+                msg(state, 'Your update was sent, but the local draft could not be reset. Close and reopen this window before the next update.');
+            } else if (state.draft.locked && (!rpcSent || serverRejected(error))) {
+                // Nothing was published, so let her edit, resend or discard instead of retrying forever.
+                unlockDraft(state, /request ID belongs/i.test(text));
+                try { await save(state); } catch (e) { /* ignore */ }
+                state.busy = false;
+                renderForm(state);
+                msg(state, `${text} Your draft is kept on this device. You can edit it and send again, or discard it.`);
+            } else {
+                msg(state, `${text} Your draft is kept on this device.`);
+            }
         } finally {
             state.busy = false;
             controls(state);
@@ -284,6 +323,10 @@
                 .eq('request_id', state.draft.request_id).maybeSingle();
             if (!check.error && check.data?.published_at) {
                 state.draft = newDraft(state);
+                await save(state);
+            } else if (!check.error && !check.data) {
+                // Never reached the server, so it's safe to edit again.
+                unlockDraft(state, false);
                 await save(state);
             }
         }
@@ -324,6 +367,7 @@
             if (e.target.matches('[data-boarding-photo-input]')) void addPhotos(state, Array.from(e.target.files || []));
         });
         dialog.addEventListener('click', async e => {
+            if (e.target.closest('[data-sit-discard]')) { void discardDraft(state); return; }
             const remove = e.target.closest('[data-sit-remove-photo]');
             if (!remove || state.busy || state.draft.locked) return;
             collect(state);
@@ -375,6 +419,8 @@
         .pis-sit-update-button{display:flex !important;align-items:center !important;justify-content:center !important;gap:8px !important;background:linear-gradient(135deg,#d6467f,#b8336a) !important;border:0 !important;color:#fff !important}
         .pis-sit-view-button{display:flex !important;align-items:center !important;justify-content:center !important;gap:8px !important;background:#fff !important;color:#b8336a !important;border:1px solid #f1c3d6 !important;box-shadow:none !important}
         .pis-sit-add-final{display:block;width:100%;margin:0 0 16px;padding:12px;border:1px dashed #b8336a;border-radius:10px;background:#fdf3f7;color:#b8336a;font:inherit;font-weight:800;cursor:pointer}
+        .pis-sit-discard{display:block;width:100%;margin:10px 0 0;padding:10px;border:0;background:none;color:#5b6f80;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+        .pis-sit-discard:disabled{opacity:.5;cursor:default}
         .pis-sit-dialog .boarding-editor-header{background:linear-gradient(135deg,#d6467f,#b8336a) !important}
         .pis-sit-dialog [data-boarding-send]{background:linear-gradient(135deg,#d6467f,#b8336a) !important;border-color:#b8336a !important;box-shadow:0 8px 18px rgba(184,51,106,.22) !important}`;
     document.head.appendChild(style);
