@@ -24634,3 +24634,225 @@ body.desktop-screen-services
             #7f2f12 100%
         );
 }
+
+/* ========================================
+   CLIENT SERVICES — MATCH ADMIN CARDS AND MODALS
+   ======================================== */
+
+body.csd-open { overflow: hidden !important; }
+
+/* These tokens match admin-visit-focus.js. */
+.client-portal-page :is(.csd-summary, .csd-overlay) {
+    --pk: #46617d;
+    --pkb: #eef4fb;
+    --pkg: linear-gradient(135deg, #46617d, #16324f);
+    box-sizing: border-box;
+}
+.client-portal-page .pis-kind-walk:is(.csd-summary, .csd-overlay) {
+    --pk: #1f63b8; --pkb: #e1edfc;
+    --pkg: linear-gradient(135deg, #2f7fd6, #1f63b8);
+}
+.client-portal-page .pis-kind-drop:is(.csd-summary, .csd-overlay) {
+    --pk: #14c0dc; --pkb: #cdf5fb;
+    --pkg: linear-gradient(135deg, #22c6e0, #0aa5c2);
+}
+.client-portal-page .pis-kind-sit:is(.csd-summary, .csd-overlay) {
+    --pk: #b8336a; --pkb: #fbe4ef;
+    --pkg: linear-gradient(135deg, #d6467f, #b8336a);
+}
+.client-portal-page .pis-kind-board:is(.csd-summary, .csd-overlay) {
+    --pk: #c0610c; --pkb: #fdebd9;
+    --pkg: linear-gradient(135deg, #e07a1f, #c0610c);
+}
+.client-portal-page .pis-kind-meet:is(.csd-summary, .csd-overlay) {
+    --pk: #6a45c2; --pkb: #ebe5fb;
+    --pkg: linear-gradient(135deg, #8160d6, #6a45c2);
+}
+
+.client-portal-page button.csd-summary {
+    display: grid !important;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%; min-height: 0;
+    margin: 0 0 10px; padding: 12px 12px 12px 10px !important;
+    border: 1px solid #dbe7f3 !important;
+    border-left: 6px solid var(--pk) !important;
+    border-radius: 16px !important;
+    background: #fff !important; color: #16324f !important;
+    box-shadow: none !important; transform: none !important;
+    font-family: inherit; text-align: left; cursor: pointer;
+}
+.client-portal-page button.csd-summary.csd-complete {
+    background: #f0f9f2 !important;
+    border-color: #c9e8d1 !important;
+    border-left-color: var(--pk) !important;
+}
+.client-portal-page button.csd-summary.csd-live {
+    background: #fff7ea !important;
+    border-color: #f0cf96 !important;
+    border-left-color: var(--pk) !important;
+    box-shadow: 0 6px 18px rgba(178,106,0,.12) !important;
+}
+.client-portal-page .csd-summary > .pis-kind-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--pkb); color: var(--pk);
+}
+.client-portal-page .csd-summary > .pis-kind-icon svg { width: 20px; height: 20px; }
+.client-portal-page .csd-copy { display: grid; gap: 3px; min-width: 0; }
+.client-portal-page .csd-copy strong {
+    font-size: 16px; font-weight: 700; line-height: 1.25;
+    color: #16324f; overflow-wrap: anywhere;
+}
+.client-portal-page .csd-copy small { font-size: 14px; line-height: 1.3; color: #46617d; }
+.client-portal-page .csd-copy small:first-of-type { font-size: 13px; font-weight: 600; }
+.client-portal-page .csd-status {
+    justify-self: start; border-radius: 999px; padding: 1px 8px;
+    font-size: 11px; font-weight: 700; line-height: 1.4;
+    background: var(--pkb); color: var(--pk);
+}
+.client-portal-page .csd-complete .csd-status { background: #dcf1e2; color: #1f7a3a; }
+.client-portal-page .csd-live .csd-status { background: #fbe3b8; color: #8a5200; }
+.client-portal-page .csd-arrow {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 40px; padding: 0 12px; border-radius: 12px;
+    background: #fff; border: 1px solid #c9d9ea; color: var(--pk);
+    font-size: 13.5px; font-weight: 700; line-height: 1;
+}
+.client-portal-page :is(.csd-summary, .csd-close):focus-visible {
+    outline: 3px solid #248ed0; outline-offset: 3px;
+}
+
+/* Full mobile sheet; centered desktop dialog. */
+.client-portal-page .csd-overlay[hidden] { display: none !important; }
+.client-portal-page .csd-overlay {
+    position: fixed; inset: 0; z-index: 9500;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; margin: 0; background: rgba(15,35,60,.45);
+}
+.client-portal-page .csd-overlay .csd-sheet {
+    box-sizing: border-box; position: relative;
+    display: flex; flex-direction: column;
+    width: 100%; max-width: 680px;
+    height: auto; max-height: 92vh; max-height: 92dvh;
+    padding: 0 !important; margin: 0 !important;
+    border: 0 !important; border-radius: 22px !important;
+    overflow: hidden; background: #f4f8fc !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,.25) !important;
+}
+.client-portal-page .csd-overlay .csd-header {
+    box-sizing: border-box; position: relative !important; inset: auto !important;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    flex-shrink: 0; width: 100%; max-width: none;
+    margin: 0 !important; border: 0 !important; border-radius: 0 !important;
+    padding: calc(env(safe-area-inset-top, 0px) + 14px)
+        calc(env(safe-area-inset-right, 0px) + 18px) 14px
+        calc(env(safe-area-inset-left, 0px) + 18px) !important;
+    background: var(--pkg) !important; color: #fff;
+}
+.client-portal-page .csd-header-copy { flex: 1 1 auto; min-width: 0; }
+.client-portal-page .csd-eyebrow {
+    display: block; font-size: 12px; font-weight: 800;
+    letter-spacing: .12em; color: #fff; opacity: .92;
+}
+.client-portal-page .csd-header h2 {
+    display: block; margin: 2px 0 0 !important;
+    font-size: 17px !important; font-weight: 700; line-height: 1.3; color: #fff !important;
+}
+.client-portal-page .csd-header p {
+    margin: 4px 0 0 !important; font-size: 15px; font-weight: 600;
+    line-height: 1.4; color: #fff !important; opacity: .92;
+}
+.client-portal-page .csd-header > .pis-kind-icon {
+    box-sizing: border-box; flex: none; display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 50px; height: 50px; border-radius: 16px;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35);
+    color: #fff;
+}
+.client-portal-page .csd-header > .pis-kind-icon svg { width: 27px; height: 27px; }
+.client-portal-page .csd-header button.csd-close {
+    box-sizing: border-box; flex: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; min-width: 0; min-height: 0;
+    margin: 0 !important; padding: 0 !important; border-radius: 14px !important;
+    border: 1px solid rgba(255,255,255,.45) !important;
+    background: rgba(255,255,255,.18) !important; color: #fff !important;
+    box-shadow: none !important; cursor: pointer;
+}
+.client-portal-page .csd-close svg { display: block; width: 20px; height: 20px; }
+.client-portal-page .csd-overlay .csd-body {
+    flex: 1; min-height: 0; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+    padding: 16px calc(env(safe-area-inset-right, 0px) + 14px)
+        calc(env(safe-area-inset-bottom, 0px) + 24px)
+        calc(env(safe-area-inset-left, 0px) + 14px) !important;
+    background: #f4f8fc !important;
+}
+
+/* Separate summary and care cards, as in the admin modal. */
+.client-portal-page .csd-overlay .csd-body > .upcoming-service-card {
+    box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;
+    width: 100% !important; margin: 0 !important; padding: 0 !important;
+    border: 0 !important; border-radius: 0 !important;
+    background: transparent !important; box-shadow: none !important;
+    overflow: visible !important;
+}
+.client-portal-page .csd-overlay .upcoming-service-card::before,
+.client-portal-page .csd-overlay .upcoming-service-card > .upcoming-service-card-header,
+.client-portal-page .csd-overlay .upcoming-service-card > .client-visit-progress-icon {
+    display: none !important;
+}
+.client-portal-page .csd-overlay .csd-detail-card,
+.client-portal-page .csd-overlay .upcoming-service-card > .client-visit-progress,
+.client-portal-page .csd-overlay .upcoming-service-card > .client-sit-updates {
+    box-sizing: border-box; flex-shrink: 0; width: 100%;
+    margin: 0 !important; padding: 16px !important;
+    background: #fff !important; border: 1px solid #dbe7f3 !important;
+    border-radius: 18px !important;
+    box-shadow: 0 4px 12px rgba(24,52,71,.05) !important;
+    color: #16324f;
+}
+.client-portal-page .csd-overlay .csd-detail-card { display: flex; flex-direction: column; gap: 14px; }
+.client-portal-page .csd-overlay .csd-detail-card > * { margin: 0 !important; }
+.client-portal-page .csd-overlay .upcoming-service-pets { padding: 0 !important; border: 0 !important; }
+.client-portal-page .csd-overlay .service-pet-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.client-portal-page .csd-overlay .service-pet-chip {
+    padding: 6px 14px; border: 0; border-radius: 999px;
+    background: #eef4fb; color: #16324f; font-size: 15px; font-weight: 700;
+}
+.client-portal-page .csd-overlay .upcoming-service-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 0; border: 0; font-size: 14px; color: #46617d;
+}
+.client-portal-page .csd-overlay .upcoming-service-row strong { color: #16324f; text-align: right; }
+.client-portal-page .csd-overlay .client-visit-report-mount:empty { display: none; }
+.client-portal-page .csd-overlay .upcoming-service-actions {
+    margin: 0 !important; padding: 12px 0 0 !important; border: 0 !important;
+}
+.client-portal-page .csd-overlay :is(
+    [data-client-visit-report-open], [data-client-sit-view], [data-client-boarding-view]
+) {
+    box-sizing: border-box; width: 100% !important; min-height: 48px;
+    padding: 13px 16px !important; border: 0 !important; border-radius: 12px !important;
+    background: var(--pkg) !important; color: #fff !important;
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    text-decoration: none !important; box-shadow: 0 4px 12px rgba(24,52,71,.12) !important;
+}
+.client-portal-page .csd-overlay [data-client-cancel-visit] {
+    box-sizing: border-box; width: 100%; min-height: 48px;
+    margin: 0; padding: 13px 16px; border: 1px solid #c9d9ea !important;
+    border-radius: 12px !important; background: #fff !important;
+    color: #b33e35 !important; font: inherit; font-weight: 700; box-shadow: none !important;
+}
+.client-portal-page .csd-overlay button:focus-visible { outline: 3px solid #248ed0; outline-offset: 3px; }
+@media (max-width: 719px) {
+    .client-portal-page .csd-overlay .csd-sheet {
+        width: 100%; max-width: none; height: 100vh; height: 100dvh;
+        max-height: 100vh; max-height: 100dvh; border-radius: 0 !important;
+    }
+}
+/* ========================================
+   END CLIENT SERVICES — MATCH ADMIN CARDS AND MODALS
+   ======================================== */
+
