@@ -14976,6 +14976,7 @@ function resetBookingForm() {
     updateBookingTotal();
 
 }
+
 // ========================================
 // REFRESH UPCOMING
 // ========================================
@@ -15064,11 +15065,17 @@ async function refreshUpcomingVisits() {
 
     renderUpcomingCalendar();
 
-    renderSelectedUpcomingServices();
+    if (activeClientVisitReportId) {
+        const reportMount = document.getElementById(`client-visit-report-${activeClientVisitReportId}`) ||
+            document.getElementById('client-desktop-visit-report');
+        if (!reportMount?.getClientRects().length) activeClientVisitReportId = null;
+    }
+    if (!activeClientVisitReportId) renderSelectedUpcomingServices();
 
     renderMobileHomeDashboard();
 
 }
+
 // ========================================
 // CLIENT BOARDING DATA AND UPDATES
 // ========================================
@@ -15351,22 +15358,24 @@ async function loadAndOpenClientBoardingUpdates(stayId) {
     }
 }
 
-async function loadClientBoardingFeed(state) {
+async function loadClientBoardingFeed(state, refresh = false) {
     if (state.busy || clientBoardingViewer !== state) return;
     state.busy = true;
     const button = state.dialog.querySelector("[data-client-boarding-more]");
     const message = state.dialog.querySelector("[data-client-boarding-feed-message]");
     button.disabled = true;
-    message.textContent = "Loading updates…";
+    if (!refresh) message.textContent = "Loading updates…";
     try {
         const { data, error } = await supabaseClient.from("boarding_updates")
             .select("id, update_date, notes, published_at, boarding_update_photos(storage_path, caption, sort_order), boarding_update_pet_care(pet_id, fed, fresh_water, pee, poop)")
             .eq("stay_id", state.stay.id).not("published_at", "is", null)
             .order("published_at", { ascending: false }).order("id", { ascending: false })
-            .range(state.offset, state.offset + 19);
+            .range(refresh ? 0 : state.offset, refresh ? Math.max(20, state.offset) - 1 : state.offset + 19);
         if (error) throw error;
         const rows = data || [];
-        const cards = await Promise.all(rows.filter(row => !state.seen.has(row.id)).map(async row => {
+        const signature = JSON.stringify(rows);
+        if (refresh && state.liveSignature === signature) return;
+        const cards = await Promise.all(rows.filter(row => refresh || !state.seen.has(row.id)).map(async row => {
             const photos = await Promise.all((row.boarding_update_photos || [])
                 .sort((a, b) => a.sort_order - b.sort_order)
                 .map(async photo => ({ ...photo, url: await signedClientBoardingPhoto(photo.storage_path) })));
@@ -15409,10 +15418,13 @@ async function loadClientBoardingFeed(state) {
             </article>`;
         }));
         if (clientBoardingViewer !== state) return;
-        state.dialog.querySelector("[data-client-boarding-feed]").insertAdjacentHTML("beforeend", cards.join(""));
+        const feed = state.dialog.querySelector("[data-client-boarding-feed]");
+        if (refresh) { feed.innerHTML = cards.join(''); state.seen.clear(); }
+        else feed.insertAdjacentHTML("beforeend", cards.join(""));
+        state.liveSignature = refresh ? signature : null;
         rows.forEach(row => state.seen.add(row.id));
-        state.offset += rows.length;
-        button.hidden = rows.length < 20;
+        state.offset = refresh ? rows.length : state.offset + rows.length;
+        button.hidden = rows.length < (refresh ? Math.max(20, state.offset) : 20);
         button.textContent = "Load More";
         message.textContent = state.seen.size ? "Tap a photo to view it full size." : "We’ll share photos and updates here during your pet’s stay.";
     } catch (error) {
@@ -15432,6 +15444,7 @@ document.addEventListener("click", event => {
 // These reads work even when the new tables have not been added to Realtime.
 // They refresh while the portal is visible; push delivery is wired separately.
 function refreshVisibleClientBoarding() {
+    if (window.PawsLiveSync) { window.PawsLiveSync.queue('boarding_stays'); return; }
     if (!currentUser?.id || document.hidden || currentProfile?.role === "admin") return;
     clientBoardingData.loadedAt = 0;
     void renderMobileHomeDashboard();
@@ -17894,20 +17907,25 @@ function getClientVisitReportMount(
 
 }
 
+
 // ========================================
 // TOGGLE CLIENT VISIT REPORT
 // ========================================
 
 async function toggleClientVisitReport(
     visitId,
-    button
+    button,
+    options = {}
 ) {
 
 
-    const mount =
-        getClientVisitReportMount(
-            visitId
-        );
+    const mount = options.refresh
+        ? (document.getElementById(`client-visit-report-${visitId}`) ||
+            document.getElementById('client-desktop-visit-report'))
+        : getClientVisitReportMount(visitId);
+    const requestUserId = currentUser?.id;
+    if (options.refresh && (!mount || !mount.getClientRects().length ||
+        mount.closest('.csd-overlay[hidden]') || activeClientVisitReportId !== visitId)) return;
 
 
     if (
@@ -17924,6 +17942,7 @@ async function toggleClientVisitReport(
     // ========================================
 
     if (
+        !options.refresh &&
         activeClientVisitReportId ===
         visitId &&
         mount.innerHTML.trim()
@@ -17951,7 +17970,7 @@ async function toggleClientVisitReport(
     // CLOSE ANY OTHER OPEN REPORT
     // ========================================
 
-    closeOpenClientVisitReport();
+    if (!options.refresh) closeOpenClientVisitReport();
 
 
     activeClientVisitReportId =
@@ -17962,7 +17981,7 @@ async function toggleClientVisitReport(
         "Hide Visit Report";
 
 
-    mount.innerHTML =
+    if (!options.refresh) mount.innerHTML =
         `
 
             <div class="client-visit-report-loading">
@@ -18226,6 +18245,10 @@ async function toggleClientVisitReport(
             [];
 
 
+        if (!mount.isConnected || activeClientVisitReportId !== visitId || currentUser?.id !== requestUserId) return;
+        const signature = JSON.stringify([report, petCareRows, media, completedWalk, walkPoints]);
+        if (options.refresh && mount.dataset.liveSignature === signature) return;
+
         const mediaWithUrls =
             await Promise.all(
 
@@ -18293,6 +18316,8 @@ async function toggleClientVisitReport(
         );
         
         
+        mount.dataset.liveSignature = signature;
+
         // ========================================
         // RENDER WALK ROUTE
         // ========================================
@@ -18316,6 +18341,7 @@ async function toggleClientVisitReport(
         // ========================================
 
         if (
+            !options.refresh &&
             !window.matchMedia(
                 "(max-width: 700px)"
             ).matches
@@ -18344,6 +18370,8 @@ async function toggleClientVisitReport(
             error
         );
 
+
+        if (options.refresh) throw error;
 
         mount.innerHTML =
             `
