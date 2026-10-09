@@ -1414,7 +1414,7 @@ function scheduleAdminBusinessDataRefresh() {
 }
 
 async function refreshAdminBusinessData() {
-    if (!navigator.onLine || document.hidden || !currentUser?.id || window.PawsLiveSync?.editing()) {
+    if (!navigator.onLine || document.hidden || !currentUser?.id) {
         return;
     }
 
@@ -1521,7 +1521,7 @@ async function refreshAdminBusinessData() {
 
         // Rebuilding the day list also rebuilds the visit popup.
         // Keep an open report intact so typed notes/photos survive.
-        if (!activeVisitReportVisitId) {
+        if (!window.PawsLiveSync?.deferForms(null, 'visits') && !activeVisitReportVisitId) {
             if (activeAdminScreen === "schedule") {
                 renderAdminCalendar();
             }
@@ -1529,7 +1529,7 @@ async function refreshAdminBusinessData() {
             renderAdminDayServices();
         }
 
-        if (activeAdminScreen === "clients") {
+        if (activeAdminScreen === "clients" && !window.PawsLiveSync?.deferForms(null, 'profiles')) {
             setupAdminClientDirectory();
         }
 
@@ -3134,8 +3134,10 @@ async function loadAdminBoardingStays(force = false) {
         await adminBoardingState.request;
     } finally {
         adminBoardingState.request = null;
-        renderAdminCalendar(false);
-        if (!activeVisitReportVisitId) renderAdminDayServices();
+        if (!window.PawsLiveSync?.deferForms(null, 'boarding_stays') && !activeVisitReportVisitId) {
+            renderAdminCalendar(false);
+            renderAdminDayServices();
+        }
     }
 }
 
@@ -15406,7 +15408,7 @@ function closeAdminPushNotificationsModal() {
 // LOAD ADMIN PUSH PREFERENCES
 // ========================================
 
-async function loadAdminPushPreferences() {
+async function loadAdminPushPreferences(background = false) {
 
     if (
         !currentUser?.id
@@ -15468,6 +15470,8 @@ async function loadAdminPushPreferences() {
         }
 
 
+        if (background && window.PawsLiveSync?.deferForms('#admin-push-notifications-modal', 'admin_notification_preferences')) return;
+
         ADMIN_PUSH_PREFERENCE_KEYS.forEach(
             preferenceKey => {
 
@@ -15506,7 +15510,6 @@ async function loadAdminPushPreferences() {
     }
 
 }
-
 
 // ========================================
 // SAVE ADMIN PUSH PREFERENCE
@@ -20470,6 +20473,13 @@ function renderAdminRouteMapPlaceholder(
     }
 
 
+    renderAdminOptimizedRouteMap.rendered = null;
+    adminBestRouteInfoWindows.forEach(info => info.close());
+    adminBestRouteMarkers.forEach(marker => marker.setMap(null));
+    adminBestRouteInfoWindows.clear();
+    adminBestRouteMarkers.clear();
+    adminBestRouteMap = null;
+
     mapElement.innerHTML =
         `
 
@@ -20528,6 +20538,25 @@ function renderAdminOptimizedRouteMap() {
 
     }
 
+
+    const mapSignature = JSON.stringify({
+        success: adminBestRoutePlan?.success,
+        start: adminBestRoutePlan?.start,
+        polyline: adminBestRoutePlan?.route_polyline || '',
+        stops: (adminBestRoutePlan?.stops || []).map(stop => [
+            stop.id, stop.order, stop.latitude, stop.longitude, stop.label,
+            stop.scheduled_start, stop.formatted_address || stop.address || ''
+        ])
+    });
+    const previous = renderAdminOptimizedRouteMap.rendered;
+    if (previous?.element === mapElement && previous.signature === mapSignature &&
+        previous.map === adminBestRouteMap && adminBestRouteMap &&
+        previous.child && previous.child === mapElement.firstChild) {
+        return; // Same route: keep zoom, pan and the open marker popup.
+    }
+    renderAdminOptimizedRouteMap.rendered = null;
+    adminBestRouteInfoWindows.forEach(info => info.close());
+    adminBestRouteMarkers.forEach(marker => marker.setMap(null));
 
     // ========================================
     // RESET MAP STATE
@@ -21001,8 +21030,12 @@ function renderAdminOptimizedRouteMap() {
         45
     );
 
-}
+    renderAdminOptimizedRouteMap.rendered = {
+        element: mapElement, signature: mapSignature,
+        map: adminBestRouteMap, child: mapElement.firstChild
+    };
 
+}
 
 // ========================================
 // RENDER BEST VISIT ROUTE
@@ -26185,7 +26218,7 @@ function setAdminServicePrices(
 // LOAD ADMIN SERVICE PRICING
 // ========================================
 
-async function loadAdminServicePricing() {
+async function loadAdminServicePricing(background = false) {
 
 
     const {
@@ -26213,6 +26246,8 @@ async function loadAdminServicePricing() {
 
     }
 
+
+    if (background && window.PawsLiveSync?.deferForms('#admin-services-pricing-modal', 'service_prices')) return;
 
     const prices =
         data ||
