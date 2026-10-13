@@ -24,13 +24,16 @@
         if (!visit.completed_at) return true;
         return Date.now() - Date.parse(visit.completed_at) < 12 * 3600 * 1000;
     }
+
     // Finished sits keep a "View Sit Updates" button so you can look back at what the client got.
     function canView(visit) {
         return !!visit && isSit(visit) && lower(visit.status) !== 'cancelled' && !!visit.checked_in_at;
     }
+
     const isDone = visit => !!visit?.completed_at || lower(visit?.status) === 'completed';
 
     /* ---------- drafts on this device (IndexedDB keeps photo blobs) ---------- */
+
     function store(action, key, value) {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(DB_NAME, 1);
@@ -54,16 +57,24 @@
             request_id: crypto.randomUUID(),
             visit_id: Number(state.visit.id),
             notes: '',
-            care: petsOf(state.visit).map(p => ({ pet_id: Number(p.id), fed: false, fresh_water: false, pee: false, poop: false })),
+            care: petsOf(state.visit).map(p => ({
+                pet_id: Number(p.id),
+                fed: false,
+                fresh_water: false,
+                pee: false,
+                poop: false
+            })),
             photos: [],
             locked: false
         };
     }
+
     function save(state) {
         const snap = structuredClone(state.draft);
         state.chain = (state.chain || Promise.resolve()).catch(() => {}).then(() => store('put', snap.key, snap));
         return state.chain;
     }
+
     // The server said no (the database rolled back), so nothing was published.
     const serverRejected = e => /^[0-9A-Z]{5}$/.test(String(e?.code || '')) ||
         /^4\d\d$/.test(String(e?.statusCode || e?.status || ''));
@@ -86,23 +97,32 @@
         const hasContent = d.notes.trim() || d.photos.length || d.care.some(c => c.fed || c.fresh_water || c.pee || c.poop);
         if (hasContent && !confirm('Discard this draft? Its notes and photos will be removed from this device.')) return;
         const uploaded = d.photos.filter(p => p.uploaded).map(p => p.path);
+
         // A locked draft might already be published, so leave its photos alone.
         if (!d.locked && uploaded.length && navigator.onLine) {
-            try { await supabaseClient.storage.from(VISIT_MEDIA_BUCKET).remove(uploaded); } catch (e) { /* ignore */ }
+            try {
+                await supabaseClient.storage.from(VISIT_MEDIA_BUCKET).remove(uploaded);
+            } catch (e) {
+                /* ignore */
+            }
         }
+
         try {
             await store('delete', d.key);
             state.draft = newDraft(state);
             await save(state);
             renderForm(state);
             msg(state, 'Draft discarded.');
-        } catch (error) { msg(state, error.message); }
+        } catch (error) {
+            msg(state, error.message);
+        }
     }
 
     function msg(state, text) {
         const t = state.dialog.querySelector('[data-boarding-message]');
         if (t) t.textContent = text;
     }
+
     function collect(state) {
         if (!state.composing || state.draft.locked) return;
         state.draft.notes = state.dialog.querySelector('[data-boarding-notes]').value;
@@ -112,6 +132,7 @@
             }
         }
     }
+
     function controls(state) {
         state.dialog.querySelector('[data-boarding-fields]').disabled = state.busy || state.draft.locked;
         state.dialog.querySelector('[data-boarding-close]').disabled = state.busy;
@@ -121,6 +142,7 @@
         const discard = state.dialog.querySelector('[data-sit-discard]');
         if (discard) discard.disabled = state.busy;
     }
+
     function renderPhotos(state) {
         for (const url of state.urls || []) URL.revokeObjectURL(url);
         state.urls = [];
@@ -131,6 +153,7 @@
                 <button type="button" data-sit-remove-photo="${photo.id}" aria-label="Remove photo" ${state.draft.locked ? 'disabled' : ''}>×</button></div>`;
         }).join('');
     }
+
     function renderForm(state) {
         const pets = petsOf(state.visit);
         state.dialog.querySelector('[data-boarding-compose]').innerHTML = `
@@ -148,8 +171,8 @@
                         </div></div>`).join('') || '<p>No pets are attached to this visit.</p>'}
                 </details>
                 <label class="boarding-field-label" for="sit-update-photos">Photos</label>
-                <input id="sit-update-photos" data-boarding-photo-input type="file" accept="image/jpeg,image/png,image/webp" multiple>
-                <small>Up to 12 photos, 10 MB each. JPEG, PNG or WebP.</small>
+                <input id="sit-update-photos" data-boarding-photo-input type="file" accept="image/*" multiple>
+                <small>Up to 12 photos. Photos are resized automatically before uploading.</small>
                 <div class="boarding-photo-grid" data-boarding-photo-previews></div>
             </fieldset>
             <p class="boarding-editor-message" data-boarding-message role="status" aria-live="polite"></p>
@@ -203,39 +226,129 @@
             state.dialog.remove();
             for (const url of state.urls || []) URL.revokeObjectURL(url);
             if (editor === state) editor = null;
-        } catch (error) { msg(state, error.message); }
+        } catch (error) {
+            msg(state, error.message);
+        }
+    }
+
+    /* ---------- resize photos before saving or uploading ---------- */
+
+    async function prepareSitPhoto(file) {
+        let timer;
+
+        try {
+            return await Promise.race([
+                (async () => {
+                    const image = await loadVisitPhotoImage(file);
+                    const blob = await resizeVisitPhotoImage(image, 1600, 0.82);
+
+                    if (!blob || !blob.size || blob.type !== 'image/jpeg') {
+                        throw new Error('This photo could not be converted to JPEG.');
+                    }
+
+                    return blob;
+                })(),
+
+                new Promise((_, reject) => {
+                    timer = setTimeout(() => reject(new Error(
+                        'Photo preparation timed out. Open this photo in Photos, let it fully load, then try it again.'
+                    )), 45000);
+                })
+            ]);
+        } finally {
+            clearTimeout(timer);
+        }
     }
 
     async function addPhotos(state, files) {
-        if (state.busy || state.draft.locked) return;
+        if (state.busy || state.draft.locked || !files.length) return;
+
         collect(state);
         state.busy = true;
         controls(state);
+
+        const failures = [];
+        let added = 0;
+
         try {
-            if (state.draft.photos.length + files.length > 12) throw new Error('Use up to 12 photos per update.');
             for (const file of files) {
-                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024) {
-                    throw new Error('Choose JPEG, PNG or WebP photos no larger than 10 MB each.');
+                const name = file.name || 'Selected photo';
+
+                if (state.draft.photos.length >= 12) {
+                    failures.push('An update can contain up to 12 photos.');
+                    break;
+                }
+
+                try {
+                    if (!file.size) {
+                        throw new Error('The selected file is empty.');
+                    }
+
+                    const type = String(file.type || '').toLowerCase();
+
+                    if (
+                        !type.startsWith('image/') &&
+                        !(type === '' && /\.(jpe?g|png|webp|heic|heif)$/i.test(name))
+                    ) {
+                        throw new Error('Please select an image file.');
+                    }
+
+                    msg(state, `Preparing photo ${added + 1}: ${name}…`);
+
+                    const blob = await prepareSitPhoto(file);
+                    const id = crypto.randomUUID();
+
+                    const photo = {
+                        id,
+                        name,
+                        blob,
+                        path: `${state.draft.visit_id}/sit-${state.draft.request_id}-${id}.jpg`,
+                        uploaded: false
+                    };
+
+                    state.draft.photos.push(photo);
+
+                    try {
+                        await save(state);
+                    } catch (error) {
+                        state.draft.photos = state.draft.photos.filter(p => p.id !== id);
+                        throw error;
+                    }
+
+                    added++;
+                    renderPhotos(state);
+
+                } catch (error) {
+                    console.error('Sit photo preparation failed:', {
+                        name,
+                        type: file.type,
+                        bytes: file.size,
+                        error
+                    });
+
+                    failures.push(
+                        `${name}: ${error.message || 'This photo could not be prepared.'}`
+                    );
                 }
             }
-            for (const file of files) {
-                msg(state, `Preparing ${file.name}…`);
-                const { displayBlob } = await buildVisitPhotoVersions(file);
-                const id = crypto.randomUUID();
-                state.draft.photos.push({
-                    id, name: file.name, blob: displayBlob,
-                    path: `${state.draft.visit_id}/sit-${state.draft.request_id}-${id}.jpg`, uploaded: false
-                });
-                await save(state);
-            }
-            msg(state, 'Photos added to your draft.');
-        } catch (error) {
-            msg(state, error.message || 'A photo could not be prepared. Try another image.');
         } finally {
             state.busy = false;
-            state.dialog.querySelector('[data-boarding-photo-input]').value = '';
+
+            const input = state.dialog.querySelector('[data-boarding-photo-input]');
+            if (input) input.value = '';
+
             renderPhotos(state);
             controls(state);
+        }
+
+        const summary = added
+            ? `${added} photo${added === 1 ? '' : 's'} added to your draft. Press Send Sit Update when ready.`
+            : 'No photos were added.';
+
+        msg(state, [summary, ...failures].join('\n'));
+
+        if (failures.length) {
+            alert([summary, ...failures].join('\n\n'));
         }
     }
 
@@ -252,9 +365,11 @@
                 !state.draft.care.some(c => c.fed || c.fresh_water || c.pee || c.poop)) {
                 throw new Error('Add a note, photo or care update first.');
             }
+
             // Freeze content before the first upload so a retry sends the identical update.
             state.draft.locked = true;
             await save(state);
+
             for (let i = 0; i < state.draft.photos.length; i++) {
                 const photo = state.draft.photos[i];
                 if (photo.uploaded) continue;
@@ -265,15 +380,18 @@
                 photo.uploaded = true;
                 await save(state);
             }
+
             msg(state, 'Saving sit update…');
             rpcSent = true;
-            const { data, error } =await supabaseClient.rpc('admin_publish_sit_update', {
+
+            const { data, error } = await supabaseClient.rpc('admin_publish_sit_update', {
                 p_visit_id: state.draft.visit_id,
                 p_request_id: state.draft.request_id,
                 p_notes: state.draft.notes.trim(),
                 p_pet_care: state.draft.care,
                 p_photos: state.draft.photos.map(p => ({ storage_path: p.path, caption: '' }))
             });
+
             if (error) throw error;
             if (!data?.id || !data.published_at) throw new Error('The save could not be confirmed. Retry Send to check it safely.');
             published = true;
@@ -283,15 +401,21 @@
             renderForm(state);
             msg(state, 'Sit update sent ✓ The client was notified. Add another whenever you like.');
             await loadHistory(state);
+
         } catch (error) {
             console.error('Sit update save error:', error);
             const text = error?.message || 'The update could not be sent.';
+
             if (published) {
                 msg(state, 'Your update was sent, but the local draft could not be reset. Close and reopen this window before the next update.');
             } else if (state.draft.locked && (!rpcSent || serverRejected(error))) {
                 // Nothing was published, so let her edit, resend or discard instead of retrying forever.
                 unlockDraft(state, /request ID belongs/i.test(text));
-                try { await save(state); } catch (e) { /* ignore */ }
+                try {
+                    await save(state);
+                } catch (e) {
+                    /* ignore */
+                }
                 state.busy = false;
                 renderForm(state);
                 msg(state, `${text} Your draft is kept on this device. You can edit it and send again, or discard it.`);
@@ -345,9 +469,11 @@
                 <h3>Updates for this sit</h3>
                 <div data-boarding-history></div>
             </div>`;
+
         document.body.appendChild(dialog);
         editor = state;
         if (state.composing) renderForm(state);
+
         dialog.querySelector('[data-sit-add-final]')?.addEventListener('click', e => {
             e.currentTarget.remove();
             state.composing = true;
@@ -355,52 +481,81 @@
             renderForm(state);
             dialog.querySelector('[data-boarding-notes]')?.focus();
         });
-        dialog.addEventListener('cancel', e => { e.preventDefault(); void close(state); });
+
+        dialog.addEventListener('cancel', e => {
+            e.preventDefault();
+            void close(state);
+        });
+
         dialog.querySelector('[data-boarding-close]').addEventListener('click', () => void close(state));
-        dialog.querySelector('[data-boarding-compose]').addEventListener('submit', e => { e.preventDefault(); void send(state); });
+
+        dialog.querySelector('[data-boarding-compose]').addEventListener('submit', e => {
+            e.preventDefault();
+            void send(state);
+        });
+
         dialog.addEventListener('input', e => {
             if (!e.target.matches('[data-boarding-notes], [data-boarding-care]')) return;
             collect(state);
             void save(state).catch(err => msg(state, err.message));
         });
+
         dialog.addEventListener('change', e => {
-            if (e.target.matches('[data-boarding-photo-input]')) void addPhotos(state, Array.from(e.target.files || []));
+            if (e.target.matches('[data-boarding-photo-input]')) {
+                void addPhotos(state, Array.from(e.target.files || []));
+            }
         });
+
         dialog.addEventListener('click', async e => {
-            if (e.target.closest('[data-sit-discard]')) { void discardDraft(state); return; }
+            if (e.target.closest('[data-sit-discard]')) {
+                void discardDraft(state);
+                return;
+            }
+
             const remove = e.target.closest('[data-sit-remove-photo]');
             if (!remove || state.busy || state.draft.locked) return;
             collect(state);
             state.draft.photos = state.draft.photos.filter(p => p.id !== remove.dataset.sitRemovePhoto);
             renderPhotos(state);
-            try { await save(state); } catch (err) { msg(state, err.message); }
+            try {
+                await save(state);
+            } catch (err) {
+                msg(state, err.message);
+            }
         });
+
         dialog.showModal();
         if (navigator.onLine) void loadHistory(state);
         else state.dialog.querySelector('[data-boarding-history]').textContent = "You're offline. Earlier updates will show when you reconnect.";
     }
 
     /* ---------- the button (used by the visit popup and the classic card) ---------- */
+
     window.buildAdminSitUpdateButton = function (visit) {
         if (!canView(visit)) return null;
         const b = document.createElement('button');
         b.type = 'button';
         b.dataset.sitUpdateVisit = String(visit.id);
+
         if (isDone(visit)) {
             b.className = 'secondary-button admin-visit-action-button pis-sit-view-button';
             b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg> View Sit Updates';
+
             // Sit under the primary report button instead of on top of it.
             requestAnimationFrame(() => {
                 const report = b.parentElement?.querySelector('[data-visit-report-open]');
                 if (report && report.parentElement === b.parentElement) report.after(b);
             });
+
             return b;
         }
+
         if (!canUpdate(visit)) return null;
         b.className = 'primary-button admin-visit-action-button pis-sit-update-button';
         b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Send Sit Update';
         return b;
     };
+
     window.openAdminSitUpdateEditor = open;
 
     document.addEventListener('click', async e => {
@@ -409,9 +564,14 @@
         e.preventDefault();
         e.stopPropagation();
         button.disabled = true;
-        try { await open(button.dataset.sitUpdateVisit); }
-        catch (error) { console.error('Sit update editor error:', error); alert(error.message || 'Sit updates could not be opened.'); }
-        finally { if (button.isConnected) button.disabled = false; }
+        try {
+            await open(button.dataset.sitUpdateVisit);
+        } catch (error) {
+            console.error('Sit update editor error:', error);
+            alert(error.message || 'Sit updates could not be opened.');
+        } finally {
+            if (button.isConnected) button.disabled = false;
+        }
     }, true);
 
     const style = document.createElement('style');
