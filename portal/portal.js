@@ -9718,7 +9718,7 @@ function handleServiceTypeChange() {
         document.getElementById(
             "booking-date-help"
         ).textContent =
-            "Select at least 3 service dates per week.";
+            "Select your preferred service dates.";
 
     }
 
@@ -13721,51 +13721,29 @@ const weeklyDiscountRate = weeklyDiscountPercent / 100;
 function getWeekKey(
     dateString
 ) {
+    const date = parseLocalDate(dateString);
 
-    const date =
-        parseLocalDate(
-            dateString
-        );
+    const day = date.getDay();
 
-
-    // Sunday is day 0, so Sunday becomes
-    // the first day of the booking week.
-    const day =
-        date.getDay();
-
+    const difference =
+        day === 0
+            ? -6
+            : 1 - day;
 
     date.setDate(
-        date.getDate() -
-        day
+        date.getDate() + difference
     );
-
 
     return makeDateString(
         date.getFullYear(),
         date.getMonth(),
         date.getDate()
     );
-
 }
-
-// Most different service days in any 7-days-in-a-row stretch that
-// includes the given date. Same rule as pis_rolling_service_days().
-function getRollingServiceDayCount(date, dates) {
-    const unique = Array.from(new Set(dates));
-    let best = 0;
-    for (let offset = -6; offset <= 0; offset++) {
-        const start = addDaysToDateString(date, offset);
-        const end = addDaysToDateString(start, 6);
-        best = Math.max(best, unique.filter(d => d >= start && d <= end).length);
-    }
-    return best;
-}
-
 
 async function validateThreePerWeek(
     serviceType
 ) {
-
     if (selectedDates.length === 0) {
         return {
             valid: false,
@@ -13773,20 +13751,54 @@ async function validateThreePerWeek(
         };
     }
 
+    if (!currentUser?.id) {
+        return {
+            valid: false,
+            message: "Please sign in again before booking."
+        };
+    }
+
+    // ========================================
+    // CHECK CLIENT BOOKING MINIMUM
+    // ========================================
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("client_booking_rules")
+            .select("waive_minimum")
+            .eq("client_id", currentUser.id)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        if (data?.waive_minimum === true) {
+            return {
+                valid: true
+            };
+        }
+    } catch (error) {
+        console.error(
+            "Booking minimum could not be checked:",
+            error
+        );
+
+        return {
+            valid: false,
+            message:
+                "We couldn't verify your booking settings. Please try again."
+        };
+    }
+
     // ========================================
     // ROLLING 7-DAY RULE
     // ========================================
     //
-    // Every date booked needs at least 3 service
-    // dates (already booked + new) inside some
-    // 7-day stretch that includes it. That keeps
-    // the 3-per-week minimum while allowing
-    // schedules that cross the Sunday week line,
-    // like Friday, Saturday and Sunday.
+    // Every selected date needs at least 3 unique
+    // service dates inside a 7-day stretch that
+    // includes it.
     //
-    // Multiple visits on one date still count as
-    // ONE service date. Matches the database check
-    // in create_booking_checkout.
+    // Existing bookings and selected dates count.
+    // Multiple visits on one date count as one day.
     // ========================================
 
     const newDates =
@@ -13796,68 +13808,103 @@ async function validateThreePerWeek(
         addDaysToDateString(newDates[0], -6);
 
     const rangeEnd =
-        addDaysToDateString(newDates[newDates.length - 1], 6);
+        addDaysToDateString(
+            newDates[newDates.length - 1],
+            6
+        );
 
     const {
         data: existingVisits,
         error
-    } =
-        await supabaseClient
-            .from("visits")
-            .select("id, visit_date, service_type, status")
-            .eq("client_id", currentUser.id)
-            .eq("service_type", serviceType)
-            .gte("visit_date", rangeStart)
-            .lte("visit_date", rangeEnd);
+    } = await supabaseClient
+        .from("visits")
+        .select("id, visit_date, service_type, status")
+        .eq("client_id", currentUser.id)
+        .eq("service_type", serviceType)
+        .gte("visit_date", rangeStart)
+        .lte("visit_date", rangeEnd);
 
     if (error) {
-        console.error("Weekly booking validation error:", error);
+        console.error(
+            "Weekly booking validation error:",
+            error
+        );
+
         return {
             valid: false,
-            message: "We couldn't verify your existing bookings. Please try again."
+            message:
+                "We couldn't verify your existing bookings. Please try again."
         };
     }
 
-    // Cancelled services do not count.
-    const existingDates =
-        new Set(
-            (existingVisits || [])
-                .filter(visit =>
-                    String(visit.status || "").trim().toLowerCase() !== "cancelled")
-                .map(visit => visit.visit_date)
-        );
+    // ========================================
+    // COMBINE EXISTING AND SELECTED DATES
+    // ========================================
 
-    const allDates =
-        new Set([...existingDates, ...newDates]);
+    const existingDates = new Set(
+        (existingVisits || [])
+            .filter(visit =>
+                String(visit.status || "")
+                    .trim()
+                    .toLowerCase() !== "cancelled"
+            )
+            .map(visit => visit.visit_date)
+    );
+
+    const allDates = new Set([
+        ...existingDates,
+        ...newDates
+    ]);
 
     const countInStretch = startDate => {
-        const endDate = addDaysToDateString(startDate, 6);
+        const endDate =
+            addDaysToDateString(startDate, 6);
+
         let count = 0;
+
         allDates.forEach(date => {
-            if (date >= startDate && date <= endDate) count++;
+            if (
+                date >= startDate &&
+                date <= endDate
+            ) {
+                count++;
+            }
         });
+
         return count;
     };
 
-    for (const date of newDates) {
+    // ========================================
+    // VALIDATE EACH SELECTED DATE
+    // ========================================
 
+    for (const date of newDates) {
         let best = 0;
 
-        for (let offset = -6; offset <= 0; offset++) {
+        for (
+            let offset = -6;
+            offset <= 0;
+            offset++
+        ) {
             best = Math.max(
                 best,
-                countInStretch(addDaysToDateString(date, offset))
+                countInStretch(
+                    addDaysToDateString(date, offset)
+                )
             );
         }
 
         if (best < 3) {
-
             const remaining = 3 - best;
 
             const noun =
                 serviceType === "Dog Walking"
-                    ? remaining === 1 ? "walk" : "walks"
-                    : remaining === 1 ? "drop-in visit" : "drop-in visits";
+                    ? remaining === 1
+                        ? "walk"
+                        : "walks"
+                    : remaining === 1
+                        ? "drop-in visit"
+                        : "drop-in visits";
 
             return {
                 valid: false,
