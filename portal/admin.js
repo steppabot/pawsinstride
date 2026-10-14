@@ -23528,6 +23528,12 @@ async function openAdminClientHousehold(
     renderAdminClientLegacyDiscount(profile);
 
     // ========================================
+    // BOOKING MINIMUM
+    // ========================================
+
+    void loadAdminClientMinimumWaiver(profile.id);
+
+    // ========================================
     // ACCOUNT CREDIT
     // ========================================
 
@@ -29679,3 +29685,138 @@ renderAdminNeedsAttention =
         loadAdminReviewClaims();
 
     };
+
+// ========================================
+// CLIENT BOOKING MINIMUM WAIVER
+// ========================================
+
+let adminMinimumWaiverRequest = 0;
+const adminMinimumWaiverSaves = new Set();
+
+function renderAdminMinimumWaiverState(button, status, enabled) {
+    button.dataset.enabled = String(enabled);
+    button.setAttribute("aria-checked", String(enabled));
+    button.textContent = enabled ? "On" : "Off";
+    button.disabled = false;
+
+    status.textContent = enabled
+        ? "One-day bookings allowed for walks and drop-ins."
+        : "3-day minimum applies to walks and drop-ins.";
+}
+
+async function loadAdminClientMinimumWaiver(clientId) {
+    const button = document.getElementById(
+        "admin-client-minimum-waiver-toggle"
+    );
+
+    const status = document.getElementById(
+        "admin-client-minimum-waiver-status"
+    );
+
+    if (!button || !status) return;
+
+    const request = ++adminMinimumWaiverRequest;
+    const id = String(clientId);
+
+    button.dataset.clientId = id;
+    delete button.dataset.enabled;
+    button.disabled = true;
+    button.textContent = "Loading…";
+    button.setAttribute("aria-checked", "false");
+    status.textContent = "Loading booking rule…";
+
+    const stillCurrent = () =>
+        request === adminMinimumWaiverRequest &&
+        button.dataset.clientId === id;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("client_booking_rules")
+            .select("waive_minimum")
+            .eq("client_id", id)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!stillCurrent()) return;
+
+        renderAdminMinimumWaiverState(
+            button,
+            status,
+            data?.waive_minimum === true
+        );
+
+        if (adminMinimumWaiverSaves.has(id)) {
+            button.disabled = true;
+            button.textContent = "Saving…";
+        }
+    } catch (error) {
+        if (!stillCurrent()) return;
+
+        console.error("Booking minimum could not be loaded:", error);
+        button.disabled = true;
+        button.textContent = "Unavailable";
+        status.textContent =
+            "Could not load. Close and reopen this household to retry.";
+    }
+}
+
+document.addEventListener("click", async event => {
+    const button = event.target.closest?.(
+        "#admin-client-minimum-waiver-toggle"
+    );
+
+    if (!button || button.disabled) return;
+
+    const clientId = button.dataset.clientId;
+    if (!clientId || adminMinimumWaiverSaves.has(clientId)) return;
+
+    const enabled = button.dataset.enabled !== "true";
+    const status = document.getElementById(
+        "admin-client-minimum-waiver-status"
+    );
+
+    adminMinimumWaiverSaves.add(clientId);
+
+    // Invalidate any earlier read for this card.
+    ++adminMinimumWaiverRequest;
+
+    button.disabled = true;
+    button.textContent = "Saving…";
+    if (status) status.textContent = "Saving booking rule…";
+
+    let saveError = null;
+
+    try {
+        const { data, error } = await supabaseClient.rpc(
+            "set_client_minimum_waiver",
+            {
+                p_client_id: clientId,
+                p_enabled: enabled
+            }
+        );
+
+        if (error) throw error;
+        if (data !== enabled) {
+            throw new Error("The change could not be confirmed.");
+        }
+    } catch (error) {
+        console.error("Booking minimum could not be saved:", error);
+        saveError = error?.message || "Unable to save the booking rule.";
+    } finally {
+        adminMinimumWaiverSaves.delete(clientId);
+
+        if (button.dataset.clientId === clientId) {
+            await loadAdminClientMinimumWaiver(clientId);
+
+            if (saveError && button.dataset.clientId === clientId) {
+                const currentStatus = document.getElementById(
+                    "admin-client-minimum-waiver-status"
+                );
+
+                if (currentStatus) {
+                    currentStatus.textContent = saveError;
+                }
+            }
+        }
+    }
+});
