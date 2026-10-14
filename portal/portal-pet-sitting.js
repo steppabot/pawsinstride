@@ -27,7 +27,16 @@
     if (!config.options.some(o => o.value === 'Extended Sit - 6 Hours')) {
         config.options.push({ value: 'Extended Sit - 6 Hours', databaseOption: 'extended_6_hour' });
     }
-    config.options.sort((a, b) => (HOURS[a.value] || 99) - (HOURS[b.value] || 99));
+    config.options.sort((a, b) => {
+        const aOvernight = a.value === 'Overnight Sit - 12 Hours';
+        const bOvernight = b.value === 'Overnight Sit - 12 Hours';
+
+        if (aOvernight !== bOvernight) {
+            return aOvernight ? 1 : -1;
+        }
+
+        return (HOURS[a.value] || 99) - (HOURS[b.value] || 99);
+    });
 
     function clock(mins) {
         const h = Math.floor(mins / 60), m = mins % 60;
