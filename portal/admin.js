@@ -25913,6 +25913,13 @@ const adminPricingGroups = [
         kind: "sitting"
     },
     {
+        key: "pet-sitting-overnight",
+        title: "Overnight Pet Sitting — 12 Hours",
+        option: "overnight_12_hour",
+        types: ["pet_sitting"],
+        kind: "sitting"
+    },
+    {
         key: "boarding",
         title: "VIP Overnight Boarding",
         option: "vip_overnight",
@@ -26065,7 +26072,9 @@ function renderAdminPricingCards() {
                     .join("");
 
             const notes =
-                group.kind === "boarding"
+                group.key === "pet-sitting-overnight"
+                    ? "8 PM–8 AM or 9 PM–9 AM the next morning, in the client's home. Additional pets included. Five-day discounts apply; the holiday fee is added afterward based on the starting date."
+                    : group.kind === "boarding"
                     ? "Drop-off from 8 AM. Pickup by noon. Noon–3 PM pickup: $50 extended care. After 3 PM: an additional night. Pickup rules are shown for reference and are not edited here."
                     : group.kind === "sitting"
                         ? "Additional pets included. Holiday fee applies per session."
