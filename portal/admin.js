@@ -25834,389 +25834,320 @@ function restoreAdminNavigationState() {
 
 }
 
-
 // ========================================
 // SERVICES & PRICING MODAL
 // ========================================
 
 const adminServicesPricingModal =
-    document.getElementById(
-        "admin-services-pricing-modal"
-    );
-
+    document.getElementById("admin-services-pricing-modal");
 
 const adminOpenServicesPricingButton =
-    document.getElementById(
-        "admin-open-services-pricing"
-    );
-
+    document.getElementById("admin-open-services-pricing");
 
 const adminServicesPricingCloseButton =
-    document.getElementById(
-        "admin-services-pricing-close"
-    );
+    document.getElementById("admin-services-pricing-close");
+
+const adminPricingList =
+    document.getElementById("admin-services-pricing-list");
+
+const adminPricingTiers = [
+    "standard",
+    "grandfathered",
+    "preferred"
+];
+
+const adminPricingTierLabels = [
+    "Standard",
+    "Legacy",
+    "Preferred"
+];
+
+const adminPricingGroups = [
+    {
+        key: "15-minute",
+        title: "15-Minute Walk / Drop-In",
+        option: "15_min",
+        types: ["dog_walking", "drop_in"],
+        kind: "visits"
+    },
+    {
+        key: "30-minute",
+        title: "30-Minute Walk / Drop-In",
+        option: "30_min",
+        types: ["dog_walking", "drop_in"],
+        kind: "visits"
+    },
+    {
+        key: "60-minute",
+        title: "60-Minute Walk / Drop-In",
+        option: "60_min",
+        types: ["dog_walking", "drop_in"],
+        kind: "visits"
+    },
+    {
+        key: "pet-sitting-4-hour",
+        title: "Basic Sit — 4 Hours",
+        option: "basic_4_hour",
+        types: ["pet_sitting"],
+        kind: "sitting"
+    },
+    {
+        key: "pet-sitting-6-hour",
+        title: "Extended Sit — 6 Hours",
+        option: "extended_6_hour",
+        types: ["pet_sitting"],
+        kind: "sitting"
+    },
+    {
+        key: "pet-sitting-8-hour",
+        title: "Standard Sit — 8 Hours",
+        option: "standard_8_hour",
+        types: ["pet_sitting"],
+        kind: "sitting"
+    },
+    {
+        key: "pet-sitting-12-hour",
+        title: "VIP Sit — 12 Hours",
+        option: "vip_12_hour",
+        types: ["pet_sitting"],
+        kind: "sitting"
+    },
+    {
+        key: "boarding",
+        title: "VIP Overnight Boarding",
+        option: "vip_overnight",
+        types: ["dog_boarding"],
+        kind: "boarding"
+    }
+];
+
+const adminPricingFeeFields = {
+    visits: [
+        ["additional_pet_fee", "Additional pet / visit"],
+        ["after_6_fee", "After 6 PM"],
+        ["after_8_fee", "After 8 PM — total fee"],
+        ["holiday_fee", "Holiday / visit"]
+    ],
+    sitting: [
+        ["holiday_fee", "Holiday / session"]
+    ],
+    boarding: [
+        ["large_dog_fee", "Over 50 lb / pet / night"],
+        ["holiday_fee", "Holiday / night"]
+    ]
+};
+
+let adminPricingRows = [];
+let adminPricingLoadId = 0;
+let adminPricingSaving = false;
 
 
 // ========================================
-// SERVICE MENU HELPERS
+// PRICING ROW HELPERS
 // ========================================
 
-function closeAllAdminServiceMenus(
-    exceptKey =
-        null
-) {
-
-
-    const menuButtons =
-        document.querySelectorAll(
-            "[data-service-menu]"
-        );
-
-
-    const menuDropdowns =
-        document.querySelectorAll(
-            "[data-service-dropdown]"
-        );
-
-
-    menuButtons.forEach(
-        button => {
-
-
-            const serviceKey =
-                button.dataset
-                    .serviceMenu;
-
-
-            if (
-                serviceKey ===
-                exceptKey
-            ) {
-
-                return;
-
-            }
-
-
-            button.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-        }
+function adminPricingGroupRows(group) {
+    return adminPricingRows.filter(row =>
+        group.types.includes(row.service_type) &&
+        row.service_option === group.option &&
+        adminPricingTiers.includes(row.pricing_tier)
     );
+}
 
+function adminPricingCommonValue(rows, field) {
+    const values = rows.map(row => row[field]);
 
-    menuDropdowns.forEach(
-        dropdown => {
+    if (
+        !values.length ||
+        values.some(value =>
+            value === null ||
+            !Number.isFinite(Number(value))
+        )
+    ) {
+        return "";
+    }
 
+    return values.every(value =>
+        Number(value) === Number(values[0])
+    )
+        ? String(Number(values[0]))
+        : "";
+}
 
-            const serviceKey =
-                dropdown.dataset
-                    .serviceDropdown;
+function adminPricingField(label, attribute, key, value) {
+    return `
+        <label class="admin-service-rate-field">
+            <span>${label}</span>
 
+            <div class="admin-service-rate-input">
+                <span aria-hidden="true">$</span>
 
-            if (
-                serviceKey ===
-                exceptKey
-            ) {
-
-                return;
-
-            }
-
-
-            dropdown.hidden =
-                true;
-
-        }
-    );
-
+                <input
+                    type="number"
+                    min="0"
+                    max="999999.99"
+                    step="0.01"
+                    inputmode="decimal"
+                    aria-label="${label}"
+                    ${attribute}="${key}"
+                    value="${value}"
+                    data-original="${value}"
+                    placeholder="Varies"
+                    readonly
+                >
+            </div>
+        </label>
+    `;
 }
 
 
 // ========================================
-// OPEN / CLOSE SERVICE MENU
+// RENDER SERVICE PRICING CARDS
 // ========================================
 
-function toggleAdminServiceMenu(
-    serviceKey
-) {
+function renderAdminPricingCards() {
+    if (!adminPricingList) return;
 
+    adminPricingList.innerHTML =
+        adminPricingGroups.map(group => {
+            const rows = adminPricingGroupRows(group);
 
-    const menuButton =
-        document.querySelector(
-            `[data-service-menu="${serviceKey}"]`
-        );
-
-
-    const menuDropdown =
-        document.querySelector(
-            `[data-service-dropdown="${serviceKey}"]`
-        );
-
-
-    if (
-        !menuButton ||
-        !menuDropdown
-    ) {
-
-        return;
-
-    }
-
-
-    const isOpen =
-        menuButton.getAttribute(
-            "aria-expanded"
-        ) ===
-        "true";
-
-
-    closeAllAdminServiceMenus();
-
-
-    if (
-        isOpen
-    ) {
-
-        return;
-
-    }
-
-
-    menuButton.setAttribute(
-        "aria-expanded",
-        "true"
-    );
-
-
-    menuDropdown.hidden =
-        false;
-
-}
-
-
-// ========================================
-// APPLY SERVICE STATE
-// ========================================
-
-function applyAdminServiceState(
-    serviceKey,
-    isActive
-) {
-
-
-    const menuButton =
-        document.querySelector(
-            `[data-service-menu="${serviceKey}"]`
-        );
-
-
-    const serviceCard =
-        menuButton?.closest(
-            ".admin-service-pricing-card"
-        );
-
-
-    if (
-        !serviceCard
-    ) {
-
-        return;
-
-    }
-
-
-    const status =
-        serviceCard.querySelector(
-            ".admin-service-status"
-        );
-
-
-    const inputs =
-        serviceCard.querySelectorAll(
-            "input"
-        );
-
-
-    const actionButton =
-        serviceCard.querySelector(
-            "[data-service-action='deactivate'], [data-service-action='activate']"
-        );
-
-
-    serviceCard.classList.toggle(
-        "admin-service-is-inactive",
-        !isActive
-    );
-
-
-    if (
-        status
-    ) {
-
-        status.textContent =
-            isActive
-                ? "Active"
-                : "Inactive";
-
-    }
-
-
-    inputs.forEach(
-        input => {
-
-            input.disabled =
-                !isActive;
-
-        }
-    );
-
-
-    if (
-        actionButton
-    ) {
-
-        actionButton.dataset
-            .serviceAction =
-            isActive
-                ? "deactivate"
-                : "activate";
-
-
-        actionButton.textContent =
-            isActive
-                ? "Deactivate Service"
-                : "Activate Service";
-
-    }
-
-
-    // ========================================
-    // BOARDING SURCHARGES
-    // ========================================
-
-    if (
-        serviceKey ===
-        "boarding"
-    ) {
-
-
-        const boardingFees =
-            serviceCard
-                .nextElementSibling;
-
-
-        if (
-            boardingFees?.classList
-                .contains(
-                    "admin-boarding-fees"
+            const complete = group.types.every(type =>
+                adminPricingTiers.every(tier =>
+                    rows.filter(row =>
+                        row.service_type === type &&
+                        row.pricing_tier === tier
+                    ).length === 1
                 )
-        ) {
-
-
-            boardingFees.classList.toggle(
-                "admin-service-is-inactive",
-                !isActive
             );
 
+            const allActive =
+                rows.length > 0 &&
+                rows.every(row => row.active === true);
 
-            boardingFees
-                .querySelectorAll(
-                    "input"
-                )
-                .forEach(
-                    input => {
+            const anyActive =
+                rows.some(row => row.active === true);
 
-                        input.disabled =
-                            !isActive;
+            const status =
+                !complete
+                    ? "Pricing unavailable"
+                    : allActive
+                        ? "Active"
+                        : anyActive
+                            ? "Mixed availability"
+                            : "Inactive";
 
-                    }
-                );
+            const baseFields =
+                adminPricingTiers.map((tier, index) =>
+                    adminPricingField(
+                        adminPricingTierLabels[index],
+                        "data-price-tier",
+                        tier,
+                        adminPricingCommonValue(
+                            rows.filter(row =>
+                                row.pricing_tier === tier
+                            ),
+                            "base_price"
+                        )
+                    )
+                ).join("");
 
-        }
+            const fees =
+                adminPricingFeeFields[group.kind]
+                    .map(([field, label]) =>
+                        adminPricingField(
+                            label,
+                            "data-price-fee",
+                            field,
+                            adminPricingCommonValue(rows, field)
+                        )
+                    )
+                    .join("");
 
-    }
+            const notes =
+                group.kind === "boarding"
+                    ? "Drop-off from 8 AM. Pickup by noon. Noon–3 PM pickup: $50 extended care. After 3 PM: an additional night. Pickup rules are shown for reference and are not edited here."
+                    : group.kind === "sitting"
+                        ? "Additional pets included. Holiday fee applies per session."
+                        : "The after-8-PM field is the total evening fee: $10 means $5 after 6 PM plus another $5 after 8 PM. Walks and drop-ins share these settings.";
 
-}
-// ========================================
-// SET SERVICE PRICE INPUTS
-// ========================================
+            return `
+                <article
+                    class="admin-service-pricing-card admin-pricing-v2-card"
+                    data-pricing-key="${group.key}"
+                >
+                    <div class="admin-pricing-v2-heading">
+                        <h3>${group.title}</h3>
 
-function setAdminServicePrices(
-    serviceKey,
-    standardPrice,
-    grandfatheredPrice,
-    preferredPrice
-) {
+                        <span class="admin-service-status">
+                            ${status}
+                        </span>
+                    </div>
 
+                    <div class="admin-service-pricing-rates">
+                        ${baseFields}
+                    </div>
 
-    const menuButton =
-        document.querySelector(
-            `[data-service-menu="${serviceKey}"]`
-        );
+                    <div class="admin-pricing-v2-fees">
+                        <strong>Surcharges</strong>
 
+                        <div class="admin-pricing-v2-fee-grid">
+                            ${fees}
+                        </div>
 
-    const serviceCard =
-        menuButton?.closest(
-            ".admin-service-pricing-card"
-        );
+                        <p class="admin-pricing-v2-note">
+                            ${notes}
+                        </p>
 
+                        <p class="admin-pricing-v2-note">
+                            Surcharge edits apply to Standard, Legacy
+                            and Preferred. “Varies” keeps existing amounts
+                            until you enter a replacement.
+                        </p>
+                    </div>
 
-    if (
-        !serviceCard
-    ) {
+                    <p
+                        class="admin-pricing-v2-message"
+                        role="status"
+                    ></p>
 
-        return;
+                    <div class="admin-pricing-v2-actions">
+                        <button
+                            type="button"
+                            data-pricing-action="edit"
+                            ${complete ? "" : "disabled"}
+                        >
+                            Edit
+                        </button>
 
-    }
+                        <button
+                            type="button"
+                            data-pricing-action="toggle"
+                            data-next-active="${!allActive}"
+                            ${complete ? "" : "disabled"}
+                        >
+                            ${allActive ? "Deactivate" : "Activate"}
+                        </button>
 
+                        <button
+                            type="button"
+                            data-pricing-action="cancel"
+                            hidden
+                        >
+                            Cancel
+                        </button>
 
-    const inputs =
-        serviceCard.querySelectorAll(
-            ".admin-service-pricing-rates input"
-        );
-
-
-    if (
-        inputs[0]
-    ) {
-
-        inputs[0].value =
-            Number(
-                standardPrice ||
-                0
-            );
-
-    }
-
-
-    if (
-        inputs[1]
-    ) {
-
-        inputs[1].value =
-            Number(
-                grandfatheredPrice ||
-                0
-            );
-
-    }
-
-
-    if (
-        inputs[2]
-    ) {
-
-        inputs[2].value =
-            Number(
-                preferredPrice ||
-                0
-            );
-
-    }
-
+                        <button
+                            type="button"
+                            data-pricing-action="save"
+                            hidden
+                        >
+                            Save changes
+                        </button>
+                    </div>
+                </article>
+            `;
+        }).join("");
 }
 
 
@@ -26225,1742 +26156,365 @@ function setAdminServicePrices(
 // ========================================
 
 async function loadAdminServicePricing(background = false) {
+    const deferRefresh = () =>
+        background && (
+            adminPricingSaving ||
+            adminPricingList?.querySelector(
+                ".admin-service-is-editing"
+            ) ||
+            window.PawsLiveSync?.deferForms(
+                "#admin-services-pricing-modal",
+                "service_prices"
+            )
+        );
 
+    if (deferRefresh()) return;
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .rpc(
+    const request = ++adminPricingLoadId;
+
+    if (!background && adminPricingList) {
+        adminPricingList.textContent =
+            "Loading service prices…";
+    }
+
+    try {
+        const { data, error } =
+            await supabaseClient.rpc(
                 "get_admin_service_prices"
             );
 
+        if (error) throw error;
 
-    if (
-        error
-    ) {
+        if (
+            request !== adminPricingLoadId ||
+            deferRefresh()
+        ) {
+            return;
+        }
 
+        adminPricingRows = data || [];
+        renderAdminPricingCards();
+
+    } catch (error) {
+        if (request !== adminPricingLoadId) return;
 
         console.error(
-            "Admin service pricing load error:",
+            "Service pricing load failed:",
             error
         );
 
-
-        throw error;
-
+        if (!background && adminPricingList) {
+            adminPricingList.textContent =
+                "Couldn't load prices. Close and reopen this window to try again.";
+        }
     }
-
-
-    if (background && window.PawsLiveSync?.deferForms('#admin-services-pricing-modal', 'service_prices')) return;
-
-    const prices =
-        data ||
-        [];
-
-
-    // ========================================
-    // FIND PRICE ROW
-    // ========================================
-
-    function findPrice(
-        serviceType,
-        serviceOption,
-        pricingTier
-    ) {
-
-
-        return prices.find(
-            row =>
-
-                row.service_type ===
-                    serviceType &&
-
-                row.service_option ===
-                    serviceOption &&
-
-                row.pricing_tier ===
-                    pricingTier
-        ) ||
-        null;
-
-    }
-
-
-    // ========================================
-    // 15 MINUTE WALK / DROP-IN
-    // ========================================
-
-    const fifteenStandard =
-        findPrice(
-            "dog_walking",
-            "15_min",
-            "standard"
-        );
-
-
-    const fifteenGrandfathered =
-        findPrice(
-            "dog_walking",
-            "15_min",
-            "grandfathered"
-        );
-
-
-    const fifteenPreferred =
-        findPrice(
-            "dog_walking",
-            "15_min",
-            "preferred"
-        );
-
-
-    setAdminServicePrices(
-        "15-minute",
-        fifteenStandard?.base_price,
-        fifteenGrandfathered?.base_price,
-        fifteenPreferred?.base_price
-    );
-
-
-    applyAdminServiceState(
-        "15-minute",
-        Boolean(
-            fifteenStandard?.active &&
-            fifteenGrandfathered?.active &&
-            fifteenPreferred?.active
-        )
-    );
-
-
-    // ========================================
-    // 30 MINUTE WALK / DROP-IN
-    // ========================================
-
-    const thirtyStandard =
-        findPrice(
-            "dog_walking",
-            "30_min",
-            "standard"
-        );
-
-
-    const thirtyGrandfathered =
-        findPrice(
-            "dog_walking",
-            "30_min",
-            "grandfathered"
-        );
-
-
-    const thirtyPreferred =
-        findPrice(
-            "dog_walking",
-            "30_min",
-            "preferred"
-        );
-
-
-    setAdminServicePrices(
-        "30-minute",
-        thirtyStandard?.base_price,
-        thirtyGrandfathered?.base_price,
-        thirtyPreferred?.base_price
-    );
-
-
-    applyAdminServiceState(
-        "30-minute",
-        Boolean(
-            thirtyStandard?.active &&
-            thirtyGrandfathered?.active &&
-            thirtyPreferred?.active
-        )
-    );
-
-
-    // ========================================
-    // 60 MINUTE WALK / DROP-IN
-    // ========================================
-
-    const sixtyStandard =
-        findPrice(
-            "dog_walking",
-            "60_min",
-            "standard"
-        );
-
-
-    const sixtyGrandfathered =
-        findPrice(
-            "dog_walking",
-            "60_min",
-            "grandfathered"
-        );
-
-
-    const sixtyPreferred =
-        findPrice(
-            "dog_walking",
-            "60_min",
-            "preferred"
-        );
-
-
-    setAdminServicePrices(
-        "60-minute",
-        sixtyStandard?.base_price,
-        sixtyGrandfathered?.base_price,
-        sixtyPreferred?.base_price
-    );
-
-
-    applyAdminServiceState(
-        "60-minute",
-        Boolean(
-            sixtyStandard?.active &&
-            sixtyGrandfathered?.active &&
-            sixtyPreferred?.active
-        )
-    );
-
-
-    // ========================================
-    // 4 HOUR PET SITTING
-    // ========================================
-
-    const petSitting4Standard =
-        findPrice(
-            "pet_sitting",
-            "basic_4_hour",
-            "standard"
-        );
-
-
-    const petSitting4Grandfathered =
-        findPrice(
-            "pet_sitting",
-            "basic_4_hour",
-            "grandfathered"
-        );
-
-
-    const petSitting4Preferred =
-        findPrice(
-            "pet_sitting",
-            "basic_4_hour",
-            "preferred"
-        );
-
-
-    setAdminServicePrices(
-        "pet-sitting-4-hour",
-        petSitting4Standard?.base_price,
-        petSitting4Grandfathered?.base_price,
-        petSitting4Preferred?.base_price
-    );
-
-
-    applyAdminServiceState(
-        "pet-sitting-4-hour",
-        Boolean(
-            petSitting4Standard?.active &&
-            petSitting4Grandfathered?.active &&
-            petSitting4Preferred?.active
-        )
-    );
-
-
-    // ========================================
-    // 8 HOUR PET SITTING
-    // ========================================
-
-    const petSitting8Standard =
-        findPrice(
-            "pet_sitting",
-            "standard_8_hour",
-            "standard"
-        );
-
-
-    const petSitting8Grandfathered =
-        findPrice(
-            "pet_sitting",
-            "standard_8_hour",
-            "grandfathered"
-        );
-
-
-    const petSitting8Preferred =
-        findPrice(
-            "pet_sitting",
-            "standard_8_hour",
-            "preferred"
-        );
-
-
-    setAdminServicePrices(
-        "pet-sitting-8-hour",
-        petSitting8Standard?.base_price,
-        petSitting8Grandfathered?.base_price,
-        petSitting8Preferred?.base_price
-    );
-
-
-    applyAdminServiceState(
-        "pet-sitting-8-hour",
-        Boolean(
-            petSitting8Standard?.active &&
-            petSitting8Grandfathered?.active &&
-            petSitting8Preferred?.active
-        )
-    );
-
-
-    // ========================================
-    // 12 HOUR PET SITTING
-    // ========================================
-
-    const petSitting12Standard =
-        findPrice(
-            "pet_sitting",
-            "vip_12_hour",
-            "standard"
-        );
-
-
-    const petSitting12Grandfathered =
-        findPrice(
-            "pet_sitting",
-            "vip_12_hour",
-            "grandfathered"
-        );
-
-
-    const petSitting12Preferred =
-        findPrice(
-            "pet_sitting",
-            "vip_12_hour",
-            "preferred"
-        );
-
-
-    setAdminServicePrices(
-        "pet-sitting-12-hour",
-        petSitting12Standard?.base_price,
-        petSitting12Grandfathered?.base_price,
-        petSitting12Preferred?.base_price
-    );
-
-
-    applyAdminServiceState(
-        "pet-sitting-12-hour",
-        Boolean(
-            petSitting12Standard?.active &&
-            petSitting12Grandfathered?.active &&
-            petSitting12Preferred?.active
-        )
-    );
-
-
-    // ========================================
-    // BOARDING
-    // ========================================
-
-    const boardingStandard =
-        findPrice(
-            "dog_boarding",
-            "vip_overnight",
-            "standard"
-        );
-
-
-    const boardingGrandfathered =
-        findPrice(
-            "dog_boarding",
-            "vip_overnight",
-            "grandfathered"
-        );
-
-
-    const boardingPreferred =
-        findPrice(
-            "dog_boarding",
-            "vip_overnight",
-            "preferred"
-        );
-
-
-    setAdminServicePrices(
-        "boarding",
-        boardingStandard?.base_price,
-        boardingGrandfathered?.base_price,
-        boardingPreferred?.base_price
-    );
-
-
-    applyAdminServiceState(
-        "boarding",
-        Boolean(
-            boardingStandard?.active &&
-            boardingGrandfathered?.active &&
-            boardingPreferred?.active
-        )
-    );
-
-
-    // ========================================
-    // BOARDING SURCHARGES
-    // ========================================
-
-    const holidayInput =
-        document.querySelector(
-            'input[aria-label="Holiday boarding surcharge"]'
-        );
-
-
-    const largeDogInput =
-        document.querySelector(
-            'input[aria-label="Large dog boarding surcharge"]'
-        );
-
-
-    if (
-        holidayInput
-    ) {
-
-        holidayInput.value =
-            Number(
-                boardingStandard
-                    ?.holiday_fee ||
-                0
-            );
-
-    }
-
-
-    if (
-        largeDogInput
-    ) {
-
-        largeDogInput.value =
-            Number(
-                boardingStandard
-                    ?.large_dog_fee ||
-                0
-            );
-
-    }
-
-
-    // ========================================
-    // LOCK LOADED PRICES
-    // ========================================
-
-    lockAllAdminServiceInputs();
-
-
-    console.log(
-        "Loaded admin service pricing:",
-        prices.length
-    );
-
 }
+
 
 // ========================================
 // OPEN SERVICES & PRICING
 // ========================================
 
 async function openAdminServicesPricingModal() {
+    if (!adminServicesPricingModal) return;
 
-
-    if (
-        !adminServicesPricingModal
-    ) {
-
-        return;
-
-    }
-
-
-    adminServicesPricingModal.hidden =
-        false;
-
+    adminServicesPricingModal.hidden = false;
 
     document.body.classList.add(
         "admin-services-pricing-open"
     );
 
-
-    try {
-
-
-        await loadAdminServicePricing();
-
-
-    } catch (
-        error
-    ) {
-
-
-        console.error(
-            "Unable to load Services & Pricing:",
-            error
+    const description =
+        adminServicesPricingModal.querySelector(
+            ".admin-services-pricing-header p"
         );
 
+    if (description) {
+        description.textContent =
+            "Manage Standard, Legacy and Preferred prices, surcharges and service availability.";
     }
 
+    await loadAdminServicePricing();
 
-    adminServicesPricingCloseButton
-        ?.focus();
-
+    adminServicesPricingCloseButton?.focus();
 }
+
 
 // ========================================
 // CLOSE SERVICES & PRICING
 // ========================================
 
 function closeAdminServicesPricingModal() {
-
-
     if (
-        !adminServicesPricingModal
+        !adminServicesPricingModal ||
+        adminPricingSaving
     ) {
-
         return;
-
     }
 
+    ++adminPricingLoadId;
 
-    closeAllAdminServiceMenus();
-
-
-    adminServicesPricingModal.hidden =
-        true;
-
+    adminServicesPricingModal.hidden = true;
 
     document.body.classList.remove(
         "admin-services-pricing-open"
     );
 
-
-    adminOpenServicesPricingButton
-        ?.focus();
-
+    adminOpenServicesPricingButton?.focus();
 }
-
-
-// ========================================
-// OPEN BUTTON
-// ========================================
-
-adminOpenServicesPricingButton
-    ?.addEventListener(
-
-        "click",
-
-        openAdminServicesPricingModal
-
-    );
-
-
-// ========================================
-// CLOSE BUTTON
-// ========================================
-
-adminServicesPricingCloseButton
-    ?.addEventListener(
-
-        "click",
-
-        closeAdminServicesPricingModal
-
-    );
 
 
 // ========================================
 // SERVICE EDIT STATE
 // ========================================
 
-const adminServiceEditSnapshots =
-    new Map();
-
-
-// ========================================
-// GET SERVICE CARD
-// ========================================
-
-function getAdminServiceCard(
-    serviceKey
-) {
-
-
-    const menuButton =
-        document.querySelector(
-            `[data-service-menu="${serviceKey}"]`
-        );
-
-
-    return (
-        menuButton?.closest(
-            ".admin-service-pricing-card"
-        ) ||
-        null
+function setAdminPricingEditing(card, editing) {
+    card.classList.toggle(
+        "admin-service-is-editing",
+        editing
     );
 
-}
+    card.querySelectorAll("input").forEach(input => {
+        input.readOnly = !editing;
 
+        if (!editing) {
+            input.value = input.dataset.original;
+        }
+    });
 
-// ========================================
-// GET SERVICE EDIT INPUTS
-// ========================================
-
-function getAdminServiceEditInputs(
-    serviceKey
-) {
-
-
-    const serviceCard =
-        getAdminServiceCard(
-            serviceKey
-        );
-
-
-    if (
-        !serviceCard
-    ) {
-
-        return [];
-
-    }
-
-
-    const inputs =
-        [
-            ...serviceCard.querySelectorAll(
-                ".admin-service-pricing-rates input"
-            )
-        ];
-
-
-    // ========================================
-    // BOARDING SURCHARGES
-    // ========================================
-
-    if (
-        serviceKey ===
-        "boarding"
-    ) {
-
-
-        const boardingFees =
-            serviceCard
-                .nextElementSibling;
-
-
-        if (
-            boardingFees?.classList
-                .contains(
-                    "admin-boarding-fees"
-                )
-        ) {
-
-
-            inputs.push(
-                ...boardingFees.querySelectorAll(
-                    "input"
-                )
+    card.querySelectorAll(
+        "[data-pricing-action]"
+    ).forEach(button => {
+        const isEditAction =
+            ["cancel", "save"].includes(
+                button.dataset.pricingAction
             );
 
-        }
+        button.hidden = editing !== isEditAction;
+    });
 
-    }
-
-
-    return inputs;
-
+    card.querySelector(
+        ".admin-pricing-v2-message"
+    ).textContent = "";
 }
 
-
-// ========================================
-// LOCK SERVICE PRICE INPUTS
-// ========================================
-
-function lockAdminServiceInputs(
-    serviceKey
-) {
-
-
-    const serviceCard =
-        getAdminServiceCard(
-            serviceKey
-        );
-
-
-    if (
-        !serviceCard
-    ) {
-
-        return;
-
-    }
-
-
-    const isActive =
-        !serviceCard.classList.contains(
-            "admin-service-is-inactive"
-        );
-
-
-    getAdminServiceEditInputs(
-        serviceKey
-    )
-        .forEach(
-            input => {
-
-
-                input.readOnly =
-                    true;
-
-
-                input.disabled =
-                    !isActive;
-
-            }
-        );
-
-}
-
-
-// ========================================
-// LOCK ALL SERVICE PRICE INPUTS
-// ========================================
-
-function lockAllAdminServiceInputs() {
-
-
-    [
-        "15-minute",
-        "30-minute",
-        "60-minute",
-
-        "pet-sitting-4-hour",
-        "pet-sitting-8-hour",
-        "pet-sitting-12-hour",
-
-        "boarding"
-    ]
-        .forEach(
-            serviceKey => {
-
-                lockAdminServiceInputs(
-                    serviceKey
-                );
-
-            }
-        );
-
-}
-
-
-// ========================================
-// ENSURE EDIT ACTION BUTTONS
-// ========================================
-
-function ensureAdminServiceEditActions(
-    serviceKey
-) {
-
-
-    const serviceCard =
-        getAdminServiceCard(
-            serviceKey
-        );
-
-
-    if (
-        !serviceCard
-    ) {
-
-        return null;
-
-    }
-
-
-    let actions =
-        serviceCard.querySelector(
-            ".admin-service-edit-actions"
-        );
-
-
-    if (
-        actions
-    ) {
-
-        return actions;
-
-    }
-
-
-    actions =
-        document.createElement(
-            "div"
-        );
-
-
-    actions.className =
-        "admin-service-edit-actions";
-
-
-    actions.innerHTML =
-        `
-
-            <button
-                type="button"
-                class="admin-service-edit-cancel"
-                data-service-edit-cancel="${serviceKey}"
-            >
-                Cancel
-            </button>
-
-            <button
-                type="button"
-                class="admin-service-edit-save"
-                data-service-edit-save="${serviceKey}"
-            >
-                Save
-            </button>
-
-        `;
-
-
-    serviceCard.appendChild(
-        actions
-    );
-
-
-    return actions;
-
-}
-
-
-// ========================================
-// BEGIN SERVICE EDIT
-// ========================================
-
-function beginAdminServiceEdit(
-    serviceKey
-) {
-
-
-    const serviceCard =
-        getAdminServiceCard(
-            serviceKey
-        );
-
-
-    if (
-        !serviceCard
-    ) {
-
-        return;
-
-    }
-
-
-    // ========================================
-    // CLOSE ANY OTHER EDIT
-    // ========================================
-
-    document
-        .querySelectorAll(
-            ".admin-service-pricing-card.admin-service-is-editing"
-        )
-        .forEach(
-            card => {
-
-
-                if (
-                    card ===
-                    serviceCard
-                ) {
-
-                    return;
-
-                }
-
-
-                const otherMenuButton =
-                    card.querySelector(
-                        "[data-service-menu]"
-                    );
-
-
-                const otherServiceKey =
-                    otherMenuButton?.dataset
-                        .serviceMenu;
-
-
-                if (
-                    otherServiceKey
-                ) {
-
-                    cancelAdminServiceEdit(
-                        otherServiceKey
-                    );
-
-                }
-
-            }
-        );
-
-
-    const inputs =
-        getAdminServiceEditInputs(
-            serviceKey
-        );
-
-
-    // ========================================
-    // SAVE ORIGINAL VALUES
-    // ========================================
-
-    adminServiceEditSnapshots.set(
-        serviceKey,
-        inputs.map(
-            input =>
-                input.value
-        )
-    );
-
-
-    ensureAdminServiceEditActions(
-        serviceKey
-    );
-
-
-    serviceCard.classList.add(
-        "admin-service-is-editing"
-    );
-
-
-    // ========================================
-    // BOARDING EDIT STATE
-    // ========================================
-
-    if (
-        serviceKey ===
-        "boarding"
-    ) {
-
-
-        const boardingFees =
-            serviceCard
-                .nextElementSibling;
-
-
-        boardingFees?.classList.add(
-            "admin-service-is-editing"
-        );
-
-    }
-
-
-    inputs.forEach(
-        input => {
-
-
-            input.disabled =
-                false;
-
-
-            input.readOnly =
-                false;
-
-        }
-    );
-
-
-    closeAllAdminServiceMenus();
-
-
-}
-
-// ========================================
-// FINISH SERVICE EDIT
-// ========================================
-
-function finishAdminServiceEdit(
-    serviceKey
-) {
-
-
-    const serviceCard =
-        getAdminServiceCard(
-            serviceKey
-        );
-
-
-    if (
-        !serviceCard
-    ) {
-
-        return;
-
-    }
-
-
-    serviceCard.classList.remove(
-        "admin-service-is-editing"
-    );
-
-
-    // ========================================
-    // BOARDING EDIT STATE
-    // ========================================
-
-    if (
-        serviceKey ===
-        "boarding"
-    ) {
-
-
-        const boardingFees =
-            serviceCard
-                .nextElementSibling;
-
-
-        boardingFees?.classList.remove(
-            "admin-service-is-editing"
-        );
-
-    }
-
-
-    adminServiceEditSnapshots.delete(
-        serviceKey
-    );
-
-
-    lockAdminServiceInputs(
-        serviceKey
-    );
-
-}
-
-
-// ========================================
-// CANCEL SERVICE EDIT
-// ========================================
-
-function cancelAdminServiceEdit(
-    serviceKey
-) {
-
-
-    const snapshot =
-        adminServiceEditSnapshots.get(
-            serviceKey
-        );
-
-
-    const inputs =
-        getAdminServiceEditInputs(
-            serviceKey
-        );
-
-
-    if (
-        Array.isArray(
-            snapshot
-        )
-    ) {
-
-
-        inputs.forEach(
-            (
-                input,
-                index
-            ) => {
-
-
-                if (
-                    snapshot[index] !==
-                    undefined
-                ) {
-
-                    input.value =
-                        snapshot[index];
-
-                }
-
-            }
-        );
-
-    }
-
-
-    finishAdminServiceEdit(
-        serviceKey
-    );
-
-}
 
 // ========================================
 // SAVE ADMIN SERVICE PRICING
 // ========================================
 
-async function saveAdminServicePricing(
-    serviceKey
+async function saveAdminPricingCard(
+    card,
+    active = null
 ) {
-
-
-    const serviceCard =
-        getAdminServiceCard(
-            serviceKey
+    const group =
+        adminPricingGroups.find(item =>
+            item.key === card.dataset.pricingKey
         );
 
+    const message =
+        card.querySelector(
+            ".admin-pricing-v2-message"
+        );
 
-    if (
-        !serviceCard
-    ) {
+    const prices = {};
+    const fees = {};
 
-        return false;
+    for (const input of card.querySelectorAll("input")) {
+        if (
+            input.value === input.dataset.original ||
+            active !== null
+        ) {
+            continue;
+        }
 
+        const value = Number(input.value);
+
+        if (
+            !input.value.trim() ||
+            !input.checkValidity() ||
+            !Number.isFinite(value) ||
+            value < 0
+        ) {
+            message.textContent =
+                "Enter a valid dollar amount with at most two decimal places.";
+
+            input.focus();
+            return;
+        }
+
+        if (input.dataset.priceTier) {
+            prices[input.dataset.priceTier] = value;
+        }
+
+        if (input.dataset.priceFee) {
+            fees[input.dataset.priceFee] = value;
+        }
     }
 
-
-    const priceInputs =
-        serviceCard.querySelectorAll(
-            ".admin-service-pricing-rates input"
-        );
-
-
-    const standardPrice =
-        Number(
-            priceInputs[0]?.value ||
-            0
-        );
-
-
-    const grandfatheredPrice =
-        Number(
-            priceInputs[1]?.value ||
-            0
-        );
-
-
-    const preferredPrice =
-        Number(
-            priceInputs[2]?.value ||
-            0
-        );
-
-
-    const isActive =
-        !serviceCard.classList.contains(
-            "admin-service-is-inactive"
-        );
-
-
-    let holidayFee =
-        null;
-
-
-    let largeDogFee =
-        null;
-
-
-    // ========================================
-    // BOARDING SURCHARGES
-    // ========================================
-
     if (
-        serviceKey ===
-        "boarding"
+        active === null &&
+        !Object.keys(prices).length &&
+        !Object.keys(fees).length
     ) {
-
-
-        const holidayInput =
-            document.querySelector(
-                'input[aria-label="Holiday boarding surcharge"]'
-            );
-
-
-        const largeDogInput =
-            document.querySelector(
-                'input[aria-label="Large dog boarding surcharge"]'
-            );
-
-
-        holidayFee =
-            Number(
-                holidayInput?.value ||
-                0
-            );
-
-
-        largeDogFee =
-            Number(
-                largeDogInput?.value ||
-                0
-            );
-
+        setAdminPricingEditing(card, false);
+        return;
     }
 
+    const disabledBeforeSave =
+        new Map(
+            [
+                ...adminPricingList.querySelectorAll(
+                    "button, input"
+                )
+            ].map(element => [
+                element,
+                element.disabled
+            ])
+        );
 
-    const {
-        error
-    } =
-        await supabaseClient
-            .rpc(
-                "update_admin_service_pricing",
+    adminPricingSaving = true;
+
+    adminPricingList.querySelectorAll(
+        "button, input"
+    ).forEach(element => {
+        element.disabled = true;
+    });
+
+    message.textContent = "Saving…";
+
+    try {
+        const { error } =
+            await supabaseClient.rpc(
+                "save_admin_service_pricing_v2",
                 {
-                    p_service_key:
-                        serviceKey,
-
-                    p_standard_price:
-                        standardPrice,
-
-                    p_grandfathered_price:
-                        grandfatheredPrice,
-
-                    p_preferred_price:
-                        preferredPrice,
-
-                    p_active:
-                        isActive,
-
-                    p_holiday_fee:
-                        holidayFee,
-
-                    p_large_dog_fee:
-                        largeDogFee
+                    p_service_key: group.key,
+                    p_prices: prices,
+                    p_fees: fees,
+                    p_active: active,
+                    p_expected: adminPricingGroupRows(group)
                 }
             );
 
+        if (error) throw error;
 
-    if (
-        error
-    ) {
+        await loadAdminServicePricing();
 
-
+    } catch (error) {
         console.error(
-            "Admin service pricing save error:",
+            "Service pricing save failed:",
             error
         );
 
+        message.textContent =
+            error?.message ||
+            "Couldn't save. Your changes are still here; please try again.";
 
-        return false;
+    } finally {
+        adminPricingSaving = false;
 
+        if (card.isConnected) {
+            disabledBeforeSave.forEach(
+                (disabled, element) => {
+                    element.disabled = disabled;
+                }
+            );
+        }
     }
-
-
-    console.log(
-        "Saved service pricing:",
-        serviceKey
-    );
-
-
-    return true;
-
 }
 
-// ========================================
-// SERVICE MENU CLICK HANDLER
-// ========================================
-
-adminServicesPricingModal
-    ?.addEventListener(
-
-        "click",
-
-        async event => {
-
-
-            // ========================================
-            // SAVE EDIT
-            // ========================================
-            
-            const saveEditButton =
-                event.target.closest(
-                    "[data-service-edit-save]"
-                );
-            
-            
-            if (
-                saveEditButton
-            ) {
-            
-            
-                const serviceKey =
-                    saveEditButton.dataset
-                        .serviceEditSave;
-            
-            
-                const serviceCard =
-                    getAdminServiceCard(
-                        serviceKey
-                    );
-            
-            
-                const cancelButton =
-                    serviceCard?.querySelector(
-                        "[data-service-edit-cancel]"
-                    );
-            
-            
-                const originalSaveText =
-                    saveEditButton.textContent;
-            
-            
-                saveEditButton.disabled =
-                    true;
-            
-            
-                if (
-                    cancelButton
-                ) {
-            
-                    cancelButton.disabled =
-                        true;
-            
-                }
-            
-            
-                saveEditButton.textContent =
-                    "Saving...";
-            
-            
-                try {
-            
-            
-                    const saved =
-                        await saveAdminServicePricing(
-                            serviceKey
-                        );
-            
-            
-                    if (
-                        !saved
-                    ) {
-            
-                        return;
-            
-                    }
-            
-            
-                    // ========================================
-                    // EXIT EDIT MODE IMMEDIATELY
-                    // ========================================
-            
-                    finishAdminServiceEdit(
-                        serviceKey
-                    );
-            
-            
-                    // ========================================
-                    // RELOAD SAVED DATABASE VALUES
-                    // ========================================
-            
-                    await loadAdminServicePricing();
-            
-            
-                } catch (
-                    error
-                ) {
-            
-            
-                    console.error(
-                        "Unable to finish service price save:",
-                        error
-                    );
-            
-            
-                } finally {
-            
-            
-                    saveEditButton.disabled =
-                        false;
-            
-            
-                    if (
-                        cancelButton
-                    ) {
-            
-                        cancelButton.disabled =
-                            false;
-            
-                    }
-            
-            
-                    saveEditButton.textContent =
-                        originalSaveText ||
-                        "Save";
-            
-                }
-            
-            
-                return;
-            
-            }
-
-            // ========================================
-            // CANCEL EDIT
-            // ========================================
-
-            const cancelEditButton =
-                event.target.closest(
-                    "[data-service-edit-cancel]"
-                );
-
-
-            if (
-                cancelEditButton
-            ) {
-
-
-                cancelAdminServiceEdit(
-                    cancelEditButton.dataset
-                        .serviceEditCancel
-                );
-
-
-                return;
-
-            }
-
-
-            // ========================================
-            // THREE-DOT MENU BUTTON
-            // ========================================
-
-            const menuButton =
-                event.target.closest(
-                    "[data-service-menu]"
-                );
-
-
-            if (
-                menuButton
-            ) {
-
-
-                event.stopPropagation();
-
-
-                toggleAdminServiceMenu(
-                    menuButton.dataset
-                        .serviceMenu
-                );
-
-
-                return;
-
-            }
-
-
-            // ========================================
-            // MENU ACTION
-            // ========================================
-
-            const menuAction =
-                event.target.closest(
-                    "[data-service-action]"
-                );
-
-
-            if (
-                !menuAction
-            ) {
-
-
-                const clickedInsideDropdown =
-                    event.target.closest(
-                        ".admin-service-menu-dropdown"
-                    );
-
-
-                if (
-                    clickedInsideDropdown
-                ) {
-
-                    return;
-
-                }
-
-
-                closeAllAdminServiceMenus();
-
-
-                return;
-
-            }
-
-
-            event.stopPropagation();
-
-
-            const action =
-                menuAction.dataset
-                    .serviceAction;
-
-
-            const serviceKey =
-                menuAction.dataset
-                    .serviceKey;
-
-
-            // ========================================
-            // EDIT SERVICE
-            // ========================================
-
-            if (
-                action ===
-                "edit"
-            ) {
-
-
-                beginAdminServiceEdit(
-                    serviceKey
-                );
-
-
-                return;
-
-            }
-
-
-            // ========================================
-            // DEACTIVATE SERVICE
-            // ========================================
-
-            if (
-                action ===
-                "deactivate"
-            ) {
-
-
-                applyAdminServiceState(
-                    serviceKey,
-                    false
-                );
-
-
-                closeAllAdminServiceMenus();
-
-
-                const saved =
-                    await saveAdminServicePricing(
-                        serviceKey
-                    );
-
-
-                if (
-                    !saved
-                ) {
-
-                    await loadAdminServicePricing();
-
-                }
-
-
-                lockAdminServiceInputs(
-                    serviceKey
-                );
-
-
-                return;
-
-            }
-
-
-            // ========================================
-            // ACTIVATE SERVICE
-            // ========================================
-
-            if (
-                action ===
-                "activate"
-            ) {
-
-
-                applyAdminServiceState(
-                    serviceKey,
-                    true
-                );
-
-
-                closeAllAdminServiceMenus();
-
-
-                const saved =
-                    await saveAdminServicePricing(
-                        serviceKey
-                    );
-
-
-                if (
-                    !saved
-                ) {
-
-                    await loadAdminServicePricing();
-
-                }
-
-
-                lockAdminServiceInputs(
-                    serviceKey
-                );
-
-
-                return;
-
-            }
-
-        }
-
-    );
-
 
 // ========================================
-// SERVICES PRICING BACKDROP CLOSE
+// PRICING BUTTON HANDLERS
 // ========================================
 
-adminServicesPricingModal
-    ?.addEventListener(
-
-        "click",
-
-        event => {
-
-
-            const closeTarget =
-                event.target.closest(
-                    "[data-close-services-pricing]"
-                );
-
-
-            if (
-                !closeTarget
-            ) {
-
-                return;
-
-            }
-
-
-            closeAdminServicesPricingModal();
-
-        }
-
-    );
-
-// ========================================
-// CLOSE MENUS OUTSIDE MODAL
-// ========================================
-
-document.addEventListener(
-
+adminOpenServicesPricingButton?.addEventListener(
     "click",
+    openAdminServicesPricingModal
+);
 
-    event => {
+adminServicesPricingCloseButton?.addEventListener(
+    "click",
+    closeAdminServicesPricingModal
+);
 
+adminServicesPricingModal?.addEventListener(
+    "click",
+    async event => {
+        if (adminPricingSaving) return;
 
         if (
             event.target.closest(
-                ".admin-service-menu-wrap"
+                "[data-close-services-pricing]"
             )
         ) {
-
+            closeAdminServicesPricingModal();
             return;
-
         }
 
+        const button =
+            event.target.closest(
+                "[data-pricing-action]"
+            );
 
-        closeAllAdminServiceMenus();
+        if (!button) return;
 
+        const card =
+            button.closest(
+                "[data-pricing-key]"
+            );
+
+        const action =
+            button.dataset.pricingAction;
+
+        if (action === "edit") {
+            adminPricingList.querySelectorAll(
+                ".admin-service-is-editing"
+            ).forEach(other => {
+                setAdminPricingEditing(other, false);
+            });
+
+            setAdminPricingEditing(card, true);
+            card.querySelector("input")?.focus();
+
+        } else if (action === "cancel") {
+            setAdminPricingEditing(card, false);
+
+        } else if (action === "save") {
+            await saveAdminPricingCard(card);
+
+        } else if (action === "toggle") {
+            await saveAdminPricingCard(
+                card,
+                button.dataset.nextActive === "true"
+            );
+        }
     }
-
 );
 
+
 // ========================================
-// ESCAPE KEY
+// PRICING ESCAPE KEY
 // ========================================
 
-document.addEventListener(
+document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
 
-    "keydown",
+    const household =
+        document.getElementById(
+            "admin-client-household-detail"
+        );
 
-    event => {
+    if (household && !household.hidden) {
+        closeAdminClientHousehold();
 
-
-        if (
-            event.key !==
-            "Escape"
-        ) {
-
-            return;
-
-        }
-
-
-        const householdModal =
-            document.getElementById(
-                "admin-client-household-detail"
-            );
-
-
-        if (
-            householdModal &&
-            !householdModal.hidden
-        ) {
-
-            closeAdminClientHousehold();
-
-            return;
-
-        }
-
-
-        const openServiceMenu =
-            document.querySelector(
-                '[data-service-menu][aria-expanded="true"]'
-            );
-
-
-        if (
-            openServiceMenu
-        ) {
-
-
-            closeAllAdminServiceMenus();
-
-
-            openServiceMenu.focus();
-
-
-            return;
-
-        }
-
-
-        if (
-            !adminServicesPricingModal ||
-            adminServicesPricingModal.hidden
-        ) {
-
-            return;
-
-        }
-
-
+    } else if (
+        adminServicesPricingModal &&
+        !adminServicesPricingModal.hidden
+    ) {
         closeAdminServicesPricingModal();
-
     }
-
-);
+});
 
 // ========================================
 // ADMIN PORTAL INTRO
