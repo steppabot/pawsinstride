@@ -568,6 +568,15 @@ const SERVICE_CONFIG = {
             },
 
             {
+                value: "Overnight Sit - 12 Hours",
+                databaseOption: "overnight_12_hour",
+                timeBlocks: [
+                    "8:00 PM - 8:00 AM",
+                    "9:00 PM - 9:00 AM"
+                ]
+            },
+
+            {
                 value:
                     "VIP Sit - 12 Hours",
 
@@ -13786,6 +13795,17 @@ function hasBookingWindowEnded(
     const currentMinutes =
         Number(parts.hour) * 60 +
         Number(parts.minute);
+
+    // Overnight slots are booked on the evening date and close at start time.
+    const start = times[0];
+    const startMinutes =
+        (Number(start[1]) % 12 +
+            (start[3].toUpperCase() === "PM" ? 12 : 0)) * 60 +
+        Number(start[2]);
+
+    if (times.length > 1 && endMinutes < startMinutes) {
+        return currentMinutes >= startMinutes;
+    }
 
     return currentMinutes >= endMinutes;
 }
