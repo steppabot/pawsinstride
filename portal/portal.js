@@ -11910,23 +11910,34 @@ function renderBookingCalendar() {
         
         
         // ========================================
-        // PAST DATE
+        // PAST DATE / EXPIRED TIME WINDOW
         // ========================================
-        
-        if (
-            date < today
-        ) {
-        
-            button.disabled =
-                true;
-        
-        
+
+        const selectedWindows =
+            getSelectedBookingTimeWindows();
+
+        const dateUnavailable =
+            hasBookingWindowEnded(date, "") ||
+            selectedWindows.some(timeWindow =>
+                hasBookingWindowEnded(date, timeWindow)
+            );
+
+        if (dateUnavailable) {
+            button.disabled = true;
+
             button.classList.add(
                 "calendar-day-past"
             );
-        
+
+            button.title =
+                "This date or a selected time window has already passed.";
+
+            button.setAttribute(
+                "aria-label",
+                `${day}. Unavailable: the date or selected time window has passed.`
+            );
         }
-        
+
         
         // ========================================
         // TODAY
@@ -11969,18 +11980,28 @@ function renderBookingCalendar() {
         // ========================================
         // CALENDAR DAY CLICK
         // ========================================
-        
+
         button.addEventListener(
             "click",
             () => {
-        
-                toggleSelectedDate(
-                    date
-                );
-        
+                const selectedWindows =
+                    getSelectedBookingTimeWindows();
+
+                const expired =
+                    hasBookingWindowEnded(date, "") ||
+                    selectedWindows.some(timeWindow =>
+                        hasBookingWindowEnded(date, timeWindow)
+                    );
+
+                if (expired) {
+                    renderBookingCalendar();
+                    return;
+                }
+
+                toggleSelectedDate(date);
             }
         );
-        
+
         
         grid.appendChild(
             button
@@ -13715,6 +13736,61 @@ const weeklyDiscountRate = weeklyDiscountPercent / 100;
 }
 
 // ========================================
+// CHECK WHETHER A BOOKING WINDOW HAS ENDED
+// ========================================
+
+function hasBookingWindowEnded(
+    date,
+    timeWindow
+) {
+    const parts = Object.fromEntries(
+        new Intl.DateTimeFormat("en-US", {
+            timeZone: "America/Chicago",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hourCycle: "h23"
+        })
+            .formatToParts(new Date())
+            .map(part => [part.type, part.value])
+    );
+
+    const today =
+        `${parts.year}-${parts.month}-${parts.day}`;
+
+    if (date !== today) {
+        return date < today;
+    }
+
+    const times = [
+        ...String(timeWindow || "").matchAll(
+            /(\d{1,2}):(\d{2})\s*(AM|PM)/gi
+        )
+    ];
+
+    if (!times.length) {
+        return false;
+    }
+
+    const end = times[times.length - 1];
+
+    const endMinutes =
+        (
+            Number(end[1]) % 12 +
+            (end[3].toUpperCase() === "PM" ? 12 : 0)
+        ) * 60 +
+        Number(end[2]);
+
+    const currentMinutes =
+        Number(parts.hour) * 60 +
+        Number(parts.minute);
+
+    return currentMinutes >= endMinutes;
+}
+
+// ========================================
 // ROLLING SERVICE DAY COUNT
 // ========================================
 
@@ -14341,6 +14417,28 @@ if (bookingForm) {
             }
             
             
+            // ========================================
+            // CHECK FOR EXPIRED SELECTED VISITS
+            // ========================================
+
+            const expiredVisit =
+                selectedVisits.find(visit =>
+                    hasBookingWindowEnded(
+                        visit.date,
+                        visit.timeWindow
+                    )
+                );
+
+            if (expiredVisit) {
+                message.textContent =
+                    `The ${expiredVisit.timeWindow} window on ` +
+                    `${formatDate(expiredVisit.date)} has already passed. ` +
+                    "Remove that visit and choose a later time or date.";
+
+                renderBookingCalendar();
+                return;
+            }
+
             // ========================================
             // REFRESH CAPACITY BEFORE CHECKOUT
             // ========================================
