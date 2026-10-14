@@ -13715,6 +13715,38 @@ const weeklyDiscountRate = weeklyDiscountPercent / 100;
 }
 
 // ========================================
+// ROLLING SERVICE DAY COUNT
+// ========================================
+
+function getRollingServiceDayCount(
+    dateString,
+    serviceDates
+) {
+    const uniqueDates =
+        [...new Set(serviceDates)];
+
+    let best = 0;
+
+    for (let offset = -6; offset <= 0; offset++) {
+        const start =
+            addDaysToDateString(dateString, offset);
+
+        const end =
+            addDaysToDateString(start, 6);
+
+        const count =
+            uniqueDates.filter(date =>
+                date >= start &&
+                date <= end
+            ).length;
+
+        best = Math.max(best, count);
+    }
+
+    return best;
+}
+
+// ========================================
 // WEEK VALIDATION
 // ========================================
 
