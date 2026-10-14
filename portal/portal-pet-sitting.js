@@ -4,7 +4,7 @@
    - "Package" becomes "Duration": 4, 6, 8 or 12 hours.
    - "Time Block" becomes a Start Time list (on the hour) plus an End Time
      that fills in automatically, so the length is always exact.
-   - Starts no earlier than 7:00 AM and ends no later than 11:00 PM.
+   - Daytime sits run between 7 AM and 11 PM. Overnight sits use 8 PM–8 AM or 9 PM–9 AM.
    The selected value is still a normal "9:00 AM - 3:00 PM" time window, so the
    rest of the booking flow, drafts, checkout and the admin portal work unchanged. */
 (function () {
@@ -18,7 +18,8 @@
         'Basic Sit - 4 Hours': 4,
         'Extended Sit - 6 Hours': 6,
         'Standard Sit - 8 Hours': 8,
-        'VIP Sit - 12 Hours': 12
+        'VIP Sit - 12 Hours': 12,
+        'Overnight Sit - 12 Hours': 12
     };
 
     const config = SERVICE_CONFIG['Pet Sitting'];
@@ -42,7 +43,10 @@
         return out;
     }
     config.options.forEach(o => {
-        if (HOURS[o.value]) { o.hours = HOURS[o.value]; o.timeBlocks = windowsFor(HOURS[o.value]); }
+        if (o.value === 'Overnight Sit - 12 Hours') {
+            o.hours = 12;
+            o.timeBlocks = ['8:00 PM - 8:00 AM', '9:00 PM - 9:00 AM'];
+        } else if (HOURS[o.value]) { o.hours = HOURS[o.value]; o.timeBlocks = windowsFor(HOURS[o.value]); }
     });
 
     const isSitting = () => typeof serviceTypeSelect !== 'undefined' && serviceTypeSelect?.value === 'Pet Sitting';
@@ -73,10 +77,11 @@
         if (!show) return;
         const value = bookingTime?.value || '';
         const end = value.includes(' - ') ? value.split(' - ')[1] : '';
-        wrap.querySelector('input').value = end;
+        const overnight = serviceOptionSelect?.value === 'Overnight Sit - 12 Hours';
+        wrap.querySelector('input').value = end ? end + (overnight ? ' (next morning)' : '') : '';
         wrap.querySelector('.pis-sit-end-help').textContent = end
-            ? `${hours}-hour sit · ${value.replace(' - ', ' – ')}`
-            : `Choose a start time and the ${hours}-hour end time fills in automatically.`;
+            ? `${overnight ? 'Overnight sit' : `${hours}-hour sit`} · ${value.replace(' - ', ' – ')}${overnight ? ' (next morning). Select the date the overnight begins.' : ''}`
+            : overnight ? 'Choose 8 PM or 9 PM. The sit ends at the same time the next morning. Select the evening date.' : `Choose a start time and the ${hours}-hour end time fills in automatically.`;
     }
 
     // Catch programmatic changes too (drafts, Repeat Last Week).
@@ -104,7 +109,7 @@
                     const h = HOURS[opt.value];
                     if (!h) return;
                     const price = opt.dataset.price ? `$${Number(opt.dataset.price).toFixed(2)}` : '';
-                    opt.textContent = `${h} Hours${price ? ' — ' + price : ''}`;
+                    opt.textContent = `${opt.value === 'Overnight Sit - 12 Hours' ? 'Overnight Sit — 12 Hours' : `${h} Hours`}${price ? ' — ' + price : ''}`;
                 });
                 if (serviceOptionSelect.options[0] && !serviceOptionSelect.options[0].value) {
                     serviceOptionSelect.options[0].textContent = 'Select duration';
