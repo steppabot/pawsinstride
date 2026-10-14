@@ -11745,20 +11745,22 @@ dialog.admin-visit-action-confirm::backdrop {
 .admin-client-household-grid > .admin-client-billing-grid {
     grid-column: 1 / -1 !important;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
     min-width: 0;
+    align-items: stretch;
 }
 
 .admin-client-billing-grid > .admin-client-household-info-card {
     grid-column: auto !important;
+    justify-content: flex-start;
     min-width: 0;
     width: 100%;
     box-sizing: border-box;
 }
 
 /* ========================================
-   LEGACY DISCOUNT DISPLAY
+   LEGACY DISCOUNT / BOOKING MINIMUM DISPLAY
    ======================================== */
 
 .admin-client-legacy-discount-display {
@@ -11768,7 +11770,9 @@ dialog.admin-visit-action-confirm::backdrop {
     gap: 10px;
 }
 
-.admin-client-legacy-discount-display > strong {
+.admin-client-legacy-discount-display > strong,
+.admin-client-billing-grid
+.admin-client-pricing-tier-display > strong {
     display: block;
     color: #ffffff;
     font-size: 17px;
@@ -11777,7 +11781,7 @@ dialog.admin-visit-action-confirm::backdrop {
 }
 
 /* ========================================
-   LEGACY DISCOUNT BUTTON
+   LEGACY DISCOUNT / BOOKING MINIMUM BUTTON
    Matches the Add Credit button
    ======================================== */
 
@@ -11831,11 +11835,12 @@ dialog.admin-visit-action-confirm::backdrop {
 }
 
 /* ========================================
-   LEGACY DISCOUNT STATUS
+   BILLING CARD STATUS TEXT
    Matches Available balance text
    ======================================== */
 
-#admin-client-legacy-discount-status {
+#admin-client-legacy-discount-status,
+#admin-client-minimum-waiver-status {
     display: block;
     margin-top: 7px;
 
@@ -11844,6 +11849,17 @@ dialog.admin-visit-action-confirm::backdrop {
     font-size: 8px;
     font-weight: 700;
     line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+/* ========================================
+   TABLET BILLING CARDS
+   ======================================== */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .admin-client-household-grid > .admin-client-billing-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 /* ========================================
@@ -11855,21 +11871,6 @@ dialog.admin-visit-action-confirm::backdrop {
         grid-template-columns: minmax(0, 1fr);
         gap: 8px;
     }
-}
-
-/* ========================================
-   ALIGN CLIENT BILLING CARD CONTENT
-   ======================================== */
-
-.admin-client-billing-grid > .admin-client-household-info-card {
-    justify-content: flex-start;
-}
-
-.admin-client-billing-grid
-.admin-client-pricing-tier-display > strong {
-    font-size: 17px;
-    font-weight: 800;
-    line-height: 1.2;
 }
 
 /* ========================================
