@@ -36,7 +36,10 @@
   if(result.completed){completed();return true;}
   if(result.order_id){
    // Reuses the same order. Existing server handles approved, captured and pending states.
-   try{await request('paypal-capture-order',{checkout_id:info.checkout_id,orderID:result.order_id});}catch(_){}
+   await request('paypal-capture-order', {
+    checkout_id: info.checkout_id,
+    orderID: result.order_id
+   });
    const after=await request('venmo-handoff',{action:'status'});
    if(after.completed){completed();return true;}
   }
