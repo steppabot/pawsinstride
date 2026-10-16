@@ -1,6 +1,25 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>Venmo Checkout | Paws in Stride</title><link rel="stylesheet" href="./portal.css"><style>[hidden]{display:none!important}</style></head>
-<body class="client-portal-page payment-page"><main class="payment-page-container">
-<header class="payment-page-header"><div class="payment-header-brand"><img class="payment-header-logo" src="./assets/paws-in-stride-logo.png" alt="Paws in Stride"><div class="payment-header-copy"><span class="payment-eyebrow">SECURE CHECKOUT</span><h1>Pay with Venmo</h1></div></div></header>
-<div class="payment-layout"><section class="payment-card"><div class="payment-card-heading"><h2 id="venmo-heading">Your booking</h2></div><p>Paws in Stride pet care services</p><p id="venmo-credit"></p><div class="payment-summary-total"><span>Amount to pay</span><strong id="venmo-total">—</strong></div><p id="venmo-message" role="status" aria-live="polite">Loading your checkout…</p><div class="payment-wallet-wrapper"><venmo-button id="venmo-button" type="pay" hidden></venmo-button></div><button id="venmo-check" class="payment-complete-credit-button" hidden>Check payment status</button><a id="venmo-return" class="booking-success-button" hidden>Return to Paws in Stride</a></section></div>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>Venmo Checkout | Paws in Stride</title><link rel="stylesheet" href="./portal.css"><style>
+[hidden]{display:none!important}
+body.venmo-checkout-page{margin:0;padding:0}
+.venmo-checkout-page .payment-page-container{width:100%;max-width:none;padding:0 0 calc(30px + env(safe-area-inset-bottom,0px))}
+.venmo-checkout-page .payment-page-header{box-sizing:border-box;width:100%;margin:0 0 16px;padding:calc(env(safe-area-inset-top,0px) + 6px) max(18px,env(safe-area-inset-right,0px)) 18px max(18px,env(safe-area-inset-left,0px));background:#fff;border:0;border-radius:0 0 16px 16px;box-shadow:0 7px 20px rgba(35,93,125,.08)}
+.venmo-checkout-page .payment-page-header::before{display:none}
+.venmo-checkout-page .payment-header-brand{display:flex;align-items:center;gap:12px}
+.venmo-checkout-page .payment-header-logo{width:90px;height:auto;flex-shrink:0}
+.venmo-checkout-page .payment-header-copy{padding-left:0;border-left:0}
+.venmo-checkout-page .payment-header-copy h1{color:#202832;font-size:20px;line-height:1.25}
+.venmo-checkout-page .payment-eyebrow{color:#2890df}
+.venmo-checkout-page .payment-layout{display:block;width:calc(100% - 24px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));max-width:760px;margin:0 auto}
+.venmo-checkout-page .payment-card{position:relative;overflow:hidden}
+.venmo-checkout-page .payment-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#47cee6,#2890df)}
+.venmo-checkout-page .payment-card-heading{margin-bottom:18px}
+.venmo-checkout-page .payment-card-heading h2{margin:4px 0 0}
+.venmo-checkout-page #venmo-return,.venmo-checkout-page #venmo-check{box-sizing:border-box;width:100%;min-height:50px;border-radius:11px}
+.venmo-checkout-page #venmo-return{display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none}
+.venmo-checkout-page #venmo-credit:empty{display:none}
+</style></head>
+<body class="client-portal-page payment-page venmo-checkout-page"><main class="payment-page-container">
+<header class="payment-page-header"><div class="payment-header-brand"><img class="payment-header-logo" src="./assets/paws-in-stride-logo.png" alt="Paws in Stride"><div class="payment-header-copy"><span class="payment-eyebrow">SECURE CHECKOUT</span><h1>Complete Your Booking</h1></div></div></header>
+<div class="payment-layout"><section class="payment-card"><div class="payment-card-heading"><span class="payment-eyebrow">YOUR BOOKING</span><h2 id="venmo-heading">Order Summary</h2></div><p>Paws in Stride pet care services</p><p id="venmo-credit"></p><div class="payment-summary-total"><span>Amount to pay</span><strong id="venmo-total">—</strong></div><p id="venmo-message" role="status" aria-live="polite">Loading your checkout…</p><div class="payment-wallet-wrapper"><venmo-button id="venmo-button" type="pay" hidden></venmo-button></div><button id="venmo-check" class="payment-complete-credit-button" hidden>Check payment status</button><a id="venmo-return" class="booking-success-button" hidden>Return to Paws in Stride</a></section></div>
 </main><script src="./venmo-checkout.js"></script></body></html>
