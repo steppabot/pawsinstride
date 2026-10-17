@@ -559,10 +559,10 @@ function perim(b,u){
   return {x:ix, y:iy+h-(u-2*w-h)};
 }
 const WEATHER = {
-  sunny:  { name:'Sunny', icon:'☀️', note:'Perfect walking weather' },
-  cloudy: { name:'Cloudy', icon:'☁️', note:'Overcast and cool' },
-  rain:   { name:'Light rain', icon:'🌧️', note:'+$2 rain tips per walk' },
-  windy:  { name:'Windy', icon:'🍃', note:'Hold on to that leash' },
+  sunny:  { name:'Sunny', icon:'☀️', note:'Perfect Walking Weather' },
+  cloudy: { name:'Cloudy', icon:'☁️', note:'Overcast and Cool' },
+  rain:   { name:'Light rain', icon:'🌧️', note:'+$2 Rain Tips Per Walk' },
+  windy:  { name:'Windy', icon:'🍃', note:'Hold On To That Leash' },
 };
 function pickWeather(){ const r = Math.random(); return r < 0.4 ? 'sunny' : r < 0.65 ? 'cloudy' : r < 0.85 ? 'rain' : 'windy'; }
 function newGame(){
@@ -4205,9 +4205,9 @@ function drawHuman360(x, y, o){
   }).sort((a,b) => a.depth-b.depth);
   for (const L of legs){
     const {sd, hip, knee, ank} = L, sh0 = 0.75*sm((-sd*Ry - 0.15)/0.7);   // the leg on the far side is a shade darker; it depends only on which way we face, never on the stride
-    const skin = mixHex(o.skin, o.skinB, sh0), bott = mixHex(o.bottom, o.bottomB, sh0), lw0 = fem ? [6.4,4.7,3.4] : [6.8,5,3.6];
+    const skin = mixHex(o.skin, o.skinB, sh0), bott = mixHex(o.bottom, o.bottomB, sh0), lw0 = fem ? [5.8,4.3,3.1] : [6.1,4.6,3.3];
     if (o.leggings){ // a smooth pant leg that tapers from the hip to the ankle (joggers get a little extra room and a cuff)
-      const pw = fem ? [7.4, 5.0, 3.9] : [8.2, 6.0, 4.6];
+      const pw = fem ? [6.6, 4.6, 3.6] : [7.2, 5.4, 4.2];
       chain([[hip[0],hip[1]],[knee[0],knee[1]],[ank[0],ank[1]]],[pw[0]*S,pw[1]*S,pw[2]*S], bott, o.hi ? hexAdj(o.bottom, -16) : OL);
       if (o.hi){ const kx = knee[0] + (hip[0]-knee[0])*0.15, ky = knee[1] + (hip[1]-knee[1])*0.15;
         ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 1.1*S; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hip[0] - 1.6*S, hip[1] + 2*S); ctx.quadraticCurveTo(kx - 1.4*S, ky, ank[0] - 1.0*S, ank[1] - 3*S); ctx.stroke(); ctx.lineCap = 'butt'; }
@@ -4216,7 +4216,7 @@ function drawHuman360(x, y, o){
       chain([[hip[0],hip[1]],[knee[0],knee[1]],[ank[0],ank[1]]],[lw0[0]*S,lw0[1]*S,lw0[2]*S], skin, o.hi ? shadeHex(o.skin, -48) : OL);
       // shorts: a tapered leg opening with a flat hem, not a rounded block
       const t = 0.62, hx2 = hip[0]+(knee[0]-hip[0])*t, hy2 = hip[1]+(knee[1]-hip[1])*t, dx = hx2-hip[0], dy = hy2-hip[1], L0 = Math.hypot(dx,dy)||1, nx = -dy/L0, ny = dx/L0;
-      const w0 = (fem?4.3:4.5)*S, w1 = (fem?3.8:4.1)*S;
+      const w0 = (fem?3.9:4.1)*S, w1 = (fem?3.5:3.8)*S;
       ctx.fillStyle = bott; ctx.beginPath(); ctx.moveTo(hip[0]-nx*w0, hip[1]-ny*w0); ctx.lineTo(hx2-nx*w1, hy2-ny*w1); ctx.lineTo(hx2+nx*w1, hy2+ny*w1); ctx.lineTo(hip[0]+nx*w0, hip[1]+ny*w0);
       ctx.arc(hip[0], hip[1], w0, Math.atan2(ny, nx), Math.atan2(-ny, -nx)); ctx.closePath(); ctx.fill();
       if (o.hi){ ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = 0.7*S; ctx.beginPath(); ctx.moveTo(hx2-nx*w1, hy2-ny*w1); ctx.lineTo(hx2+nx*w1, hy2+ny*w1); ctx.stroke(); }
@@ -4285,18 +4285,18 @@ function drawHuman360(x, y, o){
     const aOL = o.hi ? shadeHex(o.skin, -48) : OL;
     const a0 = o.hi ? 0.22 : 0, s0 = [A.sh[0]+(A.el[0]-A.sh[0])*a0, A.sh[1]+(A.el[1]-A.sh[1])*a0];
     // the whole arm is one outlined shape, so no seam circle shows at the elbow
-    if (part === 'all'){ chain([s0,[A.el[0],A.el[1]],[A.ha[0],A.ha[1]]],[5.2*S*tk,4.2*S*tk,3.2*S*tk], skin, aOL); ctx.fillStyle=skin; ctx.beginPath(); ctx.arc(A.ha[0],A.ha[1],2.2*S*tk,0,Math.PI*2); ctx.fill(); }
-    else if (part === 'lower'){ chain([[A.el[0],A.el[1]],[A.ha[0],A.ha[1]]],[4.2*S*tk,3.2*S*tk], skin, aOL);
+    if (part === 'all'){ chain([s0,[A.el[0],A.el[1]],[A.ha[0],A.ha[1]]],[4.7*S*tk,3.8*S*tk,3.0*S*tk], skin, aOL); ctx.fillStyle=skin; ctx.beginPath(); ctx.arc(A.ha[0],A.ha[1],2.2*S*tk,0,Math.PI*2); ctx.fill(); }
+    else if (part === 'lower'){ chain([[A.el[0],A.el[1]],[A.ha[0],A.ha[1]]],[3.8*S*tk,3.0*S*tk], skin, aOL);
       ctx.fillStyle=skin; ctx.beginPath(); ctx.arc(A.ha[0],A.ha[1],2.2*S*tk,0,Math.PI*2); ctx.fill(); }
     if (part === 'lower'){ if (o.watch && A.sd===-1){ ctx.fillStyle='#111'; capsule(A.ha[0]+(A.el[0]-A.ha[0])*0.18, A.ha[1]+(A.el[1]-A.ha[1])*0.18, A.ha[0]+(A.el[0]-A.ha[0])*0.27, A.ha[1]+(A.el[1]-A.ha[1])*0.27, 2.7*S, 2.7*S); } return; }
-    if (part === 'upper'){ chain([s0,[A.el[0],A.el[1]]],[5.2*S*tk,4.2*S*tk], skin, aOL); ctx.fillStyle=skin; ctx.beginPath(); ctx.arc(A.el[0],A.el[1],2.05*S*tk,0,Math.PI*2); ctx.fill(); }
+    if (part === 'upper'){ chain([s0,[A.el[0],A.el[1]]],[4.7*S*tk,3.8*S*tk], skin, aOL); ctx.fillStyle=skin; ctx.beginPath(); ctx.arc(A.el[0],A.el[1],2.05*S*tk,0,Math.PI*2); ctx.fill(); }
     // rounded shoulder cap + sleeve, so the shoulder reads as a deltoid instead of a box corner
     { const ex = A.sh[0]+(A.el[0]-A.sh[0])*0.4, ey = A.sh[1]+(A.el[1]-A.sh[1])*0.4;
       if (!o.hi){ ctx.fillStyle = OL; capsule(A.sh[0], A.sh[1], ex, ey, 7.2*S*tk, 6.6*S*tk); ctx.fillStyle = mixHex(o.top, o.topB, sh0); capsule(A.sh[0], A.sh[1], ex, ey, 6.0*S*tk, 5.6*S*tk); }
       else {
         // a loose cotton sleeve: wider than the arm, rounded over the shoulder, with an open hem the arm comes out of
         const dx = ex-A.root[0], dy = ey-A.root[1], L = Math.hypot(dx, dy) || 1, ux = dx/L, uy = dy/L, nx = -uy, ny = ux;
-        const w0 = 3.3*S*tk, w1 = 3.15*S*tk, up = 0, rot = Math.atan2(ny, nx), base = mixHex(o.top, o.topB, sh0), edge = hexAdj(base, -34);
+        const w0 = 3.0*S*tk, w1 = 2.9*S*tk, up = 0, rot = Math.atan2(ny, nx), base = mixHex(o.top, o.topB, sh0), edge = hexAdj(base, -34);
         const t0 = [A.root[0], A.root[1]];
         ctx.fillStyle = 'rgba(30,22,16,.18)'; ctx.beginPath(); ctx.ellipse(ex + ux*1.1*S, ey + uy*1.1*S, w1*0.92, 1.1*S, rot, 0, Math.PI*2); ctx.fill();   // shadow the sleeve casts on the arm
         const path = () => { ctx.beginPath(); ctx.moveTo(t0[0] - nx*w0, t0[1] - ny*w0); ctx.lineTo(ex - nx*w1, ey - ny*w1);
@@ -4324,7 +4324,8 @@ function drawHuman360(x, y, o){
   // fa: 0 = arm fully behind the body, 1 = fully in front; in between it fades across instead of popping
   for (const A of arms){ A.dz = A.sd*7.8*Ry; A.far = A.dz < -1.3; }
   // ---- torso: an ellipse-section V-taper whose width follows the heading ----
-  const wS = fem ? Math.hypot(7.4*Rx, 4.9*Fx) : Math.hypot(8.6*Rx, 5.4*Fx), wW = fem ? Math.hypot(4.9*Rx, 3.9*Fx) : Math.hypot(5.9*Rx, 4.2*Fx), wH = fem ? Math.hypot(7.0*Rx, 5.0*Fx) : Math.hypot(6.6*Rx, 4.8*Fx);
+  // an athletic build: shoulders wider than the waist (a V-taper), a flat stomach in profile, trim hips
+  const wS = fem ? Math.hypot(7.2*Rx, 4.3*Fx) : Math.hypot(8.6*Rx, 4.6*Fx), wW = fem ? Math.hypot(4.3*Rx, 3.1*Fx) : Math.hypot(4.9*Rx, 3.3*Fx), wH = fem ? Math.hypot(5.7*Rx, 3.8*Fx) : Math.hypot(5.0*Rx, 3.5*Fx);
   // long hair: a soft fall of hair from the crown to between the shoulder blades
   const sw2 = run ? Math.sin(ph)*0.6 : mv ? Math.sin(ph)*0.25 : 0, LN = 12, LLp = [], LRp = [];
   // rows from the crown down to between the shoulder blades; each row is a cross-section of the hair as a flat oval, so its screen width turns smoothly with the heading
@@ -4335,6 +4336,9 @@ function drawHuman360(x, y, o){
     const wr = above > 0 ? 6.0*skull + 0.2 : 6.2 - Math.max(0, -above - 3)*0.06 - (k > 0.85 ? (k - 0.85)*14 : 0);
     const c = P(sw2*k*k, u, f0), hw = Math.hypot(wr*Rx, th*Fx)*S; LLp.push([c[0]-hw, c[1]]); LRp.push([c[0]+hw, c[1]]); }
   const ltip = hs === 'long' ? P(sw2, 46.0 + bob, -5.4) : null;
+  if (hs === 'long'){ // the hair hangs from the (smaller) head, so scale its outline the same way about the neck
+    const hc1 = P(0, 58.6+bob, 0.9), ax = hc1[0], ay = y-(58.6+bob)*S + 6*S, kx = o.child ? 1.32 : 0.9*0.94, ky = o.child ? 1.32 : 0.9;
+    for (const q of [...LLp, ...LRp, ltip]){ q[0] = ax + (q[0] - ax)*kx; q[1] = ay + (q[1] - ay)*ky; } }
   const longShape = () => { const Lp = LLp, Rp = LRp, N = LN, tip = ltip; ctx.beginPath(); ctx.moveTo(Lp[0][0], Lp[0][1]);
     for (let i=1;i<=N;i++){ const a = Lp[i-1], b = Lp[i]; ctx.quadraticCurveTo(a[0], a[1], (a[0]+b[0])/2, (a[1]+b[1])/2); }
     ctx.quadraticCurveTo(Lp[N][0], Lp[N][1] + 1.2*S, tip[0], tip[1]); ctx.quadraticCurveTo(Rp[N][0], Rp[N][1] + 1.2*S, Rp[N][0], Rp[N][1]);
@@ -4361,15 +4365,15 @@ function drawHuman360(x, y, o){
   { const hc0 = P(0, 58.6+bob, 0.9), hy0 = y-(58.6+bob)*S; ctx.fillStyle = mixHex(o.skin, o.skinB, sm(0.5 - Fy*1.5)); const nX = hc0[0] + Fx*0.3*S, nw = (fem ? 2.2 : 2.6)*S; neckPath = () => { ctx.beginPath(); ctx.moveTo(nX - nw, hy0 + 3.4*S); ctx.lineTo(nX + nw, hy0 + 3.4*S); ctx.lineTo(nX + nw*1.12, hy0 + 10.5*S); ctx.lineTo(nX - nw*1.12, hy0 + 10.5*S); ctx.closePath(); }; neckPath(); ctx.fill();
     ctx.strokeStyle = shadeHex(o.skin, -48); ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(nX - nw, hy0 + 3.4*S); ctx.lineTo(nX - nw*1.12, hy0 + 10.5*S); ctx.moveTo(nX + nw, hy0 + 3.4*S); ctx.lineTo(nX + nw*1.12, hy0 + 10.5*S); ctx.stroke();
     const ng = ctx.createLinearGradient(0, hy0 + 3.4*S, 0, hy0 + 7*S); ng.addColorStop(0, 'rgba(80,45,30,.28)'); ng.addColorStop(1, 'rgba(80,45,30,0)'); ctx.fillStyle = ng; ctx.fillRect(nX - nw*1.12, hy0 + 3.4*S, nw*2.24, 3.6*S); }
-  const cxT = x + Fx*0.6*S, sy0 = y-(50+bob)*S, wy = y-(31.5+bob)*S;
+  const cxT = x + Fx*0.6*S, sy0 = y-(50+bob)*S, wy = y-(30.4+bob)*S;
   // shorts seat: a rounded hip shape rather than a block
   let pelvisPath = null;
   { const tY = y-(34.6+bob)*S, mY = y-(31.0+bob)*S, bY = y-(27.8+bob)*S, hw = wH*S, ww = wW*S*1.04, cx1 = x + Fx*0.3*S;
     const pelvis = () => { ctx.beginPath(); ctx.moveTo(cx1 - ww, tY);
-      ctx.bezierCurveTo(cx1 - hw*1.06, tY + 1.0*S, cx1 - hw*1.12, mY + 1.2*S, cx1 - hw*0.86, bY);     // hip curving round
+      ctx.bezierCurveTo(cx1 - hw*1.02, tY + 1.0*S, cx1 - hw*(fem ? 1.08 : 1.03), mY + 1.2*S, cx1 - hw*0.88, bY);     // hip curving round
       ctx.quadraticCurveTo(cx1 - hw*0.42, bY + 1.3*S, cx1, bY - 0.5*S);                              // under the seat into the crotch
       ctx.quadraticCurveTo(cx1 + hw*0.42, bY + 1.3*S, cx1 + hw*0.86, bY);
-      ctx.bezierCurveTo(cx1 + hw*1.12, mY + 1.2*S, cx1 + hw*1.06, tY + 1.0*S, cx1 + ww, tY); ctx.closePath(); }; pelvisPath = pelvis;
+      ctx.bezierCurveTo(cx1 + hw*(fem ? 1.08 : 1.03), mY + 1.2*S, cx1 + hw*1.02, tY + 1.0*S, cx1 + ww, tY); ctx.closePath(); }; pelvisPath = pelvis;
     pelvis(); ctx.fillStyle = o.bottom; ctx.fill();
     if (o.hi){ ctx.save(); pelvis(); ctx.clip();
       const g = ctx.createLinearGradient(cx1 - hw*1.1, 0, cx1 + hw*1.1, 0); g.addColorStop(0,'rgba(0,0,0,.20)'); g.addColorStop(0.3,'rgba(0,0,0,0)'); g.addColorStop(0.7,'rgba(255,255,255,.04)'); g.addColorStop(1,'rgba(0,0,0,.16)');
@@ -4378,7 +4382,7 @@ function drawHuman360(x, y, o){
       const ba = sm(-Fy*1.6); if (ba > 0){ ctx.globalAlpha = ba; ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 0.5*S; ctx.beginPath(); ctx.moveTo(cx1, tY + 1.2*S); ctx.lineTo(cx1, bY - 0.4*S); ctx.stroke();
         ctx.strokeStyle = 'rgba(0,0,0,.12)'; for (const sd of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx1 + sd*0.6*S, bY + 0.2*S); ctx.quadraticCurveTo(cx1 + sd*hw*0.45, bY + 1.1*S, cx1 + sd*hw*0.8, bY - 0.2*S); ctx.stroke(); } ctx.globalAlpha = 1; }
       ctx.restore(); } }
-  const dip = S*(0.25 + 1.75*sm((Fy + 0.15)/0.95)), torsoPath = () => { const a = wS*S, w = wW*S, nk = 2.7*S, top = sy0 - 2.3*S;
+  const dip = S*(0.25 + 1.75*sm((Fy + 0.15)/0.95)), torsoPath = () => { const a = wS*S, w = Math.max(wW, wH)*1.08*S, nk = 2.7*S, top = sy0 - 2.3*S;
     ctx.beginPath(); ctx.moveTo(cxT - w, wy);
     ctx.bezierCurveTo(cxT - w - 0.5*S, wy - 6*S, cxT - a - 0.4*S, sy0 + 8*S, cxT - a - 0.2*S, sy0 + 2.6*S);   // lats flaring up to the armpit
     ctx.quadraticCurveTo(cxT - a - 0.1*S, sy0 - 1.5*S, cxT - a*0.8, sy0 - 1.9*S);                          // square, high shoulder
@@ -4398,6 +4402,10 @@ function drawHuman360(x, y, o){
     // soft body shading: a darker band down the shaded side and under the shoulders so the tee reads as round
     { const sg = ctx.createLinearGradient(cxT - wS*S, 0, cxT + wS*S, 0); sg.addColorStop(0,'rgba(0,0,0,.10)'); sg.addColorStop(0.3,'rgba(0,0,0,0)'); sg.addColorStop(0.75,'rgba(0,0,0,0)'); sg.addColorStop(1,'rgba(0,0,0,.08)');
       ctx.fillStyle = sg; ctx.fillRect(cxT - wS*S - 2, sy0 - 4*S, 2*wS*S + 4, wy - sy0 + 6*S); }
+    // a fitted tee over a fit chest: soft shadow under each pec and a hint of the drape where the shirt narrows to the waist
+    if (fr > 0.2 && !fem){ ctx.globalAlpha = Math.min(1, (fr - 0.2)*2); ctx.strokeStyle = 'rgba(0,0,0,.09)'; ctx.lineWidth = 0.8*S;
+      for (const sd of [-1, 1]){ const px = cxT + sd*wS*0.42*S; ctx.beginPath(); ctx.moveTo(px - sd*wS*0.36*S, sy0 + 7.6*S); ctx.quadraticCurveTo(px, sy0 + 9.0*S, px + sd*wS*0.34*S, sy0 + 6.4*S); ctx.stroke(); }
+      ctx.strokeStyle = 'rgba(0,0,0,.05)'; ctx.beginPath(); ctx.moveTo(cxT, sy0 + 3.5*S); ctx.lineTo(cxT, sy0 + 8.2*S); ctx.stroke(); ctx.globalAlpha = 1; }
     // fabric folds that shift with the stride
     const sway = mv ? Math.sin(ph)*1.2*S : 0;
     ctx.strokeStyle='rgba(0,0,0,.06)'; ctx.lineWidth=0.7*S;
@@ -4423,6 +4431,18 @@ function drawHuman360(x, y, o){
     ctx.fillStyle='rgba(0,0,0,.06)'; ctx.fillRect(cxT-(wW+1)*S, wy-1.6*S, 2*(wW+1)*S, 1.6*S);
     ctx.restore();
   }
+  // her figure: a soft bust under the tee, seen as gentle shading from the front and a curve in profile (fades away as she turns her back)
+  if (fem){ const vis = sm((Fy + 0.5)/0.6);
+    if (vis > 0.01){ ctx.globalAlpha = vis;
+      const parts = [-1, 1].map(sd => ({sd, c: P(sd*2.45, 42.6 + bob, 3.0)})).sort((a, b) => a.c[2] - b.c[2]);
+      for (const {sd, c} of parts){ const rx = (2.35 + 0.45*Math.abs(Fx))*S, ry = 2.2*S, lit = sd*Rx < 0 ? 1 : 0.6;
+        ctx.fillStyle = o.top; ctx.beginPath(); ctx.ellipse(c[0], c[1], rx, ry, 0, 0, Math.PI*2); ctx.fill();   // same cloth as the tee, so no edge shows on the front
+        const g = ctx.createRadialGradient(c[0] - 0.5*S, c[1] - 0.8*S, 0.1*S, c[0] - 0.5*S, c[1] - 0.8*S, rx*0.9);
+        g.addColorStop(0, `rgba(255,255,255,${(0.16*lit).toFixed(3)})`); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(c[0], c[1], rx, ry, 0, 0, Math.PI*2); ctx.fill();
+        const sg = ctx.createLinearGradient(0, c[1], 0, c[1] + ry); sg.addColorStop(0, 'rgba(0,0,0,0)'); sg.addColorStop(1, 'rgba(0,0,0,.10)'); ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(c[0], c[1], rx, ry, 0, 0, Math.PI*2); ctx.fill();
+        if (o.hi){ ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 0.7*S; ctx.beginPath(); ctx.ellipse(c[0], c[1] + 0.15*S, rx*0.92, ry*0.9, 0, Math.PI*0.15, Math.PI*0.85); ctx.stroke(); } }
+      ctx.globalAlpha = 1; } }
+  if (pelvisPath && o.hi){ ctx.save(); pelvisPath(); ctx.clip(); const hg = ctx.createLinearGradient(0, wy, 0, wy + 2*S); hg.addColorStop(0, 'rgba(0,0,0,.35)'); hg.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = hg; ctx.fillRect(cxT - 12*S, wy, 24*S, 2*S); ctx.restore(); }
   // (no skin patch under the collar: a crew-neck tee covers the chest)
   let clip = null;
   if (o.waist){ // hands-free waist leash: a belt around the hips with a clip on the right side
@@ -4454,7 +4474,7 @@ function drawHuman360(x, y, o){
     const pk = `rgba(0,0,0,${(cl((iv[1] - iv[0])/F*1.5)*iv[4]).toFixed(3)})`;   // a band narrower than the feather erases only partly, so it shrinks to nothing smoothly
     g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(p0, pk); g.addColorStop(p1, pk); g.addColorStop(1, 'rgba(0,0,0,0)'); return g; };
   const ARM_R = 2.4;                                                  // an arm point is hidden only once it is a full arm-radius behind the surface
-  const torsoOcc = da => band(sway*0.7, 0.6 + lean*0.7, fem ? 5.9 : 6.6, fem ? 4.3 : 4.7, da + ARM_R);   // the ribcage: the shoulders belong to the arm, so a swinging arm never hides its own sleeve
+  const torsoOcc = da => band(sway*0.7, 0.6 + lean*0.7, fem ? 5.4 : 6.1, fem ? 3.7 : 4.0, da + ARM_R);   // the ribcage: the shoulders belong to the arm, so a swinging arm never hides its own sleeve
   const hairOcc = da => hs === 'long' ? band(sway*0.85, -4.6 + lean*0.85, 5.6, 1.6, da + ARM_R) : null;
   const yT0 = sy0 - 4*S, yT1 = y - (26.5 + bob)*S;
   const drawArmOcc = (A) => {
@@ -4479,7 +4499,7 @@ function drawHuman360(x, y, o){
       } });
   };
   if (hs === 'long'){   // hair lying on the back is never behind the back, so the body only hides it when we see her front. The hair fall: drawn once, with exactly the part the body hides erased (same depth test as the arms; no switching layers)
-    const dH = (-4.7 + lean*0.85)*Fy + sway*0.85*Ry + 1.0 + 7*sm((0.4 - Fy)/0.55), tb = band(sway*0.7, 0.6 + lean*0.7, fem ? 7.4 : 8.6, fem ? 4.9 : 5.4, dH), nb = band(0, 0.9 + lean*0.9, 2.6, 2.6, dH);
+    const dH = (-4.7 + lean*0.85)*Fy + sway*0.85*Ry + 1.0 + 7*sm((0.4 - Fy)/0.55), tb = band(sway*0.7, 0.6 + lean*0.7, fem ? 7.2 : 8.6, fem ? 4.3 : 4.6, dH), nb = band(0, 0.9 + lean*0.9, 2.6, 2.6, dH);
     if (!tb && !nb) longHair();
     else { const xs = [...LLp.map(q => q[0]), ...LRp.map(q => q[0]), ltip[0]], ys = [...LLp.map(q => q[1]), ltip[1]];
       occludeLayer(Math.min(...xs) - 2*S, Math.min(...ys) - 4*S, Math.max(...xs) + 2*S, Math.max(...ys) + 3*S, () => longHair(), () => {
@@ -4492,7 +4512,7 @@ function drawHuman360(x, y, o){
     if (!(b && bx > b[0] && bx < b[1] && by > yT0 && by < yT1)) drawTennisBall(bx, by, 2.4*S, G.t*0.5); }
   // ---- head ----
   const hc = P(0, 58.6+bob, 0.9), hx=hc[0], hy=y-(58.6+bob)*S;
-  if (o.child){ const ax = hx, ay = hy + 6*S; ctx.save(); ctx.translate(ax, ay); ctx.scale(1.32, 1.32); ctx.translate(-ax, -ay); }   // a child's head is big for the body
+  { const ax = hx, ay = hy + 6*S, k = o.child ? 1.32 : 0.9; ctx.save(); ctx.translate(ax, ay); ctx.scale(k*(o.child ? 1 : 0.94), k); ctx.translate(-ax, -ay); }   // adult heads a touch smaller and leaner; a child's head is big for the body
   // ---- head-local geometry: r = to the right, up = above the eye line, f = forward from the centre of the skull ----
   const face = (r,f) => hx + (r*Rx + f*Fx)*S, vis = (r,f) => r*Ry + f*Fy;
   const hp = (r, up, f) => [face(r, f), hy - up*S, hc[2] + vis(r, f)];
@@ -4539,23 +4559,26 @@ function drawHuman360(x, y, o){
     extras.push([hc[2] + 10, () => { for (const q of pts){ ctx.fillStyle = hexAdj(o.hair,-22); ctx.beginPath(); ctx.arc(q[0], q[1], 1.75*S, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = o.hair; ctx.beginPath(); ctx.arc(q[0]-0.2*S, q[1]-0.2*S, 1.45*S, 0, Math.PI*2); ctx.fill();
         if (o.hi){ ctx.fillStyle = rgbaHex(hexAdj(o.hair, 55), 0.3); ctx.beginPath(); ctx.arc(q[0]-0.6*S, q[1]-0.6*S, 0.55*S, 0, Math.PI*2); ctx.fill(); } } }]); }
-  for (const e of extras){ e.f = sm((e[0] - hc[2] + 1.6)/3.2); if (e.f < 1) e[1](); }   // behind the head (full), then fades over it as it comes round
+  for (const e of extras){ e.f = sm((e[0] - hc[2] + 1.6)/3.2); if (e.f < 1){
+    if (Fy > 0 && neckPath){ ctx.save(); ctx.beginPath(); ctx.rect(hx - 40*S, hy - 40*S, 80*S, 80*S); const nX = hc[0] + Fx*0.3*S, nw = (fem ? 2.2 : 2.6)*S*1.3;   // the neck is in front of a ponytail hanging behind it
+      ctx.moveTo(nX - nw, hy + 2*S); ctx.lineTo(nX - nw, hy + 14*S); ctx.lineTo(nX + nw, hy + 14*S); ctx.lineTo(nX + nw, hy + 2*S); ctx.closePath(); ctx.clip('evenodd'); e[1](); ctx.restore(); }
+    else e[1](); } }   // behind the head (full), then fades over it as it comes round
   const ears = [-1,1].map(sd => { const e = hp(sd*5.2, -0.4, 0.2); return {sd, X:e[0], d:e[2] - hc[2]}; });
   const earW = (0.75 + 0.55*Math.abs(Ry))*S;
   ctx.fillStyle=o.skinB; if (hs !== 'long') for (const e of ears){ ctx.beginPath(); ctx.ellipse(e.X, hy+0.4*S, earW, 2*S, 0, 0, Math.PI*2); ctx.fill(); }
   // head: rounded cranium over a squared jaw and chin (the jaw widens in profile)
   const headPath = () => { ctx.beginPath();
     if (!o.hi){ ctx.ellipse(hx, hy, 5.3*S, 6.3*S, 0, 0, Math.PI*2); return; }
-    const jw = (fem ? 3.9 : 4.5) + 0.5*Math.abs(Fx), cw = (fem ? 1.5 : 2.3) + 0.6*Math.abs(Fx), cx0 = hx + Fx*1.1*S;   // jaw half-width, chin half-width, chin shifts toward the face
+    const jw = (fem ? 3.6 : 3.9) + 0.5*Math.abs(Fx), cw = (fem ? 1.4 : 1.9) + 0.6*Math.abs(Fx), cx0 = hx + Fx*1.1*S;   // jaw half-width, chin half-width, chin shifts toward the face
     ctx.moveTo(hx - 5.2*S, hy - 0.6*S);
     ctx.bezierCurveTo(hx - 5.5*S, hy - 5.4*S, hx - 2.6*S, hy - 6.9*S, hx, hy - 6.9*S);
     ctx.bezierCurveTo(hx + 2.6*S, hy - 6.9*S, hx + 5.5*S, hy - 5.4*S, hx + 5.2*S, hy - 0.6*S);
-    ctx.quadraticCurveTo(hx + 5.0*S, hy + 2.4*S, hx + jw*S, hy + 3.9*S);              // cheek down to the jaw angle
-    const cb = fem ? 6.3 : 6.6;
+    ctx.quadraticCurveTo(hx + 4.85*S, hy + 2.3*S, hx + jw*S, hy + 4.1*S);              // cheek down to the jaw angle
+    const cb = fem ? 6.4 : 6.9;
     ctx.quadraticCurveTo(cx0 + (cw+1.4)*S, hy + (cb-0.6)*S, cx0 + cw*S, hy + cb*S);       // jawline
     ctx.quadraticCurveTo(cx0, hy + (cb+0.4)*S, cx0 - cw*S, hy + cb*S);                   // chin (squared for him, rounded for her)
-    ctx.quadraticCurveTo(cx0 - (cw+1.4)*S, hy + (cb-0.6)*S, hx - jw*S, hy + 3.9*S);
-    ctx.quadraticCurveTo(hx - 5.0*S, hy + 2.4*S, hx - 5.2*S, hy - 0.6*S); ctx.closePath(); };
+    ctx.quadraticCurveTo(cx0 - (cw+1.4)*S, hy + (cb-0.6)*S, hx - jw*S, hy + 4.1*S);
+    ctx.quadraticCurveTo(hx - 4.85*S, hy + 2.3*S, hx - 5.2*S, hy - 0.6*S); ctx.closePath(); };
   // her hair has volume: a slightly larger silhouette behind the skull, only where the hair is
   if (fem && o.hi){ ctx.save(); hairPath(hairTab); ctx.clip();
     ctx.translate(hx, hy - 0.8*S); ctx.scale(1.1, 1.07); ctx.translate(-hx, -(hy - 0.8*S));
@@ -4675,7 +4698,7 @@ function drawHuman360(x, y, o){
     ctx.globalAlpha = 1; }
   for (const e of extras) if (e.f > 0) fadeLayer(x, y, S, e.f, e[1]);
 
-  if (o.child) ctx.restore();
+  ctx.restore();
   const leashA = arms.find(a => a.leashArm) || arms[1]; let hand = clip ? [clip[0], clip[1]] : [leashA.ha[0], leashA.ha[1]];
   if (o.bag){ // a blue poop bag in the free hand: dangling from it, or pulled over the hand like a glove while scooping
     const sw = mv&&!reduceMotion ? Math.sin(ph*2)*1*S : 0, bh = arms[0].ha, gl = o.bagGrab || 0;
