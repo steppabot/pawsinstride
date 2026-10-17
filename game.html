@@ -3877,17 +3877,26 @@ function drawDog(x,y,d,D){
       const hU = hu - rearDrop*0.84, hF = hf - stk*1.3, tpF = hf + 1.5*sqk + 6*stk, tpU = 0.8, du = hU - tpU, df = tpF - hF, dd = Math.hypot(du, df) || 1, half = Math.min(6.45, dd/2), hh = Math.sqrt(6.5*6.5 - half*half);
       const tkU = (hU + tpU)/2 + hh*df/dd, tkF = (hF + tpF)/2 + hh*du/dd, wq = Math.min(1, sqk + stk);
       kU += (tkU - kU)*wq; kF += (tkF - kF)*wq; pU += (tpU - pU)*wq; pF += (tpF - pF)*wq;
-      legs.push({fr, sd, hip:Praw(sd*(4.4 + sqk*0.8),hU,hF), knee:Praw(sd*(4.6 + sqk*1.4 + stk*0.6),kU,kF), paw:Praw(sd*(4.6 + sqk*1.2),pU,pF), toe:Praw(sd*(4.6 + sqk*1.2),pU-0.4,pF+2), depth:sd*4.4*Ry+hf*Fy});
+      legs.push({fr, sd, hip:Praw(sd*(4.0 + sqk*0.8),hU,hF), knee:Praw(sd*(4.6 + sqk*1.4 + stk*0.6),kU,kF), hock:Praw(sd*(4.6 + sqk*1.3),kU + (pU - kU)*0.62, kF + (pF - kF)*0.62 - 1.2), paw:Praw(sd*(4.6 + sqk*1.2),pU,pF), toe:Praw(sd*(4.6 + sqk*1.2),pU-0.4,pF+2), depth:sd*4.4*Ry+hf*Fy});
+      continue; }
+    if (fr < 0){ // a real hind leg: thigh forward to the stifle, shin back to the hock, then the long foot down to the paw
+      const th1 = sw*0.9 + 0.35, th2 = th1 - 1.0 - bend*0.7, th3 = th2 + 0.85 + bend*0.45;
+      const sU = hu - 5.8*Math.cos(th1), sF = hf + 5.8*Math.sin(th1), hkU = sU - 5.0*Math.cos(th2), hkF = sF + 5.0*Math.sin(th2);
+      const qU = Math.max(0.8, hkU - 4.0*Math.cos(th3)), qF = hkF + 4.0*Math.sin(th3);
+      legs.push({fr, sd, hip:P(sd*4.0,hu,hf), knee:P(sd*4.5,sU,sF), hock:P(sd*4.6,Math.max(1.6, hkU),hkF), paw:P(sd*4.6,qU,qF), toe:P(sd*4.6,qU-0.4,qF+2), depth:sd*4.4*Ry+hf*Fy});
       continue; }
     legs.push({fr, sd, hip:P(sd*4.4,hu,hf), knee:P(sd*4.6,kU,kF), paw:P(sd*4.6,pU,pF), toe:P(sd*4.6,pU-0.4,pF+2), depth:sd*4.4*Ry+hf*Fy});
   }
   const drawLeg = L => { const col = (L.sd*Ry < -0.3 || (Math.abs(Ry)<0.3 && L.fr*Fy<0)) ? dark : D.body;
-    chain([[L.hip[0],L.hip[1]],[L.knee[0],L.knee[1]],[L.paw[0],L.paw[1]]],[4.8*z,3.1*z,2.5*z], col, OLd);
+    if (L.hock) chain([[L.hip[0],L.hip[1]],[L.knee[0],L.knee[1]],[L.hock[0],L.hock[1]],[L.paw[0],L.paw[1]]],[6.6*z,3.7*z,2.3*z,2.2*z], col, 'rgba(25,25,25,.32)');   // a thick, muscled thigh tapering to a slim hock
+    if (L.hock){ ctx.fillStyle = col; ctx.beginPath(); ctx.arc(L.hip[0], L.hip[1], 3.35*z, 0, Math.PI*2); ctx.fill(); }   // the top of the thigh melts into the body (no outlined ball joint)
+    else chain([[L.hip[0],L.hip[1]],[L.knee[0],L.knee[1]],[L.paw[0],L.paw[1]]],[4.4*z,2.8*z,2.4*z], col, 'rgba(25,25,25,.32)');
+    if (!L.hock){ ctx.fillStyle = col; ctx.beginPath(); ctx.arc(L.hip[0], L.hip[1], 2.25*z, 0, Math.PI*2); ctx.fill(); }
     ctx.fillStyle=col; capsule(L.paw[0],L.paw[1]+0.4*z, L.toe[0],L.toe[1]+0.4*z, 2.6*z, 2.4*z);
     if (d.hi){ const lifted = L.paw[1] < y - 1.6*z;
       if (lifted && Fy < -0.2 && L.fr < 0){ ctx.fillStyle='#3b2b2b'; ctx.beginPath(); ctx.ellipse(L.paw[0], L.paw[1]+0.6*z, 1.4*z, 0.9*z, 0, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle='#5a3f3f'; for (const k of [-1,0,1]){ ctx.beginPath(); ctx.arc(L.paw[0]+k*0.9*z, L.paw[1]-0.6*z, 0.45*z, 0, Math.PI*2); ctx.fill(); } }
-      ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=0.6*z; ctx.beginPath(); ctx.moveTo(L.knee[0]-1*z, L.knee[1]); ctx.lineTo(L.knee[0]+1*z, L.knee[1]+0.4*z); ctx.stroke(); } };
+    } };
   // body = a chain of soft cross-sections along the spine
   const key = [[-12.5,17.6,5.2,5.0],[-8,18,5.8,5.6],[-4,18,5.1,5.0],[0,18.3,5.2,5.0],[4,18.8,5.9,5.4],[8,19.2,6.3,5.8],[12,19.4,5.8,5.2]];
   const prof = []; for (let f=-12.5; f<=12.01; f+=1.2){ let k=0; while (k<key.length-2 && f>key[k+1][0]) k++; const A=key[k], B=key[k+1], t=Math.max(0,Math.min(1,(f-A[0])/(B[0]-A[0])));
@@ -3898,13 +3907,13 @@ function drawDog(x,y,d,D){
     const top = Math.min(...secs.map(c=>c.Y-c.ry)), bot = Math.max(...secs.map(c=>c.Y+c.ry));
     const g = ctx.createLinearGradient(0,top,0,bot); g.addColorStop(0,light); g.addColorStop(0.55,D.body); g.addColorStop(1,dark);
     ctx.fillStyle=g; for (const c of secs){ ctx.beginPath(); ctx.ellipse(c.X,c.Y,c.rx,c.ry,0,0,Math.PI*2); ctx.fill(); }
-    if (D.patch){ const q=P(0,22.5+bob,-3); ctx.fillStyle=D.patch; ctx.beginPath(); ctx.ellipse(q[0],q[1],(2.5+2.5*Math.abs(Fx))*z,2.6*z,0,0,Math.PI*2); ctx.fill(); }
+    if (D.patch){ ctx.fillStyle=D.patch; ctx.beginPath();   // an irregular spot over one side of the back
+      for (const [r, u, f, a, b] of [[1.6, 22.4, -2.2, 2.6, 2.1], [2.6, 21.6, -4.6, 1.9, 1.8], [0.9, 22.6, 0.2, 1.7, 1.5]]){ const q = P(r, u+bob, f); ctx.moveTo(q[0] + (a + a*Math.abs(Fx))*z*0.6, q[1]); ctx.ellipse(q[0], q[1], (a + a*Math.abs(Fx))*z*0.6, b*z, 0, 0, Math.PI*2); }
+      ctx.fill(); }
     if (d.hi){
-      // short fur strokes along the back and flanks
-      ctx.strokeStyle='rgba(0,0,0,.14)'; ctx.lineWidth=0.55*z; ctx.lineCap='round';
-      for (let k=0;k<22;k++){ const f = -11 + (k*1.13)%22, side = (k%3)-1, a0 = P(side*2.6, 21.5+bob+((k*7)%3)*0.6, f), a1 = P(side*2.9, 20.6+bob+((k*7)%3)*0.6, f-1.1);
-        if (a0[2] < -6 && Fy > 0.5) continue; ctx.beginPath(); ctx.moveTo(a0[0],a0[1]); ctx.lineTo(a1[0],a1[1]); ctx.stroke(); }
-      ctx.strokeStyle='rgba(255,255,255,.16)'; for (let k=0;k<10;k++){ const f = -9 + k*2, a0 = P(-1.2, 23+bob, f), a1 = P(-1.4, 22.4+bob, f-0.9); ctx.beginPath(); ctx.moveTo(a0[0],a0[1]); ctx.lineTo(a1[0],a1[1]); ctx.stroke(); }
+      // a soft sheen along the top of the back (no fur strokes: they read as scratches, especially from behind)
+      for (let f = -9; f <= 9; f += 3){ const q = P(-0.8, 22.6+bob, f), r = 3.2*z, sg = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], r);
+        sg.addColorStop(0, 'rgba(255,255,255,.10)'); sg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(q[0], q[1], r, 0, Math.PI*2); ctx.fill(); }
     }
     const ch=P(0,15.5+bob,11); if (ch[2] > -4){ ctx.fillStyle=D.belly; ctx.globalAlpha=0.9; ctx.beginPath(); ctx.ellipse(ch[0],ch[1],(2.4+1.6*Math.max(0,Fy))*z,4*z,0,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; }
   };
@@ -3915,20 +3924,45 @@ function drawDog(x,y,d,D){
     if (sqk > 0.01 && D.tail !== 'curl'){ const up = P(tipR*0.3, 31+bob, -13.5); tip[0] += (up[0]-tip[0])*sqk; tip[1] += (up[1]-tip[1])*sqk; }
     if (stk > 0.01 && D.tail !== 'curl'){ const dn = P(tipR*1.6, 1.4, -19.5); tip[0] += (dn[0]-tip[0])*stk; tip[1] += (dn[1]-tip[1])*stk; }
     ctx.strokeStyle=D.body; ctx.lineCap='round';
-    if (D.tail==='fluffy'){ ctx.fillStyle=OLd; ctx.beginPath(); ctx.ellipse((tb[0]+tip[0])/2,(tb[1]+tip[1])/2,3.4*z,4*z,0,0,Math.PI*2); ctx.fill(); ctx.fillStyle=D.body; ctx.beginPath(); ctx.ellipse((tb[0]+tip[0])/2,(tb[1]+tip[1])/2,2.8*z,3.4*z,0,0,Math.PI*2); ctx.fill(); }
+    if (D.tail==='fluffy'){ // a soft plume of fur along the tail (overlapping tufts, no hard outline)
+      const mx = (tb[0]+tip[0])/2, my = Math.min(tb[1],tip[1]) - 2*z, at = t => { const a = (1-t)*(1-t), b = 2*(1-t)*t, c = t*t; return [a*tb[0] + b*mx + c*tip[0], a*tb[1] + b*my + c*tip[1]]; };
+      for (const [col, grow] of [[dark, 0.5*z], [D.body, 0]]){ ctx.fillStyle = col; for (let i = 0; i <= 5; i++){ const t = i/5, q = at(t), r = (1.3 + 2.2*Math.sin(Math.PI*Math.min(1, t*1.15)))*z + grow; ctx.beginPath(); ctx.arc(q[0], q[1] + (col === dark ? 0.5*z : 0), r, 0, Math.PI*2); ctx.fill(); } }
+      ctx.fillStyle = 'rgba(255,255,255,.22)'; for (let i = 1; i <= 4; i++){ const q = at(i/5); ctx.beginPath(); ctx.arc(q[0] - 0.6*z, q[1] - 0.8*z, 1.1*z, 0, Math.PI*2); ctx.fill(); } }
     else { ctx.lineWidth=(D.tail==='curl'?3.6:2.6)*z; ctx.beginPath(); ctx.moveTo(tb[0],tb[1]); ctx.quadraticCurveTo((tb[0]+tip[0])/2, Math.min(tb[1],tip[1])-2*z, tip[0], tip[1]); ctx.stroke();
-      if (D.tail==='curl'){ ctx.strokeStyle=D.mask||D.belly; ctx.lineWidth=1.2*z; ctx.beginPath(); ctx.moveTo(tb[0],tb[1]-1*z); ctx.quadraticCurveTo((tb[0]+tip[0])/2, Math.min(tb[1],tip[1])-2.6*z, tip[0], tip[1]-0.6*z); ctx.stroke(); } }
+      if (D.tail==='curl' && Fy > -0.2){ /* the pale underside of the curl, only when it faces us */ ctx.strokeStyle=rgbaHex(D.mask||D.belly, 0.55); ctx.lineWidth=1.0*z; ctx.beginPath(); ctx.moveTo(tb[0],tb[1]-1*z); ctx.quadraticCurveTo((tb[0]+tip[0])/2, Math.min(tb[1],tip[1])-2.6*z, tip[0], tip[1]-0.6*z); ctx.stroke(); } }
   };
   // head
   const hc = P(0, 27+bob-dip, 16), hx=hc[0], hy=hc[1];
-  const neck = () => { const n0=P(0,20+bob,9), n1=P(0,25+bob-dip,14.5); ctx.fillStyle=OLd; capsule(n0[0],n0[1],n1[0],n1[1],8*z,7*z); ctx.fillStyle=D.body; capsule(n0[0],n0[1],n1[0],n1[1],7*z,6*z); };
+  // the collar is a ring around the neck (not drawn on the face): the far half goes behind the neck, the near half in front,
+  // and the tag hangs from its lowest point under the chin
+  const collarRing = () => { const cu = 22.6+bob-dip*0.55, cf = 11.9 + dip*0.12, pts = [];
+    for (let i=0;i<=32;i++){ const th = i/32*Math.PI*2, q = P(Math.cos(th)*3.6, cu + Math.sin(th)*2.5, cf - Math.sin(th)*2.3); pts.push(q); }
+    const mid = P(0, cu, cf)[2]; return { pts, mid, tag: P(0, cu - 2.6, cf + 2.4) }; };
+  const collarDraw = (C, front) => { ctx.lineCap = 'round';
+    for (const [col, w] of [[shadeHex(D.collar, -40), 2.5*z], [D.collar, 1.7*z]]){ ctx.strokeStyle = col; ctx.lineWidth = w;
+      for (let i=0;i<32;i++){ const a = C.pts[i], b = C.pts[i+1]; if (((a[2] + b[2])/2 >= C.mid) !== front) continue; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); } }
+    if (front && C.tag[2] >= C.mid - 0.5){ ctx.fillStyle = '#c9a23a'; ctx.beginPath(); ctx.arc(C.tag[0], C.tag[1] + 1.3*z, 1.0*z, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#f1d27a'; ctx.beginPath(); ctx.arc(C.tag[0] - 0.25*z, C.tag[1] + 1.05*z, 0.55*z, 0, Math.PI*2); ctx.fill(); } };
+  const neck = () => { const n0=P(0,20+bob,9), n1=P(0,25+bob-dip,14.5), C = collarRing(); collarDraw(C, false);
+    ctx.fillStyle=OLd; capsule(n0[0],n0[1],n1[0],n1[1],8*z,7*z); ctx.fillStyle=D.body; capsule(n0[0],n0[1],n1[0],n1[1],7*z,6*z); collarDraw(C, true); };
   const head = () => {
     const H = (r,u,f) => { const gx=r*Rx+f*Fx, gy=r*Ry+f*Fy; return [hx+gx*z, hy+(gy*K-u)*z, gy]; };
     const ear = (sd, front) => { const e=H(sd*3.4,2.6,-0.6); if ((e[2] >= 0) !== front) return;
       const flap = gal ? Math.sin(ph*2 + sd*0.6) : 0;          // ears bounce and sweep back with each bound
       ctx.fillStyle=D.ear; ctx.strokeStyle=OLd; ctx.lineWidth=0.8;
-      if (D.ears==='up' || D.ears==='crop'){ const h=D.ears==='up'?7.5:5, t=H(sd*(4.2+flap*0.5),2.6+h-(gal?1.2:0)+flap*0.7,-1-(gal?2.2:0)); const w=1.8*z*(0.5+0.5*Math.abs(Fy))+0.8*z;
-        ctx.beginPath(); ctx.moveTo(e[0]-w,e[1]); ctx.lineTo(t[0],t[1]); ctx.lineTo(e[0]+w,e[1]+0.6*z); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+      if (D.ears==='up' || D.ears==='crop'){
+        // an upright ear is a cupped leaf, not a flat triangle: curved sides, a softly rounded tip, the base sunk into the skull,
+        // and a pale, shaded inside that shows when the dog faces us. Built in the ear's own plane so it turns with the head.
+        const h = (D.ears==='up' ? 7.2 : 5.0) - (gal ? 1.0 : 0) + flap*0.6, back = gal ? 2.2 : 0, wB = D.ears==='up' ? 2.1 : 2.3;
+        const E = (a, b) => { const k = b/h; return H(sd*(3.0 + a + k*(0.9 + flap*0.4)), 1.6 + b, -0.5 - k*(0.6 + back) + (a < 0 ? 1.5 : -1.5)*(1 - k*0.65)); };   // a: across (outward +), b: up from the base
+        const leaf = (sc, lift) => { const p = (a, b) => E(a*sc, lift + b*sc), q = [p(-wB, 0), p(-wB*1.05, h*0.45), p(-0.45, h*0.92), p(0.15, h), p(0.55, h*0.95), p(wB*0.85, h*0.5), p(wB, 0)];
+          ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); ctx.quadraticCurveTo(q[1][0], q[1][1], q[2][0], q[2][1]); ctx.quadraticCurveTo(q[3][0], q[3][1], q[4][0], q[4][1]);
+          ctx.quadraticCurveTo(q[5][0], q[5][1], q[6][0], q[6][1]); ctx.closePath(); };
+        ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(25,25,25,.4)'; ctx.lineWidth = 0.7;
+        leaf(1, 0); ctx.fill(); ctx.stroke();
+        const inA = sm01((Fy + 0.15)/0.6)*(0.35 + 0.65*Math.abs(Fy));   // the inside of the ear faces forward
+        if (inA > 0.02){ ctx.globalAlpha = inA; leaf(0.62, 0.9); ctx.fillStyle = mixHex(D.ear.length===7 ? D.ear : '#555555', '#e9a6a0', 0.55); ctx.fill();
+          leaf(0.36, 1.6); ctx.fillStyle = 'rgba(90,40,40,.25)'; ctx.fill(); ctx.globalAlpha = 1; }
+        else { leaf(0.7, 0.6); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill(); } }
       else { const lift = gal ? (1.6 + flap*1.6) : 0; ctx.beginPath(); ctx.ellipse(e[0]+sd*Rx*1.6*z + sd*lift*0.4*z, e[1]+(4-lift)*z, 2.2*z, (4.6-lift*0.5)*z, sd*Rx*0.3 + sd*lift*0.25, 0, Math.PI*2); ctx.fill(); ctx.stroke(); } };
     const mt = H(0,-1.2,4+mz*0.9), mb=H(0,-0.8,2.4);
     const muzzle = () => { ctx.fillStyle=OLd; capsule(mb[0],mb[1],mt[0],mt[1],5.2*z,4.2*z); ctx.fillStyle=D.mask||D.body; capsule(mb[0],mb[1],mt[0],mt[1],4.4*z,3.4*z);
@@ -3947,10 +3981,6 @@ function drawDog(x,y,d,D){
     if (Fy > -0.55) for (const sd of [-1,1]){ const e=H(sd*2.3,1.6,3.6); if (e[2] < -0.8) continue;
       ctx.fillStyle='#1b1b1b'; ctx.beginPath(); ctx.arc(e[0],e[1],1*z,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(e[0]+0.3*z,e[1]-0.3*z,0.33*z,0,Math.PI*2); ctx.fill(); }
     for (const sd of [-1,1]) ear(sd,true);
-    // collar
-    const c0=H(-3.3,-3.6,-0.8), c1=H(3.3,-3.6,-0.8), cf=H(0,-4.6,1.6);
-    ctx.strokeStyle=D.collar; ctx.lineWidth=2.1*z; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(c0[0],c0[1]); ctx.quadraticCurveTo(cf[0],cf[1]+1*z,c1[0],c1[1]); ctx.stroke();
-    if (cf[2] > -1){ ctx.fillStyle='#e9c46a'; ctx.beginPath(); ctx.arc(cf[0],cf[1]+1.6*z,0.9*z,0,Math.PI*2); ctx.fill(); }
   };
   // Paws In Stride harness: a strap ring behind the front legs with a back plate and D-ring
   let ring = null;
@@ -4533,13 +4563,13 @@ function drawHuman360(x, y, o){
     if (!(b && bx > b[0] && bx < b[1] && by > yT0 && by < yT1)) drawTennisBall(bx, by, 2.4*S, G.t*0.5); }
   // ---- head ----
   const hc = P(0, 58.6+bob, 0.9), hx=hc[0], hy=y-(58.6+bob)*S;
-  { const ax = hx, ay = hy + 6*S, k = o.child ? 1.32 : 0.9; ctx.save(); ctx.translate(ax, ay); ctx.scale(k*(o.child ? 1 : (fem ? 0.92 : 0.84)), k); ctx.translate(-ax, -ay); }   // adult heads a touch smaller and leaner; a child's head is big for the body
+  { const ax = hx, ay = hy + 6*S, k = o.child ? 1.32 : 0.9; ctx.save(); ctx.translate(ax, ay); ctx.scale(k*(o.child ? 1 : (fem ? 0.9 : 0.92)), k); ctx.translate(-ax, -ay); }   // adult heads a touch smaller and leaner; a child's head is big for the body
   // ---- head-local geometry: r = to the right, up = above the eye line, f = forward from the centre of the skull ----
   const face = (r,f) => hx + (r*Rx + f*Fx)*S, vis = (r,f) => r*Ry + f*Fy;
   const hp = (r, up, f) => [face(r, f), hy - up*S, hc[2] + vis(r, f)];
   // the hairline, traced all the way round the skull (by angle from the face: 0 = forehead, pi = nape), in head units below the eye line
-  const HL = { m: [[0,-4.9],[0.55,-4.9],[0.68,-4.15],[0.95,-3.5],[1.3,-2.6],[1.65,-2.0],[2.2,-0.7],[3.15,0.5]],
-               tuck: [[0,-4.6],[0.45,-4.4],[0.85,-3.4],[1.2,-1.3],[1.42,-2.3],[1.75,-2.5],[1.98,0.3],[2.4,2.6],[3.15,3.4]],
+  const HL = { m: [[0,-4.7],[0.55,-4.7],[0.68,-4.05],[0.95,-3.3],[1.3,-2.5],[1.65,-1.9],[2.2,-0.65],[3.15,0.5]],
+               tuck: [[0,-4.4],[0.45,-4.2],[0.85,-3.3],[1.2,-1.3],[1.42,-2.3],[1.75,-2.5],[1.98,0.3],[2.4,2.6],[3.15,3.4]],
                long: [[0,-4.6],[0.4,-4.4],[0.72,-2.8],[0.98,1.2],[1.22,6.5],[3.15,7.5]] };
   const hlAt = (tab, q) => { for (let i=1;i<tab.length;i++) if (q <= tab[i][0]){ const [a0,v0] = tab[i-1], [a1,v1] = tab[i]; return v0 + (v1-v0)*(q-a0)/(a1-a0); } return tab[tab.length-1][1]; };
   const thC = Math.atan2(Ry, Fy);                 // the point on the skull that faces the camera
@@ -4553,7 +4583,7 @@ function drawHuman360(x, y, o){
     ctx.beginPath(); ctx.moveTo(pts[0][0] - dir*3*S, hy - 14*S); ctx.lineTo(pts[0][0] - dir*3*S, pts[0][1]);
     for (const q of pts) ctx.lineTo(q[0], q[1]); ctx.lineTo(pts[n][0] + dir*3*S, pts[n][1]); ctx.lineTo(pts[n][0] + dir*3*S, hy - 14*S); ctx.closePath(); };
   const hairCol = hs === 'buzz' ? mixHex(o.skin, o.hair, 0.62) : o.hair;
-  // hair that sits outside the skull (ponytail, bun, puff, curls), placed on the head itself so it turns with it
+  // hair that sits outside the skull (ponytail, bun, pigtails, space buns, curls), placed on the head itself so it turns with it
   const extras = [];
   if (hs === 'pony'){ const sw = run ? Math.sin(ph)*2.2 : mv ? Math.sin(ph)*0.9 : 0, fl = run ? 2.6 : 0;
     const a0 = hp(0, 2.6, -5.3), a1 = hp(sw*0.5, -0.6, -7.0-fl*0.6), a2 = hp(sw*1.2, -4.4, -7.6-fl), a3 = hp(sw*1.7, -7.6, -7.2-fl*1.2);
@@ -4565,11 +4595,18 @@ function drawHuman360(x, y, o){
       ctx.fillStyle = o.hair; ctx.beginPath(); ctx.arc(c[0], c[1], 2.8*S, 0, Math.PI*2); ctx.fill();
       if (o.hi){ ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 0.5*S; ctx.beginPath(); ctx.arc(c[0], c[1], 1.6*S, 0.4, 4.6); ctx.stroke();
         ctx.fillStyle = rgbaHex(hexAdj(o.hair, 60), 0.3); ctx.beginPath(); ctx.ellipse(c[0]-1*S, c[1]-1.2*S, 1.2*S, 0.7*S, -0.5, 0, Math.PI*2); ctx.fill(); } }]); }
-  if (hs === 'puff'){ const c = hp(0, 5.9, -1.9);
-    extras.push([c[2], () => { for (const [col, rr] of [[hexAdj(o.hair,-30), 4.5], [o.hair, 4.0]]){ ctx.fillStyle = col; ctx.beginPath();
-        for (let i=0;i<12;i++){ const a = i/12*Math.PI*2; ctx.moveTo(c[0] + Math.cos(a)*rr*0.78*S + 1.2*S, c[1] + Math.sin(a)*rr*0.66*S); ctx.arc(c[0] + Math.cos(a)*rr*0.78*S, c[1] + Math.sin(a)*rr*0.66*S, 1.2*S, 0, Math.PI*2); }
-        ctx.moveTo(c[0] + rr*0.8*S, c[1]); ctx.arc(c[0], c[1], rr*0.8*S, 0, Math.PI*2); ctx.fill(); }
-      if (o.hi){ ctx.fillStyle = rgbaHex(hexAdj(o.hair, 60), 0.25); ctx.beginPath(); ctx.ellipse(c[0]-1.3*S, c[1]-1.4*S, 1.8*S, 1.0*S, -0.4, 0, Math.PI*2); ctx.fill(); } }]); }
+  if (hs === 'pigtails'){ // two tails tied just behind the ears, hanging down past the jaw; they swing in turn as she walks
+    for (const sd of [-1, 1]){ const sw = run ? Math.sin(ph + (sd > 0 ? 0 : Math.PI))*1.6 : mv ? Math.sin(ph + (sd > 0 ? 0 : Math.PI))*0.7 : 0, fl = run ? 1.4 : 0;
+      const a0 = hp(sd*4.1, 3.3, -3.5), a1 = hp(sd*5.6, 2.1, -4.1 - fl*0.4), a2 = hp(sd*6.4, -1.6, -3.9 + sw - fl), a3 = hp(sd*6.1, -5.8, -3.2 + sw*1.6 - fl*1.3);
+      extras.push([a1[2], () => { chain([[a0[0],a0[1]],[a1[0],a1[1]],[a2[0],a2[1]],[a3[0],a3[1]]],[2.7*S,2.8*S,2.2*S,0.8*S], o.hair, hexAdj(o.hair,-30));
+        if (o.hi){ ctx.strokeStyle = rgbaHex(hexAdj(o.hair, 50), 0.35); ctx.lineWidth = 0.5*S; ctx.beginPath(); ctx.moveTo(a1[0] - sd*0.4*S, a1[1]); ctx.quadraticCurveTo(a2[0] - sd*0.6*S, a2[1], a3[0] - sd*0.3*S, a3[1] - 0.6*S); ctx.stroke(); }
+        ctx.fillStyle = '#f39a2b'; ctx.beginPath(); ctx.ellipse(a0[0] + (a1[0] - a0[0])*0.45, a0[1] + (a1[1] - a0[1])*0.45, 1.3*S, 1.05*S, 0, 0, Math.PI*2); ctx.fill(); }]); } }   // orange hair ties
+  if (hs === 'spacebuns'){ // two buns high on the crown, one each side of a centre part
+    for (const sd of [-1, 1]){ const c = hp(sd*3.4, 5.4, -1.2);
+      extras.push([c[2], () => { ctx.fillStyle = hexAdj(o.hair,-30); ctx.beginPath(); ctx.arc(c[0], c[1], 3.0*S, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = o.hair; ctx.beginPath(); ctx.arc(c[0], c[1], 2.5*S, 0, Math.PI*2); ctx.fill();
+        if (o.hi){ ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 0.45*S; ctx.beginPath(); ctx.arc(c[0], c[1], 1.4*S, 0.4, 4.6); ctx.stroke();
+          ctx.fillStyle = rgbaHex(hexAdj(o.hair, 60), 0.3); ctx.beginPath(); ctx.ellipse(c[0]-0.9*S, c[1]-1.1*S, 1.0*S, 0.6*S, -0.5, 0, Math.PI*2); ctx.fill(); } }]); } }
   if (hs === 'curly'){ const pts = [];
     // curls sit on a dome centred over the skull, so they turn with the head instead of sliding around on it
     const dome = (e, th) => { const R = 5.5, r = R*Math.cos(e)*Math.sin(th), f = R*Math.cos(e)*Math.cos(th) - 0.3; return hp(r, 1.5 + R*Math.sin(e), f); };
@@ -4585,37 +4622,57 @@ function drawHuman360(x, y, o){
       ctx.moveTo(nX - nw, hy + 2*S); ctx.lineTo(nX - nw, hy + 14*S); ctx.lineTo(nX + nw, hy + 14*S); ctx.lineTo(nX + nw, hy + 2*S); ctx.closePath(); ctx.clip('evenodd'); e[1](); ctx.restore(); }
     else e[1](); } }   // behind the head (full), then fades over it as it comes round
   const ears = [-1,1].map(sd => { const e = hp(sd*5.2, -0.4, 0.2); return {sd, X:e[0], d:e[2] - hc[2]}; });
-  const earW = (0.75 + 0.55*Math.abs(Ry))*S;
-  ctx.fillStyle=o.skinB; if (hs !== 'long') for (const e of ears){ ctx.beginPath(); ctx.ellipse(e.X, hy+0.4*S, earW, 2*S, 0, 0, Math.PI*2); ctx.fill(); }
+  // a real ear shape: a curled rim that's wider at the top, a soft lobe, a shadowed bowl and a little flap (tragus) in front of the opening.
+  // It's drawn in the ear's own plane (u = toward the face, v = down from the eye line), so it's a full C from the side and a thin edge
+  // from the front or back, with the back of the rim flaring out from the head and the top tilted back a touch.
+  const earBase = mixHex(o.skin, o.skinB, 0.45), earDet = Math.max(sm((Math.abs(Fx) - 0.12)/0.45), 0.8*sm(Fy/0.5));   // the bowl opens forward, so it shows from the front too
+  const earPt = (e, u, v) => [e.X + (u*Fx*1.1 + (Math.max(0, 0.6 - u)*0.36 - 0.08)*e.sd*Rx)*S, hy + (v*0.8 - 0.05 + u*0.14)*S];   // top level with the brow, lobe ending at the bottom of the nose
+  const earPath = (e, pts) => { const q = pts.map(([u, v]) => earPt(e, u, v)); ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]);
+    for (let i = 1; i + 2 < q.length; i += 3) ctx.bezierCurveTo(q[i][0], q[i][1], q[i+1][0], q[i+1][1], q[i+2][0], q[i+2][1]); };
+  const EAR_RIM = [[0.38,-1.5],[0.1,-2.3],[-0.95,-2.25],[-1.18,-1.3],[-1.42,-0.45],[-1.05,0.55],[-0.78,1.15],[-0.62,1.8],[-0.32,2.12],[0.06,2.08],[0.4,2.04],[0.5,1.55],[0.42,1.12],[0.58,0.3],[0.55,-0.85],[0.38,-1.5]];
+  const drawEar = (e, full) => {
+    earPath(e, EAR_RIM); ctx.fillStyle = earBase; ctx.fill();
+    if (!full){ const r0 = earPt(e, 0.4, -1.3), r1 = earPt(e, 0.4, 1.1); ctx.beginPath(); ctx.moveTo(r0[0], r0[1]); ctx.lineTo(r1[0], r1[1]); ctx.lineTo(hx, r1[1]); ctx.lineTo(hx, r0[1]); ctx.fill(); }   // (behind the head) joins the ear to the skull so no gap shows from behind
+    if (full && o.hi){ earPath(e, EAR_RIM); ctx.strokeStyle = 'rgba(105,52,38,.28)'; ctx.lineWidth = 0.22*S; ctx.stroke(); }   // a soft edge so the ear reads against the cheek
+    if (!full || !o.hi || earDet <= 0) return;
+    const a0 = ctx.globalAlpha; ctx.globalAlpha = a0*earDet; ctx.lineCap = 'round';
+    earPath(e, [[0.22,-0.75],[-0.5,-1.05],[-0.82,0.15],[-0.4,0.98],[-0.12,1.32],[0.3,0.95],[0.24,0.28],[0.2,-0.2],[0.3,-0.5],[0.22,-0.75]]);   // the bowl
+    ctx.fillStyle = 'rgba(105,52,38,.34)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(95,48,35,.32)'; ctx.lineWidth = 0.32*S; earPath(e, [[0.15,-1.78],[-0.75,-1.98],[-1.12,-0.75],[-0.86,0.9]]); ctx.stroke();   // fold inside the rim
+    ctx.strokeStyle = 'rgba(255,236,218,.30)'; ctx.lineWidth = 0.3*S; earPath(e, [[-0.32,-1.25],[-0.82,-0.7],[-0.8,0.35],[-0.34,1.1]]); ctx.stroke();   // the ridge inside it catches the light
+    const t = earPt(e, 0.42, 0.42); ctx.fillStyle = mixHex(o.skin, o.skinB, 0.25); ctx.beginPath(); ctx.ellipse(t[0], t[1], 0.3*S*(0.4 + 0.6*Math.abs(Fx)), 0.42*S, 0, 0, Math.PI*2); ctx.fill();   // tragus
+    ctx.globalAlpha = a0; };
+  if (hs !== 'long') for (const e of ears) drawEar(e, false);
   // head: rounded cranium over a squared jaw and chin (the jaw widens in profile)
   // his face: high cheekbones, a defined jaw corner, a straight jawline into a squared chin. Built from points on the skull in 3D,
   // so in profile the jaw runs from under the ear down to a forward chin instead of turning into a box
   const manJaw = !fem && !o.child && o.hi;
-  const JP = { cheek:[4.75, 1.6, 1.9], corner:[3.95, -0.6, 5.3], mid:[2.3, 3.5, 7.0], chin:[1.75, 4.0, 7.55] };
+  const JP = { cheek:[4.85, 1.6, 1.9], jowl:[4.6, 0.4, 3.4], corner:[4.05, -0.3, 4.5], mid:[2.75, 3.0, 5.45], chin:[1.25, 3.9, 6.05] };   // a short, broad jaw: the chin sits about as far below the mouth as the mouth is below the nose
   const jp = (key, sd) => { const [r, f, u] = JP[key]; return [face(sd*r, f), hy + u*S, vis(sd*r, f)]; };
   const jawLine = (sd) => [jp('corner', sd), jp('mid', sd), jp('chin', sd)];
   let headHull = null;
   if (manJaw){ const pts = [];
-    for (let i=0;i<=24;i++){ const a = Math.PI*i/24; pts.push([hx + Math.cos(a)*5.2*S, hy - 0.6*S - Math.sin(a)*6.3*S]); }   // the dome of the skull
-    for (const sd of [-1, 1]){ for (const k of ['cheek', 'corner', 'mid', 'chin']) pts.push(jp(k, sd)); pts.push([face(sd*4.9, -2.6), hy + 1.2*S]); }
-    pts.push([face(0, 4.3), hy + 7.75*S]); pts.push([face(0, -4.4), hy + 1.6*S]);
+    for (let i=0;i<=24;i++){ const a = Math.PI*i/24, c = Math.cos(a), sn = Math.sin(a); pts.push([hx + Math.sign(c)*Math.pow(Math.abs(c), 0.85)*5.2*S, hy - 0.6*S - Math.pow(sn, 0.85)*5.9*S]); }   // the dome of the skull: broad and fairly flat on top
+    for (const sd of [-1, 1]){ for (const k of ['cheek', 'jowl', 'corner', 'mid', 'chin']) pts.push(jp(k, sd)); pts.push([face(sd*4.9, -2.6), hy + 1.2*S]); }
+    pts.push([face(0, 4.2), hy + 6.15*S]); pts.push([face(0, -4.4), hy + 1.6*S]);
     const P2 = pts.map(q => [q[0], q[1]]).sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o2, a, b) => (a[0]-o2[0])*(b[1]-o2[1]) - (a[1]-o2[1])*(b[0]-o2[0]);
     const lo = [], up = []; for (const q of P2){ while (lo.length >= 2 && cr(lo[lo.length-2], lo[lo.length-1], q) <= 0) lo.pop(); lo.push(q); }
     for (let i = P2.length - 1; i >= 0; i--){ const q = P2[i]; while (up.length >= 2 && cr(up[up.length-2], up[up.length-1], q) <= 0) up.pop(); up.push(q); }
     headHull = lo.slice(0, -1).concat(up.slice(0, -1)); }
   const headPath = () => { ctx.beginPath();
-    if (!o.hi){ ctx.ellipse(hx, hy, 5.3*S, 6.3*S, 0, 0, Math.PI*2); return; }
-    if (headHull){ ctx.moveTo(headHull[0][0], headHull[0][1]); for (let i = 1; i < headHull.length; i++) ctx.lineTo(headHull[i][0], headHull[i][1]); ctx.closePath(); return; }
-    const jw = (fem ? 3.6 : 3.9) + 0.5*Math.abs(Fx), cw = (fem ? 1.4 : 1.9) + 0.6*Math.abs(Fx), cx0 = hx + Fx*1.1*S;   // jaw half-width, chin half-width, chin shifts toward the face
+    if (!o.hi){ ctx.ellipse(hx, hy - 0.3*S, 5.4*S, 5.9*S, 0, 0, Math.PI*2); return; }
+    if (headHull){ const n = headHull.length, mid = i => { const a = headHull[(i + n) % n], b = headHull[(i + 1) % n]; return [(a[0] + b[0])/2, (a[1] + b[1])/2]; };   // rounded through the hull's corners: full cheeks, no hard angles
+      const m0 = mid(n - 1); ctx.moveTo(m0[0], m0[1]); for (let i = 0; i < n; i++){ const m = mid(i); ctx.quadraticCurveTo(headHull[i][0], headHull[i][1], m[0], m[1]); } ctx.closePath(); return; }
+    const jw = (fem ? 3.8 : 4.1) + 0.5*Math.abs(Fx), cw = (fem ? 1.6 : 2.0) + 0.6*Math.abs(Fx), cx0 = hx + Fx*1.1*S;   // jaw half-width, chin half-width, chin shifts toward the face
     ctx.moveTo(hx - 5.2*S, hy - 0.6*S);
-    ctx.bezierCurveTo(hx - 5.5*S, hy - 5.4*S, hx - 2.6*S, hy - 6.9*S, hx, hy - 6.9*S);
-    ctx.bezierCurveTo(hx + 2.6*S, hy - 6.9*S, hx + 5.5*S, hy - 5.4*S, hx + 5.2*S, hy - 0.6*S);
-    ctx.quadraticCurveTo(hx + 4.85*S, hy + 2.3*S, hx + jw*S, hy + 4.1*S);              // cheek down to the jaw angle
-    const cb = fem ? 6.4 : 6.9;
+    ctx.bezierCurveTo(hx - 5.6*S, hy - 5.2*S, hx - 3.0*S, hy - 6.5*S, hx, hy - 6.5*S);
+    ctx.bezierCurveTo(hx + 3.0*S, hy - 6.5*S, hx + 5.6*S, hy - 5.2*S, hx + 5.2*S, hy - 0.6*S);
+    ctx.quadraticCurveTo(hx + 4.9*S, hy + 2.1*S, hx + jw*S, hy + 3.7*S);              // cheek down to the jaw angle
+    const cb = fem ? 5.75 : 6.0;
     ctx.quadraticCurveTo(cx0 + (cw+1.4)*S, hy + (cb-0.6)*S, cx0 + cw*S, hy + cb*S);       // jawline
     ctx.quadraticCurveTo(cx0, hy + (cb+0.4)*S, cx0 - cw*S, hy + cb*S);                   // chin (squared for him, rounded for her)
-    ctx.quadraticCurveTo(cx0 - (cw+1.4)*S, hy + (cb-0.6)*S, hx - jw*S, hy + 4.1*S);
-    ctx.quadraticCurveTo(hx - 4.85*S, hy + 2.3*S, hx - 5.2*S, hy - 0.6*S); ctx.closePath(); };
+    ctx.quadraticCurveTo(cx0 - (cw+1.4)*S, hy + (cb-0.6)*S, hx - jw*S, hy + 3.7*S);
+    ctx.quadraticCurveTo(hx - 4.9*S, hy + 2.1*S, hx - 5.2*S, hy - 0.6*S); ctx.closePath(); };
   // her hair has volume: a slightly larger silhouette behind the skull, only where the hair is
   if (fem && o.hi){ ctx.save(); hairPath(hairTab); ctx.clip();
     ctx.translate(hx, hy - 0.8*S); ctx.scale(1.1, 1.07); ctx.translate(-hx, -(hy - 0.8*S));
@@ -4654,14 +4711,14 @@ function drawHuman360(x, y, o){
         ctx.strokeStyle = `rgba(105,58,38,${(0.1*al).toFixed(3)})`; ctx.lineWidth = 2.2*S; ctx.beginPath();                              // the hollow under it
         ctx.moveTo(face(sd*4.75, 1.4), hy + 2.1*S); ctx.quadraticCurveTo(face(sd*4.1, 3.0), hy + 3.4*S, face(sd*3.0, 4.3), hy + 4.2*S); ctx.stroke(); }
       // a crisp jaw edge from each corner to the chin, and a little shadow under the lower lip
-      ctx.strokeStyle = 'rgba(78,42,26,.34)'; ctx.lineWidth = 1.0*S;
+      ctx.strokeStyle = 'rgba(78,42,26,.14)'; ctx.lineWidth = 0.8*S;
       for (const sd of [-1, 1]){ const J = jawLine(sd), al = sm((J[1][2] + 1.5)/2); if (al <= 0.01) continue; ctx.globalAlpha = al;   // only the jaw on the side we can see
         ctx.beginPath(); ctx.moveTo(J[0][0], J[0][1]); ctx.lineTo(J[1][0], J[1][1]); ctx.lineTo(J[2][0], J[2][1]); ctx.stroke(); }
       ctx.globalAlpha = 1; { const a = jp('chin', -1), b = jp('chin', 1); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); }
-      const lc = face(0, 4.8); ctx.fillStyle = 'rgba(90,50,32,.16)'; ctx.beginPath(); ctx.ellipse(lc, hy + 4.6*S, 1.3*S*Math.max(0.3, Fy), 0.5*S, 0, 0, Math.PI*2); ctx.fill();
+      const lc = face(0, 4.8); ctx.fillStyle = 'rgba(90,50,32,.16)'; ctx.beginPath(); ctx.ellipse(lc, hy + 4.15*S, 1.3*S*Math.max(0.3, Fy), 0.5*S, 0, 0, Math.PI*2); ctx.fill();
       ctx.lineCap = 'butt'; }
     // nape shading on the neck side of the head
-    if (bk > 0.15 && !fem){ ctx.fillStyle = `rgba(120,70,45,${0.2*sm((bk-0.15)*1.6)})`; ctx.beginPath(); ctx.ellipse(hx, hy+5.4*S, 3.4*S, 1.6*S, 0, 0, Math.PI*2); ctx.fill(); }
+    if (bk > 0.15 && !fem){ ctx.fillStyle = `rgba(120,70,45,${0.2*sm((bk-0.15)*1.6)})`; ctx.beginPath(); ctx.ellipse(hx, hy+4.7*S, 3.4*S, 1.5*S, 0, 0, Math.PI*2); ctx.fill(); }
   }
   // beard wraps the jaw on the side facing forward
   if (o.beard && Fy > -0.55 && o.hi){
@@ -4680,7 +4737,7 @@ function drawHuman360(x, y, o){
     for (const [lift, al] of [[0.55*S, 0.08], [0.25*S, 0.11], [0, 0.15]]){ ctx.save(); region(lift); ctx.clip();
       ctx.fillStyle = `rgba(${rgb},${al*a0})`; ctx.fillRect(hx - 8*S, hy - 4*S, 16*S, 14*S); ctx.restore(); }
     // a touch darker around the chin and jaw so the beard has depth
-    ctx.save(); region(0); ctx.clip(); const cg = ctx.createRadialGradient(face(0,2.6), hy + 5.6*S, 0.5*S, face(0,2.6), hy + 5.6*S, 5.5*S);
+    ctx.save(); region(0); ctx.clip(); const cg = ctx.createRadialGradient(face(0,2.6), hy + 4.9*S, 0.5*S, face(0,2.6), hy + 4.9*S, 5*S);
     cg.addColorStop(0, `rgba(${rgb},${0.16*a0})`); cg.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = cg; ctx.fillRect(hx - 8*S, hy - 2*S, 16*S, 12*S); ctx.restore();
     const mA = sm((Fy + 0.12)*4), Fq = 0.28 + 0.72*Math.max(0, Fy);
     if (mA > 0){ ctx.globalAlpha = mA;
@@ -4743,9 +4800,7 @@ function drawHuman360(x, y, o){
           ctx.fillStyle='rgba(255,240,220,.35)'; ctx.beginPath(); ctx.ellipse(nx-0.2*S, hy+0.2*S, 0.35*S, 0.9*S, 0, 0, Math.PI*2); ctx.fill(); } }
       ctx.globalAlpha = 1; } }
   if (hs !== 'long') for (const e of ears){ const ea = Math.max(0, Math.min(1, (e.d + 2.6)/2.4)); if (ea <= 0) continue;   // ear eases out of sight behind the head
-    ctx.globalAlpha = ea*ea*(3 - 2*ea); ctx.fillStyle=o.skinB; ctx.beginPath(); ctx.ellipse(e.X, hy+0.4*S, earW, 2*S, 0, 0, Math.PI*2); ctx.fill();
-    if (o.hi){ ctx.fillStyle='rgba(120,60,40,.35)'; ctx.beginPath(); ctx.ellipse(e.X, hy+0.5*S, earW*0.46, 1.2*S, 0, 0, Math.PI*2); ctx.fill(); }
-    ctx.globalAlpha = 1; }
+    ctx.globalAlpha = ea*ea*(3 - 2*ea); drawEar(e, true); ctx.globalAlpha = 1; }
   for (const e of extras) if (e.f > 0) fadeLayer(x, y, S, e.f, e[1]);
 
   ctx.restore();
@@ -4969,12 +5024,13 @@ const LOOKS = {
   hair: ['#17120f','#3a2c22','#6b4a35','#8a3f22','#c49a5c','#e3c48a','#9a948c'],
   top:  ['#f7f6f2','#f39a2b','#1f4e6b','#2f9be0','#e8708f','#3f9b5b','#7a5cc4','#26282b'],
   bottom: ['#18181a','#1f3346','#5b6168','#b59a6e','#7a2f3a'],
-  styles: { m: [['fade','Fade'],['buzz','Buzz'],['curly','Curly top'],['bald','Bald']], f: [['pony','Ponytail'],['bun','Bun'],['long','Long'],['puff','Puff']] },
+  styles: { m: [['fade','Fade'],['buzz','Buzz'],['curly','Curly top'],['bald','Bald']], f: [['pony','Ponytail'],['bun','Bun'],['long','Long'],['pigtails','Pigtails'],['spacebuns','Space buns']] },
   facial: [['beard','Beard'],['stubble','Stubble'],['none','Clean']],
 };
 const LOOK_DEFAULT = { sex:'m', skin:2, hairStyle:'fade', hair:1, facial:'beard', top:0, bottom:0, legs:'shorts' };
 let LOOK = { ...LOOK_DEFAULT };
 try { const j = JSON.parse(localStorage.getItem('leashrun-look') || 'null'); if (j && typeof j === 'object') LOOK = { ...LOOK_DEFAULT, ...j }; } catch(_){}
+if (LOOK.hairStyle === 'puff') LOOK.hairStyle = 'pigtails';   // the old Puff style was replaced by Pigtails
 const saveLook = () => { try { localStorage.setItem('leashrun-look', JSON.stringify(LOOK)); } catch(_){} };
 // everything drawHuman360 needs to draw your walker the way you designed them
 function walkerOpts(L = LOOK){
