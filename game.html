@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="description" content="Leash Run: a Paws In Stride dog walking game set in Frisco, TX.">
 <script src="vendor/supabase.js"></script>
 <title>Leash Run</title>
@@ -26,6 +26,9 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%}
+/* no accidental zooming: double-tap and pinch never zoom the game (scrolling the menus still works) */
+html,body,*{touch-action:manipulation}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html{overflow:hidden;background:#f39a2b}
 body{background:#f39a2b;color:var(--ink);font-family:var(--body);overflow:visible;-webkit-user-select:none;user-select:none}
 #app{position:relative;height:calc(100% + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
@@ -559,10 +562,10 @@ function perim(b,u){
   return {x:ix, y:iy+h-(u-2*w-h)};
 }
 const WEATHER = {
-  sunny:  { name:'Sunny', icon:'☀️', note:'Perfect Walking Weather' },
-  cloudy: { name:'Cloudy', icon:'☁️', note:'Overcast and Cool' },
-  rain:   { name:'Light rain', icon:'🌧️', note:'+$2 Rain Tips Per Walk' },
-  windy:  { name:'Windy', icon:'🍃', note:'Hold On To That Leash' },
+  sunny:  { name:'Sunny', icon:'☀️', note:'Perfect walking weather' },
+  cloudy: { name:'Cloudy', icon:'☁️', note:'Overcast and cool' },
+  rain:   { name:'Light rain', icon:'🌧️', note:'+$2 rain tips per walk' },
+  windy:  { name:'Windy', icon:'🍃', note:'Hold on to that leash' },
 };
 function pickWeather(){ const r = Math.random(); return r < 0.4 ? 'sunny' : r < 0.65 ? 'cloudy' : r < 0.85 ? 'rain' : 'windy'; }
 function newGame(){
@@ -875,6 +878,24 @@ const SND = (() => {
   };
   return { fx, music, ensure, unlock, ambience, get running(){ return !!ac && ac.state === 'running'; }, get mode(){ return mode; }, get song(){ return song ? song.name : null; }, get started(){ return !!ac; }, setMuted, get muted(){ return muted; }, _tap: () => master };
 })();
+
+/* ================= no accidental zoom ================= */
+// iPhone Safari can still zoom on a pinch or a quick double tap; block both, and if the page did get zoomed, snap it back
+{ const stop = e => { e.preventDefault(); };
+  for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(ev, stop, { passive: false });
+  document.addEventListener('dblclick', stop, { passive: false });
+  document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });   // two-finger pinch
+  let lastEnd = 0;
+  document.addEventListener('touchend', e => { const now = Date.now(), t = e.target, ui = t && t.closest && t.closest('button, a, input, select, textarea, label, summary');
+    if (now - lastEnd < 320 && !ui) e.preventDefault(); lastEnd = now; }, { passive: false });
+  // already zoomed in (from before this fix, or a browser that ignores the above)? briefly pin the viewport scale, which makes Safari zoom back out
+  const meta = document.querySelector('meta[name="viewport"]');
+  const unzoom = () => { const vv = window.visualViewport; if (!vv || vv.scale <= 1.01) return;
+    const m = meta || Object.assign(document.createElement('meta'), { name: 'viewport' }); if (!m.parentNode) document.head.appendChild(m);
+    const base = m.getAttribute('content') || 'width=device-width, initial-scale=1, viewport-fit=cover';
+    m.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover'); setTimeout(() => m.setAttribute('content', base), 400); };
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', unzoom);
+  document.addEventListener('touchend', () => setTimeout(unzoom, 50), { passive: true }); }
 
 /* ================= input ================= */
 const keys = {};
@@ -4337,7 +4358,7 @@ function drawHuman360(x, y, o){
     const c = P(sw2*k*k, u, f0), hw = Math.hypot(wr*Rx, th*Fx)*S; LLp.push([c[0]-hw, c[1]]); LRp.push([c[0]+hw, c[1]]); }
   const ltip = hs === 'long' ? P(sw2, 46.0 + bob, -5.4) : null;
   if (hs === 'long'){ // the hair hangs from the (smaller) head, so scale its outline the same way about the neck
-    const hc1 = P(0, 58.6+bob, 0.9), ax = hc1[0], ay = y-(58.6+bob)*S + 6*S, kx = o.child ? 1.32 : 0.9*0.94, ky = o.child ? 1.32 : 0.9;
+    const hc1 = P(0, 58.6+bob, 0.9), ax = hc1[0], ay = y-(58.6+bob)*S + 6*S, kx = o.child ? 1.32 : 0.9*(fem ? 0.92 : 0.84), ky = o.child ? 1.32 : 0.9;
     for (const q of [...LLp, ...LRp, ltip]){ q[0] = ax + (q[0] - ax)*kx; q[1] = ay + (q[1] - ay)*ky; } }
   const longShape = () => { const Lp = LLp, Rp = LRp, N = LN, tip = ltip; ctx.beginPath(); ctx.moveTo(Lp[0][0], Lp[0][1]);
     for (let i=1;i<=N;i++){ const a = Lp[i-1], b = Lp[i]; ctx.quadraticCurveTo(a[0], a[1], (a[0]+b[0])/2, (a[1]+b[1])/2); }
@@ -4362,7 +4383,7 @@ function drawHuman360(x, y, o){
       ctx.restore(); } };
   // behind the body when she faces us, over her back when she faces away (switches only once the hair is fully clear of the torso)
   let neckPath = null;
-  { const hc0 = P(0, 58.6+bob, 0.9), hy0 = y-(58.6+bob)*S; ctx.fillStyle = mixHex(o.skin, o.skinB, sm(0.5 - Fy*1.5)); const nX = hc0[0] + Fx*0.3*S, nw = (fem ? 2.2 : 2.6)*S; neckPath = () => { ctx.beginPath(); ctx.moveTo(nX - nw, hy0 + 3.4*S); ctx.lineTo(nX + nw, hy0 + 3.4*S); ctx.lineTo(nX + nw*1.12, hy0 + 10.5*S); ctx.lineTo(nX - nw*1.12, hy0 + 10.5*S); ctx.closePath(); }; neckPath(); ctx.fill();
+  { const hc0 = P(0, 58.6+bob, 0.9), hy0 = y-(58.6+bob)*S; ctx.fillStyle = mixHex(o.skin, o.skinB, sm(0.5 - Fy*1.5)); const nX = hc0[0] + Fx*0.3*S, nw = (fem ? 2.1 : 2.35)*S; neckPath = () => { ctx.beginPath(); ctx.moveTo(nX - nw, hy0 + 3.4*S); ctx.lineTo(nX + nw, hy0 + 3.4*S); ctx.lineTo(nX + nw*1.12, hy0 + 10.5*S); ctx.lineTo(nX - nw*1.12, hy0 + 10.5*S); ctx.closePath(); }; neckPath(); ctx.fill();
     ctx.strokeStyle = shadeHex(o.skin, -48); ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(nX - nw, hy0 + 3.4*S); ctx.lineTo(nX - nw*1.12, hy0 + 10.5*S); ctx.moveTo(nX + nw, hy0 + 3.4*S); ctx.lineTo(nX + nw*1.12, hy0 + 10.5*S); ctx.stroke();
     const ng = ctx.createLinearGradient(0, hy0 + 3.4*S, 0, hy0 + 7*S); ng.addColorStop(0, 'rgba(80,45,30,.28)'); ng.addColorStop(1, 'rgba(80,45,30,0)'); ctx.fillStyle = ng; ctx.fillRect(nX - nw*1.12, hy0 + 3.4*S, nw*2.24, 3.6*S); }
   const cxT = x + Fx*0.6*S, sy0 = y-(50+bob)*S, wy = y-(30.4+bob)*S;
@@ -4512,7 +4533,7 @@ function drawHuman360(x, y, o){
     if (!(b && bx > b[0] && bx < b[1] && by > yT0 && by < yT1)) drawTennisBall(bx, by, 2.4*S, G.t*0.5); }
   // ---- head ----
   const hc = P(0, 58.6+bob, 0.9), hx=hc[0], hy=y-(58.6+bob)*S;
-  { const ax = hx, ay = hy + 6*S, k = o.child ? 1.32 : 0.9; ctx.save(); ctx.translate(ax, ay); ctx.scale(k*(o.child ? 1 : 0.94), k); ctx.translate(-ax, -ay); }   // adult heads a touch smaller and leaner; a child's head is big for the body
+  { const ax = hx, ay = hy + 6*S, k = o.child ? 1.32 : 0.9; ctx.save(); ctx.translate(ax, ay); ctx.scale(k*(o.child ? 1 : (fem ? 0.92 : 0.84)), k); ctx.translate(-ax, -ay); }   // adult heads a touch smaller and leaner; a child's head is big for the body
   // ---- head-local geometry: r = to the right, up = above the eye line, f = forward from the centre of the skull ----
   const face = (r,f) => hx + (r*Rx + f*Fx)*S, vis = (r,f) => r*Ry + f*Fy;
   const hp = (r, up, f) => [face(r, f), hy - up*S, hc[2] + vis(r, f)];
@@ -4567,8 +4588,24 @@ function drawHuman360(x, y, o){
   const earW = (0.75 + 0.55*Math.abs(Ry))*S;
   ctx.fillStyle=o.skinB; if (hs !== 'long') for (const e of ears){ ctx.beginPath(); ctx.ellipse(e.X, hy+0.4*S, earW, 2*S, 0, 0, Math.PI*2); ctx.fill(); }
   // head: rounded cranium over a squared jaw and chin (the jaw widens in profile)
+  // his face: high cheekbones, a defined jaw corner, a straight jawline into a squared chin. Built from points on the skull in 3D,
+  // so in profile the jaw runs from under the ear down to a forward chin instead of turning into a box
+  const manJaw = !fem && !o.child && o.hi;
+  const JP = { cheek:[4.75, 1.6, 1.9], corner:[3.95, -0.6, 5.3], mid:[2.3, 3.5, 7.0], chin:[1.75, 4.0, 7.55] };
+  const jp = (key, sd) => { const [r, f, u] = JP[key]; return [face(sd*r, f), hy + u*S, vis(sd*r, f)]; };
+  const jawLine = (sd) => [jp('corner', sd), jp('mid', sd), jp('chin', sd)];
+  let headHull = null;
+  if (manJaw){ const pts = [];
+    for (let i=0;i<=24;i++){ const a = Math.PI*i/24; pts.push([hx + Math.cos(a)*5.2*S, hy - 0.6*S - Math.sin(a)*6.3*S]); }   // the dome of the skull
+    for (const sd of [-1, 1]){ for (const k of ['cheek', 'corner', 'mid', 'chin']) pts.push(jp(k, sd)); pts.push([face(sd*4.9, -2.6), hy + 1.2*S]); }
+    pts.push([face(0, 4.3), hy + 7.75*S]); pts.push([face(0, -4.4), hy + 1.6*S]);
+    const P2 = pts.map(q => [q[0], q[1]]).sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o2, a, b) => (a[0]-o2[0])*(b[1]-o2[1]) - (a[1]-o2[1])*(b[0]-o2[0]);
+    const lo = [], up = []; for (const q of P2){ while (lo.length >= 2 && cr(lo[lo.length-2], lo[lo.length-1], q) <= 0) lo.pop(); lo.push(q); }
+    for (let i = P2.length - 1; i >= 0; i--){ const q = P2[i]; while (up.length >= 2 && cr(up[up.length-2], up[up.length-1], q) <= 0) up.pop(); up.push(q); }
+    headHull = lo.slice(0, -1).concat(up.slice(0, -1)); }
   const headPath = () => { ctx.beginPath();
     if (!o.hi){ ctx.ellipse(hx, hy, 5.3*S, 6.3*S, 0, 0, Math.PI*2); return; }
+    if (headHull){ ctx.moveTo(headHull[0][0], headHull[0][1]); for (let i = 1; i < headHull.length; i++) ctx.lineTo(headHull[i][0], headHull[i][1]); ctx.closePath(); return; }
     const jw = (fem ? 3.6 : 3.9) + 0.5*Math.abs(Fx), cw = (fem ? 1.4 : 1.9) + 0.6*Math.abs(Fx), cx0 = hx + Fx*1.1*S;   // jaw half-width, chin half-width, chin shifts toward the face
     ctx.moveTo(hx - 5.2*S, hy - 0.6*S);
     ctx.bezierCurveTo(hx - 5.5*S, hy - 5.4*S, hx - 2.6*S, hy - 6.9*S, hx, hy - 6.9*S);
@@ -4610,6 +4647,19 @@ function drawHuman360(x, y, o){
       for (const k of [-0.5, 0.25, 0.9]){ const p1 = hairPts(hairTab).map(q => q); ctx.beginPath(); ctx.moveTo(face(k*2.2, 4.2), hy - 6.3*S); ctx.quadraticCurveTo(face(k*4.4, 0.5), hy - 5.2*S, face(k*5.0, -3.0), hy - 1.0*S); ctx.stroke(); }
       ctx.restore();
     }
+    if (manJaw){ ctx.lineCap = 'round';
+      for (const sd of [-1, 1]){ const al = sm((vis(sd*3.4, 3.4) + 1.2)/2.4); if (al <= 0.01) continue;
+        const cbx = face(sd*3.4, 3.5), hg = ctx.createRadialGradient(cbx, hy + 0.9*S, 0.2*S, cbx, hy + 0.9*S, 2.4*S);   // cheekbone catching the light
+        hg.addColorStop(0, `rgba(255,236,214,${(0.26*al).toFixed(3)})`); hg.addColorStop(1, 'rgba(255,236,214,0)'); ctx.fillStyle = hg; ctx.fillRect(cbx - 3*S, hy - 2*S, 6*S, 6*S);
+        ctx.strokeStyle = `rgba(105,58,38,${(0.1*al).toFixed(3)})`; ctx.lineWidth = 2.2*S; ctx.beginPath();                              // the hollow under it
+        ctx.moveTo(face(sd*4.75, 1.4), hy + 2.1*S); ctx.quadraticCurveTo(face(sd*4.1, 3.0), hy + 3.4*S, face(sd*3.0, 4.3), hy + 4.2*S); ctx.stroke(); }
+      // a crisp jaw edge from each corner to the chin, and a little shadow under the lower lip
+      ctx.strokeStyle = 'rgba(78,42,26,.34)'; ctx.lineWidth = 1.0*S;
+      for (const sd of [-1, 1]){ const J = jawLine(sd), al = sm((J[1][2] + 1.5)/2); if (al <= 0.01) continue; ctx.globalAlpha = al;   // only the jaw on the side we can see
+        ctx.beginPath(); ctx.moveTo(J[0][0], J[0][1]); ctx.lineTo(J[1][0], J[1][1]); ctx.lineTo(J[2][0], J[2][1]); ctx.stroke(); }
+      ctx.globalAlpha = 1; { const a = jp('chin', -1), b = jp('chin', 1); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); }
+      const lc = face(0, 4.8); ctx.fillStyle = 'rgba(90,50,32,.16)'; ctx.beginPath(); ctx.ellipse(lc, hy + 4.6*S, 1.3*S*Math.max(0.3, Fy), 0.5*S, 0, 0, Math.PI*2); ctx.fill();
+      ctx.lineCap = 'butt'; }
     // nape shading on the neck side of the head
     if (bk > 0.15 && !fem){ ctx.fillStyle = `rgba(120,70,45,${0.2*sm((bk-0.15)*1.6)})`; ctx.beginPath(); ctx.ellipse(hx, hy+5.4*S, 3.4*S, 1.6*S, 0, 0, Math.PI*2); ctx.fill(); }
   }
@@ -4618,7 +4668,7 @@ function drawHuman360(x, y, o){
     // beard as a soft shadow: a darker tone over the jaw, cheeks and chin, feathered at the edges (no hard shape, no dots)
     const a0 = Math.min(1, (Fy+0.55)*2.2)*(o.stubble ? 0.5 : 1), n = parseInt(o.beard.slice(1),16), rgb = `${(n>>16)&255},${(n>>8)&255},${n&255}`;
     // the beard region: below a cheek line traced around the jaw in 3D, from sideburn to sideburn, so it turns smoothly with the head
-    const cheekY = th => { const q = Math.abs(th); return q < 0.8 ? 1.9 - q*0.75 : q < 1.45 ? 1.3 - (q-0.8)*3.85 : -1.2; };
+    const cheekY = th => { const q = Math.abs(th); return q < 0.8 ? 2.9 - q*0.55 : q < 1.45 ? 2.46 - (q-0.8)*3.6 : 0.1; };
     const pts = []; let cutA = false, cutB = false;
     for (let i=0;i<=44;i++){ const th = -1.8 + 3.6*i/44, r = 5.1*Math.sin(th), f = 0.3 + 4.8*Math.cos(th);
       if (r*Ry + f*Fy < 0){ if (pts.length) cutB = true; else cutA = true; continue; }
@@ -4627,11 +4677,11 @@ function drawHuman360(x, y, o){
       const p0 = pts[0], pn = pts[pts.length-1], dir = Math.sign(pn[0] - p0[0]) || 1;
       const x0 = p0[0] - (cutA ? dir*3*S : 0), xn = pn[0] + (cutB ? dir*3*S : 0);   // run past the silhouette when the edge is the turning cheek
       ctx.moveTo(x0, hy + 10*S); ctx.lineTo(x0, p0[1] - lift); for (const q of pts) ctx.lineTo(q[0], q[1] - lift); ctx.lineTo(xn, pn[1] - lift); ctx.lineTo(xn, hy + 10*S); ctx.closePath(); };
-    for (const [lift, al] of [[0.55*S, 0.16], [0.25*S, 0.18], [0, 0.22]]){ ctx.save(); region(lift); ctx.clip();
+    for (const [lift, al] of [[0.55*S, 0.08], [0.25*S, 0.11], [0, 0.15]]){ ctx.save(); region(lift); ctx.clip();
       ctx.fillStyle = `rgba(${rgb},${al*a0})`; ctx.fillRect(hx - 8*S, hy - 4*S, 16*S, 14*S); ctx.restore(); }
     // a touch darker around the chin and jaw so the beard has depth
     ctx.save(); region(0); ctx.clip(); const cg = ctx.createRadialGradient(face(0,2.6), hy + 5.6*S, 0.5*S, face(0,2.6), hy + 5.6*S, 5.5*S);
-    cg.addColorStop(0, `rgba(${rgb},${0.22*a0})`); cg.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = cg; ctx.fillRect(hx - 8*S, hy - 2*S, 16*S, 12*S); ctx.restore();
+    cg.addColorStop(0, `rgba(${rgb},${0.16*a0})`); cg.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = cg; ctx.fillRect(hx - 8*S, hy - 2*S, 16*S, 12*S); ctx.restore();
     const mA = sm((Fy + 0.12)*4), Fq = 0.28 + 0.72*Math.max(0, Fy);
     if (mA > 0){ ctx.globalAlpha = mA;
       // mustache shadow + mouth with a fuller lower lip
@@ -5052,7 +5102,7 @@ function drawLookInto(cvs, opt){
   finally { ctx = real; }
 }
 function drawYouMini(){ const c = $('youMini'); if (!c || c.getBoundingClientRect().width < 2) return;
-  drawLookInto(c, { x: 28, y: 166, S: 2.35, ang: Math.PI/2 - 0.3 });
+  drawLookInto(c, { x: 28, y: 137, S: 1.92, ang: Math.PI/2 - 0.22 });   // head and shoulders, so his build reads at a glance
   const L = LOOK, st = (LOOKS.styles[L.sex] || []).find(z => z[0] === L.hairStyle);
   $('youTxt').textContent = `${L.sex === 'f' ? 'Her' : 'Him'} · ${st ? st[1] : ''}`; }
 const lookUI = { open:false, ang: Math.PI/2 - 0.5, spin: 0.55, ph: 0, drag: null, raf: 0, last: 0 };
