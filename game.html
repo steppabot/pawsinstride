@@ -46,7 +46,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .obj{z-index:2;position:absolute;top:10px;left:max(12px,env(safe-area-inset-left,0px));max-width:calc(100% - 160px);
   background:var(--paper);border:2.5px solid var(--ink);border-radius:12px;box-shadow:0 3px 0 var(--ink);
   padding:6px 10px;font-weight:800;font-size:14px;line-height:1.25;pointer-events:none}
-.obj small{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange-deep)}
+.obj small{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange-deep);white-space:pre-line;line-height:1.35}
 .snd{position:absolute;right:max(10px,env(safe-area-inset-right,0px));top:132px;
   width:40px;height:40px;border-radius:50%;border:2.5px solid var(--ink);background:var(--paper);color:var(--ink);box-shadow:0 3px 0 var(--ink);
   display:grid;place-items:center;cursor:pointer;z-index:3;touch-action:none;padding:0}
@@ -403,7 +403,6 @@ const M = { fences:[], dest:null, hq:null, props:[], drives:[], landmarks:[], to
       M.fountain = {x:cx, y:cy};
       M.circles.push({x:cx, y:cy+2, r:5});   // the pedestal; the pool itself can be waded into
       M.pond = {x:x0+82, y:y0+78, rx:52, ry:32};
-      M.circles.push({x:x0+82, y:y0+78, r:34});
       const spots = [[40,200],[60,250],[300,40],[250,70],[310,110],[180,40],[120,140],[230,240],[40,130],[300,250],
                      [40,290],[300,300]];
       for (const [tx,ty] of spots) tree(x0+tx, y0+ty);
@@ -562,10 +561,10 @@ function perim(b,u){
   return {x:ix, y:iy+h-(u-2*w-h)};
 }
 const WEATHER = {
-  sunny:  { name:'Sunny', icon:'☀️', note:'Perfect walking weather' },
-  cloudy: { name:'Cloudy', icon:'☁️', note:'Overcast and cool' },
-  rain:   { name:'Light rain', icon:'🌧️', note:'+$2 rain tips per walk' },
-  windy:  { name:'Windy', icon:'🍃', note:'Hold on to that leash' },
+  sunny:  { name:'Sunny', icon:'☀️', note:'Perfect Walking Weather' },
+  cloudy: { name:'Cloudy', icon:'☁️', note:'Overcast and Cool' },
+  rain:   { name:'Light Rain', icon:'🌧️', note:'+$2 Rain Tips per Walk' },
+  windy:  { name:'Windy', icon:'🍃', note:'Hold On to That Leash' },
 };
 function pickWeather(){ const r = Math.random(); return r < 0.4 ? 'sunny' : r < 0.65 ? 'cloudy' : r < 0.85 ? 'rain' : 'windy'; }
 function newGame(){
@@ -623,7 +622,7 @@ function setObjective(){
   else { step = 'Bring ' + (j.D2 ? 'them' : j.D.name) + ' home'; text = j.door.label; }
   // the job type shows while you head to the pickup; after that, the dog's personality
   const extra = j.stage === 'pickup' ? `${J.icon} ${J.name}` : (j.trait !== 'easy' ? `${T.icon} ${T.name}` : '');
-  $('objStep').textContent = extra ? step + ' · ' + extra : step; $('objText').textContent = text;
+  $('objStep').textContent = extra ? step + '\n' + extra : step; $('objText').textContent = text;   // the job type (or the dog's personality) gets its own line
 }
 // where the arrow and target ring point right now
 function jobTarget(){
@@ -1293,6 +1292,9 @@ function renderZoomies(dt){
     for (let i=0;i<7;i++){ const a = zmHash(Math.floor(zm.t*14)+i*7), side = i%2 ? 1 : -1, y = H*(0.45 + a*0.5), x = W/2 + side*W*(0.36+a*0.12);
       ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + side*30, y + 22); ctx.stroke(); } }
   ctx.restore();
+  if (G.weather === 'rain'){ ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = 'rgba(95,112,144,.42)'; ctx.fillRect(0, 0, W, H);   // grey, overcast light
+    const sk = ctx.createLinearGradient(0, 0, 0, hy); sk.addColorStop(0, 'rgba(120,130,150,.55)'); sk.addColorStop(1, 'rgba(160,170,185,.2)'); ctx.fillStyle = sk; ctx.fillRect(0, 0, W, hy + 4);
+    ctx.globalCompositeOperation = 'source-over'; if (!reduceMotion) drawRain(dt, { horizon: hy }); }
   // ---- overlay HUD ----
   const name = zm.D2 ? `${zm.D.name} & ${zm.D2.name}` : zm.D.name;
   if (zm.flash > 0){ ctx.fillStyle=`rgba(255,250,242,${zm.flash*2})`; ctx.fillRect(0,0,W,H); }
@@ -1703,7 +1705,7 @@ function update(dt){
   // walker
   let sp = BASE * WALK_K * (has('shoes') ? 1.12 : 1) * (1 + (RUN_K - 1)*G.runK) * (G.tiredT > 0 ? 0.88 : 1);
   if (M.puddles.some(u => ((p.x-u.x)/u.rx)**2 + ((p.y-u.y)/u.ry)**2 < 1)) sp *= 0.5;
-  sp *= 1 - 0.45*(p.wade||0);   // wading through the fountain is slow going
+  sp *= 1 - 0.45*(p.wade||0)*Math.min(1.35, p.wdeep||1);   // wading through the fountain (or the deeper pond) is slow going
   if (G.weather === 'rain') sp *= 0.95;
   if (G.weather === 'windy') sp *= 1 + 0.06*Math.sign(inp.x)*G.windDir;
   if (G.boost > 0){ sp *= G.runK > 0.5 ? 1.15 : 1.6; G.boost -= dt; }
@@ -2151,7 +2153,7 @@ function render(dt){
   const d = G.dog;
   const dogDraw = (dg) => { dg.hi = true; dg.run = (G.runK > 0.5 || dg.gallop) && dg.anim; dg.ball = !!(dg === G.dog && G.fetch && G.fetch.ball && G.fetch.ball.held === 'dog');
     const f = dg.fade === undefined ? 1 : dg.fade; if (f <= 0) return null; let c = null;
-    const go = () => { c = wadeDraw(dg, sx(dg.x), sy(dg.y), 7*s*dg.D.size, () => drawDog(sx(dg.x), sy(dg.y), dg, dg.D)); };
+    const go = () => { c = wadeDraw(dg, sx(dg.x), sy(dg.y), 7*s*dg.D.size*Math.min(1.35, dg.wdeep||1), () => drawDog(sx(dg.x), sy(dg.y), dg, dg.D)); };
     if (f < 1) fadeLayer(sx(dg.x), sy(dg.y), dg.D.size*s*0.4, f, go); else go(); return c; };
   if (d) L.push([d.y, () => { collar = dogDraw(d); if (collar) G.ringPt = collar; }]);
   const d2 = G.dog2; let collar2 = null;
@@ -2159,7 +2161,7 @@ function render(dt){
   if (G.fetch && G.fetch.ball && !G.fetch.ball.held){ const b = G.fetch.ball; L.push([b.y, () => drawBallWorld(b)]); }
   if (G.scene && G.scene.tech){ const T = G.scene.tech; L.push([T.y, () => drawTech(T)]);
     if (G.scene.techLeash) for (const [dg, k] of [[d, 'collar'], [d2, 'collar2']]) if (dg) L.push([Math.max(T.y, dg.y) + 0.01, () => { const c = k === 'collar' ? collar : collar2; if (T.hand && c && T.fade > 0 && (dg.fade === undefined || dg.fade > 0)) drawLeash(T.hand, c, false, '#36a39b'); }]); }
-  L.push([p.y, () => { hand = wadeDraw(p, sx(p.x), sy(p.y), 11*s, () => drawWalker(sx(p.x), sy(p.y), p, G.boost>0)); }]);
+  L.push([p.y, () => { hand = wadeDraw(p, sx(p.x), sy(p.y), 11*s*(p.wdeep||1), () => drawWalker(sx(p.x), sy(p.y), p, G.boost>0)); }]);
   // the leash is depth-sorted with everything else, so houses and trees in front of it hide it too
   if (d && !G.offLeash) L.push([Math.max(p.y, d.y)+0.01, () => { if (!collar) return; G.rope = G.rope || {}; ropeStep(G.rope, hand, collar, dt, [p.x, p.y], [d.x, d.y]); drawRope(G.rope, '#1f4e6b', G.taut); }]);
   else if (G.rope) G.rope.n = null;
@@ -3421,7 +3423,10 @@ function drawBench(b){
 }
 // a park trash can: slatted steel drum with a domed lid, rim highlight and a dark opening
 // ---- the Simpson Plaza fountain: walk in and you wade, with splashes and ripples ----
-const inPool = (x, y) => { const f = M.fountain; return f && ((x - f.x)/23)**2 + ((y - f.y - 3)/9.6)**2 < 1; };
+const inFountain = (x, y) => { const f = M.fountain; return f && ((x - f.x)/23)**2 + ((y - f.y - 3)/9.6)**2 < 1; };
+// the pond in Simpson Plaza can be waded into too, and it gets deeper toward the middle (up to about the waist)
+const pondDepth = (x, y) => { const pd = M.pond; if (!pd) return 0; const q = ((x - pd.x)/(pd.rx - 2))**2 + ((y - pd.y)/(pd.ry - 1.5))**2; return q < 1 ? 1.2 + 0.4*(1 - q) : 0; };
+const inPool = (x, y) => inFountain(x, y) || pondDepth(x, y) > 0;
 function splashAt(x, y, n, power){
   G.drops = G.drops || []; G.ripples = G.ripples || [];
   for (let i = 0; i < n; i++){ const a = Math.random()*Math.PI*2, v = (10 + Math.random()*26)*power;
@@ -3430,10 +3435,11 @@ function splashAt(x, y, n, power){
 }
 function updateWading(dt, fx0, fy0){
   const p = G.p; G.drops = G.drops || []; G.ripples = G.ripples || [];
-  const step = (o, x0, y0, big) => { const inside = inPool(o.x, o.y), was = (o.wade||0) > 0.5;
+  const step = (o, x0, y0, big) => { const inside = inPool(o.x, o.y), was = (o.wade||0) > 0.5, pond = pondDepth(o.x, o.y);
     o.wade = (o.wade||0) + ((inside ? 1 : 0) - (o.wade||0))*Math.min(1, dt*7);
+    o.wdeep = (o.wdeep||1) + ((pond || (inside ? 1 : o.wdeep||1)) - (o.wdeep||1))*Math.min(1, dt*4);
     const mv = Math.hypot(o.x - x0, o.y - y0)/Math.max(dt, 1e-4);
-    if (inside && !was && o.wade > 0.5){ splashAt(o.x, o.y, big ? 22 : 12, big ? 1.2 : 0.8); if (big){ SND.fx.splash(); addFloat(o.x, o.y, 60, 'Splash!', '#2f8fc4'); } }
+    if (inside && !was && o.wade > 0.5){ splashAt(o.x, o.y, big ? 22 : 12, big ? 1.2 : 0.8); if (big){ SND.fx.splash(); addFloat(o.x, o.y, 60, pond ? 'Into the pond!' : 'Splash!', '#2f8fc4'); } }
     if (inside && mv > 8){ o.wsT = (o.wsT||0) - dt; if (o.wsT <= 0){ o.wsT = big ? 0.22 : 0.18; splashAt(o.x + (Math.random()-0.5)*4, o.y + 1, big ? 5 : 3, 0.5); if (big && Math.random() < 0.35) SND.fx.slosh(); } }
     if (!inside && (o.wade||0) > 0.05) o.wetT = 3; else o.wetT = Math.max(0, (o.wetT||0) - dt);
   };
@@ -3455,11 +3461,74 @@ function wadeDraw(o, x, y, depth, draw){
     g.save(); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(70,150,200,.55)'; g.fillRect(x - 400, wl - 50, 800, 500); g.restore();
     ctx.save(); ctx.beginPath(); ctx.rect(x - 400, wl, 800, 400); ctx.clip(); ctx.setTransform(1,0,0,1,0,0); ctx.globalAlpha = 0.45; ctx.drawImage(L.c, 0, 0); ctx.restore(); }
   ctx.save(); ctx.beginPath(); ctx.rect(x - 400, wl - 800, 800, 800); ctx.clip(); out = draw(); ctx.restore();
-  const t = G.t, rx = depth*0.62, ry = depth*0.2;
+  const dd = depth/Math.max(1, o.wdeep||1)*1.12, t = G.t, rx = dd*0.62, ry = dd*0.2;   // the ring around the body stays body-sized in deeper water
   ctx.fillStyle = `rgba(110,180,215,${0.35*w})`; ctx.beginPath(); ctx.ellipse(x, wl, rx, ry, 0, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle = `rgba(255,255,255,${0.75*w})`; ctx.lineWidth = Math.max(0.8, depth*0.06);
+  ctx.strokeStyle = `rgba(255,255,255,${0.75*w})`; ctx.lineWidth = Math.max(0.8, dd*0.06);
   ctx.beginPath(); ctx.ellipse(x, wl, rx*(1 + 0.08*Math.sin(t*6)), ry*(1 + 0.12*Math.sin(t*6 + 1)), 0, 0, Math.PI*2); ctx.stroke();
   return out;
+}
+/* ---------- rain: falling streaks in depth, splashes where they land, and drops that hit the "lens" and run down the screen ---------- */
+const RAIN = { drops: [], splash: [], lens: [], trail: [], next: 0.8, snap: null, w: 0, h: 0 };
+function drawRain(dt, opt){
+  const R = RAIN, horizon = (opt && opt.horizon) || 0, wind = 0.1*(G.windDir || 1);
+  // falling drops: three depths (far ones short, faint and slow; near ones long, bright and fast), falling almost straight down
+  const want = Math.round(Math.min(420, Math.max(90, W*H/2400)));
+  const spawn = (q, top) => { q.z = Math.random(); q.x = Math.random()*(W + 60) - 30; q.y = top ? -Math.random()*H*0.6 - 20 : Math.random()*H;
+    q.v = 650 + q.z*750 + Math.random()*120; q.len = 9 + q.z*24; q.land = horizon + (H - horizon)*(0.08 + Math.random()*0.95); return q; };
+  if (R.w !== W || R.h !== H){ R.drops.length = 0; R.w = W; R.h = H; }
+  while (R.drops.length < want) R.drops.push(spawn({}, false));
+  if (R.drops.length > want) R.drops.length = want;
+  const layers = [[], [], []];
+  for (const q of R.drops){ q.y += q.v*dt; q.x += q.v*wind*dt;
+    if (q.y >= q.land){ if (q.z > 0.3 && R.splash.length < 80) R.splash.push({ x: q.x, y: q.land, t: 0, s: 0.55 + q.z*0.6*(horizon ? (q.land - horizon)/(H - horizon) + 0.3 : 1) }); spawn(q, true); continue; }
+    layers[q.z < 0.4 ? 0 : q.z < 0.75 ? 1 : 2].push(q); }
+  ctx.lineCap = 'round';
+  layers.forEach((L, k) => { const a = [0.22, 0.36, 0.55][k], w = [0.8, 1.15, 1.6][k];
+    for (const [part, al] of [[0, a*0.35], [1, a]]){ ctx.strokeStyle = `rgba(214,228,242,${al})`; ctx.lineWidth = w; ctx.beginPath();
+      for (const q of L){ const tx = q.len*wind, y0 = part ? q.y - q.len*0.45 : q.y - q.len, y1 = part ? q.y : q.y - q.len*0.45, x0 = q.x - (q.y - y0)/q.len*tx, x1 = q.x - (q.y - y1)/q.len*tx;
+        ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); }
+      ctx.stroke(); } });
+  // splashes: a little crown ring and a few droplets that hop up and fall back
+  for (let i = R.splash.length - 1; i >= 0; i--){ const sp = R.splash[i]; sp.t += dt; const k = sp.t/0.3; if (k >= 1){ R.splash.splice(i, 1); continue; }
+    const s = sp.s*1.3, a = (1 - k)*0.6, r = (1.5 + 6*k)*s;
+    ctx.strokeStyle = `rgba(225,236,248,${a})`; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.ellipse(sp.x, sp.y, r, r*0.35, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = `rgba(232,242,252,${a})`; for (const d of [-1, -0.3, 0.45, 1]){ const hx = sp.x + d*r*0.9, hy = sp.y - Math.sin(Math.PI*k)*(3 + Math.abs(d)*2)*s; ctx.beginPath(); ctx.arc(hx, hy, 0.75*s, 0, Math.PI*2); ctx.fill(); } }
+  // drops on the lens: they land, bead up, and some run down the glass leaving a wet trail
+  const cv0 = ctx.canvas, k0 = cv0.width/W;
+  R.next -= dt; if (R.next <= 0 && R.lens.length < 6){ R.next = 0.5 + Math.random()*1.4;
+    const r = 6 + Math.random()*7; R.lens.push({ x: W*(0.04 + Math.random()*0.92), y: H*(0.06 + Math.random()*0.7), r, t: 0, sit: 1.2 + Math.random()*3.5, slide: Math.random() < 0.55, vy: 0, wob: Math.random()*6, drop: 0 }); }
+  if (!R.lens.length && !R.trail.length) return;
+  if (!R.snap) R.snap = document.createElement('canvas');
+  if (R.snap.width !== cv0.width || R.snap.height !== cv0.height){ R.snap.width = cv0.width; R.snap.height = cv0.height; }
+  const sg = R.snap.getContext('2d'); sg.setTransform(1, 0, 0, 1, 0, 0); sg.clearRect(0, 0, R.snap.width, R.snap.height); sg.drawImage(cv0, 0, 0);   // the scene behind the glass
+  // wet trails: faint streaks with tiny beads left behind, drying out
+  for (let i = R.trail.length - 1; i >= 0; i--){ const b = R.trail[i]; b.t += dt; const a = 1 - b.t/2.2; if (a <= 0){ R.trail.splice(i, 1); continue; }
+    ctx.fillStyle = `rgba(255,255,255,${0.16*a})`; ctx.beginPath(); ctx.ellipse(b.x, b.y, b.r, b.r*1.1, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = `rgba(20,35,50,${0.18*a})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.arc(b.x, b.y + b.r*0.2, b.r, 0.2, Math.PI - 0.2); ctx.stroke(); }
+  for (let i = R.lens.length - 1; i >= 0; i--){ const d = R.lens[i]; d.t += dt;
+    const grow = Math.min(1, d.t/0.12), r = d.r*grow; let fade = 1;
+    if (d.t > d.sit){ if (d.slide){ d.vy = Math.min(150 + d.r*8, d.vy + 260*dt); const dy = d.vy*dt; d.y += dy; d.x += Math.sin(d.y*0.06 + d.wob)*0.35; d.drop += dy;
+        if (d.drop > 5){ d.drop = 0; R.trail.push({ x: d.x + (Math.random() - 0.5)*0.8, y: d.y - r*1.2, r: Math.max(0.6, r*(0.12 + Math.random()*0.16)), t: 0 }); }
+        if (d.y - r*2 > H){ R.lens.splice(i, 1); continue; } }
+      else { fade = 1 - (d.t - d.sit)/1.2; if (fade <= 0){ R.lens.splice(i, 1); continue; } } }
+    const run = d.slide && d.t > d.sit ? Math.min(1, d.vy/120) : 0, tail = r*(1 + run*1.1);   // a running drop stretches into a teardrop
+    const shape = () => { ctx.beginPath(); ctx.moveTo(d.x - r, d.y); ctx.bezierCurveTo(d.x - r, d.y + r*1.25, d.x + r, d.y + r*1.25, d.x + r, d.y);
+      ctx.bezierCurveTo(d.x + r, d.y - tail*0.55, d.x + r*0.25, d.y - tail, d.x, d.y - tail); ctx.bezierCurveTo(d.x - r*0.25, d.y - tail, d.x - r, d.y - tail*0.55, d.x - r, d.y); ctx.closePath(); };
+    ctx.save(); ctx.globalAlpha = fade;
+    shape(); ctx.save(); ctx.clip();
+    // a water drop is a tiny lens: it shows a wider patch of the scene behind it, upside down
+    const S = r*2.6, sx0 = (d.x - S)*k0, sy0 = (d.y - S)*k0;
+    ctx.translate(d.x, d.y - (tail - r)*0.4); ctx.scale(-1, -1);
+    ctx.drawImage(R.snap, Math.max(0, sx0), Math.max(0, sy0), S*2*k0, S*2*k0, -r*1.05, -tail*0.75, r*2.1, tail*1.5);
+    ctx.restore();
+    // rim shading, a bright glint up top and a soft focused highlight at the bottom
+    const cy = d.y - (tail - r)*0.3, rg = ctx.createRadialGradient(d.x - r*0.2, cy - r*0.25, r*0.2, d.x, cy, Math.max(r, tail)*1.05);
+    rg.addColorStop(0, 'rgba(255,255,255,0)'); rg.addColorStop(0.7, 'rgba(10,25,40,.10)'); rg.addColorStop(1, 'rgba(10,25,40,.42)');
+    shape(); ctx.fillStyle = rg; ctx.fill();
+    ctx.strokeStyle = 'rgba(10,20,30,.28)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.arc(d.x, d.y, r*0.98, 0.15, Math.PI - 0.15); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.beginPath(); ctx.ellipse(d.x - r*0.38, d.y - r*0.45 - (tail - r)*0.3, r*0.24, r*0.15, -0.6, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = Math.max(0.8, r*0.12); ctx.beginPath(); ctx.arc(d.x, d.y - r*0.05, r*0.72, 0.55, Math.PI - 0.55); ctx.stroke();   // light focused through the bottom of the drop
+    ctx.restore(); }
 }
 /* ---------- weather + time of day ---------- */
 // the shift runs from a soft morning to golden afternoon to dusk, when the street lamps come on
@@ -3493,18 +3562,9 @@ function drawAtmosphere(dt){
       const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, rgbaHex(l.col, 0.55*l.a)); g.addColorStop(0.5, rgbaHex(l.col, 0.18*l.a)); g.addColorStop(1, rgbaHex(l.col, 0));
       ctx.fillStyle = g; ctx.fillRect(-r, -r, 2*r, 2*r); ctx.restore(); }
     ctx.globalCompositeOperation = 'source-over'; }
-  // rain: slanted streaks and little splash rings on the ground
-  if (wx === 'rain' && !reduceMotion){
-    ctx.strokeStyle = 'rgba(220,232,245,.55)'; ctx.lineWidth = 1.2; ctx.beginPath();
-    const n = Math.round(W*H/5200);
-    for (let i = 0; i < n; i++){ const h1 = (i*9301 + 49297) % 233280 / 233280, h2 = (i*4271 + 12345) % 23328 / 23328, sp = 0.9 + h2*0.6;
-      const y = ((h2*H + t*620*sp) % (H + 40)) - 20, x = ((h1*W - t*120*sp) % W + W) % W; ctx.moveTo(x, y); ctx.lineTo(x - 4, y + 14); }
-    ctx.stroke();
-    ctx.strokeStyle = 'rgba(220,235,250,.5)'; ctx.lineWidth = 0.8;
-    for (let i = 0; i < 26; i++){ const ph = (t*1.7 + i*0.37) % 1, h1 = (i*7919 % 997)/997, h2 = (i*104729 % 991)/991, r = 1 + ph*7;
-      ctx.globalAlpha = 1 - ph; ctx.beginPath(); ctx.ellipse(h1*W, h2*H, r, r*0.4, 0, 0, Math.PI*2); ctx.stroke(); }
-    ctx.globalAlpha = 1;
-  }
+  // rain: streaks falling in depth, splashes on the ground, and drops running down the screen
+  if (wx === 'rain' && !reduceMotion) drawRain(dt);
+  else if (RAIN.lens.length || RAIN.trail.length){ RAIN.lens.length = 0; RAIN.trail.length = 0; }
   // wind: leaves tumbling across the screen
   if (wx === 'windy' && !reduceMotion){
     while (LEAVES.length < 26) LEAVES.push({x: Math.random()*W, y: Math.random()*H, r: Math.random()*6, v: 0.7 + Math.random()*0.8, c: ['#c8732e','#e0a33a','#8fae3c','#b3502a'][LEAVES.length%4]});
