@@ -19339,6 +19339,8 @@ adminNeedsAttentionList
 // ========================================
 
 function getAdminFinancialVisitMinutes(visit) {
+    // Outside income entries (admin-outside-income.js) carry their own length.
+    if (visit?.is_outside_income) return Number(visit.outside_minutes) || 60;
     const actual = getVisitDurationMinutes(visit);
     if (Number.isFinite(actual) && actual >= 0) return actual;
     const text = [visit.service_name, visit.service_type, visit.service_option]
@@ -19360,9 +19362,11 @@ function getAdminWeekDateRange() {
 }
 
 function getAdminFinancialVisits(startDate, endDate) {
+    // Plus clients paid outside the app (admin-outside-income.js), money only.
+    const outside = window.PisOutsideIncome?.visitsBetween(startDate, endDate) || [];
     return allVisits.filter(visit => visit.visit_date >= startDate &&
         visit.visit_date <= endDate &&
-        String(visit.status || '').toLowerCase() !== 'cancelled');
+        String(visit.status || '').toLowerCase() !== 'cancelled').concat(outside);
 }
 
 function getAdminFinancialRevenue(visits) {

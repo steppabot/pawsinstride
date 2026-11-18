@@ -1,8 +1,9 @@
 /* Paws in Stride — Full Financials modal.
    Load AFTER admin.js. Adds a "View Full Financials" button to the bottom of the
    Financial Snapshot card and opens a modal with month / year stats.
-   Everything is worked out from the visits already loaded in the portal; the only
-   extra request is the saved driving estimates for the current month. */
+   Everything is worked out from the visits already loaded in the portal, plus
+   outside income (admin-outside-income.js); the only extra request is the saved
+   driving estimates for the current month. */
 (function () {
     'use strict';
 
@@ -86,7 +87,8 @@
         const t = parseLocalDate(today);
         const y = t.getFullYear(), m = t.getMonth(), d = t.getDate();
         const mStart = key(y, m, 1), mEnd = key(y, m, daysIn(y, m));
-        const all = Array.isArray(allVisits) ? allVisits : [];
+        const outsideAll = window.PisOutsideIncome?.visitsBetween(null, null) || [];
+        const all = (Array.isArray(allVisits) ? allVisits : []).concat(outsideAll);
         const live = all.filter(v => !isCancelled(v));
 
         // This month
@@ -94,6 +96,7 @@
         const monthDone = month.filter(v => isDone(v, today));
         const monthTotal = sum(month);
         const monthEarned = sum(monthDone);
+        const monthOutside = sum(month.filter(v => v.is_outside_income));
 
         // Same point last month (1st through today's day number)
         const ly = m === 0 ? y - 1 : y, lm = m === 0 ? 11 : m - 1;
@@ -153,7 +156,7 @@
         const yearScheduled = yearBars.reduce((t, b) => t + b.scheduled, 0);
 
         return {
-            thisSoFar, y, m, d, mStart, mEnd, lm, monthTotal, monthEarned, change, lastSoFar,
+            thisSoFar, y, m, d, mStart, mEnd, lm, monthTotal, monthEarned, monthOutside, change, lastSoFar,
             visitMin, driveMin, rate, rateDays, workDays: byDay.size, visitOnly, per, yStart,
             work, nights, avg, yearBars, yearEarned, yearScheduled
         };
@@ -207,6 +210,7 @@
                 <span><i class="dot dot-earned"></i>${money(s.monthEarned)} earned</span>
                 <span><i class="dot dot-sched"></i>${money(s.monthTotal - s.monthEarned)} still on the schedule</span>
             </div>
+            ${s.monthOutside ? `<span class="pfin-outside">Includes ${money(s.monthOutside)} from outside clients</span>` : ''}
             <div class="pfin-change-row">${changeHtml}</div>
         </section>
 
@@ -245,7 +249,8 @@
             </div>
             <div class="pfin-chart">${bars}</div>
             <div class="pfin-chart-detail"><strong>${MONTHS[selectedMonth]}</strong><span>${money(sel.earned + sel.scheduled)}${sel.scheduled ? ` · ${money(sel.earned)} earned` : ''}</span></div>
-        </section>`;
+        </section>
+        ${window.PisOutsideIncome ? window.PisOutsideIncome.cardHtml() : ''}`;
         body.scrollTop = keepScroll;
     }
 
@@ -282,6 +287,7 @@
         render();
         const s = compute();
         void loadDrive(s.yStart, s.mEnd);
+        void window.PisOutsideIncome?.load(true); // pick up changes made on another device
     }
 
     function close(fromPop) {
@@ -294,6 +300,7 @@
     }
 
     window.addEventListener('popstate', () => { if (document.getElementById('pfin-modal')) close(true); });
+    document.addEventListener('pis:outside-income', () => { if (document.getElementById('pfin-modal')) render(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
     function addButton() {

@@ -1,8 +1,8 @@
 /* Paws in Stride — Lifetime Stats on the More page.
    Load AFTER admin.js. Adds a card right under "My Profile" with total miles walked,
    hours worked, visits completed, longest walk and busiest day.
-   Uses the visits and GPS walks the portal already loads, plus saved driving
-   estimates (one extra request, cached). */
+   Uses the visits and GPS walks the portal already loads, outside income
+   (admin-outside-income.js) and saved driving estimates (one extra request, cached). */
 (function () {
     'use strict';
 
@@ -78,7 +78,8 @@
         const me = typeof currentUser !== 'undefined' ? currentUser?.id : null;
         // Your own work only (visits assigned to an employee are theirs).
         const visits = ((typeof allVisits !== 'undefined' && Array.isArray(allVisits)) ? allVisits : [])
-            .filter(v => !v.assigned_to || v.assigned_to === me);
+            .filter(v => !v.assigned_to || v.assigned_to === me)
+            .concat(window.PisOutsideIncome?.visitsBetween(null, null) || []);
         const walksAll = (typeof allVisitWalks !== 'undefined' && Array.isArray(allVisitWalks)) ? allVisitWalks : [];
 
         // Finished GPS walks, one per id (a walk can briefly exist locally and on the server).
@@ -248,6 +249,8 @@
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
+
+    document.addEventListener('pis:outside-income', () => { if (document.getElementById('pis-lifetime-stats')) render(); });
 
     window.refreshAdminLiveLifetimeStats = async function () {
         driveLoadedAt = 0;
