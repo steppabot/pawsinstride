@@ -12002,3 +12002,46 @@ dialog.admin-visit-action-confirm::backdrop {
 .admin-pricing-v2-actions button:disabled { opacity: .55; cursor: default; }
 .admin-pricing-v2-actions button[hidden] { display: none !important; }
 .admin-pricing-v2-card.admin-service-is-editing { border-color: #2890df; }
+
+/* ========================================
+   VISIT POPUP BUTTONS
+   - Undo Check-In and Reopen Visit both take something back, so they
+     share one look: a soft red button with a back arrow.
+   - View Client Report is a soft, filled button in the service color,
+     so it never looks like Reopen Visit.
+   ======================================== */
+
+.vfm[data-kind] .vfm-body > .pis-footer > button:is([data-visit-action="undo-check-in"], [data-visit-action="reopen"]),
+.admin-page .admin-reopen-visit-button,
+.admin-page .admin-visit-undo-check-in-button {
+    background: #fff6f3 !important;
+    border: 1px solid #efc5b7 !important;
+    color: #b9472d !important;
+    box-shadow: none !important;
+}
+
+.vfm[data-kind] .vfm-body > .pis-footer > button:is([data-visit-action="undo-check-in"], [data-visit-action="reopen"]):not(:disabled):active {
+    background: #fde9e2 !important;
+}
+
+.vfm[data-kind] .vfm-body > .pis-footer > button:is([data-visit-action="undo-check-in"], [data-visit-action="reopen"])::before {
+    content: "";
+    flex: none;
+    width: 17px;
+    height: 17px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='1 4 1 10 7 10'/%3E%3Cpath d='M3.51 15a9 9 0 1 0 2.13-9.36L1 10'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='1 4 1 10 7 10'/%3E%3Cpath d='M3.51 15a9 9 0 1 0 2.13-9.36L1 10'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.vfm[data-kind="walk"] .vfm-body > .pis-footer > button[data-admin-client-report-view] { background: #e7f0fb !important; border: 1px solid #e7f0fb !important; color: #1f63b8 !important; }
+.vfm[data-kind="dropin"] .vfm-body > .pis-footer > button[data-admin-client-report-view] { background: #dcf4f9 !important; border: 1px solid #dcf4f9 !important; color: #08879f !important; }
+.vfm[data-kind="sit"] .vfm-body > .pis-footer > button[data-admin-client-report-view] { background: #fbe7f0 !important; border: 1px solid #fbe7f0 !important; color: #b8336a !important; }
+.vfm[data-kind="meet"] .vfm-body > .pis-footer > button[data-admin-client-report-view] { background: #eee9fb !important; border: 1px solid #eee9fb !important; color: #6a45c2 !important; }
+.vfm[data-kind="boarding"] .vfm-body > .pis-footer > button[data-admin-client-report-view] { background: #fdeedf !important; border: 1px solid #fdeedf !important; color: #c0610c !important; }
+
+.admin-check-in-button:disabled,
+.pis-footer button[data-visit-action="check-in"]:disabled {
+    opacity: .5 !important;
+    cursor: default;
+}

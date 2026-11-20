@@ -1387,6 +1387,8 @@ async function fastStartAdminFromCache() {
         content.style.display = "block";
 
         console.log("Admin dashboard shown instantly from saved data:", saved.saved_at);
+        // The saved copy can be out of date: get today's visits right away.
+        setTimeout(() => { void refreshAdminFocusDays(); }, 0);
         return true;
     } catch (error) {
         console.warn("Fast start skipped:", error);
@@ -1413,8 +1415,353 @@ function scheduleAdminBusinessDataRefresh() {
     window.PawsLiveSync?.queue('visits');
 }
 
+// ========================================
+// KEEP THE SCHEDULE CURRENT
+// ========================================
+// When the app comes back on screen (for example from a notification
+// that an employee finished a visit), today's visits are fetched first
+// so the schedule is right within a moment, then everything else.
+// ========================================
+
+var adminFocusRefreshAt =
+    0;
+
+var adminFocusRefreshRunning =
+    false;
+
+var adminFocusRefreshAgain =
+    false;
+
+var adminRefreshWaitingForTyping =
+    false;
+
+function isAdminTypingNow() {
+
+    const el =
+        document.activeElement;
+
+    if (
+        !el ||
+        el === document.body ||
+        !el.matches?.(
+            'input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"]'
+        )
+    ) {
+        return false;
+    }
+
+    if (
+        el.matches('[type="search"], [data-live-filter]') ||
+        /search|filter/i.test(el.id || "")
+    ) {
+        return false;
+    }
+
+    return el.getClientRects().length > 0;
+
+}
+
+// Things done on this phone that haven't uploaded yet stay as you left them.
+function reapplyAdminPendingVisitChanges() {
+
+    for (const visit of allVisits) {
+
+        const pendingCheckIn =
+            loadPendingVisitCheckIn(visit.id);
+
+        if (pendingCheckIn) {
+            visit.status = "checked_in";
+            visit.checked_in_at = pendingCheckIn.checked_in_at;
+            visit.completed_at = null;
+        }
+
+        const pendingVisitFinish =
+            loadPendingVisitFinish(visit.id);
+
+        if (pendingVisitFinish) {
+            visit.status = "completed";
+            visit.checked_in_at = pendingVisitFinish.checked_in_at || visit.checked_in_at;
+            visit.completed_at = pendingVisitFinish.completed_at;
+        }
+
+    }
+
+}
+
+async function refreshAdminFocusDays() {
+
+    if (adminFocusRefreshRunning) {
+        adminFocusRefreshAgain = true;
+        return;
+    }
+
+    if (
+        navigator.onLine === false ||
+        typeof currentUser === "undefined" ||
+        !currentUser?.id
+    ) {
+        return;
+    }
+
+    adminFocusRefreshRunning = true;
+    adminFocusRefreshAt = Date.now();
+
+    const userId =
+        currentUser.id;
+
+    try {
+
+        const dates =
+            [...new Set(
+                [getLocalDateString(), selectedAdminDate]
+                    .filter(Boolean)
+                    .map(date => String(date).slice(0, 10))
+            )];
+
+        const visitResult =
+            await withWalkNetworkTimeout(
+                supabaseClient
+                    .from("visits")
+                    .select("*")
+                    .in("visit_date", dates),
+                15000
+            );
+
+        if (visitResult.error || currentUser?.id !== userId) {
+            return;
+        }
+
+        const fresh =
+            visitResult.data || [];
+
+        const freshIds =
+            new Set(fresh.map(visit => String(visit.id)));
+
+        const walkResult =
+            fresh.length
+                ? await withWalkNetworkTimeout(
+                    supabaseClient
+                        .from("visit_walks")
+                        .select("*")
+                        .in("visit_id", fresh.map(visit => visit.id)),
+                    15000
+                )
+                : { data: [], error: null };
+
+        if (walkResult.error || currentUser?.id !== userId) {
+            return;
+        }
+
+        // Those days' visits: take the server's copy.
+        allVisits =
+            allVisits
+                .filter(visit =>
+                    !freshIds.has(String(visit.id)) &&
+                    !dates.includes(String(visit.visit_date || "").slice(0, 10))
+                )
+                .concat(fresh)
+                .sort((a, b) =>
+                    String(a.visit_date || "").localeCompare(String(b.visit_date || ""))
+                );
+
+        reapplyAdminPendingVisitChanges();
+
+        // Their walks too, keeping any walk still on this phone.
+        const onThisPhone = walk =>
+            (activeWalkGpsTracker && String(activeWalkGpsTracker.walkId) === String(walk.id)) ||
+            (typeof loadLocalVisitWalk === "function" && loadLocalVisitWalk(walk.visit_id)) ||
+            (typeof loadPendingWalkFinish === "function" && loadPendingWalkFinish(walk.id));
+
+        const kept =
+            allVisitWalks.filter(onThisPhone);
+
+        allVisitWalks =
+            allVisitWalks
+                .filter(walk => !freshIds.has(String(walk.visit_id)) && !onThisPhone(walk))
+                .concat(
+                    (walkResult.data || []).filter(walk =>
+                        !kept.some(local => String(local.id) === String(walk.id))
+                    )
+                )
+                .concat(kept);
+
+        // Show it (but never rebuild an open visit report).
+        if (!activeVisitReportVisitId && !isAdminTypingNow()) {
+            if (activeAdminScreen === "schedule") {
+                renderAdminCalendar();
+            }
+            renderAdminDayServices();
+        }
+
+        if (activeAdminScreen === "home") {
+            renderAdminTodaySummary();
+            renderAdminNeedsAttention();
+            renderAdminBestVisitRoute();
+            renderAdminFinancialSnapshot();
+        }
+
+    startAdminVisitLiveUpdates();
+
+    } catch (error) {
+
+        console.warn("Quick schedule refresh:", error);
+
+    } finally {
+
+        adminFocusRefreshRunning = false;
+
+        if (adminFocusRefreshAgain) {
+            adminFocusRefreshAgain = false;
+            setTimeout(() => { void refreshAdminFocusDays(); }, 200);
+        }
+
+    }
+
+}
+
+// Something may have changed: refresh now (today's visits first),
+// then let the live updates refresh everything else.
+function refreshAdminNow() {
+
+    if (
+        document.hidden ||
+        typeof currentUser === "undefined" ||
+        !currentUser?.id
+    ) {
+        return;
+    }
+
+    if (Date.now() - adminFocusRefreshAt > 1500) {
+        void refreshAdminFocusDays();
+    }
+
+    window.PawsLiveSync?.queue?.("*");
+
+}
+
+// Live: when anyone checks in, finishes or changes a visit, today's
+// visits are fetched right away, so it changes in front of you.
+var adminVisitLiveChannel =
+    null;
+
+var adminVisitLiveTimer =
+    null;
+
+function startAdminVisitLiveUpdates() {
+
+    if (
+        adminVisitLiveChannel ||
+        typeof currentUser === "undefined" ||
+        !currentUser?.id ||
+        typeof supabaseClient?.channel !== "function"
+    ) {
+        return;
+    }
+
+    try {
+
+        adminVisitLiveChannel =
+            supabaseClient
+                .channel(`admin-visits-live-${currentUser.id}`)
+                .on(
+                    "postgres_changes",
+                    { event: "*", schema: "public", table: "visits" },
+                    () => {
+                        clearTimeout(adminVisitLiveTimer);
+                        adminVisitLiveTimer = setTimeout(() => {
+                            if (document.hidden) {
+                                return;
+                            }
+                            if (isAdminTypingNow()) {
+                                adminRefreshWaitingForTyping = true;
+                                return;
+                            }
+                            void refreshAdminFocusDays();
+                        }, 300);
+                    }
+                )
+                .subscribe();
+
+    } catch (error) {
+
+        adminVisitLiveChannel = null;
+        console.warn("Live visit updates:", error);
+
+    }
+
+}
+
+setInterval(
+    startAdminVisitLiveUpdates,
+    5000
+);
+
+// Back on screen (switching back to the app, or opening a notification).
+document.addEventListener(
+    "visibilitychange",
+    () => {
+        if (!document.hidden) {
+            refreshAdminNow();
+        }
+    }
+);
+
+window.addEventListener(
+    "pageshow",
+    () => refreshAdminNow()
+);
+
+// A notification arrived or was tapped while the app was open.
+try {
+
+    const pushPlugin =
+        window.Capacitor?.isNativePlatform?.()
+            ? window.Capacitor.Plugins?.PushNotifications
+            : null;
+
+    if (pushPlugin?.addListener) {
+        pushPlugin.addListener(
+            "pushNotificationReceived",
+            () => refreshAdminNow()
+        );
+        pushPlugin.addListener(
+            "pushNotificationActionPerformed",
+            () => refreshAdminNow()
+        );
+    }
+
+} catch (error) {
+
+    console.warn("Notification refresh not available:", error);
+
+}
+
+// Finished typing: catch up on anything that was held back.
+document.addEventListener(
+    "focusout",
+    () => {
+        if (!adminRefreshWaitingForTyping) {
+            return;
+        }
+        adminRefreshWaitingForTyping = false;
+        setTimeout(() => {
+            if (!isAdminTypingNow()) {
+                refreshAdminNow();
+            }
+        }, 400);
+    }
+);
+
 async function refreshAdminBusinessData() {
     if (!navigator.onLine || document.hidden || !currentUser?.id) {
+        return;
+    }
+
+    // Wait only while you're typing or picking something (a focused
+    // field). A picker that's just showing on the visit screen, like
+    // "Assigned to", no longer stops updates. Refreshes when you're done.
+    if (isAdminTypingNow()) {
+        adminRefreshWaitingForTyping = true;
         return;
     }
 
@@ -1434,6 +1781,12 @@ async function refreshAdminBusinessData() {
 
         if (authData?.session?.user?.id !== userId) {
             return;
+        }
+
+        // Today's (and the day you're looking at) visits first, so the
+        // screen is right in a moment; then everything else.
+        if (Date.now() - adminFocusRefreshAt > 1500) {
+            await refreshAdminFocusDays();
         }
 
         const results = await Promise.all([
@@ -1482,6 +1835,8 @@ async function refreshAdminBusinessData() {
             allVisitReports
         ] = results.map(result => result.data || []);
 
+        reapplyAdminPendingVisitChanges();
+
         const walkResult = await supabaseClient.from('visit_walks').select('*');
         if (walkResult.error) throw walkResult.error;
         if (currentUser?.id !== userId) return;
@@ -1521,7 +1876,11 @@ async function refreshAdminBusinessData() {
 
         // Rebuilding the day list also rebuilds the visit popup.
         // Keep an open report intact so typed notes/photos survive.
-        if (!window.PawsLiveSync?.deferForms(null, 'visits') && !activeVisitReportVisitId) {
+        if (isAdminTypingNow()) {
+            adminRefreshWaitingForTyping = true;
+        }
+
+        if (!activeVisitReportVisitId && !isAdminTypingNow()) {
             if (activeAdminScreen === "schedule") {
                 renderAdminCalendar();
             }
@@ -4385,6 +4744,14 @@ const adminVisitConfirmationOptions = {
         caution: false
     },
 
+    "undo-check-in": {
+        title: "Undo this check-in?",
+        message:
+            "The visit goes back to Not Started and the check-in time is cleared, so you can check in again when you get there.",
+        confirmText: "Undo Check-In",
+        caution: true
+    },
+
     "start-walk": {
         title: "Start this walk?",
         message:
@@ -4573,6 +4940,7 @@ adminDayServicesContainer?.addEventListener(
 
         const supportedActions = [
             "check-in",
+            "undo-check-in",
             "start-walk",
             "resume-walk-gps",
             "sync-walk",
@@ -4591,7 +4959,15 @@ adminDayServicesContainer?.addEventListener(
 
         event.preventDefault();
 
-        adminVisitActionBusy = true;
+        // Retry Sync only waits on the network, so it never locks the
+        // other buttons (like Finish Visit) while it runs.
+        const locksOtherButtons =
+            !["sync-walk", "sync-visit"].includes(action);
+
+        if (locksOtherButtons) {
+            adminVisitActionBusy = true;
+        }
+
         actionButton.disabled = true;
 
         const originalText = actionButton.textContent;
@@ -4610,6 +4986,12 @@ adminDayServicesContainer?.addEventListener(
                 actionButton.textContent = "Checking In...";
 
                 await checkInVisit(visitId);
+
+            } else if (action === "undo-check-in") {
+
+                actionButton.textContent = "Undoing...";
+
+                await undoVisitCheckIn(visitId);
 
             } else if (action === "start-walk") {
 
@@ -4678,7 +5060,9 @@ adminDayServicesContainer?.addEventListener(
 
         } finally {
 
-            adminVisitActionBusy = false;
+            if (locksOtherButtons) {
+                adminVisitActionBusy = false;
+            }
 
             // The action may have already rebuilt the card.
             if (actionButton.isConnected) {
@@ -5038,9 +5422,18 @@ async function syncPendingVisitCheckIn(
     if (
         !pendingCheckIn
     ) {
-
         return false;
+    }
 
+    // If the visit was also finished on this phone, the finish upload
+    // sends the check-in too. Sending the check-in after it would
+    // reopen the visit.
+    if (
+        loadPendingVisitFinish(
+            visitId
+        )
+    ) {
+        return false;
     }
 
 
@@ -5050,15 +5443,12 @@ async function syncPendingVisitCheckIn(
         const {
             data,
             error
-        } =
-            await supabaseClient
-                .from(
-                    "visits"
-                )
-                .update({
-
-                    status:
-                        "checked_in",
+        } = await withWalkNetworkTimeout(
+                supabaseClient
+                    .from("visits")
+                    .update({
+                        status:
+                            "checked_in",
 
                     checked_in_at:
                         pendingCheckIn
@@ -5068,20 +5458,14 @@ async function syncPendingVisitCheckIn(
                         null
 
                 })
-                .eq(
-                    "id",
-                    visitId
-                )
-                .select("*")
-                .single();
+                .eq("id", visitId)
+                    .select("*")
+                    .single(),
+                20000
+            );
 
-
-        if (
-            error
-        ) {
-
+        if (error) {
             throw error;
-
         }
 
 
@@ -5254,6 +5638,172 @@ async function retryPendingVisitCheckInSync(
 }
 
 
+// ========================================
+// FUTURE VISITS
+// ========================================
+
+function isFutureVisitDate(
+    visitDate
+) {
+    const date =
+        String(visitDate || "").slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+        date > getLocalDateString();
+}
+
+function formatVisitDayName(
+    visitDate
+) {
+    try {
+        return parseLocalDate(
+            String(visitDate).slice(0, 10)
+        ).toLocaleDateString(
+            "en-US",
+            { weekday: "long", month: "short", day: "numeric" }
+        );
+    } catch (error) {
+        return String(visitDate || "");
+    }
+}
+
+// ========================================
+// UNDO CHECK-IN
+// ========================================
+// For a visit started by mistake (wrong client, wrong day). The visit
+// goes back to Not Started with no check-in time, so it can be checked
+// in for real later. Only before a walk has been started on it.
+// ========================================
+
+async function undoVisitCheckIn(
+    visitId
+) {
+
+    const visit =
+        allVisits.find(
+            item =>
+                Number(item.id) ===
+                Number(visitId)
+        );
+
+    if (!visit) {
+        throw new Error(
+            "Visit not found."
+        );
+    }
+
+    if (
+        getVisitProgressInfo(visit).state !== "checked_in" ||
+        loadPendingVisitFinish(visit.id)
+    ) {
+        throw new Error(
+            "Only a visit that’s in progress can be undone. For a finished visit, use Reopen Visit."
+        );
+    }
+
+    if (
+        getVisitWalk(visit.id) ||
+        loadLocalVisitWalk(visit.id) ||
+        (activeWalkGpsTracker && Number(activeWalkGpsTracker.visitId) === Number(visit.id))
+    ) {
+        throw new Error(
+            "A walk was already started on this visit, so the check-in can’t be undone."
+        );
+    }
+
+    const wasOnlyOnPhone =
+        Boolean(
+            loadPendingVisitCheckIn(
+                visit.id
+            )
+        );
+
+    // Checked in with no service and never uploaded: just undo it here.
+    if (wasOnlyOnPhone) {
+
+        clearPendingVisitCheckIn(
+            visit.id
+        );
+
+    }
+
+    if (
+        wasOnlyOnPhone &&
+        navigator.onLine === false
+    ) {
+
+        replaceAdminVisit({
+            ...visit,
+            status: "scheduled",
+            checked_in_at: null,
+            completed_at: null
+        });
+
+    } else {
+
+        let result;
+
+        try {
+
+            result =
+                await withWalkNetworkTimeout(
+                    supabaseClient
+                        .from("visits")
+                        .update({
+                            status: "scheduled",
+                            checked_in_at: null,
+                            completed_at: null
+                        })
+                        .eq("id", visit.id)
+                        .select("*")
+                        .single(),
+                    20000
+                );
+
+        } catch (error) {
+
+            result = { error };
+
+        }
+
+        if (result.error) {
+
+            if (wasOnlyOnPhone) {
+
+                // It never reached the server, so undoing it here is enough.
+                replaceAdminVisit({
+                    ...visit,
+                    status: "scheduled",
+                    checked_in_at: null,
+                    completed_at: null
+                });
+
+            } else if (isWalkNetworkError(result.error)) {
+
+                throw new Error(
+                    "No service right now. Undo Check-In needs a connection, so try again in a moment."
+                );
+
+            } else {
+
+                throw result.error;
+
+            }
+
+        } else {
+
+            replaceAdminVisit(
+                result.data
+            );
+
+        }
+
+    }
+
+    renderAdminCalendar();
+    renderAdminDayServices();
+
+}
+
 async function checkInVisit(
     visitId
 ) {
@@ -5274,11 +5824,20 @@ async function checkInVisit(
     if (
         !visit
     ) {
-
         throw new Error(
             "Visit not found."
         );
+    }
 
+    // A visit can only be started on its day (or after, if you forgot).
+    if (
+        isFutureVisitDate(
+            visit.visit_date
+        )
+    ) {
+        throw new Error(
+            `This visit is for ${formatVisitDayName(visit.visit_date)}. You can check in that day.`
+        );
     }
 
 
@@ -5346,12 +5905,10 @@ async function checkInVisit(
 
     renderAdminDayServices();
 
-    await waitForSync(
-        syncPendingVisitCheckIn(
-            visitId
-        )
+    // Upload in the background so the buttons are ready right away.
+    syncInBackground(
+        () => syncPendingVisitCheckIn(visitId)
     );
-
 }
 
 // ========================================
@@ -5890,6 +6447,120 @@ function stopWalkUiTimer() {
 // PERSIST WALK GPS POINT
 // ========================================
 
+// ========================================
+// UPLOAD GPS POINTS IN BATCHES
+// ========================================
+// One request saves up to WALK_GPS_BATCH_SIZE points, then the walk's
+// totals are updated once, instead of 2 requests for every point.
+// If some points were already saved (an earlier upload timed out after
+// reaching the server), it falls back to one at a time and skips those.
+// ========================================
+
+var WALK_GPS_BATCH_SIZE =
+    50;
+
+async function persistWalkGpsBatch(
+    tracker,
+    points
+) {
+
+    const rows =
+        points.map(
+            ({
+                distance_meters_total,
+                point_count_total,
+                ...row
+            }) => row
+        );
+
+    const {
+        error: batchError
+    } =
+        await supabaseClient
+            .from(
+                "visit_walk_points"
+            )
+            .insert(
+                rows
+            );
+
+    if (
+        batchError
+    ) {
+
+        if (
+            batchError.code !==
+            "23505"
+        ) {
+            throw batchError;
+        }
+
+        for (const row of rows) {
+
+            const {
+                error: rowError
+            } =
+                await supabaseClient
+                    .from(
+                        "visit_walk_points"
+                    )
+                    .insert(
+                        row
+                    );
+
+            if (
+                rowError &&
+                rowError.code !==
+                "23505"
+            ) {
+                throw rowError;
+            }
+
+        }
+
+    }
+
+    const last =
+        points[
+            points.length - 1
+        ];
+
+    const {
+        data: updatedWalk,
+        error: walkUpdateError
+    } =
+        await supabaseClient
+            .from(
+                "visit_walks"
+            )
+            .update({
+                distance_meters:
+                    last.distance_meters_total,
+                point_count:
+                    last.point_count_total,
+                updated_at:
+                    new Date()
+                        .toISOString()
+            })
+            .eq(
+                "id",
+                tracker.walkId
+            )
+            .select("*")
+            .single();
+
+    if (
+        walkUpdateError
+    ) {
+        throw walkUpdateError;
+    }
+
+    replaceAdminVisitWalk(
+        updatedWalk
+    );
+
+}
+
 async function persistWalkGpsPoint(
     tracker,
     queuedPoint
@@ -6014,22 +6685,33 @@ async function flushWalkGpsQueue(
                     walkFinishFlushHold === 0
                 ) {
 
-                    const queuedPoint =
-                        tracker.pendingQueue[0];
-
+                    const batch =
+                        tracker.pendingQueue.slice(
+                            0,
+                            WALK_GPS_BATCH_SIZE
+                        );
 
                     try {
 
-
                         await withWalkNetworkTimeout(
-                            persistWalkGpsPoint(
+                            persistWalkGpsBatch(
                                 tracker,
-                                queuedPoint
-                            )
+                                batch
+                            ),
+                            20000
                         );
 
+                        const sent =
+                            new Set(
+                                batch.map(
+                                    point => point.sequence_number
+                                )
+                            );
 
-                        tracker.pendingQueue.shift();
+                        tracker.pendingQueue =
+                            tracker.pendingQueue.filter(
+                                point => !sent.has(point.sequence_number)
+                            );
 
 
                         savePendingWalkGpsQueue(
@@ -8638,10 +9320,10 @@ async function finishVisitWalk(
 
     // Try to upload now. With no service the card shows
     // "Saved on this phone • Waiting to sync" and it syncs later.
-    await waitForSync(
-        syncPendingWalkFinish(
-            walkId
-        )
+    // Upload in the background. The buttons are free right away, so
+    // Finish Visit works even while the walk is still uploading.
+    syncInBackground(
+        () => syncPendingWalkFinish(walkId)
     );
 
 }
@@ -9088,15 +9770,12 @@ async function syncPendingVisitFinish(
             data,
             error
 
-        } =
-            await supabaseClient
-                .from(
-                    "visits"
-                )
-                .update({
-
-                    status:
-                        "completed",
+        } = await withWalkNetworkTimeout(
+                supabaseClient
+                    .from("visits")
+                    .update({
+                        status:
+                            "completed",
 
                     checked_in_at:
                         pendingFinish
@@ -9107,20 +9786,14 @@ async function syncPendingVisitFinish(
                             .completed_at
 
                 })
-                .eq(
-                    "id",
-                    visit.id
-                )
-                .select("*")
-                .single();
+                .eq("id", visit.id)
+                    .select("*")
+                    .single(),
+                20000
+            );
 
-
-        if (
-            error
-        ) {
-
+        if (error) {
             throw error;
-
         }
 
 
@@ -9130,6 +9803,11 @@ async function syncPendingVisitFinish(
 
 
         clearPendingVisitFinish(
+            visit.id
+        );
+
+        // The finish already includes the check-in time.
+        clearPendingVisitCheckIn(
             visit.id
         );
 
@@ -9297,28 +9975,22 @@ async function retryPendingVisitSync(
     visitId
 ) {
 
-
-    const pendingFinish =
-        loadPendingVisitFinish(
+    const walk =
+        getVisitWalk(
             visitId
         );
 
+    const waiting =
+        loadPendingVisitFinish(visitId) ||
+        (walk && loadPendingWalkFinish(walk.id));
 
-    if (
-        !pendingFinish
-    ) {
-
-
+    if (!waiting) {
         renderAdminDayServices();
-
-
         return;
-
     }
 
-
     await waitForSync(
-        syncPendingVisitFinish(
+        syncVisitInOrder(
             visitId
         )
     );
@@ -9333,117 +10005,236 @@ async function finishVisit(
     visitId
 ) {
 
-
     const visit =
         allVisits.find(
-
             item =>
-
-                Number(
-                    item.id
-                ) ===
-                Number(
-                    visitId
-                )
-
+                Number(item.id) ===
+                Number(visitId)
         );
 
-
-    if (
-        !visit
-    ) {
-
+    if (!visit) {
         throw new Error(
             "Visit not found."
         );
-
     }
 
-
     // ========================================
-    // ALREADY SAVED LOCALLY
-    // JUST TRY TO SYNC AGAIN
+    // SAVE VISIT ON PHONE FIRST
+    // (works with or without service)
     // ========================================
 
-    const existingPendingFinish =
+    let pendingFinish =
         loadPendingVisitFinish(
             visit.id
         );
 
+    if (!pendingFinish) {
 
-    if (
-        existingPendingFinish
-    ) {
+        const completedAt =
+            new Date()
+                .toISOString();
 
-        await waitForSync(
-            syncPendingVisitFinish(
-                visit.id
-            )
+        pendingFinish = {
+            checked_in_at:
+                visit.checked_in_at ||
+                completedAt,
+            completed_at:
+                completedAt,
+            saved_at:
+                completedAt
+        };
+
+        savePendingVisitFinish(
+            visit.id,
+            pendingFinish
         );
-
-        return;
 
     }
 
-
     // ========================================
-    // BUILD FINAL VISIT TIMES
-    // ========================================
-
-    const completedAt =
-        new Date()
-            .toISOString();
-
-
-    const checkedInAt =
-        visit.checked_in_at ||
-        completedAt;
-
-
-    const pendingFinish = {
-
-        checked_in_at:
-            checkedInAt,
-
-        completed_at:
-            completedAt,
-
-        saved_at:
-            new Date()
-                .toISOString()
-
-    };
-
-
-    // ========================================
-    // SAVE VISIT ON PHONE FIRST
+    // SHOW IT AS FINISHED RIGHT AWAY
     // ========================================
 
-    savePendingVisitFinish(
-        visit.id,
-        pendingFinish
-    );
+    visit.status =
+        "completed";
+    visit.checked_in_at =
+        pendingFinish.checked_in_at;
+    visit.completed_at =
+        pendingFinish.completed_at;
 
-
-    // ========================================
-    // UPDATE UI IMMEDIATELY
-    // ========================================
-
+    renderAdminCalendar();
     renderAdminDayServices();
 
-
     // ========================================
-    // ATTEMPT SERVER SYNC
-    // FAILURE IS OKAY -- LOCAL COPY REMAINS
+    // UPLOAD IN THE BACKGROUND
+    // (walk first, then the visit; retries on its own)
     // ========================================
 
-    await waitForSync(
-        syncPendingVisitFinish(
-            visit.id
-        )
+    syncInBackground(
+        () => syncVisitInOrder(visit.id)
     );
 
 }
+
+// ========================================
+// SYNC ONE VISIT IN ORDER
+// ========================================
+// The walk goes up first, then the finished visit. A walk that can't
+// upload yet doesn't hold the visit back. Errors (other than no
+// service) are passed on so Retry Sync can show them.
+// ========================================
+
+async function syncVisitInOrder(
+    visitId
+) {
+
+    let walkError =
+        null;
+
+    const walk =
+        getVisitWalk(
+            visitId
+        );
+
+    if (
+        walk &&
+        loadPendingWalkFinish(
+            walk.id
+        )
+    ) {
+
+        try {
+            await syncPendingWalkFinish(
+                walk.id
+            );
+        } catch (error) {
+            walkError =
+                error;
+        }
+
+    }
+
+    await syncPendingVisitFinish(
+        visitId
+    );
+
+    if (walkError) {
+        throw walkError;
+    }
+
+}
+
+// ========================================
+// SYNC IN THE BACKGROUND
+// ========================================
+// Anything saved on this phone (check-ins, walks, finished visits)
+// is retried every 20 seconds while the app is open, and when the app
+// comes back on screen. Before, it only retried when the phone said
+// it was back online, which weak signal often never triggers.
+// ========================================
+
+function syncInBackground(
+    work
+) {
+
+    Promise.resolve()
+        .then(work)
+        .catch(error =>
+            console.warn(
+                "Saved on this phone; sync will retry:",
+                error
+            )
+        );
+
+}
+
+var backgroundSyncRunning =
+    false;
+
+function hasAnythingWaitingToSync() {
+
+    try {
+
+        for (
+            let index = 0;
+            index < localStorage.length;
+            index++
+        ) {
+
+            const key =
+                localStorage.key(index) ||
+                "";
+
+            if (
+                key.startsWith("paws-in-stride-visit-check-in-") ||
+                key.startsWith("paws-in-stride-walk-finish-") ||
+                key.startsWith("paws-in-stride-visit-finish-")
+            ) {
+                return true;
+            }
+
+        }
+
+    } catch (error) {
+        return false;
+    }
+
+    return false;
+
+}
+
+async function syncEverythingWaiting() {
+
+    if (
+        backgroundSyncRunning ||
+        document.hidden ||
+        navigator.onLine === false ||
+        !currentUser ||
+        !hasAnythingWaitingToSync()
+    ) {
+        return;
+    }
+
+    backgroundSyncRunning =
+        true;
+
+    try {
+
+        await syncAllPendingVisitCheckIns();
+        await syncAllPendingWalkFinishes();
+        await syncAllPendingVisitFinishes();
+
+    } catch (error) {
+
+        console.warn(
+            "Background sync will retry:",
+            error
+        );
+
+    } finally {
+
+        backgroundSyncRunning =
+            false;
+
+    }
+
+}
+
+setInterval(
+    () => {
+        void syncEverythingWaiting();
+    },
+    20000
+);
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+        if (!document.hidden) {
+            void syncEverythingWaiting();
+        }
+    }
+);
 
 // ========================================
 // REOPEN VISIT
@@ -9471,11 +10262,32 @@ async function reopenVisit(
 
 
     if (!visit) {
-
-
         throw new Error(
             "Visit not found."
         );
+    }
+
+    // Finished on this phone but not uploaded yet: just undo it here.
+    if (
+        loadPendingVisitFinish(
+            visit.id
+        )
+    ) {
+
+        clearPendingVisitFinish(
+            visit.id
+        );
+
+        visit.status =
+            visit.checked_in_at
+                ? "checked_in"
+                : "scheduled";
+        visit.completed_at =
+            null;
+
+        renderAdminCalendar();
+        renderAdminDayServices();
+        return;
 
     }
 
@@ -10423,6 +11235,19 @@ function buildAdminVisitProgressSection(
             isMeetAndGreetService(
                 visit
             );
+
+        // Finished on this phone and still waiting to upload.
+        const visitSavedOnPhone =
+            loadPendingVisitFinish(
+                visit.id
+            );
+
+        const walkSavedOnPhone =
+            walkingService && walk
+                ? loadPendingWalkFinish(
+                    walk.id
+                )
+                : null;
     
     
         // ========================================
@@ -10435,16 +11260,22 @@ function buildAdminVisitProgressSection(
     
         if (
             walkingService &&
-            walk?.status ===
-            "completed"
+            (
+                walk?.status ===
+                "completed" ||
+                walkSavedOnPhone
+            )
         ) {
+
+            const walkStats =
+                walkSavedOnPhone ||
+                walk;
     
     
             const walkDuration =
                 formatWalkDuration(
                     Number(
-                        walk.duration_seconds ||
-                        0
+                        walkStats.duration_seconds || 0
                     )
                 );
     
@@ -10452,8 +11283,7 @@ function buildAdminVisitProgressSection(
             const walkMiles =
                 (
                     Number(
-                        walk.distance_meters ||
-                        0
+                        walkStats.distance_meters || 0
                     ) /
                     1609.344
                 ).toFixed(
@@ -10463,8 +11293,7 @@ function buildAdminVisitProgressSection(
     
             const walkPointCount =
                 Number(
-                    walk.point_count ||
-                    0
+                    walkStats.point_count || 0
                 );
     
     
@@ -10474,7 +11303,7 @@ function buildAdminVisitProgressSection(
     
     
                     <strong>
-                        🐾 Walk Complete
+                        ${walkSavedOnPhone ? "🐾 Walk Saved" : "🐾 Walk Complete"}
                     </strong>
     
     
@@ -10495,10 +11324,11 @@ function buildAdminVisitProgressSection(
                             1
     
                                 ? "point"
-    
                                 : "points"
                         }
                     </span>
+
+                    ${walkSavedOnPhone ? "<span>Saved on this phone • Waiting to sync</span>" : ""}
     
     
                 </div>
@@ -10531,10 +11361,10 @@ function buildAdminVisitProgressSection(
                                 ? `${checkedIn} – ${completed} • ${durationText}`
     
                                 : durationText
-    
                         )}
-    
                     </span>
+
+                    ${visitSavedOnPhone ? "<span>Saved on this phone • Waiting to sync</span>" : ""}
     
     
                 </div>
@@ -10588,6 +11418,21 @@ function buildAdminVisitProgressSection(
                     }
     
     
+                    ${
+                        visitSavedOnPhone || walkSavedOnPhone
+                            ? `
+                                <button
+                                    type="button"
+                                    class="secondary-button admin-visit-action-button"
+                                    data-visit-action="sync-visit"
+                                    data-visit-id="${visit.id}"
+                                >
+                                    Retry Sync
+                                </button>
+                            `
+                            : ""
+                    }
+
                     <button
                         type="button"
                         class="secondary-button admin-reopen-visit-button"
@@ -11234,9 +12079,16 @@ function buildAdminVisitProgressSection(
                             Finish Visit
                         </button>
 
+                    <button
+                        type="button"
+                        class="secondary-button admin-visit-action-button admin-visit-undo-check-in-button"
+                        data-visit-action="undo-check-in"
+                        data-visit-id="${visit.id}"
+                    >
+                        Undo Check-In
+                    </button>
 
                     </div>
-
 
                 </div>
 
@@ -11291,6 +12143,14 @@ function buildAdminVisitProgressSection(
                     Finish Visit
                 </button>
 
+                    <button
+                        type="button"
+                        class="secondary-button admin-visit-action-button admin-visit-undo-check-in-button"
+                        data-visit-action="undo-check-in"
+                        data-visit-id="${visit.id}"
+                    >
+                        Undo Check-In
+                    </button>
 
             </div>
 
@@ -11302,6 +12162,38 @@ function buildAdminVisitProgressSection(
     // ========================================
     // NOT STARTED
     // ========================================
+
+    // Not until the visit's day.
+    if (
+        isFutureVisitDate(
+            visit.visit_date
+        )
+    ) {
+
+        return `
+            <div class="admin-visit-progress admin-visit-progress-ready">
+                <div class="admin-visit-progress-copy">
+                    <strong>
+                        Visit Not Started
+                    </strong>
+                    <span>
+                        This visit is for ${escapeHtml(formatVisitDayName(visit.visit_date))}. You can check in that day.
+                    </span>
+                </div>
+                <button
+                    type="button"
+                    class="primary-button admin-visit-action-button admin-check-in-button"
+                    data-visit-action="check-in"
+                    data-visit-id="${visit.id}"
+                    disabled
+                    aria-disabled="true"
+                >
+                    Check In on ${escapeHtml(formatVisitDayName(visit.visit_date).replace(/^[A-Za-z]+, /, ""))}
+                </button>
+            </div>
+        `;
+
+    }
 
     return `
 
@@ -14323,7 +15215,7 @@ async function saveAdminVisitReport(
         ) {
 
             saveButton.textContent =
-                `Uploading photo ${uploadedCount + 1} of ${Math.max(photoCount, uploadedCount + pendingVisitReportPhotos.length)}…`;
+                `Uploading Photo ${uploadedCount + 1} of ${Math.max(photoCount, uploadedCount + pendingVisitReportPhotos.length)}…`;
 
             await uploadVisitReportMedia(
                 visitId,
@@ -16402,6 +17294,113 @@ updateAdminPushNotificationUI();
 // LOGOUT
 // ========================================
 
+let adminLogoutRunning =
+    false;
+
+// ========================================
+// GENERAL CONFIRMATION
+// ========================================
+// The same popup as Start Visit / Finish Visit, for anything else that
+// needs a yes or no (like logging out).
+// ========================================
+
+function confirmAdminChoice({
+    title,
+    context = "",
+    message,
+    confirmText,
+    caution = false
+}) {
+
+    const dialog =
+        document.getElementById("admin-visit-action-confirm");
+    const titleEl =
+        document.getElementById("admin-visit-confirm-title");
+    const contextEl =
+        document.getElementById("admin-visit-confirm-context");
+    const messageEl =
+        document.getElementById("admin-visit-confirm-message");
+    const cancelButton =
+        document.getElementById("admin-visit-confirm-cancel");
+    const confirmButton =
+        document.getElementById("admin-visit-confirm-accept");
+
+    if (
+        !dialog ||
+        !titleEl ||
+        !contextEl ||
+        !messageEl ||
+        !cancelButton ||
+        !confirmButton ||
+        typeof dialog.showModal !== "function"
+    ) {
+        return Promise.resolve(
+            window.confirm(`${title}\n\n${message}`)
+        );
+    }
+
+    if (dialog.open) {
+        return Promise.resolve(false);
+    }
+
+    titleEl.textContent = title;
+    contextEl.textContent = context;
+    contextEl.style.display = context ? "" : "none";
+    messageEl.textContent = message;
+    confirmButton.textContent = confirmText;
+    dialog.dataset.caution = String(Boolean(caution));
+    dialog.returnValue = "";
+
+    return new Promise(resolve => {
+
+        function cleanup() {
+            cancelButton.removeEventListener("click", cancel);
+            confirmButton.removeEventListener("click", confirm);
+            dialog.removeEventListener("cancel", handleEscape);
+            dialog.removeEventListener("close", handleClose);
+            // Visit popups always show their details box.
+            contextEl.style.display = "";
+        }
+
+        function cancel() {
+            dialog.close("cancelled");
+        }
+
+        function confirm() {
+            dialog.close("confirmed");
+        }
+
+        function handleEscape(event) {
+            event.preventDefault();
+            cancel();
+        }
+
+        function handleClose() {
+            const confirmed =
+                dialog.returnValue === "confirmed";
+            cleanup();
+            resolve(confirmed);
+        }
+
+        cancelButton.addEventListener("click", cancel);
+        confirmButton.addEventListener("click", confirm);
+        dialog.addEventListener("cancel", handleEscape);
+        dialog.addEventListener("close", handleClose);
+
+        try {
+            dialog.showModal();
+            // Enter initially activates Cancel, not Confirm.
+            cancelButton.focus({ preventScroll: true });
+        } catch (error) {
+            cleanup();
+            resolve(window.confirm(`${title}\n\n${message}`));
+        }
+
+    });
+
+}
+// ========================================
+
 document.getElementById(
     "admin-logout-button"
 )?.addEventListener(
@@ -16410,10 +17409,56 @@ document.getElementById(
 
     async () => {
 
+        if (adminLogoutRunning) {
+            return;
+        }
 
         if (window.PawsNative) {
             try { await window.PawsNative.canLogout(); }
             catch (error) { window.alert(error.message); return; }
+        }
+
+        // Ask first, in the same popup as Start Visit / Finish Visit.
+        adminLogoutRunning = true;
+
+        const name =
+            currentProfile?.full_name ||
+            "";
+
+        const email =
+            currentProfile?.email ||
+            currentUser?.email ||
+            "";
+
+        const confirmed =
+            await confirmAdminChoice({
+                title:
+                    "Log out?",
+                context:
+                    name || email
+                        ? `Signed in as ${[...new Set([name, email].filter(Boolean))].join(" · ")}`
+                        : "",
+                message:
+                    window.PisNativePush
+                        ? "You’ll need to sign in again to see your schedule. Visit alerts stop on this phone until you sign back in."
+                        : "You’ll need to sign in again to see your schedule.",
+                confirmText:
+                    "Log Out",
+                caution:
+                    true
+            });
+
+        if (!confirmed) {
+            adminLogoutRunning = false;
+            return;
+        }
+
+        const logoutButton =
+            document.getElementById("admin-logout-button");
+
+        if (logoutButton) {
+            logoutButton.disabled = true;
+            logoutButton.textContent = "Logging Out…";
         }
 
         // Android app: stop sending this account's alerts to this phone.

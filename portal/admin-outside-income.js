@@ -4,6 +4,7 @@
    Clients you're paid for outside the app (for example 3 one-hour visits a day
    at $85 each). They're saved in the admin_outside_income table
    (sql/admin_outside_income.sql) and each one becomes an entry per visit per day,
+   with its own number of visits on each weekday if you like (visits_by_day),
    so they count in the Financial Snapshot, Full Financials and Lifetime Stats:
      - days before today count as earned
      - today through the end of this month (or the end of this week, if the week
@@ -19,7 +20,12 @@
     'use strict';
 
     const TABLE = 'admin_outside_income';
-    const COLUMNS = 'id, label, visits_per_day, price_per_visit, minutes_per_visit, days_of_week, start_date, end_date, skipped_dates';
+    const BASE_COLUMNS = 'id, label, visits_per_day, price_per_visit, minutes_per_visit, days_of_week, start_date, end_date, skipped_dates';
+    // visits_by_day (visits on each weekday, Sun..Sat) needs a one-time
+    // database update. Until it's run, everything else keeps working.
+    let hasByDay = true;
+    const columns = () => hasByDay ? `${BASE_COLUMNS}, visits_by_day` : BASE_COLUMNS;
+    const DAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -73,16 +79,24 @@
     }
 
     function clean(r) {
-        const days = Array.isArray(r.days_of_week)
-            ? [...new Set(r.days_of_week.map(Number).filter(n => ALL_DAYS.includes(n)))].sort()
+        const listed = Array.isArray(r.days_of_week)
+            ? [...new Set(r.days_of_week.map(Number).filter(n => ALL_DAYS.includes(n)))]
             : [];
+        const days = listed.length ? listed : ALL_DAYS.slice();
+        const perDay = int(r.visits_per_day, 1, 20, 1);
+        // Visits on each weekday (Sun..Sat), 0 on days you don't go.
+        const saved = Array.isArray(r.visits_by_day) && r.visits_by_day.length === 7
+            ? r.visits_by_day.map(n => int(n, 0, 20, 0))
+            : null;
+        const byDay = ALL_DAYS.map(d => days.includes(d) ? ((saved && saved[d]) || perDay) : 0);
         return {
             id: r.id,
             label: String(r.label || '').trim() || 'Outside client',
-            visits_per_day: int(r.visits_per_day, 1, 20, 1),
+            visits_by_day: byDay,
+            visits_per_day: Math.max(...byDay),
             price_per_visit: Math.max(0, Number(r.price_per_visit) || 0),
             minutes_per_visit: int(r.minutes_per_visit, 1, 1440, 60),
-            days_of_week: days.length ? days : ALL_DAYS.slice(),
+            days_of_week: ALL_DAYS.filter(d => byDay[d] > 0),
             start_date: String(r.start_date || '').slice(0, 10),
             end_date: isDate(String(r.end_date || '').slice(0, 10)) ? String(r.end_date).slice(0, 10) : null,
             skipped_dates: (Array.isArray(r.skipped_dates) ? r.skipped_dates : [])
@@ -111,6 +125,30 @@
         return out;
     }
 
+    const weekday = date => parseLocalDate(date).getDay();
+    const varies = r => new Set(r.days_of_week.map(d => r.visits_by_day[d])).size > 1;
+    const visitsOn = (r, dates) => dates.reduce((sum, date) => sum + r.visits_by_day[weekday(date)], 0);
+    // A short stretch (a week or less with an end date) is listed by date.
+    function isShort(r) {
+        return isDate(r.start_date) && isDate(r.end_date) && r.end_date >= r.start_date &&
+            r.end_date <= addDays(r.start_date, 6);
+    }
+    // The order days are listed in: by date for a short stretch, otherwise Monday first.
+    function dayOrder(r, days) {
+        if (isShort(r)) {
+            const inRange = datesFor({ ...r, skipped_dates: [] }, null, r.end_date).map(weekday);
+            return inRange.filter(d => days.includes(d));
+        }
+        return [1, 2, 3, 4, 5, 6, 0].filter(d => days.includes(d));
+    }
+    function dayLabel(r, d, full) {
+        if (isShort(r)) {
+            const date = datesFor({ ...r, days_of_week: [d], skipped_dates: [] }, null, r.end_date)[0];
+            if (date) return `${DAY_NAMES[d]}, ${niceDate(date)}`;
+        }
+        return full ? DAY_FULL[d] : DAY_NAMES[d];
+    }
+
     /* ---------- the entries the financial screens use ---------- */
     function allEntries() {
         const t = today();
@@ -120,7 +158,8 @@
         const list = [];
         for (const r of rows) {
             for (const date of datesFor(r, null, last)) {
-                for (let n = 1; n <= r.visits_per_day; n++) {
+                const count = r.visits_by_day[weekday(date)];
+                for (let n = 1; n <= count; n++) {
                     list.push({
                         id: `outside:${r.id}:${date}:${n}`,
                         visit_date: date,
@@ -158,7 +197,11 @@
     function writeCache() {
         try { localStorage.setItem(cacheKey(loadedFor), JSON.stringify(rows)); } catch (e) { /* storage full or blocked */ }
     }
+    function isMissingByDay(error) {
+        return /visits_by_day/i.test(`${error?.message || ''} ${error?.details || ''} ${error?.hint || ''}`);
+    }
     function isMissingTable(error) {
+        if (isMissingByDay(error)) return false;
         const code = String(error?.code || '');
         const text = String(error?.message || '');
         return code === 'PGRST205' || code === '42P01' ||
@@ -184,11 +227,16 @@
         if (!force && state !== 'idle') return Promise.resolve();
         request = (async () => {
             try {
-                const { data, error } = await supabaseClient
+                const fetchRows = () => supabaseClient
                     .from(TABLE)
-                    .select(COLUMNS)
+                    .select(columns())
                     .eq('admin_id', id)
                     .order('start_date', { ascending: true });
+                let { data, error } = await fetchRows();
+                if (error && hasByDay && isMissingByDay(error)) {
+                    hasByDay = false;
+                    ({ data, error } = await fetchRows());
+                }
                 if (error) throw error;
                 if (loadedFor !== id) return;
                 rows = (data || []).map(clean);
@@ -214,6 +262,8 @@
     async function save(id, values) {
         const owner = me();
         if (!owner) throw new Error('Sign in again, then try saving.');
+        const differs = varies(clean(values));
+        if (!hasByDay && differs) throw new Error('needs-update');
         const payload = {
             label: values.label,
             visits_per_day: values.visits_per_day,
@@ -225,10 +275,19 @@
             skipped_dates: values.skipped_dates,
             updated_at: new Date().toISOString()
         };
-        const query = id
-            ? supabaseClient.from(TABLE).update(payload).eq('id', id).eq('admin_id', owner)
-            : supabaseClient.from(TABLE).insert({ ...payload, admin_id: owner });
-        const { data, error } = await query.select(COLUMNS).single();
+        const send = () => {
+            const body = hasByDay ? { ...payload, visits_by_day: values.visits_by_day } : payload;
+            const query = id
+                ? supabaseClient.from(TABLE).update(body).eq('id', id).eq('admin_id', owner)
+                : supabaseClient.from(TABLE).insert({ ...body, admin_id: owner });
+            return query.select(columns()).single();
+        };
+        let { data, error } = await send();
+        if (error && hasByDay && isMissingByDay(error)) {
+            hasByDay = false;
+            if (differs) throw new Error('needs-update');
+            ({ data, error } = await send());
+        }
         if (error) throw error;
         const row = clean(data);
         const at = rows.findIndex(r => String(r.id) === String(row.id));
@@ -250,6 +309,7 @@
     }
 
     function friendlyError(error) {
+        if (error?.message === 'needs-update') return 'A different number of visits on different days needs a quick database update. Run the outside income part of the setup SQL in Supabase → SQL Editor, then try again.';
         if (isMissingTable(error)) return 'Outside income isn’t set up in the database yet. Run sql/admin_outside_income.sql in Supabase → SQL Editor, then try again.';
         if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'You’re offline. Connect and try again.';
         return `Couldn’t save: ${error?.message || 'please try again.'}`;
@@ -264,15 +324,47 @@
         // Monday first reads more naturally for a work week.
         return [1, 2, 3, 4, 5, 6, 0].filter(d => days.includes(d)).map(d => DAY_NAMES[d]).join(', ');
     }
-    function scheduleText(r) {
-        const days = daysText(r.days_of_week);
+    // Which days, then when. Short ones stay on one line ("Every day since
+    // Oct 18"); longer ones put the dates on their own line, starting with
+    // a capital ("Sat 3 · Sun 2 · Mon 1" / "Starting Nov 21 until Nov 23").
+    function scheduleLines(r) {
+        const days = varies(r)
+            ? dayOrder(r, r.days_of_week).map(d => `${DAY_NAMES[d]} ${r.visits_by_day[d]}`).join(' · ')
+            : daysText(r.days_of_week);
         const t = today();
-        if (r.end_date && r.end_date < t) return `${days} · ${niceDate(r.start_date)} – ${niceDate(r.end_date)}`;
-        const from = r.start_date > t ? `starting ${niceDate(r.start_date)}` : `since ${niceDate(r.start_date)}`;
-        return `${days} ${from}${r.end_date ? ` until ${niceDate(r.end_date)}` : ''}`;
+        let when, joiner = ' ';
+        if (r.end_date && r.end_date < t) {
+            when = `${niceDate(r.start_date)} – ${niceDate(r.end_date)}`;
+            joiner = ' · ';
+        } else {
+            when = `${r.start_date > t ? 'starting' : 'since'} ${niceDate(r.start_date)}${r.end_date ? ` until ${niceDate(r.end_date)}` : ''}`;
+        }
+        const oneLine = `${days}${joiner}${when}`;
+        return oneLine.length <= 26 ? [oneLine] : [days, when.charAt(0).toUpperCase() + when.slice(1)];
+    }
+    function scheduleText(r) {
+        return scheduleLines(r).join(' · ');
     }
     function earnedSoFar(r) {
-        return datesFor(r, null, addDays(today(), -1)).length * r.visits_per_day * r.price_per_visit;
+        return visitsOn(r, datesFor(r, null, addDays(today(), -1))) * r.price_per_visit;
+    }
+    // "$255/day", "$175/week", or the whole total when it has an end date.
+    function rate(r) {
+        const each = money(r.price_per_visit, true);
+        if (r.end_date) {
+            const visits = visitsOn(r, datesFor(r, null, r.end_date));
+            return { line: `${visits} ${visits === 1 ? 'visit' : 'visits'} × ${each} · ${money(visits * r.price_per_visit, true)} total`,
+                big: `${money(visits * r.price_per_visit, true)} total`, sub: `${visits} ${visits === 1 ? 'visit' : 'visits'}` };
+        }
+        if (varies(r)) {
+            const counts = r.days_of_week.map(d => r.visits_by_day[d]);
+            const week = counts.reduce((a, b) => a + b, 0) * r.price_per_visit;
+            return { line: `${Math.min(...counts)}–${Math.max(...counts)} visits a day × ${each} · ${money(week, true)}/week`,
+                big: `${money(week, true)} a week` };
+        }
+        const n = r.visits_per_day;
+        return { line: `${n} ${n === 1 ? 'visit' : 'visits'} × ${each} · ${money(n * r.price_per_visit, true)}/day`,
+            big: `${money(n * r.price_per_visit, true)} a day` };
     }
 
     /* ---------- card in Full Financials ---------- */
@@ -293,14 +385,13 @@
         else note = `This month · each day counts as earned once it’s over${state === 'error' ? ' · showing the copy saved on this phone' : ''}`;
 
         const items = rows.map(r => {
-            const perDay = r.visits_per_day * r.price_per_visit;
             const off = r.skipped_dates.length;
             return `<div class="poi-item">
                 <div class="poi-item-copy">
                     <strong>${esc(r.label)}</strong>
-                    <span>${r.visits_per_day} ${r.visits_per_day === 1 ? 'visit' : 'visits'} × ${money(r.price_per_visit, true)} · ${money(perDay, true)}/day</span>
-                    <span>${esc(scheduleText(r))}${off ? ` · ${off} ${off === 1 ? 'day' : 'days'} off` : ''}</span>
-                    <em>${money(earnedSoFar(r))} earned so far</em>
+                    <span>${esc(rate(r).line)}</span>
+                    ${scheduleLines(r).map((line, i, all) => `<span>${esc(line)}${i === all.length - 1 && off ? ` · ${off} ${off === 1 ? 'day' : 'days'} off` : ''}</span>`).join('')}
+                    <em>${r.start_date > today() ? 'Not started yet' : `${money(earnedSoFar(r))} earned so far`}</em>
                 </div>
                 <button type="button" class="poi-edit" data-poi-edit="${esc(r.id)}" aria-label="Edit ${esc(r.label)}">Edit</button>
             </div>`;
@@ -313,7 +404,7 @@
             </div>
             <span class="pfin-note">${esc(note)}</span>
             ${items ? `<div class="poi-list">${items}</div>` : ''}
-            ${state === 'missing' ? '' : '<button type="button" class="poi-add" data-poi-add>+ Add outside income</button>'}
+            ${state === 'missing' ? '' : '<button type="button" class="poi-add" data-poi-add>+ Add Outside Income</button>'}
         </section>`;
     }
 
@@ -326,10 +417,15 @@
         if (document.getElementById('poi-editor')) return;
         const existing = id ? rows.find(r => String(r.id) === String(id)) : null;
         const r = existing || {
-            label: '', visits_per_day: 1, price_per_visit: '', minutes_per_visit: 60,
+            label: '', visits_per_day: 1, visits_by_day: ALL_DAYS.map(() => 1), price_per_visit: '', minutes_per_visit: 60,
             days_of_week: ALL_DAYS.slice(), start_date: today(), end_date: null, skipped_dates: []
         };
-        editor = { id: existing ? existing.id : null, skipped: r.skipped_dates.slice(), deleteArmed: false, busy: false };
+        editor = {
+            id: existing ? existing.id : null, skipped: r.skipped_dates.slice(), deleteArmed: false, busy: false,
+            perDay: existing ? varies(r) : false,
+            uniform: r.visits_per_day,
+            counts: r.visits_by_day.map(n => n || r.visits_per_day)
+        };
 
         const wrap = document.createElement('div');
         wrap.id = 'poi-editor';
@@ -349,24 +445,24 @@
                     <p class="poi-intro">For a client you’re paid outside the app. It’s added to your totals but never shows on your schedule.</p>
                     <label class="poi-field"><span>Client</span>
                         <input type="text" name="label" maxlength="80" autocomplete="off" placeholder="Client name" value="${esc(existing ? r.label : '')}"></label>
-                    <div class="poi-row3">
-                        <label class="poi-field"><span>Visits a day</span>
-                            <input type="number" name="visits" inputmode="numeric" min="1" max="20" step="1" value="${esc(r.visits_per_day)}"></label>
+                    <div class="poi-row2 poi-row-tight">
                         <label class="poi-field"><span>Pay per visit</span>
                             <span class="poi-money"><i>$</i><input type="number" name="price" inputmode="decimal" min="0" step="0.01" placeholder="85" value="${esc(r.price_per_visit)}"></span></label>
                         <label class="poi-field"><span>Minutes each</span>
                             <input type="number" name="minutes" inputmode="numeric" min="1" max="1440" step="1" value="${esc(r.minutes_per_visit)}"></label>
                     </div>
-                    <div class="poi-field"><span id="poi-days-label">Days you go</span>
-                        <div class="poi-days" role="group" aria-labelledby="poi-days-label">
-                            ${ALL_DAYS.map(d => `<button type="button" class="poi-day" data-poi-day="${d}" aria-pressed="${r.days_of_week.includes(d)}" aria-label="${DAY_NAMES[d]}">${DAY_LETTERS[d]}</button>`).join('')}
-                        </div></div>
                     <div class="poi-row2">
                         <label class="poi-field"><span>Started</span>
                             <input type="date" name="start" value="${esc(r.start_date)}"></label>
                         <label class="poi-field"><span>Ended <small>(blank if still going)</small></span>
                             <input type="date" name="end" value="${esc(r.end_date || '')}"></label>
                     </div>
+                    <div class="poi-field"><span id="poi-days-label">Days you go</span>
+                        <div class="poi-days" role="group" aria-labelledby="poi-days-label">
+                            ${ALL_DAYS.map(d => `<button type="button" class="poi-day" data-poi-day="${d}" aria-pressed="${r.days_of_week.includes(d)}" aria-label="${DAY_NAMES[d]}">${DAY_LETTERS[d]}</button>`).join('')}
+                        </div></div>
+                    <div class="poi-field"><span>Visits a day</span>
+                        <div class="poi-visits"></div></div>
                     <div class="poi-field"><span>Days off <small>(days you didn’t go)</small></span>
                         <div class="poi-off-add">
                             <input type="date" name="off" aria-label="Day off">
@@ -387,9 +483,17 @@
 
         const formEl = wrap.querySelector('form');
         wrap.addEventListener('click', onEditorClick);
-        formEl.addEventListener('input', () => { hideError(); preview(); });
+        formEl.addEventListener('input', e => {
+            hideError();
+            if (e.target.name === 'start' || e.target.name === 'end') renderVisits();
+            preview();
+        });
+        formEl.addEventListener('change', e => {
+            if (e.target.name === 'start' || e.target.name === 'end') { renderVisits(); preview(); }
+        });
         formEl.addEventListener('submit', e => { e.preventDefault(); void submit(); });
         renderOff();
+        renderVisits();
         preview();
         try { history.pushState({ poi: true }, ''); editorHistory = true; } catch (e) { editorHistory = false; }
     }
@@ -410,14 +514,19 @@
     function form() { return document.querySelector('#poi-editor form'); }
     function field(name) { return form().elements.namedItem(name); }
 
-    function read() {
-        const f = form();
-        const days = [...f.querySelectorAll('[data-poi-day]')]
+    function selectedDays() {
+        return [...form().querySelectorAll('[data-poi-day]')]
             .filter(b => b.getAttribute('aria-pressed') === 'true').map(b => Number(b.dataset.poiDay));
+    }
+
+    function read() {
+        const days = selectedDays();
         const priceText = String(field('price').value).trim();
+        const byDay = ALL_DAYS.map(d => days.includes(d) ? (editor.perDay ? editor.counts[d] : editor.uniform) : 0);
         return {
             label: String(field('label').value).trim(),
-            visits_per_day: Number(field('visits').value),
+            visits_by_day: byDay,
+            visits_per_day: days.length ? Math.max(...days.map(d => byDay[d])) : editor.uniform,
             price_per_visit: priceText === '' ? NaN : Math.round(Number(priceText) * 100) / 100,
             minutes_per_visit: Number(field('minutes').value),
             days_of_week: days,
@@ -430,7 +539,7 @@
     function problem(v) {
         if (!v.label) return 'Add the client’s name.';
         if (v.label.length > 80) return 'Keep the name under 80 characters.';
-        if (!Number.isInteger(v.visits_per_day) || v.visits_per_day < 1 || v.visits_per_day > 20) return 'Visits a day should be a whole number from 1 to 20.';
+        if (v.visits_by_day.some(n => !Number.isInteger(n) || n < 0 || n > 20)) return 'Visits a day should be from 1 to 20.';
         if (!Number.isFinite(v.price_per_visit) || v.price_per_visit < 0 || v.price_per_visit > 100000) return 'Add how much you’re paid per visit.';
         if (!Number.isInteger(v.minutes_per_visit) || v.minutes_per_visit < 1 || v.minutes_per_visit > 1440) return 'Minutes each should be a whole number from 1 to 1440.';
         if (!v.days_of_week.length) return 'Pick at least one day you go.';
@@ -444,15 +553,44 @@
         const box = document.querySelector('#poi-editor .poi-preview');
         if (!box || !editor) return;
         const v = read();
-        if (!Number.isFinite(v.price_per_visit) || !Number.isInteger(v.visits_per_day) || v.visits_per_day < 1 || v.visits_per_day > 20 ||
-            !isDate(v.start_date) || !v.days_of_week.length) {
+        if (!Number.isFinite(v.price_per_visit) || !isDate(v.start_date) || !v.days_of_week.length ||
+            (v.end_date && (!isDate(v.end_date) || v.end_date < v.start_date))) {
             box.textContent = '';
             return;
         }
         const r = clean({ ...v, id: 'preview' });
-        const perDay = r.visits_per_day * r.price_per_visit;
         const so = earnedSoFar(r);
-        box.innerHTML = `<strong>${money(perDay, true)} a day</strong><span>${so > 0 ? `${money(so)} earned so far` : 'Starts counting after the first day'}</span>`;
+        const sum = rate(r);
+        const after = so > 0 ? `${money(so)} earned so far` : 'Starts counting after the first day';
+        box.innerHTML = `<strong>${esc(sum.big)}</strong><span>${esc(sum.sub ? `${sum.sub} · ${after}` : after)}</span>`;
+    }
+
+    // "Visits a day": one number for every day, or a number for each day.
+    function renderVisits() {
+        const box = document.querySelector('#poi-editor .poi-visits');
+        if (!box || !editor) return;
+        const days = selectedDays();
+        if (!days.length) {
+            box.innerHTML = '<span class="poi-none">Pick the days you go first.</span>';
+            return;
+        }
+        const step = (key, label, n, name) => `
+            <div class="poi-step-row">
+                <span class="poi-step-label">${esc(label)}</span>
+                <div class="poi-stepper">
+                    <button type="button" class="poi-step-btn" data-poi-step="-1" data-poi-step-day="${key}" aria-label="One fewer visit ${esc(name)}"${n <= 1 ? ' disabled' : ''}>−</button>
+                    <span class="poi-step-num" aria-live="polite">${n}<small>${n === 1 ? 'visit' : 'visits'}</small></span>
+                    <button type="button" class="poi-step-btn" data-poi-step="1" data-poi-step-day="${key}" aria-label="One more visit ${esc(name)}"${n >= 20 ? ' disabled' : ''}>+</button>
+                </div>
+            </div>`;
+        if (!editor.perDay) {
+            box.innerHTML = step('all', days.length === 7 ? 'Every day' : 'Each day you go', editor.uniform, 'each day') +
+                (days.length > 1 ? '<button type="button" class="poi-mode" data-poi-mode="each">Different Number Some Days</button>' : '');
+            return;
+        }
+        const r = { start_date: String(field('start').value), end_date: String(field('end').value) || null, days_of_week: days, skipped_dates: [] };
+        box.innerHTML = dayOrder(r, days).map(d => step(d, dayLabel(r, d, true), editor.counts[d], `on ${DAY_FULL[d]}`)).join('') +
+            '<button type="button" class="poi-mode" data-poi-mode="same">Same Number Every Day</button>';
     }
 
     function renderOff() {
@@ -484,6 +622,7 @@
         const saveBtn = f.querySelector('.poi-save');
         if (label && saveBtn) saveBtn.textContent = label;
         if (!on && saveBtn) saveBtn.textContent = 'Save';
+        if (!on) renderVisits();
     }
 
     async function submit() {
@@ -514,6 +653,33 @@
         if (day) {
             day.setAttribute('aria-pressed', day.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
             hideError();
+            renderVisits();
+            preview();
+            return;
+        }
+        const step = el.closest('[data-poi-step]');
+        if (step) {
+            const delta = Number(step.dataset.poiStep);
+            const key = step.dataset.poiStepDay;
+            const clamp = n => Math.min(20, Math.max(1, n));
+            if (key === 'all') editor.uniform = clamp(editor.uniform + delta);
+            else editor.counts[Number(key)] = clamp(editor.counts[Number(key)] + delta);
+            hideError();
+            renderVisits();
+            preview();
+            return;
+        }
+        const mode = el.closest('[data-poi-mode]');
+        if (mode) {
+            if (mode.dataset.poiMode === 'each') {
+                editor.perDay = true;
+                editor.counts = ALL_DAYS.map(() => editor.uniform);
+            } else {
+                const days = selectedDays();
+                editor.perDay = false;
+                editor.uniform = days.length ? Math.max(...days.map(d => editor.counts[d])) : editor.uniform;
+            }
+            renderVisits();
             preview();
             return;
         }
@@ -539,7 +705,7 @@
         if (del) {
             if (!editor.deleteArmed) {
                 editor.deleteArmed = true;
-                del.textContent = 'Tap again to delete';
+                del.textContent = 'Tap Again to Delete';
                 del.classList.add('is-armed');
                 setTimeout(() => {
                     if (editor && editor.deleteArmed && del.isConnected && !editor.busy) {
@@ -615,6 +781,21 @@
     .poi-field > span{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#46617d}
     .poi-field small{font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;color:#8293a2}
     .poi input[type=text],.poi input[type=number],.poi input[type=date]{display:block !important;width:100% !important;min-width:0 !important;height:48px !important;margin:0 !important;padding:0 12px !important;box-sizing:border-box !important;border:1px solid #c9d9ea !important;border-radius:12px !important;background:#fff !important;color:#183447 !important;font-family:inherit !important;font-size:16px !important;font-weight:700 !important;box-shadow:none !important;-webkit-appearance:none;appearance:none}
+    .poi input[type=date]{line-height:46px !important;text-align:left !important}
+    .poi input[type=date]::-webkit-date-and-time-value{min-height:0;margin:0;line-height:46px;text-align:left}
+    .poi input[type=date]::-webkit-datetime-edit{padding:0;line-height:46px}
+    .poi-row2 .poi-field{justify-content:flex-end}
+    .poi-row2 .poi-field > span{min-height:0 !important}
+    .poi-visits{display:flex;flex-direction:column;gap:8px}
+    .poi-step-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:6px 6px 6px 14px;border:1px solid #c9d9ea;border-radius:12px;background:#fff;box-sizing:border-box}
+    .poi-step-label{flex:1 1 auto;min-width:0;font-size:15px;font-weight:800;color:#183447;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .poi-stepper{flex:none;display:flex;align-items:center;gap:4px}
+    .poi-step-btn{all:unset;display:flex !important;align-items:center !important;justify-content:center !important;width:42px !important;height:42px !important;margin:0 !important;padding:0 !important;border-radius:10px !important;background:#eaf3fb !important;color:#1f63b8 !important;font-family:inherit !important;font-size:22px !important;font-weight:800 !important;line-height:1 !important;box-sizing:border-box !important;cursor:pointer}
+    .poi-step-btn:disabled{opacity:.35;cursor:default}
+    .poi-step-btn:not(:disabled):active{background:#d4e7f7 !important}
+    .poi-step-num{display:flex;flex-direction:column;align-items:center;min-width:52px;font-size:18px;font-weight:800;color:#183447;line-height:1.05}
+    .poi-step-num small{font-size:11px;font-weight:700;color:#6b7785;letter-spacing:0;text-transform:none}
+    .poi-mode{all:unset;align-self:flex-start;display:inline-flex !important;align-items:center !important;height:36px !important;margin:0 !important;padding:0 2px !important;color:#1f63b8 !important;font-family:inherit !important;font-size:14px !important;font-weight:800 !important;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
     .poi input:focus{outline:none !important;border-color:#1f7bc2 !important;box-shadow:0 0 0 3px rgba(31,123,194,.15) !important}
     .poi input:disabled{opacity:.6}
     .poi-row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}

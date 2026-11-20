@@ -868,7 +868,7 @@
    // One button that matches the visit's state.
    let action = null;
    if (state === 'scheduled') {
-    const checkIn = card.querySelector('button[data-visit-action="check-in"]');
+    const checkIn = card.querySelector('button[data-visit-action="check-in"]:not(:disabled)');
     action = checkIn
      ? { label: 'Check In', run: () => checkIn.click() }
      : { label: 'Open', run: () => openFocus(visit.id) };
@@ -980,6 +980,14 @@
   wrapAsync('finishVisit', null, (_r, visitId) => {
    const v = findVisit(visitId);
    if (Number(focusedVisitId) === Number(visitId) && v && progressOf(v).state === 'completed') {
+    closeFocus({ scrollToCard: true });
+   }
+  });
+
+  // Undo Check-In -> the visit is back to Not Started, so close the popup.
+  wrapAsync('undoVisitCheckIn', null, (_r, visitId) => {
+   const v = findVisit(visitId);
+   if (Number(focusedVisitId) === Number(visitId) && v && progressOf(v).state !== 'checked_in') {
     closeFocus({ scrollToCard: true });
    }
   });

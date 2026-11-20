@@ -21452,7 +21452,182 @@ if (document.readyState === "loading") {
 // LOGOUT
 // ========================================
 
+// ========================================
+// LOGOUT CONFIRMATION
+// ========================================
+// Asks before logging out, in the same style as the other
+// confirmation popups (like Cancel Service).
+// ========================================
+
+let clientLogoutRunning =
+    false;
+
 async function logoutClient() {
+
+    // The header button can fire twice (its own handler and the menu's).
+    if (clientLogoutRunning) {
+        return;
+    }
+
+    clientLogoutRunning = true;
+
+    try {
+
+        if (await confirmClientLogout()) {
+            await logoutClientNow();
+        }
+
+    } finally {
+
+        clientLogoutRunning = false;
+
+    }
+
+}
+
+function confirmClientLogout() {
+
+    document.getElementById("client-logout-modal")?.remove();
+
+    const previousFocus =
+        document.activeElement;
+
+    const name =
+        currentProfile?.full_name ||
+        "";
+
+    const email =
+        currentProfile?.email ||
+        currentUser?.email ||
+        "";
+
+    const overlay =
+        document.createElement("div");
+
+    overlay.id =
+        "client-logout-modal";
+
+    overlay.className =
+        "client-cancellation-modal client-logout-modal";
+
+    overlay.innerHTML = `
+        <div
+            class="client-cancellation-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="client-logout-title"
+            aria-describedby="client-logout-message"
+        >
+            <div class="client-cancellation-header">
+                <div>
+                    <span class="client-cancellation-eyebrow" style="color:#1f7bc2">
+                        Paws in Stride
+                    </span>
+                    <h3 id="client-logout-title">
+                        Log out?
+                    </h3>
+                </div>
+                <button
+                    type="button"
+                    class="client-cancellation-close"
+                    data-client-logout-close
+                    aria-label="Close"
+                >×</button>
+            </div>
+            ${
+                name || email
+                    ? `<div class="client-cancellation-service">
+                        <strong>Signed in as ${escapeHtml(name || email)}</strong>
+                        ${name && email ? `<span>${escapeHtml(email)}</span>` : ""}
+                    </div>`
+                    : ""
+            }
+            <p id="client-logout-message" class="client-cancellation-note">
+                You’ll need to sign in again to book services and see your pet’s updates.
+            </p>
+            <div class="client-cancellation-actions">
+                <button
+                    type="button"
+                    class="secondary-button"
+                    data-client-logout-close
+                >
+                    Stay Signed In
+                </button>
+                <button
+                    type="button"
+                    class="client-cancellation-confirm"
+                    data-client-logout-confirm
+                >
+                    Log Out
+                </button>
+            </div>
+        </div>
+    `;
+
+    return new Promise(resolve => {
+
+        let answered =
+            false;
+
+        function answer(confirmed) {
+
+            if (answered) {
+                return;
+            }
+
+            answered = true;
+            document.removeEventListener("keydown", onKey, true);
+
+            if (confirmed) {
+                // Stay up, showing progress, until the login page opens.
+                overlay.querySelectorAll("button").forEach(button => {
+                    button.disabled = true;
+                });
+                overlay.querySelector("[data-client-logout-confirm]").textContent =
+                    "Logging Out…";
+            } else {
+                overlay.remove();
+                if (previousFocus?.isConnected) {
+                    previousFocus.focus({ preventScroll: true });
+                }
+            }
+
+            resolve(confirmed);
+
+        }
+
+        function onKey(event) {
+            if (event.key === "Escape") {
+                event.preventDefault();
+                answer(false);
+            }
+        }
+
+        overlay.addEventListener("click", event => {
+            if (
+                event.target === overlay ||
+                event.target.closest("[data-client-logout-close]")
+            ) {
+                answer(false);
+            } else if (
+                event.target.closest("[data-client-logout-confirm]")
+            ) {
+                answer(true);
+            }
+        });
+
+        document.addEventListener("keydown", onKey, true);
+        document.body.appendChild(overlay);
+
+        overlay
+            .querySelector(".secondary-button[data-client-logout-close]")
+            ?.focus({ preventScroll: true });
+
+    });
+
+}
+
+async function logoutClientNow() {
 
 // Don't leave this account's saved copy on a shared device.
     clearClientFastStart();
@@ -21523,6 +21698,12 @@ async function logoutClient() {
         console.error(
             "Logout error:",
             error
+        );
+
+        document.getElementById("client-logout-modal")?.remove();
+
+        alert(
+            "We couldn’t log you out. Please check your connection and try again."
         );
 
     }

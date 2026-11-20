@@ -293,7 +293,7 @@
                         throw new Error('Please select an image file.');
                     }
 
-                    state.busyLabel = `Adding photo ${added + 1} of ${files.length}…`;
+                    state.busyLabel = `Adding Photo ${added + 1} of ${files.length}…`;
                     controls(state);
 
                     const blob = await prepareSitPhoto(file);
@@ -377,7 +377,7 @@
             for (let i = 0; i < state.draft.photos.length; i++) {
                 const photo = state.draft.photos[i];
                 if (photo.uploaded) continue;
-                state.busyLabel = `Uploading photo ${i + 1} of ${state.draft.photos.length}…`;
+                state.busyLabel = `Uploading Photo ${i + 1} of ${state.draft.photos.length}…`;
                 controls(state);
                 const { error } = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
                     .upload(photo.path, photo.blob, { contentType: 'image/jpeg', cacheControl: '3600', upsert: false });
