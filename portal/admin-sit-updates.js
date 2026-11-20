@@ -138,7 +138,7 @@
         state.dialog.querySelector('[data-boarding-close]').disabled = state.busy;
         const send = state.dialog.querySelector('[data-boarding-send]');
         send.disabled = state.busy;
-        send.textContent = state.busy ? 'Sending…' : state.draft.locked ? 'Retry Send' : 'Send Sit Update';
+        send.textContent = state.busy ? (state.busyLabel || 'Sending…') : state.draft.locked ? 'Retry Send' : 'Send Sit Update';
         const discard = state.dialog.querySelector('[data-sit-discard]');
         if (discard) discard.disabled = state.busy;
     }
@@ -293,7 +293,8 @@
                         throw new Error('Please select an image file.');
                     }
 
-                    msg(state, `Preparing photo ${added + 1}: ${name}…`);
+                    state.busyLabel = `Adding photo ${added + 1} of ${files.length}…`;
+                    controls(state);
 
                     const blob = await prepareSitPhoto(file);
                     const id = crypto.randomUUID();
@@ -333,6 +334,7 @@
             }
         } finally {
             state.busy = false;
+            state.busyLabel = '';
 
             const input = state.dialog.querySelector('[data-boarding-photo-input]');
             if (input) input.value = '';
@@ -356,6 +358,8 @@
         if (state.busy) return;
         collect(state);
         state.busy = true;
+        state.busyLabel = 'Sending…';
+        msg(state, '');
         controls(state);
         let published = false;
         let rpcSent = false;
@@ -373,7 +377,8 @@
             for (let i = 0; i < state.draft.photos.length; i++) {
                 const photo = state.draft.photos[i];
                 if (photo.uploaded) continue;
-                msg(state, `Uploading photo ${i + 1} of ${state.draft.photos.length}…`);
+                state.busyLabel = `Uploading photo ${i + 1} of ${state.draft.photos.length}…`;
+                controls(state);
                 const { error } = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
                     .upload(photo.path, photo.blob, { contentType: 'image/jpeg', cacheControl: '3600', upsert: false });
                 if (error && String(error.statusCode || error.status) !== '409' && !/already exists|duplicate/i.test(error.message || '')) throw error;
@@ -381,7 +386,8 @@
                 await save(state);
             }
 
-            msg(state, 'Saving sit update…');
+            state.busyLabel = 'Sending…';
+            controls(state);
             rpcSent = true;
 
             const { data, error } = await supabaseClient.rpc('admin_publish_sit_update', {
@@ -424,6 +430,7 @@
             }
         } finally {
             state.busy = false;
+            state.busyLabel = '';
             controls(state);
         }
     }

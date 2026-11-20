@@ -5239,17 +5239,16 @@ async function retryPendingVisitCheckInSync(
         !pendingCheckIn
     ) {
 
-
         renderAdminDayServices();
-
 
         return;
 
     }
 
-
-    await syncPendingVisitCheckIn(
-        visitId
+    await waitForSync(
+        syncPendingVisitCheckIn(
+            visitId
+        )
     );
 
 }
@@ -5345,12 +5344,12 @@ async function checkInVisit(
 
     renderAdminCalendar();
 
-
     renderAdminDayServices();
 
-
-    await syncPendingVisitCheckIn(
-        visitId
+    await waitForSync(
+        syncPendingVisitCheckIn(
+            visitId
+        )
     );
 
 }
@@ -5988,13 +5987,18 @@ async function flushWalkGpsQueue(
     tracker
 ) {
 
+    // Finishing a walk saves on the phone first; uploads come after.
+    if (
+        walkFinishFlushHold > 0 ||
+        navigator.onLine === false
+    ) {
+        return;
+    }
 
     if (
         tracker.flushPromise
     ) {
-
         return tracker.flushPromise;
-
     }
 
 
@@ -6006,9 +6010,9 @@ async function flushWalkGpsQueue(
 
                 while (
                     tracker.pendingQueue.length >
-                    0
+                    0 &&
+                    walkFinishFlushHold === 0
                 ) {
-
 
                     const queuedPoint =
                         tracker.pendingQueue[0];
@@ -6017,9 +6021,11 @@ async function flushWalkGpsQueue(
                     try {
 
 
-                        await persistWalkGpsPoint(
-                            tracker,
-                            queuedPoint
+                        await withWalkNetworkTimeout(
+                            persistWalkGpsPoint(
+                                tracker,
+                                queuedPoint
+                            )
                         );
 
 
@@ -7003,6 +7009,64 @@ function clearPendingWalkFinish(
 // NETWORK-LIKE WALK ERROR
 // ========================================
 
+// ========================================
+// NO-SERVICE GUARDS
+// ========================================
+//
+// With no service the phone can still look online, and a request then
+// hangs instead of failing. Anything already saved on this phone must
+// never wait on one of those, or the buttons get stuck.
+// ========================================
+
+var walkFinishFlushHold =
+    0;
+
+var walkFinishSyncsInFlight =
+    null;
+
+function withWalkNetworkTimeout(
+    work,
+    ms = 15000
+) {
+
+    let timer;
+
+    return Promise.race([
+        Promise.resolve(work),
+        new Promise((_, reject) => {
+            timer = setTimeout(
+                () => reject(new TypeError("Network request timed out (no service).")),
+                ms
+            );
+        })
+    ]).finally(() => clearTimeout(timer));
+
+}
+
+// Wait for a sync of something already saved on this phone, but no
+// longer than ms. If it's still going, it finishes in the background
+// and redraws the screen itself.
+function waitForSync(
+    work,
+    ms = 12000
+) {
+
+    const running =
+        Promise.resolve(work);
+
+    running.catch(error => console.warn("Background sync ended with an error:", error));
+
+    let timer;
+
+    return Promise.race([
+        running,
+        new Promise(resolve => {
+            timer = setTimeout(() => resolve(false), ms);
+        })
+    ]).finally(() => clearTimeout(timer));
+
+}
+
 function isWalkNetworkError(
     error
 ) {
@@ -7313,7 +7377,35 @@ async function convertLocalWalkToServerWalk(
 // SYNC PENDING WALK FINISH
 // ========================================
 
-async function syncPendingWalkFinish(
+function syncPendingWalkFinish(
+    walkId,
+    shouldRender = true
+) {
+
+    walkFinishSyncsInFlight ||= new Map();
+
+    const key =
+        String(walkId);
+
+    if (walkFinishSyncsInFlight.has(key)) {
+        return walkFinishSyncsInFlight.get(key);
+    }
+
+    const run =
+        syncPendingWalkFinishOnce(
+            walkId,
+            shouldRender
+        ).finally(() => {
+            walkFinishSyncsInFlight.delete(key);
+        });
+
+    walkFinishSyncsInFlight.set(key, run);
+
+    return run;
+
+}
+
+async function syncPendingWalkFinishOnce(
     walkId,
     shouldRender = true
 ) {
@@ -7372,8 +7464,11 @@ async function syncPendingWalkFinish(
 
 
             walk =
-                await convertLocalWalkToServerWalk(
-                    walk
+                await withWalkNetworkTimeout(
+                    convertLocalWalkToServerWalk(
+                        walk
+                    ),
+                    20000
                 );
 
 
@@ -7495,12 +7590,12 @@ async function syncPendingWalkFinish(
             data,
             error
         } =
-            await supabaseClient
+            await withWalkNetworkTimeout(
+                supabaseClient
                 .from(
                     "visit_walks"
                 )
                 .update({
-
                     status:
                         "completed",
 
@@ -7534,17 +7629,15 @@ async function syncPendingWalkFinish(
                     "in_progress"
                 )
                 .select("*")
-                .maybeSingle();
-
+                .maybeSingle(),
+                20000
+            );
 
         if (
             error
         ) {
-
             throw error;
-
         }
-
 
         // ========================================
         // HANDLE RETRY AFTER SERVER
@@ -7564,7 +7657,8 @@ async function syncPendingWalkFinish(
                 data: existingWalk,
                 error: existingWalkError
             } =
-                await supabaseClient
+                await withWalkNetworkTimeout(
+                    supabaseClient
                     .from(
                         "visit_walks"
                     )
@@ -7573,7 +7667,9 @@ async function syncPendingWalkFinish(
                         "id",
                         walk.id
                     )
-                    .single();
+                    .single(),
+                    20000
+                );
 
 
             if (
@@ -7799,17 +7895,16 @@ async function retryPendingWalkSync(
         !pendingFinish
     ) {
 
-
         renderAdminDayServices();
-
 
         return;
 
     }
 
-
-    await syncPendingWalkFinish(
-        walk.id
+    await waitForSync(
+        syncPendingWalkFinish(
+            walk.id
+        )
     );
 
 }
@@ -8514,6 +8609,47 @@ async function finishVisitWalk(
     visitId
 ) {
 
+    // The walk ends the moment Finish Walk is tapped, however long
+    // stopping GPS or syncing takes afterwards.
+    const finishedAt =
+        new Date();
+
+    // No uploads until the finish is saved on this phone.
+    walkFinishFlushHold++;
+
+    let walkId;
+
+    try {
+
+        walkId =
+            await saveVisitWalkFinishOnPhone(
+                visitId,
+                finishedAt
+            );
+
+    } finally {
+
+        walkFinishFlushHold =
+            Math.max(0, walkFinishFlushHold - 1);
+
+    }
+
+    renderAdminDayServices();
+
+    // Try to upload now. With no service the card shows
+    // "Saved on this phone • Waiting to sync" and it syncs later.
+    await waitForSync(
+        syncPendingWalkFinish(
+            walkId
+        )
+    );
+
+}
+
+async function saveVisitWalkFinishOnPhone(
+    visitId,
+    finishedAt = new Date()
+) {
 
     const walk =
         getVisitWalk(
@@ -8549,16 +8685,9 @@ async function finishVisitWalk(
         existingPendingFinish
     ) {
 
-
-        await syncPendingWalkFinish(
-            walk.id
-        );
-
-
-        return;
+        return walk.id;
 
     }
-
 
     if (
         walk.status !==
@@ -8665,8 +8794,7 @@ async function finishVisitWalk(
     // ========================================
 
     const endedAt =
-        new Date();
-
+        finishedAt;
 
     const startedAt =
         new Date(
@@ -8756,15 +8884,7 @@ async function finishVisitWalk(
 
     renderAdminDayServices();
 
-
-    // ========================================
-    // ATTEMPT SERVER SYNC
-    // FAILURE IS OKAY -- LOCAL COPY REMAINS
-    // ========================================
-
-    await syncPendingWalkFinish(
-        walk.id
-    );
+    return walk.id;
 
 }
 
@@ -9197,12 +9317,13 @@ async function retryPendingVisitSync(
     }
 
 
-    await syncPendingVisitFinish(
-        visitId
+    await waitForSync(
+        syncPendingVisitFinish(
+            visitId
+        )
     );
 
 }
-
 
 // ========================================
 // FINISH VISIT
@@ -9254,11 +9375,11 @@ async function finishVisit(
         existingPendingFinish
     ) {
 
-
-        await syncPendingVisitFinish(
-            visit.id
+        await waitForSync(
+            syncPendingVisitFinish(
+                visit.id
+            )
         );
-
 
         return;
 
@@ -9316,8 +9437,10 @@ async function finishVisit(
     // FAILURE IS OKAY -- LOCAL COPY REMAINS
     // ========================================
 
-    await syncPendingVisitFinish(
-        visit.id
+    await waitForSync(
+        syncPendingVisitFinish(
+            visit.id
+        )
     );
 
 }
@@ -13778,69 +13901,57 @@ function handleVisitReportPhotos(
 
 function renderPendingVisitPhotos() {
 
-
     const container =
         document.querySelector(
             "[data-pending-visit-photos]"
         );
 
+    // Free the previous previews before making new ones.
+    for (const url of window.pendingVisitPhotoUrls || []) {
+        URL.revokeObjectURL(url);
+    }
+    window.pendingVisitPhotoUrls = [];
 
     if (
         !container
     ) {
-
         return;
-
     }
-
 
     if (
         pendingVisitReportPhotos.length ===
         0
     ) {
-
-
         container.innerHTML =
             "";
-
-
         return;
-
     }
 
-
-    container.innerHTML =
-        pendingVisitReportPhotos
-            .map(
-                (
-                    file,
-                    index
-                ) => `
-
-                    <div class="admin-pending-media-item">
-
-                        <span>
-                            ${escapeHtml(
-                                file.name
-                            )}
-                        </span>
-
-                        <button
-                            type="button"
-                            class="admin-pending-media-remove"
-                            data-remove-pending-visit-photo="${index}"
-                            aria-label="Remove pending visit photo"
-                            title="Remove photo"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-                `
-            )
-            .join("");
-
+    // Thumbnails of the photos waiting to upload, like sit updates.
+    container.innerHTML = `
+        <div class="admin-visit-existing-media admin-visit-pending-thumbs">
+            ${pendingVisitReportPhotos
+                .map((file, index) => {
+                    const url = URL.createObjectURL(file);
+                    window.pendingVisitPhotoUrls.push(url);
+                    return `
+                        <div class="admin-visit-media-preview admin-visit-saved-media admin-visit-pending-photo">
+                            <img src="${escapeHtml(url)}" alt="${escapeHtml(file.name || "Selected photo")}">
+                            <button
+                                type="button"
+                                class="admin-visit-media-delete"
+                                data-remove-pending-visit-photo="${index}"
+                                aria-label="Remove photo"
+                                title="Remove photo"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    `;
+                })
+                .join("")}
+        </div>
+    `;
 
     container
         .querySelectorAll(
@@ -13848,42 +13959,32 @@ function renderPendingVisitPhotos() {
         )
         .forEach(
             button => {
-
-
                 button.addEventListener(
                     "click",
                     () => {
-
-
                         const index =
                             Number(
                                 button.dataset
                                     .removePendingVisitPhoto
                             );
 
-
                         if (
                             Number.isNaN(
                                 index
-                            )
+                            ) ||
+                            button.closest("form")?.dataset.savingReport === "true"
                         ) {
-
                             return;
-
                         }
-
 
                         pendingVisitReportPhotos.splice(
                             index,
                             1
                         );
 
-
                         renderPendingVisitPhotos();
-
                     }
                 );
-
             }
         );
 
@@ -13943,13 +14044,24 @@ async function saveAdminVisitReport(
     saveButton.disabled =
         true;
 
-
     saveButton.textContent =
         "Saving...";
 
-
     message.textContent =
         "";
+
+    form.dataset.savingReport =
+        "true";
+
+    form
+        .querySelectorAll(
+            "[data-remove-pending-visit-photo]"
+        )
+        .forEach(
+            button => {
+                button.disabled = true;
+            }
+        );
 
 
     try {
@@ -14197,28 +14309,37 @@ async function saveAdminVisitReport(
         // UPLOAD NORMAL VISIT PHOTOS
         // ========================================
 
-        for (
-            let index = 0;
-            index <
+        // Progress shows on the button. Each photo leaves the list once it's
+        // uploaded, so trying again after an error never uploads it twice.
+        const photoCount =
             pendingVisitReportPhotos.length;
-            index++
+
+        let uploadedCount =
+            0;
+
+        while (
+            pendingVisitReportPhotos.length >
+            0
         ) {
 
-
-            const file =
-                pendingVisitReportPhotos[
-                    index
-                ];
-
+            saveButton.textContent =
+                `Uploading photo ${uploadedCount + 1} of ${Math.max(photoCount, uploadedCount + pendingVisitReportPhotos.length)}…`;
 
             await uploadVisitReportMedia(
                 visitId,
-                file,
+                pendingVisitReportPhotos[0],
                 "visit",
-                index
+                uploadedCount
             );
 
+            pendingVisitReportPhotos.shift();
+
+            uploadedCount++;
+
         }
+
+        saveButton.textContent =
+            "Saving...";
 
         // ========================================
         // PUBLISH VISIT REPORT
@@ -14356,13 +14477,16 @@ async function saveAdminVisitReport(
         message.textContent =
             "We couldn't save this visit report.";
 
-
         saveButton.disabled =
             false;
 
-
         saveButton.textContent =
             "Save Visit Report";
+
+        delete form.dataset.savingReport;
+
+        // Show only the photos that still need uploading.
+        renderPendingVisitPhotos();
 
     }
 
