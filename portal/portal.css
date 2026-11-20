@@ -24635,6 +24635,20 @@ body.desktop-screen-services
         );
 }
 
+/* Thanksgiving and Christmas intros: match each video's edges. */
+.mobile-portal-intro.thanksgiving-intro {
+    background:
+        linear-gradient(
+            180deg,
+            #d46429 0%,
+            #d86e2e 100%
+        );
+}
+
+.mobile-portal-intro.christmas-intro {
+    background: #eca443;
+}
+
 /* ========================================
    CLIENT SERVICES — MATCH ADMIN CARDS AND MODALS
    ======================================== */

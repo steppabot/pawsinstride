@@ -431,16 +431,31 @@
     // ========================================
     // SELECT SEASONAL PORTAL INTRO
     // ========================================
+    // Same months as the holiday decorations on the
+    // website, in Texas time. To add a holiday, add a
+    // month here and put its video in portal/assets.
     
     (function () {
     
-        const today =
-            new Date();
+        const SEASONAL_INTROS = {
+            10: { name: "halloween", src: "/portal/assets/paws-in-stride-intro-halloween.mp4" },
+            11: { name: "thanksgiving", src: "/portal/assets/paws-in-stride-intro-thanksgiving.mp4" },
+            12: { name: "christmas", src: "/portal/assets/paws-in-stride-intro-xmas.mp4" }
+        };
     
-        const isHalloweenSeason =
-            today.getMonth() === 9 &&
-            today.getDate() >= 1 &&
-            today.getDate() <= 31;
+        let month = new Date().getMonth() + 1;
+    
+        try {
+            month = Number(
+                new Intl.DateTimeFormat("en-US", {
+                    timeZone: "America/Chicago",
+                    month: "numeric"
+                }).format(new Date())
+            );
+        } catch (e) {}
+    
+        const season =
+            SEASONAL_INTROS[month] || null;
     
         const intro =
             document.getElementById(
@@ -469,18 +484,18 @@
     
     
         source.dataset.src =
-            isHalloweenSeason
-                ? "/portal/assets/paws-in-stride-intro-halloween.mp4"
+            season
+                ? season.src
                 : "/portal/assets/paws-in-stride-intro.mp4";
     
     
         if (
-            isHalloweenSeason &&
+            season &&
             intro
         ) {
     
             intro.classList.add(
-                "halloween-intro"
+                `${season.name}-intro`
             );
     
         }
