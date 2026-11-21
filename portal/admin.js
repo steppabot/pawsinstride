@@ -16720,10 +16720,15 @@ async function updateAdminPushNotificationUI() {
         const nativeEnabled =
             nativePermission.receive === "granted";
 
+        const phoneSettings =
+            window.Capacitor.getPlatform?.() === "ios"
+                ? "iPhone Settings"
+                : "Android Settings";
+
         const nativeText =
             nativeEnabled
                 ? "Notifications are enabled in this app."
-                : "Notifications are turned off for this app in Android settings.";
+                : `Notifications are turned off for this app in ${phoneSettings}.`;
 
         if (adminPushNotificationStatus) {
             adminPushNotificationStatus.textContent = nativeText;
@@ -16742,7 +16747,7 @@ async function updateAdminPushNotificationUI() {
             adminPushModalEnableButton.textContent =
                 nativeEnabled
                     ? "Notifications Enabled"
-                    : "Turn On in Android Settings";
+                    : `Turn On in ${phoneSettings}`;
         }
 
         return;

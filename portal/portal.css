@@ -24951,3 +24951,39 @@ body.csd-open { overflow: hidden !important; }
     }
 
 }
+
+/* ========================================
+   FACE ID SIGN-IN (iPhone app)
+   ======================================== */
+
+.pis-faceid-login { display: flex; flex-direction: column; gap: 10px; margin: 0 0 18px; }
+.pis-faceid-button {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; min-height: 52px; padding: 12px 18px; border: 0; border-radius: 12px;
+    background: linear-gradient(135deg, #2f7fd6, #1f63b8); color: #ffffff;
+    box-shadow: 0 8px 18px rgba(31, 99, 184, 0.22);
+    font: inherit; font-size: 16px; font-weight: 800; cursor: pointer;
+}
+.pis-faceid-button:disabled { opacity: .7; }
+.pis-faceid-for { margin: 0; text-align: center; font-size: 13px; color: #5c7286; overflow-wrap: anywhere; }
+.pis-faceid-off { all: unset; color: #1f7bc2; font-weight: 700; cursor: pointer; }
+.pis-faceid-or { display: flex; align-items: center; gap: 10px; margin-top: 4px; color: #8a9aa8; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.pis-faceid-or::before, .pis-faceid-or::after { content: ""; flex: 1; height: 1px; background: #dbe5ee; }
+
+.pis-faceid-modal .pis-faceid-yes { background: #1f7bc2 !important; border-color: #1f7bc2 !important; color: #ffffff !important; }
+.pis-faceid-password { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 14px; color: #183447; font-size: 13px; font-weight: 700; }
+.pis-faceid-password input {
+    width: 100%; min-height: 46px; padding: 0 72px 0 12px; border: 1px solid #cfdfec; border-radius: 10px;
+    background: #ffffff; color: #183447; font: inherit; font-size: 16px; font-weight: 500; box-sizing: border-box;
+}
+.pis-faceid-password small { min-height: 1em; color: #b9472d; font-weight: 700; }
+
+.pis-faceid-setting {
+    display: flex; align-items: center; gap: 12px; margin: 0 0 16px; padding: 12px 14px;
+    border: 1px solid #dbe7f3; border-radius: 14px; background: #f7fbff;
+}
+.pis-faceid-setting-icon { display: inline-flex; color: #1f63b8; }
+.pis-faceid-setting-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pis-faceid-setting-text strong { color: #183447; font-size: 15px; }
+.pis-faceid-setting-text small { color: #5c7286; font-size: 13px; font-weight: 600; }
+.pis-faceid-setting .pis-faceid-setting-button { flex: none; width: auto !important; min-height: 38px; margin: 0 !important; padding: 0 14px !important; }

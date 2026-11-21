@@ -720,6 +720,7 @@
 
   modal.hidden = false;
   document.documentElement.classList.add('vfm-lock');
+  if (!alreadyOpen) { try { window.PisMotion?.visitOpened?.(modal); } catch { /* ignore */ } }   // slide in (native-motion.js)
 
   if (!historyPushed) {
    try { history.pushState({ vfm: focusedVisitId }, ''); historyPushed = true; } catch { /* ignore */ }
@@ -741,6 +742,7 @@
   reportModeActive = null;
   body.classList.remove('vfm-report-mode');
   clearInterval(timerHandle);
+  try { window.PisMotion?.visitClosing?.(modal); } catch { /* ignore */ }   // slide out (native-motion.js)
   modal.hidden = true;
   body.replaceChildren();
   document.documentElement.classList.remove('vfm-lock');
@@ -782,6 +784,9 @@
 
   closeFocus({ scrollToCard: true, fromHistory });
  }
+
+ // swipe back from the left edge closes the visit the same way the X does (native-motion.js)
+ window.pisCloseVisit = () => requestClose();
 
  // ---------- 6. Hook into the portal (after admin.js has loaded) ----------
  function wrapAsync(name, before, after) {

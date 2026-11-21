@@ -1296,6 +1296,10 @@ if (loginForm) {
                 message.textContent =
                     "Incorrect email or password.";
 
+                // a Face ID sign-in with an old saved password clears it (native-faceid.js)
+                window.PisFaceId?.loginFailed?.();
+                window.PisHaptics?.error();
+
                 return;
 
             }
@@ -1353,6 +1357,13 @@ if (loginForm) {
                 )
                     .trim()
                     .toLowerCase();
+
+            // iPhone app: offer Face ID for next time (native-faceid.js)
+            try {
+                await window.PisFaceId?.afterPasswordLogin?.({ email, password });
+            } catch (faceIdError) {
+                console.warn("Face ID offer skipped:", faceIdError);
+            }
 
 
             // ========================================
@@ -5425,6 +5436,12 @@ if (
                     throw error;
 
                 }
+
+                // keep a saved Face ID sign-in working with the new password (native-faceid.js)
+                void window.PisFaceId?.passwordChanged?.(
+                    currentUser?.email || currentProfile?.email,
+                    newPassword
+                );
 
 
                 // ========================================
