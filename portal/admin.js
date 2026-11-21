@@ -4367,6 +4367,7 @@ function confirmAdminBoardingAction(action, visit, stay) {
     message.textContent = choice[1];
     accept.textContent = choice[2];
     dialog.dataset.caution = String(choice[3]);
+    dialog.dataset.kind = "boarding";
     dialog.returnValue = "";
 
     return new Promise((resolve, reject) => {
@@ -4791,6 +4792,19 @@ const adminVisitConfirmationOptions = {
 // SHOW VISIT ACTION CONFIRMATION
 // ========================================
 
+// The confirmation popup takes the color of the visit it's about:
+// purple Meet & Greet, blue walk, teal drop-in, pink pet sitting, orange boarding.
+function adminConfirmKind(visit) {
+
+    try {
+        const kind = window.pisVisitKind?.(visit);
+        return kind && kind !== "other" ? kind : "";
+    } catch {
+        return "";
+    }
+
+}
+
 function confirmAdminVisitAction(action, visitId) {
 
     const options = adminVisitConfirmationOptions[action];
@@ -4857,6 +4871,7 @@ function confirmAdminVisitAction(action, visitId) {
     confirmButton.textContent = options.confirmText;
 
     dialog.dataset.caution = String(options.caution);
+    dialog.dataset.kind = adminConfirmKind(visit);
     dialog.returnValue = "";
 
     return new Promise((resolve, reject) => {
@@ -17349,6 +17364,7 @@ function confirmAdminChoice({
     messageEl.textContent = message;
     confirmButton.textContent = confirmText;
     dialog.dataset.caution = String(Boolean(caution));
+    delete dialog.dataset.kind;
     dialog.returnValue = "";
 
     return new Promise(resolve => {

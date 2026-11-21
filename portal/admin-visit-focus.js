@@ -83,6 +83,19 @@
   } catch { return ''; }
  }
 
+ // the same address split in two so it doesn't run on as one long sentence:
+ // "5855 Windhaven Parkway" / "Apt 2094, The Colony, TX 75056"
+ function addressLinesOf(visit) {
+  try {
+   const h = (typeof allHouseholds !== 'undefined' ? allHouseholds : []).find(item => String(item.client_id) === String(visit.client_id));
+   if (!h) return [];
+   const cityState = [h.city, h.state].filter(Boolean).join(', ');
+   const cityStateZip = `${cityState}${h.zip_code ? ` ${h.zip_code}` : ''}`.trim();
+   const second = [h.address_line_2, cityStateZip].filter(Boolean).join(', ');
+   return h.street_address ? [h.street_address, second].filter(Boolean) : (second ? [second] : []);
+  } catch { return []; }
+ }
+
  function petNamesOf(visit) {
   try {
    const pets = typeof getAdminPetsForVisit === 'function' ? getAdminPetsForVisit(visit) : [];
@@ -105,6 +118,9 @@
   if (/walk/.test(name)) return 'walk';
   return 'other';
  }
+
+ // the color type of a visit, so popups opened from it (like "Finish this visit?") match it
+ window.pisVisitKind = visit => (isBoarding(visit) ? 'boarding' : serviceKind(visit));
 
  function startHour(visit) {
   const text = String(visit.time_window || visit.start_time || '').toUpperCase();
@@ -287,7 +303,10 @@
    }
    .pis-quick span { color: #9bb0c6; }
    .pis-quick svg { width: 22px; height: 22px; }
-   .pis-sum-foot { font-size: 14px; color: #46617d; }
+   .pis-sum-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; font-size: 14px; color: #46617d; }
+   .pis-sum-address { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.35; }
+   .pis-sum-price { flex: none; font-size: 15px; font-weight: 800; color: #183447; line-height: 1.35; white-space: nowrap; }
+   .pis-sum-price small { font-size: 12px; font-weight: 700; color: #5c7286; }
    .pis-footer {
     position: sticky; bottom: 0; z-index: 2; margin: auto -14px 0;
     padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 18px);
@@ -515,6 +534,10 @@
   const pets = petNamesOf(visit);
   const p = progressOf(visit);
   const price = Number(visit.price || 0);
+  const addressLines = addressLinesOf(visit);
+  // owners see what the client paid; a boarding pickup day has no price of its own
+  const pickupDay = boarding && (Boolean(visit.boarding_pickup_display_only) || /pickup/i.test(card?.querySelector('h5')?.textContent || ''));
+  const showPrice = !window.pisTeam?.isEmployee() && !pickupDay && (!boarding || price > 0);
 
   const quick = (enabled, href, icon, label, external) => enabled
    ? `<a href="${esc(href)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${icon}${label}</a>`
@@ -541,7 +564,10 @@
     ${quick(Boolean(phoneDigits), `sms:${phoneDigits}`, ICONS.text, 'Text')}
     ${quick(Boolean(address), `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`, ICONS.nav, 'Navigate', true)}
    </div>
-   <span class="pis-sum-foot">${esc(boarding || window.pisTeam?.isEmployee() ? (address || 'Address not added') : [address || 'Address not added', `$${price.toFixed(2)}`].join(' \u00b7 '))}</span>`;
+   <div class="pis-sum-foot">
+    <span class="pis-sum-address">${addressLines.length ? addressLines.map(line => `<span>${esc(line)}</span>`).join('') : '<span>Address not added</span>'}</span>
+    ${showPrice ? `<strong class="pis-sum-price">$${price.toFixed(2)}${boarding ? '<small> / night</small>' : ''}</strong>` : ''}
+   </div>`;
   // Main admin: "Assigned to" picker (admin-team.js).
   const assign = window.pisTeam?.buildAssignControl?.(visit);
   if (assign) section.appendChild(assign);

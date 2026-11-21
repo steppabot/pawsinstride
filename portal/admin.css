@@ -12045,3 +12045,43 @@ dialog.admin-visit-action-confirm::backdrop {
     opacity: .5 !important;
     cursor: default;
 }
+
+/* ========================================
+   CONFIRMATION POPUP MATCHES THE VISIT
+   ("Finish this visit?" on a Meet & Greet is purple, on boarding orange, ...)
+   Stop and reopen actions keep their red button.
+   ======================================== */
+
+.admin-visit-action-confirm[data-kind="walk"] .admin-visit-confirm-heading { background: linear-gradient(120deg, #2f7fd6, #1f63b8); }
+.admin-visit-action-confirm[data-kind="walk"] #admin-visit-confirm-context { background: #e7f0fb; border-color: #cfe0f5; color: #1f63b8; }
+.admin-visit-action-confirm[data-kind="walk"] #admin-visit-confirm-cancel { color: #1f63b8; border-color: #cfe0f5; }
+.admin-visit-action-confirm[data-kind="walk"]:not([data-caution="true"]) #admin-visit-confirm-accept { background: #1f63b8; border-color: #1f63b8; }
+.admin-visit-action-confirm[data-kind="walk"] .admin-visit-confirm-actions button:focus-visible { outline-color: #2f7fd6; }
+
+.admin-visit-action-confirm[data-kind="dropin"] .admin-visit-confirm-heading { background: linear-gradient(120deg, #22c6e0, #0aa5c2); }
+.admin-visit-action-confirm[data-kind="dropin"] #admin-visit-confirm-context { background: #dcf4f9; border-color: #bfe8f1; color: #08879f; }
+.admin-visit-action-confirm[data-kind="dropin"] #admin-visit-confirm-cancel { color: #08879f; border-color: #bfe8f1; }
+.admin-visit-action-confirm[data-kind="dropin"]:not([data-caution="true"]) #admin-visit-confirm-accept { background: #0aa5c2; border-color: #0aa5c2; }
+.admin-visit-action-confirm[data-kind="dropin"] .admin-visit-confirm-actions button:focus-visible { outline-color: #22c6e0; }
+
+.admin-visit-action-confirm[data-kind="sit"] .admin-visit-confirm-heading { background: linear-gradient(120deg, #d6467f, #b8336a); }
+.admin-visit-action-confirm[data-kind="sit"] #admin-visit-confirm-context { background: #fbe7f0; border-color: #f3cadb; color: #b8336a; }
+.admin-visit-action-confirm[data-kind="sit"] #admin-visit-confirm-cancel { color: #b8336a; border-color: #f3cadb; }
+.admin-visit-action-confirm[data-kind="sit"]:not([data-caution="true"]) #admin-visit-confirm-accept { background: #b8336a; border-color: #b8336a; }
+.admin-visit-action-confirm[data-kind="sit"] .admin-visit-confirm-actions button:focus-visible { outline-color: #d6467f; }
+
+.admin-visit-action-confirm[data-kind="meet"] .admin-visit-confirm-heading { background: linear-gradient(120deg, #8160d6, #6a45c2); }
+.admin-visit-action-confirm[data-kind="meet"] #admin-visit-confirm-context { background: #eee9fb; border-color: #dcd2f5; color: #6a45c2; }
+.admin-visit-action-confirm[data-kind="meet"] #admin-visit-confirm-cancel { color: #6a45c2; border-color: #dcd2f5; }
+.admin-visit-action-confirm[data-kind="meet"]:not([data-caution="true"]) #admin-visit-confirm-accept { background: #6a45c2; border-color: #6a45c2; }
+.admin-visit-action-confirm[data-kind="meet"] .admin-visit-confirm-actions button:focus-visible { outline-color: #8160d6; }
+
+.admin-visit-action-confirm[data-kind="boarding"] .admin-visit-confirm-heading { background: linear-gradient(120deg, #e07a1f, #c0610c); }
+.admin-visit-action-confirm[data-kind="boarding"] #admin-visit-confirm-context { background: #fdeedf; border-color: #f6d6b5; color: #c0610c; }
+.admin-visit-action-confirm[data-kind="boarding"] #admin-visit-confirm-cancel { color: #c0610c; border-color: #f6d6b5; }
+.admin-visit-action-confirm[data-kind="boarding"]:not([data-caution="true"]) #admin-visit-confirm-accept { background: #c0610c; border-color: #c0610c; }
+.admin-visit-action-confirm[data-kind="boarding"] .admin-visit-confirm-actions button:focus-visible { outline-color: #e07a1f; }
+
+/* Send Boarding Update: orange like the boarding visit (pet sitting updates are already pink) */
+.boarding-update-dialog:not(.pis-sit-dialog) .boarding-editor-header { background: linear-gradient(135deg, #e07a1f, #c0610c); }
+.boarding-update-dialog:not(.pis-sit-dialog) [data-boarding-send] { background: linear-gradient(135deg, #e07a1f, #c0610c) !important; border-color: #c0610c !important; }
