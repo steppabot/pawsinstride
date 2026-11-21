@@ -2069,7 +2069,24 @@ function buildGround(){
 /* ================= render ================= */
 let W=0, H=0, dpr=1;
 let DPR_CAP = 2;
-function resize(){ dpr = Math.min(window.devicePixelRatio||1, DPR_CAP); W = cv.clientWidth; H = cv.clientHeight; cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); }
+// Big screens (desktop full screen) can have 2-5 million pixels to fill every frame.
+// The game starts sharp, and if frames run slow it draws at a lower resolution that the
+// browser stretches to fit, a step at a time, until it's smooth. Phones are left alone.
+const PX_MAX = 2.4e6, PX_MIN = 1.2e6;
+let pxBudget = PX_MAX;
+function resize(){ dpr = Math.min(window.devicePixelRatio||1, DPR_CAP); W = cv.clientWidth; H = cv.clientHeight;
+  if (W > 700 && W*H*dpr*dpr > pxBudget) dpr = Math.max(0.5, Math.sqrt(pxBudget/(W*H)));
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); }
+const perfTune = { n:0, sum:0, warm:0 };
+function tunePerf(ms){
+  if (state !== 'play' || document.hidden || W <= 700 || G.zm){ perfTune.n = perfTune.sum = 0; perfTune.warm = 0; return; }
+  if (perfTune.warm < 90){ perfTune.warm++; return; }          // let the first ~1.5 s settle
+  perfTune.n++; perfTune.sum += Math.min(ms, 100);
+  if (perfTune.n < 45) return;
+  const avg = perfTune.sum / perfTune.n; perfTune.n = perfTune.sum = 0;
+  const px = W*H*dpr*dpr;
+  if (avg > 21 && px > PX_MIN*1.05){ pxBudget = Math.max(PX_MIN, px*0.8); needResize = true; perfTune.warm = 60; }
+}
 let needResize = true;
 if (window.addEventListener) window.addEventListener('resize', () => { needResize = true; });
 if (window.ResizeObserver) new ResizeObserver(() => { needResize = true; }).observe(cv);
@@ -3808,10 +3825,15 @@ function drawCoin(c){
     ctx.strokeStyle = `rgba(255,255,255,${(0.9*k).toFixed(3)})`; ctx.lineWidth = Math.max(0.6, 0.5*s); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(px - l, py); ctx.lineTo(px + l, py); ctx.moveTo(px, py - l); ctx.lineTo(px, py + l); ctx.stroke(); }
 }
 function drawPoop(x,y,old){
-  ctx.globalAlpha = old ? 0.5 : 1;
-  ctx.fillStyle='#6e4426'; ctx.strokeStyle='#3b2312'; ctx.lineWidth=1.2;
-  [[0,-2,6,3],[0,-5,4.5,2.6],[1,-7.5,3,2.2]].forEach(([ox,oy,rx,ry])=>{ ctx.beginPath(); ctx.ellipse(x+ox*s,y+oy*s,rx*s,ry*s,0,0,Math.PI*2); ctx.fill(); ctx.stroke(); });
-  ctx.globalAlpha = 1;
+  // The same size on every screen (it used to grow with the zoom, so on a big monitor it was dog-sized)
+  const z = Math.min(s, 2);
+  ctx.save(); ctx.globalAlpha = old ? 0.5 : 1;
+  ctx.fillStyle='rgba(31,45,36,.22)'; ctx.beginPath(); ctx.ellipse(x+0.6*z, y+0.4*z, 6.6*z, 2*z, 0, 0, Math.PI*2); ctx.fill();   // shadow on the ground
+  const g = ctx.createLinearGradient(0, y-9.5*z, 0, y+1*z); g.addColorStop(0,'#86562f'); g.addColorStop(1,'#5a361c');
+  ctx.fillStyle=g; ctx.strokeStyle='#3b2312'; ctx.lineWidth=Math.max(0.7, 0.55*z);
+  [[0,-2,6,3],[0,-5,4.5,2.6],[1,-7.5,3,2.2]].forEach(([ox,oy,rx,ry])=>{ ctx.beginPath(); ctx.ellipse(x+ox*z,y+oy*z,rx*z,ry*z,0,0,Math.PI*2); ctx.fill(); ctx.stroke(); });
+  ctx.fillStyle='rgba(255,236,214,.35)'; ctx.beginPath(); ctx.ellipse(x-1.4*z, y-5.7*z, 1.5*z, 0.7*z, -0.25, 0, Math.PI*2); ctx.fill();   // a little shine
+  ctx.restore();
 }
 function drawSquirrel(x,y,dir,q){
   const z=s*0.55, st=q?q.st:0, t=G.t + (q?q.hx*0.01:0);
@@ -5340,6 +5362,7 @@ $('againBtn').addEventListener('click', start);
 let last = performance.now();
 function frame(t){
   requestAnimationFrame(frame);
+  tunePerf(t - last);
   const dt = Math.min(0.05, Math.max(0, (t-last)/1000)); last = t;
   if (needResize){ needResize = false; resize(); }
   if (state==='play' && !document.hidden) update(dt);
