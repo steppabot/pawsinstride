@@ -24870,3 +24870,84 @@ body.csd-open { overflow: hidden !important; }
    END CLIENT SERVICES — MATCH ADMIN CARDS AND MODALS
    ======================================== */
 
+/* ========================================
+   SHOW / HIDE ON THE CHANGE PASSWORD FIELDS
+   (same look as the login page)
+   ======================================== */
+
+.pis-password-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.pis-password-wrap input {
+    width: 100%;
+    padding-right: 72px !important;
+}
+
+.pis-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 6px 9px !important;
+    transform: translateY(-50%);
+    background: transparent !important;
+    color: #667784 !important;
+    border: 0 !important;
+    border-radius: 7px;
+    box-shadow: none !important;
+    font-family: inherit;
+    font-size: 12px !important;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.pis-password-toggle:hover,
+.pis-password-toggle:focus {
+    background: rgba(40, 144, 223, 0.08) !important;
+    color: #1f7bc2 !important;
+}
+
+/* ========================================
+   A PICKED DAY TURNS ORANGE RIGHT AWAY
+   ----------------------------------------
+   On iPhone the "finger is over it" (hover) color sticks after a tap,
+   and it used to win over the orange, so the day you just picked
+   looked light blue until you tapped somewhere else.
+   Picked days now always stay orange, and phones skip the hover color.
+   ======================================== */
+
+.client-portal-page .booking-calendar .calendar-day.calendar-day-selected:not(:disabled),
+.client-portal-page .booking-calendar .calendar-day.calendar-day-selected:hover:not(:disabled) {
+    background: linear-gradient(145deg, #f5ab40 0%, #eb872c 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(201, 111, 25, 0.23);
+}
+
+.client-portal-page .booking-calendar .calendar-day.calendar-day-selected .calendar-holiday-star {
+    color: #ffffff;
+}
+
+@media (hover: none) {
+
+    .client-portal-page .booking-calendar .calendar-day:hover:not(:disabled):not(.calendar-day-selected) {
+        background: #ffffff;
+        color: #263d4c;
+        border-color: #e3ebef;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .client-portal-page .booking-calendar .calendar-day.calendar-day-today:hover:not(:disabled):not(.calendar-day-selected) {
+        color: #1f7bc2;
+        border-color: #1f9aeb;
+    }
+
+}

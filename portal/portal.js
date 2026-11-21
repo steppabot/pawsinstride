@@ -727,6 +727,80 @@ function getServicePrice(
 }
 
 
+// ========================================
+// SHORT LABELS FOR THE DROPDOWNS
+// ========================================
+// The iPhone's pop-up menu is narrow, so long labels like
+// "6:00 PM – 8:00 PM (+$5.00)" wrapped onto two lines while
+// shorter ones didn't. Short labels keep every line on one row.
+// The saved values don't change, only what the menu shows.
+// ========================================
+
+function formatShortPrice(value) {
+
+    const amount =
+        Number(value || 0);
+
+    return Number.isInteger(amount)
+        ? String(amount)
+        : amount.toFixed(2);
+
+}
+
+function shortTimeWindowLabel(label) {
+
+    const match =
+        String(label || "").match(
+            /(\d{1,2}):(\d{2})\s*(AM|PM)\s*[–-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i
+        );
+
+    if (!match) {
+        return label;
+    }
+
+    const start =
+        match[1] + (match[2] === "00" ? "" : `:${match[2]}`);
+
+    const end =
+        match[4] + (match[5] === "00" ? "" : `:${match[5]}`);
+
+    const startHalf =
+        match[3].toUpperCase();
+
+    const endHalf =
+        match[6].toUpperCase();
+
+        // A morning window that ends at noon reads "10 – 12 PM".
+    const endsAtNoon =
+        startHalf === "AM" &&
+        endHalf === "PM" &&
+        Number(match[4]) === 12;
+
+    return startHalf === endHalf || endsAtNoon
+        ? `${start} – ${end} ${endHalf}`
+        : `${start} ${startHalf} – ${end} ${endHalf}`;
+
+}
+
+function getTimeWindowStartMinutes(timeWindow) {
+
+    const match =
+        String(timeWindow || "").match(
+            /(\d{1,2}):(\d{2})\s*(AM|PM)/i
+        );
+
+    if (!match) {
+        return Number.MAX_SAFE_INTEGER;
+    }
+
+    const hour =
+        Number(match[1]) % 12 +
+        (match[3].toUpperCase() === "PM" ? 12 : 0);
+
+    return hour * 60 + Number(match[2]);
+
+}
+
 function formatServicePrice(
     value
 ) {
@@ -9826,8 +9900,8 @@ function populateServiceOptions(
                 option.value;
 
 
-            element.textContent =
-                `${option.value} — $${formatServicePrice(price)}`;
+                        element.textContent =
+                `${String(option.value).replace(/\bMinutes?\b/, "Min")} — $${formatShortPrice(price)}`;
 
 
             element.dataset.price =
@@ -10084,10 +10158,10 @@ function getPreferredTimeWindowLabel(
 
         surcharge,
 
-        label:
+                label:
             surcharge > 0
-                ? `${window.label} (+$${formatServicePrice(surcharge)})`
-                : window.label
+                ? `${shortTimeWindowLabel(window.label)} (+$${formatShortPrice(surcharge)})`
+                : shortTimeWindowLabel(window.label)
 
     };
 
@@ -10972,8 +11046,24 @@ function sortSelectedBookingVisits() {
             }
 
 
-            return firstVisit.timeWindow.localeCompare(
-                secondVisit.timeWindow
+                        const firstStart =
+                getTimeWindowStartMinutes(
+                    firstVisit.timeWindow
+                );
+
+            const secondStart =
+                getTimeWindowStartMinutes(
+                    secondVisit.timeWindow
+                );
+
+            if (
+                firstStart !== secondStart
+            ) {
+                return firstStart - secondStart;
+            }
+
+            return String(firstVisit.timeWindow || "").localeCompare(
+                String(secondVisit.timeWindow || "")
             );
 
         }
@@ -33583,5 +33673,56 @@ if (!document.getElementById("dashboard-content")) {
     document.addEventListener("keydown", event => {
         if (event.key === "Escape" && !modal.hidden) closeModal();
     });
+
+})();
+
+// ========================================
+// SHOW / HIDE ON THE CHANGE PASSWORD FIELDS
+// ========================================
+// Same as the login page, so you can check the new password
+// you're typing. Both go back to hidden when you tap Update Password.
+// ========================================
+
+(() => {
+
+    document.addEventListener("click", event => {
+
+        const button =
+            event.target.closest?.("[data-password-toggle]");
+
+        if (!button) {
+            return;
+        }
+
+        const input =
+            document.getElementById(button.dataset.passwordToggle);
+
+        if (!input) {
+            return;
+        }
+
+        const showing =
+            input.type === "password";
+
+        input.type = showing ? "text" : "password";
+        button.textContent = showing ? "Hide" : "Show";
+        button.setAttribute("aria-label", showing ? "Hide password" : "Show password");
+
+    });
+
+    document
+        .getElementById("change-password-form")
+        ?.addEventListener(
+            "submit",
+            () => {
+                document.querySelectorAll("[data-password-toggle]").forEach(button => {
+                    const input = document.getElementById(button.dataset.passwordToggle);
+                    if (input) input.type = "password";
+                    button.textContent = "Show";
+                    button.setAttribute("aria-label", "Show password");
+                });
+            },
+            true
+        );
 
 })();
