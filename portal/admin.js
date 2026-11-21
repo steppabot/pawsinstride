@@ -4360,10 +4360,12 @@ function confirmAdminBoardingAction(action, visit, stay) {
 
     const client = allProfiles.find(item => item.id === visit.client_id);
     title.textContent = choice[0];
-    context.textContent = [client?.full_name || client?.email || "Client",
-        getAdminPetsForVisit(visit).map(pet => pet.name).join(" & "),
-        `${formatAdminBoardingDate(stay.dropoff_date)} → ${formatAdminBoardingDate(stay.pickup_date)}`
-    ].filter(Boolean).join(" · ");
+    setAdminConfirmContext(context, [
+        { kind: "main", text: "Dog Boarding" },
+        { text: `${formatAdminConfirmDate(stay.dropoff_date)} → ${formatAdminConfirmDate(stay.pickup_date)}` },
+        { kind: "who", text: [client?.full_name || client?.email || "Client",
+            formatAdminPetList(getAdminPetsForVisit(visit).map(pet => pet.name))].filter(Boolean).join(" · ") }
+    ]);
     message.textContent = choice[1];
     accept.textContent = choice[2];
     dialog.dataset.caution = String(choice[3]);
@@ -4805,6 +4807,74 @@ function adminConfirmKind(visit) {
 
 }
 
+// The details box in a confirmation popup is short lines instead of one long sentence:
+//   Meet & Greet                      #80
+//   11-20-2026 · 3:30 PM
+//   Avery Dalfrey · Roxie & Ruby
+function setAdminConfirmContext(element, lines) {
+
+    element.replaceChildren();
+
+    for (const line of lines) {
+
+        if (!line || !line.text) {
+            continue;
+        }
+
+        const row = document.createElement("span");
+        row.className = `admin-confirm-line admin-confirm-line-${line.kind || "sub"}`;
+
+        const text = document.createElement("span");
+        text.textContent = line.text;
+        row.appendChild(text);
+
+        if (line.tag) {
+            const tag = document.createElement("small");
+            tag.textContent = line.tag;
+            row.appendChild(tag);
+        }
+
+        element.appendChild(row);
+
+    }
+
+    element.style.display = element.childElementCount ? "" : "none";
+
+}
+
+// "Dog Walking - 30 Minutes" reads "Dog Walking · 30 min"
+function formatAdminConfirmService(visit) {
+
+    return String(visit.service_name || visit.service_type || "Visit")
+        .replace(/\s+-\s+/g, " · ")
+        .replace(/(\d+)\s*Minutes?/i, "$1 min")
+        .replace(/Pet Sitting\s*·\s*[^·]*?Sit\s*·\s*(\d+)\s*Hours?/i, "Pet Sitting · $1 hrs")
+        .replace(/(\d+)\s*Hours?/i, "$1 hrs");
+
+}
+
+// dates read month-day-year: 2026-11-20 shows as 11-20-2026
+function formatAdminConfirmDate(date) {
+
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(date || ""));
+
+    return match
+        ? `${match[2]}-${match[3]}-${match[1]}`
+        : String(date || "");
+
+}
+
+// "Roxie & Ruby", "Roxie, Ruby & Max"
+function formatAdminPetList(names) {
+
+    const list = names.filter(Boolean);
+
+    return list.length > 1
+        ? `${list.slice(0, -1).join(", ")} & ${list[list.length - 1]}`
+        : list[0] || "";
+
+}
+
 function confirmAdminVisitAction(action, visitId) {
 
     const options = adminVisitConfirmationOptions[action];
@@ -4860,12 +4930,29 @@ function confirmAdminVisitAction(action, visitId) {
 
     title.textContent = options.title;
 
-    context.textContent = [
-        visit.service_name,
-        visit.visit_date,
-        visit.time_window,
-        `Visit #${visitId}`
-    ].filter(Boolean).join(" · ");
+    const confirmClient =
+        allProfiles.find(item => item.id === visit.client_id);
+
+    setAdminConfirmContext(context, [
+        {
+            kind: "main",
+            text: formatAdminConfirmService(visit),
+            tag: `#${visitId}`
+        },
+        {
+            text: [
+                formatAdminConfirmDate(visit.visit_date),
+                visit.time_window
+            ].filter(Boolean).join(" · ")
+        },
+        {
+            kind: "who",
+            text: [
+                confirmClient?.full_name || confirmClient?.email,
+                formatAdminPetList(getAdminPetsForVisit(visit).map(pet => pet.name))
+            ].filter(Boolean).join(" · ")
+        }
+    ]);
 
     message.textContent = options.message;
     confirmButton.textContent = options.confirmText;
@@ -17359,8 +17446,13 @@ function confirmAdminChoice({
     }
 
     titleEl.textContent = title;
-    contextEl.textContent = context;
-    contextEl.style.display = context ? "" : "none";
+    const contextLines =
+        (Array.isArray(context) ? context : [context]).filter(Boolean);
+
+    setAdminConfirmContext(
+        contextEl,
+        contextLines.map((text, index) => ({ kind: index === 0 ? "main" : "who", text }))
+    );
     messageEl.textContent = message;
     confirmButton.textContent = confirmText;
     dialog.dataset.caution = String(Boolean(caution));
@@ -17451,9 +17543,10 @@ document.getElementById(
                 title:
                     "Log out?",
                 context:
-                    name || email
-                        ? `Signed in as ${[...new Set([name, email].filter(Boolean))].join(" · ")}`
-                        : "",
+                    [
+                        name ? `Signed in as ${name}` : email ? "Signed in" : "",
+                        email && email !== name ? email : ""
+                    ],
                 message:
                     window.PisNativePush
                         ? "You’ll need to sign in again to see your schedule. Visit alerts stop on this phone until you sign back in."

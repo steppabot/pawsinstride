@@ -12085,3 +12085,10 @@ dialog.admin-visit-action-confirm::backdrop {
 /* Send Boarding Update: orange like the boarding visit (pet sitting updates are already pink) */
 .boarding-update-dialog:not(.pis-sit-dialog) .boarding-editor-header { background: linear-gradient(135deg, #e07a1f, #c0610c); }
 .boarding-update-dialog:not(.pis-sit-dialog) [data-boarding-send] { background: linear-gradient(135deg, #e07a1f, #c0610c) !important; border-color: #c0610c !important; }
+
+/* Confirmation popup details: short lines instead of one long sentence */
+#admin-visit-confirm-context .admin-confirm-line { display: block; }
+#admin-visit-confirm-context .admin-confirm-line + .admin-confirm-line { margin-top: 3px; }
+#admin-visit-confirm-context .admin-confirm-line-main { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 15px; font-weight: 800; }
+#admin-visit-confirm-context .admin-confirm-line-main small { flex: none; font-size: 12px; font-weight: 700; opacity: .7; }
+#admin-visit-confirm-context .admin-confirm-line-who { font-weight: 600; opacity: .85; }
