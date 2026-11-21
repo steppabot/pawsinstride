@@ -24987,3 +24987,26 @@ body.csd-open { overflow: hidden !important; }
 .pis-faceid-setting-text strong { color: #183447; font-size: 15px; }
 .pis-faceid-setting-text small { color: #5c7286; font-size: 13px; font-weight: 600; }
 .pis-faceid-setting .pis-faceid-setting-button { flex: none; width: auto !important; min-height: 38px; margin: 0 !important; padding: 0 14px !important; }
+
+
+/* ========================================
+   PRIVACY POLICY LINK (sign-in page and Profile)
+   ======================================== */
+.pis-legal-links {
+    margin: 14px 0 0;
+    text-align: center;
+    font-size: 14px;
+}
+.pis-legal-links a {
+    color: #1f7bc2;
+    font-weight: 700;
+    text-decoration: none;
+}
+.pis-legal-links a:hover,
+.pis-legal-links a:focus-visible {
+    text-decoration: underline;
+}
+a.admin-more-tool-card.pis-privacy-card {
+    text-decoration: none;
+    color: inherit;
+}
