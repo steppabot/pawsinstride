@@ -2245,7 +2245,9 @@ try { LOGO && LOGO.addEventListener('load', () => { CACHE_V++; }); } catch(e){}
 try { document.fonts && document.fonts.ready.then(() => { CACHE_V++; }); } catch(e){}
 function cached(obj, ww, wh, ax, ay, fn){
   const sc = s*dpr;
-  if (!obj._c || obj._sc !== sc || obj._v !== CACHE_V){
+  // a picture drawn a little sharper than needed is kept (it just gets drawn smaller), so stepping
+  // the quality down doesn't make every building redraw itself from scratch mid-game
+  if (!obj._c || obj._v !== CACHE_V || obj._sc < sc*0.98 || obj._sc > sc*1.6){
     const c = document.createElement('canvas');
     c.width = Math.max(1, Math.ceil(ww*sc)); c.height = Math.max(1, Math.ceil(wh*sc));
     const g = c.getContext('2d');
@@ -2254,9 +2256,21 @@ function cached(obj, ww, wh, ax, ay, fn){
   }
   return obj._c;
 }
-function drawBuilding(b){
+function buildingCache(b){
   const pad = 26, top = b.h + b.rd + (b.kind==='cityhall' ? 110 : 60), bot = 16, ww = b.w + pad*2, wh = top + bot;
-  const c = cached(b, ww, wh, pad, top, (X,B) => { DOOR_REC = {b, X, B}; try { drawBuildingInner(b, X, B); } finally { DOOR_REC = null; } });
+  return { c: cached(b, ww, wh, pad, top, (X,B) => { DOOR_REC = {b, X, B}; try { drawBuildingInner(b, X, B); } finally { DOOR_REC = null; } }), pad, top, ww, wh };
+}
+// draw building pictures ahead of time, nearest first, in the spare time left in a frame, so
+// walking into a new part of town doesn't stutter while they're drawn for the first time
+function warmBuildings(msLeft){
+  if (!M || !M.buildings || !G || !G.p || msLeft <= 0) return;
+  const W0 = warmBuildings, sc = s*dpr;
+  if (W0.m !== M || W0.sc !== sc || W0.v !== CACHE_V){ const p = G.p; W0.m = M; W0.sc = sc; W0.v = CACHE_V;   // fonts and logo finishing loading redraw everything
+    W0.list = M.buildings.slice().sort((a, b) => Math.hypot(a.x + a.w/2 - p.x, a.base - p.y) - Math.hypot(b.x + b.w/2 - p.x, b.base - p.y)); }
+  const t0 = performance.now(); while (W0.list.length && performance.now() - t0 < msLeft) buildingCache(W0.list.shift());
+}
+function drawBuilding(b){
+  const { c, pad, top, ww, wh } = buildingCache(b);
   ctx.drawImage(c, sx(b.x) - pad*s, sy(b.base) - top*s, ww*s, wh*s);
   if (G && b.nightFx && G.dusk > 0.02) b.nightFx(sx(b.x), sy(b.base), Math.min(1, G.dusk*1.3));
   if (G && G.doors && b.doorGeo) for (const e of G.doors) if (e.door.b === b && e.k > 0.01){ const g = b.doorGeo; frontDoor(sx(b.x) + g.dx*s, sy(b.base) + g.dB*s, g.col, g.h, g.arched, e.k); }
@@ -2949,8 +2963,8 @@ function drawApt(b, X, B, w, hh, rd){
     ctx.fillStyle = '#c47a3a'; ctx.fillRect(ex - 25*u, B - 31.2*u, 50*u, 0.35*u);                          // copper trim line
     if (DOOR_REC){ const ox = ex - X, oy = ly - B;
       b.nightFx = (X2, B2, k) => { addLight(X2 + ox, B2 + oy, 30*s, 6*s, '#ffd9a0', 0.45*k);
-        G.lights.push({fn: () => { ctx.globalCompositeOperation = 'lighter'; ctx.font = SF(fs); ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(255,200,130,1)'; ctx.shadowBlur = 4*s;
-          ctx.fillStyle = `rgba(255,226,170,${(0.85*k).toFixed(3)})`; trackText('RAIL DISTRICT LOFTS', X2 + ox, B2 + oy, tr); }}); }; } }
+        G.lights.push({fn: () => { ctx.globalCompositeOperation = 'lighter';
+          glowText('RAIL DISTRICT LOFTS', X2 + ox, B2 + oy, fs, tr, 'rgba(255,200,130,1)', 4*s, 'rgba(255,226,170,0.85)', k); }}); }; } }
   for (const sd of [-1,1]){ const lx=ex+sd*22*u; ctx.fillStyle='#1f2326'; ctx.fillRect(lx-1.3*u, B-22*u, 2.6*u, 5*u); ctx.fillStyle='#ffe7a1'; ctx.fillRect(lx-0.8*u, B-21.4*u, 1.6*u, 3.6*u); }
   ctx.fillStyle='#3a3f42'; ctx.fillRect(ex+15.5*u, B-15*u, 2.4*u, 4*u); ctx.fillStyle='#8fd0ea'; ctx.fillRect(ex+16*u, B-14.4*u, 1.4*u, 1*u);
   ctx.fillStyle='#bdb3a3'; ctx.fillRect(ex-17*u, B-1.6*u, 34*u, 2.6*u);
@@ -2990,8 +3004,9 @@ function drawPaw(x, y, r, col){
 const SIGN_CACHE = { key:'', c:null };
 function hqSign(w, u){
   const fontOK = !!(document.fonts && document.fonts.check && document.fonts.check('12px "Lilita One"'));
-  const key = [Math.round(w*10), u.toFixed(3), dpr, logoReady(), fontOK].join('|');
-  if (SIGN_CACHE.key === key) return SIGN_CACHE;
+  const key = [Math.round(w*10), u.toFixed(3), logoReady(), fontOK].join('|');
+  if (SIGN_CACHE.key === key && SIGN_CACHE.dpr >= dpr*0.98 && SIGN_CACHE.dpr <= dpr*1.6) return SIGN_CACHE;   // a sharper sign is kept when quality steps down
+  SIGN_CACHE.dpr = dpr;
   const pad = 7*u, sh = 26*u, W = w + 2*pad, H = sh + 2*pad, PW = Math.max(1, Math.ceil(W*dpr)), PH = Math.max(1, Math.ceil(H*dpr));
   const mk = () => { const c = document.createElement('canvas'); c.width = PW; c.height = PH; const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, pad*dpr, pad*dpr); return [c, g]; };
   const tint = (mask, fill) => { const [c, g] = mk(); g.save(); g.setTransform(1,0,0,1,0,0); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = typeof fill === 'function' ? fill(g) : fill; g.fillRect(0, 0, PW, PH); g.restore(); return c; };
@@ -3279,8 +3294,8 @@ function drawLibrary(b, X, B, w, hh, rd){
     raisedText('FRISCO PUBLIC LIBRARY', lx, ly, fs, SF, tr, '#eef2f4', '#8d979e', '#5d666c', u);
     if (DOOR_REC){ const ox = lx - X, oy = ly - B;
       b.nightFx = (X2, B2, k) => { addLight(X2 + ox, B2 + oy, cw*0.5, 7*s, '#ffe7c2', 0.45*k);
-        G.lights.push({fn: () => { ctx.globalCompositeOperation = 'lighter'; ctx.font = SF(fs); ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(255,226,180,1)'; ctx.shadowBlur = 5*s;
-          ctx.fillStyle = `rgba(255,236,205,${(0.35*k).toFixed(3)})`; trackText('FRISCO PUBLIC LIBRARY', X2 + ox, B2 + oy, tr); }}); }; } }
+        G.lights.push({fn: () => { ctx.globalCompositeOperation = 'lighter';
+          glowText('FRISCO PUBLIC LIBRARY', X2 + ox, B2 + oy, fs, tr, 'rgba(255,226,180,1)', 5*s, 'rgba(255,236,205,0.35)', k); }}); }; } }
   ctx.strokeStyle=OL; ctx.lineWidth=1.2; ctx.strokeRect(X, top, cw, hh);
   // breezeway
   const bxx = X+cw;
@@ -3515,28 +3530,36 @@ function drawRain(dt, opt){
   R.next -= dt; if (R.next <= 0 && R.lens.length < 6){ R.next = 0.5 + Math.random()*1.4;
     const r = 6 + Math.random()*7; R.lens.push({ x: W*(0.04 + Math.random()*0.92), y: H*(0.06 + Math.random()*0.7), r, t: 0, sit: 1.2 + Math.random()*3.5, slide: Math.random() < 0.55, vy: 0, wob: Math.random()*6, drop: 0 }); }
   if (!R.lens.length && !R.trail.length) return;
-  if (!R.snap) R.snap = document.createElement('canvas');
-  if (R.snap.width !== cv0.width || R.snap.height !== cv0.height){ R.snap.width = cv0.width; R.snap.height = cv0.height; }
-  const sg = R.snap.getContext('2d'); sg.setTransform(1, 0, 0, 1, 0, 0); sg.clearRect(0, 0, R.snap.width, R.snap.height); sg.drawImage(cv0, 0, 0);   // the scene behind the glass
-  // wet trails: faint streaks with tiny beads left behind, drying out
-  for (let i = R.trail.length - 1; i >= 0; i--){ const b = R.trail[i]; b.t += dt; const a = 1 - b.t/2.2; if (a <= 0){ R.trail.splice(i, 1); continue; }
-    ctx.fillStyle = `rgba(255,255,255,${0.16*a})`; ctx.beginPath(); ctx.ellipse(b.x, b.y, b.r, b.r*1.1, 0, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = `rgba(20,35,50,${0.18*a})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.arc(b.x, b.y + b.r*0.2, b.r, 0.2, Math.PI - 0.2); ctx.stroke(); }
+  // move the drops first, then copy just the small patch of scene behind each one (copying the
+  // whole screen every frame for a handful of drops was the slowest part of rainy weather)
+  const live = [];
   for (let i = R.lens.length - 1; i >= 0; i--){ const d = R.lens[i]; d.t += dt;
     const grow = Math.min(1, d.t/0.12), r = d.r*grow; let fade = 1;
     if (d.t > d.sit){ if (d.slide){ d.vy = Math.min(150 + d.r*8, d.vy + 260*dt); const dy = d.vy*dt; d.y += dy; d.x += Math.sin(d.y*0.06 + d.wob)*0.35; d.drop += dy;
         if (d.drop > 5){ d.drop = 0; R.trail.push({ x: d.x + (Math.random() - 0.5)*0.8, y: d.y - r*1.2, r: Math.max(0.6, r*(0.12 + Math.random()*0.16)), t: 0 }); }
         if (d.y - r*2 > H){ R.lens.splice(i, 1); continue; } }
       else { fade = 1 - (d.t - d.sit)/1.2; if (fade <= 0){ R.lens.splice(i, 1); continue; } } }
+    live.push({ d, r, fade }); }
+  let slot = 1; for (const q of live) slot = Math.max(slot, Math.ceil(q.r*2.6*2*k0) + 2);
+  if (!R.snap) R.snap = document.createElement('canvas');
+  if (R.snap.width < slot*Math.max(1, live.length) || R.snap.height < slot){ R.snap.width = Math.max(R.snap.width, slot*Math.max(1, live.length)); R.snap.height = Math.max(R.snap.height, slot); }
+  const sg = R.snap.getContext('2d'); sg.setTransform(1, 0, 0, 1, 0, 0); sg.clearRect(0, 0, R.snap.width, R.snap.height);
+  live.forEach((q, j) => { const S = q.r*2.6, sw = S*2*k0, sx0 = Math.max(0, (q.d.x - S)*k0), sy0 = Math.max(0, (q.d.y - S)*k0);
+    q.cw = Math.max(0, Math.min(sw, cv0.width - sx0)); q.ch = Math.max(0, Math.min(sw, cv0.height - sy0)); q.sw = sw; q.slot = j*slot;
+    if (q.cw >= 1 && q.ch >= 1) sg.drawImage(cv0, sx0, sy0, q.cw, q.ch, q.slot, 0, q.cw, q.ch); });   // the scene behind the glass
+  // wet trails: faint streaks with tiny beads left behind, drying out
+  for (let i = R.trail.length - 1; i >= 0; i--){ const b = R.trail[i]; b.t += dt; const a = 1 - b.t/2.2; if (a <= 0){ R.trail.splice(i, 1); continue; }
+    ctx.fillStyle = `rgba(255,255,255,${0.16*a})`; ctx.beginPath(); ctx.ellipse(b.x, b.y, b.r, b.r*1.1, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = `rgba(20,35,50,${0.18*a})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.arc(b.x, b.y + b.r*0.2, b.r, 0.2, Math.PI - 0.2); ctx.stroke(); }
+  for (const q of live){ const d = q.d, r = q.r, fade = q.fade;
     const run = d.slide && d.t > d.sit ? Math.min(1, d.vy/120) : 0, tail = r*(1 + run*1.1);   // a running drop stretches into a teardrop
     const shape = () => { ctx.beginPath(); ctx.moveTo(d.x - r, d.y); ctx.bezierCurveTo(d.x - r, d.y + r*1.25, d.x + r, d.y + r*1.25, d.x + r, d.y);
       ctx.bezierCurveTo(d.x + r, d.y - tail*0.55, d.x + r*0.25, d.y - tail, d.x, d.y - tail); ctx.bezierCurveTo(d.x - r*0.25, d.y - tail, d.x - r, d.y - tail*0.55, d.x - r, d.y); ctx.closePath(); };
     ctx.save(); ctx.globalAlpha = fade;
     shape(); ctx.save(); ctx.clip();
     // a water drop is a tiny lens: it shows a wider patch of the scene behind it, upside down
-    const S = r*2.6, sx0 = (d.x - S)*k0, sy0 = (d.y - S)*k0;
     ctx.translate(d.x, d.y - (tail - r)*0.4); ctx.scale(-1, -1);
-    ctx.drawImage(R.snap, Math.max(0, sx0), Math.max(0, sy0), S*2*k0, S*2*k0, -r*1.05, -tail*0.75, r*2.1, tail*1.5);
+    if (q.cw >= 1 && q.ch >= 1) ctx.drawImage(R.snap, q.slot, 0, q.cw, q.ch, -r*1.05, -tail*0.75, r*2.1*q.cw/q.sw, tail*1.5*q.ch/q.sw);
     ctx.restore();
     // rim shading, a bright glint up top and a soft focused highlight at the bottom
     const cy = d.y - (tail - r)*0.3, rg = ctx.createRadialGradient(d.x - r*0.2, cy - r*0.25, r*0.2, d.x, cy, Math.max(r, tail)*1.05);
@@ -3546,6 +3569,31 @@ function drawRain(dt, opt){
     ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.beginPath(); ctx.ellipse(d.x - r*0.38, d.y - r*0.45 - (tail - r)*0.3, r*0.24, r*0.15, -0.6, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = Math.max(0.8, r*0.12); ctx.beginPath(); ctx.arc(d.x, d.y - r*0.05, r*0.72, 0.55, Math.PI - 0.55); ctx.stroke();   // light focused through the bottom of the drop
     ctx.restore(); }
+}
+// a soft round glow, drawn once per color and reused (making a new gradient for every lamp,
+// window and cloud shadow on every frame was a big part of the slowdown at dusk and in the rain)
+const GLOW_SPRITES = new Map();
+function glowSprite(col, stops){
+  const key = col + '|' + stops.join(';'); let c = GLOW_SPRITES.get(key);
+  if (!c){ c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+    const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); for (const [at, a] of stops) gr.addColorStop(at, rgbaHex(col, a));
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128); GLOW_SPRITES.set(key, c); }
+  return c;
+}
+// glowing sign letters at dusk: the soft blur behind each letter is slow to draw, so the whole
+// glowing sign is drawn once into a picture and reused every frame
+const GLOW_TEXT = new Map();
+function glowText(text, x, y, fs, tr, shadowCol, blur, fill, alpha){
+  const key = [text, fs.toFixed(2), tr.toFixed(3), blur.toFixed(2), shadowCol, fill, dpr].join('|'); let e = GLOW_TEXT.get(key);
+  if (!e){ const c = document.createElement('canvas'), g = c.getContext('2d'); g.font = SF(fs);
+    let tw = 0; for (const ch of text) tw += g.measureText(ch).width; tw += tr*(text.length - 1);
+    const pad = blur*2 + fs*0.3, w = tw + pad*2, h = fs*1.5 + pad*2;
+    c.width = Math.max(1, Math.ceil(w*dpr)); c.height = Math.max(1, Math.ceil(h*dpr));
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.font = SF(fs); g.textBaseline = 'middle'; g.textAlign = 'left';
+    g.shadowColor = shadowCol; g.shadowBlur = blur; g.fillStyle = fill;
+    let xx = pad; for (const ch of text){ g.fillText(ch, xx, h/2); xx += g.measureText(ch).width + tr; }
+    e = { c, w, h, pad, tw }; if (GLOW_TEXT.size > 40) GLOW_TEXT.clear(); GLOW_TEXT.set(key, e); }
+  ctx.globalAlpha = alpha; ctx.drawImage(e.c, x - e.tw/2 - e.pad, y - e.h/2, e.w, e.h); ctx.globalAlpha = 1;
 }
 /* ---------- weather + time of day ---------- */
 // the shift runs from a soft morning to golden afternoon to dusk, when the street lamps come on
@@ -3561,23 +3609,33 @@ function drawAtmosphere(dt){
   // cloud shadows drifting over town
   if (wx === 'cloudy' || wx === 'rain'){
     for (let k = 0; k < 5; k++){ const cx = ((k*397 + t*14) % (W + 600)) - 300, cy = (k*263) % Math.max(1, H) + Math.sin(t*0.05 + k)*30, r = 140 + (k%3)*70;
-      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, 'rgba(20,30,45,.16)'); g.addColorStop(1, 'rgba(20,30,45,0)'); ctx.fillStyle = g; ctx.fillRect(cx - r, cy - r, 2*r, 2*r); }
+      ctx.drawImage(glowSprite('#141e2d', [[0, 0.16], [1, 0]]), cx - r, cy - r, 2*r, 2*r); }
   }
-  // overall grade
-  const grade = (col, a, op) => { if (a <= 0.003) return; ctx.globalCompositeOperation = op; ctx.globalAlpha = a; ctx.fillStyle = col; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; };
-  grade('#ffd6a0', 0.10*L.morning, 'soft-light');
-  grade('#ffb065', 0.26*L.golden, 'multiply'); grade('#ffd28a', 0.12*L.golden, 'overlay');
-  grade('#3e3890', 0.6*L.dusk, 'multiply');
-  if (L.dusk > 0.01){ const sg = ctx.createLinearGradient(0, 0, 0, H); sg.addColorStop(0, `rgba(255,120,70,${0.22*L.dusk})`); sg.addColorStop(0.5, `rgba(255,120,70,${0.06*L.dusk})`); sg.addColorStop(1, 'rgba(255,120,70,0)');
-    ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }
-  if (wx === 'cloudy') grade('#8a96a8', 0.16, 'multiply');
-  if (wx === 'rain'){ grade('#5f7090', 0.40, 'multiply'); grade('#9fb6cc', 0.10, 'soft-light'); }
+  // overall grade. Full-screen blend layers are the slowest thing to draw on a big screen, so every
+  // darkening (multiply) layer is folded into one pass with the exact same result, and the soft warm or
+  // cool tints become one see-through layer on top: two full-screen passes at most instead of up to six.
+  const mul = [1, 1, 1], tint = [0, 0, 0, 0];
+  const rgbOf = hex => { const n = parseInt(hex.slice(1), 16); return [(n>>16)&255, (n>>8)&255, n&255]; };
+  const addMul = (hex, a) => { if (a <= 0.003) return; const c = rgbOf(hex); for (let i = 0; i < 3; i++) mul[i] *= 1 - a + a*c[i]/255; };
+  const over = (base, hex, a) => { const c = rgbOf(hex), na = a + base[3]*(1 - a); if (na <= 0) return base.slice();
+    return [0, 1, 2].map(i => (c[i]*a + base[i]*base[3]*(1 - a))/na).concat(na); };
+  const addTint = (hex, a) => { if (a > 0.003){ const t = over(tint, hex, a); for (let i = 0; i < 4; i++) tint[i] = t[i]; } };
+  const rgbaOf = t => `rgba(${Math.round(t[0])},${Math.round(t[1])},${Math.round(t[2])},${t[3].toFixed(4)})`;
+  addTint('#ffd6a0', 0.05*L.morning);
+  addMul('#ffb065', 0.26*L.golden); addTint('#ffd28a', 0.06*L.golden);
+  addMul('#3e3890', 0.6*L.dusk);
+  if (wx === 'cloudy') addMul('#8a96a8', 0.16);
+  if (wx === 'rain'){ addMul('#5f7090', 0.40); addTint('#9fb6cc', 0.05); }
+  if (mul[0] < 0.997 || mul[1] < 0.997 || mul[2] < 0.997){
+    ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgb(${mul.map(v => Math.round(v*255)).join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }
+  if (L.dusk > 0.01){ const sg = ctx.createLinearGradient(0, 0, 0, H);   // the sunset glow is strongest at the top of the screen
+    sg.addColorStop(0, rgbaOf(over(tint, '#ff7846', 0.11*L.dusk))); sg.addColorStop(0.5, rgbaOf(over(tint, '#ff7846', 0.03*L.dusk))); sg.addColorStop(1, rgbaOf(tint));
+    ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H); }
+  else if (tint[3] > 0.003){ ctx.fillStyle = rgbaOf(tint); ctx.fillRect(0, 0, W, H); }
   // emissive light: signs and lamps glow on top of the evening grade instead of being darkened by it
   if (G.lights && G.lights.length){ ctx.globalCompositeOperation = 'lighter';
     for (const l of G.lights){ if (l.fn){ ctx.save(); l.fn(); ctx.restore(); continue; } if (l.img){ ctx.globalAlpha = l.a; ctx.drawImage(l.img, l.x, l.y, l.w, l.h); ctx.globalAlpha = 1; continue; }
-      const r = Math.max(l.rx, l.ry); ctx.save(); ctx.translate(l.x, l.y); ctx.scale(l.rx/r, l.ry/r);
-      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, rgbaHex(l.col, 0.55*l.a)); g.addColorStop(0.5, rgbaHex(l.col, 0.18*l.a)); g.addColorStop(1, rgbaHex(l.col, 0));
-      ctx.fillStyle = g; ctx.fillRect(-r, -r, 2*r, 2*r); ctx.restore(); }
+      ctx.globalAlpha = Math.min(1, l.a); ctx.drawImage(glowSprite(l.col, [[0, 0.55], [0.5, 0.18], [1, 0]]), l.x - l.rx, l.y - l.ry, 2*l.rx, 2*l.ry); ctx.globalAlpha = 1; }
     ctx.globalCompositeOperation = 'source-over'; }
   // rain: streaks falling in depth, splashes on the ground, and drops running down the screen
   if (wx === 'rain' && !reduceMotion) drawRain(dt);
@@ -5055,16 +5113,19 @@ function npcHeading(q, x, y, still){
 // people who stand or sit still are drawn once into their own little picture and reused every frame (redrawn only if the zoom changes)
 const NPC_SPRITES = new Map();
 function cachedFigure(q, x, y, S, draw){
-  const key = q, ver = s.toFixed(4) + '|' + dpr, pad = 44*S, top = 92*S, W = Math.ceil(2*pad*dpr), H = Math.ceil((top + 16*S)*dpr);
+  const key = q, ver = s.toFixed(4), pad = 44*S, top = 92*S, W = Math.ceil(2*pad*dpr), H = Math.ceil((top + 16*S)*dpr);
   let e = NPC_SPRITES.get(key);
-  if (!e || e.ver !== ver){
+  if (!e || e.ver !== ver || !(e.dpr >= dpr*0.98 && e.dpr <= dpr*1.6)){   // a sharper picture is kept when quality steps down
     const c = e && e.c || document.createElement('canvas'); c.width = Math.max(1, W); c.height = Math.max(1, H);
     const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, c.width, c.height);
     const main = ctx; ctx = g; let out; try { out = draw(pad, top); } finally { ctx = main; }
-    e = { c, ver, out: out ? [out[0] - pad, out[1] - top] : null }; NPC_SPRITES.set(key, e);
+    e = { c, ver, dpr, out: out ? [out[0] - pad, out[1] - top] : null }; NPC_SPRITES.set(key, e);
   }
   const M0 = ctx.getTransform(); ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.drawImage(e.c, Math.round(M0.a*(x - pad) + M0.e), Math.round(M0.d*(y - top) + M0.f)); ctx.restore();
+  const X0 = Math.round(M0.a*(x - pad) + M0.e), Y0 = Math.round(M0.d*(y - top) + M0.f);
+  if (e.dpr === dpr) ctx.drawImage(e.c, X0, Y0);
+  else ctx.drawImage(e.c, X0, Y0, e.c.width*M0.a/e.dpr, e.c.height*M0.d/e.dpr);
+  ctx.restore();
   return e.out ? [x + e.out[0], y + e.out[1]] : null;
 }
 function drawTownsfolk(q){
@@ -5368,6 +5429,8 @@ function frame(t){
   if (state==='play' && !document.hidden) update(dt);
   else { G.t += dt; updateCars(dt, []); }
   render(dt); hud();
+  // spare time this frame goes to drawing buildings ahead (more of it on the start screen)
+  warmBuildings((state === 'play' ? 9 : 14) - (performance.now() - t));
 }
 newGame(); renderBoard($('boardStart')); resize();
 // music from the start menu: try right away (works where the browser allows autoplay), otherwise on the first tap/key anywhere
