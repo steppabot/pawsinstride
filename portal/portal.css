@@ -25031,3 +25031,37 @@ html.iphone-login body.portal-login-page .login-container:has(.pis-faceid-login)
 html.iphone-login body.portal-login-page .login-container:has(.pis-faceid-login) .login-mobile-logo-wrapper { margin-bottom: 10px; }
 html.iphone-login body.portal-login-page .login-container:has(.pis-faceid-login) .login-form-heading { margin-bottom: 14px; }
 html.iphone-login body.portal-login-page .pis-faceid-login { margin-bottom: 12px; }
+
+
+/* ========================================
+   BACK TO SIGN IN BUTTON (sign-up page)
+   and room for the iPhone status bar on sign-up
+   ======================================== */
+.pis-auth-back {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    left: calc(env(safe-area-inset-left, 0px) + 12px);
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 14px 8px 8px;
+    border: 1px solid #dbe6f1;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .94);
+    color: #1f7bc2;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(31, 63, 98, .10);
+    -webkit-tap-highlight-color: transparent;
+}
+.pis-auth-back svg { display: block; width: 20px; height: 20px; }
+.pis-auth-back:active { transform: scale(.96); }
+@media (max-width: 680px) {
+    body.portal-signup-page .signup-shell {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 60px);
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 34px);
+    }
+}
