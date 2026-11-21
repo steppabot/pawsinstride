@@ -25010,3 +25010,24 @@ a.admin-more-tool-card.pis-privacy-card {
     text-decoration: none;
     color: inherit;
 }
+
+
+/* ========================================
+   IPHONE SIGN-IN: FITS ON ONE SCREEN (NO SCROLLING)
+   ======================================== */
+html.iphone-login body.portal-login-page .login-form-panel {
+    margin: 0;
+    padding-top: 18px;
+    padding-bottom: 16px;
+}
+html.iphone-login body.portal-login-page .login-mobile-logo-wrapper { margin-bottom: 16px; }
+html.iphone-login body.portal-login-page .login-mobile-logo { width: 150px; }
+html.iphone-login body.portal-login-page .login-form-heading { margin-bottom: 20px; }
+html.iphone-login body.portal-login-page .login-signup-prompt { margin-top: 16px; }
+html.iphone-login body.portal-login-page .login-footer-note { margin-top: 18px; padding-top: 12px; }
+html.iphone-login body.portal-login-page .pis-legal-links { margin-top: 6px; }
+/* With the Face ID button there's more to fit, so the logo is smaller. */
+html.iphone-login body.portal-login-page .login-container:has(.pis-faceid-login) .login-mobile-logo { width: 112px; }
+html.iphone-login body.portal-login-page .login-container:has(.pis-faceid-login) .login-mobile-logo-wrapper { margin-bottom: 10px; }
+html.iphone-login body.portal-login-page .login-container:has(.pis-faceid-login) .login-form-heading { margin-bottom: 14px; }
+html.iphone-login body.portal-login-page .pis-faceid-login { margin-bottom: 12px; }
