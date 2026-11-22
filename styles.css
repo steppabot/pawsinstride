@@ -7813,3 +7813,188 @@ html {
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
+
+/* =========================================================
+   FOOTER CLEANUP
+   - "Proverbs 12:10" gets the small orange label look (all sizes)
+   - Phones and tablets: everything centered, one column,
+     thin lines between sections, towns as chips, same link style
+   ========================================================= */
+.pis-faith-verse {
+    color: #d9780f;
+    font-family: "Manrope", "Roboto", sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.pis-faith-verse p {
+    margin: 0 0 6px;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+@media (max-width: 900px) {
+    .site-footer-v2 {
+        text-align: center;
+    }
+
+    /* one centered column, never wider than 560px */
+    .site-footer-v2-inner,
+    .pis-faith,
+    .site-footer-v2-bottom {
+        width: min(560px, calc(100% - 40px));
+    }
+
+    .site-footer-v2-inner {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 36px 0 4px;
+    }
+
+    .site-footer-v2-brand,
+    .site-footer-v2-cta {
+        grid-column: auto;
+    }
+
+    /* Logo, line and social icons, centered */
+    .site-footer-v2-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 26px;
+    }
+
+    .site-footer-v2-logo {
+        width: 96px;
+        margin: 0 auto;
+    }
+
+    .site-footer-v2-brand p {
+        max-width: 290px;
+        margin: 12px auto 16px;
+        font-size: 15px;
+    }
+
+    .site-footer-v2-socials {
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .site-footer-v2-socials a {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        font-size: 18px;
+    }
+
+    /* Every section: thin line above, centered heading */
+    .site-footer-v2-col {
+        padding: 22px 0;
+        border-top: 1px solid #e6ecf1;
+    }
+
+    .site-footer-v2-col h3,
+    .site-footer-v2-cta h3 {
+        margin: 0 0 12px;
+        text-align: center;
+    }
+
+    /* Explore: one centered row, same style as the other links (no all caps) */
+    .site-footer-v2-explore {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2px 26px;
+    }
+
+    .site-footer-v2-explore h3 {
+        flex: 0 0 100%;
+    }
+
+    .site-footer-v2-explore > a {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+    }
+
+    /* Service areas: four chips */
+    .site-footer-v2 .site-footer-v2-col:has(.site-footer-v2-subhead) > a:not(.site-header-v2-register):not(.site-header-v2-login) {
+        display: inline-block;
+        width: auto;
+        margin: 5px 4px;
+        padding: 9px 16px;
+        border: 1px solid #d9e7ef;
+        border-radius: 999px;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(24, 52, 71, 0.05);
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .site-footer-v2 .site-footer-v2-col:has(.site-footer-v2-subhead) > a:not(.site-header-v2-register):not(.site-header-v2-login):hover {
+        border-color: #9dd7ec;
+        color: #2890df;
+    }
+
+    /* Dog owner resources: its own section, one link per line */
+    .site-footer-v2-col h3.site-footer-v2-subhead {
+        margin: 22px 0 12px;
+        padding-top: 22px;
+        border-top: 1px solid #e6ecf1;
+    }
+
+    .site-footer-v2 .site-footer-v2-col > .site-footer-v2-subhead ~ a:not(.site-header-v2-register):not(.site-header-v2-login) {
+        display: block;
+        width: fit-content;
+        margin: 0 auto;
+        padding: 7px 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: none;
+        background-image: linear-gradient(#f3aa4c, #f3aa4c);
+        background-repeat: no-repeat;
+        background-position: 0 calc(100% - 3px);
+        background-size: 0 3px;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .site-footer-v2 .site-footer-v2-col > .site-footer-v2-subhead ~ a:not(.site-header-v2-register):not(.site-header-v2-login):hover {
+        background-size: 100% 3px;
+    }
+
+    /* Get started: centered phone number, full-width buttons */
+    .site-footer-v2-cta {
+        padding: 22px 0 28px;
+        border-top: 1px solid #e6ecf1;
+    }
+
+    .site-footer-v2-phone {
+        display: block;
+        text-align: center;
+        font-size: 28px;
+    }
+
+    .site-footer-v2-cta .site-header-v2-register,
+    .site-footer-v2-cta .site-header-v2-login {
+        flex: 1 1 100%;
+    }
+
+    /* Copyright lines, centered */
+    .site-footer-v2-bottom {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-right: 0;
+        padding-bottom: 80px;   /* keeps the back-to-top button off the text */
+    }
+
+    .site-footer-v2-bottom p,
+    .site-footer-v2-brand p {
+        text-wrap: balance;
+    }
+}
