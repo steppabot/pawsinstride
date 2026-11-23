@@ -84,14 +84,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"
-    >
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"></noscript>
 
     <!-- Starts loading the big hero photo right away (it's the biggest thing on screen) -->
-    <link rel="preload" as="image" href="/images/golden.jpg" fetchpriority="high">
+    <link rel="preload" as="image" href="/images/golden.jpg" fetchpriority="high" imagesrcset="/images/golden-800.jpg 800w, /images/golden.jpg 1400w" imagesizes="(max-width: 1000px) 100vw, 600px">
 
     <!-- Leading slash so it works from any folder. Change the ?v= number whenever you
          edit the CSS so visitors don't get an old cached copy. -->
@@ -840,6 +839,8 @@
             >
     
                 <img
+                    width="300"
+                    height="305"
                     src="/pawsnstridelogo1.png"
                     alt="Paws in Stride"
                     class="site-header-v2-logo"
@@ -1117,7 +1118,7 @@
         <section class="hero-section homepage-hero">
           <div class="hero-container">
             <div class="hero-image">
-              <img src="/images/golden.jpg" alt="Happy golden retriever for dog walking in Frisco Texas">
+              <img srcset="/images/golden-800.jpg 800w, /images/golden.jpg 1400w" sizes="(max-width: 1000px) 100vw, 600px" fetchpriority="high" width="1400" height="1867" src="/images/golden.jpg" alt="Happy golden retriever for dog walking in Frisco Texas">
             </div>
 
             <div class="hero-text-container">
@@ -1167,9 +1168,9 @@
           </div>
 
           <div class="trust-grid">
-            <img src="/images/golden3.jpg" alt="Golden retriever sitting outside in Frisco Texas">
-            <img src="/images/trusted2.jpg" alt="Australian shepherd receving pet care in Frisco Texas">
-            <img src="/images/trusted3.jpg" alt="Friendly Yorkshire Terrier being cared for by Paws in Stride">
+            <img loading="lazy" srcset="/images/golden3-600.jpg 600w, /images/golden3.jpg 900w" sizes="(max-width: 500px) 68vw, 373px" decoding="async" width="900" height="1600" src="/images/golden3.jpg" alt="Golden retriever sitting outside in Frisco Texas">
+            <img loading="lazy" srcset="/images/trusted2-600.jpg 600w, /images/trusted2.jpg 900w" sizes="(max-width: 500px) 68vw, 373px" decoding="async" width="900" height="1200" src="/images/trusted2.jpg" alt="Australian shepherd receving pet care in Frisco Texas">
+            <img loading="lazy" srcset="/images/trusted3-600.jpg 600w, /images/trusted3.jpg 900w" sizes="(max-width: 500px) 68vw, 373px" decoding="async" width="900" height="1200" src="/images/trusted3.jpg" alt="Friendly Yorkshire Terrier being cared for by Paws in Stride">
           </div>
         </section>
 
@@ -1193,7 +1194,7 @@
             <div class="service-container">
               <div class="service-image">
                 <a href="/services.html#dog-walking">
-                  <img src="/images/dogwalking.jpg" alt="Dog walking in Frisco Texas" class="rounded-image">
+                  <img loading="lazy" srcset="/images/dogwalking-600.jpg 600w, /images/dogwalking.jpg 900w" sizes="(max-width: 500px) 46vw, 464px" decoding="async" width="900" height="1200" src="/images/dogwalking.jpg" alt="Dog walking in Frisco Texas" class="rounded-image">
                   <div class="overlay"></div>
                   <h2>DOG WALKING</h2>
                 </a>
@@ -1201,7 +1202,7 @@
 
               <div class="service-image">
                 <a href="/services.html#drop-in-visits">
-                  <img src="/images/dropin.jpg" alt="Drop in visits and potty breaks in Frisco Texas" class="rounded-image">
+                  <img loading="lazy" srcset="/images/dropin-600.jpg 600w, /images/dropin.jpg 900w" sizes="(max-width: 500px) 46vw, 464px" decoding="async" width="900" height="1200" src="/images/dropin.jpg" alt="Drop in visits and potty breaks in Frisco Texas" class="rounded-image">
                   <div class="overlay"></div>
                   <h2>DROP-IN VISITS / POTTY BREAKS</h2>
                 </a>
@@ -1209,7 +1210,7 @@
 
               <div class="service-image">
                 <a href="/services.html#pet-sitting">
-                  <img src="/images/poodle.jpg" alt="Pet sitting in Frisco Texas" class="rounded-image">
+                  <img loading="lazy" srcset="/images/poodle-600.jpg 600w, /images/poodle.jpg 900w" sizes="(max-width: 500px) 48vw, 464px" decoding="async" width="900" height="1132" src="/images/poodle.jpg" alt="Pet sitting in Frisco Texas" class="rounded-image">
                   <div class="overlay"></div>
                   <h2>PET SITTING</h2>
                 </a>
@@ -1217,7 +1218,7 @@
 
               <div class="service-image">
                 <a href="/services.html#dog-boarding">
-                  <img src="/images/poodle2.jpg" alt="Dog boarding in Frisco Texas" class="rounded-image">
+                  <img loading="lazy" srcset="/images/poodle2-600.jpg 600w, /images/poodle2.jpg 900w" sizes="(max-width: 500px) 43vw, 464px" decoding="async" width="900" height="1514" src="/images/poodle2.jpg" alt="Dog boarding in Frisco Texas" class="rounded-image">
                   <div class="overlay"></div>
                   <h2>DOG BOARDING</h2>
                 </a>
@@ -1314,7 +1315,7 @@
             <!-- Brand -->
             <div class="site-footer-v2-brand">
                 <a href="/index.html" aria-label="Paws in Stride Home">
-                    <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
+                    <img width="300" height="305" src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
                 </a>
                 <p>Dog Walking, Pet Sitting &amp; Boarding in Frisco, TX.</p>
     
@@ -1392,7 +1393,27 @@
         });
     </script>
 
-    <script src="https://static.elfsight.com/platform/platform.js" async></script>
+    <script>
+    // Reviews widget: load its script when a review box gets close to the screen (keeps the first load fast)
+    (function () {
+        var loaded = false;
+        function load() {
+            if (loaded) return; loaded = true;
+            var s = document.createElement('script'); s.src = 'https://static.elfsight.com/platform/platform.js'; s.async = true;
+            document.body.appendChild(s);
+        }
+        function watch() {
+            var boxes = document.querySelectorAll('[class^="elfsight-app-"], [class*=" elfsight-app-"]');
+            if (!boxes.length) return;
+            if (!('IntersectionObserver' in window)) return load();
+            var io = new IntersectionObserver(function (entries) {
+                if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+            }, { rootMargin: '800px 0px' });
+            boxes.forEach(function (b) { io.observe(b); });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+    })();
+    </script>
     
     <!-- ========================================
          SEASONAL HEADER — OCTOBER / NOVEMBER / DECEMBER

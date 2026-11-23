@@ -94,11 +94,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"
-    >
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"></noscript>
 
     <link rel="preload" as="image" href="/images/restaurants/dog-friendly-restaurant-frisco-hero2.jpg" fetchpriority="high">
 
@@ -848,6 +847,8 @@
             >
     
                 <img
+                    width="300"
+                    height="305"
                     src="/pawsnstridelogo1.png"
                     alt="Paws in Stride"
                     class="site-header-v2-logo"
@@ -1145,7 +1146,7 @@
             </div>
 
             <div class="gd-hero-media">
-                <img class="restaurant-hero-photo" src="/images/restaurants/dog-friendly-restaurant-frisco-hero2.jpg" alt="Dog in front of outdoor restaurant patio in Frisco, Texas" fetchpriority="high" decoding="async">
+                <img width="447" height="447" class="restaurant-hero-photo" src="/images/restaurants/dog-friendly-restaurant-frisco-hero2.jpg" alt="Dog in front of outdoor restaurant patio in Frisco, Texas" fetchpriority="high" decoding="async">
             </div>
         </article>
 
@@ -1244,7 +1245,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/restaurants/5th-street-patio-cafe.jpg" alt="5th Street Patio Cafe outdoor patio in downtown Frisco, TX" loading="lazy" decoding="async">
+                        <img width="1152" height="648" src="/images/restaurants/5th-street-patio-cafe.jpg" alt="5th Street Patio Cafe outdoor patio in downtown Frisco, TX" loading="lazy" srcset="/images/restaurants/5th-street-patio-cafe-600.jpg 600w, /images/restaurants/5th-street-patio-cafe.jpg 1152w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1276,7 +1277,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/restaurants/the-common-table.jpg" alt="The Common Table patio in the Star District, Frisco, TX" loading="lazy" decoding="async">
+                        <img width="1152" height="648" src="/images/restaurants/the-common-table.jpg" alt="The Common Table patio in the Star District, Frisco, TX" loading="lazy" srcset="/images/restaurants/the-common-table-600.jpg 600w, /images/restaurants/the-common-table.jpg 1152w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1307,7 +1308,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/restaurants/frisco-rail-yard.jpg" alt="Frisco Rail Yard outdoor food truck park in the Rail District, Frisco, TX" loading="lazy" decoding="async">
+                        <img width="1152" height="648" src="/images/restaurants/frisco-rail-yard.jpg" alt="Frisco Rail Yard outdoor food truck park in the Rail District, Frisco, TX" loading="lazy" srcset="/images/restaurants/frisco-rail-yard-600.jpg 600w, /images/restaurants/frisco-rail-yard.jpg 1152w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1339,7 +1340,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/restaurants/tupelo-honey.jpg" alt="Tupelo Honey Southern Kitchen and Bar patio in Frisco, TX" loading="lazy" decoding="async">
+                        <img width="1152" height="648" src="/images/restaurants/tupelo-honey.jpg" alt="Tupelo Honey Southern Kitchen and Bar patio in Frisco, TX" loading="lazy" srcset="/images/restaurants/tupelo-honey-600.jpg 600w, /images/restaurants/tupelo-honey.jpg 1152w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1370,7 +1371,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/restaurants/didis-downtown.jpg" alt="Didi's Downtown patio in the Rail District, Frisco, TX" loading="lazy" decoding="async">
+                        <img width="1152" height="648" src="/images/restaurants/didis-downtown.jpg" alt="Didi's Downtown patio in the Rail District, Frisco, TX" loading="lazy" srcset="/images/restaurants/didis-downtown-600.jpg 600w, /images/restaurants/didis-downtown.jpg 1152w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1401,7 +1402,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/restaurants/trufire-kitchen-bar.jpg" alt="TruFire Kitchen and Bar patio in the Shops at Starwood, Frisco, TX" loading="lazy" decoding="async">
+                        <img width="1152" height="648" src="/images/restaurants/trufire-kitchen-bar.jpg" alt="TruFire Kitchen and Bar patio in the Shops at Starwood, Frisco, TX" loading="lazy" srcset="/images/restaurants/trufire-kitchen-bar-600.jpg 600w, /images/restaurants/trufire-kitchen-bar.jpg 1152w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1432,7 +1433,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/restaurants/rudys-bar-b-q.jpg" alt="Rudy's Country Store and Bar-B-Q in Frisco, TX" loading="lazy" decoding="async">
+                        <img width="1152" height="648" src="/images/restaurants/rudys-bar-b-q.jpg" alt="Rudy's Country Store and Bar-B-Q in Frisco, TX" loading="lazy" srcset="/images/restaurants/rudys-bar-b-q-600.jpg 600w, /images/restaurants/rudys-bar-b-q.jpg 1152w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1463,7 +1464,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/restaurants/fuzzys-taco-shop.jpg" alt="Fuzzy's Taco Shop on Preston Road in Frisco, TX" loading="lazy" decoding="async">
+                        <img width="1152" height="648" src="/images/restaurants/fuzzys-taco-shop.jpg" alt="Fuzzy's Taco Shop on Preston Road in Frisco, TX" loading="lazy" srcset="/images/restaurants/fuzzys-taco-shop-600.jpg 600w, /images/restaurants/fuzzys-taco-shop.jpg 1152w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1557,7 +1558,7 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
             <!-- Brand -->
             <div class="site-footer-v2-brand">
                 <a href="/index.html" aria-label="Paws in Stride Home">
-                    <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
+                    <img width="300" height="305" src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
                 </a>
                 <p>Dog Walking, Pet Sitting &amp; Boarding in Frisco, TX.</p>
 
@@ -1633,7 +1634,27 @@ For the easiest, most no-fuss option, start with <a href="#frisco-rail-yard">Fri
         });
     </script>
 
-    <script src="https://static.elfsight.com/platform/platform.js" async></script>
+    <script>
+    // Reviews widget: load its script when a review box gets close to the screen (keeps the first load fast)
+    (function () {
+        var loaded = false;
+        function load() {
+            if (loaded) return; loaded = true;
+            var s = document.createElement('script'); s.src = 'https://static.elfsight.com/platform/platform.js'; s.async = true;
+            document.body.appendChild(s);
+        }
+        function watch() {
+            var boxes = document.querySelectorAll('[class^="elfsight-app-"], [class*=" elfsight-app-"]');
+            if (!boxes.length) return;
+            if (!('IntersectionObserver' in window)) return load();
+            var io = new IntersectionObserver(function (entries) {
+                if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+            }, { rootMargin: '800px 0px' });
+            boxes.forEach(function (b) { io.observe(b); });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+    })();
+    </script>
 
 
     <!-- ========================================

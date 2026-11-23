@@ -126,11 +126,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"
-    >
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"></noscript>
 
     <!-- Same stylesheet as the homepage. Change the ?v= number whenever you edit the CSS. -->
     <link rel="stylesheet" href="/styles.css?v=20260919">
@@ -185,7 +184,7 @@
 
             <!-- BRAND -->
             <a href="/index.html" class="site-header-v2-brand" aria-label="Paws in Stride Home">
-                <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-header-v2-logo">
+                <img width="300" height="305" src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-header-v2-logo">
             </a>
 
             <!-- DESKTOP NAVIGATION (Services is the active page) -->
@@ -285,19 +284,19 @@
 
                 <nav class="svc-tiles" aria-label="Jump to a service">
                     <a class="svc-tile" href="#dog-walking">
-                        <img src="/images/dogwalking.jpg" alt="" loading="lazy" decoding="async">
+                        <img width="900" height="1200" src="/images/dogwalking.jpg" alt="" loading="lazy" srcset="/images/dogwalking-600.jpg 600w, /images/dogwalking.jpg 900w" sizes="(max-width: 500px) 42vw, 353px" decoding="async">
                         <span>Dog Walking</span>
                     </a>
                     <a class="svc-tile" href="#drop-in-visits">
-                        <img src="/images/dropin.jpg" alt="" loading="lazy" decoding="async">
+                        <img width="900" height="1200" src="/images/dropin.jpg" alt="" loading="lazy" srcset="/images/dropin-600.jpg 600w, /images/dropin.jpg 900w" sizes="(max-width: 500px) 42vw, 353px" decoding="async">
                         <span>Drop-Ins</span>
                     </a>
                     <a class="svc-tile" href="#pet-sitting">
-                        <img src="/images/poodle.jpg" alt="" loading="lazy" decoding="async">
+                        <img width="900" height="1132" src="/images/poodle.jpg" alt="" loading="lazy" srcset="/images/poodle-600.jpg 600w, /images/poodle.jpg 900w" sizes="(max-width: 500px) 42vw, 353px" decoding="async">
                         <span>Pet Sitting</span>
                     </a>
                     <a class="svc-tile" href="#dog-boarding">
-                        <img src="/images/poodle2.jpg" alt="" loading="lazy" decoding="async">
+                        <img width="900" height="1514" src="/images/poodle2.jpg" alt="" loading="lazy" srcset="/images/poodle2-600.jpg 600w, /images/poodle2.jpg 900w" sizes="(max-width: 500px) 42vw, 353px" decoding="async">
                         <span>Boarding</span>
                     </a>
                 </nav>
@@ -308,7 +307,7 @@
         <!-- ========== DOG WALKING ========== -->
         <section id="dog-walking" class="svc-card">
             <div class="svc-media">
-                <img class="svc-img-walking" src="/images/dogwalking3.jpg" alt="Dog Walking Services Frisco Texas" loading="lazy" decoding="async">
+                <img width="1200" height="1600" class="svc-img-walking" src="/images/dogwalking3.jpg" alt="Dog Walking Services Frisco Texas" loading="lazy" srcset="/images/dogwalking3-600.jpg 600w, /images/dogwalking3.jpg 1200w" sizes="(max-width: 500px) 95vw, 872px" decoding="async">
             </div>
 
             <div class="svc-body">
@@ -376,7 +375,7 @@
         <!-- ========== DROP-IN VISITS ========== -->
         <section id="drop-in-visits" class="svc-card svc-card--reverse">
             <div class="svc-media">
-                <img class="svc-img-dropin" src="/images/dropinvisits.jpg" alt="Dog Drop-In Visits and Potty Breaks Frisco Texas" loading="lazy" decoding="async">
+                <img width="1200" height="1600" class="svc-img-dropin" src="/images/dropinvisits.jpg" alt="Dog Drop-In Visits and Potty Breaks Frisco Texas" loading="lazy" srcset="/images/dropinvisits-600.jpg 600w, /images/dropinvisits.jpg 1200w" sizes="(max-width: 500px) 95vw, 893px" decoding="async">
             </div>
 
             <div class="svc-body">
@@ -444,7 +443,7 @@
         <!-- ========== PET SITTING ========== -->
         <section id="pet-sitting" class="svc-card">
             <div class="svc-media">
-                <img class="svc-img-sitting" src="/images/petsitting.png" alt="Pet Sitting Frisco Texas" loading="lazy" decoding="async">
+                <img width="1200" height="2098" class="svc-img-sitting" src="/images/petsitting.jpg" alt="Pet Sitting Frisco Texas" loading="lazy" srcset="/images/petsitting-600.jpg 600w, /images/petsitting.jpg 1200w" sizes="(max-width: 500px) 95vw, 1080px" decoding="async">
             </div>
 
             <div class="svc-body">
@@ -563,7 +562,7 @@
         <!-- ========== VIP DOG BOARDING ========== -->
         <section id="dog-boarding" class="svc-card svc-card--reverse">
             <div class="svc-media">
-                <img class="svc-img-boarding" src="/images/dogboarding.jpg" alt="VIP Dog Boarding Frisco Texas" loading="lazy" decoding="async">
+                <img width="1144" height="1898" class="svc-img-boarding" src="/images/dogboarding.jpg" alt="VIP Dog Boarding Frisco Texas" loading="lazy" srcset="/images/dogboarding-600.jpg 600w, /images/dogboarding.jpg 1144w" sizes="(max-width: 500px) 95vw, 750px" decoding="async">
             </div>
 
             <div class="svc-body">
@@ -652,7 +651,7 @@
             <!-- Brand -->
             <div class="site-footer-v2-brand">
                 <a href="/index.html" aria-label="Paws in Stride Home">
-                    <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
+                    <img width="300" height="305" src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
                 </a>
                 <p>Dog Walking, Pet Sitting &amp; Boarding in Frisco, TX.</p>
 
@@ -728,7 +727,27 @@
         });
     </script>
 
-    <script src="https://static.elfsight.com/platform/platform.js" async></script>
+    <script>
+    // Reviews widget: load its script when a review box gets close to the screen (keeps the first load fast)
+    (function () {
+        var loaded = false;
+        function load() {
+            if (loaded) return; loaded = true;
+            var s = document.createElement('script'); s.src = 'https://static.elfsight.com/platform/platform.js'; s.async = true;
+            document.body.appendChild(s);
+        }
+        function watch() {
+            var boxes = document.querySelectorAll('[class^="elfsight-app-"], [class*=" elfsight-app-"]');
+            if (!boxes.length) return;
+            if (!('IntersectionObserver' in window)) return load();
+            var io = new IntersectionObserver(function (entries) {
+                if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+            }, { rootMargin: '800px 0px' });
+            boxes.forEach(function (b) { io.observe(b); });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+    })();
+    </script>
     <script src="/site-banner.js" defer></script>
 </body>
 </html>

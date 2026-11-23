@@ -147,11 +147,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"
-    >
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"></noscript>
 
     <link rel="preload" as="image" href="/images/dropinvisits.jpg" fetchpriority="high">
 
@@ -901,6 +900,8 @@
             >
     
                 <img
+                    width="300"
+                    height="305"
                     src="/pawsnstridelogo1.png"
                     alt="Paws in Stride"
                     class="site-header-v2-logo"
@@ -1200,7 +1201,7 @@
             </div>
 
             <div class="gd-hero-media">
-                <img src="/images/dropinvisits.jpg" alt="Dog greeting a Paws in Stride sitter during a midday drop-in visit in Frisco, Texas" fetchpriority="high" decoding="async">
+                <img width="1200" height="1600" src="/images/dropinvisits.jpg" alt="Dog greeting a Paws in Stride sitter during a midday drop-in visit in Frisco, Texas" fetchpriority="high" decoding="async">
             </div>
         </article>
 
@@ -1342,7 +1343,7 @@
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/dog-playing-fetch-frisco.jpg" alt="Yellow Lab puppy playing fetch with a soccer ball in a Frisco backyard" loading="lazy" decoding="async" style="object-position: 50% 15%;">
+                        <img width="1600" height="900" src="/images/dog-playing-fetch-frisco.jpg" alt="Yellow Lab puppy playing fetch with a soccer ball in a Frisco backyard" loading="lazy" srcset="/images/dog-playing-fetch-frisco-600.jpg 600w, /images/dog-playing-fetch-frisco.jpg 1600w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async" style="object-position: 50% 15%;">
                     </div>
 
                     <div class="gd-park-body">
@@ -1396,7 +1397,7 @@
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/dog-relaxing-on-bed.jpg" alt="Rottweiler relaxing on a cozy bed at home" loading="lazy" decoding="async" style="object-position: 50% 35%;">
+                        <img width="1600" height="900" src="/images/dog-relaxing-on-bed.jpg" alt="Rottweiler relaxing on a cozy bed at home" loading="lazy" srcset="/images/dog-relaxing-on-bed-600.jpg 600w, /images/dog-relaxing-on-bed.jpg 1600w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async" style="object-position: 50% 35%;">
                     </div>
 
                     <div class="gd-park-body">
@@ -1527,7 +1528,7 @@
                     </div>
 
                     <div class="gd-park-media">
-                        <img src="/images/home-alone-dog.jpg" alt="Rottweiler resting on the bed waiting for its owner to come home" loading="lazy" decoding="async">
+                        <img width="1600" height="900" src="/images/home-alone-dog.jpg" alt="Rottweiler resting on the bed waiting for its owner to come home" loading="lazy" srcset="/images/home-alone-dog-600.jpg 600w, /images/home-alone-dog.jpg 1600w" sizes="(max-width: 500px) 86vw, 1146px" decoding="async">
                     </div>
 
                     <div class="gd-park-body">
@@ -1779,7 +1780,7 @@
             <!-- Brand -->
             <div class="site-footer-v2-brand">
                 <a href="/index.html" aria-label="Paws in Stride Home">
-                    <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
+                    <img width="300" height="305" src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
                 </a>
                 <p>Dog Walking, Pet Sitting &amp; Boarding in Frisco, TX.</p>
 
@@ -1856,7 +1857,27 @@
         });
     </script>
 
-    <script src="https://static.elfsight.com/platform/platform.js" async></script>
+    <script>
+    // Reviews widget: load its script when a review box gets close to the screen (keeps the first load fast)
+    (function () {
+        var loaded = false;
+        function load() {
+            if (loaded) return; loaded = true;
+            var s = document.createElement('script'); s.src = 'https://static.elfsight.com/platform/platform.js'; s.async = true;
+            document.body.appendChild(s);
+        }
+        function watch() {
+            var boxes = document.querySelectorAll('[class^="elfsight-app-"], [class*=" elfsight-app-"]');
+            if (!boxes.length) return;
+            if (!('IntersectionObserver' in window)) return load();
+            var io = new IntersectionObserver(function (entries) {
+                if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+            }, { rootMargin: '800px 0px' });
+            boxes.forEach(function (b) { io.observe(b); });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+    })();
+    </script>
 
 
     <!-- ========================================

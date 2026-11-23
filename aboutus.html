@@ -27,7 +27,7 @@
       "name": "Paws in Stride",
       "url": "https://www.pawsinstride.com/",
       "logo": "https://www.pawsinstride.com/pawsnstridelogo1.png",
-      "image": "https://www.pawsinstride.com/images/ownerandchi.png",
+      "image": "https://www.pawsinstride.com/images/ownerandchi.jpg",
       "telephone": "+1-214-736-7923",
 
       "founder": {
@@ -84,14 +84,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"
-    >
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;700&display=swap"></noscript>
 
     <!-- Starts loading the top photo right away -->
-    <link rel="preload" as="image" href="/images/ownerandchi.png" fetchpriority="high">
+    <link rel="preload" as="image" href="/images/ownerandchi.jpg" fetchpriority="high">
 
     <!-- Same stylesheet as the other pages. Change the ?v= number whenever you edit the CSS. -->
     <link rel="stylesheet" href="/styles.css?v=20260919">
@@ -146,7 +145,7 @@
 
             <!-- BRAND -->
             <a href="/index.html" class="site-header-v2-brand" aria-label="Paws in Stride Home">
-                <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-header-v2-logo">
+                <img width="300" height="305" src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-header-v2-logo">
             </a>
 
             <!-- DESKTOP NAVIGATION (Services is the active page) -->
@@ -226,7 +225,7 @@
         <!-- ========== STORY ========== -->
         <section class="abt-hero">
             <div class="abt-media">
-                <img class="abt-img-owner" src="/images/ownerandchi.png" alt="Greg with his dog Chi - Paws in Stride" fetchpriority="high" decoding="async">
+                <img width="1200" height="896" class="abt-img-owner" src="/images/ownerandchi.jpg" alt="Greg with his dog Chi - Paws in Stride" fetchpriority="high" decoding="async">
             </div>
 
             <div class="abt-body">
@@ -261,7 +260,7 @@
         <!-- ========== COMMITMENT ========== -->
         <section class="abt-card abt-card--reverse">
             <div class="abt-media">
-                <img class="abt-img-commit" src="/images/commit.png" alt="Professional dog walking commitment and care in Frisco Texas" loading="lazy" decoding="async">
+                <img width="1200" height="896" class="abt-img-commit" src="/images/commit.jpg" alt="Professional dog walking commitment and care in Frisco Texas" loading="lazy" srcset="/images/commit-600.jpg 600w, /images/commit.jpg 1200w" sizes="(max-width: 500px) 96vw, 1111px" decoding="async">
             </div>
 
             <div class="abt-body">
@@ -334,7 +333,7 @@
             <!-- Brand -->
             <div class="site-footer-v2-brand">
                 <a href="/index.html" aria-label="Paws in Stride Home">
-                    <img src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
+                    <img width="300" height="305" src="/pawsnstridelogo1.png" alt="Paws in Stride" class="site-footer-v2-logo">
                 </a>
                 <p>Dog Walking, Pet Sitting &amp; Boarding in Frisco, TX.</p>
 
@@ -410,7 +409,27 @@
         });
     </script>
 
-    <script src="https://static.elfsight.com/platform/platform.js" async></script>
+    <script>
+    // Reviews widget: load its script when a review box gets close to the screen (keeps the first load fast)
+    (function () {
+        var loaded = false;
+        function load() {
+            if (loaded) return; loaded = true;
+            var s = document.createElement('script'); s.src = 'https://static.elfsight.com/platform/platform.js'; s.async = true;
+            document.body.appendChild(s);
+        }
+        function watch() {
+            var boxes = document.querySelectorAll('[class^="elfsight-app-"], [class*=" elfsight-app-"]');
+            if (!boxes.length) return;
+            if (!('IntersectionObserver' in window)) return load();
+            var io = new IntersectionObserver(function (entries) {
+                if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+            }, { rootMargin: '800px 0px' });
+            boxes.forEach(function (b) { io.observe(b); });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+    })();
+    </script>
     <script src="/site-banner.js" defer></script>
 </body>
 </html>
