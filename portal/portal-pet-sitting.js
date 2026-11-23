@@ -286,7 +286,7 @@
         if (opening) return opening;
         opening = openViewer(visitId).catch(error => {
             console.error(error);
-            alert('Sit updates could not be loaded. Please try again.');
+            (window.pisNotice || window.alert)('Sit updates could not be loaded. Please try again.');
         }).finally(() => { opening = null; });
         return opening;
     };

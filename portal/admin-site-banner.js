@@ -95,11 +95,11 @@
         if (document.getElementById('psb-editor')) return;
         if (state !== 'ready') await load();
         if (state === 'missing') {
-            alert('The website banner needs a one-time setup: run paws-birthday-and-banner-setup.sql in Supabase → SQL Editor.');
+            (window.pisNotice || window.alert)('The website banner needs a one-time setup: run paws-birthday-and-banner-setup.sql in Supabase → SQL Editor.');
             return;
         }
         if (state !== 'ready') {
-            alert('The website banner couldn’t be loaded. Check your connection and try again.');
+            (window.pisNotice || window.alert)('The website banner couldn’t be loaded. Check your connection and try again.');
             return;
         }
         draft = JSON.parse(JSON.stringify(banner));

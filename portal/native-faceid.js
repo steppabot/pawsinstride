@@ -232,7 +232,7 @@
         } catch (error) {
             if (!wasCancelled(error)) {
                 console.warn("Face ID could not be turned on:", error);
-                window.alert(`${label} couldn't be turned on. You can try again from your Profile.`);
+                (window.pisNotice || window.alert)(`${label} couldn't be turned on. You can try again from your Profile.`);
             }
             return false;
         }

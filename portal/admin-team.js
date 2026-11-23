@@ -86,9 +86,9 @@
                     <input type="checkbox" class="pis-assign-all-input" checked>
                     Apply to all ${siblings.length} upcoming visits in this booking
                 </label>` : ''}
-            <p class="pis-assign-msg" role="status" aria-live="polite">${
-                lastResult && lastResult.ids.includes(Number(visit.id)) && Date.now() - lastResult.at < 10000
-                    ? esc(lastResult.text) : ''}</p>`;
+            ${lastResult && lastResult.ids.includes(Number(visit.id)) && Date.now() - lastResult.at < 10000
+                ? `<p class="pis-assign-msg" role="status" aria-live="polite" data-pis-tone-fixed="success">${esc(lastResult.text)}</p>`
+                : '<p class="pis-assign-msg" role="status" aria-live="polite"></p>'}`;
 
         const select = wrap.querySelector('.pis-assign-select');
         const all = wrap.querySelector('.pis-assign-all-input');
@@ -100,6 +100,7 @@
             const who = employeeId ? (profiles().find(p => p.id === employeeId)?.full_name || 'your employee') : 'you';
             select.disabled = true;
             if (all) all.disabled = true;
+            delete msg.dataset.pisToneFixed;
             msg.textContent = 'Saving…';
             try {
                 if (!navigator.onLine) throw new Error("You're offline. Reconnect and try again.");
@@ -114,8 +115,9 @@
                 }
                 const count = ids.length;
                 const text = employeeId
-                    ? `Assigned ${count === 1 ? 'this visit' : `${count} visits`} to ${firstName(who)} ✓${Number(data) > 0 ? ` ${firstName(who)} was notified.` : ''}`
-                    : `${count === 1 ? 'This visit is' : `${count} visits are`} back on your schedule ✓`;
+                    ? `Assigned ${count === 1 ? 'this visit' : `${count} visits`} to ${firstName(who)}.${Number(data) > 0 ? `\n${firstName(who)} was notified.` : ''}`
+                    : `${count === 1 ? 'This visit is' : `${count} visits are`} back on your schedule.`;
+                msg.dataset.pisToneFixed = 'success';
                 msg.textContent = text;
                 lastResult = { ids, text, at: Date.now() };
                 if (typeof renderAdminDayServices === 'function') renderAdminDayServices();
@@ -123,7 +125,8 @@
             } catch (error) {
                 console.error('Assign visit error:', error);
                 select.value = current;
-                msg.textContent = error?.message || 'The visit could not be assigned. Try again.';
+                msg.dataset.pisToneFixed = 'error';
+                msg.textContent = window.PisFormErrors ? PisFormErrors.serverText(error, 'The visit could not be assigned. Try again.') : 'The visit could not be assigned. Try again.';
             } finally {
                 select.disabled = false;
                 if (all) all.disabled = false;
@@ -197,7 +200,7 @@
         .pis-assign-select { flex: 1 1 auto; max-width: 240px; min-width: 0; min-height: 40px; padding: 0 34px 0 12px; border: 1px solid #c9d9ea; border-radius: 10px; background: #fff; color: #1d2b3a; font: inherit; font-weight: 700; }
         .pis-assign-all { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; color: #46617d; font-size: 13px; font-weight: 600; }
         .pis-assign-all input { width: 18px; height: 18px; accent-color: #1f63b8; }
-        .pis-assign-msg { margin: 8px 0 0; color: #2e6b3f; font-size: 13px; font-weight: 700; }
+        .pis-assign-msg { margin: 8px 0 0; color: #2e6b3f; font-size: 13px; font-weight: 700; white-space: pre-line; }
         .pis-assign-msg:empty { display: none; }
         .pis-badge.pis-badge-assignee { background: #ebe5fb !important; color: #5a3aa8 !important; }
 

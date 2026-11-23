@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <title>
+        Join the Team | Paws in Stride
+    </title>
+
+
+    <!-- ========================================
+         PAWS IN STRIDE APP FONT
+         ======================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ========================================
+         PORTAL STYLES
+         ======================================== -->
+
+    <link rel="stylesheet" href="portal.css">
+
+    <!-- ========================================
+         FAVICONS
+    ======================================== -->
+    
+    <link
+        rel="apple-touch-icon"
+        sizes="180x180"
+        href="/icons/apple-touch-icon.png"
+    >
+    
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="32x32"
+        href="/icons/favicon-32x32.png"
+    >
+    
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="16x16"
+        href="/icons/favicon-16x16.png"
+    >
+    
+    <link
+        rel="icon"
+        href="/icons/favicon.ico"
+        type="image/x-icon"
+    >
+    
+    <link
+        rel="shortcut icon"
+        href="/icons/favicon.ico"
+    >
+    
+    <link
+        rel="manifest"
+        href="/portal/manifest.webmanifest"
+    >
+
+</head>
+
+
+<body class="portal-login-page">
+
+    <!-- ========================================
+         JOIN THE TEAM (employees make their login here)
+         ======================================== -->
+
+    <main class="login-page-shell">
+
+        <section class="login-brand-panel">
+            <div class="login-brand-content">
+                <img
+                    src="/portal/assets/paws-in-stride-logo.png"
+                    alt="Paws in Stride"
+                    class="login-brand-logo"
+                >
+                <span class="login-brand-eyebrow">
+                    Team Portal
+                </span>
+                <h1>
+                    Welcome to the Team
+                </h1>
+                <p>
+                    Make your staff login to see your visits, check in,
+                    track walks, and send visit reports.
+                </p>
+                <div class="login-brand-trust">
+                    <span>
+                        Your Visits
+                    </span>
+                    <span>
+                        Walk Tracking
+                    </span>
+                    <span>
+                        Visit Reports
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-form-panel">
+            <div class="login-container">
+
+                <div class="login-mobile-logo-wrapper">
+                    <img
+                        src="/portal/assets/paws-in-stride-logo.png"
+                        alt="Paws in Stride"
+                        class="login-mobile-logo"
+                    >
+                </div>
+
+                <div class="login-form-heading">
+                    <span>
+                        Paws in Stride Team
+                    </span>
+                    <h2>
+                        Make your team login
+                    </h2>
+                    <p>
+                        Use the email Paws in Stride added you with and
+                        the 6-digit setup code they sent you.
+                    </p>
+                </div>
+
+                <form id="join-team-form" novalidate>
+
+                    <div class="login-field">
+                        <label for="join-team-email">
+                            Email Address
+                        </label>
+                        <input
+                            type="email"
+                            id="join-team-email"
+                            name="email"
+                            autocomplete="username"
+                            inputmode="email"
+                            autocapitalize="none"
+                            placeholder="you@example.com"
+                            required
+                        >
+                    </div>
+
+                    <div class="login-field">
+                        <label for="join-team-code">
+                            Setup Code
+                        </label>
+                        <input
+                            type="text"
+                            id="join-team-code"
+                            name="code"
+                            autocomplete="one-time-code"
+                            inputmode="numeric"
+                            maxlength="7"
+                            placeholder="6 digits"
+                            required
+                        >
+                    </div>
+
+                    <div class="login-field">
+                        <label for="join-team-password">
+                            Create a Password
+                        </label>
+                        <input
+                            type="password"
+                            id="join-team-password"
+                            name="password"
+                            autocomplete="new-password"
+                            minlength="8"
+                            placeholder="At least 8 characters"
+                            required
+                        >
+                    </div>
+
+                    <div class="login-field">
+                        <label for="join-team-password-2">
+                            Confirm Password
+                        </label>
+                        <input
+                            type="password"
+                            id="join-team-password-2"
+                            name="password2"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                        >
+                    </div>
+
+                    <button
+                        type="submit"
+                        id="join-team-submit"
+                        class="login-submit-button"
+                    >
+                        Create My Login
+                    </button>
+
+                </form>
+
+                <p id="join-team-message" role="status" aria-live="polite"></p>
+
+                <div class="login-signup-prompt join-team-signin-prompt">
+
+                    <span>
+                        Already Have a Login?
+                    </span>
+
+                    <a href="./login.html">
+                        Sign In
+                    </a>
+
+                </div>
+
+                <div class="login-footer-note">
+                    <span>
+                        Paws in Stride
+                    </span>
+                    <span>
+                        Professional Pet Care
+                    </span>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================
+         SUPABASE
+         ======================================== -->
+
+    <script src="../vendor/supabase.js"></script>
+    <script>
+        // Website or app: use the bundled copy; fall back to the internet copy if it's missing.
+        window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');
+    </script>
+
+    <script src="form-errors.js"></script>
+    <script src="join-team.js"></script>
+<script src="native-back.js"></script>
+<script src="native-noselect.js"></script>
+</body>
+</html>

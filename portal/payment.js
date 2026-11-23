@@ -323,8 +323,7 @@ function setPaymentMessage(
     type = ""
 ) {
 
-    paymentMessage.textContent =
-        message;
+    paymentMessage.dataset.pisToneFixed = type === "error" || type === "success" ? type : ""; if (!paymentMessage.dataset.pisToneFixed) delete paymentMessage.dataset.pisToneFixed; paymentMessage.textContent = message;
 
 
     paymentMessage.style.color =

@@ -273,6 +273,18 @@
     border-radius: 0 !important; box-shadow: none !important; background: #ffffff !important;
    }
    .vfm-body > .admin-service-card .admin-completed-visit-actions:empty { display: none !important; }
+   .vfm-body > .admin-boarding-walk-panel.vfm-live-walk {
+    margin: 0 !important; padding: 16px !important; border: 1px solid #f2cfae !important; border-radius: 18px !important;
+    background: #fff8f1 !important; box-shadow: none !important;
+   }
+   .vfm-live-walk h6 { margin: 0 0 4px !important; font-size: 12px !important; letter-spacing: .08em; text-transform: uppercase; color: #c0610c; }
+   .vfm-body > .admin-service-card > .admin-boarding-walk-list h6 { font-size: 13px !important; letter-spacing: .06em; text-transform: uppercase; color: #c0610c; margin: 0 0 8px !important; }
+   .vfm-live-walk .boarding-walk-totals { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px !important; margin: 8px 0 6px; }
+   .vfm-live-walk .boarding-walk-totals span {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px;
+    background: #ffffff; border: 1px solid #f2cfae; border-radius: 14px; font-size: 12px; font-weight: 700; color: #8a5a2b;
+   }
+   .vfm-live-walk .boarding-walk-totals strong { font-size: 30px !important; line-height: 1.1; font-weight: 800; color: #183447; font-variant-numeric: tabular-nums; }
    html.vfm-lock, html.vfm-lock body { overflow: hidden; }
 
    /* ----- popup: summary, quick actions, pinned buttons ----- */
@@ -581,9 +593,14 @@
   return 'scheduled';
  }
 
+ // A boarding walk in progress goes to the top of the popup (time and
+ // distance first); when it starts, the popup scrolls up to show it.
+ let liveWalkShownFor = '';
+
  function decoratePopup(visit, card) {
   body.querySelectorAll(':scope > .pis-summary, :scope > .pis-footer').forEach(el => el.remove());
   body.insertBefore(buildSummary(visit, card), card);
+
 
   // Pin the visit's action buttons to the bottom of the popup.
   const footer = document.createElement('div');
@@ -597,6 +614,15 @@
    if (sitButton) footer.prepend(sitButton);
   }
   body.appendChild(footer);
+
+  const liveWalk = card.querySelector(':scope > .admin-boarding-walk-panel.has-active-walk');
+  if (liveWalk) {
+   liveWalk.classList.add('vfm-live-walk');
+   body.insertBefore(liveWalk, body.firstChild);
+  }
+  const liveKey = liveWalk ? String(visit.id) : '';
+  if (liveKey && liveKey !== liveWalkShownFor) body.scrollTop = 0;
+  liveWalkShownFor = liveKey;
  }
 
  // ---------- 3b. Report view: show only the report inside the popup ----------
@@ -687,7 +713,7 @@
   timerEl.classList.remove('is-live');
   if (isBoarding(visit)) {
    const card = body.querySelector('.admin-service-card');
-   const walkLive = card?.querySelector('[id^="admin-walk-duration-"]');
+   const walkLive = body.querySelector('[id^="admin-walk-duration-"]');
    timerEl.textContent = walkLive
     ? `Boarding walk ${walkLive.textContent.trim()}`
     : (card?.querySelector('.admin-service-statuses .service-status')?.textContent.trim() || 'Boarding');
@@ -717,6 +743,10 @@
   else if (Number(focusedVisitId) !== Number(visitId)) focusedIsPickup = false;
   focusedVisitId = Number(visitId);
   if (!alreadyOpen) mountCard();
+  // Boarding: pull the latest stay status and walks as it opens (no refresh buttons).
+  if (!alreadyOpen && isBoarding(visit)) {
+   try { window.PawsLiveSync?.queue?.('boarding_stays'); window.PawsLiveSync?.queue?.('visit_walks'); } catch { /* ignore */ }
+  }
 
   modal.hidden = false;
   document.documentElement.classList.add('vfm-lock');
@@ -764,16 +794,43 @@
   }
  }
 
- function requestClose({ fromHistory = false } = {}) {
+ let askingClose = false;
+
+ function askCloseReport() {
+  if (typeof confirmAdminChoice === 'function') {
+   return confirmAdminChoice({
+    title: 'Close without saving?',
+    context: ['Visit report', "What you've typed will be lost."],
+    message: 'Keep editing to finish the report, or close and lose your changes.',
+    confirmText: 'Close Without Saving',
+    cancelText: 'Keep Editing',
+    caution: true
+   });
+  }
+  return Promise.resolve(window.confirm('Close without saving this visit report?'));
+ }
+
+ async function requestClose({ fromHistory = false } = {}) {
   if (!focusedVisitId) return;
   const editingReport =
    typeof activeVisitReportVisitId !== 'undefined' &&
    Number(activeVisitReportVisitId) === Number(focusedVisitId) &&
    body.querySelector('[data-visit-report-form]');
 
-  if (editingReport && !window.confirm('Close without saving this visit report?')) {
+  if (editingReport) {
+   // the back button already left this screen's history entry: put it back while asking
    if (fromHistory) { try { history.pushState({ vfm: focusedVisitId }, ''); historyPushed = true; } catch { /* ignore */ } }
-   return;
+   if (askingClose) {
+    // back pressed again while the question is up: same as Keep Editing
+    if (fromHistory) document.getElementById('admin-visit-action-confirm')?.close('cancelled');
+    return;
+   }
+   askingClose = true;
+   const askedFor = focusedVisitId;
+   let leave = false;
+   try { leave = await askCloseReport(); } finally { askingClose = false; }
+   if (!leave || focusedVisitId !== askedFor) return;
+   fromHistory = false;
   }
 
   try {

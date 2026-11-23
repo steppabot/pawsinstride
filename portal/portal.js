@@ -1241,13 +1241,10 @@ if (loginForm) {
                 !loginEmailInput.checkValidity()
             ) {
 
-                message.textContent =
-                    "Please enter a valid email address.";
-
-
-                loginEmailInput.focus();
-
-                return;
+                message.textContent = "";
+            if (window.PisFormErrors) window.PisFormErrors.show(loginEmailInput, email ? "Enter a full email address, like name@example.com." : "Enter your email address.");
+            else { message.textContent = "Please enter a valid email address."; loginEmailInput.focus(); }
+            return;
 
             }
 
@@ -1258,13 +1255,10 @@ if (loginForm) {
 
             if (!password) {
 
-                message.textContent =
-                    "Please enter your password.";
-
-
-                loginPasswordInput.focus();
-
-                return;
+                message.textContent = "";
+            if (window.PisFormErrors) window.PisFormErrors.show(loginPasswordInput, "Enter your password.");
+            else { message.textContent = "Please enter your password."; loginPasswordInput.focus(); }
+            return;
 
             }
 
@@ -1293,8 +1287,12 @@ if (loginForm) {
                 );
 
 
-                message.textContent =
-                    "Incorrect email or password.";
+                message.textContent = "";
+                if (window.PisFormErrors) {
+                    window.PisFormErrors.show(loginPasswordInput, "That email and password don't match. Try again, or tap Forgot Password?");
+                } else {
+                    message.textContent = "Incorrect email or password.";
+                }
 
                 // a Face ID sign-in with an old saved password clears it (native-faceid.js)
                 window.PisFaceId?.loginFailed?.();
@@ -1477,15 +1475,14 @@ if (forgotPasswordForm) {
                 )
             ) {
 
+                if (window.PisFormErrors) {
+                window.PisFormErrors.show(emailField, email ? "Enter a full email address, like name@example.com." : "Enter the email address you signed up with.");
+            } else {
                 emailField.focus();
-
-                emailField.style.borderColor =
-                    "#dc3545";
-
-                emailField.style.boxShadow =
-                    "0 0 0 3px rgba(220, 53, 69, 0.14)";
-
-                return;
+                emailField.style.borderColor = "#dc3545";
+                emailField.style.boxShadow = "0 0 0 3px rgba(220, 53, 69, 0.14)";
+            }
+            return;
 
             }
 
@@ -2044,14 +2041,13 @@ if (resetPasswordForm) {
                 8
             ) {
 
-                showResetPasswordFieldError(
-                    resetNewPasswordField
-                );
-
-
-                resetPasswordMessage.textContent =
-                    "Your password must be at least 8 characters.";
-
+                if (window.PisFormErrors) {
+                    resetPasswordMessage.textContent = "";
+                    window.PisFormErrors.show(resetNewPasswordField, "Use at least 8 characters.");
+                } else {
+                    showResetPasswordFieldError(resetNewPasswordField);
+                    resetPasswordMessage.textContent = "Your password must be at least 8 characters.";
+                }
                 return;
 
             }
@@ -2066,13 +2062,13 @@ if (resetPasswordForm) {
                 confirmPassword
             ) {
 
-                showResetPasswordFieldError(
-                    resetConfirmPasswordField
-                );
-
-
-                resetPasswordMessage.textContent =
-                    "The passwords do not match.";
+                if (window.PisFormErrors) {
+                    resetPasswordMessage.textContent = "";
+                    window.PisFormErrors.show(resetConfirmPasswordField, "The two passwords don't match.");
+                } else {
+                    showResetPasswordFieldError(resetConfirmPasswordField);
+                    resetPasswordMessage.textContent = "The passwords do not match.";
+                }
 
                 return;
 
@@ -2505,8 +2501,7 @@ async function loadDashboard(options = {}) {
         );
 
 
-        loading.textContent =
-            "We couldn't load your client profile.";
+        loading.textContent = "We couldn't load your client profile."; loading.dataset.pisTone = "error";
 
         return;
 
@@ -4022,18 +4017,11 @@ if (clientPhotoInput) {
                 )
             ) {
 
-                clientPhotoInput.value =
-                    "";
-
-
-                pendingClientPhotoFile =
-                    null;
-
-
-                message.textContent =
-                    "Please choose a JPG, PNG, or WebP image.";
-
-                return;
+                clientPhotoInput.value = "";
+            pendingClientPhotoFile = null;
+            message.textContent = "Please choose a JPG, PNG, or WebP image.";
+            window.PisFormErrors?.fromPageMessage(clientPhotoInput);
+            return;
 
             }
 
@@ -4043,18 +4031,11 @@ if (clientPhotoInput) {
                 MAX_PHOTO_SIZE
             ) {
 
-                clientPhotoInput.value =
-                    "";
-
-
-                pendingClientPhotoFile =
-                    null;
-
-
-                message.textContent =
-                    "That photo is larger than 5 MB.";
-
-                return;
+                clientPhotoInput.value = "";
+            pendingClientPhotoFile = null;
+            message.textContent = "That photo is larger than 5 MB. Choose a smaller one.";
+            window.PisFormErrors?.fromPageMessage(clientPhotoInput);
+            return;
 
             }
 
@@ -4371,11 +4352,16 @@ function clearHouseholdFieldError(
 
 
 function focusHouseholdFieldError(
-    field
+    field,
+    message = ""
 ) {
-
     if (!field) {
         return false;
+    }
+    if (window.PisFormErrors && message) {
+        field.classList.add("household-field-error");
+        window.PisFormErrors.show(field, message);
+        return true;
     }
 
 
@@ -4775,8 +4761,9 @@ if (householdForm) {
             ) {
 
                 focusHouseholdFieldError(
-                    fullNameField
-                );
+            fullNameField,
+            "Enter your first and last name."
+        );
 
                 return;
 
@@ -4800,8 +4787,9 @@ if (householdForm) {
             ) {
 
                 focusHouseholdFieldError(
-                    phoneField
-                );
+            phoneField,
+            "Enter a 10-digit phone number."
+        );
 
                 return;
 
@@ -4817,8 +4805,9 @@ if (householdForm) {
             ) {
 
                 focusHouseholdFieldError(
-                    streetAddressField
-                );
+            streetAddressField,
+            "Enter your street address."
+        );
 
                 return;
 
@@ -4834,8 +4823,9 @@ if (householdForm) {
             ) {
 
                 focusHouseholdFieldError(
-                    cityField
-                );
+            cityField,
+            "Enter your city."
+        );
 
                 return;
 
@@ -4851,8 +4841,9 @@ if (householdForm) {
             ) {
 
                 focusHouseholdFieldError(
-                    stateField
-                );
+            stateField,
+            "Choose your state."
+        );
 
                 return;
 
@@ -4870,8 +4861,9 @@ if (householdForm) {
             ) {
 
                 focusHouseholdFieldError(
-                    zipField
-                );
+            zipField,
+            "Enter a 5-digit ZIP code."
+        );
 
                 return;
 
@@ -4892,8 +4884,9 @@ if (householdForm) {
             ) {
 
                 focusHouseholdFieldError(
-                    emergencyPhoneField
-                );
+            emergencyPhoneField,
+            "Enter a 10-digit phone number for your emergency contact, or leave it blank."
+        );
 
                 return;
 
@@ -5343,14 +5336,10 @@ if (
                     message
                 ) {
 
-                    message.textContent =
-                        "Your new password must be at least 8 characters.";
-
-                    message.classList.add(
-                        "is-error"
-                    );
-
-                }
+                    message.textContent = newPassword ? "Your new password must be at least 8 characters." : "Enter a new password.";
+                message.classList.add("is-error");
+                window.PisFormErrors?.fromPageMessage(newPasswordField);
+            }
 
 
                 newPasswordField.focus();
@@ -5379,14 +5368,10 @@ if (
                     message
                 ) {
 
-                    message.textContent =
-                        "Your passwords do not match.";
-
-                    message.classList.add(
-                        "is-error"
-                    );
-
-                }
+                    message.textContent = "Your passwords do not match.";
+                message.classList.add("is-error");
+                window.PisFormErrors?.fromPageMessage(confirmPasswordField);
+            }
 
 
                 confirmPasswordField.focus();
@@ -6752,14 +6737,10 @@ if (petPhotoInput) {
                 )
             ) {
 
-                petPhotoInput.value =
-                    "";
-
-
-                message.textContent =
-                    "Please choose a JPG, PNG, or WebP image.";
-
-                return;
+                petPhotoInput.value = "";
+            message.textContent = "Please choose a JPG, PNG, or WebP image.";
+            window.PisFormErrors?.fromPageMessage(petPhotoInput);
+            return;
 
             }
 
@@ -6769,14 +6750,10 @@ if (petPhotoInput) {
                 MAX_PHOTO_SIZE
             ) {
 
-                petPhotoInput.value =
-                    "";
-
-
-                message.textContent =
-                    "That photo is larger than 5 MB.";
-
-                return;
+                petPhotoInput.value = "";
+            message.textContent = "That photo is larger than 5 MB. Choose a smaller one.";
+            window.PisFormErrors?.fromPageMessage(petPhotoInput);
+            return;
 
             }
 
@@ -6880,13 +6857,10 @@ if (petForm) {
 
 
             if (!name) {
-
-                message.textContent =
-                    "Please enter your pet's name.";
-
-                return;
-
-            }
+            message.textContent = "Please enter your pet's name.";
+            if (nameField) window.PisFormErrors?.fromPageMessage(nameField);
+            return;
+        }
 
 
             const payload = {
@@ -14441,7 +14415,7 @@ if (bookingForm) {
                 message.textContent =
                     serviceType ===
                         "Pet Sitting"
-                        ? "Please select a time block."
+                        ? "Please select a start time."
                         : "Please select a preferred time window.";
 
 
@@ -14484,14 +14458,9 @@ if (bookingForm) {
                     !validation.valid
                 ) {
             
-                    message.textContent =
-                        validation.message;
-            
-            
-                    const calendar =
-                        document.getElementById(
-                            "multi-date-booking"
-                        );
+                    message.textContent = validation.message;
+                    const calendar = document.getElementById("multi-date-booking");
+                    if (window.PisFormErrors && calendar) { window.PisFormErrors.fromPageMessage(calendar); return; }
             
             
                     calendar?.scrollIntoView({
@@ -14516,14 +14485,9 @@ if (bookingForm) {
                 1
             ) {
             
-                message.textContent =
-                    "Please select at least one visit.";
-            
-            
-                const calendar =
-                    document.getElementById(
-                        "multi-date-booking"
-                    );
+                message.textContent = "Please select at least one visit.";
+                const calendar = document.getElementById("multi-date-booking");
+                if (window.PisFormErrors && calendar) { window.PisFormErrors.fromPageMessage(calendar); return; }
             
             
                 calendar?.scrollIntoView({
@@ -14561,8 +14525,9 @@ if (bookingForm) {
                     `The ${expiredVisit.timeWindow} window on ` +
                     `${formatDate(expiredVisit.date)} has already passed. ` +
                     "Remove that visit and choose a later time or date.";
-
                 renderBookingCalendar();
+                const pastCalendar = document.getElementById("selected-dates") || document.getElementById("multi-date-booking");
+                if (pastCalendar) window.PisFormErrors?.fromPageMessage(pastCalendar);
                 return;
             }
 
@@ -14614,15 +14579,13 @@ if (bookingForm) {
             
             
                     renderSelectedDates();
-            
-            
-                    const selectedVisitsSection =
-                        document.getElementById(
-                            "selected-dates"
-                        ) ||
-                        document.getElementById(
-                            "multi-date-booking"
-                        );
+                const selectedVisitsSection =
+                    document.getElementById("selected-dates") ||
+                    document.getElementById("multi-date-booking");
+                if (window.PisFormErrors && selectedVisitsSection) {
+                    window.PisFormErrors.fromPageMessage(selectedVisitsSection);
+                    return;
+                }
             
             
                     selectedVisitsSection
@@ -14904,10 +14867,10 @@ if (bookingForm) {
                     )
                 ) {
 
-                    message.textContent =
-                        "Dog Walking and Drop-In bookings require at least 3 service dates per week.";
-
-                }
+                    message.textContent = "Dog Walking and Drop-In bookings require at least 3 service dates per week.";
+                const weekCalendar = document.getElementById("multi-date-booking");
+                if (weekCalendar) window.PisFormErrors?.fromPageMessage(weekCalendar);
+            }
                 else if (
                     serverMessage.includes(
                         "time window just filled up"
@@ -15000,10 +14963,14 @@ async function submitBoardingBooking(
         nights < 1
     ) {
 
-        message.textContent =
-            "Please complete your boarding dates and pickup time.";
-
-
+        message.textContent = "Please complete your boarding dates and pickup time.";
+        if (window.PisFormErrors) {
+            message.textContent = "";
+            if (!dropoff) window.PisFormErrors.show(boardingDropoff, "Pick your drop-off date.");
+            else if (!pickup) window.PisFormErrors.show(boardingPickup, "Pick your pickup date.");
+            else if (nights < 1) window.PisFormErrors.show(boardingPickup, "Pickup needs to be at least one night after drop-off.");
+            else window.PisFormErrors.show(boardingPickupWindow, "Choose a pickup time.");
+        }
         return;
 
     }
@@ -15162,20 +15129,18 @@ async function submitBoardingBooking(
             )
         ) {
 
-            message.textContent =
-                "Your pickup date must be after your drop-off date.";
-
-        }
+            message.textContent = "Your pickup date must be after your drop-off date.";
+                window.PisFormErrors?.fromPageMessage(boardingPickup);
+            }
         else if (
             serverMessage.includes(
                 "Invalid boarding pickup"
             )
         ) {
 
-            message.textContent =
-                "Please select a valid boarding pickup time.";
-
-        }
+            message.textContent = "Please select a valid boarding pickup time.";
+                window.PisFormErrors?.fromPageMessage(boardingPickupWindow);
+            }
         else if (
             serverMessage.includes(
                 "does not belong to this account"
@@ -15402,6 +15367,7 @@ async function loadClientBoardingWalks(state, reset = false) {
     const more = state.dialog.querySelector("[data-client-boarding-walk-more]");
     const refresh = state.dialog.querySelector("[data-client-boarding-walk-refresh]");
     more.disabled = refresh.disabled = true;
+    refresh.hidden = true;   // walks update live; Try Again only shows if loading fails
     if (reset) { state.walkOffset = 0; state.walkSeen = new Set(); mount.innerHTML = ""; }
     message.textContent = "Loading walks…";
     try {
@@ -15428,7 +15394,8 @@ async function loadClientBoardingWalks(state, reset = false) {
         message.textContent = state.walkSeen.size ? "Completed walks during this stay." : "Completed walks will appear here when available.";
     } catch (error) {
         console.error("Boarding walks error:", error);
-        message.textContent = "Walks could not be loaded. Tap Refresh Walks to try again.";
+        message.textContent = "Walks couldn't load.";
+        refresh.hidden = false;
     } finally { state.walkBusy = false; more.disabled = refresh.disabled = false; }
 }
 
@@ -15453,12 +15420,12 @@ async function showClientBoardingWalkRoute(state, button) {
         }
         if (!mount.isConnected) return;
         if (points.length < 2) { mount.textContent = "Not enough GPS points to display this route."; return; }
-        if (!window.google?.maps) { mount.textContent = "The map could not load. Refresh the page and try again."; return; }
+        if (!window.google?.maps) { mount.innerHTML = `<p class="client-route-problem" data-pis-tone="error">The map could not load. Refresh the page and try again.</p>`; return; }
         mount.textContent = "";
         renderClientGoogleWalkRoute(`boarding-${id}`, points);
     } catch (error) {
         console.error("Boarding walk route error:", error);
-        mount.textContent = "This route could not be loaded. Please try again.";
+        mount.innerHTML = `<p class="client-route-problem" data-pis-tone="error">This route could not be loaded. Please try again.</p>`;
     } finally { button.disabled = false; }
 }
 
@@ -15611,11 +15578,23 @@ async function signedClientBoardingPhoto(path) {
     return result.error ? null : result.data?.signedUrl || null;
 }
 
+// Boarding photos are stored as <first night's visit id>/boarding-<update request id>-<photo id>.jpg.
+// If an update comes back without its photo list, look for its files in storage.
+async function listClientBoardingStoredPhotos(stay) {
+    if (!stay?.primary_visit_id) return [];
+    const folder = String(stay.primary_visit_id);
+    const { data, error } = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
+        .list(folder, { limit: 1000, search: "boarding-", sortBy: { column: "created_at", order: "asc" } });
+    if (error) return [];
+    return (data || []).filter(file => /^boarding-.+\.jpg$/i.test(file.name || ""))
+        .map(file => ({ ...file, path: `${folder}/${file.name}` }));
+}
+
 async function openClientBoardingUpdates(stayId) {
     if (clientBoardingOpenPromise) return clientBoardingOpenPromise;
     clientBoardingOpenPromise = loadAndOpenClientBoardingUpdates(stayId);
     try { await clientBoardingOpenPromise; }
-    catch (error) { console.error(error); alert("Boarding updates could not be loaded. Please try again."); }
+    catch (error) { console.error(error); (window.pisNotice || window.alert)("Boarding updates could not be loaded. Please try again."); }
     finally { clientBoardingOpenPromise = null; }
 }
 
@@ -15626,7 +15605,7 @@ async function loadAndOpenClientBoardingUpdates(stayId) {
     await loadClientBoardingData(true);
     const stay = clientBoardingData.stays.find(s => s.id === stayId);
     if (!clientBoardingData.loaded || !stay) {
-        alert("Boarding updates could not be loaded. Please try again."); return;
+        (window.pisNotice || window.alert)("Boarding updates could not be loaded. Please try again."); return;
     }
     const dialog = document.createElement("dialog");
     dialog.className = "client-boarding-dialog";
@@ -15637,12 +15616,12 @@ async function loadAndOpenClientBoardingUpdates(stayId) {
         <p>${escapeHtml(clientBoardingDate(stay.dropoff_date))} → ${escapeHtml(clientBoardingDate(stay.pickup_date))}</p></div>
         <button type="button" data-boarding-view-close aria-label="Close boarding updates">×</button></header>
         <div class="client-boarding-dialog-body"><p>${stay.status === "active" ? "Boarding with us" : "Boarding complete"}</p>
-        <section class="client-boarding-walk-section"><h3>Boarding walks</h3>
+        <section class="client-boarding-walk-section"><h3>Boarding Walks</h3>
         <div data-client-boarding-walks></div><p data-client-boarding-walk-message role="status"></p>
-        <button type="button" class="secondary-button" data-client-boarding-walk-refresh>Refresh Walks</button>
+        <button type="button" class="secondary-button" data-client-boarding-walk-refresh hidden>Try Again</button>
         <button type="button" class="secondary-button" data-client-boarding-walk-more hidden>Load More Walks</button></section>
         <div data-client-boarding-feed></div><p data-client-boarding-feed-message role="status"></p>
-        <button type="button" class="secondary-button" data-client-boarding-more>Load updates</button></div>`;
+        <button type="button" class="secondary-button" data-client-boarding-more>Load More</button></div>`;
     const state = { dialog, stay, offset: 0, seen: new Set(), busy: false };
     clientBoardingViewer = state;
     document.body.appendChild(dialog);
@@ -15664,7 +15643,7 @@ async function loadAndOpenClientBoardingUpdates(stayId) {
     }
     catch (error) {
         dialog.remove(); clientBoardingViewer = null;
-        console.error(error); alert("Boarding updates could not be opened. Please refresh and try again.");
+        console.error(error); (window.pisNotice || window.alert)("Boarding updates could not be opened. Please refresh and try again.");
     }
 }
 
@@ -15677,7 +15656,7 @@ async function loadClientBoardingFeed(state, refresh = false) {
     if (!refresh) message.textContent = "Loading updates…";
     try {
         const { data, error } = await supabaseClient.from("boarding_updates")
-            .select("id, update_date, notes, published_at, boarding_update_photos(storage_path, caption, sort_order), boarding_update_pet_care(pet_id, fed, fresh_water, pee, poop)")
+            .select("id, request_id, update_date, notes, published_at, boarding_update_photos(storage_path, caption, sort_order), boarding_update_pet_care(pet_id, fed, fresh_water, pee, poop)")
             .eq("stay_id", state.stay.id).not("published_at", "is", null)
             .order("published_at", { ascending: false }).order("id", { ascending: false })
             .range(refresh ? 0 : state.offset, refresh ? Math.max(20, state.offset) - 1 : state.offset + 19);
@@ -15685,6 +15664,13 @@ async function loadClientBoardingFeed(state, refresh = false) {
         const rows = data || [];
         const signature = JSON.stringify(rows);
         if (refresh && state.liveSignature === signature) return;
+        let stored = null;
+        for (const row of rows) {
+            if ((row.boarding_update_photos || []).length || !row.request_id) continue;
+            stored ||= await listClientBoardingStoredPhotos(state.stay);
+            row.boarding_update_photos = stored.filter(file => file.name.startsWith(`boarding-${row.request_id}-`))
+                .map((file, index) => ({ storage_path: file.path, caption: "", sort_order: index }));
+        }
         const cards = await Promise.all(rows.filter(row => refresh || !state.seen.has(row.id)).map(async row => {
             const photos = await Promise.all((row.boarding_update_photos || [])
                 .sort((a, b) => a.sort_order - b.sort_order)
@@ -15739,8 +15725,9 @@ async function loadClientBoardingFeed(state, refresh = false) {
         message.textContent = state.seen.size ? "Tap a photo to view it full size." : "We’ll share photos and updates here during your pet’s stay.";
     } catch (error) {
         console.error("Boarding feed error:", error);
-        message.textContent = "Updates could not be loaded. Please try again.";
-        button.textContent = "Retry";
+        message.textContent = "Updates couldn't load.";
+        button.textContent = "Try Again";
+        button.hidden = false;
     } finally { state.busy = false; button.disabled = false; }
 }
 
@@ -17537,9 +17524,7 @@ function openClientMeetGreetCancellationModal(visit) {
                 button.textContent =
                     "Confirm Cancellation";
 
-                message.textContent =
-                    error?.message ||
-                    "We couldn't cancel the appointment. Please try again.";
+                message.textContent = window.PisFormErrors ? PisFormErrors.serverText(error, "We couldn't cancel the appointment. Please try again.") : "We couldn't cancel the appointment. Please try again.";
 
                 return;
 
@@ -17592,9 +17577,7 @@ function openClientMeetGreetCancellationModal(visit) {
                     error
                 );
 
-                window.alert(
-                    "Your Meet & Greet was cancelled. Refresh the page to update your calendar."
-                );
+                (window.pisNotice ? window.pisNotice("Your Meet & Greet was cancelled. Refresh the page to update your calendar.", "success") : (window.pisNotice || window.alert)("Your Meet & Greet was cancelled. Refresh the page to update your calendar."));
 
             }
 
@@ -17754,7 +17737,7 @@ async function openClientCancellationModal(visit) {
         } catch (error) {
             console.error("Cancellation preview error:", error);
             if (!overlay.isConnected || request !== requestNumber) return;
-            renderPreview(error?.message || "We couldn't load your cancellation credit. Please retry.");
+            renderPreview(window.PisFormErrors ? PisFormErrors.serverText(error, "We couldn't load your cancellation credit. Please retry.") : "We couldn't load your cancellation credit. Please retry.");
         }
         if (overlay.isConnected) {
             overlay.querySelector(".client-cancellation-actions [data-client-cancellation-close]")?.focus();
@@ -17821,7 +17804,7 @@ async function openClientCancellationModal(visit) {
                 }
             } else {
                 preview = null;
-                renderPreview(error?.message || "We couldn't confirm the cancellation. Retry the preview to check its current status.");
+                renderPreview(window.PisFormErrors ? PisFormErrors.serverText(error, "We couldn't confirm the cancellation. Retry the preview to check its current status.") : "We couldn't confirm the cancellation. Retry the preview to check its current status.");
             }
             return;
         }
@@ -17848,7 +17831,7 @@ async function openClientCancellationModal(visit) {
             await renderAccountCredit();
         } catch (error) {
             console.error("Service cancelled, but the display could not refresh:", error);
-            window.alert("Your service was cancelled and the account credit was saved. Refresh the page to update your services.");
+            (window.pisNotice ? window.pisNotice("Your service was cancelled and the account credit was saved. Refresh the page to update your services.", "success") : (window.pisNotice || window.alert)("Your service was cancelled and the account credit was saved. Refresh the page to update your services."));
         }
     });
 
@@ -21454,8 +21437,7 @@ async function initializeClientPortal() {
             );
 
         if (loading && !fastStarted) {
-            loading.textContent =
-                "We couldn't load your portal. Please refresh to try again.";
+            loading.textContent = "We couldn't load your portal. Please refresh to try again."; loading.dataset.pisTone = "error";
         }
 
     } finally {
@@ -21809,7 +21791,7 @@ async function logoutClientNow() {
 
         document.getElementById("client-logout-modal")?.remove();
 
-        alert(
+        (window.pisNotice || window.alert)(
             "We couldn’t log you out. Please check your connection and try again."
         );
 
@@ -23717,7 +23699,7 @@ async function renderClientHomeLatestUpdate(version) {
         } else {
             if (!stillCurrent()) return;
             for (const target of targets) {
-                target.empty.textContent = clientBoardingData.error ? "Updates are temporarily unavailable. Please try again." :
+                target.empty.dataset.pisStatus = ""; target.empty.textContent = clientBoardingData.error ? "Updates are temporarily unavailable. Please try again." :
                     "Your latest visit or boarding update will appear here.";
                 target.empty.style.display = "block";
                 target.content.style.display = "none";
@@ -23744,7 +23726,7 @@ async function renderClientHomeLatestUpdate(version) {
         console.error("Latest update error:", error);
         if (!stillCurrent()) return;
         for (const target of targets) {
-            target.empty.textContent = "Your latest update is temporarily unavailable. Please try again.";
+            target.empty.dataset.pisStatus = ""; target.empty.textContent = "Your latest update is temporarily unavailable. Please try again.";
             target.empty.style.display = "block";
             target.content.style.display = "none";
             target.button.onclick = null;
@@ -26023,7 +26005,7 @@ async function handleClientNotificationAction(
     if (isClientBoardingNotification(notificationType) || entityType === "boarding_stay") {
         const stayId = String(notification.metadata?.boarding_stay_id || notification.entity_id || "");
         if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stayId)) {
-            alert("This boarding notification is missing its stay. Please open Boarding Updates from your calendar.");
+            (window.pisNotice || window.alert)("This boarding notification is missing its stay. Please open Boarding Updates from your calendar.");
             return;
         }
         closeClientMessaging();
@@ -32604,9 +32586,7 @@ async function startReviewClaim() {
             message
         ) {
  
-            message.textContent =
-                error?.message ||
-                "We couldn't start your review credit. Please try again.";
+            message.textContent = window.PisFormErrors ? PisFormErrors.serverText(error, "We couldn't start your review credit. Please try again.") : "We couldn't start your review credit. Please try again.";
  
         }
  
@@ -32864,6 +32844,7 @@ function openClientBoardingPhotoLightbox(link) {
 document.addEventListener('click', event => {
     const link = event.target.closest?.('.client-boarding-dialog .client-boarding-photo-grid a[href]');
     if (!link) return;
+    if (window.PisPhotoGallery) return;   // the swipeable gallery (admin-photo-viewer.js) opens it
     event.preventDefault();
     event.stopPropagation();
     openClientBoardingPhotoLightbox(link);
@@ -33672,7 +33653,7 @@ if (!document.getElementById("dashboard-content")) {
             busy = false;
             input.disabled = false;
             modal.querySelectorAll("[data-delete-account-close]").forEach(el => { el.disabled = false; });
-            setMessage(error?.message || "Your account could not be deleted. Please try again.");
+            setMessage(window.PisFormErrors ? PisFormErrors.serverText(error, "Your account could not be deleted. Please try again.") : "Your account could not be deleted. Please try again.");
             updateFinalButton();
         }
     }

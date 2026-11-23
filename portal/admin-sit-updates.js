@@ -95,7 +95,19 @@
         if (state.busy) return;
         const d = state.draft;
         const hasContent = d.notes.trim() || d.photos.length || d.care.some(c => c.fed || c.fresh_water || c.pee || c.poop);
-        if (hasContent && !confirm('Discard this draft? Its notes and photos will be removed from this device.')) return;
+        if (hasContent) {
+            const ok = typeof confirmAdminChoice === 'function'
+                ? await confirmAdminChoice({
+                    title: 'Discard this draft?',
+                    context: ['Sit update draft', 'Notes and photos you added'],
+                    message: 'They will be removed from this phone.',
+                    confirmText: 'Discard Draft',
+                    cancelText: 'Keep Draft',
+                    caution: true
+                })
+                : window.confirm('Discard this draft? Its notes and photos will be removed from this device.');
+            if (!ok) return;
+        }
         const uploaded = d.photos.filter(p => p.uploaded).map(p => p.path);
 
         // A locked draft might already be published, so leave its photos alone.
@@ -149,9 +161,11 @@
         state.dialog.querySelector('[data-boarding-photo-previews]').innerHTML = state.draft.photos.map(photo => {
             const url = URL.createObjectURL(photo.blob);
             state.urls.push(url);
-            return `<div class="boarding-photo-preview"><img src="${esc(url)}" alt="Selected photo">
-                <button type="button" data-sit-remove-photo="${photo.id}" aria-label="Remove photo" ${state.draft.locked ? 'disabled' : ''}>×</button></div>`;
-        }).join('');
+                        return `<div class="boarding-photo-preview"><img src="${esc(url)}" alt="Selected photo">
+                <button type="button" data-sit-remove-photo="${photo.id}" aria-label="Remove photo" ${state.draft.locked ? 'disabled' : ''}>×</button>
+                ${photo === state.draft.photos[0] && window.PisCover ? window.PisCover.pillHtml(`data-sit-cover-photo="${esc(photo.id)}"`, state.draft.locked) : ''}</div>`;
+        }).join('') + (state.draft.photos.length && window.PisCover
+            ? `<p class="pis-cover-hint">The first photo is the cover on your client's Home screen.</p>` : '');
     }
 
     function renderForm(state) {
@@ -213,7 +227,7 @@
             </article>`).join('') || '<p>No updates sent for this sit yet.</p>';
         } catch (error) {
             console.error('Sit update history error:', error);
-            if (editor === state) mount.textContent = 'Updates could not be loaded. Close and reopen this window to retry.';
+            if (editor === state) mount.innerHTML = '<p data-pis-tone="error">Updates could not be loaded. Close and reopen this window to retry.</p>';
         }
     }
 
@@ -350,7 +364,7 @@
         msg(state, [summary, ...failures].join('\n'));
 
         if (failures.length) {
-            alert([summary, ...failures].join('\n\n'));
+            (window.pisNotice || window.alert)([summary, ...failures].join('\n\n'));
         }
     }
 
@@ -399,8 +413,12 @@
             });
 
             if (error) throw error;
-            if (!data?.id || !data.published_at) throw new Error('The save could not be confirmed. Retry Send to check it safely.');
+                        if (!data?.id || !data.published_at) throw new Error('The save could not be confirmed. Retry Send to check it safely.');
             published = true;
+            for (const photo of state.draft.photos) {
+                if (!photo.cover || !photo.path || !window.PisCover) continue;
+                try { await window.PisCover.save(photo.path, photo.cover); } catch (error) { console.warn('Cover not saved:', error?.message || error); }
+            }
             await store('delete', state.draft.key);
             state.draft = newDraft(state);
             await save(state);
@@ -519,6 +537,19 @@
                 return;
             }
 
+                        const cover = e.target.closest('[data-sit-cover-photo]');
+            if (cover) {
+                if (state.busy || state.draft.locked || !window.PisCover) return;
+                const photo = state.draft.photos.find(p => p.id === cover.dataset.sitCoverPhoto);
+                const img = cover.closest('.boarding-photo-preview')?.querySelector('img');
+                if (!photo || !img) return;
+                const result = await window.PisCover.edit({ src: img.src, box: photo.cover });
+                if (!result) return;
+                if (result.reset) delete photo.cover; else photo.cover = result.box;
+                try { await save(state); } catch (error) { msg(state, error.message); }
+                msg(state, result.reset ? "Cover reset. It's saved when you send the update." : "Cover set ✓ It's saved when you send the update.");
+                return;
+            }
             const remove = e.target.closest('[data-sit-remove-photo]');
             if (!remove || state.busy || state.draft.locked) return;
             collect(state);
@@ -575,7 +606,7 @@
             await open(button.dataset.sitUpdateVisit);
         } catch (error) {
             console.error('Sit update editor error:', error);
-            alert(error.message || 'Sit updates could not be opened.');
+            (window.pisNotice || window.alert)(error.message || 'Sit updates could not be opened.');
         } finally {
             if (button.isConnected) button.disabled = false;
         }

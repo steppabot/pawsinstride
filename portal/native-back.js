@@ -31,10 +31,36 @@
         });
     }
 
+    function askToLeave() {
+        if (typeof window.pisConfirm === "function") {
+            return window.pisConfirm({
+                title: "Leave sign up?",
+                message: "What you've entered so far won't be saved.",
+                confirmText: "Leave",
+                cancelText: "Keep Going"
+            });
+        }
+        return Promise.resolve(window.confirm("Leave sign up? What you've entered won't be saved."));
+    }
+
+    let asking = false;
+
     // true = leaving now, false = staying
-    function leave() {
-        if (hasTypedInfo() && !window.confirm("Leave sign up? What you've entered won't be saved.")) {
-            return false;
+    async function leave() {
+        if (hasTypedInfo()) {
+            if (asking) {
+                return false;
+            }
+            asking = true;
+            let ok = false;
+            try {
+                ok = await askToLeave();
+            } finally {
+                asking = false;
+            }
+            if (!ok) {
+                return false;
+            }
         }
         window.location.href = LOGIN;
         return true;
@@ -110,12 +136,14 @@
         const speed = dx / Math.max(1, Date.now() - time);
         const width = window.innerWidth || 390;
         if (dx > width * 0.33 || (speed > 0.55 && dx > 40)) {
-            setOffset(width, true);
-            setTimeout(() => {
-                if (!leave()) {
-                    setOffset(0, true);
-                }
-            }, 230);
+            if (hasTypedInfo()) {
+                // slide back first so the question shows on the page, then ask
+                setOffset(0, true);
+                setTimeout(leave, 230);
+            } else {
+                setOffset(width, true);
+                setTimeout(leave, 230);
+            }
         } else {
             setOffset(0, true);
         }

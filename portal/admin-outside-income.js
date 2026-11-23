@@ -612,6 +612,8 @@
     function hideError() {
         const el = document.querySelector('#poi-editor .poi-error');
         if (el) el.hidden = true;
+        const f = document.getElementById('poi-editor');
+        if (f) window.PisFormErrors?.clearAll(f);
     }
 
     function setBusy(on, label) {
@@ -628,8 +630,16 @@
     async function submit() {
         if (!editor || editor.busy) return;
         const v = read();
+        window.PisFormErrors?.clearAll(document.getElementById('poi-editor') || document);
         const issue = problem(v);
-        if (issue) return showError(issue);
+        if (issue) {
+            // point at the box the problem is about (same red-box flow as every other form)
+            const which = /name/i.test(issue) ? 'label' : /paid per visit/i.test(issue) ? 'price' : /minutes/i.test(issue) ? 'minutes'
+                : /start/i.test(issue) && !/end date/i.test(issue) ? 'start' : /end date/i.test(issue) ? 'end' : '';
+            const box = which ? field(which) : (/day you go/i.test(issue) ? document.querySelector('#poi-editor .poi-days, #poi-editor [data-poi-days]') : null);
+            if (box && window.PisFormErrors) { hideError(); window.PisFormErrors.show(box, issue); return; }
+            return showError(issue);
+        }
         setBusy(true, 'Saving…');
         try {
             await save(editor.id, v);

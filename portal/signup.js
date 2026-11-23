@@ -1971,8 +1971,9 @@ function validateOwnerStep() {
     if (!clientType) {
 
         showOwnerValidationError(
-            "Please tell us whether you are a new or existing client."
-        );
+                "Please tell us whether you are a new or existing client.",
+                document.querySelector('input[name="client_type"]')
+            );
 
         return false;
 
@@ -3383,11 +3384,12 @@ function getSignupErrorMessage(error) {
     }
 
 
-    return (
-        error?.message ||
-        "We couldn't finish creating your account. Please try again."
-    );
-
+    const raw = String(error?.message || "").trim();
+    // only show the server's own words when they read like a sentence meant for people
+    const readable = /^[A-Z][^_"{}<>]{8,160}[.!]$/.test(raw) &&
+        !/violates|constraint|null value|syntax|column|relation|function|jwt|token|schema|duplicate key|uuid|fetch/i.test(raw);
+    if (raw && !readable) console.error("Signup error:", error);
+    return readable ? raw : "We couldn't finish creating your account. Please try again.";
 }
 
 // ========================================
@@ -4204,9 +4206,14 @@ async function completeNewClientSignup() {
         showSignupError(
             "Please select a Meet & Greet date and time."
         );
-
-        scrollSignupErrorIntoView();
-
+        const meetGreetPicker = !selectedMeetGreet?.date
+            ? document.getElementById("signup-meet-greet-calendar")
+            : document.getElementById("signup-meet-greet-times");
+        if (window.PisFormErrors && meetGreetPicker) {
+            window.PisFormErrors.fromPageMessage(meetGreetPicker);
+        } else {
+            scrollSignupErrorIntoView();
+        }
         return;
 
     }
@@ -4243,7 +4250,7 @@ async function completeNewClientSignup() {
     ) {
 
         showSignupError(
-            "This Meet & Greet signup flow is only for new clients."
+            "Meet & Greet sign-up is only for new clients. Go back and choose Existing Client if you already use Paws in Stride."
         );
 
         scrollSignupErrorIntoView();
@@ -4363,9 +4370,9 @@ async function completeNewClientSignup() {
             showSignupError(
                 "That Meet & Greet time was just booked by another client. Please choose another available time."
             );
-
-
-            scrollSignupErrorIntoView();
+        const takenPicker = document.getElementById("signup-meet-greet-times") || document.getElementById("signup-meet-greet-calendar");
+        if (window.PisFormErrors && takenPicker) window.PisFormErrors.fromPageMessage(takenPicker);
+        else scrollSignupErrorIntoView();
 
             return;
 
@@ -4604,9 +4611,9 @@ async function completeNewClientSignup() {
                 showSignupError(
                     "That Meet & Greet time was just booked by another client. Your portal account has been started, so simply choose another available time to finish signup."
                 );
-
-
-                scrollSignupErrorIntoView();
+        const takenPicker = document.getElementById("signup-meet-greet-times") || document.getElementById("signup-meet-greet-calendar");
+        if (window.PisFormErrors && takenPicker) window.PisFormErrors.fromPageMessage(takenPicker);
+        else scrollSignupErrorIntoView();
 
                 return;
 

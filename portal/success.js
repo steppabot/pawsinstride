@@ -1652,6 +1652,7 @@ function showSuccessPageError(
 
         errorBox.textContent =
             message;
+        errorBox.dataset.pisTone = "error";
 
 
         successDetails.appendChild(

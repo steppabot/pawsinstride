@@ -219,8 +219,7 @@ async function loadAdminDashboard(options = {}) {
         );
 
 
-        loading.textContent =
-            "There was a problem loading your login session.";
+        loading.textContent = "There was a problem loading your login session."; loading.dataset.pisTone = "error";
 
 
         return;
@@ -332,8 +331,7 @@ async function loadAdminDashboard(options = {}) {
             );
     
     
-            loading.textContent =
-                "We couldn't load your account profile.";
+            loading.textContent = "We couldn't load your account profile."; loading.dataset.pisTone = "error";
     
     
             return;
@@ -788,8 +786,7 @@ async function loadAdminDashboard(options = {}) {
         ) {
     
     
-            loading.textContent =
-                "We couldn't load the service calendar.";
+            loading.textContent = "We couldn't load the service calendar."; loading.dataset.pisTone = "error";
     
     
             return;
@@ -2677,18 +2674,10 @@ document.getElementById(
         ) {
 
 
-            event.target.value =
-                "";
-
-
-            pendingAdminPhotoFile =
-                null;
-
-
-            message.textContent =
-                "Please choose a JPG, PNG, or WebP image.";
-
-
+            event.target.value = "";
+            pendingAdminPhotoFile = null;
+            message.textContent = "Please choose a JPG, PNG, or WebP image.";
+            window.PisFormErrors?.fromPageMessage(event.target);
             return;
 
         }
@@ -2701,18 +2690,10 @@ document.getElementById(
         ) {
 
 
-            event.target.value =
-                "";
-
-
-            pendingAdminPhotoFile =
-                null;
-
-
-            message.textContent =
-                "That photo is larger than 5 MB.";
-
-
+            event.target.value = "";
+            pendingAdminPhotoFile = null;
+            message.textContent = "That photo is larger than 5 MB. Choose a smaller one.";
+            window.PisFormErrors?.fromPageMessage(event.target);
             return;
 
         }
@@ -2802,14 +2783,23 @@ document.getElementById(
         if (
             !fullName
         ) {
-
-
-            message.textContent =
-                "Please enter your full name.";
-
-
+            message.textContent = "Please enter your full name.";
+            window.PisFormErrors?.fromPageMessage(document.getElementById("admin-full-name"));
             return;
+        }
 
+        // Phone numbers: blank is fine, but if one is typed it needs all 10 digits
+        for (const [id, text] of [
+            ["admin-phone", "Enter a 10-digit phone number, or leave it blank."],
+            ["admin-emergency-phone", "Enter a 10-digit phone number for your emergency contact, or leave it blank."]
+        ]) {
+            const phoneBox = document.getElementById(id);
+            const digits = String(phoneBox?.value || "").replace(/\D/g, "");
+            if (phoneBox && digits && digits.length !== 10) {
+                message.textContent = text;
+                window.PisFormErrors?.fromPageMessage(phoneBox);
+                return;
+            }
         }
 
 
@@ -3608,8 +3598,10 @@ function buildAdminBoardingCard(visit) {
         String(visit.status || "").toLowerCase() === "cancelled";
     const pickup = Boolean(visit.boarding_pickup_display_only);
     const today = adminBoardingToday();
-    const ready = adminBoardingState.loaded && !adminBoardingState.error &&
-        !adminBoardingState.request && navigator.onLine;
+    // Stays already loaded stay usable during a background refresh (live
+    // updates during a walk reload them every few seconds); every boarding
+    // action re-reads the stay before it changes anything.
+    const ready = adminBoardingState.loaded && !adminBoardingState.error && navigator.onLine;
 
     let status = cancelled ? "Cancelled night" : {
         active: "Boarding with us",
@@ -3650,7 +3642,7 @@ function buildAdminBoardingCard(visit) {
     if (!navigator.onLine) {
         description += " Connect to the internet to update boarding status.";
     } else if (adminBoardingState.error) {
-        description += " Boarding status could not be loaded. Try refreshing it.";
+        description += " Boarding status couldn't load.";
     }
     if (!cancelled && canAddAdminBoardingUpdate(stay, visit.visit_date)) {
         actions += `<button type="button" class="primary-button admin-visit-action-button"
@@ -3659,9 +3651,17 @@ function buildAdminBoardingCard(visit) {
             ${ready ? "" : "disabled"}>Send Boarding Update</button>`;
     }
 
-    actions += `<button type="button" class="secondary-button admin-visit-action-button"
-        data-boarding-action="refresh" ${navigator.onLine ? "" : "disabled"}>
-        Refresh Boarding Status</button>`;
+    // Boarding status and walks update live (portal-live-sync.js), so there is
+    // no refresh button; "Try Again" only appears if loading failed.
+    if (!cancelled && stay.id && stay.started_at) {
+        actions += `<button type="button" class="secondary-button admin-visit-action-button"
+            data-boarding-view-updates="${escapeHtml(stay.id)}" data-boarding-view-visit="${visit.id}">
+            View Boarding Updates</button>`;
+    }
+    if (adminBoardingState.error) {
+        actions += `<button type="button" class="secondary-button admin-visit-action-button"
+            data-boarding-action="refresh" ${navigator.onLine ? "" : "disabled"}>Try Again</button>`;
+    }
 
     const cardClass = !cancelled && stay.status === "active"
         ? "admin-service-card-in-progress"
@@ -3727,6 +3727,10 @@ function getAdminBoardingWalkFinish(walk) {
     return value ? JSON.parse(value) : loadPendingWalkFinish(walk.id);
 }
 
+function formatAdminBoardingWalkTime(value) {
+    return new Date(value).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" });
+}
+
 function buildAdminBoardingWalkPanel(stay, date) {
     if (!stay?.id || !stay.started_at) return "";
     const walks = getAdminBoardingWalks(stay.id);
@@ -3734,38 +3738,50 @@ function buildAdminBoardingWalkPanel(stay, date) {
     const completed = walks.filter(walk => walk.status === "completed" && walk.boarding_date === date);
     const today = date === adminBoardingToday();
     const locked = adminVisitActionBusy ? "disabled" : "";
-    const button = (action, label, walk, disabled = false) => `<button type="button"
-        class="secondary-button admin-visit-action-button" data-boarding-walk-action="${action}"
+    const button = (action, label, walk, disabled = false, extra = "secondary-button admin-visit-action-button") => `<button type="button"
+        class="${extra}" data-boarding-walk-action="${action}"
         data-boarding-walk-stay="${stay.id}" data-boarding-walk-id="${walk?.id || ""}"
         ${disabled ? "disabled" : locked}>${label}</button>`;
-    let controls = "";
-    let summary = "";
+    const message = adminBoardingWalkMessages.get(stay.id) || "";
+    const messageHtml = `<p class="boarding-walk-message" role="status">${escapeHtml(message)}</p>`;
+    let live = "";
+    let startControl = "";
     if (active) {
         const finish = getAdminBoardingWalkFinish(active);
         const tracking = isWalkGpsTracking(active.id) && !activeWalkGpsTracker?.permissionErrorShown;
         const elapsed = finish?.duration_seconds ?? Math.max(0, Math.floor((Date.now() - new Date(active.started_at).getTime()) / 1000));
         const distance = finish?.distance_meters ?? (tracking ? activeWalkGpsTracker.distanceMeters : active.distance_meters);
-        summary = `<p><strong>${finish ? "Walk finished — waiting to sync" : "Walk in progress"}</strong></p>
+        const controls = finish ? button("sync", "Sync Finished Walk", active, !navigator.onLine)
+            : `${!tracking ? button("resume", "Resume GPS", active, !navigator.onLine) : ""}${button("finish", "Finish Boarding Walk", active)}`;
+        live = `<section class="admin-boarding-walk-panel has-active-walk">
+            <h6>${finish ? "Walk Finished · Waiting to Sync" : "Walk in Progress"}</h6>
             <div class="boarding-walk-totals">
                 <span>Time <strong id="admin-walk-duration-${active.visit_id}">${formatWalkDuration(elapsed)}</strong></span>
                 <span>Distance <strong id="admin-walk-distance-${active.visit_id}">${(Number(distance || 0) / 1609.344).toFixed(2)} mi</strong></span>
-            </div><p>${escapeHtml(formatAdminBoardingTimestamp(active.started_at))}</p>`;
-        controls = finish ? button("sync", "Sync Finished Walk", active, !navigator.onLine)
-            : `${!tracking ? button("resume", "Resume GPS", active, !navigator.onLine) : ""}${button("finish", "Finish Boarding Walk", active)}`;
-        if (!finish && !tracking) summary += '<p>GPS is not recording on this device. Resume here only if this walk is no longer being tracked on another device.</p>';
+            </div>
+            <p>Started at ${escapeHtml(formatAdminBoardingWalkTime(active.started_at))}</p>
+            ${!finish && !tracking ? "<p>GPS is not recording on this device. Resume here only if this walk is no longer being tracked on another device.</p>" : ""}
+            <div class="admin-completed-visit-actions">${controls}</div>
+            ${messageHtml}
+        </section>`;
     } else if (stay.status === "active" && today) {
-        controls = button("start", "Start Boarding Walk", null, !navigator.onLine);
+        startControl = button("start", "Start Boarding Walk", null, !navigator.onLine);
     }
-    return `<section class="admin-boarding-walk-panel"><h6>Boarding walks</h6>
-        ${summary}<div class="admin-completed-visit-actions">${controls}${button("refresh", "Refresh Walks", null, !navigator.onLine)}</div>
-        <p class="boarding-walk-message" role="status">${escapeHtml(adminBoardingWalkMessages.get(stay.id) || "")}</p>
-        ${!navigator.onLine ? '<p>Connect to start or resume GPS. A walk already recording can continue, and its finish can be saved on this device.</p>' : ""}
-        <div class="boarding-walk-history">${completed.map(walk => `<article>
-            <strong>${escapeHtml(formatAdminBoardingTimestamp(walk.started_at))}</strong>
-            <p>${formatWalkDuration(walk.duration_seconds)} · ${(Number(walk.distance_meters || 0) / 1609.344).toFixed(2)} mi</p>
-            ${button("route", "View Walk Route", walk, !navigator.onLine)}
+    const heading = today ? "Today's Walks" : `Walks on ${formatAdminBoardingDate(date)}`;
+    const rows = completed.map((walk, index) => `<div class="boarding-walk-row">
+            <div class="boarding-walk-row-main">
+                <strong>Walk ${completed.length - index} · ${escapeHtml(formatAdminBoardingWalkTime(walk.started_at))}</strong>
+                <span>${Math.max(1, Math.round(Number(walk.duration_seconds || 0) / 60))} min · ${(Number(walk.distance_meters || 0) / 1609.344).toFixed(2)} mi</span>
+            </div>
+            ${button("route", "View Route", walk, !navigator.onLine, "secondary-button boarding-walk-route-button")}
             <div id="admin-boarding-walk-map-${walk.id}" class="boarding-walk-map" hidden></div>
-        </article>`).join("") || '<p>No completed walks for this day yet.</p>'}</div>
+        </div>`).join("");
+    return `${live}<section class="admin-boarding-walk-panel admin-boarding-walk-list">
+        <h6>${escapeHtml(heading)}</h6>
+        ${startControl ? `<div class="admin-completed-visit-actions">${startControl}</div>` : ""}
+        ${active ? "" : messageHtml}
+        ${!navigator.onLine ? '<p>Connect to start or resume GPS. A walk already recording can continue, and its finish can be saved on this device.</p>' : ""}
+        <div class="boarding-walk-history">${rows || `<p class="boarding-walk-empty">No walks yet${today ? " today" : ""}.</p>`}</div>
     </section>`;
 }
 
@@ -3811,9 +3827,9 @@ async function startAdminBoardingWalk(stay) {
         p_stay_id: stay.id, p_tracking_session_id: token
     });
     if (error) throw error;
-    if (!walk?.id || walk.boarding_stay_id !== stay.id) throw new Error("The walk could not be confirmed. Refresh Walks before retrying.");
+    if (!walk?.id || walk.boarding_stay_id !== stay.id) throw new Error("The walk could not be confirmed. Wait a moment for it to appear before trying again.");
     replaceAdminVisitWalk(walk);
-    if (walk.status !== "in_progress") throw new Error("That walk has already finished. Refresh Walks to start a new one.");
+    if (walk.status !== "in_progress") throw new Error("That walk has already finished. You can start a new one.");
     await startWalkGpsTracking(walk);
     startWalkUiTimer();
 }
@@ -3870,7 +3886,7 @@ async function showAdminBoardingWalkRoute(walk) {
     }
     if (!mount.isConnected) return;
     if (points.length < 2) { mount.textContent = "Not enough GPS points to draw this route."; return; }
-    if (!window.google?.maps) { mount.textContent = "The map could not load. Refresh the page and try again."; return; }
+    if (!window.google?.maps) { mount.innerHTML = `<p data-pis-tone="error">The map could not load. Refresh the page and try again.</p>`; return; }
     mount.textContent = "";
     renderAdminGoogleWalkRoute(mount, points);
 }
@@ -3885,12 +3901,17 @@ async function handleAdminBoardingWalkAction(button) {
     try {
         const stay = adminBoardingState.stays.find(s => s.id === stayId);
         const visit = allVisits.find(v => Number(v.id) === Number(stay?.primary_visit_id));
-        if (!stay || !visit) throw new Error("Refresh boarding status before continuing.");
+        if (!stay || !visit) throw new Error("Boarding status is still loading. Try again in a moment.");
         let walk = getAdminBoardingWalks(stayId).find(w => Number(w.id) === Number(button.dataset.boardingWalkId));
         adminBoardingWalkMessages.delete(stayId);
         if (action === "route") {
             if (!walk || walk.status !== "completed") throw new Error("Completed walk not found.");
-            await showAdminBoardingWalkRoute(walk); preserveRoute = true; return;
+            preserveRoute = true;
+            const mount = document.getElementById(`admin-boarding-walk-map-${walk.id}`);
+            if (mount && !mount.hidden) { mount.hidden = true; button.textContent = "View Route"; return; }
+            await showAdminBoardingWalkRoute(walk);
+            button.textContent = "Hide Route";
+            return;
         }
         if (action === "refresh") { await refreshAdminBoardingWalks(stayId); return; }
         if (action === "start") {
@@ -3899,7 +3920,7 @@ async function handleAdminBoardingWalkAction(button) {
             adminBoardingWalkMessages.set(stayId, "Walk started. Keep this page open while tracking.");
             return;
         }
-        if (!walk) throw new Error("Walk not found. Refresh Walks and try again.");
+        if (!walk) throw new Error("Walk not found. Close this visit, open it again and try again.");
         if (action === "sync" || getAdminBoardingWalkFinish(walk)) {
             const synced = await finishAdminBoardingWalk(walk);
             adminBoardingWalkMessages.set(stayId, synced ? "Walk saved. Boarding is still active unless already ended." : "Finish saved on this device. Connect and tap Sync Finished Walk.");
@@ -3922,7 +3943,7 @@ async function handleAdminBoardingWalkAction(button) {
         }
     } catch (error) {
         console.error("Boarding walk error:", error);
-        adminBoardingWalkMessages.set(stayId, error?.message || "The walk could not be updated. Try refreshing walks.");
+        adminBoardingWalkMessages.set(stayId, error?.message || "The walk could not be updated. Try again.");
     } finally {
         adminVisitActionBusy = false;
         if (!preserveRoute) renderAdminDayServices();
@@ -4037,12 +4058,15 @@ function renderAdminBoardingPhotoDrafts(state) {
     state.dialog.querySelector("[data-boarding-photo-previews]").innerHTML = state.draft.photos.map(photo => {
         const url = URL.createObjectURL(photo.blob);
         state.previewUrls.push(url);
-        return `<div class="boarding-photo-preview">
+                return `<div class="boarding-photo-preview">
             <img src="${escapeHtml(url)}" alt="Selected boarding photo">
             <button type="button" data-boarding-remove-photo="${photo.id}"
                 aria-label="Remove photo" ${state.draft.locked ? "disabled" : ""}>×</button>
+            ${photo === state.draft.photos[0] && window.PisCover
+                ? window.PisCover.pillHtml(`data-boarding-cover-photo="${escapeHtml(photo.id)}"`, state.draft.locked) : ""}
         </div>`;
-    }).join("");
+    }).join("") + (state.draft.photos.length && window.PisCover
+        ? `<p class="pis-cover-hint">The first photo is the cover on your client's Home screen.</p>` : "");
 }
 
 function renderAdminBoardingDraftForm(state) {
@@ -4082,44 +4106,154 @@ function renderAdminBoardingDraftForm(state) {
     }
 }
 
+// Photos are stored as <first night's visit id>/boarding-<update request id>-<photo id>.jpg.
+// If the database hands back an update without its photo list, find its files
+// in storage instead, so photos always show for staff.
+async function listAdminBoardingStoredPhotos(stayId) {
+    const stay = adminBoardingState.stays.find(item => String(item.id) === String(stayId));
+    if (!stay?.primary_visit_id) return [];
+    const folder = String(stay.primary_visit_id);
+    const { data, error } = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
+        .list(folder, { limit: 1000, search: "boarding-", sortBy: { column: "created_at", order: "asc" } });
+    if (error) { console.warn("Boarding photo lookup:", error); return []; }
+    return (data || []).filter(file => /^boarding-.+\.jpg$/i.test(file.name || ""))
+        .map(file => ({ ...file, path: `${folder}/${file.name}` }));
+}
+
+async function loadAdminBoardingUpdates(stayId, date = null) {
+    let query = supabaseClient.from("boarding_updates")
+        .select("id, request_id, update_date, notes, created_at, published_at, boarding_update_photos(id, storage_path, caption, sort_order), boarding_update_pet_care(pet_id, fed, fresh_water, pee, poop)")
+        .eq("stay_id", stayId);
+    if (date) query = query.eq("update_date", date);
+    const { data, error } = await query.not("published_at", "is", null).order("created_at", { ascending: false });
+    if (error) throw error;
+    const sorted = [...(data || [])].sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+    let stored = null;
+    for (const update of sorted) {
+        if ((update.boarding_update_photos || []).length || !update.request_id) continue;
+        stored ||= await listAdminBoardingStoredPhotos(stayId);
+        update.boarding_update_photos = stored
+            .filter(file => file.name.startsWith(`boarding-${update.request_id}-`))
+            .map((file, index) => ({ id: file.name, storage_path: file.path, caption: "", sort_order: index }));
+    }
+    return Promise.all(sorted.map(async update => {
+        const photos = await Promise.all((update.boarding_update_photos || [])
+            .sort((a, b) => a.sort_order - b.sort_order).map(async photo => {
+                const result = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
+                    .createSignedUrl(photo.storage_path, 3600);
+                return { ...photo, url: result.error ? null : result.data?.signedUrl };
+            }));
+        return { ...update, photos };
+    }));
+}
+
+function renderAdminBoardingUpdate(update, { timeOnly = false } = {}) {
+    const when = timeOnly ? formatAdminBoardingWalkTime(update.published_at) : formatAdminBoardingTimestamp(update.published_at);
+    return `
+        <article class="boarding-saved-update">
+            <strong>${escapeHtml(when)}</strong>
+            ${update.notes ? `<p class="boarding-update-note">${escapeHtml(update.notes)}</p>` : ""}
+            ${(update.boarding_update_pet_care || []).map(care => {
+                const flags = [["fed", "Fed"], ["fresh_water", "Fresh water"], ["pee", "Pee"], ["poop", "Poop"]]
+                    .filter(([key]) => care[key]).map(([, label]) => label);
+                return flags.length ? `<p><strong>${escapeHtml(allPets.find(p => Number(p.id) === Number(care.pet_id))?.name || "Pet")}:</strong>
+                    ${escapeHtml(flags.join(" · "))}</p>` : "";
+            }).join("")}
+            <div class="boarding-photo-grid">${update.photos.map(photo => photo.url
+                ? `<a href="${escapeHtml(photo.url)}" target="_blank" rel="noopener noreferrer">
+                    <img src="${escapeHtml(photo.url)}" alt="Boarding photo" loading="lazy"></a>`
+                : "<span>Photo unavailable</span>").join("")}</div>
+        </article>`;
+}
+
+// ========================================
+// VIEW BOARDING UPDATES (read only, whole stay)
+// ========================================
+let adminBoardingViewer = null;
+
+async function loadAdminBoardingViewer(state) {
+    const mount = state.dialog.querySelector("[data-boarding-viewer-list]");
+    if (!state.loadedOnce) mount.textContent = "Loading updates…";
+    try {
+        const updates = await loadAdminBoardingUpdates(state.stay.id);
+        if (adminBoardingViewer !== state) return;
+        state.loadedOnce = true;
+        const days = [];
+        for (const update of updates) {
+            const day = update.update_date || String(update.published_at).slice(0, 10);
+            let group = days.find(item => item.day === day);
+            if (!group) days.push(group = { day, updates: [] });
+            group.updates.push(update);
+        }
+        days.sort((a, b) => b.day.localeCompare(a.day));
+        mount.innerHTML = days.map(group => `
+            <section class="boarding-viewer-day">
+                <h3>${escapeHtml(new Date(`${group.day}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" }))}</h3>
+                ${group.updates.map(update => renderAdminBoardingUpdate(update, { timeOnly: true })).join("")}
+            </section>`).join("") || "<p class=\"boarding-viewer-empty\">No updates sent yet. Tap Send Boarding Update to send the first one.</p>";
+    } catch (error) {
+        console.error("Boarding updates error:", error);
+        if (adminBoardingViewer === state && !state.loadedOnce) {
+            mount.innerHTML = `<p data-pis-tone="error">Updates couldn't load.</p><button type="button" class="secondary-button" data-boarding-viewer-retry>Try Again</button>`;
+        }
+    }
+}
+
+function closeAdminBoardingViewer(state) {
+    state.dialog.close();
+    state.dialog.remove();
+    if (adminBoardingViewer === state) adminBoardingViewer = null;
+}
+
+function openAdminBoardingViewer(stayId, visitId) {
+    if (adminBoardingViewer) closeAdminBoardingViewer(adminBoardingViewer);
+    const stay = adminBoardingState.stays.find(item => String(item.id) === String(stayId));
+    const visit = allVisits.find(item => Number(item.id) === Number(visitId));
+    if (!stay || !visit) throw new Error("Boarding stay not found. Try again in a moment.");
+    const pets = getAdminPetsForVisit(visit).map(pet => pet.name).join(" & ") || "Boarding";
+    const dates = stay.dropoff_date && stay.pickup_date
+        ? `${formatAdminBoardingDate(stay.dropoff_date)} → ${formatAdminBoardingDate(stay.pickup_date)}` : "";
+    const dialog = document.createElement("dialog");
+    dialog.className = "boarding-update-dialog boarding-viewer-dialog";
+    dialog.setAttribute("aria-labelledby", "boarding-viewer-title");
+    dialog.innerHTML = `
+        <header class="boarding-editor-header">
+            <div><small>PAWS IN STRIDE</small><h2 id="boarding-viewer-title">Boarding Updates</h2>
+                <p>${escapeHtml(pets)}${dates ? ` · ${escapeHtml(dates)}` : ""}</p></div>
+            <button type="button" data-boarding-close data-boarding-viewer-close aria-label="Close boarding updates">×</button>
+        </header>
+        <div class="boarding-editor-body" data-boarding-viewer-list></div>`;
+    document.body.appendChild(dialog);
+    const state = { dialog, stay, visit, loadedOnce: false };
+    adminBoardingViewer = state;
+    dialog.addEventListener("cancel", event => { event.preventDefault(); closeAdminBoardingViewer(state); });
+    dialog.addEventListener("click", event => {
+        if (event.target.closest("[data-boarding-viewer-close]")) closeAdminBoardingViewer(state);
+        else if (event.target.closest("[data-boarding-viewer-retry]")) void loadAdminBoardingViewer(state);
+    });
+    dialog.showModal();
+    void loadAdminBoardingViewer(state);
+}
+
+document.getElementById("admin-day-services")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-boarding-view-updates]");
+    if (!button || button.disabled) return;
+    event.preventDefault();
+    try { openAdminBoardingViewer(button.dataset.boardingViewUpdates, button.dataset.boardingViewVisit); }
+    catch (error) { (window.pisNotice || window.alert)(error.message || "Boarding updates could not be opened."); }
+});
+
 async function loadAdminBoardingUpdateHistory(state) {
     const mount = state.dialog.querySelector("[data-boarding-history]");
     mount.textContent = "Loading updates…";
     try {
-        const { data, error } = await supabaseClient.from("boarding_updates")
-            .select("id, notes, created_at, published_at, boarding_update_photos(id, storage_path, caption, sort_order), boarding_update_pet_care(pet_id, fed, fresh_water, pee, poop)")
-            .eq("stay_id", state.stay.id).eq("update_date", state.date)
-            .not("published_at", "is", null).order("created_at", { ascending: false });
-        if (error) throw error;
-        const updates = await Promise.all((data || []).map(async update => {
-            const photos = await Promise.all((update.boarding_update_photos || [])
-                .sort((a, b) => a.sort_order - b.sort_order).map(async photo => {
-                    const result = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
-                        .createSignedUrl(photo.storage_path, 3600);
-                    return { ...photo, url: result.error ? null : result.data?.signedUrl };
-                }));
-            return { ...update, photos };
-        }));
+        const updates = await loadAdminBoardingUpdates(state.stay.id, state.date);
         if (adminBoardingEditor !== state) return;
-        mount.innerHTML = updates.map(update => `
-            <article class="boarding-saved-update">
-                <strong>${escapeHtml(formatAdminBoardingTimestamp(update.published_at))}</strong>
-                ${update.notes ? `<p class="boarding-update-note">${escapeHtml(update.notes)}</p>` : ""}
-                ${(update.boarding_update_pet_care || []).map(care => {
-                    const flags = [["fed", "Fed"], ["fresh_water", "Fresh water"], ["pee", "Pee"], ["poop", "Poop"]]
-                        .filter(([key]) => care[key]).map(([, label]) => label);
-                    return flags.length ? `<p><strong>${escapeHtml(allPets.find(p => Number(p.id) === Number(care.pet_id))?.name || "Pet")}:</strong>
-                        ${escapeHtml(flags.join(" · "))}</p>` : "";
-                }).join("")}
-                <div class="boarding-photo-grid">${update.photos.map(photo => photo.url
-                    ? `<a href="${escapeHtml(photo.url)}" target="_blank" rel="noopener noreferrer">
-                        <img src="${escapeHtml(photo.url)}" alt="Boarding photo" loading="lazy"></a>`
-                    : "<span>Photo unavailable</span>").join("")}</div>
-            </article>
-        `).join("") || "<p>No updates sent for this day yet.</p>";
+        mount.innerHTML = updates.map(update => renderAdminBoardingUpdate(update)).join("") ||
+            "<p>No updates sent for this day yet.</p>";
     } catch (error) {
         console.error("Boarding update history error:", error);
-        if (adminBoardingEditor === state) mount.textContent = "Updates could not be loaded. Close and reopen this window to retry.";
+        if (adminBoardingEditor === state) mount.innerHTML = `<p data-pis-tone="error">Updates could not be loaded. Close and reopen this window to retry.</p>`;
     }
 }
 
@@ -4171,6 +4305,16 @@ async function addAdminBoardingPhotos(state, files) {
     }
 }
 
+// After an update is sent, save any cover framing set on its photos (never blocks the update).
+async function saveAdminDraftCovers(photos) {
+    if (!window.PisCover) return;
+    for (const photo of photos || []) {
+        if (!photo?.cover || !photo.path) continue;
+        try { await window.PisCover.save(photo.path, photo.cover); }
+        catch (error) { console.warn("Cover not saved:", error?.message || error); }
+    }
+}
+
 function boardingPublishPayload(draft) {
     return {
         p_stay_id: draft.stay_id,
@@ -4214,8 +4358,9 @@ async function sendAdminBoardingUpdate(state) {
             "admin_publish_boarding_update", boardingPublishPayload(state.draft)
         );
         if (error) throw error;
-        if (!data?.id || !data.published_at) throw new Error("The save could not be confirmed. Retry Send to check it safely.");
+                if (!data?.id || !data.published_at) throw new Error("The save could not be confirmed. Retry Send to check it safely.");
         state.published = true;
+        await saveAdminDraftCovers(state.draft.photos);
 
         await boardingDraftStore("delete", state.draft.key);
         state.draft = newAdminBoardingDraft(state);
@@ -4294,7 +4439,22 @@ async function openAdminBoardingEditor(visitId, date) {
             void addAdminBoardingPhotos(state, Array.from(event.target.files || []));
         }
     });
-    dialog.addEventListener("click", async event => {
+        dialog.addEventListener("click", async event => {
+        const cover = event.target.closest("[data-boarding-cover-photo]");
+        if (cover) {
+            if (state.busy || state.draft.locked || !window.PisCover) return;
+            const photo = state.draft.photos.find(item => item.id === cover.dataset.boardingCoverPhoto);
+            const img = cover.closest(".boarding-photo-preview")?.querySelector("img");
+            if (!photo || !img) return;
+            const result = await window.PisCover.edit({ src: img.src, box: photo.cover });
+            if (!result) return;
+            collectAdminBoardingDraft(state);
+            if (result.reset) delete photo.cover; else photo.cover = result.box;
+            try { await saveAdminBoardingDraft(state); }
+            catch (error) { setAdminBoardingEditorMessage(state, error.message); }
+            setAdminBoardingEditorMessage(state, result.reset ? "Cover reset. It's saved when you send the update." : "Cover set ✓ It's saved when you send the update.");
+            return;
+        }
         const remove = event.target.closest("[data-boarding-remove-photo]");
         if (!remove || state.busy || state.draft.locked) return;
         collectAdminBoardingDraft(state);
@@ -4325,7 +4485,7 @@ document.getElementById("admin-day-services")?.addEventListener("click", async e
         await openAdminBoardingEditor(button.dataset.boardingUpdateVisit, button.dataset.boardingUpdateDate);
     } catch (error) {
         console.error("Boarding editor error:", error);
-        alert(error.message || "Boarding updates could not be opened.");
+        (window.pisNotice || window.alert)(error.message || "Boarding updates could not be opened.");
     } finally {
         adminVisitActionBusy = false;
         if (button.isConnected) button.disabled = false;
@@ -4446,10 +4606,10 @@ document.getElementById("admin-day-services")?.addEventListener("click", async e
         if (!stay?.id) throw new Error("Boarding stay could not be loaded.");
 
         if (action === "start" && stay.status !== "scheduled") {
-            throw new Error("This stay is no longer scheduled. Refresh its status before continuing.");
+            throw new Error("This stay is no longer scheduled. It has been updated on your screen.");
         }
         if (action === "end" && stay.status !== "active") {
-            throw new Error("This stay is no longer active. Refresh its status before continuing.");
+            throw new Error("This stay is no longer active. It has been updated on your screen.");
         }
         if (action === "end") {
             if (adminBoardingToday() < stay.pickup_date) {
@@ -4464,14 +4624,15 @@ document.getElementById("admin-day-services")?.addEventListener("click", async e
             ? await supabaseClient.rpc("admin_start_boarding", { p_visit_id: visit.id })
             : await supabaseClient.rpc("admin_end_boarding", { p_stay_id: stay.id });
         if (error) throw error;
-        if (!saved?.id) throw new Error("Boarding status was not returned. Refresh before trying again.");
+        if (!saved?.id) throw new Error("Boarding status was not returned. Try again in a moment.");
         adminBoardingState.stays = adminBoardingState.stays.filter(item => item.id !== saved.id);
         adminBoardingState.stays.push(saved);
         adminBoardingState.loaded = true;
         adminBoardingState.error = null;
     } catch (error) {
         console.error("Boarding action error:", error);
-        alert(error?.message || "Boarding could not be updated. Refresh its status and try again.");
+        void loadAdminBoardingStays(true);   // show the latest status
+        (window.pisNotice || window.alert)(error?.message || "Boarding could not be updated. Try again.");
     } finally {
         adminVisitActionBusy = false;
         renderAdminCalendar(false);
@@ -5155,7 +5316,7 @@ adminDayServicesContainer?.addEventListener(
                 error
             );
 
-            alert(
+            (window.pisNotice || window.alert)(
                 error?.message ||
                 "We couldn't update this visit. Please try again."
             );
@@ -5188,6 +5349,16 @@ adminDayServicesContainer
         "click",
         async event => {
 
+
+                        const coverButton =
+                event.target.closest(
+                    "[data-adjust-visit-cover]"
+                );
+
+            if (coverButton) {
+                await adjustAdminVisitReportCover(Number(coverButton.dataset.adjustVisitCover));
+                return;
+            }
 
             const deleteMediaButton =
                 event.target.closest(
@@ -7207,7 +7378,7 @@ function handleWalkGpsError(
             true;
 
 
-        alert(
+        (window.pisNotice || window.alert)(
             "Location permission is required to track this walk. Please allow precise location access for Paws in Stride."
         );
 
@@ -14081,8 +14252,8 @@ function renderAdminVisitReportForm(
                 </span>
 
 
-                <p class="admin-visit-report-help">
-                    Add photos from today's visit.
+                                <p class="admin-visit-report-help">
+                    Add photos from today's visit. The first one is the cover on your client's Home screen.
                 </p>
 
 
@@ -14126,7 +14297,7 @@ function renderAdminVisitReportForm(
                                                 }
 
 
-                                                <button
+                                                                                                <button
                                                     type="button"
                                                     class="admin-visit-media-delete"
                                                     data-delete-visit-report-media="${item.id}"
@@ -14135,6 +14306,10 @@ function renderAdminVisitReportForm(
                                                 >
                                                     ×
                                                 </button>
+
+                                                ${item === existingVisitPhotos[0] && item.signed_url && window.PisCover
+                                                    ? window.PisCover.pillHtml(`data-adjust-visit-cover="${item.id}"`)
+                                                    : ""}
 
 
                                             </div>
@@ -14591,6 +14766,22 @@ function renderAdminVisitReportForm(
 // DELETE SAVED VISIT REPORT MEDIA
 // ========================================
 
+// Adjust how the report's first photo is framed on the client's Home card (photo-cover.js).
+async function adjustAdminVisitReportCover(mediaId) {
+    const item = activeVisitReportMedia.find(media => Number(media.id) === Number(mediaId));
+    if (!item?.storage_path || !window.PisCover) return;
+    try {
+        const saved = await window.PisCover.load([item.storage_path]);
+        const result = await window.PisCover.edit({ src: item.signed_url, box: saved.get(item.storage_path) });
+        if (!result) return;
+        await window.PisCover.save(item.storage_path, result.reset ? null : result.box);
+        (window.pisNotice || window.alert)(result.reset ? "Cover reset to the standard framing." : "Cover saved ✓", "success");
+    } catch (error) {
+        console.error("Adjust cover error:", error);
+        (window.pisNotice || window.alert)(error?.message || "The cover couldn't be saved. Try again.");
+    }
+}
+
 async function deleteAdminVisitReportMedia(
     mediaId,
     button
@@ -14613,7 +14804,7 @@ async function deleteAdminVisitReportMedia(
         !mediaItem
     ) {
 
-        alert(
+        (window.pisNotice || window.alert)(
             "We couldn't find that photo."
         );
 
@@ -14632,9 +14823,16 @@ async function deleteAdminVisitReportMedia(
 
 
     const confirmed =
-        window.confirm(
-            `Delete this ${mediaLabel}? This cannot be undone.`
-        );
+        await confirmAdminChoice({
+            title: "Delete this photo?",
+            context: [
+                mediaLabel.charAt(0).toUpperCase() + mediaLabel.slice(1),
+                "It will be removed from the visit report."
+            ],
+            message: "This can't be undone.",
+            confirmText: "Delete Photo",
+            caution: true
+        });
 
 
     if (
@@ -14778,7 +14976,7 @@ async function deleteAdminVisitReportMedia(
         );
 
 
-        alert(
+        (window.pisNotice || window.alert)(
             "We couldn't delete that photo. Please try again."
         );
 
@@ -14842,7 +15040,7 @@ function handleVisitReportPhotos(
         ) {
 
 
-            alert(
+            (window.pisNotice || window.alert)(
                 "Visit photos must be JPG, PNG, or WebP images."
             );
 
@@ -14858,7 +15056,7 @@ function handleVisitReportPhotos(
         ) {
 
 
-            alert(
+            (window.pisNotice || window.alert)(
                 "Each visit photo must be 10 MB or smaller."
             );
 
@@ -17416,6 +17614,7 @@ function confirmAdminChoice({
     context = "",
     message,
     confirmText,
+    cancelText = "Cancel",
     caution = false
 }) {
 
@@ -17458,8 +17657,11 @@ function confirmAdminChoice({
         contextEl,
         contextLines.map((text, index) => ({ kind: index === 0 ? "main" : "who", text }))
     );
+    // a question, not a problem: keep its words plain even when they say "can't"
+    messageEl.dataset.pisToneFixed = "info";
     messageEl.textContent = message;
     confirmButton.textContent = confirmText;
+    cancelButton.textContent = cancelText;
     dialog.dataset.caution = String(Boolean(caution));
     delete dialog.dataset.kind;
     dialog.returnValue = "";
@@ -17473,6 +17675,8 @@ function confirmAdminChoice({
             dialog.removeEventListener("close", handleClose);
             // Visit popups always show their details box.
             contextEl.style.display = "";
+            cancelButton.textContent = "Cancel";
+            delete messageEl.dataset.pisToneFixed;
         }
 
         function cancel() {
@@ -17528,7 +17732,7 @@ document.getElementById(
 
         if (window.PawsNative) {
             try { await window.PawsNative.canLogout(); }
-            catch (error) { window.alert(error.message); return; }
+            catch (error) { (window.pisNotice || window.alert)(error.message); return; }
         }
 
         // Ask first, in the same popup as Start Visit / Finish Visit.
@@ -20885,7 +21089,7 @@ function saveAdminDailyRoute(plan) {
         localStorage.setItem(key, JSON.stringify(adminSavedRoute));
     } catch (error) {
         console.error('Route could not be saved on this device:', error);
-        window.alert('The route is ready, but this phone could not save it for reopening.');
+        (window.pisNotice || window.alert)('The route is ready, but this phone could not save it for reopening.');
     }
 }
 
@@ -21461,8 +21665,12 @@ async function getAdminCurrentRouteOrigin() {
             visit.completed_at && String(visit.status || '').toLowerCase() !== 'cancelled')
             .sort((a, b) => Date.parse(b.completed_at) - Date.parse(a.completed_at))[0];
         const address = lastVisit ? getAdminRouteVisitAddress(lastVisit) : getAdminRouteStartAddress();
-        const label = lastVisit ? `your last completed visit (${getAdminRouteClientName(lastVisit)})` : 'your saved home address';
-        if (address && window.confirm(`Your current location is unavailable. Use ${label} as the starting point?\n\n${address}`)) {
+        if (address && await confirmAdminChoice({
+            title: lastVisit ? 'Start from your last visit?' : 'Start from home?',
+            context: [lastVisit ? getAdminRouteClientName(lastVisit) : 'Your saved home address', address],
+            message: `Your current location isn't available, so the route can start from ${lastVisit ? 'your last completed visit' : 'your saved home address'} instead.`,
+            confirmText: 'Start From Here'
+        })) {
             return { start_address: address };
         }
         throw new Error('Route not calculated. Allow location access and try again.');
@@ -21488,7 +21696,7 @@ async function calculateAdminBestVisitRoute() {
     }
     if (remaining.some(visit => visit.checked_in_at ||
         String(visit.status || '').toLowerCase() === 'checked_in')) {
-        window.alert('Finish your current visit before recalculating the remaining route.');
+        (window.pisNotice || window.alert)('Finish your current visit before recalculating the remaining route.');
         renderAdminBestVisitRoute();
         return;
     }
@@ -21558,7 +21766,7 @@ async function calculateAdminBestVisitRoute() {
     } catch (error) {
         syncAdminSavedRoute();
         console.error('Admin route optimization error:', error);
-        window.alert(error?.message || 'Unable to calculate the route.');
+        (window.pisNotice || window.alert)(error?.message || 'Unable to calculate the route.');
     } finally {
         adminBestRouteLoading = false;
         renderAdminBestVisitRoute();
@@ -22853,7 +23061,7 @@ function openAdminRouteVisitInSchedule(visitId) {
 
     if (!visit) {
 
-        window.alert(
+        (window.pisNotice || window.alert)(
             "This visit could not be found. Refresh and try again."
         );
 
@@ -23068,7 +23276,7 @@ adminRouteStartButton?.addEventListener('click', async () => {
         else window.location.assign(url.toString());
     } catch (error) {
         mapTab?.close();
-        window.alert(error?.message || 'Unable to open navigation.');
+        (window.pisNotice || window.alert)(error?.message || 'Unable to open navigation.');
     }
 });
 
@@ -25915,13 +26123,10 @@ function openAdminClientCreditModal(
                     message
                 ) {
 
-                    message.textContent =
-                        "Enter a credit amount greater than $0.00.";
-
-                }
-
-
-                amountInput?.focus();
+                    message.textContent = "Enter a credit amount greater than $0.00.";
+            }
+            if (window.PisFormErrors && amountInput) window.PisFormErrors.fromPageMessage(amountInput);
+            else amountInput?.focus();
 
                 return;
 
@@ -25941,13 +26146,10 @@ function openAdminClientCreditModal(
                     message
                 ) {
 
-                    message.textContent =
-                        "Enter a description for this credit.";
-
-                }
-
-
-                descriptionInput?.focus();
+                    message.textContent = "Enter a description for this credit.";
+            }
+            if (window.PisFormErrors && descriptionInput) window.PisFormErrors.fromPageMessage(descriptionInput);
+            else descriptionInput?.focus();
 
                 return;
 
@@ -27500,8 +27702,7 @@ async function loadAdminServicePricing(background = false) {
         );
 
         if (!background && adminPricingList) {
-            adminPricingList.textContent =
-                "Couldn't load prices. Close and reopen this window to try again.";
+            adminPricingList.innerHTML = `<p data-pis-tone="error">Couldn't load prices. Close and reopen this window to try again.</p>`;
         }
     }
 }
@@ -27632,11 +27833,10 @@ async function saveAdminPricingCard(
             !Number.isFinite(value) ||
             value < 0
         ) {
-            message.textContent =
-                "Enter a valid dollar amount with at most two decimal places.";
-
-            input.focus();
-            return;
+            message.textContent = "Enter a valid dollar amount with at most two decimal places.";
+                if (window.PisFormErrors) window.PisFormErrors.fromPageMessage(input);
+                else input.focus();
+                return;
         }
 
         if (input.dataset.priceTier) {
@@ -29286,9 +29486,8 @@ async function approveAdminReviewClaim(
         amount <= 0
     ) {
 
-        window.alert(
-            "Enter a credit amount greater than zero."
-        );
+        if (window.PisFormErrors && amountInput) window.PisFormErrors.show(amountInput, "Enter a credit amount greater than $0.");
+                else (window.pisNotice || window.alert)("Enter a credit amount greater than zero.");
 
 
         return;
@@ -29353,7 +29552,7 @@ async function approveAdminReviewClaim(
         );
 
 
-        window.alert(
+        (window.pisNotice || window.alert)(
             error?.message ||
             "We couldn't approve that review claim."
         );
@@ -29447,7 +29646,7 @@ async function denyAdminReviewClaim(
         );
 
 
-        window.alert(
+        (window.pisNotice || window.alert)(
             error?.message ||
             "We couldn't update that review claim."
         );
