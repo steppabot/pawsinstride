@@ -1,0 +1,640 @@
+/* Paws in Stride — Pet Sitting live updates (admin side).
+   Load AFTER admin.js. Adds a "Send Sit Update" button to the visit popup while a
+   pet sit is checked in, and an editor just like boarding updates: notes, photos and
+   care checkboxes, saved as a draft on this device until sent. Each update notifies
+   the client. Uses the database function admin_publish_sit_update. */
+(function () {
+    'use strict';
+
+    const DB_NAME = 'paws-in-stride-sit-drafts';
+    let editor = null;
+
+    const esc = v => (typeof escapeHtml === 'function' ? escapeHtml(v) : String(v ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'));
+    const lower = v => String(v || '').toLowerCase();
+    const isSit = v => /pet[\s_-]*sit/.test(lower(`${v?.service_type || ''} ${v?.service_name || ''}`));
+    const stamp = value => new Date(value).toLocaleString('en-US', {
+        timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+    const findVisit = id => (allVisits || []).find(v => Number(v.id) === Number(id));
+    const petsOf = visit => (typeof getAdminPetsForVisit === 'function' ? getAdminPetsForVisit(visit) : []) || [];
+
+    function canUpdate(visit) {
+        if (!visit || !isSit(visit) || lower(visit.status) === 'cancelled' || !visit.checked_in_at) return false;
+        if (!visit.completed_at) return true;
+        return Date.now() - Date.parse(visit.completed_at) < 12 * 3600 * 1000;
+    }
+
+    // Finished sits keep a "View Sit Updates" button so you can look back at what the client got.
+    function canView(visit) {
+        return !!visit && isSit(visit) && lower(visit.status) !== 'cancelled' && !!visit.checked_in_at;
+    }
+
+    const isDone = visit => !!visit?.completed_at || lower(visit?.status) === 'completed';
+
+    /* ---------- drafts on this device (IndexedDB keeps photo blobs) ---------- */
+
+    function store(action, key, value) {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onupgradeneeded = () => request.result.createObjectStore('drafts', { keyPath: 'key' });
+            request.onerror = () => reject(new Error('The sit update draft could not be saved on this device.'));
+            request.onblocked = () => reject(new Error('Close other portal tabs and try again.'));
+            request.onsuccess = () => {
+                const db = request.result;
+                const tx = db.transaction('drafts', action === 'get' ? 'readonly' : 'readwrite');
+                const os = tx.objectStore('drafts');
+                const op = action === 'get' ? os.get(key) : action === 'delete' ? os.delete(key) : os.put(value);
+                tx.oncomplete = () => { db.close(); resolve(op.result); };
+                tx.onerror = tx.onabort = () => { db.close(); reject(new Error('The draft could not be saved. Check storage on this device.')); };
+            };
+        });
+    }
+
+    function newDraft(state) {
+        return {
+            key: `${currentUser.id}:sit:${state.visit.id}`,
+            request_id: crypto.randomUUID(),
+            visit_id: Number(state.visit.id),
+            notes: '',
+            care: petsOf(state.visit).map(p => ({
+                pet_id: Number(p.id),
+                fed: false,
+                fresh_water: false,
+                pee: false,
+                poop: false
+            })),
+            photos: [],
+            locked: false
+        };
+    }
+
+    function save(state) {
+        const snap = structuredClone(state.draft);
+        state.chain = (state.chain || Promise.resolve()).catch(() => {}).then(() => store('put', snap.key, snap));
+        return state.chain;
+    }
+
+    // The server said no (the database rolled back), so nothing was published.
+    const serverRejected = e => /^[0-9A-Z]{5}$/.test(String(e?.code || '')) ||
+        /^4\d\d$/.test(String(e?.statusCode || e?.status || ''));
+
+    // Make a stuck draft editable again. Nothing was published under its request ID.
+    function unlockDraft(state, newRequest) {
+        state.draft.locked = false;
+        if (newRequest) {
+            state.draft.request_id = crypto.randomUUID();
+            for (const photo of state.draft.photos) {
+                photo.path = `${state.draft.visit_id}/sit-${state.draft.request_id}-${photo.id}.jpg`;
+                photo.uploaded = false;
+            }
+        }
+    }
+
+    async function discardDraft(state) {
+        if (state.busy) return;
+        const d = state.draft;
+        const hasContent = d.notes.trim() || d.photos.length || d.care.some(c => c.fed || c.fresh_water || c.pee || c.poop);
+        if (hasContent) {
+            const ok = typeof confirmAdminChoice === 'function'
+                ? await confirmAdminChoice({
+                    title: 'Discard this draft?',
+                    context: ['Sit update draft', 'Notes and photos you added'],
+                    message: 'They will be removed from this phone.',
+                    confirmText: 'Discard Draft',
+                    cancelText: 'Keep Draft',
+                    caution: true
+                })
+                : window.confirm('Discard this draft? Its notes and photos will be removed from this device.');
+            if (!ok) return;
+        }
+        const uploaded = d.photos.filter(p => p.uploaded).map(p => p.path);
+
+        // A locked draft might already be published, so leave its photos alone.
+        if (!d.locked && uploaded.length && navigator.onLine) {
+            try {
+                await supabaseClient.storage.from(VISIT_MEDIA_BUCKET).remove(uploaded);
+            } catch (e) {
+                /* ignore */
+            }
+        }
+
+        try {
+            await store('delete', d.key);
+            state.draft = newDraft(state);
+            await save(state);
+            renderForm(state);
+            msg(state, 'Draft discarded.');
+        } catch (error) {
+            msg(state, error.message);
+        }
+    }
+
+    function msg(state, text) {
+        const t = state.dialog.querySelector('[data-boarding-message]');
+        if (t) t.textContent = text;
+    }
+
+    function collect(state) {
+        if (!state.composing || state.draft.locked) return;
+        state.draft.notes = state.dialog.querySelector('[data-boarding-notes]').value;
+        for (const care of state.draft.care) {
+            for (const flag of ['fed', 'fresh_water', 'pee', 'poop']) {
+                care[flag] = state.dialog.querySelector(`[data-boarding-pet="${care.pet_id}"][data-boarding-care="${flag}"]`)?.checked || false;
+            }
+        }
+    }
+
+    function controls(state) {
+        state.dialog.querySelector('[data-boarding-fields]').disabled = state.busy || state.draft.locked;
+        state.dialog.querySelector('[data-boarding-close]').disabled = state.busy;
+        const send = state.dialog.querySelector('[data-boarding-send]');
+        send.disabled = state.busy;
+        send.textContent = state.busy ? (state.busyLabel || 'Sending…') : state.draft.locked ? 'Retry Send' : 'Send Sit Update';
+        const discard = state.dialog.querySelector('[data-sit-discard]');
+        if (discard) discard.disabled = state.busy;
+    }
+
+    function renderPhotos(state) {
+        for (const url of state.urls || []) URL.revokeObjectURL(url);
+        state.urls = [];
+        state.dialog.querySelector('[data-boarding-photo-previews]').innerHTML = state.draft.photos.map(photo => {
+            const url = URL.createObjectURL(photo.blob);
+            state.urls.push(url);
+                        return `<div class="boarding-photo-preview"><img src="${esc(url)}" alt="Selected photo">
+                <button type="button" data-sit-remove-photo="${photo.id}" aria-label="Remove photo" ${state.draft.locked ? 'disabled' : ''}>×</button>
+                ${photo === state.draft.photos[0] && window.PisCover ? window.PisCover.pillHtml(`data-sit-cover-photo="${esc(photo.id)}"`, state.draft.locked) : ''}</div>`;
+                }).join('') + (state.draft.photos.length && window.PisCover
+            ? `<p class="pis-cover-hint">The first photo is the cover on your client's Home screen.${state.draft.photos.length > 1 ? ' Hold and drag a photo to change the order.' : ''}</p>` : '');
+    }
+
+    function renderForm(state) {
+        const pets = petsOf(state.visit);
+        state.dialog.querySelector('[data-boarding-compose]').innerHTML = `
+            <fieldset data-boarding-fields>
+                <label class="boarding-field-label" for="sit-update-notes">Update notes</label>
+                <textarea id="sit-update-notes" data-boarding-notes maxlength="5000" rows="4"
+                    placeholder="How is their pet doing?">${esc(state.draft.notes)}</textarea>
+                <details class="boarding-care-details" open>
+                    <summary>Care details (optional)</summary>
+                    ${state.draft.care.map(care => `<div class="boarding-care-pet">
+                        <strong>${esc(pets.find(p => Number(p.id) === care.pet_id)?.name || 'Pet')}</strong>
+                        <div class="boarding-care-options">
+                            ${[['fed', 'Fed'], ['fresh_water', 'Fresh water'], ['pee', 'Pee'], ['poop', 'Poop']].map(([f, l]) =>
+                                `<label><input type="checkbox" data-boarding-pet="${care.pet_id}" data-boarding-care="${f}" ${care[f] ? 'checked' : ''}> ${l}</label>`).join('')}
+                        </div></div>`).join('') || '<p>No pets are attached to this visit.</p>'}
+                </details>
+                <label class="boarding-field-label" for="sit-update-photos">Photos</label>
+                <input id="sit-update-photos" data-boarding-photo-input type="file" accept="image/*" multiple>
+                <small>Up to 12 photos. Photos are resized automatically before uploading.</small>
+                <div class="boarding-photo-grid" data-boarding-photo-previews></div>
+            </fieldset>
+            <p class="boarding-editor-message" data-boarding-message role="status" aria-live="polite"></p>
+            <button type="submit" class="primary-button" data-boarding-send>Send Sit Update</button>
+            <button type="button" class="pis-sit-discard" data-sit-discard>Discard draft</button>`;
+        renderPhotos(state);
+        controls(state);
+        if (state.draft.locked) msg(state, 'An earlier send needs to be retried. Its content is kept unchanged so retrying cannot create a second copy.');
+    }
+
+    async function loadHistory(state) {
+        const mount = state.dialog.querySelector('[data-boarding-history]');
+        mount.textContent = 'Loading updates…';
+        try {
+            const { data, error } = await supabaseClient.from('visit_updates')
+                .select('id, notes, published_at, visit_update_photos(id, storage_path, sort_order), visit_update_pet_care(pet_id, fed, fresh_water, pee, poop)')
+                .eq('visit_id', state.visit.id).not('published_at', 'is', null)
+                .order('published_at', { ascending: false });
+            if (error) throw error;
+            const rows = await Promise.all((data || []).map(async row => ({
+                ...row,
+                photos: await Promise.all((row.visit_update_photos || []).sort((a, b) => a.sort_order - b.sort_order).map(async photo => {
+                    const r = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET).createSignedUrl(photo.storage_path, 3600);
+                    return { ...photo, url: r.error ? null : r.data?.signedUrl };
+                }))
+            })));
+            if (editor !== state) return;
+            mount.innerHTML = rows.map(row => `<article class="boarding-saved-update">
+                <strong>${esc(stamp(row.published_at))}</strong>
+                ${row.notes ? `<p class="boarding-update-note">${esc(row.notes)}</p>` : ''}
+                ${(row.visit_update_pet_care || []).map(care => {
+                    const flags = [['fed', 'Fed'], ['fresh_water', 'Fresh water'], ['pee', 'Pee'], ['poop', 'Poop']].filter(([k]) => care[k]).map(([, l]) => l);
+                    return flags.length ? `<p><strong>${esc([...petsOf(state.visit), ...(typeof allPets !== 'undefined' ? allPets || [] : [])].find(p => Number(p.id) === Number(care.pet_id))?.name || 'Pet')}:</strong> ${esc(flags.join(' · '))}</p>` : '';
+                }).join('')}
+                <div class="boarding-photo-grid">${row.photos.map(p => p.url
+                    ? `<a href="${esc(p.url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(p.url)}" alt="Sit photo" loading="lazy"></a>`
+                    : '<span>Photo unavailable</span>').join('')}</div>
+            </article>`).join('') || '<p>No updates sent for this sit yet.</p>';
+        } catch (error) {
+            console.error('Sit update history error:', error);
+            if (editor === state) mount.innerHTML = '<p data-pis-tone="error">Updates could not be loaded. Close and reopen this window to retry.</p>';
+        }
+    }
+
+    async function close(state) {
+        if (state.busy) return;
+        try {
+            collect(state);
+            await save(state);
+            state.dialog.close();
+            state.dialog.remove();
+            for (const url of state.urls || []) URL.revokeObjectURL(url);
+            if (editor === state) editor = null;
+        } catch (error) {
+            msg(state, error.message);
+        }
+    }
+
+    /* ---------- resize photos before saving or uploading ---------- */
+
+    async function prepareSitPhoto(file) {
+        let timer;
+
+        try {
+            return await Promise.race([
+                (async () => {
+                    const image = await loadVisitPhotoImage(file);
+                    const blob = await resizeVisitPhotoImage(image, 1600, 0.82);
+
+                    if (!blob || !blob.size || blob.type !== 'image/jpeg') {
+                        throw new Error('This photo could not be converted to JPEG.');
+                    }
+
+                    return blob;
+                })(),
+
+                new Promise((_, reject) => {
+                    timer = setTimeout(() => reject(new Error(
+                        'Photo preparation timed out. Open this photo in Photos, let it fully load, then try it again.'
+                    )), 45000);
+                })
+            ]);
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    async function addPhotos(state, files) {
+        if (state.busy || state.draft.locked || !files.length) return;
+
+        collect(state);
+        state.busy = true;
+        controls(state);
+
+        const failures = [];
+        let added = 0;
+
+        try {
+            for (const file of files) {
+                const name = file.name || 'Selected photo';
+
+                if (state.draft.photos.length >= 12) {
+                    failures.push('An update can contain up to 12 photos.');
+                    break;
+                }
+
+                try {
+                    if (!file.size) {
+                        throw new Error('The selected file is empty.');
+                    }
+
+                    const type = String(file.type || '').toLowerCase();
+
+                    if (
+                        !type.startsWith('image/') &&
+                        !(type === '' && /\.(jpe?g|png|webp|heic|heif)$/i.test(name))
+                    ) {
+                        throw new Error('Please select an image file.');
+                    }
+
+                    state.busyLabel = `Adding Photo ${added + 1} of ${files.length}…`;
+                    controls(state);
+
+                    const blob = await prepareSitPhoto(file);
+                    const id = crypto.randomUUID();
+
+                    const photo = {
+                        id,
+                        name,
+                        blob,
+                        path: `${state.draft.visit_id}/sit-${state.draft.request_id}-${id}.jpg`,
+                        uploaded: false
+                    };
+
+                    state.draft.photos.push(photo);
+
+                    try {
+                        await save(state);
+                    } catch (error) {
+                        state.draft.photos = state.draft.photos.filter(p => p.id !== id);
+                        throw error;
+                    }
+
+                    added++;
+                    renderPhotos(state);
+
+                } catch (error) {
+                    console.error('Sit photo preparation failed:', {
+                        name,
+                        type: file.type,
+                        bytes: file.size,
+                        error
+                    });
+
+                    failures.push(
+                        `${name}: ${error.message || 'This photo could not be prepared.'}`
+                    );
+                }
+            }
+        } finally {
+            state.busy = false;
+            state.busyLabel = '';
+
+            const input = state.dialog.querySelector('[data-boarding-photo-input]');
+            if (input) input.value = '';
+
+            renderPhotos(state);
+            controls(state);
+        }
+
+        const summary = added
+            ? `${added} photo${added === 1 ? '' : 's'} added to your draft. Press Send Sit Update when ready.`
+            : 'No photos were added.';
+
+        msg(state, [summary, ...failures].join('\n'));
+
+        if (failures.length) {
+            (window.pisNotice || window.alert)([summary, ...failures].join('\n\n'));
+        }
+    }
+
+    async function send(state) {
+        if (state.busy) return;
+        collect(state);
+        state.busy = true;
+        state.busyLabel = 'Sending…';
+        msg(state, '');
+        controls(state);
+        let published = false;
+        let rpcSent = false;
+        try {
+            if (!navigator.onLine) throw new Error("You're offline. Your draft stays on this device; reconnect and send it again.");
+            if (!state.draft.notes.trim() && !state.draft.photos.length &&
+                !state.draft.care.some(c => c.fed || c.fresh_water || c.pee || c.poop)) {
+                throw new Error('Add a note, photo or care update first.');
+            }
+
+            // Freeze content before the first upload so a retry sends the identical update.
+            state.draft.locked = true;
+            await save(state);
+
+            for (let i = 0; i < state.draft.photos.length; i++) {
+                const photo = state.draft.photos[i];
+                if (photo.uploaded) continue;
+                state.busyLabel = `Uploading Photo ${i + 1} of ${state.draft.photos.length}…`;
+                controls(state);
+                const { error } = await supabaseClient.storage.from(VISIT_MEDIA_BUCKET)
+                    .upload(photo.path, photo.blob, { contentType: 'image/jpeg', cacheControl: '3600', upsert: false });
+                if (error && String(error.statusCode || error.status) !== '409' && !/already exists|duplicate/i.test(error.message || '')) throw error;
+                photo.uploaded = true;
+                await save(state);
+            }
+
+            state.busyLabel = 'Sending…';
+            controls(state);
+            rpcSent = true;
+
+            const { data, error } = await supabaseClient.rpc('admin_publish_sit_update', {
+                p_visit_id: state.draft.visit_id,
+                p_request_id: state.draft.request_id,
+                p_notes: state.draft.notes.trim(),
+                p_pet_care: state.draft.care,
+                p_photos: state.draft.photos.map(p => ({ storage_path: p.path, caption: '' }))
+            });
+
+            if (error) throw error;
+                        if (!data?.id || !data.published_at) throw new Error('The save could not be confirmed. Retry Send to check it safely.');
+            published = true;
+            for (const photo of state.draft.photos) {
+                if (!photo.cover || !photo.path || !window.PisCover) continue;
+                try { await window.PisCover.save(photo.path, photo.cover); } catch (error) { console.warn('Cover not saved:', error?.message || error); }
+            }
+            await store('delete', state.draft.key);
+            state.draft = newDraft(state);
+            await save(state);
+            renderForm(state);
+            msg(state, 'Sit update sent ✓ The client was notified. Add another whenever you like.');
+            await loadHistory(state);
+
+        } catch (error) {
+            console.error('Sit update save error:', error);
+            const text = error?.message || 'The update could not be sent.';
+
+            if (published) {
+                msg(state, 'Your update was sent, but the local draft could not be reset. Close and reopen this window before the next update.');
+            } else if (state.draft.locked && (!rpcSent || serverRejected(error))) {
+                // Nothing was published, so let her edit, resend or discard instead of retrying forever.
+                unlockDraft(state, /request ID belongs/i.test(text));
+                try {
+                    await save(state);
+                } catch (e) {
+                    /* ignore */
+                }
+                state.busy = false;
+                renderForm(state);
+                msg(state, `${text} Your draft is kept on this device. You can edit it and send again, or discard it.`);
+            } else {
+                msg(state, `${text} Your draft is kept on this device.`);
+            }
+        } finally {
+            state.busy = false;
+            state.busyLabel = '';
+            controls(state);
+        }
+    }
+
+    async function open(visitId) {
+        if (editor) { editor.dialog.focus(); return; }
+        const visit = findVisit(visitId);
+        if (!canView(visit)) throw new Error('Check in to the sit first. Updates can be sent during the sit and up to 12 hours after.');
+        const viewOnly = isDone(visit);
+        const canAdd = canUpdate(visit);
+
+        const dialog = document.createElement('dialog');
+        dialog.className = 'boarding-update-dialog pis-sit-dialog';
+        dialog.setAttribute('aria-labelledby', 'sit-editor-title');
+        const state = { dialog, visit, busy: false, urls: [], composing: !viewOnly };
+        state.draft = await store('get', `${currentUser.id}:sit:${visit.id}`) || newDraft(state);
+
+        // A lost response may have published the locked draft already.
+        if (state.draft.locked && navigator.onLine) {
+            const check = await supabaseClient.from('visit_updates').select('id, published_at')
+                .eq('request_id', state.draft.request_id).maybeSingle();
+            if (!check.error && check.data?.published_at) {
+                state.draft = newDraft(state);
+                await save(state);
+            } else if (!check.error && !check.data) {
+                // Never reached the server, so it's safe to edit again.
+                unlockDraft(state, false);
+                await save(state);
+            }
+        }
+
+        dialog.innerHTML = `
+            <header class="boarding-editor-header">
+                <div><small>PAWS IN STRIDE</small><h2 id="sit-editor-title">${viewOnly ? 'Pet sitting updates' : 'Pet sitting update'}</h2>
+                    <p>${esc(petsOf(visit).map(p => p.name).join(' & ') || 'Pet update')} · ${esc(visit.time_window || '')}</p></div>
+                <button type="button" data-boarding-close aria-label="Close sit updates">×</button>
+            </header>
+            <div class="boarding-editor-body">
+                ${viewOnly ? `<p class="boarding-draft-help">This sit is finished. These are the updates the client can see in their portal.</p>
+                ${canAdd ? '<button type="button" class="pis-sit-add-final" data-sit-add-final>+ Send one more update</button>' : ''}` :
+                '<p class="boarding-draft-help">Drafts stay on this device until sent. Send as many updates during the sit as you like. Each one notifies the client.</p>'}
+                <form data-boarding-compose ${viewOnly ? 'hidden' : ''}></form>
+                <h3>Updates for this sit</h3>
+                <div data-boarding-history></div>
+            </div>`;
+
+        document.body.appendChild(dialog);
+        editor = state;
+        if (state.composing) renderForm(state);
+
+        dialog.querySelector('[data-sit-add-final]')?.addEventListener('click', e => {
+            e.currentTarget.remove();
+            state.composing = true;
+            dialog.querySelector('[data-boarding-compose]').hidden = false;
+            renderForm(state);
+            dialog.querySelector('[data-boarding-notes]')?.focus();
+        });
+
+        dialog.addEventListener('cancel', e => {
+            e.preventDefault();
+            void close(state);
+        });
+
+        dialog.querySelector('[data-boarding-close]').addEventListener('click', () => void close(state));
+
+        dialog.querySelector('[data-boarding-compose]').addEventListener('submit', e => {
+            e.preventDefault();
+            void send(state);
+        });
+
+        dialog.addEventListener('input', e => {
+            if (!e.target.matches('[data-boarding-notes], [data-boarding-care]')) return;
+            collect(state);
+            void save(state).catch(err => msg(state, err.message));
+        });
+
+        dialog.addEventListener('change', e => {
+            if (e.target.matches('[data-boarding-photo-input]')) {
+                void addPhotos(state, Array.from(e.target.files || []));
+            }
+        });
+
+        dialog.addEventListener('click', async e => {
+            if (e.target.closest('[data-sit-discard]')) {
+                void discardDraft(state);
+                return;
+            }
+
+                        const cover = e.target.closest('[data-sit-cover-photo]');
+            if (cover) {
+                if (state.busy || state.draft.locked || !window.PisCover) return;
+                const photo = state.draft.photos.find(p => p.id === cover.dataset.sitCoverPhoto);
+                const img = cover.closest('.boarding-photo-preview')?.querySelector('img');
+                if (!photo || !img) return;
+                const result = await window.PisCover.edit({ src: img.src, box: photo.cover });
+                if (!result) return;
+                if (result.reset) delete photo.cover; else photo.cover = result.box;
+                try { await save(state); } catch (error) { msg(state, error.message); }
+                msg(state, result.reset ? "Cover reset. It's saved when you send the update." : "Cover set ✓ It's saved when you send the update.");
+                return;
+            }
+            const remove = e.target.closest('[data-sit-remove-photo]');
+            if (!remove || state.busy || state.draft.locked) return;
+            collect(state);
+            state.draft.photos = state.draft.photos.filter(p => p.id !== remove.dataset.sitRemovePhoto);
+            renderPhotos(state);
+            try {
+                await save(state);
+            } catch (err) {
+                msg(state, err.message);
+            }
+        });
+
+        dialog.showModal();
+        if (navigator.onLine) void loadHistory(state);
+        else state.dialog.querySelector('[data-boarding-history]').textContent = "You're offline. Earlier updates will show when you reconnect.";
+    }
+
+    /* ---------- the button (used by the visit popup and the classic card) ---------- */
+
+    window.buildAdminSitUpdateButton = function (visit) {
+        if (!canView(visit)) return null;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.dataset.sitUpdateVisit = String(visit.id);
+
+        if (isDone(visit)) {
+            b.className = 'secondary-button admin-visit-action-button pis-sit-view-button';
+            b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg> View Sit Updates';
+
+            // Sit under the primary report button instead of on top of it.
+            requestAnimationFrame(() => {
+                const report = b.parentElement?.querySelector('[data-visit-report-open]');
+                if (report && report.parentElement === b.parentElement) report.after(b);
+            });
+
+            return b;
+        }
+
+        if (!canUpdate(visit)) return null;
+        b.className = 'primary-button admin-visit-action-button pis-sit-update-button';
+        b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Send Sit Update';
+        return b;
+    };
+
+        window.openAdminSitUpdateEditor = open;
+
+    // Hold and drag draft photos into a new order (photo-cover.js); kept until Send.
+    if (window.PisPhotoSort) {
+        window.PisPhotoSort.register({
+            items: '[data-boarding-photo-previews] .boarding-photo-preview',
+            owns: item => Boolean(editor) && item.closest('dialog') === editor.dialog,
+            disabled: () => !editor || editor.busy || editor.draft.locked,
+            onDrop: async (item, from, to) => {
+                const state = editor;
+                state.draft.photos = window.PisPhotoSort.move(state.draft.photos, from, to);
+                renderPhotos(state);
+                try { await save(state); } catch (error) { msg(state, error.message); }
+            }
+        });
+    }
+
+    document.addEventListener('click', async e => {
+        const button = e.target.closest('[data-sit-update-visit]');
+        if (!button || button.disabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        button.disabled = true;
+        try {
+            await open(button.dataset.sitUpdateVisit);
+        } catch (error) {
+            console.error('Sit update editor error:', error);
+            (window.pisNotice || window.alert)(error.message || 'Sit updates could not be opened.');
+        } finally {
+            if (button.isConnected) button.disabled = false;
+        }
+    }, true);
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .pis-sit-update-button{display:flex !important;align-items:center !important;justify-content:center !important;gap:8px !important;background:linear-gradient(135deg,#d6467f,#b8336a) !important;border:0 !important;color:#fff !important}
+        .pis-sit-view-button{display:flex !important;align-items:center !important;justify-content:center !important;gap:8px !important;background:#fff !important;color:#b8336a !important;border:1px solid #f1c3d6 !important;box-shadow:none !important}
+        .pis-sit-add-final{display:block;width:100%;margin:0 0 16px;padding:12px;border:1px dashed #b8336a;border-radius:10px;background:#fdf3f7;color:#b8336a;font:inherit;font-weight:800;cursor:pointer}
+        .pis-sit-discard{display:block;width:100%;margin:10px 0 0;padding:10px;border:0;background:none;color:#5b6f80;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+        .pis-sit-discard:disabled{opacity:.5;cursor:default}
+        .pis-sit-dialog .boarding-editor-header{background:linear-gradient(135deg,#d6467f,#b8336a) !important}
+        .pis-sit-dialog [data-boarding-send]{background:linear-gradient(135deg,#d6467f,#b8336a) !important;border-color:#b8336a !important;box-shadow:0 8px 18px rgba(184,51,106,.22) !important}`;
+    document.head.appendChild(style);
+})();

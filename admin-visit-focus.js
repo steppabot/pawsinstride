@@ -1,0 +1,1130 @@
+/* ========================================
+   VISIT FOCUS SCREEN (popup for the current visit)
+   ========================================
+   Opens the visit you're working on in a full-screen
+   popup, so you never lose your place while walking:
+
+   - Check In          -> opens the popup with a running visit timer
+   - Start Walk        -> walk runs inside the popup (same walk logic)
+   - Finish Walk       -> visit timer keeps going, Finish Visit stays
+   - Finish Visit      -> popup closes, schedule card shows the stats
+   - Add/Edit Report   -> report form opens in the popup, Save closes it
+   - View Client Report-> preview opens in the popup, X closes it
+   - Reopen Visit      -> popup opens again and the timer resumes
+
+   The schedule list shows each visit as a compact row
+   (time, service, client and pet, status, one button), and
+   the popup adds Call / Text / Navigate buttons and pins the
+   visit's action buttons to the bottom of the screen.
+
+   The popup holds the real visit card, and every button
+   runs the portal's existing code, so behavior matches the
+   schedule card exactly.
+
+   IMPORTANT: load this BEFORE admin.js:
+     <script src="./admin-visit-focus.js"></script>
+     <script src="./admin.js"></script>
+   ======================================== */
+(() => {
+ const STORAGE_KEY = 'pis-focus-visit';
+ const REOPEN_WINDOW_MS = 12 * 60 * 60 * 1000;
+
+ // ---------- 1. Remember the schedule list's button handlers ----------
+ // admin.js attaches its card button handlers to #admin-day-services.
+ // We record them so the popup can use the very same handlers.
+ const captured = [];
+ const nativeAdd = EventTarget.prototype.addEventListener;
+ EventTarget.prototype.addEventListener = function (type, listener, options) {
+  try {
+   if (this instanceof Element && this.id === 'admin-day-services') captured.push([type, listener, options]);
+  } catch { /* ignore */ }
+  return nativeAdd.call(this, type, listener, options);
+ };
+
+ let focusedVisitId = null;
+ let focusedIsPickup = false;
+ let timerHandle = null;
+ let historyPushed = false;
+ let modal, body, timerEl, titleEl;
+
+ const isCancelled = v => String(v?.status || '').trim().toLowerCase() === 'cancelled';
+ const findVisit = id => (typeof allVisits !== 'undefined' ? allVisits : []).find(v => Number(v.id) === Number(id));
+ const progressOf = v => { try { return getVisitProgressInfo(v); } catch { return { state: 'scheduled' }; } };
+ const esc = s => (typeof escapeHtml === 'function' ? escapeHtml(s) : String(s ?? ''));
+
+ const ICONS = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  call: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.8 2z"/></svg>',
+  text: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>',
+  paw: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="7" cy="9" rx="2" ry="2.6"/><ellipse cx="12" cy="6.5" rx="2" ry="2.6"/><ellipse cx="17" cy="9" rx="2" ry="2.6"/><ellipse cx="4.6" cy="13.6" rx="1.7" ry="2.2"/><ellipse cx="19.4" cy="13.6" rx="1.7" ry="2.2"/><path d="M12 11.5c-2.6 0-5.2 3.4-5.2 5.6 0 1.6 1.3 2.4 2.8 2.4 1 0 1.6-.5 2.4-.5s1.4.5 2.4.5c1.5 0 2.8-.8 2.8-2.4 0-2.2-2.6-5.6-5.2-5.6z"/></svg>',
+  house: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.4c2.6.2 4.7 2.2 4.7 4.9"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><path d="M17 3v3M15.5 4.5h3"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>',
+  dot: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="5"/></svg>',
+  nav: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>'
+ };
+
+ const isBoarding = v => { try { return typeof isAdminBoardingService === 'function' && isAdminBoardingService(v); } catch { return false; } };
+
+ function clientOf(visit) {
+  try { return (typeof allProfiles !== 'undefined' ? allProfiles : []).find(p => String(p.id) === String(visit.client_id)) || null; } catch { return null; }
+ }
+
+ function addressOf(visit) {
+  try {
+   const h = (typeof allHouseholds !== 'undefined' ? allHouseholds : []).find(item => String(item.client_id) === String(visit.client_id));
+   if (!h) return '';
+   const cityState = [h.city, h.state].filter(Boolean).join(', ');
+   const cityStateZip = `${cityState}${h.zip_code ? ` ${h.zip_code}` : ''}`.trim();
+   return [h.street_address, h.address_line_2, cityStateZip].filter(Boolean).join(', ');
+  } catch { return ''; }
+ }
+
+ // the same address split in two so it doesn't run on as one long sentence:
+ // "5855 Windhaven Parkway" / "Apt 2094, The Colony, TX 75056"
+ function addressLinesOf(visit) {
+  try {
+   const h = (typeof allHouseholds !== 'undefined' ? allHouseholds : []).find(item => String(item.client_id) === String(visit.client_id));
+   if (!h) return [];
+   const cityState = [h.city, h.state].filter(Boolean).join(', ');
+   const cityStateZip = `${cityState}${h.zip_code ? ` ${h.zip_code}` : ''}`.trim();
+   const second = [h.address_line_2, cityStateZip].filter(Boolean).join(', ');
+   return h.street_address ? [h.street_address, second].filter(Boolean) : (second ? [second] : []);
+  } catch { return []; }
+ }
+
+ function petNamesOf(visit) {
+  try {
+   const pets = typeof getAdminPetsForVisit === 'function' ? getAdminPetsForVisit(visit) : [];
+   return pets.map(p => p.name).filter(Boolean);
+  } catch { return []; }
+ }
+
+ function shortService(visit) {
+  return String(visit.service_name || visit.service_type || 'Service')
+   .replace(/\s+-\s+/g, ' \u00b7 ')
+   .replace(/(\d+)\s*Minutes?/i, '$1 min')
+   .replace(/Pet Sitting\s*\u00b7\s*[^\u00b7]*?Sit\s*\u00b7\s*(\d+)\s*Hours?/i, 'Pet Sitting \u00b7 $1 hrs');
+ }
+
+ function serviceKind(visit) {
+  const name = `${visit.service_name || ''} ${visit.service_type || ''}`.toLowerCase();
+  if (/meet\s*(&|and)?\s*greet/.test(name)) return 'meet';
+  if (/drop/.test(name)) return 'dropin';
+  if (/pet[\s_-]*sit/.test(name)) return 'sit';
+  if (/walk/.test(name)) return 'walk';
+  return 'other';
+ }
+
+ // the color type of a visit, so popups opened from it (like "Finish this visit?") match it
+ window.pisVisitKind = visit => (isBoarding(visit) ? 'boarding' : serviceKind(visit));
+
+ function startHour(visit) {
+  const text = String(visit.time_window || visit.start_time || '').toUpperCase();
+  const m = text.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?/);
+  if (!m) return null;
+  let hour = Number(m[1]);
+  let period = m[3];
+  if (!period) { const later = text.match(/(AM|PM)/); period = later ? later[1] : null; }
+  if (period === 'PM' && hour < 12) hour += 12;
+  if (period === 'AM' && hour === 12) hour = 0;
+  if (!period && hour < 7) hour += 12;
+  return hour;
+ }
+
+ function dayPart(visit) {
+  const h = startHour(visit);
+  if (h == null) return 'Anytime';
+  if (h < 12) return 'Morning';
+  if (h < 17) return 'Afternoon';
+  return 'Evening';
+ }
+
+ function fmtStatus(value) {
+  try { return typeof formatStatus === 'function' ? formatStatus(value) : String(value || ''); } catch { return String(value || ''); }
+ }
+
+ function canFocus(visit) {
+  return Boolean(visit && !isCancelled(visit));
+ }
+
+ const isPickupCard = card => /pickup/i.test(card?.querySelector('.admin-service-top h5')?.textContent || '');
+
+ function findListCard(visitId, pickup) {
+  const container = document.getElementById('admin-day-services');
+  if (!container) return null;
+  const cards = [...container.querySelectorAll(`:scope > .admin-service-card[data-schedule-visit-id="${visitId}"]`)];
+  return cards.find(card => isPickupCard(card) === Boolean(pickup)) || cards[0] || null;
+ }
+
+
+ function ensureStyles() {
+  if (document.getElementById('pis-visit-focus-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'pis-visit-focus-styles';
+  style.textContent = `
+   .vfm { position: fixed; inset: 0; z-index: 100000; display: flex; justify-content: center; }
+   .vfm[hidden] { display: none; }
+   .vfm-backdrop { position: absolute; inset: 0; background: rgba(15, 35, 60, 0.45); }
+   .vfm-sheet {
+    position: relative; display: flex; flex-direction: column;
+    width: 100%; max-width: 680px; height: 100%;
+    background: #f4f8fc;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+   }
+   @media (min-width: 720px) {
+    .vfm { align-items: center; }
+    .vfm-sheet { height: auto; max-height: 92vh; border-radius: 22px; overflow: hidden; }
+   }
+   .vfm-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 14px;
+    background: #ffffff; border-bottom: 1px solid #dbe7f3;
+   }
+   .vfm-eyebrow { display: block; font-size: 12px; font-weight: 800; letter-spacing: .12em; color: #2a7fd4; }
+   .vfm-head-text { flex: 1 1 auto; min-width: 0; }
+   .vfm-kind-icon { flex: none; display: none; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 16px;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); color: #fff; }
+   .vfm-kind-icon svg { width: 27px; height: 27px; display: block; }
+   .vfm[data-kind="walk"], .admin-client-report-preview[data-kind="walk"] { --vk: linear-gradient(135deg,#2f7fd6,#1f63b8); }
+   .vfm[data-kind="dropin"], .admin-client-report-preview[data-kind="dropin"] { --vk: linear-gradient(135deg,#22c6e0,#0aa5c2); }
+   .vfm[data-kind="sit"], .admin-client-report-preview[data-kind="sit"] { --vk: linear-gradient(135deg,#d6467f,#b8336a); }
+   .vfm[data-kind="boarding"], .admin-client-report-preview[data-kind="boarding"] { --vk: linear-gradient(135deg,#e07a1f,#c0610c); }
+   .vfm[data-kind="meet"], .admin-client-report-preview[data-kind="meet"] { --vk: linear-gradient(135deg,#8160d6,#6a45c2); }
+   .vfm[data-kind="walk"] .vfm-header, .vfm[data-kind="dropin"] .vfm-header, .vfm[data-kind="sit"] .vfm-header,
+   .vfm[data-kind="boarding"] .vfm-header, .vfm[data-kind="meet"] .vfm-header { background: var(--vk); border-bottom: 0; }
+   .vfm[data-kind] .vfm-header .vfm-kind-icon { display: inline-flex; }
+   .vfm[data-kind="other"] .vfm-header .vfm-kind-icon { display: none; }
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-eyebrow,
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-title,
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-timer,
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-timer.is-live { color: #fff; }
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-eyebrow, .vfm[data-kind]:not([data-kind="other"]) .vfm-timer { opacity: .92; }
+   .vfm[data-kind]:not([data-kind="other"]) .vfm-close { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.45); color: #fff; }
+   .admin-client-report-preview[data-kind] .admin-preview-header { background: var(--vk) !important; display: flex !important; align-items: center !important; gap: 14px !important; }
+   .admin-client-report-preview[data-kind] .admin-preview-header > div { flex: 1 1 auto; min-width: 0; }
+   .pis-preview-icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 16px;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); color: #fff; }
+   .pis-preview-icon svg { width: 27px; height: 27px; display: block; }
+   /* Popup + list buttons follow the service color (finish buttons stay green, sit update stays pink) */
+   /* Visit report editor: Save button + Add Photos follow the service color, square corners like the other buttons */
+   .vfm .admin-save-visit-report-button { width: 100% !important; min-height: 52px !important; border-radius: 10px !important; border: 0 !important; color: #fff !important; font-weight: 800 !important; }
+   .vfm .admin-visit-media-upload-button { border-radius: 10px !important; }
+   .vfm[data-kind="walk"] .admin-save-visit-report-button { background: linear-gradient(135deg,#2f7fd6,#1f63b8) !important; box-shadow: none !important; }
+   .vfm[data-kind="walk"] .admin-visit-media-upload-button { background: #f2f7fd !important; color: #1f63b8 !important; border: 1px dashed #1f63b8 !important; }
+   .vfm[data-kind="dropin"] .admin-save-visit-report-button { background: linear-gradient(135deg,#22c6e0,#0aa5c2) !important; box-shadow: none !important; }
+   .vfm[data-kind="dropin"] .admin-visit-media-upload-button { background: #effbfd !important; color: #0a9ab6 !important; border: 1px dashed #0a9ab6 !important; }
+   .vfm[data-kind="sit"] .admin-save-visit-report-button { background: linear-gradient(135deg,#d6467f,#b8336a) !important; box-shadow: none !important; }
+   .vfm[data-kind="sit"] .admin-visit-media-upload-button { background: #fdf3f7 !important; color: #b8336a !important; border: 1px dashed #b8336a !important; }
+   .vfm[data-kind="meet"] .admin-save-visit-report-button { background: linear-gradient(135deg,#8160d6,#6a45c2) !important; box-shadow: none !important; }
+   .vfm[data-kind="meet"] .admin-visit-media-upload-button { background: #f6f3fd !important; color: #6a45c2 !important; border: 1px dashed #6a45c2 !important; }
+   .vfm[data-kind="boarding"] .admin-save-visit-report-button { background: linear-gradient(135deg,#e07a1f,#c0610c) !important; box-shadow: none !important; }
+   .vfm[data-kind="boarding"] .admin-visit-media-upload-button { background: #fdf6ef !important; color: #c0610c !important; border: 1px dashed #c0610c !important; }
+   .vfm[data-kind="walk"] .pis-footer button:is([data-visit-report-open],[data-visit-action="check-in"],[data-visit-action="start-walk"],[data-boarding-action="start"],[data-boarding-update-visit],[data-boarding-walk-action="start"]) { background: linear-gradient(135deg,#2f7fd6,#1f63b8) !important; border-color: transparent !important; color: #fff !important; box-shadow: none !important; }
+   .vfm[data-kind="walk"] .pis-footer button:is([data-admin-client-report-view],[data-visit-action="reopen"],[data-visit-action="resume-walk-gps"],[data-visit-action="sync-visit"],[data-visit-action="sync-walk"],[data-boarding-walk-action="resume"],[data-boarding-walk-action="sync"]) { background: #fff !important; color: #1f63b8 !important; border: 1px solid #c9dcf3 !important; }
+   #admin-day-services .pis-row.kind-walk button.pis-row-action:not(.is-secondary) { background: linear-gradient(135deg,#2f7fd6,#1f63b8) !important; color: #fff !important; }
+   #admin-day-services .pis-row.kind-walk button.pis-row-action.is-secondary { color: #1f63b8 !important; border-color: #c9dcf3 !important; }
+   .vfm[data-kind="dropin"] .pis-footer button:is([data-visit-report-open],[data-visit-action="check-in"],[data-visit-action="start-walk"],[data-boarding-action="start"],[data-boarding-update-visit],[data-boarding-walk-action="start"]) { background: linear-gradient(135deg,#22c6e0,#0aa5c2) !important; border-color: transparent !important; color: #fff !important; box-shadow: none !important; }
+   .vfm[data-kind="dropin"] .pis-footer button:is([data-admin-client-report-view],[data-visit-action="reopen"],[data-visit-action="resume-walk-gps"],[data-visit-action="sync-visit"],[data-visit-action="sync-walk"],[data-boarding-walk-action="resume"],[data-boarding-walk-action="sync"]) { background: #fff !important; color: #0a9ab6 !important; border: 1px solid #a8e6f1 !important; }
+   #admin-day-services .pis-row.kind-dropin button.pis-row-action:not(.is-secondary) { background: linear-gradient(135deg,#22c6e0,#0aa5c2) !important; color: #fff !important; }
+   #admin-day-services .pis-row.kind-dropin button.pis-row-action.is-secondary { color: #0a9ab6 !important; border-color: #a8e6f1 !important; }
+   .vfm[data-kind="sit"] .pis-footer button:is([data-visit-report-open],[data-visit-action="check-in"],[data-visit-action="start-walk"],[data-boarding-action="start"],[data-boarding-update-visit],[data-boarding-walk-action="start"]) { background: linear-gradient(135deg,#d6467f,#b8336a) !important; border-color: transparent !important; color: #fff !important; box-shadow: none !important; }
+   .vfm[data-kind="sit"] .pis-footer button:is([data-admin-client-report-view],[data-visit-action="reopen"],[data-visit-action="resume-walk-gps"],[data-visit-action="sync-visit"],[data-visit-action="sync-walk"],[data-boarding-walk-action="resume"],[data-boarding-walk-action="sync"]) { background: #fff !important; color: #b8336a !important; border: 1px solid #f1c3d6 !important; }
+   #admin-day-services .pis-row.kind-sit button.pis-row-action:not(.is-secondary) { background: linear-gradient(135deg,#d6467f,#b8336a) !important; color: #fff !important; }
+   #admin-day-services .pis-row.kind-sit button.pis-row-action.is-secondary { color: #b8336a !important; border-color: #f1c3d6 !important; }
+   .vfm[data-kind="meet"] .pis-footer button:is([data-visit-report-open],[data-visit-action="check-in"],[data-visit-action="start-walk"],[data-boarding-action="start"],[data-boarding-update-visit],[data-boarding-walk-action="start"]) { background: linear-gradient(135deg,#8160d6,#6a45c2) !important; border-color: transparent !important; color: #fff !important; box-shadow: none !important; }
+   .vfm[data-kind="meet"] .pis-footer button:is([data-admin-client-report-view],[data-visit-action="reopen"],[data-visit-action="resume-walk-gps"],[data-visit-action="sync-visit"],[data-visit-action="sync-walk"],[data-boarding-walk-action="resume"],[data-boarding-walk-action="sync"]) { background: #fff !important; color: #6a45c2 !important; border: 1px solid #d6cbf3 !important; }
+   #admin-day-services .pis-row.kind-meet button.pis-row-action:not(.is-secondary) { background: linear-gradient(135deg,#8160d6,#6a45c2) !important; color: #fff !important; }
+   #admin-day-services .pis-row.kind-meet button.pis-row-action.is-secondary { color: #6a45c2 !important; border-color: #d6cbf3 !important; }
+   .vfm[data-kind="boarding"] .pis-footer button:is([data-visit-report-open],[data-visit-action="check-in"],[data-visit-action="start-walk"],[data-boarding-action="start"],[data-boarding-update-visit],[data-boarding-walk-action="start"]) { background: linear-gradient(135deg,#e07a1f,#c0610c) !important; border-color: transparent !important; color: #fff !important; box-shadow: none !important; }
+   .vfm[data-kind="boarding"] .pis-footer button:is([data-admin-client-report-view],[data-visit-action="reopen"],[data-visit-action="resume-walk-gps"],[data-visit-action="sync-visit"],[data-visit-action="sync-walk"],[data-boarding-walk-action="resume"],[data-boarding-walk-action="sync"]) { background: #fff !important; color: #c0610c !important; border: 1px solid #f2cfae !important; }
+   #admin-day-services .pis-row.kind-boarding button.pis-row-action:not(.is-secondary) { background: linear-gradient(135deg,#e07a1f,#c0610c) !important; color: #fff !important; }
+   #admin-day-services .pis-row.kind-boarding button.pis-row-action.is-secondary { color: #c0610c !important; border-color: #f2cfae !important; }
+   .vfm-title { display: block; font-size: 17px; font-weight: 700; color: #16324f; margin-top: 2px; }
+   .vfm-timer { display: block; font-size: 15px; font-weight: 600; color: #46617d; margin-top: 4px; font-variant-numeric: tabular-nums; }
+   .vfm-timer.is-live { color: #1f7a3a; }
+   .vfm .vfm-close {
+    flex: none; box-sizing: border-box;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; min-width: 0; min-height: 0;
+    margin: 0; padding: 0; border-radius: 14px;
+    border: 1px solid #c9d9ea; background: #ffffff; color: #2a5d8f;
+    cursor: pointer; box-shadow: none;
+   }
+   .vfm .vfm-close svg { display: block; width: 20px; height: 20px; }
+   .vfm-hidden { display: none !important; }
+   .vfm-body.vfm-report-mode > .admin-service-card {
+    padding: 0; border: 0; background: transparent; box-shadow: none;
+   }
+   .vfm-body {
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 16px 14px 0;
+    display: flex; flex-direction: column; gap: 12px;
+   }
+   .vfm-body.vfm-report-mode { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); }
+   .vfm-body > * { flex-shrink: 0 !important; }   /* never squash content: let the popup scroll instead */
+   .vfm-body > .admin-service-card { margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+   .vfm-body > .admin-service-card > .admin-visit-progress { margin: 0 !important; border-top: 0 !important; padding: 18px !important; }
+   .vfm-body > .admin-service-card > .admin-boarding-walk-panel {
+    margin: 0 !important; padding: 18px !important; border: 0 !important; border-top: 1px solid #e3ebf3 !important;
+    border-radius: 0 !important; box-shadow: none !important; background: #ffffff !important;
+   }
+   .vfm-body > .admin-service-card .admin-completed-visit-actions:empty { display: none !important; }
+   .vfm-body > .admin-boarding-walk-panel.vfm-live-walk {
+    margin: 0 !important; padding: 16px !important; border: 1px solid #f2cfae !important; border-radius: 18px !important;
+    background: #fff8f1 !important; box-shadow: none !important;
+   }
+         .vfm-body > .pis-live { margin: 0 !important; }
+   .vfm-body > .admin-service-card.vfm-card-empty { display: none !important; }
+   .vfm-body > .pis-live .admin-completed-visit-actions:not(:has(*)) { display: none !important; }
+   .vfm-live-walk h6 { margin: 0 0 4px !important; font-size: 12px !important; letter-spacing: .08em; text-transform: uppercase; color: #c0610c; }
+   .vfm-body > .admin-service-card > .admin-boarding-walk-list h6 { font-size: 13px !important; letter-spacing: .06em; text-transform: uppercase; color: #c0610c; margin: 0 0 8px !important; }
+   .vfm-live-walk .boarding-walk-totals { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px !important; margin: 8px 0 6px; }
+   .vfm-live-walk .boarding-walk-totals span {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px;
+    background: #ffffff; border: 1px solid #f2cfae; border-radius: 14px; font-size: 12px; font-weight: 700; color: #8a5a2b;
+   }
+   .vfm-live-walk .boarding-walk-totals strong { font-size: 30px !important; line-height: 1.1; font-weight: 800; color: #183447; font-variant-numeric: tabular-nums; }
+   html.vfm-lock, html.vfm-lock body { overflow: hidden; }
+
+   /* ----- popup: summary, quick actions, pinned buttons ----- */
+   .vfm-body > .admin-service-card > .admin-service-top,
+   .vfm-body > .admin-service-card > .admin-service-main-grid,
+   .vfm-body > .admin-service-card > .admin-visit-progress-icon,
+   .vfm-body .pis-row { display: none !important; }
+   .vfm-body.vfm-report-mode > .pis-summary,
+   .vfm-body.vfm-report-mode > .pis-footer { display: none !important; }
+   .pis-summary {
+    background: #ffffff; border: 1px solid #dbe7f3; border-radius: 18px; padding: 16px;
+    display: flex; flex-direction: column; gap: 14px; color: #16324f;
+   }
+   .pis-sum-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+   .pis-sum-name { display: block; font-size: 20px; font-weight: 700; }
+   .pis-sum-time { display: block; font-size: 14px; color: #46617d; margin-top: 3px; }
+   .pis-pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+   .pis-pill { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 10px; color: #46617d; background: #eef4fb; white-space: nowrap; }
+   .pis-pill-checked_in { color: #8a5200; background: #fbe3b8; }
+   .pis-pill-completed { color: #1f7a3a; background: #e3f3e6; }
+   .pis-pets { display: flex; gap: 8px; flex-wrap: wrap; }
+   .pis-pet { font-size: 15px; font-weight: 700; background: #eef4fb; border-radius: 999px; padding: 6px 14px; }
+   .pis-quick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+   .pis-quick a, .pis-quick span {
+    height: 64px; border-radius: 14px; background: #eef4fb; color: #1f63b8; text-decoration: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font-size: 13px; font-weight: 700;
+   }
+   .pis-quick span { color: #9bb0c6; }
+   .pis-quick svg { width: 22px; height: 22px; }
+   .pis-sum-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; font-size: 14px; color: #46617d; }
+   .pis-sum-address { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.35; }
+   .pis-sum-price { flex: none; font-size: 15px; font-weight: 800; color: #183447; line-height: 1.35; white-space: nowrap; }
+   .pis-sum-price small { font-size: 12px; font-weight: 700; color: #5c7286; }
+   .pis-footer {
+    position: sticky; bottom: 0; z-index: 2; margin: auto -14px 0;
+    padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 18px);
+    background: #ffffff; border-top: 1px solid #dbe7f3;
+    display: flex; flex-direction: column; gap: 10px;
+   }
+   .pis-footer:empty { display: none; }
+   .pis-footer > button { width: 100%; margin: 0; }
+
+   /* ----- compact schedule list -----
+      Every rule is locked with !important because portal.css styles
+      all buttons as full-width blocks (button { width: 100%; padding: 14px }). */
+   #admin-day-services > .admin-service-card.pis-compact {
+    padding: 0 !important; margin: 0 0 10px !important; border: 0 !important;
+    background: transparent !important; box-shadow: none !important;
+    overflow: visible !important; min-height: 0 !important; transform: none !important;
+   }
+   #admin-day-services > .admin-service-card.pis-compact::before,
+   #admin-day-services > .admin-service-card.pis-compact::after { display: none !important; }
+   #admin-day-services > .admin-service-card.pis-compact > :not(.pis-row) { display: none !important; }
+   #admin-day-services .pis-row, #admin-day-services .pis-row * { box-sizing: border-box !important; }
+   #admin-day-services .pis-row {
+    display: flex !important; flex-direction: row !important; align-items: center !important; gap: 10px !important;
+    width: 100% !important; margin: 0 !important; padding: 12px !important;
+    border-radius: 16px !important; background: #ffffff !important; border: 1px solid #dbe7f3 !important;
+    color: #16324f !important; text-align: left !important; font-family: inherit !important;
+   }
+   #admin-day-services .pis-row.is-live { background: #fff7ea !important; border-color: #f0cf96 !important; box-shadow: 0 6px 18px rgba(178,106,0,.12) !important; }
+   #admin-day-services .pis-row.is-cancelled { background: #fffafa !important; border-color: #f3c4c0 !important; }
+   #admin-day-services .pis-row-icon {
+    flex: 0 0 32px !important; width: 32px !important; height: 32px !important; margin: 0 !important; padding: 0 !important;
+    border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important;
+    background: #e8f0f9 !important; color: #46617d !important; font-size: 14px !important; font-weight: 700 !important; line-height: 1 !important;
+   }
+   #admin-day-services .pis-row-icon { position: relative !important; border-radius: 12px !important; flex-basis: 40px !important; width: 40px !important; height: 40px !important; }
+   #admin-day-services .pis-row-icon > svg { width: 20px !important; height: 20px !important; display: block !important; }
+   #admin-day-services .pis-row.kind-walk .pis-row-icon { background: #e1edfc !important; color: #1f63b8 !important; }
+   #admin-day-services .pis-row.kind-dropin .pis-row-icon { background: #cdf5fb !important; color: #0aa5c2 !important; }
+   #admin-day-services .pis-row.kind-walk, #admin-day-services .pis-row.kind-dropin, #admin-day-services .pis-row.kind-sit,
+   #admin-day-services .pis-row.kind-meet, #admin-day-services .pis-row.kind-boarding { border-left-width: 6px !important; padding-left: 10px !important; }
+   #admin-day-services .pis-row.pis-row.kind-walk { border-left-color: #1f63b8 !important; }
+   #admin-day-services .pis-row.pis-row.kind-dropin { border-left-color: #14c0dc !important; }
+   #admin-day-services .pis-row.pis-row.kind-sit { border-left-color: #b8336a !important; }
+   #admin-day-services .pis-row.pis-row.kind-meet { border-left-color: #6a45c2 !important; }
+   #admin-day-services .pis-row.pis-row.kind-boarding { border-left-color: #c0610c !important; }
+   #admin-day-services .pis-row.pis-row.pis-row.is-cancelled { border-left-color: #e3a19b !important; }
+   #admin-day-services .pis-row.kind-meet .pis-row-icon { background: #ebe5fb !important; color: #6a45c2 !important; }
+   #admin-day-services .pis-row.kind-sit .pis-row-icon { background: #fbe4ef !important; color: #b8336a !important; }
+   #admin-day-services .pis-row.kind-boarding .pis-row-icon { background: #fdebd9 !important; color: #c0610c !important; }
+   #admin-day-services .pis-group-boarding .pis-group-count { color: #c0610c !important; background: #fdebd9 !important; }
+   #admin-day-services .pis-row.kind-other .pis-row-icon { background: #e8f0f9 !important; color: #46617d !important; }
+   #admin-day-services .pis-row-status {
+    position: absolute !important; right: -5px !important; bottom: -5px !important;
+    width: 20px !important; height: 20px !important; border-radius: 50% !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    border: 2px solid #ffffff !important; color: #ffffff !important;
+   }
+   #admin-day-services .pis-row-status svg { width: 11px !important; height: 11px !important; display: block !important; }
+   #admin-day-services .pis-row.is-done .pis-row-status { background: #2e8b4a !important; }
+   #admin-day-services .pis-row.is-live .pis-row-status { background: #d98a00 !important; border-color: #fff7ea !important; }
+   #admin-day-services .pis-row.is-cancelled .pis-row-status { background: #c62828 !important; border-color: #fffafa !important; }
+   #admin-day-services .pis-row.is-cancelled .pis-row-icon { background: #f6e3e1 !important; color: #b07a76 !important; }
+   #admin-day-services .pis-row.is-done { background: #f0f9f2 !important; border-color: #c9e8d1 !important; }
+   #admin-day-services .pis-row.is-done .pis-row-status { border-color: #f0f9f2 !important; }
+   #admin-day-services .pis-row.is-done .pis-badge-done { background: #dcf1e2 !important; }
+   #admin-day-services .pis-group {
+    display: flex !important; align-items: center !important; gap: 8px !important;
+    margin: 18px 2px 8px !important; font-size: 12px !important; font-weight: 800 !important;
+    letter-spacing: .1em !important; text-transform: uppercase !important; color: #46617d !important;
+   }
+   #admin-day-services .pis-group:first-child { margin-top: 2px !important; }
+   #admin-day-services .pis-group-count {
+    font-size: 11px !important; letter-spacing: 0 !important; color: #1f63b8 !important;
+    background: #e3effb !important; border-radius: 999px !important; padding: 1px 8px !important;
+   }
+   #admin-day-services .pis-group-cancelled { color: #a0504b !important; }
+   #admin-day-services .pis-group-cancelled .pis-group-count { color: #c62828 !important; background: #fdecea !important; }
+   #admin-day-services button.pis-row-main {
+    all: unset !important; box-sizing: border-box !important;
+    flex: 1 1 auto !important; min-width: 0 !important; width: auto !important;
+    display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 3px !important;
+    margin: 0 !important; padding: 0 !important; text-align: left !important; cursor: pointer !important;
+    font-family: inherit !important; color: inherit !important;
+   }
+   #admin-day-services .pis-row.is-cancelled button.pis-row-main { cursor: default !important; }
+   #admin-day-services .pis-row-main > span { display: block !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+   #admin-day-services .pis-row-meta {
+    display: flex !important; align-items: center !important; gap: 8px !important; flex-wrap: wrap !important;
+    font-size: 13px !important; font-weight: 600 !important; line-height: 1.3 !important; color: #46617d !important;
+   }
+   #admin-day-services .pis-row.is-live .pis-row-meta, #admin-day-services .pis-row.is-live .pis-row-sub { color: #6b4a14 !important; }
+   #admin-day-services .pis-row.is-cancelled .pis-row-meta, #admin-day-services .pis-row.is-cancelled .pis-row-sub { color: #8a5a58 !important; }
+   #admin-day-services .pis-badge { display: inline-block !important; font-size: 11px !important; font-weight: 700 !important; line-height: 1.4 !important; border-radius: 999px !important; padding: 1px 8px !important; }
+   #admin-day-services .pis-badge-done { color: #1f7a3a !important; background: #e3f3e6 !important; }
+   #admin-day-services .pis-badge-cancelled { color: #c62828 !important; background: #fdecea !important; }
+   #admin-day-services .pis-row-title {
+    font-size: 16px !important; font-weight: 700 !important; line-height: 1.25 !important; color: #16324f !important;
+    white-space: normal !important; overflow-wrap: anywhere !important; width: 100% !important;
+    display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 2 !important; overflow: hidden !important;
+   }
+   #admin-day-services .pis-row.is-cancelled .pis-row-title { color: #5e4746 !important; }
+   #admin-day-services .pis-row-sub {
+    font-size: 14px !important; line-height: 1.3 !important; color: #46617d !important;
+    white-space: normal !important; width: 100% !important;
+    display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 2 !important; overflow: hidden !important;
+   }
+      #admin-day-services .pis-live-timer { font-variant-numeric: tabular-nums !important; }
+   #admin-day-services button.pis-row-action {
+    flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; max-width: none !important;
+    height: 40px !important; min-height: 0 !important; margin: 0 !important; padding: 0 12px !important;
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+    border-radius: 12px !important; border: 0 !important; background: #1f63b8 !important; color: #ffffff !important;
+    box-shadow: none !important; transform: none !important;
+    font-family: inherit !important; font-size: 13.5px !important; font-weight: 700 !important; line-height: 1 !important;
+    white-space: nowrap !important; cursor: pointer !important;
+   }
+   #admin-day-services button.pis-row-action.is-secondary { background: #ffffff !important; color: #1f63b8 !important; border: 1px solid #c9d9ea !important; }
+
+   /* Phones: flatten the panels around the day's visits so rows get the full width
+      (the list sat inside three padded boxes and was only ~266px wide). */
+   @media (max-width: 700px) {
+    .admin-page #admin-screen-schedule { padding-left: 0 !important; padding-right: 0 !important; }
+    .admin-page #admin-screen-schedule .admin-calendar-section { padding-left: 12px !important; padding-right: 12px !important; }
+    .admin-page #admin-screen-schedule .admin-selected-day {
+     padding: 4px 0 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important;
+    }
+    .admin-page #admin-screen-schedule .admin-selected-day-heading { margin-bottom: 12px !important; }
+   }
+
+   /* Popup buttons we create also need to beat the global button rule. */
+   .vfm .pis-quick a, .vfm .pis-quick span { box-sizing: border-box; }
+  `;
+  document.head.appendChild(style);
+ }
+
+ // ---------- 2. Build the popup ----------
+ function buildModal() {
+  if (modal) return;
+
+  ensureStyles();
+
+  modal = document.createElement('div');
+  modal.className = 'vfm';
+  modal.hidden = true;
+  modal.innerHTML = `
+   <div class="vfm-backdrop"></div>
+   <section class="vfm-sheet" role="dialog" aria-modal="true" aria-labelledby="vfm-title">
+    <header class="vfm-header">
+     <span class="vfm-kind-icon" aria-hidden="true"></span>
+     <div class="vfm-head-text">
+      <span class="vfm-eyebrow">CURRENT VISIT</span>
+      <strong class="vfm-title" id="vfm-title"></strong>
+      <span class="vfm-timer"></span>
+     </div>
+     <button type="button" class="vfm-close" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+     </button>
+    </header>
+    <div class="vfm-body"></div>
+   </section>`;
+  document.body.appendChild(modal);
+
+  body = modal.querySelector('.vfm-body');
+  timerEl = modal.querySelector('.vfm-timer');
+  titleEl = modal.querySelector('.vfm-title');
+
+  // Same handlers as the schedule list -> every card button works identically.
+  captured.forEach(([type, listener, options]) => nativeAdd.call(body, type, listener, options));
+
+  modal.querySelector('.vfm-close').addEventListener('click', () => requestClose());
+
+  // Report "Cancel" inside the popup closes the popup for completed visits.
+  nativeAdd.call(body, 'click', event => {
+   if (!event.target.closest('[data-visit-report-close]')) return;
+   setTimeout(() => {
+    const visit = findVisit(focusedVisitId);
+    if (visit && progressOf(visit).state === 'completed') closeFocus({ scrollToCard: true });
+    else applyReportMode();
+   }, 0);
+  });
+
+  // Android back button / browser back closes the popup.
+  window.addEventListener('popstate', () => {
+   if (!focusedVisitId) return;
+   historyPushed = false;
+   requestClose({ fromHistory: true });
+  });
+ }
+
+ // ---------- 3. Put the real card into the popup ----------
+ function mountCard() {
+  const visit = findVisit(focusedVisitId);
+  if (!visit) return;
+  body.replaceChildren();
+
+  const listCard = findListCard(visit.id, focusedIsPickup);
+
+  if (listCard) {
+   body.appendChild(listCard);           // move (not copy) -> no duplicate IDs
+  } else if (isBoarding(visit) && typeof buildAdminBoardingCard === 'function') {
+   body.innerHTML = buildAdminBoardingCard(visit);
+   const card = body.querySelector('.admin-service-card');
+   if (card) card.dataset.scheduleVisitId = String(visit.id);
+  } else if (typeof buildAdminServiceCard === 'function') {
+   body.innerHTML = buildAdminServiceCard(visit);
+   const card = body.querySelector('.admin-service-card');
+   if (card) card.dataset.scheduleVisitId = String(visit.id);
+  }
+
+  reportModeActive = null;
+  body.classList.remove('vfm-report-mode');
+  const card = body.querySelector('.admin-service-card');
+  card?.querySelectorAll('.vfm-open-visit-button').forEach(button => button.remove());
+  if (card) decoratePopup(visit, card);
+  updateHeader();
+ }
+
+ function buildSummary(visit, card) {
+  const boarding = isBoarding(visit);
+  const client = clientOf(visit);
+  const name = client?.full_name || client?.email || 'Client';
+  const phone = String(client?.phone || '').trim();
+  const phoneDigits = phone.replace(/[^\d+]/g, '');
+  const address = addressOf(visit);
+  const pets = petNamesOf(visit);
+  const p = progressOf(visit);
+  const price = Number(visit.price || 0);
+  const addressLines = addressLinesOf(visit);
+  // owners see what the client paid; a boarding pickup day has no price of its own
+  const pickupDay = boarding && (Boolean(visit.boarding_pickup_display_only) || /pickup/i.test(card?.querySelector('h5')?.textContent || ''));
+  const showPrice = !window.pisTeam?.isEmployee() && !pickupDay && (!boarding || price > 0);
+
+  const quick = (enabled, href, icon, label, external) => enabled
+   ? `<a href="${esc(href)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${icon}${label}</a>`
+   : `<span aria-disabled="true">${icon}${label}</span>`;
+
+  const section = document.createElement('section');
+  section.className = 'pis-summary';
+  section.innerHTML = `
+   <div class="pis-sum-top">
+    <div>
+     <strong class="pis-sum-name">${esc(name)}</strong>
+     <span class="pis-sum-time">${esc(boarding ? (card?.querySelector('.admin-service-time')?.textContent.trim() || '') : (visit.time_window || 'Time not set'))}</span>
+    </div>
+    <div class="pis-pills">
+     ${boarding
+      ? `<span class="pis-pill pis-pill-${esc(boardingState(card))}">${esc(card?.querySelector('.admin-service-statuses .service-status')?.textContent.trim() || 'Boarding')}</span>`
+      : `<span class="pis-pill pis-pill-${esc(p.state)}">${esc(fmtStatus(visit.status))}</span>`}
+     ${visit.payment_status && !window.pisTeam?.isEmployee() ? `<span class="pis-pill pis-pill-payment">${esc(fmtStatus(visit.payment_status))}</span>` : ''}
+    </div>
+   </div>
+   ${pets.length ? `<div class="pis-pets">${pets.map(n => `<span class="pis-pet">${esc(n)}</span>`).join('')}</div>` : ''}
+   <div class="pis-quick">
+    ${quick(Boolean(phoneDigits), `tel:${phoneDigits}`, ICONS.call, 'Call')}
+    ${quick(Boolean(phoneDigits), `sms:${phoneDigits}`, ICONS.text, 'Text')}
+    ${quick(Boolean(address), `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`, ICONS.nav, 'Navigate', true)}
+   </div>
+   <div class="pis-sum-foot">
+    <span class="pis-sum-address">${addressLines.length ? addressLines.map(line => `<span>${esc(line)}</span>`).join('') : '<span>Address not added</span>'}</span>
+    ${showPrice ? `<strong class="pis-sum-price">$${price.toFixed(2)}${boarding ? '<small> / night</small>' : ''}</strong>` : ''}
+   </div>`;
+  // Main admin: "Assigned to" picker (admin-team.js).
+  const assign = window.pisTeam?.buildAssignControl?.(visit);
+  if (assign) section.appendChild(assign);
+  return section;
+ }
+
+ function boardingState(card) {
+  if (!card) return 'scheduled';
+  if (card.classList.contains('admin-service-card-completed')) return 'completed';
+  if (card.classList.contains('admin-service-card-in-progress')) return 'checked_in';
+  return 'scheduled';
+ }
+
+ // A boarding walk in progress goes to the top of the popup (time and
+ // distance first); when it starts, the popup scrolls up to show it.
+ let liveWalkShownFor = '';
+
+ function decoratePopup(visit, card) {
+  body.querySelectorAll(':scope > .pis-summary, :scope > .pis-footer').forEach(el => el.remove());
+  body.insertBefore(buildSummary(visit, card), card);
+
+
+  // Pin the visit's action buttons to the bottom of the popup.
+  const footer = document.createElement('div');
+  footer.className = 'pis-footer';
+  const mount = document.getElementById(`admin-visit-report-${visit.id}`);
+  card.querySelectorAll('button[data-visit-action], button[data-visit-report-open], button[data-admin-client-report-view], button[data-boarding-action="start"], button[data-boarding-action="end"], button[data-boarding-walk-action="start"], button[data-boarding-walk-action="finish"], button[data-boarding-walk-action="resume"], button[data-boarding-walk-action="sync"], button[data-boarding-update-visit]')
+   .forEach(button => { if (!mount || !mount.contains(button)) footer.appendChild(button); });
+  footer.querySelectorAll('button[data-boarding-walk-action]').forEach(button => footer.prepend(button));
+  if (typeof window.buildAdminSitUpdateButton === 'function') {
+   const sitButton = window.buildAdminSitUpdateButton(visit);
+   if (sitButton) footer.prepend(sitButton);
+  }
+  body.appendChild(footer);
+
+    const liveWalk = card.querySelector(':scope > .admin-boarding-walk-panel.has-active-walk');
+  if (liveWalk) {
+   liveWalk.classList.add('vfm-live-walk');
+   body.insertBefore(liveWalk, body.firstChild);
+  }
+  // Walks, drop-ins and sits that are happening: their live card (live-hero.js) goes on top too.
+    const liveCard = liveWalk ? null : card.querySelector(':scope > .pis-live');
+  if (liveCard) body.insertBefore(liveCard, body.firstChild);
+  // With the live card on top, the old visit box can be left with nothing in it: hide it.
+  const shownParts = [...card.children].filter(el => !el.matches('.admin-service-top, .admin-service-main-grid, .admin-visit-progress-icon, .pis-row'));
+  card.classList.toggle('vfm-card-empty', Boolean(liveCard) &&
+   !shownParts.some(el => el.textContent.trim() || el.querySelector('img, button, input, select, canvas, iframe, video')));
+  const liveKey = liveWalk || liveCard ? String(visit.id) : '';
+  if (liveKey && liveKey !== liveWalkShownFor) body.scrollTop = 0;
+  liveWalkShownFor = liveKey;
+ }
+
+ // ---------- 3b. Report view: show only the report inside the popup ----------
+ let reportModeActive = null;
+
+ function applyReportMode() {
+  if (!body || !focusedVisitId) return;
+  decoratePreview();
+  const card = body.querySelector('.admin-service-card');
+  const reportOpen =
+   typeof activeVisitReportVisitId !== 'undefined' &&
+   Number(activeVisitReportVisitId) === Number(focusedVisitId);
+  const mount = document.getElementById(`admin-visit-report-${focusedVisitId}`);
+    const showing = Boolean(reportOpen && mount && card?.contains(mount) && mount.innerHTML.trim());
+  if (showing) card?.classList.remove('vfm-card-empty');
+  const isPreview = showing && Boolean(mount.querySelector('.admin-client-report-preview') || /client report preview/i.test(mount.textContent || ''));
+  const mode = showing ? (isPreview ? 'preview' : 'edit') : null;
+
+  const hiddenApplied = Boolean(card?.querySelector('.vfm-hidden'));
+  if (mode === reportModeActive && (mode ? hiddenApplied : !hiddenApplied)) return;
+  reportModeActive = mode;
+
+  body.querySelectorAll('.vfm-hidden').forEach(el => el.classList.remove('vfm-hidden'));
+  body.classList.toggle('vfm-report-mode', Boolean(mode));
+
+  if (mode) {
+   // Hide everything in the card except the path down to the report.
+   let node = mount;
+   while (node && node !== card) {
+    const parent = node.parentElement;
+    if (!parent) break;
+    [...parent.children].forEach(child => { if (child !== node) child.classList.add('vfm-hidden'); });
+    node = parent;
+   }
+   body.scrollTop = 0;
+  }
+  updateHeader();
+ }
+
+ function updateHeader() {
+  const visit = findVisit(focusedVisitId);
+  if (!visit || !titleEl) return;
+  const serviceName = isBoarding(visit)
+   ? (focusedIsPickup ? 'Boarding Pickup' : 'Dog Boarding')
+   : shortService(visit);
+  const eyebrow = modal.querySelector('.vfm-eyebrow');
+  eyebrow.textContent =
+   reportModeActive === 'edit' ? 'VISIT REPORT' :
+   reportModeActive === 'preview' ? 'CLIENT REPORT' :
+   isBoarding(visit) ? 'BOARDING STAY' : 'CURRENT VISIT';
+  titleEl.textContent = serviceName;
+  const kind = isBoarding(visit) ? 'boarding' : serviceKind(visit);
+  if (modal.dataset.kind !== kind) {
+   modal.dataset.kind = kind;
+   const slot = modal.querySelector('.vfm-kind-icon');
+   if (slot) slot.innerHTML = { walk: ICONS.paw, dropin: ICONS.house, meet: ICONS.people, sit: ICONS.heart, boarding: ICONS.moon }[kind] || '';
+  }
+ }
+
+ // Theme the admin "View Client Report" preview header with the service color + icon.
+ function decoratePreview() {
+  const visit = findVisit(focusedVisitId);
+  const preview = body && body.querySelector('.admin-client-report-preview');
+  if (!visit || !preview) return;
+  const kind = isBoarding(visit) ? 'boarding' : serviceKind(visit);
+  if (preview.dataset.kind !== kind) preview.dataset.kind = kind;
+  const header = preview.querySelector('.admin-preview-header');
+  if (header && !header.querySelector('.pis-preview-icon')) {
+   const icon = document.createElement('span');
+   icon.className = 'pis-preview-icon';
+   icon.setAttribute('aria-hidden', 'true');
+   icon.innerHTML = { walk: ICONS.paw, dropin: ICONS.house, meet: ICONS.people, sit: ICONS.heart, boarding: ICONS.moon }[kind] || ICONS.dot;
+   header.prepend(icon);
+  }
+ }
+
+ // ---------- 4. Visit timer ----------
+ function formatClock(totalSeconds) {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+ }
+
+ function tick() {
+  const visit = findVisit(focusedVisitId);
+  if (!visit || !timerEl) return;
+  applyReportMode();
+  const p = progressOf(visit);
+  timerEl.classList.remove('is-live');
+  if (isBoarding(visit)) {
+   const card = body.querySelector('.admin-service-card');
+   const walkLive = body.querySelector('[id^="admin-walk-duration-"]');
+   timerEl.textContent = walkLive
+    ? `Boarding walk ${walkLive.textContent.trim()}`
+    : (card?.querySelector('.admin-service-statuses .service-status')?.textContent.trim() || 'Boarding');
+   if (walkLive || boardingState(card) === 'checked_in') timerEl.classList.add('is-live');
+   return;
+  }
+  if (p.state === 'checked_in' && visit.checked_in_at) {
+   timerEl.textContent = `Visit time ${formatClock((Date.now() - Date.parse(visit.checked_in_at)) / 1000)}`;
+   timerEl.classList.add('is-live');
+  } else if (p.state === 'completed') {
+   const minutes = p.minutes ?? (typeof getVisitDurationMinutes === 'function' ? getVisitDurationMinutes(visit) : null);
+   timerEl.textContent = minutes != null ? `Completed · ${minutes} min` : 'Completed';
+  } else {
+   timerEl.textContent = 'Not started';
+  }
+ }
+
+ // ---------- 5. Open / close ----------
+ function openFocus(visitId, pickup = null) {
+  const visit = findVisit(visitId);
+  if (!canFocus(visit)) return false;
+  buildModal();
+
+  const samePickup = pickup === null || Boolean(pickup) === focusedIsPickup;
+  const alreadyOpen = Number(focusedVisitId) === Number(visitId) && samePickup && !modal.hidden;
+  if (pickup !== null) focusedIsPickup = Boolean(pickup);
+  else if (Number(focusedVisitId) !== Number(visitId)) focusedIsPickup = false;
+  focusedVisitId = Number(visitId);
+  if (!alreadyOpen) mountCard();
+  // Boarding: pull the latest stay status and walks as it opens (no refresh buttons).
+  if (!alreadyOpen && isBoarding(visit)) {
+   try { window.PawsLiveSync?.queue?.('boarding_stays'); window.PawsLiveSync?.queue?.('visit_walks'); } catch { /* ignore */ }
+  }
+
+  modal.hidden = false;
+  document.documentElement.classList.add('vfm-lock');
+  if (!alreadyOpen) { try { window.PisMotion?.visitOpened?.(modal); } catch { /* ignore */ } }   // slide in (native-motion.js)
+
+  if (!historyPushed) {
+   try { history.pushState({ vfm: focusedVisitId }, ''); historyPushed = true; } catch { /* ignore */ }
+  }
+
+  clearInterval(timerHandle);
+  tick();
+  timerHandle = setInterval(tick, 1000);
+
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ id: focusedVisitId, at: Date.now() })); } catch { /* ignore */ }
+  return true;
+ }
+
+ function closeFocus({ scrollToCard = false, fromHistory = false } = {}) {
+  if (!focusedVisitId) return;
+  const visitId = focusedVisitId;
+
+  focusedVisitId = null;
+  reportModeActive = null;
+  body.classList.remove('vfm-report-mode');
+  clearInterval(timerHandle);
+  try { window.PisMotion?.visitClosing?.(modal); } catch { /* ignore */ }   // slide out (native-motion.js)
+  modal.hidden = true;
+  body.replaceChildren();
+  document.documentElement.classList.remove('vfm-lock');
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+
+  if (historyPushed && !fromHistory) {
+   historyPushed = false;
+   try { history.back(); } catch { /* ignore */ }
+  }
+
+  // Put the card back in the schedule list.
+  try { renderAdminDayServices(); } catch { /* ignore */ }
+
+  if (scrollToCard) {
+   requestAnimationFrame(() => {
+    document.querySelector(`#admin-day-services [data-schedule-visit-id="${visitId}"]`)
+     ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+   });
+  }
+ }
+
+ let askingClose = false;
+
+ function askCloseReport() {
+  if (typeof confirmAdminChoice === 'function') {
+   return confirmAdminChoice({
+    title: 'Close without saving?',
+    context: ['Visit report', "What you've typed will be lost."],
+    message: 'Keep editing to finish the report, or close and lose your changes.',
+    confirmText: 'Close Without Saving',
+    cancelText: 'Keep Editing',
+    caution: true
+   });
+  }
+  return Promise.resolve(window.confirm('Close without saving this visit report?'));
+ }
+
+ async function requestClose({ fromHistory = false } = {}) {
+  if (!focusedVisitId) return;
+  const editingReport =
+   typeof activeVisitReportVisitId !== 'undefined' &&
+   Number(activeVisitReportVisitId) === Number(focusedVisitId) &&
+   body.querySelector('[data-visit-report-form]');
+
+  if (editingReport) {
+   // the back button already left this screen's history entry: put it back while asking
+   if (fromHistory) { try { history.pushState({ vfm: focusedVisitId }, ''); historyPushed = true; } catch { /* ignore */ } }
+   if (askingClose) {
+    // back pressed again while the question is up: same as Keep Editing
+    if (fromHistory) document.getElementById('admin-visit-action-confirm')?.close('cancelled');
+    return;
+   }
+   askingClose = true;
+   const askedFor = focusedVisitId;
+   let leave = false;
+   try { leave = await askCloseReport(); } finally { askingClose = false; }
+   if (!leave || focusedVisitId !== askedFor) return;
+   fromHistory = false;
+  }
+
+  try {
+   if (typeof activeVisitReportVisitId !== 'undefined' && Number(activeVisitReportVisitId) === Number(focusedVisitId)) {
+    closeAdminVisitReport();
+   }
+  } catch { /* ignore */ }
+
+  closeFocus({ scrollToCard: true, fromHistory });
+ }
+
+ // swipe back from the left edge closes the visit the same way the X does (native-motion.js)
+ window.pisCloseVisit = () => requestClose();
+
+ // ---------- 6. Hook into the portal (after admin.js has loaded) ----------
+ function wrapAsync(name, before, after) {
+  const original = window[name];
+  if (typeof original !== 'function') return;
+  window[name] = async function (...args) {
+   if (before) before(...args);
+   const result = await original.apply(this, args);
+   if (after) after(result, ...args);
+   return result;
+  };
+ }
+
+ let liveRowTimer = null;
+
+ function updateLiveTimers() {
+  document.querySelectorAll('#admin-day-services .pis-live-timer[data-since]').forEach(el => {
+   const since = Date.parse(el.dataset.since);
+   if (Number.isFinite(since)) el.textContent = formatClock((Date.now() - since) / 1000);
+  });
+ }
+
+ function buildBoardingRow(card, visit) {
+  const pickup = isPickupCard(card);
+  const cancelled = !pickup && isCancelled(visit);
+  const state = cancelled ? 'cancelled' : boardingState(card);
+  const client = clientOf(visit);
+  const clientName = client?.full_name || client?.email || 'Client';
+  const pets = petNamesOf(visit);
+  const dates = card.querySelector('.admin-service-time')?.textContent.trim() || '';
+  const statusText = card.querySelector('.admin-service-statuses .service-status')?.textContent.trim() || '';
+  const walkLive = card.querySelector('button[data-boarding-walk-action="finish"]');
+
+  let rowClass = '', meta = esc(dates);
+  if (state === 'checked_in') { rowClass = 'is-live'; if (walkLive) meta = `${esc(dates)} \u00b7 walk in progress`; }
+  if (state === 'completed') { rowClass = 'is-done'; meta += ' <span class="pis-badge pis-badge-done">Complete</span>'; }
+  if (state === 'cancelled') { rowClass = 'is-cancelled'; meta += ' <span class="pis-badge pis-badge-cancelled">Cancelled</span>'; }
+  const sub = state === 'cancelled'
+   ? 'This reserved night was cancelled.'
+   : [clientName, pets.join(', ')].filter(Boolean).join(' \u00b7 ');
+  const statusBadge = { completed: ICONS.check, checked_in: ICONS.clock, cancelled: ICONS.x }[state] || '';
+
+  // One button that matches the stay's state.
+  let action = null;
+  const startBtn = card.querySelector('button[data-boarding-action="start"]');
+  const endBtn = card.querySelector('button[data-boarding-action="end"]');
+  if (!cancelled) {
+   if (startBtn && !startBtn.disabled) action = { label: 'Start Boarding', run: () => startBtn.click() };
+   else if (endBtn && !endBtn.disabled) action = { label: 'End Boarding', run: () => endBtn.click() };
+   else if (state === 'completed') action = { label: 'View', secondary: true, run: () => openFocus(visit.id, pickup) };
+   else action = { label: 'Open', run: () => openFocus(visit.id, pickup) };
+  }
+
+  const title = pickup ? 'Boarding Pickup' : 'Dog Boarding';
+  const row = document.createElement('div');
+  row.className = `pis-row ${rowClass} kind-boarding`;
+  row.innerHTML = `
+   <div class="pis-row-icon" aria-hidden="true">${ICONS.moon}${statusBadge ? `<span class="pis-row-status">${statusBadge}</span>` : ''}</div>
+   <button type="button" class="pis-row-main"${cancelled ? ' disabled' : ''} aria-label="Open ${esc(title)} for ${esc(clientName)}">
+    <span class="pis-row-meta">${meta}</span>
+    <span class="pis-row-title">${esc(title)}</span>
+    <span class="pis-row-sub">${esc(sub)}</span>
+   </button>
+   ${action ? `<button type="button" class="pis-row-action${action.secondary ? ' is-secondary' : ''}">${esc(action.label)}</button>` : ''}`;
+
+  if (!cancelled) row.querySelector('.pis-row-main').addEventListener('click', () => openFocus(visit.id, pickup));
+  if (action) row.querySelector('.pis-row-action').addEventListener('click', event => { event.stopPropagation(); action.run(); });
+
+  card.classList.add('pis-compact');
+  card.prepend(row);
+ }
+
+ function compactSchedule() {
+  const container = document.getElementById('admin-day-services');
+  if (!container) return;
+  container.querySelectorAll(':scope > .pis-group').forEach(el => el.remove());
+
+  container.querySelectorAll(':scope > .admin-service-card[data-schedule-visit-id]').forEach(card => {
+   const visit = findVisit(card.dataset.scheduleVisitId);
+   if (!visit) return;
+
+   card.querySelector(':scope > .pis-row')?.remove();
+   if (isBoarding(visit)) { buildBoardingRow(card, visit); return; }
+   const cancelled = isCancelled(visit);
+   const state = cancelled ? 'cancelled' : progressOf(visit).state;
+
+   const client = clientOf(visit);
+   const clientName = client?.full_name || client?.email || 'Client';
+   const pets = petNamesOf(visit);
+   const time = visit.time_window || 'Time not set';
+
+   const kind = serviceKind(visit);
+   const kindIcon = { walk: ICONS.paw, dropin: ICONS.house, meet: ICONS.people, sit: ICONS.heart }[kind] || ICONS.dot;
+   const statusBadge = { completed: ICONS.check, checked_in: ICONS.clock, cancelled: ICONS.x }[state] || '';
+   let rowClass = '', meta = esc(time), sub = esc([clientName, pets.join(', ')].filter(Boolean).join(' \u00b7 '));
+   if (state === 'completed') { rowClass = 'is-done'; meta += ' <span class="pis-badge pis-badge-done">Completed</span>'; }
+   const assignee = window.pisTeam?.assigneeName?.(visit);
+   if (state === 'checked_in') {
+    rowClass = 'is-live';
+    meta = visit.checked_in_at
+     ? `In progress \u00b7 <span class="pis-live-timer" data-since="${esc(visit.checked_in_at)}"></span>`
+     : 'In progress';
+   }
+   if (assignee && state !== 'cancelled') meta += ` <span class="pis-badge pis-badge-assignee">${esc(assignee)}</span>`;
+   if (state === 'cancelled') {
+    rowClass = 'is-cancelled'; meta += ' <span class="pis-badge pis-badge-cancelled">Cancelled</span>';
+    sub = esc(String(visit.cancellation_reason || '').trim() || `${clientName} \u00b7 cancelled`);
+   }
+
+   // One button that matches the visit's state.
+   let action = null;
+   if (state === 'scheduled') {
+    const checkIn = card.querySelector('button[data-visit-action="check-in"]:not(:disabled)');
+    action = checkIn
+     ? { label: 'Check In', run: () => checkIn.click() }
+     : { label: 'Open', run: () => openFocus(visit.id) };
+   } else if (state === 'checked_in') {
+    action = { label: 'Open', run: () => openFocus(visit.id) };
+   } else if (state === 'completed') {
+    const reportButton = card.querySelector('button[data-visit-report-open]');
+    action = reportButton && /add/i.test(reportButton.textContent || '')
+     ? { label: 'Add Report', run: () => reportButton.click() }
+     : { label: 'View', secondary: true, run: () => openFocus(visit.id) };
+   }
+
+   const row = document.createElement('div');
+   row.className = `pis-row ${rowClass} kind-${kind}`;
+   row.innerHTML = `
+    <div class="pis-row-icon" aria-hidden="true">${kindIcon}${statusBadge ? `<span class="pis-row-status">${statusBadge}</span>` : ''}</div>
+    <button type="button" class="pis-row-main"${cancelled ? ' disabled' : ''} aria-label="Open ${esc(shortService(visit))} for ${esc(clientName)}">
+     <span class="pis-row-meta">${meta}</span>
+     <span class="pis-row-title">${esc(shortService(visit))}</span>
+     <span class="pis-row-sub">${sub}</span>
+    </button>
+    ${action ? `<button type="button" class="pis-row-action${action.secondary ? ' is-secondary' : ''}">${esc(action.label)}</button>` : ''}`;
+
+   if (!cancelled) row.querySelector('.pis-row-main').addEventListener('click', () => openFocus(visit.id));
+   if (action) row.querySelector('.pis-row-action').addEventListener('click', event => { event.stopPropagation(); action.run(); });
+
+   card.classList.add('pis-compact');
+   card.prepend(row);
+  });
+
+  // Morning / Afternoon / Evening headers (cancelled visits get their own at the bottom).
+  let lastGroup = null;
+  const counts = {};
+  // All-day boarding goes to the top of the day (cancelled nights stay at the bottom).
+  [...container.querySelectorAll(':scope > .admin-service-card.pis-compact')]
+   .filter(card => { const v = findVisit(card.dataset.scheduleVisitId); return isBoarding(v) && !(isCancelled(v) && !isPickupCard(card)); })
+   .reverse()
+   .forEach(card => container.insertBefore(card, container.querySelector(':scope > .admin-service-card.pis-compact')));
+
+  const cards = [...container.querySelectorAll(':scope > .admin-service-card.pis-compact')];
+  const groupOf = card => {
+   const v = findVisit(card.dataset.scheduleVisitId);
+   if (isCancelled(v) && !isPickupCard(card)) return 'Cancelled';
+   return isBoarding(v) ? 'Boarding' : dayPart(v);
+  };
+  cards.forEach(card => { const g = groupOf(card); counts[g] = (counts[g] || 0) + 1; });
+  if (cards.length > 1) {
+   cards.forEach(card => {
+    const g = groupOf(card);
+    if (g === lastGroup) return;
+    lastGroup = g;
+    const header = document.createElement('div');
+    header.className = `pis-group pis-group-${g.toLowerCase()}`;
+    header.innerHTML = `<span>${esc(g)}</span><span class="pis-group-count">${counts[g]}</span>`;
+    container.insertBefore(header, card);
+   });
+  }
+
+  updateLiveTimers();
+  if (!liveRowTimer) liveRowTimer = setInterval(updateLiveTimers, 1000);
+ }
+
+ function addOpenButtons() {
+  // In-progress visits in the schedule list get an "Open Visit Screen" button,
+  // so you can get back to the popup after closing it.
+  document.querySelectorAll('#admin-day-services > .admin-service-card[data-schedule-visit-id]').forEach(card => {
+   const visit = findVisit(card.dataset.scheduleVisitId);
+   if (!canFocus(visit) || progressOf(visit).state !== 'checked_in') return;
+   const copy = card.querySelector('.admin-visit-progress-copy');
+   if (!copy || card.querySelector('.vfm-open-visit-button')) return;
+   const button = document.createElement('button');
+   button.type = 'button';
+   button.className = 'secondary-button vfm-open-visit-button';
+   button.textContent = 'Open Visit Screen';
+   button.addEventListener('click', event => { event.stopPropagation(); openFocus(visit.id); });
+   copy.parentElement.insertBefore(button, copy.nextSibling);
+  });
+ }
+
+ function install() {
+  // Stop recording listeners; we have what we need.
+  EventTarget.prototype.addEventListener = nativeAdd;
+  ensureStyles();
+
+  // Re-render: keep the focused card in the popup instead of the list.
+  const originalRender = window.renderAdminDayServices;
+  if (typeof originalRender === 'function') {
+   window.renderAdminDayServices = function (...args) {
+    if (focusedVisitId && body) body.replaceChildren();   // avoid duplicate IDs
+    const result = originalRender.apply(this, args);
+    try {
+     if (focusedVisitId) { mountCard(); tick(); }
+     compactSchedule();
+    } catch (e) { console.error('Visit focus render', e); }
+    return result;
+   };
+  }
+
+  // Check In -> open the popup.
+  wrapAsync('checkInVisit', null, (_r, visitId) => {
+   const v = findVisit(visitId);
+   if (v && progressOf(v).state === 'checked_in') openFocus(visitId);
+  });
+
+  // Start Walk from the list -> open the popup too.
+  wrapAsync('startVisitWalk', null, (_r, visitId) => { openFocus(visitId); });
+
+  // Finish Visit -> close the popup and show the card with its stats.
+  wrapAsync('finishVisit', null, (_r, visitId) => {
+   const v = findVisit(visitId);
+   if (Number(focusedVisitId) === Number(visitId) && v && progressOf(v).state === 'completed') {
+    closeFocus({ scrollToCard: true });
+   }
+  });
+
+  // Undo Check-In -> the visit is back to Not Started, so close the popup.
+  wrapAsync('undoVisitCheckIn', null, (_r, visitId) => {
+   const v = findVisit(visitId);
+   if (Number(focusedVisitId) === Number(visitId) && v && progressOf(v).state !== 'checked_in') {
+    closeFocus({ scrollToCard: true });
+   }
+  });
+
+  // Reopen Visit -> popup opens and the timer resumes.
+  wrapAsync('reopenVisit', null, (_r, visitId) => { openFocus(visitId); });
+
+  // Reports open inside the popup.
+  wrapAsync('openAdminVisitReport', visitId => { openFocus(visitId); }, () => { applyReportMode(); });
+  wrapAsync('openAdminClientVisitReportPreview', visitId => { openFocus(visitId); }, () => { applyReportMode(); });
+
+  // Saving the report closes the popup.
+  wrapAsync('saveAdminVisitReport', null, () => {
+   if (!focusedVisitId) return;
+   const reportStillOpen =
+    typeof activeVisitReportVisitId !== 'undefined' &&
+    Number(activeVisitReportVisitId) === Number(focusedVisitId);
+   const v = findVisit(focusedVisitId);
+   if (!reportStillOpen && v && progressOf(v).state === 'completed') closeFocus({ scrollToCard: true });
+  });
+
+  // After a reload (camera, phone memory), reopen the visit you were in.
+  const reopenCheck = setInterval(() => {
+   if (typeof currentUser === 'undefined' || !currentUser?.id) return;
+   if (typeof allVisits === 'undefined' || !allVisits.length) return;
+   clearInterval(reopenCheck);
+   if (focusedVisitId) return;
+   try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if (!saved || Date.now() - Number(saved.at || 0) > REOPEN_WINDOW_MS) return;
+    const v = findVisit(saved.id);
+    if (v && progressOf(v).state === 'checked_in') openFocus(saved.id);
+    else localStorage.removeItem(STORAGE_KEY);
+   } catch { /* ignore */ }
+  }, 500);
+  setTimeout(() => clearInterval(reopenCheck), 60000);
+ }
+
+ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
+ else install();
+})();
