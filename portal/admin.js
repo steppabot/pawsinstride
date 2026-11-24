@@ -4422,7 +4422,7 @@ async function sendAdminBoardingUpdate(state) {
         await saveAdminBoardingDraft(state);
         state.published = false;
         renderAdminBoardingDraftForm(state);
-        setAdminBoardingEditorMessage(state, "Boarding update saved ✓ You can add another update for this day.");
+        setAdminBoardingEditorMessage(state, "Boarding update saved ✓ You can add more for this day.");
         await loadAdminBoardingUpdateHistory(state);
     } catch (error) {
         console.error("Boarding update save error:", error);

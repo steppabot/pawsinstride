@@ -249,22 +249,91 @@
             }
         }
     }
+    /* ---------- one sentence per line when a message wraps ----------
+       Messages, status lines, hints and notices written by the app often hold two sentences.
+       When both don't fit on one line, the second used to start mid-line and spill onto the next.
+       Each sentence is now its own block: it stays beside the first if there's room, otherwise it
+       starts on a new line. Only plain app text is touched (never notes or messages people typed),
+       and the words themselves don't change (textContent reads the same). */
+    const HINT_BOXES = ['help', 'hint', 'empty', 'intro', 'muted', 'subtitle', 'problem', 'lead'].map(end => `[class$="-${end}"], [class*="-${end} "]`).join(', ')
+        + ', small, [data-pis-tone], [role="status"], [role="alert"], .pis-field-note, .pis-notice p, #pis-confirm-message, .client-cancellation-note, '
+        + '.admin-pricing-v2-note, .pis-team-note, .pis-team-confirm > p, .pis-photo-viewer-note, .pis-xmas-retry, .pis-client-delete-text, .psb-note, .remove-pet-note, '
+        + '.admin-visit-progress-copy > p, .admin-visit-progress-copy > span, .pis-live-meta, .admin-boarding-walk-panel > p, .admin-calendar-section-heading p, '
+        + '.boarding-policy p, .pis-delete-account-body p, .client-cancellation-policy p, .payment-security-note p, .booking-success-note p, .signup-pet-note p, '
+        + '.reset-password-success p, .review-strip-copy > strong, .review-strip-copy > span, .pfin-note, [data-boarding-history], [data-pis-lines]';
+    const LINE_BOXES = TONE_BOXES + ', ' + HINT_BOXES;
+    // a period after one of these is not the end of a sentence ("Dr. Smith", "Country Blvd. Frisco", "J. Smith", "5 p.m. Friday")
+    const NOT_AN_END = /(?:^|[\s(“"])(?:[A-Z]|Mr|Mrs|Ms|Dr|Jr|Sr|St|Ave|Blvd|Rd|Ln|Ct|Hwy|Apt|Ste|vs|etc|approx|est|ext|Inc|Co|Ltd|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec|a\.m|p\.m|e\.g|i\.e|U\.S)\.$/;
+    function sentences(text) {
+        const value = String(text ?? '').replace(/\s+/g, ' ').trim();
+        const parts = [];
+        const ends = /[.!?…✓]+["'”’)\]]*\s+(?=["'“‘(\[]?[A-Z0-9$])/g;
+        let start = 0;
+        let m;
+        while ((m = ends.exec(value))) {
+            const end = m.index + m[0].length;
+            const head = value.slice(start, end).trimEnd();
+            const bare = head.replace(/["'”’)\]]+$/, '');
+            if (!/[A-Za-z]/.test(head)) continue;                                            // a leading "✓" or "1." is not a sentence by itself
+            if (/\.$/.test(bare) && !/\.\.$/.test(bare) && NOT_AN_END.test(bare)) continue;
+            if (/(?:\bNo|\d)\.$/.test(bare) && /^\d/.test(value.slice(end))) continue;      // "No. 5", "1. 2."
+            parts.push(head);
+            start = end;
+        }
+        const tail = value.slice(start).trim();
+        if (tail) parts.push(tail);
+        return parts;
+    }
+    function tidyLines(el) {
+        if (!el || el.nodeType !== 1 || !el.firstChild) return;
+        const kids = el.childNodes;
+        for (let i = 0; i < kids.length; i++) if (kids[i].nodeType !== 3) return;       // plain text only (ours is already wrapped)
+        const raw = el.textContent;
+        if (raw.length < 12) return;
+        const parts = sentences(raw);
+        if (parts.length < 2) return;
+        const look = getComputedStyle(el);
+        if (/\n/.test(raw.trim()) && /^pre/.test(look.whiteSpace)) return;                    // lines someone laid out by hand stay as written
+        if (look.whiteSpace === 'nowrap' || (look.webkitLineClamp && look.webkitLineClamp !== 'none')) return;   // one-line labels that end in "…" stay as they are
+        const wrap = document.createElement('span');
+        wrap.className = 'pis-lines';
+        parts.forEach((part, index) => {
+            if (index) wrap.appendChild(document.createTextNode(' '));
+            const line = document.createElement('span');
+            line.className = part.length > 90 ? 'pis-line is-long' : 'pis-line';
+            line.textContent = part;
+            wrap.appendChild(line);
+        });
+        el.replaceChildren(wrap);
+    }
+
     const toneWatcher = new MutationObserver(records => {
         const seen = new Set();
+        const visit = box => {
+            if (!box || seen.has(box)) return;
+            seen.add(box);
+            if (box.matches(TONE_BOXES)) setTone(box);
+            try { tidyLines(box); } catch { /* the message still shows, just unsplit */ }
+        };
         for (const r of records) {
+            // our own tidy-up (text swapped for the same words in lines) is not a new message
+            if (r.type === 'childList' && r.addedNodes.length === 1 && r.addedNodes[0].nodeType === 1 && r.addedNodes[0].classList.contains('pis-lines')) continue;
             const el = r.target.nodeType === 3 ? r.target.parentElement : r.target;
-            const box = el?.closest?.(TONE_BOXES);
-            if (box && !seen.has(box)) { seen.add(box); setTone(box); }
+            if (el?.closest?.('.pis-lines')) continue;
+            visit(el?.closest?.(LINE_BOXES));
             // a whole sheet or card added at once (its message already filled in)
             for (const node of r.addedNodes || []) {
                 if (node.nodeType !== 1) continue;
-                const found = node.matches(TONE_BOXES) ? [node] : [];
-                found.push(...node.querySelectorAll(TONE_BOXES));
-                found.forEach(b => { if (!seen.has(b)) { seen.add(b); setTone(b); } });
+                if (node.matches(LINE_BOXES)) visit(node);
+                node.querySelectorAll(LINE_BOXES).forEach(visit);
             }
         }
     });
     toneWatcher.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
+    // text that's already on the page when it loads
+    const tidyPage = () => document.querySelectorAll(LINE_BOXES).forEach(box => { try { tidyLines(box); } catch { /* ignore */ } });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tidyPage, { once: true });
+    else tidyPage();
 
     /* ---------- in-app messages (instead of the phone's grey pop-up) ---------- */
     let noticeWrap = null;
@@ -349,6 +418,7 @@
     window.PisFormErrors = {
         notice,
         tone: setTone,
+        sentences, tidyLines,
         show, clear, clearAll,
         // mark a box using the message the page already wrote in its usual place
         fromPageMessage(field, options) { return show(field, moveMessage(field), options); },
@@ -492,6 +562,9 @@
         .pis-notice[data-pis-tone="info"] { background: #f4f8fc; color: #33506d; border-color: #d7e7f5; }
         .pis-notice[data-pis-tone="info"]::before { content: "i"; background: #2f7fc1; }
         .pis-notice p { flex: 1 1 auto; margin: 0; white-space: pre-line; }
+        .pis-lines { min-width: 0; }
+        .pis-line { display: inline-block; max-width: 100%; text-wrap: balance; }
+        .pis-line.is-long { text-wrap: pretty; }
         .pis-notice button { appearance: none; -webkit-appearance: none; flex: 0 0 28px; width: 28px; height: 28px; margin: -4px -2px -4px 0; padding: 0; border: 0; border-radius: 8px; background: transparent; color: inherit; font: inherit; font-size: 22px; line-height: 1; cursor: pointer; opacity: .7; }
         .pis-notice.is-leaving { opacity: 0; transform: translateY(-6px); transition: opacity .2s, transform .2s; }
         @keyframes pis-notice-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
