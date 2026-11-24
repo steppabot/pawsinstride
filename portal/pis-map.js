@@ -99,10 +99,13 @@
 
     function create(element, extra = {}) {
         const night = isNight();
-        const map = new google.maps.Map(element, {
+        const options = {
             mapTypeControl: false, streetViewControl: false, fullscreenControl: true, clickableIcons: false,
             keyboardShortcuts: false, gestureHandling: 'cooperative', ...extra, ...looks(night)
-        });
+        };
+        // the phone apps' web view can't do a real full screen for a map: no expand button there
+        if (window.Capacitor?.isNativePlatform?.()) options.fullscreenControl = false;
+        const map = new google.maps.Map(element, options);
         map.__pisNight = night;
         map.__pisRoutes = [];
         return map;

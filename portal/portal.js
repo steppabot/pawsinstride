@@ -2256,7 +2256,7 @@ function clearClientFastStart() {
         localStorage.removeItem(CLIENT_FAST_START_KEY);
         localStorage.removeItem("pis-client-last-view");
         // the saved Home card and review answer belong to this account too
-        ["pis-star-card", "pis-star-photo", "pis-star-urls", "pis-review-claim"].forEach(key => localStorage.removeItem(key));
+        ["pis-star-card", "pis-star-photo", "pis-star-urls", "pis-review-claim", "pis-walks-done"].forEach(key => localStorage.removeItem(key));
     } catch (error) { /* ignore */ }
 }
 
@@ -20707,12 +20707,28 @@ function startMobilePortalIntro() {
 
     }
 
-    function finishWhenReady() {
+    let waitingForHomeCard = false;
 
-        if (dashboardFinished && videoFinished) {
-            dismissIntro();
+    function finishWhenReady() {
+        if (!(dashboardFinished && videoFinished) || waitingForHomeCard) {
+            return;
         }
 
+        // Let the Home photo card finish building behind the intro, so Home
+        // appears with it already there (never more than 2.5 s extra).
+        const homeCard = window.PisHomeStar?.whenReady?.();
+
+        if (!homeCard) {
+            dismissIntro();
+            return;
+        }
+
+        waitingForHomeCard = true;
+
+        Promise.race([
+            homeCard,
+            new Promise(resolve => window.setTimeout(resolve, 2500))
+        ]).then(dismissIntro, dismissIntro);
     }
 
     function handleVisibilityChange() {

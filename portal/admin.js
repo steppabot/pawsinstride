@@ -3892,8 +3892,24 @@ async function finishAdminBoardingWalk(walk) {
     return await syncPendingWalkFinish(walk.id, false);
 }
 
+// Routes that are open stay open when the schedule redraws (live updates redraw it often):
+// walk id -> the box with its map (null while it's still loading).
+const adminOpenBoardingRoutes = new Map();
+const adminBoardingRouteBox = walkId => document.getElementById(`admin-boarding-walk-map-${walkId}`);
+
+function restoreAdminBoardingRoutes() {
+    adminOpenBoardingRoutes.forEach((drawn, walkId) => {
+        const mount = adminBoardingRouteBox(walkId);
+        if (!mount) return;
+        if (drawn && drawn !== mount) { mount.replaceWith(drawn); drawn.hidden = false; }
+        else if (!drawn) { mount.hidden = false; if (!mount.textContent.trim()) mount.textContent = "Loading route…"; }
+        const button = document.querySelector(`[data-boarding-walk-action="route"][data-boarding-walk-id="${walkId}"]`);
+        if (button) button.textContent = "Hide Route";
+    });
+}
+
 async function showAdminBoardingWalkRoute(walk) {
-    const mount = document.getElementById(`admin-boarding-walk-map-${walk.id}`);
+    let mount = adminBoardingRouteBox(walk.id);
     if (!mount) return;
     mount.hidden = false;
     mount.textContent = "Loading route…";
@@ -3909,11 +3925,16 @@ async function showAdminBoardingWalkRoute(walk) {
         points.push(...data); sequence = data.at(-1).sequence_number;
         if (data.length < 1000) break;
     }
-    if (!mount.isConnected) return;
+    if (!adminOpenBoardingRoutes.has(Number(walk.id))) return;   // closed while it was loading
+    // the schedule may have redrawn while the points loaded: draw in the box that's on screen now
+    mount = adminBoardingRouteBox(walk.id);
+    if (!mount) return;
+    mount.hidden = false;
     if (points.length < 2) { mount.textContent = "Not enough GPS points to draw this route."; return; }
     if (!window.google?.maps) { mount.innerHTML = `<p data-pis-tone="error">The map could not load. Refresh the page and try again.</p>`; return; }
     mount.textContent = "";
     renderAdminGoogleWalkRoute(mount, points);
+    adminOpenBoardingRoutes.set(Number(walk.id), mount);
 }
 
 async function handleAdminBoardingWalkAction(button) {
@@ -3932,10 +3953,18 @@ async function handleAdminBoardingWalkAction(button) {
         if (action === "route") {
             if (!walk || walk.status !== "completed") throw new Error("Completed walk not found.");
             preserveRoute = true;
-            const mount = document.getElementById(`admin-boarding-walk-map-${walk.id}`);
-            if (mount && !mount.hidden) { mount.hidden = true; button.textContent = "View Route"; return; }
-            await showAdminBoardingWalkRoute(walk);
+            const walkId = Number(walk.id);
+            if (adminOpenBoardingRoutes.has(walkId)) {
+                adminOpenBoardingRoutes.delete(walkId);
+                const mount = adminBoardingRouteBox(walkId);
+                if (mount) mount.hidden = true;
+                button.textContent = "View Route";
+                return;
+            }
+            adminOpenBoardingRoutes.set(walkId, null);
             button.textContent = "Hide Route";
+            try { await showAdminBoardingWalkRoute(walk); }
+            catch (error) { adminOpenBoardingRoutes.delete(walkId); preserveRoute = false; throw error; }
             return;
         }
         if (action === "refresh") { await refreshAdminBoardingWalks(stayId); return; }
@@ -3971,7 +4000,8 @@ async function handleAdminBoardingWalkAction(button) {
         adminBoardingWalkMessages.set(stayId, error?.message || "The walk could not be updated. Try again.");
     } finally {
         adminVisitActionBusy = false;
-        if (!preserveRoute) renderAdminDayServices();
+        // If the schedule redrew while this was busy, its buttons were drawn switched off: redraw them on.
+        if (!preserveRoute || !button.isConnected) renderAdminDayServices();
         else button.disabled = false;
     }
 }
@@ -4682,6 +4712,11 @@ window.addEventListener("focus", () => {
 // ========================================
 
 function renderAdminDayServices() {
+    try { return renderAdminDayServicesNow(); }
+    finally { try { restoreAdminBoardingRoutes(); } catch (error) { console.warn("Boarding routes:", error); } }
+}
+
+function renderAdminDayServicesNow() {
 
     const heading =
         document.getElementById(
