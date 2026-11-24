@@ -22,10 +22,32 @@
     const esc = s => (typeof escapeHtml === 'function' ? escapeHtml(String(s ?? ''))
         : String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
     const lower = v => String(v || '').trim().toLowerCase();
-    const urlCache = new Map();
+        const urlCache = new Map();
     let renderVersion = 0;
     let liveTimer = null;
     let shownKey = '';
+    let shownPhoto = '';          // which picture is on screen (path, or link without its token)
+    let pendingClick = false;     // tapped the saved card's button before the fresh one was ready
+    // The last card is kept on this phone so Home opens with it straight away (no blank, no pop-in).
+    const SAVED_CARD = 'pis-star-card';
+    const SAVED_PHOTO = 'pis-star-photo';
+    const SAVED_URLS = 'pis-star-urls';
+    const store = {
+        get(name) { try { return JSON.parse(localStorage.getItem(name) || 'null'); } catch { return null; } },
+        set(name, value) { try { localStorage.setItem(name, JSON.stringify(value)); return true; } catch { return false; } }
+    };
+        const me = () => (typeof currentUser !== 'undefined' && currentUser?.id) || '';
+    // Buttons go straight into that visit's screen (portal.js), not the calendar or a popup.
+    const openVisit = visit => {
+        if (typeof window.openClientVisitScreen === 'function' && window.openClientVisitScreen(visit)) return true;
+        openClientServiceDate(visit);
+        return false;
+    };
+    // photo links stay valid for an hour: reuse them across app opens so the phone's copy is used
+    (() => {
+        const saved = store.get(SAVED_URLS);
+        if (saved?.uid && Array.isArray(saved.list)) saved.list.forEach(([path, hit]) => urlCache.set(path, { ...hit, uid: saved.uid }));
+    })();
     let people = new Map();
     let peopleMissing = false;
 
@@ -44,7 +66,8 @@
         }
         .pis-star-card { position: relative; border-radius: 26px; overflow: hidden; aspect-ratio: 1 / 1.15; isolation: isolate;
             background: linear-gradient(150deg, #174b68 0%, #1d6f98 55%, #268db2 100%); box-shadow: 0 14px 34px rgba(16, 52, 86, .22); }
-        .pis-star-photo { z-index: 0; }
+                .pis-star-photo { z-index: 0; transition: opacity .25s ease; }
+        .pis-star-photo.is-loading { opacity: 0; }
         .pis-star-card::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
             background: linear-gradient(180deg, rgba(8,24,40,.28) 0%, rgba(8,24,40,0) 24%, rgba(8,24,40,.05) 40%, rgba(8,24,40,.88) 100%); }
         .pis-star-card.no-photo::after { background: linear-gradient(180deg, rgba(8,24,40,0) 40%, rgba(8,24,40,.35) 100%); }
@@ -69,6 +92,7 @@
             text-shadow: 0 1px 12px rgba(0,0,0,.25); overflow-wrap: anywhere; }
         .pis-star-sub { margin: -4px 0 0; font: 600 14px/1.35 Roboto, Arial, sans-serif; color: rgba(255,255,255,.92); }
         .pis-star-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+                .pis-star-stat[hidden] { display: none !important; }
         .pis-star-stat { padding: 7px 11px; border-radius: 12px; background: rgba(255,255,255,.16); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             font: 700 13px Roboto, Arial, sans-serif; color: #fff; display: inline-flex; gap: 6px; align-items: center; font-variant-numeric: tabular-nums; }
         .pis-star-note { margin: 0; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -124,14 +148,19 @@
         if (mins < 60) return `${mins} min`;
         return `${Math.floor(mins / 60)} hr ${mins % 60} min`;
     }
-    const miles = meters => (Number(meters) / 1609.344);
+        const miles = meters => { const m = Number(meters) / 1609.344; return Number.isFinite(m) ? m : 0; };
 
-    async function signed(path) {
+        async function signed(path) {
         if (!path) return null;
         const hit = urlCache.get(path);
-        if (hit && hit.at > Date.now() - 45 * 60000) return hit.url;
+        if (hit && hit.uid === me() && hit.at > Date.now() - 45 * 60000) return hit.url;
         const url = typeof signedClientBoardingPhoto === 'function' ? await signedClientBoardingPhoto(path) : null;
-        if (url) urlCache.set(path, { url, at: Date.now() });
+        if (url) {
+            urlCache.set(path, { url, at: Date.now(), uid: me() });
+            const fresh = [...urlCache].filter(([, h]) => h.uid === me() && h.at > Date.now() - 45 * 60000).slice(-40)
+                .map(([k, h]) => [k, { url: h.url, at: h.at }]);
+            store.set(SAVED_URLS, { uid: me(), list: fresh });
+        }
         return url;
     }
 
@@ -220,16 +249,20 @@
             const kind = kindOf(v);
             const walk = typeof currentClientLiveWalks !== 'undefined' ? currentClientLiveWalks.get?.(Number(v.id)) : null;
             key += `:${v.id}`;
-            if (kind === 'walk') {
+                        if (kind === 'walk' && walk) {
                 chip = 'Live · Walking Now';
                 title = `${listNames(names)} ${verb(names, 'is', 'are')} out on a walk`;
-                button = { text: 'Follow the Walk', run: () => openClientServiceDate(v) };
+                button = { text: 'Follow the Walk', run: () => openVisit(v) };
+            } else if (kind === 'walk') {
+                // checked in, walk not started yet
+                chip = 'Live · Checked In';
+                title = person ? `${person} is with ${listNames(names)}` : `${listNames(names)} ${verb(names, 'has', 'have')} company right now`;
+                sub = 'The walk starts soon.';
+                button = { text: 'View Visit', run: () => openVisit(v) };
             } else if (kind === 'sit') {
                 chip = 'Live · Sit in Progress';
                 title = person ? `${person} is with ${listNames(names)}` : `${listNames(names)} ${verb(names, 'has', 'have')} company right now`;
-                button = typeof window.openClientSitUpdates === 'function'
-                    ? { text: 'See Sit Updates', run: () => window.openClientSitUpdates(v.id) }
-                    : { text: 'View Visit', run: () => openClientServiceDate(v) };
+                button = { text: 'See Sit Updates', run: () => openVisit(v) };
                 const { data } = await supabaseClient.from('visit_updates').select('published_at, visit_update_photos(storage_path, sort_order)')
                     .eq('visit_id', v.id).not('published_at', 'is', null).order('published_at', { ascending: false }).limit(1);
                 const photos = [...(data?.[0]?.visit_update_photos || [])].sort((a, b) => a.sort_order - b.sort_order);
@@ -237,12 +270,12 @@
             } else {
                 chip = 'Live · Visit in Progress';
                 title = person ? `${person} is visiting ${listNames(names)}` : `${listNames(names)} ${verb(names, 'has', 'have')} company right now`;
-                button = { text: 'View Visit', run: () => openClientServiceDate(v) };
+                button = { text: 'View Visit', run: () => openVisit(v) };
             }
             chipClass = 'live';
             const since = walk?.started_at || v.checked_in_at;
             stats.push(`<span class="pis-star-stat" data-star-since="${esc(since)}">⏱ <b>${esc(minutesText(since))}</b></span>`);
-            if (kind === 'walk') {
+                        if (kind === 'walk' && walk) {
                 stats.push(`<span class="pis-star-stat" data-star-miles="${esc(v.id)}" ${miles(walk?.distance_meters) >= 0.01 ? '' : 'hidden'}>${PAW.replace('<svg', '<svg width="14" height="14"')} <b>${miles(walk?.distance_meters).toFixed(1)} mi</b></span>`);
             }
             if (!photoPath) photoPath = await newestVisitPhoto();
@@ -264,7 +297,10 @@
             note = update
                 ? `<b>${esc(clock(update.published_at))}</b> · ${esc((update.notes || '').trim() || 'New photos from the stay.')}`
                 : 'We’ll share photos and care updates here during the stay.';
-            button = { text: 'See Boarding Updates', run: () => openClientBoardingUpdates(stay.id), orange: true };
+                        button = { text: 'See Boarding Updates', orange: true, run: () => {
+                const night = window.findClientBoardingNightVisit?.(stay.id);
+                if (!(night && openVisit(night))) openClientBoardingUpdates(stay.id);
+            } };
             key += `:${stay.id}:${update?.id || ''}`;
             if (!photoPath) photoPath = await newestVisitPhoto();
             if (!photoPath) photoUrl = await petPhoto(currentPets || []);
@@ -308,7 +344,7 @@
                 title = `See you ${dayWord(v.visit_date)}, ${listNames(names)}!`;
                 const service = typeof window.pisShortServiceName === 'function' ? window.pisShortServiceName(v) : (v.service_name || 'Visit');
                 sub = [String(service).replace(/\s+-\s+/, ' · '), v.time_window].filter(Boolean).join(' · ');
-                button = { text: 'View Visit', run: () => openClientServiceDate(v) };
+                button = { text: 'View Visit', run: () => openVisit(v) };
                 key += `:${v.id}`;
                 photoPath = await newestVisitPhoto();
                 if (!photoPath) photoUrl = await petPhoto(pets);
@@ -331,12 +367,14 @@
         const thumbs = thumbUrls.map((url, i) => (i === 2 && extra > 0
             ? `<span class="more">+${extra + 1}</span>`
             : url ? `<span><img src="${esc(url)}" alt="" loading="lazy"></span>` : '')).join('');
-        const box = photoPath ? covers.get(photoPath) : null;
-        key += `|${photoPath || photoUrl || 'none'}|${box ? Object.values(box).join(',') : ''}|${title}|${sub}|${note}|${stats.length}|${thumbPaths.length}`;
+                const box = photoPath ? covers.get(photoPath) : null;
+        // the same picture keeps the same id even when its link is renewed
+        const photoId = photoPath ? `p:${photoPath}` : (mainUrl ? `u:${String(mainUrl).split('?')[0]}` : 'none');
+        key += `|${photoId}|${box ? Object.values(box).join(',') : ''}|${title}|${sub}|${note}|${stats.length}|${thumbPaths.length}`;
 
         const html = `
             <div class="pis-star-card${mainUrl ? '' : ' no-photo'}">
-                ${mainUrl ? `<img class="pis-star-photo" src="${esc(mainUrl)}" alt="" style="${window.PisCover ? window.PisCover.imgStyle(box) : 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover'}">`
+                                ${mainUrl ? `<img class="pis-star-photo" data-full="1" src="${esc(mainUrl)}" alt="" decoding="async" style="${window.PisCover ? window.PisCover.imgStyle(box) : 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover'}">`
                     : `<div class="pis-star-paws">${PAW}</div>`}
                 <div class="pis-star-top">
                     ${chip ? `<span class="pis-star-chip ${chipClass}"><span class="pis-star-dot"></span>${esc(chip)}</span>` : '<span></span>'}
@@ -351,7 +389,7 @@
                     ${button ? `<button type="button" class="pis-star-btn${button.orange ? ' orange' : ''}" data-star-button>${esc(button.text)} <span aria-hidden="true">→</span></button>` : ''}
                 </div>
             </div>`;
-        return { html, key, button, coversUpdate: state.kind === 'done' || state.kind === 'stay', live: state.kind === 'live' ? state.visit : null };
+                return { html, key, button, photoId, mainUrl, coversUpdate: state.kind === 'done' || state.kind === 'stay', live: state.kind === 'live' ? state.visit : null };
     }
 
     // ---------- keep the live numbers moving ----------
@@ -382,38 +420,158 @@
     function turnOff() {
         const dash = document.getElementById('mobile-home-dashboard');
         dash?.classList.remove('pis-star-on', 'pis-star-covers-update');
-        document.getElementById('pis-star')?.remove();
+                document.getElementById('pis-star')?.remove();
         shownKey = '';
+        shownPhoto = '';
         clearInterval(liveTimer);
         liveTimer = null;
+    }
+
+    function hostFor(dash) {
+        let host = document.getElementById('pis-star');
+        if (!host) {
+            host = document.createElement('div');
+            host.id = 'pis-star';
+            host.className = 'pis-star';
+            host.setAttribute('role', 'region');
+            host.setAttribute('aria-label', 'Your pet today');
+            const anchor = document.getElementById('mobile-home-next-visit-card');
+            if (anchor) anchor.before(host); else dash.prepend(host);
+        }
+        return host;
+    }
+
+    // fade a photo in once it has loaded (a photo that can't load leaves the blue card, not a broken image)
+    function watchLoading(img) {
+        if (!img || (img.complete && img.naturalWidth)) return;
+        img.classList.add('is-loading');
+        img.addEventListener('load', () => img.classList.remove('is-loading'), { once: true });
+    }
+
+    // load and decode a photo off screen; it goes on screen only when it's ready to show
+    function preload(url, ms = 4000) {
+        return new Promise(resolve => {
+            if (!url) return resolve(null);
+            const img = new Image();
+            img.decoding = 'async';
+            let done = false;
+            const finish = ok => { if (!done) { done = true; resolve(ok ? img : null); } };
+            img.onload = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(() => finish(true));
+            img.onerror = () => finish(false);
+            setTimeout(() => finish(false), ms);
+            img.src = url;
+        });
+    }
+
+    // Home opens with the last card this phone showed
+    function paintSaved(dash) {
+        const saved = store.get(SAVED_CARD);
+        if (!saved?.html || saved.uid !== me() || Date.now() - (saved.at || 0) > 7 * 86400000) return;
+        const host = hostFor(dash);
+        host.innerHTML = saved.html;
+        const img = host.querySelector('.pis-star-photo');
+        if (img) {
+            const pic = store.get(SAVED_PHOTO);
+            if (pic?.uid === me() && pic.photoId === saved.photoId && pic.data) img.src = pic.data;
+            else if (Date.now() - (saved.at || 0) > 50 * 60000) img.removeAttribute('src');  // its link has run out
+            img.dataset.full = '0';
+            watchLoading(img);
+            img.addEventListener('error', () => img.classList.add('is-loading'), { once: true });
+        }
+        const btn = host.querySelector('[data-star-button]');
+        if (btn) btn.onclick = () => { pendingClick = true; };
+        shownKey = saved.key || '';
+        shownPhoto = saved.photoId || '';
+        dash.classList.add('pis-star-on');
+        dash.classList.toggle('pis-star-covers-update', Boolean(saved.coversUpdate));
+        document.getElementById('mobile-home-latest-update')?.closest('.mobile-home-section')?.classList.add('pis-star-latest-section');
+    }
+
+    // remember this card (and a small copy of its photo) for next time
+    let savingPhotoFor = '';
+    function saveCard(card) {
+        if (!me()) return;
+        store.set(SAVED_CARD, { uid: me(), key: card.key, html: card.html, photoId: card.photoId, coversUpdate: card.coversUpdate, at: Date.now() });
+        const pic = store.get(SAVED_PHOTO);
+        if (!card.mainUrl || (pic?.uid === me() && pic.photoId === card.photoId) || savingPhotoFor === card.photoId) return;
+        savingPhotoFor = card.photoId;
+        (async () => {
+            try {
+                const response = await fetch(card.mainUrl, { mode: 'cors', credentials: 'omit' });
+                if (!response.ok) return;
+                const bitmap = await createImageBitmap(await response.blob());
+                const scale = Math.min(1, 900 / bitmap.width);
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(bitmap.width * scale);
+                canvas.height = Math.round(bitmap.height * scale);
+                canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                bitmap.close?.();
+                const data = canvas.toDataURL('image/jpeg', 0.75);
+                if (data.length < 1200000) store.set(SAVED_PHOTO, { uid: me(), photoId: card.photoId, data });
+            } catch { /* the saved copy is a nice-to-have */ }
+            finally { savingPhotoFor = ''; }
+        })();
+    }
+
+    // put a new card on screen without blinking
+    async function showCard(host, card, version) {
+        const box = document.createElement('div');
+        box.innerHTML = card.html;
+        const next = box.querySelector('.pis-star-photo');
+        const current = host.querySelector('.pis-star-photo');
+        if (next && current && card.photoId === shownPhoto) {
+            // same picture: keep the one already on screen (only its framing can change)
+            current.setAttribute('style', next.getAttribute('style') || '');
+            next.replaceWith(current);
+        } else if (next) {
+            // a different picture: get it ready first, then swap (the old card stays until then)
+            const ready = await preload(card.mainUrl);
+            if (version !== renderVersion) return false;
+            if (ready) {
+                ready.className = next.className;
+                ready.alt = '';
+                ready.dataset.full = '1';
+                ready.setAttribute('style', next.getAttribute('style') || '');
+                next.replaceWith(ready);
+            } else {
+                watchLoading(next);
+            }
+        }
+        host.replaceChildren(...box.childNodes);
+        shownKey = card.key;
+        shownPhoto = card.photoId;
+        return true;
+    }
+
+    // the saved card's small photo -> the full photo, once it has loaded
+    async function sharpen(host, card, version) {
+        const img = host.querySelector('.pis-star-photo');
+        if (!img || !card.mainUrl || img.dataset.full === '1') return;
+        const ready = await preload(card.mainUrl, 15000);
+        if (!ready || version !== renderVersion || !img.isConnected) return;
+        img.src = card.mainUrl;
+        img.dataset.full = '1';
+        img.classList.remove('is-loading');
     }
 
     async function render() {
         const version = ++renderVersion;
         const dash = document.getElementById('mobile-home-dashboard');
-        if (!dash || typeof currentUser === 'undefined' || !currentUser?.id || typeof supabaseClient === 'undefined') return;
+        if (!dash || !me() || typeof supabaseClient === 'undefined') return;
         ensureCss();
+        if (!document.querySelector('#pis-star .pis-star-card')) paintSaved(dash);
         try {
             const state = await pickState();
             const card = await build(state);
             if (version !== renderVersion) return;
 
-            let host = document.getElementById('pis-star');
-            if (!host) {
-                host = document.createElement('div');
-                host.id = 'pis-star';
-                host.className = 'pis-star';
-                host.setAttribute('role', 'region');
-                host.setAttribute('aria-label', 'Your pet today');
-                const anchor = document.getElementById('mobile-home-next-visit-card');
-                if (anchor) anchor.before(host); else dash.prepend(host);
-            }
-            if (card.key !== shownKey) {
-                host.innerHTML = card.html;
-                shownKey = card.key;
+            const host = hostFor(dash);
+            if (card.key !== shownKey || !host.querySelector('.pis-star-card')) {
+                if (!(await showCard(host, card, version))) return;
             }
             const btn = host.querySelector('[data-star-button]');
             if (btn) btn.onclick = () => card.button?.run();
+            if (pendingClick) { pendingClick = false; card.button?.run(); }
             const latest = document.getElementById('mobile-home-latest-update')?.closest('.mobile-home-section');
             latest?.classList.add('pis-star-latest-section');
             dash.classList.add('pis-star-on');
@@ -421,17 +579,26 @@
             clearInterval(liveTimer);
             liveTimer = card.live ? setInterval(tickLive, 20000) : null;
             if (card.live) tickLive();
+            saveCard(card);
+            void sharpen(host, card, version);
         } catch (error) {
             console.error('Home card:', error);
-            if (version === renderVersion) turnOff();
+            // a hiccup (weak signal on resume) keeps the card that's showing; only an empty Home falls back
+            if (version === renderVersion && !document.querySelector('#pis-star .pis-star-card')) turnOff();
         }
     }
 
     // ---------- hook into Home ----------
     const originalRender = window.renderMobileHomeDashboard;
     if (typeof originalRender === 'function') {
-        window.renderMobileHomeDashboard = async function (...args) {
-            const result = await originalRender.apply(this, args);
+                window.renderMobileHomeDashboard = async function (...args) {
+            const pending = originalRender.apply(this, args);
+            // Home has just been drawn: put the saved card up now, not after the refresh finishes
+            try {
+                const dash = document.getElementById('mobile-home-dashboard');
+                if (dash && me() && !document.querySelector('#pis-star .pis-star-card')) { ensureCss(); paintSaved(dash); }
+            } catch (error) { console.warn('Home card (saved copy):', error); }
+            const result = await pending;
             void render();
             return result;
         };
@@ -445,6 +612,6 @@
         };
     }
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tickLive(); });
-    window.PisHomeStar = { render, turnOff };
+        window.PisHomeStar = { render, turnOff, forget() { [SAVED_CARD, SAVED_PHOTO, SAVED_URLS].forEach(k => { try { localStorage.removeItem(k); } catch { /* ignore */ } }); } };
     if (typeof currentUser !== 'undefined' && currentUser?.id) void render();
 })();

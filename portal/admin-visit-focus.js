@@ -277,6 +277,9 @@
     margin: 0 !important; padding: 16px !important; border: 1px solid #f2cfae !important; border-radius: 18px !important;
     background: #fff8f1 !important; box-shadow: none !important;
    }
+         .vfm-body > .pis-live { margin: 0 !important; }
+   .vfm-body > .admin-service-card.vfm-card-empty { display: none !important; }
+   .vfm-body > .pis-live .admin-completed-visit-actions:not(:has(*)) { display: none !important; }
    .vfm-live-walk h6 { margin: 0 0 4px !important; font-size: 12px !important; letter-spacing: .08em; text-transform: uppercase; color: #c0610c; }
    .vfm-body > .admin-service-card > .admin-boarding-walk-list h6 { font-size: 13px !important; letter-spacing: .06em; text-transform: uppercase; color: #c0610c; margin: 0 0 8px !important; }
    .vfm-live-walk .boarding-walk-totals { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px !important; margin: 8px 0 6px; }
@@ -615,12 +618,19 @@
   }
   body.appendChild(footer);
 
-  const liveWalk = card.querySelector(':scope > .admin-boarding-walk-panel.has-active-walk');
+    const liveWalk = card.querySelector(':scope > .admin-boarding-walk-panel.has-active-walk');
   if (liveWalk) {
    liveWalk.classList.add('vfm-live-walk');
    body.insertBefore(liveWalk, body.firstChild);
   }
-  const liveKey = liveWalk ? String(visit.id) : '';
+  // Walks, drop-ins and sits that are happening: their live card (live-hero.js) goes on top too.
+    const liveCard = liveWalk ? null : card.querySelector(':scope > .pis-live');
+  if (liveCard) body.insertBefore(liveCard, body.firstChild);
+  // With the live card on top, the old visit box can be left with nothing in it: hide it.
+  const shownParts = [...card.children].filter(el => !el.matches('.admin-service-top, .admin-service-main-grid, .admin-visit-progress-icon, .pis-row'));
+  card.classList.toggle('vfm-card-empty', Boolean(liveCard) &&
+   !shownParts.some(el => el.textContent.trim() || el.querySelector('img, button, input, select, canvas, iframe, video')));
+  const liveKey = liveWalk || liveCard ? String(visit.id) : '';
   if (liveKey && liveKey !== liveWalkShownFor) body.scrollTop = 0;
   liveWalkShownFor = liveKey;
  }
@@ -636,7 +646,8 @@
    typeof activeVisitReportVisitId !== 'undefined' &&
    Number(activeVisitReportVisitId) === Number(focusedVisitId);
   const mount = document.getElementById(`admin-visit-report-${focusedVisitId}`);
-  const showing = Boolean(reportOpen && mount && card?.contains(mount) && mount.innerHTML.trim());
+    const showing = Boolean(reportOpen && mount && card?.contains(mount) && mount.innerHTML.trim());
+  if (showing) card?.classList.remove('vfm-card-empty');
   const isPreview = showing && Boolean(mount.querySelector('.admin-client-report-preview') || /client report preview/i.test(mount.textContent || ''));
   const mode = showing ? (isPreview ? 'preview' : 'edit') : null;
 

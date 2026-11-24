@@ -2633,7 +2633,7 @@ document.getElementById(
 
     "change",
 
-    event => {
+    async event => {
 
 
         const file =
@@ -2700,8 +2700,21 @@ document.getElementById(
 
 
 
+                // Drag and zoom inside a circle first (photo-cover.js); Cancel keeps the old photo.
+        let cropped = file;
+        try {
+            cropped = window.PisCover?.cropFile ? await window.PisCover.cropFile(file, { title: "Adjust Your Photo" }) : file;
+        } catch (error) {
+            cropped = file;
+            console.warn("Photo crop:", error?.message || error);
+        }
+        if (!cropped) {
+            event.target.value = "";
+            return;
+        }
+
         pendingAdminPhotoFile =
-            file;
+            cropped;
 
 
         clearAdminPhotoPreviewUrl();
@@ -2710,7 +2723,7 @@ document.getElementById(
 
         adminPhotoPreviewObjectUrl =
             URL.createObjectURL(
-                file
+                cropped
             );
 
 
@@ -3517,10 +3530,19 @@ function getAdminCalendarEntries() {
     return entries;
 }
 
+// During a stay, each night is done once the next day starts (Sunday's night is
+// done on Monday). The pickup day stays open until End Boarding.
+function isAdminBoardingNightDone(visit, stay) {
+    return Boolean(stay) && stay.status === "active" && !visit.boarding_pickup_display_only &&
+        String(visit.status || "").toLowerCase() !== "cancelled" &&
+        String(visit.visit_date || "") < adminBoardingToday();
+}
+
 function isAdminCalendarEntryCompleted(visit) {
     if (isAdminBoardingService(visit)) {
-        return adminBoardingState.loaded &&
-            getAdminBoardingReservation(visit).status === "completed";
+        if (!adminBoardingState.loaded) return false;
+        const stay = getAdminBoardingReservation(visit);
+        return stay.status === "completed" || isAdminBoardingNightDone(visit, stay);
     }
     return String(visit.status || "").trim().toLowerCase() === "completed" ||
         Boolean(visit.completed_at);
@@ -3609,6 +3631,8 @@ function buildAdminBoardingCard(visit) {
         cancelled: "Cancelled",
         scheduled: "Scheduled"
     }[stay.status] || "Needs review";
+        const nightDone = !cancelled && adminBoardingState.loaded && isAdminBoardingNightDone(visit, stay);
+    if (nightDone) status = "Night complete";
     if (!cancelled && !adminBoardingState.loaded && !stay.issue) {
         status = adminBoardingState.error ? "Unable to load stay" :
             navigator.onLine ? "Loading stay…" : "Offline";
@@ -3625,6 +3649,7 @@ function buildAdminBoardingCard(visit) {
     } else if (stay.status === "completed") {
         description = "This boarding stay has ended.";
     }
+        if (nightDone) description = `This night is done. Boarding continues until pickup on ${formatAdminBoardingDate(stay.pickup_date)}.`;
     if (cancelled) description = "This reserved night was cancelled.";
 
     let actions = "";
@@ -3663,8 +3688,8 @@ function buildAdminBoardingCard(visit) {
             data-boarding-action="refresh" ${navigator.onLine ? "" : "disabled"}>Try Again</button>`;
     }
 
-    const cardClass = !cancelled && stay.status === "active"
-        ? "admin-service-card-in-progress"
+        const cardClass = nightDone ? "admin-service-card-completed"
+        : !cancelled && stay.status === "active" ? "admin-service-card-in-progress"
         : !cancelled && stay.status === "completed" ? "admin-service-card-completed" : "";
     return `
         <article class="admin-service-card ${cardClass}">
@@ -4065,8 +4090,8 @@ function renderAdminBoardingPhotoDrafts(state) {
             ${photo === state.draft.photos[0] && window.PisCover
                 ? window.PisCover.pillHtml(`data-boarding-cover-photo="${escapeHtml(photo.id)}"`, state.draft.locked) : ""}
         </div>`;
-    }).join("") + (state.draft.photos.length && window.PisCover
-        ? `<p class="pis-cover-hint">The first photo is the cover on your client's Home screen.</p>` : "");
+        }).join("") + (state.draft.photos.length && window.PisCover
+        ? `<p class="pis-cover-hint">The first photo is the cover on your client's Home screen.${state.draft.photos.length > 1 ? " Hold and drag a photo to change the order." : ""}</p>` : "");
 }
 
 function renderAdminBoardingDraftForm(state) {
@@ -14252,8 +14277,8 @@ function renderAdminVisitReportForm(
                 </span>
 
 
-                                <p class="admin-visit-report-help">
-                    Add photos from today's visit. The first one is the cover on your client's Home screen.
+                                                <p class="admin-visit-report-help">
+                    Add photos from today's visit. The first one is the cover on your client's Home screen. Hold and drag a photo to change the order.
                 </p>
 
 
@@ -14765,6 +14790,83 @@ function renderAdminVisitReportForm(
 // ========================================
 // DELETE SAVED VISIT REPORT MEDIA
 // ========================================
+
+// ========================================
+// HOLD AND DRAG PHOTOS INTO A NEW ORDER (photo-cover.js)
+// ========================================
+// Saved report photos: the new order is saved right away (admin_reorder_visit_photos).
+// Photos not uploaded yet, and boarding update drafts: the order is kept until saving/sending.
+if (window.PisPhotoSort) {
+    window.PisPhotoSort.register({
+        items: "[data-saved-visit-media]",
+        disabled: item => item.closest("form")?.dataset.savingReport === "true",
+        onDrop: (item, from, to) => void reorderAdminVisitReportPhotos(item, from, to)
+    });
+    window.PisPhotoSort.register({
+        items: ".admin-visit-pending-photo",
+        disabled: item => item.closest("form")?.dataset.savingReport === "true",
+        onDrop: (item, from, to) => {
+            pendingVisitReportPhotos = window.PisPhotoSort.move(pendingVisitReportPhotos, from, to);
+            renderPendingVisitPhotos();
+        }
+    });
+    window.PisPhotoSort.register({
+        items: "[data-boarding-photo-previews] .boarding-photo-preview",
+        owns: item => Boolean(adminBoardingEditor) && item.closest("dialog") === adminBoardingEditor.dialog,
+        disabled: () => !adminBoardingEditor || adminBoardingEditor.busy || adminBoardingEditor.draft.locked,
+        onDrop: async (item, from, to) => {
+            const state = adminBoardingEditor;
+            collectAdminBoardingDraft(state);
+            state.draft.photos = window.PisPhotoSort.move(state.draft.photos, from, to);
+            renderAdminBoardingPhotoDrafts(state);
+            try { await saveAdminBoardingDraft(state); }
+            catch (error) { setAdminBoardingEditorMessage(state, error.message); }
+        }
+    });
+}
+
+async function reorderAdminVisitReportPhotos(item, from, to) {
+    const grid = item.parentElement;
+    const visitPhotos = activeVisitReportMedia.filter(media => media.photo_type === "visit");
+    const others = activeVisitReportMedia.filter(media => media.photo_type !== "visit");
+    const ordered = window.PisPhotoSort.move(visitPhotos, from, to);
+    const putBack = () => {
+        const tiles = [...grid.querySelectorAll("[data-saved-visit-media]")];
+        const moved = tiles[to];
+        if (moved) grid.insertBefore(moved, tiles[from + (from > to ? 1 : 0)] || null);
+        refreshAdminVisitCoverPill(grid);
+    };
+    refreshAdminVisitCoverPill(grid);
+    try {
+        if (!navigator.onLine) throw new Error("You're offline. Reconnect and try again.");
+        const visitId = ordered[0]?.visit_id ?? visitPhotos[0]?.visit_id;
+        const { error } = await supabaseClient.rpc("admin_reorder_visit_photos", {
+            p_visit_id: String(visitId),
+            p_photo_ids: ordered.map(media => String(media.id))
+        });
+        if (error) {
+            if (/admin_reorder_visit_photos/i.test(error.message || "") && /not find|does not exist|schema cache/i.test(error.message || "")) {
+                throw new Error("Moving saved photos needs the new Supabase script (paws-photo-order.sql). Run it, then try again.");
+            }
+            throw error;
+        }
+        ordered.forEach((media, index) => { media.sort_order = index; });
+        activeVisitReportMedia = [...ordered, ...others];
+    } catch (error) {
+        console.error("Photo order error:", error);
+        putBack();
+        (window.pisNotice || window.alert)(error?.message || "The new photo order couldn't be saved. Try again.");
+    }
+}
+
+// The Cover button always sits on the first saved photo.
+function refreshAdminVisitCoverPill(grid) {
+    if (!grid || !window.PisCover) return;
+    grid.querySelectorAll(".pis-cover-pill").forEach(pill => pill.remove());
+    const first = grid.querySelector("[data-saved-visit-media]");
+    const media = first && activeVisitReportMedia.find(item => String(item.id) === first.dataset.savedVisitMedia);
+    if (media?.signed_url) first.insertAdjacentHTML("beforeend", window.PisCover.pillHtml(`data-adjust-visit-cover="${media.id}"`));
+}
 
 // Adjust how the report's first photo is framed on the client's Home card (photo-cover.js).
 async function adjustAdminVisitReportCover(mediaId) {

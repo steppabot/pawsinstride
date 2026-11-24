@@ -182,17 +182,18 @@
     // Card section used by portal.js inside each pet sitting card.
     window.buildClientSitUpdatesSection = function (visit, progress) {
         if (!isSit(visit) || lower(visit.status) === 'cancelled') return '';
-        const state = progress?.state;
+                const state = progress?.state;
         if (state === 'checked_in' || state === 'completed') {
-            return `<div class="client-sit-updates${state === 'completed' ? ' is-done' : ''}">
-                <p>${state === 'checked_in'
-                    ? `Your sitter is with ${escapeHtml(petNames(visit))} now. Photos and updates appear here.`
-                    : 'Thanks for booking a sit with us. You can still view the photos and updates.'}</p>
-                <button type="button" class="secondary-button client-boarding-view-button" data-client-sit-view="${Number(visit.id)}">View Sit Updates</button>
-            </div>`;
+            // the sit's photos and updates, right here in its visit screen
+            return `<section class="client-sit-inline${state === 'completed' ? ' is-done' : ''}" data-sit-inline="${Number(visit.id)}">
+                <h4 class="client-inline-heading">Sit Updates</h4>
+                <div data-sit-feed></div><p data-sit-feed-message role="status"></p>
+            </section>`;
         }
         return '<p class="client-sit-updates-hint">Photos and care updates will appear here during the sit.</p>';
     };
+
+        const stillShown = state => state.inline ? state.dialog.isConnected : viewer === state;
 
     async function loadFeed(state, silent = false) {
         const feed = state.dialog.querySelector('[data-sit-feed]');
@@ -226,17 +227,39 @@
                         : '<span>Photo temporarily unavailable</span>').join('')}</div>
                 </article>`;
             }));
-            if (viewer !== state) return;
+                        if (!stillShown(state)) return;
             feed.innerHTML = cards.join('');
             state.liveSignature = signature;
             message.textContent = cards.length ? 'Tap a photo to view it full size.' : 'Your sitter will share photos and updates here during the sit.';
+            if (state.inline) inlineSaved.set(state.visitId, { html: state.dialog.innerHTML, signature });
         } catch (error) {
             console.error('Sit updates error:', error);
             message.textContent = 'Updates could not be loaded. Please try again.';
         }
     }
 
+        // Sit updates inside each sit's visit screen. The last result is kept so a
+    // refresh redraws it straight away, then quietly checks for new updates.
+    const inlineSaved = new Map();
+    const inlineStates = new Set();
+    function fillInlineFeeds() {
+        document.querySelectorAll('[data-sit-inline]:not([data-filled])').forEach(section => {
+            section.dataset.filled = '1';
+            const visitId = Number(section.dataset.sitInline);
+            const saved = inlineSaved.get(visitId);
+            if (saved?.html) section.innerHTML = saved.html;
+            const state = { dialog: section, visitId, inline: true, liveSignature: saved?.signature };
+            inlineStates.add(state);
+            void loadFeed(state, Boolean(saved));
+        });
+        inlineStates.forEach(state => { if (!state.dialog.isConnected) inlineStates.delete(state); });
+    }
+    new MutationObserver(() => {
+        if (document.querySelector('[data-sit-inline]:not([data-filled])')) fillInlineFeeds();
+    }).observe(document.documentElement, { childList: true, subtree: true });
+
     window.refreshClientLiveSitFeed = async function () {
+        inlineStates.forEach(state => { if (state.dialog.isConnected) void loadFeed(state, true); });
         const state = viewer;
         if (!state || state.liveBusy) return;
         state.liveBusy = true;
@@ -282,7 +305,10 @@
         await loadFeed(state);
     }
 
-    window.openClientSitUpdates = async function (visitId) {
+        window.openClientSitUpdates = async function (visitId) {
+        // Go into the sit's visit screen (its updates are there); the popup is only a fallback.
+        const visit = findVisit(Number(visitId));
+        if (visit && typeof window.openClientVisitScreen === 'function' && window.openClientVisitScreen(visit)) return;
         if (opening) return opening;
         opening = openViewer(visitId).catch(error => {
             console.error(error);
@@ -319,7 +345,9 @@
         .client-sit-updates p{margin:0 0 10px;color:#7a5512;font-weight:600;font-size:14px;line-height:1.4}
         .client-sit-updates.is-done{background:#f3faf4;border-color:#cfe7d4}
         .client-sit-updates.is-done p{color:#2e6b3f}
-        .client-sit-updates-hint{margin:10px 0 0;color:#6b7785;font-size:13px}
+                .client-sit-updates-hint{margin:10px 0 0;color:#6b7785;font-size:13px}
+        .client-sit-inline{margin-top:14px}
+        .client-sit-inline [data-sit-feed-message]{margin:6px 0 0;color:#6b7785;font-size:13px}
         .client-sit-dialog .client-boarding-dialog-header{background:linear-gradient(135deg,#d6467f,#b8336a) !important}`;
     document.head.appendChild(style);
 })();

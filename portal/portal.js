@@ -2255,6 +2255,8 @@ function clearClientFastStart() {
     try {
         localStorage.removeItem(CLIENT_FAST_START_KEY);
         localStorage.removeItem("pis-client-last-view");
+        // the saved Home card and review answer belong to this account too
+        ["pis-star-card", "pis-star-photo", "pis-star-urls", "pis-review-claim"].forEach(key => localStorage.removeItem(key));
     } catch (error) { /* ignore */ }
 }
 
@@ -3983,9 +3985,9 @@ const clientPhotoInput =
 
 if (clientPhotoInput) {
 
-    clientPhotoInput.addEventListener(
+        clientPhotoInput.addEventListener(
         "change",
-        event => {
+        async event => {
 
             const file =
                 event.target.files[0];
@@ -4040,16 +4042,27 @@ if (clientPhotoInput) {
             }
 
 
-            pendingClientPhotoFile =
-                file;
+                        // Drag and zoom inside a circle first (photo-cover.js); Cancel keeps the old photo.
+            let cropped = file;
+            try {
+                cropped = window.PisCover?.cropFile ? await window.PisCover.cropFile(file, { title: 'Adjust Your Photo' }) : file;
+            } catch (error) {
+                cropped = file;
+                console.warn("Photo crop:", error?.message || error);
+            }
+            if (!cropped) {
+                clientPhotoInput.value = "";
+                return;
+            }
 
+            pendingClientPhotoFile =
+                cropped;
 
             clearClientPhotoPreviewUrl();
 
-
             clientPhotoPreviewObjectUrl =
                 URL.createObjectURL(
-                    file
+                    cropped
                 );
 
 
@@ -6707,9 +6720,9 @@ const petPhotoInput =
 
 if (petPhotoInput) {
 
-    petPhotoInput.addEventListener(
+        petPhotoInput.addEventListener(
         "change",
-        event => {
+        async event => {
 
             const file =
                 event.target.files[0];
@@ -6758,16 +6771,27 @@ if (petPhotoInput) {
             }
 
 
-            pendingPetPhotoFile =
-                file;
+                        // Drag and zoom inside a circle first (photo-cover.js); Cancel keeps the old photo.
+            let cropped = file;
+            try {
+                cropped = window.PisCover?.cropFile ? await window.PisCover.cropFile(file, { title: "Adjust Your Pet's Photo" }) : file;
+            } catch (error) {
+                cropped = file;
+                console.warn("Photo crop:", error?.message || error);
+            }
+            if (!cropped) {
+                petPhotoInput.value = "";
+                return;
+            }
 
+            pendingPetPhotoFile =
+                cropped;
 
             clearPetPhotoPreviewUrl();
 
-
             petPhotoPreviewObjectUrl =
                 URL.createObjectURL(
-                    file
+                    cropped
                 );
 
 
@@ -15359,26 +15383,35 @@ async function refreshUpcomingVisits() {
 // CLIENT BOARDING WALK HISTORY
 // ========================================
 
+// A boarding stay's updates can show in a popup (clientBoardingViewer) or right inside
+// that night's visit screen (state.inline), where only that day's updates are shown (state.day).
+const isLiveClientBoardingState = state => Boolean(state) && (state.inline ? state.dialog.isConnected : clientBoardingViewer === state);
+
 async function loadClientBoardingWalks(state, reset = false) {
-    if (state.walkBusy || clientBoardingViewer !== state) return;
+    if (state.walkBusy || !isLiveClientBoardingState(state)) return;
     state.walkBusy = true;
     const mount = state.dialog.querySelector("[data-client-boarding-walks]");
     const message = state.dialog.querySelector("[data-client-boarding-walk-message]");
     const more = state.dialog.querySelector("[data-client-boarding-walk-more]");
     const refresh = state.dialog.querySelector("[data-client-boarding-walk-refresh]");
     more.disabled = refresh.disabled = true;
-    refresh.hidden = true;   // walks update live; Try Again only shows if loading fails
-    if (reset) { state.walkOffset = 0; state.walkSeen = new Set(); mount.innerHTML = ""; }
-    message.textContent = "Loading walks…";
+        refresh.hidden = true;   // walks update live; Try Again only shows if loading fails
+    // Inside a visit screen the walks already shown stay up until the new list arrives (no blank flash).
+    const keepShown = Boolean(reset && state.inline && mount.children.length);
+    if (reset) { state.walkOffset = 0; state.walkSeen = new Set(); if (!keepShown) mount.innerHTML = ""; }
+    if (!keepShown) message.textContent = "Loading walks…";
     try {
-        const { data, error } = await supabaseClient.from("visit_walks")
+                let walkQuery = supabaseClient.from("visit_walks")
             .select("id, boarding_stay_id, boarding_date, started_at, ended_at, duration_seconds, distance_meters, point_count")
-            .eq("boarding_stay_id", state.stay.id).eq("status", "completed")
+            .eq("boarding_stay_id", state.stay.id).eq("status", "completed");
+        if (state.day) walkQuery = walkQuery.eq("boarding_date", state.day);
+        const { data, error } = await walkQuery
             .order("started_at", { ascending: false }).order("id", { ascending: false })
             .range(state.walkOffset || 0, (state.walkOffset || 0) + 19);
         if (error) throw error;
-        if (clientBoardingViewer !== state) return;
-        state.walkSeen ||= new Set();
+        if (!isLiveClientBoardingState(state)) return;
+                state.walkSeen ||= new Set();
+        if (keepShown) mount.innerHTML = "";
         const rows = data || [];
         const newRows = rows.filter(w => !state.walkSeen.has(w.id));
         mount.insertAdjacentHTML("beforeend", newRows.map(walk => `<article class="client-boarding-walk">
@@ -15391,7 +15424,9 @@ async function loadClientBoardingWalks(state, reset = false) {
         state.walkOffset = (state.walkOffset || 0) + rows.length;
         more.hidden = rows.length < 20;
         more.textContent = "Load More Walks";
-        message.textContent = state.walkSeen.size ? "Completed walks during this stay." : "Completed walks will appear here when available.";
+                message.textContent = state.walkSeen.size
+            ? (state.day ? "" : "Completed walks during this stay.")
+            : (state.day ? "No finished walks yet today." : "Completed walks will appear here when available.");
     } catch (error) {
         console.error("Boarding walks error:", error);
         message.textContent = "Walks couldn't load.";
@@ -15412,8 +15447,8 @@ async function showClientBoardingWalkRoute(state, button) {
                 .select("sequence_number, latitude, longitude")
                 .eq("walk_id", Number(id)).gt("sequence_number", sequence)
                 .order("sequence_number", { ascending: true }).limit(1000);
-            if (error) throw error;
-            if (clientBoardingViewer !== state) return;
+                        if (error) throw error;
+            if (!isLiveClientBoardingState(state)) return;
             if (!data?.length) break;
             points.push(...data); sequence = data.at(-1).sequence_number;
             if (data.length < 1000) break;
@@ -15540,22 +15575,35 @@ function getClientBoardingCalendarEntries() {
     return entries;
 }
 
+// During a stay, each night is done once the next day starts; the pickup day
+// stays open until the stay ends.
+function isClientBoardingNightDone(visit, stay) {
+    return stay?.status === "active" && !visit.boarding_pickup_display_only &&
+        String(visit.status || "").toLowerCase() !== "cancelled" &&
+        String(visit.visit_date || "") < getLocalDateString();
+}
+
 function isClientCalendarVisitComplete(visit) {
-    if (isClientBoardingService(visit)) return getClientBoardingStay(visit)?.status === "completed";
+    if (isClientBoardingService(visit)) {
+        const stay = getClientBoardingStay(visit);
+        return stay?.status === "completed" || isClientBoardingNightDone(visit, stay);
+    }
     return String(visit.status || "").toLowerCase() === "completed" || Boolean(visit.completed_at);
 }
 
 function buildClientBoardingServiceCard(visit) {
     const stay = getClientBoardingStay(visit);
     const pickup = Boolean(visit.boarding_pickup_display_only);
+        const nightDone = clientBoardingData.loaded && isClientBoardingNightDone(visit, stay);
     const status = !clientBoardingData.loaded ? "Status temporarily unavailable" :
+        nightDone ? "Night complete" :
         stay?.status === "active" ? "Boarding with us" :
         stay?.status === "completed" ? "Boarding complete" : "Booked";
     const pets = getPetsForVisit(visit);
     const canCancel = clientBoardingData.loaded && !stay?.started_at && !pickup &&
         !["completed", "checked_in", "cancelled"].includes(String(visit.status || "").toLowerCase()) &&
         !visit.checked_in_at && !visit.completed_at;
-    return `<div class="upcoming-service-card ${stay?.status === "active" ? "upcoming-service-card-in-progress" :
+        return `<div class="upcoming-service-card ${nightDone ? "upcoming-service-card-completed" : stay?.status === "active" ? "upcoming-service-card-in-progress" :
         stay?.status === "completed" ? "upcoming-service-card-completed" : ""} ${(typeof pisKindClass === "function" ? pisKindClass(visit) : "")}">
         <div class="upcoming-service-card-header"><div class="pis-card-head">${(typeof pisKindIconHtml === "function" ? pisKindIconHtml(visit) : "")}<strong>${pickup ? "Boarding pickup" : "Dog Boarding"}</strong></div>
             <span class="service-status">${escapeHtml(status)}</span></div>
@@ -15564,13 +15612,59 @@ function buildClientBoardingServiceCard(visit) {
         <div class="upcoming-service-row"><span>${pickup ? "Pickup window" : "Reserved night"}</span>
             <strong>${pickup ? escapeHtml(stay?.pickup_window || visit.time_window || "Arrange with us") : `$${Number(visit.price || 0).toFixed(2)}`}</strong></div>
         ${pickup ? "" : `<div class="upcoming-service-row"><span>Payment</span><strong>${escapeHtml(formatStatus(visit.payment_status))}</strong></div>`}
-        ${stay?.started_at ? `<p>${stay.status === "active" ? "Your pet is boarding with us. Photos and updates appear below." : "Thank you for boarding with us."}</p>
-            <button type="button" class="secondary-button client-boarding-view-button" data-client-boarding-view="${escapeHtml(stay.id)}">View Boarding Updates</button>` :
+                ${stay?.started_at ? buildClientBoardingDaySection(visit, stay) :
             "<p>Photos and care updates will appear here during your pet’s stay.</p>"}
         ${canCancel ? `<div class="upcoming-service-actions"><button type="button" class="client-cancel-service-button"
             data-client-cancel-visit="${Number(visit.id)}">Cancel Service</button></div>` : ""}
     </div>`;
 }
+
+// That night's updates and walks, right in its visit screen. The live walk card
+// (live-hero.js) shows on top while a walk is happening.
+function buildClientBoardingDaySection(visit, stay) {
+    const day = String(visit.visit_date || "");
+    const liveWalk = currentClientLiveWalks.get(Number(visit.id)) || null;
+    const hero = liveWalk && typeof window.buildClientLiveHero === "function"
+        ? window.buildClientLiveHero(visit, { state: "checked_in" }, liveWalk) : "";
+    return `${hero}
+        <section class="client-boarding-inline" data-boarding-inline="${escapeHtml(stay.id)}" data-boarding-day="${escapeHtml(day)}">
+            <h4 class="client-inline-heading">${stay.status === "active" ? "Today’s Updates" : "Updates"}</h4>
+            <div data-client-boarding-feed></div><p data-client-boarding-feed-message role="status"></p>
+            <button type="button" class="secondary-button" data-client-boarding-more hidden>Load More</button>
+            <section class="client-boarding-walk-section"><h3>Walks</h3>
+                <div data-client-boarding-walks></div><p data-client-boarding-walk-message role="status"></p>
+                <button type="button" class="secondary-button" data-client-boarding-walk-refresh hidden>Try Again</button>
+                <button type="button" class="secondary-button" data-client-boarding-walk-more hidden>Load More Walks</button></section>
+        </section>`;
+}
+
+// Fill each boarding day section once it is on the page. The last result is kept,
+// so a refresh redraws it straight away and then quietly updates it.
+const clientBoardingInlineCache = new Map();
+function fillClientBoardingDaySections() {
+    document.querySelectorAll("[data-boarding-inline]:not([data-filled])").forEach(section => {
+        section.dataset.filled = "1";
+        const stay = clientBoardingData.stays.find(s => s.id === section.dataset.boardingInline);
+        if (!stay) return;
+        const key = `${stay.id}:${section.dataset.boardingDay}`;
+        const saved = clientBoardingInlineCache.get(key);
+        const state = { dialog: section, stay, day: section.dataset.boardingDay, inline: true, offset: 0, seen: new Set(), busy: false };
+        if (saved?.html) section.innerHTML = saved.html;
+        section.querySelector("[data-client-boarding-more]").onclick = () => void loadClientBoardingFeed(state);
+        section.querySelector("[data-client-boarding-walk-refresh]").onclick = () => void loadClientBoardingWalks(state, true);
+        section.querySelector("[data-client-boarding-walk-more]").onclick = () => void loadClientBoardingWalks(state);
+        section.querySelector("[data-client-boarding-walks]").addEventListener("click", event => {
+            const button = event.target.closest("[data-client-boarding-walk-route]");
+            if (button) void showClientBoardingWalkRoute(state, button);
+        });
+        clientBoardingInlineCache.set(key, state);
+        void Promise.all([loadClientBoardingFeed(state, true), loadClientBoardingWalks(state, true)])
+            .then(() => { if (section.isConnected) state.html = section.innerHTML; });
+    });
+}
+new MutationObserver(() => {
+    if (document.querySelector("[data-boarding-inline]:not([data-filled])")) fillClientBoardingDaySections();
+}).observe(document.documentElement, { childList: true, subtree: true });
 
 async function signedClientBoardingPhoto(path) {
     if (!path) return null;
@@ -15648,16 +15742,18 @@ async function loadAndOpenClientBoardingUpdates(stayId) {
 }
 
 async function loadClientBoardingFeed(state, refresh = false) {
-    if (state.busy || clientBoardingViewer !== state) return;
+    if (state.busy || !isLiveClientBoardingState(state)) return;
     state.busy = true;
     const button = state.dialog.querySelector("[data-client-boarding-more]");
     const message = state.dialog.querySelector("[data-client-boarding-feed-message]");
     button.disabled = true;
     if (!refresh) message.textContent = "Loading updates…";
     try {
-        const { data, error } = await supabaseClient.from("boarding_updates")
+                let feedQuery = supabaseClient.from("boarding_updates")
             .select("id, request_id, update_date, notes, published_at, boarding_update_photos(storage_path, caption, sort_order), boarding_update_pet_care(pet_id, fed, fresh_water, pee, poop)")
-            .eq("stay_id", state.stay.id).not("published_at", "is", null)
+            .eq("stay_id", state.stay.id).not("published_at", "is", null);
+        if (state.day) feedQuery = feedQuery.eq("update_date", state.day);
+        const { data, error } = await feedQuery
             .order("published_at", { ascending: false }).order("id", { ascending: false })
             .range(refresh ? 0 : state.offset, refresh ? Math.max(20, state.offset) - 1 : state.offset + 19);
         if (error) throw error;
@@ -15712,8 +15808,8 @@ async function loadClientBoardingFeed(state, refresh = false) {
                         src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.caption || "Boarding photo")}" loading="lazy"></a>` :
                     "<span>Photo temporarily unavailable</span>").join("")}</div>
             </article>`;
-        }));
-        if (clientBoardingViewer !== state) return;
+                }));
+        if (!isLiveClientBoardingState(state)) return;
         const feed = state.dialog.querySelector("[data-client-boarding-feed]");
         if (refresh) { feed.innerHTML = cards.join(''); state.seen.clear(); }
         else feed.insertAdjacentHTML("beforeend", cards.join(""));
@@ -15722,7 +15818,9 @@ async function loadClientBoardingFeed(state, refresh = false) {
         state.offset = refresh ? rows.length : state.offset + rows.length;
         button.hidden = rows.length < (refresh ? Math.max(20, state.offset) : 20);
         button.textContent = "Load More";
-        message.textContent = state.seen.size ? "Tap a photo to view it full size." : "We’ll share photos and updates here during your pet’s stay.";
+                message.textContent = state.seen.size ? "Tap a photo to view it full size." :
+            (state.day ? "Photos and updates from this day will show up here." : "We’ll share photos and updates here during your pet’s stay.");
+        if (state.inline) state.html = state.dialog.innerHTML;
     } catch (error) {
         console.error("Boarding feed error:", error);
         message.textContent = "Updates couldn't load.";
@@ -25658,10 +25756,13 @@ async function openClientBoardingNotificationLink() {
     clientBoardingNotificationLinkBusy = true;
     clientBoardingNotificationLinkAttempt = attempt;
     try {
-        closeClientNotificationCenter();
+                closeClientNotificationCenter();
         closeClientMessaging();
-        await openClientBoardingUpdates(stayId);
-        if (clientBoardingViewer?.stay.id === stayId &&
+        const night = typeof window.findClientBoardingNightVisit === "function" ? window.findClientBoardingNightVisit(stayId) : null;
+        if (!(night && typeof window.openClientVisitScreen === "function" && window.openClientVisitScreen(night))) {
+            await openClientBoardingUpdates(stayId);
+        }
+        if ((night || clientBoardingViewer?.stay.id === stayId) &&
             new URL(window.location.href).searchParams.get("boarding_stay") === stayId) {
             const cleaned = new URL(window.location.href);
             cleaned.searchParams.delete("boarding_stay");
@@ -31879,6 +31980,23 @@ const REVIEW_MIN_VISITS =
  
 let currentReviewClaim =
     null;
+
+// Known once the server answers (or this phone remembers the last answer),
+// so Home doesn't flash "Leave a review" at someone who already reviewed.
+let reviewClaimKnown =
+    false;
+
+const REVIEW_CLAIM_SAVED_KEY =
+    "pis-review-claim";
+
+function readSavedReviewClaim() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(REVIEW_CLAIM_SAVED_KEY) || "null");
+        return saved && saved.uid === currentUser?.id ? saved : null;
+    } catch (error) {
+        return null;
+    }
+}
  
  
 // ========================================
@@ -31917,12 +32035,16 @@ async function loadMyReviewClaim() {
         }
  
  
-        currentReviewClaim =
+                currentReviewClaim =
             Array.isArray(
                 data
             )
                 ? data[0] || null
                 : data || null;
+
+        try {
+            localStorage.setItem(REVIEW_CLAIM_SAVED_KEY, JSON.stringify({ uid: currentUser.id, claim: currentReviewClaim }));
+        } catch (saveError) { /* ignore */ }
  
     }
     catch (
@@ -31941,6 +32063,8 @@ async function loadMyReviewClaim() {
     }
  
  
+    reviewClaimKnown = true;
+
     renderReviewCreditCard();
  
 }
@@ -32113,6 +32237,19 @@ function mountReviewCreditCard(
 // ========================================
  
 function renderReviewCreditCard() {
+
+    // Not heard from the server yet: use what this phone last knew, or wait.
+    if (!reviewClaimKnown) {
+        const saved = readSavedReviewClaim();
+        if (saved) {
+            currentReviewClaim = saved.claim || null;
+        } else {
+            document.getElementById("client-review-credit-card")?.remove();
+            document.body.classList.remove("home-review-prompt");
+            return;
+        }
+    }
+
  
     const card =
         getReviewCreditCard();
@@ -33319,8 +33456,14 @@ if (!document.getElementById("dashboard-content")) {
                 }
             });
 
-            if (detailCard.children.length) {
+                        if (detailCard.children.length) {
                 card.prepend(detailCard);
+            }
+
+            // A visit that's happening shows its live card first (live-hero.js).
+            const liveCard = card.querySelector(":scope > .pis-live");
+            if (liveCard) {
+                card.prepend(liveCard);
             }
 
             // Move the existing card instead of duplicating
@@ -33457,6 +33600,39 @@ if (!document.getElementById("dashboard-content")) {
         }
 
         return result;
+    };
+
+        // Home card and notification taps go straight into that visit's screen
+    // (not the calendar, not a popup).
+    window.openClientVisitScreen = function (visit) {
+        if (!visit?.visit_date) return false;
+        closeClientMessaging?.();
+        openClientServiceDate(visit);
+        const id = Number(visit.id);
+        const overlays = [...document.querySelectorAll(".csd-overlay")];
+        const modal = overlays.find(m => m.dataset.csdKey === `${id}:${visit.boarding_pickup_display_only ? "pickup" : "visit"}`) ||
+            overlays.find(m => String(m.dataset.csdKey || "").startsWith(`${id}:`));
+        if (!modal) {
+            document.getElementById("selected-upcoming-services")?.scrollIntoView({ block: "start" });
+            return false;
+        }
+        openDetails(modal);
+        const body = modal.querySelector(".csd-body");
+        if (body) body.scrollTop = 0;
+        return true;
+    };
+
+    // A stay's visit to open: tonight's night, or the closest night of that stay.
+    window.findClientBoardingNightVisit = function (stayId) {
+        const stay = clientBoardingData.stays.find(s => s.id === stayId);
+        if (!stay) return null;
+        const nights = currentVisits.filter(v => v.booking_group_id === stay.booking_group_id &&
+            String(v.status || "").toLowerCase() !== "cancelled")
+            .sort((a, b) => String(a.visit_date).localeCompare(String(b.visit_date)));
+        if (!nights.length) return null;
+        const today = getLocalDateString();
+        return nights.find(v => v.visit_date === today) ||
+            (today > nights[nights.length - 1].visit_date ? nights[nights.length - 1] : nights[0]);
     };
 
     // Reports opened from Home or notifications also

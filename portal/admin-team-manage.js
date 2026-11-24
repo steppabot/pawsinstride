@@ -663,8 +663,10 @@
         if (!file) return;
         const preview = team.dialog.querySelector('[data-team-preview]');
         const error = team.dialog.querySelector('[data-team-form-error]');
-        try {
-            const blob = await squarePhoto(file);
+                try {
+            // Drag and zoom inside a circle (photo-cover.js); Cancel keeps the old photo.
+            let blob = window.PisCover?.cropFile ? await window.PisCover.cropFile(file, { size: 600, title: 'Adjust Their Photo' }) : await squarePhoto(file);
+            if (!blob) return;
             if (!team?.form) return;
             team.form.photoBlob = blob;
             const img = new Image();

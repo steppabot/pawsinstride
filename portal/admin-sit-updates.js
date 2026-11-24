@@ -164,8 +164,8 @@
                         return `<div class="boarding-photo-preview"><img src="${esc(url)}" alt="Selected photo">
                 <button type="button" data-sit-remove-photo="${photo.id}" aria-label="Remove photo" ${state.draft.locked ? 'disabled' : ''}>×</button>
                 ${photo === state.draft.photos[0] && window.PisCover ? window.PisCover.pillHtml(`data-sit-cover-photo="${esc(photo.id)}"`, state.draft.locked) : ''}</div>`;
-        }).join('') + (state.draft.photos.length && window.PisCover
-            ? `<p class="pis-cover-hint">The first photo is the cover on your client's Home screen.</p>` : '');
+                }).join('') + (state.draft.photos.length && window.PisCover
+            ? `<p class="pis-cover-hint">The first photo is the cover on your client's Home screen.${state.draft.photos.length > 1 ? ' Hold and drag a photo to change the order.' : ''}</p>` : '');
     }
 
     function renderForm(state) {
@@ -594,7 +594,22 @@
         return b;
     };
 
-    window.openAdminSitUpdateEditor = open;
+        window.openAdminSitUpdateEditor = open;
+
+    // Hold and drag draft photos into a new order (photo-cover.js); kept until Send.
+    if (window.PisPhotoSort) {
+        window.PisPhotoSort.register({
+            items: '[data-boarding-photo-previews] .boarding-photo-preview',
+            owns: item => Boolean(editor) && item.closest('dialog') === editor.dialog,
+            disabled: () => !editor || editor.busy || editor.draft.locked,
+            onDrop: async (item, from, to) => {
+                const state = editor;
+                state.draft.photos = window.PisPhotoSort.move(state.draft.photos, from, to);
+                renderPhotos(state);
+                try { await save(state); } catch (error) { msg(state, error.message); }
+            }
+        });
+    }
 
     document.addEventListener('click', async e => {
         const button = e.target.closest('[data-sit-update-visit]');
