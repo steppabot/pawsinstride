@@ -1388,6 +1388,77 @@
             </section>
         
         
+            <!-- Home photo card, straight away: the last card this phone or computer showed (or a placeholder
+                 in its shape) goes up before the app's code loads, so the old card never flashes.
+                 portal-home-star.js takes over from here. -->
+            <script>
+            (function () {
+                try {
+                    var read = function (key) { try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (e) { return null; } };
+                    var auth = read("sb-xyhndwopvlmnxjkthtkl-auth-token");
+                    var user = auth && (auth.user || (auth.currentSession && auth.currentSession.user));
+                    var uid = user && user.id;
+                    var dash = document.getElementById("mobile-home-dashboard");
+                    var anchor = document.getElementById("mobile-home-next-visit-card");
+                    if (!uid || !dash || !anchor || document.getElementById("pis-star")) return;
+                    var card = read("pis-star-card");
+                    var css = read("pis-star-css");
+                    var host = document.createElement("div");
+                    host.id = "pis-star";
+                    host.className = "pis-star";
+                    host.setAttribute("data-early", "1");
+                    host.setAttribute("role", "region");
+                    host.setAttribute("aria-label", "Your pet today");
+                    var style = document.createElement("style");
+                    if (card && card.uid === uid && card.html && css && css.css && Date.now() - (card.at || 0) < 7 * 86400000) {
+                        style.id = "pis-star-css";
+                        style.setAttribute("data-early", "1");
+                        style.textContent = css.css;
+                        host.innerHTML = card.html;
+                        var img = host.querySelector(".pis-star-photo");
+                        var pic = read("pis-star-photo");
+                        if (img) {
+                            if (pic && pic.uid === uid && pic.photoId === card.photoId && pic.data) img.src = pic.data;
+                            else if (Date.now() - (card.at || 0) > 50 * 60000) img.removeAttribute("src");
+                            img.setAttribute("data-full", "0");
+                        }
+                        dash.classList.add("pis-star-on");
+                        if (card.coversUpdate) dash.classList.add("pis-star-covers-update");
+                    } else {
+                        // nothing saved yet (first open after an update): a placeholder in the card's shape
+                        style.id = "pis-star-wait-css";
+                        style.textContent =
+                            "@media (max-width: 700px) {" +
+                            "#mobile-home-dashboard.pis-star-wait #mobile-home-next-visit-card{display:none!important}" +
+                            "#mobile-home-dashboard.pis-star-wait .mobile-home-greeting{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;margin:2px 2px 10px!important;overflow:visible!important}" +
+                            "#mobile-home-dashboard.pis-star-wait .mobile-home-greeting::before,#mobile-home-dashboard.pis-star-wait .mobile-home-greeting::after{display:none!important}" +
+                            "#mobile-home-dashboard.pis-star-wait .mobile-home-greeting h2{color:#4f6070!important;font-size:16px!important;font-weight:700!important;margin:0!important;text-shadow:none!important}" +
+                            "#mobile-home-dashboard.pis-star-wait .mobile-home-greeting p{display:none!important}" +
+                            "#pis-star .pis-star-skeleton{aspect-ratio:1/1.15;margin:0 0 18px;border-radius:26px;background:linear-gradient(110deg,#174b68 8%,#22678c 18%,#174b68 33%);background-size:200% 100%;animation:pisStarSkel 1.4s linear infinite}" +
+                            "}" +
+                            "@media (min-width: 701px) {" +
+                            "#mobile-home-dashboard.pis-star-wait>#mobile-home-next-visit-card{display:none!important}" +
+                            "#mobile-home-dashboard.pis-star-wait>#pis-star{grid-column:1/-1!important;grid-row:2!important}" +
+                            "#mobile-home-dashboard.pis-star-wait>.mobile-home-section:has(#mobile-home-upcoming-list){grid-column:1!important;grid-row:3!important}" +
+                            "#mobile-home-dashboard.pis-star-wait>.mobile-home-section:has(#mobile-home-latest-update){grid-column:2!important;grid-row:3!important}" +
+                            "#pis-star .pis-star-skeleton{height:340px;border-radius:22px;background:linear-gradient(110deg,#13283f 8%,#1e3d5c 18%,#13283f 33%);background-size:200% 100%;animation:pisStarSkel 1.4s linear infinite}" +
+                            "}" +
+                            "@keyframes pisStarSkel{to{background-position-x:-200%}}" +
+                            "@media (prefers-reduced-motion: reduce){#pis-star .pis-star-skeleton{animation:none}}";
+                        host.innerHTML = '<div class="pis-star-skeleton" aria-hidden="true"></div>';
+                        dash.classList.add("pis-star-wait");
+                        // if the app can't build a card, the placeholder steps aside
+                        setTimeout(function () {
+                            var h = document.getElementById("pis-star");
+                            if (h && !h.querySelector(".pis-star-card")) { h.remove(); dash.classList.remove("pis-star-wait"); }
+                        }, 12000);
+                    }
+                    document.head.appendChild(style);
+                    anchor.parentNode.insertBefore(host, anchor);
+                } catch (e) { /* the app draws Home as usual */ }
+            })();
+            </script>
+
             <!-- ========================================
                  QUICK ACTIONS
                  ======================================== -->
@@ -4253,6 +4324,7 @@
 <script src="pet-birthday.js"></script>
 <script src="holiday-gift.js"></script>
 <script src="portal-pet-sitting.js"></script>
+        <script src="pis-map.js"></script>
         <script src="live-hero.js"></script>
 <script src="photo-cover.js"></script>
 <script src="portal-home-star.js"></script>

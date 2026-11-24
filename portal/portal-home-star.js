@@ -1,5 +1,5 @@
 /* ========================================
-   PAWS IN STRIDE: THE PET IS THE STAR OF HOME (client app, phone size)
+   PAWS IN STRIDE: THE PET IS THE STAR OF HOME (client app and website)
    ========================================
    Load AFTER portal.js, portal-pet-sitting.js and photo-cover.js.
 
@@ -11,8 +11,9 @@
 
    Photo: that moment's first photo (framed the way the team set it with Adjust Cover),
    else the newest visit photo, else the pet's profile photo, else a branded card.
-   Only on phone-size screens; the desktop layout is unchanged. If anything fails,
-   Home falls back to the cards it had before.
+   Phones: a tall card at the top of Home. Desktop: the same card as a wide banner under
+   the greeting (photo on the right, words on the left, and the live map inside it during
+   a walk). If anything fails, Home falls back to the cards it had before.
    ======================================== */
 (() => {
     'use strict';
@@ -27,11 +28,15 @@
     let liveTimer = null;
     let shownKey = '';
     let shownPhoto = '';          // which picture is on screen (path, or link without its token)
-    let pendingClick = false;     // tapped the saved card's button before the fresh one was ready
+        let pendingClick = false;     // tapped the saved card's button before the fresh one was ready
+    // The intro video waits for this (portal.js), so Home appears with the card already built.
+    let markReady = () => {};
+    const readyPromise = new Promise(resolve => { markReady = resolve; });
     // The last card is kept on this phone so Home opens with it straight away (no blank, no pop-in).
     const SAVED_CARD = 'pis-star-card';
     const SAVED_PHOTO = 'pis-star-photo';
-    const SAVED_URLS = 'pis-star-urls';
+        const SAVED_URLS = 'pis-star-urls';
+    const SAVED_CSS = 'pis-star-css';
     const store = {
         get(name) { try { return JSON.parse(localStorage.getItem(name) || 'null'); } catch { return null; } },
         set(name, value) { try { localStorage.setItem(name, JSON.stringify(value)); return true; } catch { return false; } }
@@ -107,6 +112,45 @@
             background: #fff; color: #14324d; font: 800 15px Roboto, Arial, sans-serif; box-shadow: 0 6px 16px rgba(0,0,0,.18); cursor: pointer; }
         .pis-star-btn.orange { background: linear-gradient(135deg, #f7a531, #f07c1e); color: #fff; }
         .pis-star-btn:focus-visible { outline: 3px solid #8fd0ff; outline-offset: 2px; }
+        #pis-star .pis-star-map { display: none; }
+
+        /* desktop: a wide banner under the greeting */
+        @media (min-width: 701px) {
+            #mobile-home-dashboard.pis-star-on > #pis-star, #mobile-home-dashboard.pis-star-wait > #pis-star { display: block; grid-column: 1 / -1 !important; grid-row: 2 !important; margin: 0 !important;
+                padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; }
+            #mobile-home-dashboard.pis-star-on > #mobile-home-next-visit-card { display: none !important; }
+            #mobile-home-dashboard.pis-star-on > .mobile-home-section:has(#mobile-home-upcoming-list) { grid-column: 1 !important; grid-row: 3 !important; }
+            #mobile-home-dashboard.pis-star-on > .mobile-home-section:has(#mobile-home-latest-update) { grid-column: 2 !important; grid-row: 3 !important; }
+            #mobile-home-dashboard.pis-star-covers-update > .mobile-home-section:has(#mobile-home-latest-update) { display: none !important; }
+            #mobile-home-dashboard.pis-star-covers-update > .mobile-home-section:has(#mobile-home-upcoming-list) { grid-column: 1 / -1 !important; }
+            #pis-star .pis-star-card { aspect-ratio: auto; min-height: 340px; border-radius: 22px; background: #13283f; box-shadow: 0 14px 32px rgba(19,35,58,.18);
+                display: flex; }
+            #pis-star .pis-star-photo { left: auto !important; right: 0 !important; top: 0 !important; width: 48% !important; height: 100% !important;
+                max-height: none !important; object-fit: cover !important; object-position: var(--pis-focus, 50% 22%) !important; }
+            #pis-star .pis-star-card::after { background: linear-gradient(90deg, #13283f 0%, #13283f 53%, rgba(19,40,63,.6) 60%, rgba(19,40,63,0) 70%); }
+            #pis-star .pis-star-card.no-photo { background: linear-gradient(115deg, #13283f 0%, #174b68 45%, #1d6f98 75%, #268db2 100%); }
+            #pis-star .pis-star-card.no-photo::after { background: none; }
+            #pis-star .pis-star-paws { left: auto; width: 46%; }
+            #pis-star .pis-star-top { left: 34px; right: auto; top: 26px; justify-content: flex-start; gap: 10px; }
+            /* the words sit in the page flow, so a long name or more photos make the banner taller instead of cutting off */
+            #pis-star .pis-star-bottom { position: relative; inset: auto; margin: 72px 0 26px 34px; width: min(500px, 46%); min-height: 242px;
+                display: flex; flex-direction: column; gap: 12px; }
+            #pis-star .pis-star-bottom h2 { font-size: 32px; line-height: 1.14; }
+            #pis-star .pis-star-sub { margin: 0; font-size: 15px; }
+            #pis-star .pis-star-stat { padding: 8px 12px; font-size: 14px; }
+            #pis-star .pis-star-note { -webkit-line-clamp: 2; }
+            #pis-star .pis-star-btn { margin-top: auto; width: auto; align-self: flex-start; padding: 0 28px; }
+            #pis-star .pis-star-map { display: block; position: absolute; z-index: 2; right: 22px; top: 22px; bottom: 22px; width: 330px; height: auto;
+                margin: 0; border: 3px solid #fff; border-radius: 16px; box-shadow: 0 10px 26px rgba(0,0,0,.3); }
+            #pis-star .pis-star-card.has-map .pis-star-photo { right: 372px !important; width: 440px !important; }
+            #pis-star .pis-star-card.has-map::after { background: linear-gradient(90deg, #13283f 0%, #13283f 40%, rgba(19,40,63,.55) 47%, rgba(19,40,63,0) 56%); }
+        }
+        /* a smaller desktop window during a walk: the map takes the photo's place */
+        @media (min-width: 701px) and (max-width: 1199px) {
+            #pis-star .pis-star-card.has-map .pis-star-photo { display: none; }
+            #pis-star .pis-star-card.has-map .pis-star-map { width: 44%; }
+            #pis-star .pis-star-card.has-map::after { background: none; }
+        }
     `;
     const PAW = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="10" r="2.2"/><circle cx="9.5" cy="5.5" r="2.2"/><circle cx="14.5" cy="5.5" r="2.2"/><circle cx="19" cy="10" r="2.2"/><path d="M12 11c-3.2 0-6 3.4-6 6 0 1.8 1.4 2.6 3 2.6 1.3 0 2-.6 3-.6s1.7.6 3 .6c1.6 0 3-.8 3-2.6 0-2.6-2.8-6-6-6z"/></svg>';
 
@@ -238,6 +282,7 @@
         let photoUrl = null;    // a ready URL (pet profile photo; default framing)
         let thumbPaths = [];
         let chip = '', chipClass = '', title = '', sub = '', stats = [], note = '', button = null, person = '';
+        let mapWalk = null;     // a walk happening: its live map (desktop banner)
         let key = state.kind;
 
         if (state.kind === 'live') {
@@ -251,6 +296,7 @@
             key += `:${v.id}`;
                         if (kind === 'walk' && walk) {
                 chip = 'Live · Walking Now';
+                mapWalk = walk;
                 title = `${listNames(names)} ${verb(names, 'is', 'are')} out on a walk`;
                 button = { text: 'Follow the Walk', run: () => openVisit(v) };
             } else if (kind === 'walk') {
@@ -368,14 +414,17 @@
             ? `<span class="more">+${extra + 1}</span>`
             : url ? `<span><img src="${esc(url)}" alt="" loading="lazy"></span>` : '')).join('');
                 const box = photoPath ? covers.get(photoPath) : null;
+        // the wide desktop banner shows a strip of the photo: aim at the top part of the chosen framing (where the face usually is)
+        const focus = box ? `--pis-focus:${((box.x + box.w / 2) * 100).toFixed(1)}% ${((box.y + box.h * 0.3) * 100).toFixed(1)}%;` : '';
         // the same picture keeps the same id even when its link is renewed
         const photoId = photoPath ? `p:${photoPath}` : (mainUrl ? `u:${String(mainUrl).split('?')[0]}` : 'none');
         key += `|${photoId}|${box ? Object.values(box).join(',') : ''}|${title}|${sub}|${note}|${stats.length}|${thumbPaths.length}`;
 
         const html = `
-            <div class="pis-star-card${mainUrl ? '' : ' no-photo'}">
-                                ${mainUrl ? `<img class="pis-star-photo" data-full="1" src="${esc(mainUrl)}" alt="" decoding="async" style="${window.PisCover ? window.PisCover.imgStyle(box) : 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover'}">`
+            <div class="pis-star-card${mainUrl ? '' : ' no-photo'}${mapWalk ? ' has-map' : ''}">
+                                ${mainUrl ? `<img class="pis-star-photo" data-full="1" src="${esc(mainUrl)}" alt="" decoding="async" style="${window.PisCover ? window.PisCover.imgStyle(box) : 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover'}${focus}">`
                     : `<div class="pis-star-paws">${PAW}</div>`}
+                ${mapWalk ? `<div class="pis-map-box pis-star-map" data-pis-map-walk="${Number(mapWalk.id)}" data-pis-map-live="1" role="img" aria-label="Map of the walk so far"></div>` : ''}
                 <div class="pis-star-top">
                     ${chip ? `<span class="pis-star-chip ${chipClass}"><span class="pis-star-dot"></span>${esc(chip)}</span>` : '<span></span>'}
                     ${person ? `<span class="pis-star-person"><b>${esc(person.charAt(0).toUpperCase())}</b>with ${esc(person)}</span>` : ''}
@@ -409,22 +458,42 @@
         });
     }
 
+        // The page's early script (dashboard.html) uses a saved copy of these styles to put the
+    // card up before this file loads; keep that copy current.
+    let cssSaved = false;
     function ensureCss() {
-        if (document.getElementById('pis-star-css')) return;
-        const style = document.createElement('style');
-        style.id = 'pis-star-css';
-        style.textContent = CSS;
-        document.head.appendChild(style);
+        let style = document.getElementById('pis-star-css');
+        if (!style || style.dataset.early === '1') {
+            if (!style) {
+                style = document.createElement('style');
+                style.id = 'pis-star-css';
+                document.head.appendChild(style);
+            }
+            style.textContent = CSS;
+            delete style.dataset.early;
+        }
+        if (!cssSaved) {
+            cssSaved = true;
+            if (store.get(SAVED_CSS)?.css !== CSS) store.set(SAVED_CSS, { css: CSS });
+        }
+    }
+
+    // The placeholder the early script shows when nothing is saved yet goes once a card (or nothing) is decided.
+    function doneWaiting(dash) {
+        dash?.classList.remove('pis-star-wait');
+        document.getElementById('pis-star-wait-css')?.remove();
     }
 
     function turnOff() {
-        const dash = document.getElementById('mobile-home-dashboard');
+                const dash = document.getElementById('mobile-home-dashboard');
         dash?.classList.remove('pis-star-on', 'pis-star-covers-update');
+        doneWaiting(dash);
                 document.getElementById('pis-star')?.remove();
         shownKey = '';
         shownPhoto = '';
-        clearInterval(liveTimer);
+                clearInterval(liveTimer);
         liveTimer = null;
+        markReady();
     }
 
     function hostFor(dash) {
@@ -480,8 +549,9 @@
         }
         const btn = host.querySelector('[data-star-button]');
         if (btn) btn.onclick = () => { pendingClick = true; };
-        shownKey = saved.key || '';
+                shownKey = saved.key || '';
         shownPhoto = saved.photoId || '';
+        doneWaiting(dash);
         dash.classList.add('pis-star-on');
         dash.classList.toggle('pis-star-covers-update', Boolean(saved.coversUpdate));
         document.getElementById('mobile-home-latest-update')?.closest('.mobile-home-section')?.classList.add('pis-star-latest-section');
@@ -572,21 +642,42 @@
             const btn = host.querySelector('[data-star-button]');
             if (btn) btn.onclick = () => card.button?.run();
             if (pendingClick) { pendingClick = false; card.button?.run(); }
-            const latest = document.getElementById('mobile-home-latest-update')?.closest('.mobile-home-section');
+                        const latest = document.getElementById('mobile-home-latest-update')?.closest('.mobile-home-section');
             latest?.classList.add('pis-star-latest-section');
+            doneWaiting(dash);
             dash.classList.add('pis-star-on');
             dash.classList.toggle('pis-star-covers-update', card.coversUpdate);
             clearInterval(liveTimer);
             liveTimer = card.live ? setInterval(tickLive, 20000) : null;
             if (card.live) tickLive();
-            saveCard(card);
+                        saveCard(card);
+            markReady();
             void sharpen(host, card, version);
         } catch (error) {
             console.error('Home card:', error);
             // a hiccup (weak signal on resume) keeps the card that's showing; only an empty Home falls back
-            if (version === renderVersion && !document.querySelector('#pis-star .pis-star-card')) turnOff();
+                        if (version === renderVersion && !document.querySelector('#pis-star .pis-star-card')) turnOff();
+            markReady();
         }
     }
+
+        // The page's early script may already have put the saved card up: carry on from it.
+    (() => {
+        const early = document.querySelector('#pis-star[data-early]');
+        if (!early) return;
+        delete early.dataset.early;
+        const saved = store.get(SAVED_CARD);
+        if (!early.querySelector('.pis-star-card') || !saved) return;
+        shownKey = saved.key || '';
+        shownPhoto = saved.photoId || '';
+        const img = early.querySelector('.pis-star-photo');
+        if (img) {
+            watchLoading(img);
+            img.addEventListener('error', () => img.classList.add('is-loading'), { once: true });
+        }
+        const btn = early.querySelector('[data-star-button]');
+        if (btn) btn.onclick = () => { pendingClick = true; };
+    })();
 
     // ---------- hook into Home ----------
     const originalRender = window.renderMobileHomeDashboard;
@@ -612,6 +703,8 @@
         };
     }
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tickLive(); });
-        window.PisHomeStar = { render, turnOff, forget() { [SAVED_CARD, SAVED_PHOTO, SAVED_URLS].forEach(k => { try { localStorage.removeItem(k); } catch { /* ignore */ } }); } };
+            window.PisHomeStar = { render, turnOff,
+        // resolves once Home's card is built (or there's no card on this screen size)
+        whenReady: () => (window.matchMedia('(max-width: 700px)').matches ? readyPromise : Promise.resolve()), forget() { [SAVED_CARD, SAVED_PHOTO, SAVED_URLS].forEach(k => { try { localStorage.removeItem(k); } catch { /* ignore */ } }); } };
     if (typeof currentUser !== 'undefined' && currentUser?.id) void render();
 })();
