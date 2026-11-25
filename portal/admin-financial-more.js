@@ -116,9 +116,11 @@
         const periodDone = doneIn(per === 'month' ? mStart : yStart);
         const work = periodDone.filter(v => !isBoarding(v));
         const rows = new Map(driveRows.map(r => [String(r.visit_id), r]));
+        // The drive estimate kept for this stop when its route was worked out (each morning by itself,
+        // or with Recalculate). It counts whether or not it was marked as locked afterwards.
         const locked = v => {
             const r = rows.get(String(v.id));
-            return r?.locked_at && Number.isFinite(Number(r.drive_seconds)) ? Number(r.drive_seconds) : null;
+            return r && r.drive_seconds !== null && r.drive_seconds !== undefined && Number.isFinite(Number(r.drive_seconds)) ? Number(r.drive_seconds) : null;
         };
         let visitMin = 0, driveMin = 0;
         const byDay = new Map();

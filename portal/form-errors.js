@@ -32,6 +32,9 @@
         + '#admin-push-modal-status, #admin-push-notification-status, #admin-client-credit-status, #admin-client-legacy-discount-status, '
         + '#admin-client-minimum-waiver-status, #admin-financial-hourly-detail, .pis-assign-msg, .admin-visit-report-error, .boarding-walk-message';
     const TONE_BOXES = MESSAGE_BOXES + ', ' + STATUS_LINES;
+    // status lines the app writes on its own (when a screen opens or refreshes, not because a button beside them was tapped):
+    // they get the colour, but the page is never scrolled to them
+    const PASSIVE_LINES = '#admin-financial-hourly-detail, #admin-push-notification-status, #push-notification-status';
     const CONTROL = 'input, select, textarea';
     let seq = 0;
     let firstShownAt = 0;         // only the first error in a burst scrolls the page
@@ -244,7 +247,7 @@
             el.setAttribute('role', 'alert');
             // keep it in view when it appears (it sits by the button they just tapped)
             const r = el.getBoundingClientRect();
-            if (r.height && (r.bottom > innerHeight - 70 || r.top < 0)) {
+            if (r.height && !el.matches(PASSIVE_LINES) && (r.bottom > innerHeight - 70 || r.top < 0)) {
                 el.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'center' });
             }
         }

@@ -18306,6 +18306,153 @@ function getClientVisitReportMount(
 // TOGGLE CLIENT VISIT REPORT
 // ========================================
 
+// ========================================
+// VISIT REPORT: EVERYTHING IT SHOWS, FETCHED QUICKLY
+// ========================================
+//
+// The report, each pet's care, the photos with their links, and the walk with its route.
+//   - The requests run side by side (they used to wait for one another, five in a row).
+//   - A photo's small version is no longer downloaded before the report may appear; if it
+//     turns out not to exist, the picture falls back to the full photo by itself.
+//   - The result is kept for a while (photo links last an hour), so a report Home has
+//     already looked up, or one opened a moment ago, shows straight away.
+const clientVisitReportBundles = new Map();          // "user:visit" -> { at, bundle, pending }
+const CLIENT_VISIT_REPORT_KEEP_MS = 45 * 60 * 1000;
+const CLIENT_VISIT_REPORT_KEEP_MAX = 12;
+
+async function signClientVisitReportPhoto(storagePath) {
+    if (!storagePath) return null;
+    try {
+        const { data, error } = await supabaseClient.storage
+            .from(VISIT_MEDIA_BUCKET)
+            .createSignedUrl(storagePath, 3600);
+        return error ? null : data?.signedUrl || null;
+    } catch (error) {
+        console.warn("Visit photo link error:", error);
+        return null;
+    }
+}
+
+async function fetchClientVisitReportBundle(visitId) {
+    // the report, then each pet's care (which needs the report's id)
+    const reportPart = supabaseClient
+        .from("visit_reports")
+        .select("id, visit_id, notes, fed, fresh_water, pee, poop, created_at, updated_at")
+        .eq("visit_id", visitId)
+        .maybeSingle()
+        .then(async ({ data: report, error }) => {
+            if (error) throw error;
+            if (!report) return { report: null, petCareRows: [] };
+            const care = await supabaseClient
+                .from("visit_report_pet_care")
+                .select("visit_report_id, pet_id, fed, fresh_water, pee, poop, created_at, updated_at")
+                .eq("visit_report_id", report.id);
+            if (care.error) throw care.error;
+            return { report, petCareRows: care.data || [] };
+        });
+    // the photos, then a link for each one and for its small version
+    const photoPart = supabaseClient
+        .from("visit_photos")
+        .select("id, visit_id, storage_path, photo_type, caption, sort_order, created_at")
+        .eq("visit_id", visitId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true })
+        .then(async ({ data, error }) => {
+            if (error) throw error;
+            const rows = data || [];
+            const media = await Promise.all(rows.map(async item => {
+                const [signedUrl, thumbUrl] = await Promise.all([
+                    signClientVisitReportPhoto(item.storage_path),
+                    signClientVisitReportPhoto(getVisitPhotoThumbPath(item.storage_path))
+                ]);
+                return { ...item, signed_url: signedUrl, thumb_url: thumbUrl };
+            }));
+            return { rows, media };
+        });
+    // the finished walk, then its route
+    const walkPart = supabaseClient
+        .from("visit_walks")
+        .select("id, visit_id, status, started_at, ended_at, duration_seconds, distance_meters")
+        .eq("visit_id", visitId)
+        .eq("status", "completed")
+        .maybeSingle()
+        .then(async ({ data: completedWalk, error }) => {
+            if (error) throw error;
+            if (!completedWalk) return { completedWalk: null, walkPoints: [] };
+            const points = await supabaseClient
+                .from("visit_walk_points")
+                .select("sequence_number, latitude, longitude, recorded_at")
+                .eq("walk_id", completedWalk.id)
+                .order("sequence_number", { ascending: true });
+            if (points.error) throw points.error;
+            return { completedWalk, walkPoints: points.data || [] };
+        });
+    const [reportData, photoData, walkData] = await Promise.all([reportPart, photoPart, walkPart]);
+    if (!reportData.report) return { report: null };
+    return {
+        report: reportData.report,
+        petCareRows: reportData.petCareRows,
+        media: photoData.media,
+        completedWalk: walkData.completedWalk,
+        walkPoints: walkData.walkPoints,
+        // what the report holds, without the photo links (those are new every time)
+        signature: JSON.stringify([reportData.report, reportData.petCareRows, photoData.rows, walkData.completedWalk, walkData.walkPoints])
+    };
+}
+
+function getClientVisitReportBundleKey(visitId) {
+    return `${currentUser?.id || ""}:${Number(visitId)}`;
+}
+
+// The newest copy from the server. Anyone asking while it is on its way shares the same request.
+function loadClientVisitReportBundle(visitId) {
+    const key = getClientVisitReportBundleKey(visitId);
+    const entry = clientVisitReportBundles.get(key);
+    if (entry?.pending) return entry.pending;
+    const pending = fetchClientVisitReportBundle(visitId).then(
+        bundle => {
+            clientVisitReportBundles.delete(key);
+            clientVisitReportBundles.set(key, { at: Date.now(), bundle });
+            while (clientVisitReportBundles.size > CLIENT_VISIT_REPORT_KEEP_MAX) {
+                clientVisitReportBundles.delete(clientVisitReportBundles.keys().next().value);
+            }
+            return bundle;
+        },
+        error => {
+            const now = clientVisitReportBundles.get(key);
+            if (now?.pending === pending) {
+                if (now.bundle) clientVisitReportBundles.set(key, { at: now.at, bundle: now.bundle });
+                else clientVisitReportBundles.delete(key);
+            }
+            throw error;
+        }
+    );
+    clientVisitReportBundles.set(key, { at: entry?.at || 0, bundle: entry?.bundle || null, pending });
+    return pending;
+}
+
+// A copy that is still good to show (it has a report, and its photo links have not run out).
+function peekClientVisitReportBundle(visitId) {
+    const entry = clientVisitReportBundles.get(getClientVisitReportBundleKey(visitId));
+    return entry?.bundle?.report && Date.now() - entry.at < CLIENT_VISIT_REPORT_KEEP_MS ? entry.bundle : null;
+}
+
+// Home calls this for the visit it is showing, so its report is ready before it is tapped.
+window.prefetchClientVisitReport = function (visitId) {
+    const id = Number(visitId);
+    if (!currentUser?.id || !Number.isFinite(id) || peekClientVisitReportBundle(id)) return;
+    loadClientVisitReportBundle(id).catch(error => console.warn("Visit report (ahead of time):", error));
+};
+
+// A photo's small version that won't load (older photos have none) becomes the full photo.
+document.addEventListener("error", event => {
+    const image = event.target;
+    if (!(image instanceof HTMLImageElement) || !image.dataset.fullSrc) return;
+    const full = image.dataset.fullSrc;
+    delete image.dataset.fullSrc;                    // one try only
+    if (image.getAttribute("src") !== full) image.src = full;
+}, true);
+
 async function toggleClientVisitReport(
     visitId,
     button,
@@ -18375,8 +18522,36 @@ async function toggleClientVisitReport(
         "Hide Visit Report";
 
 
-    if (!options.refresh) mount.innerHTML =
-        `
+    // Home may already have looked this report up, or it was open a moment ago:
+    // show that straight away, then check for anything newer.
+    const kept = options.refresh ? null : peekClientVisitReportBundle(visitId);
+    const showBundle = bundle => {
+        renderClientVisitReport(
+            mount,
+            bundle.report,
+            bundle.petCareRows,
+            bundle.media,
+            bundle.completedWalk,
+            bundle.walkPoints
+        );
+        mount.dataset.liveSignature = bundle.signature;
+        if (bundle.completedWalk && bundle.walkPoints.length >= 2) {
+            renderClientGoogleWalkRoute(visitId, bundle.walkPoints);
+        }
+    };
+    // On a computer the report is brought into view when it first shows.
+    const settleOnComputer = () => {
+        if (!options.refresh && !window.matchMedia("(max-width: 700px)").matches) {
+            mount.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    };
+
+    if (kept) {
+        showBundle(kept);
+        settleOnComputer();
+    } else if (!options.refresh) {
+        mount.innerHTML =
+            `
 
             <div class="client-visit-report-loading">
 
@@ -18385,373 +18560,43 @@ async function toggleClientVisitReport(
             </div>
 
         `;
-
+    }
 
     try {
 
+        const bundle = await loadClientVisitReportBundle(visitId);
 
-        // ========================================
-        // LOAD VISIT REPORT
-        // ========================================
-        
-        const {
-            data: report,
-            error: reportError
-        } =
-            await supabaseClient
-                .from(
-                    "visit_reports"
-                )
-                .select(
-                    "id, visit_id, notes, fed, fresh_water, pee, poop, created_at, updated_at"
-                )
-                .eq(
-                    "visit_id",
-                    visitId
-                )
-                .maybeSingle();
-        
-        
-        if (
-            reportError
-        ) {
-        
-            throw reportError;
-        
-        }
-        
-        
+        if (!mount.isConnected || activeClientVisitReportId !== visitId || currentUser?.id !== requestUserId) return;
+
         // ========================================
         // REPORT NOT YET ADDED
         // ========================================
-        
-        if (
-            !report
-        ) {
-        
-        
+
+        if (!bundle.report) {
             mount.innerHTML =
                 `
-        
+
                     <div class="client-visit-report-empty">
-        
+
                         <strong>
                             Visit Report
                         </strong>
-        
+
                         <p>
                             A visit report has not been added yet.
                         </p>
-        
+
                     </div>
-        
+
                 `;
-        
-        
             return;
-        
-        }
-        
-        
-        // ========================================
-        // LOAD PET CARE + PHOTOS + WALK
-        // ========================================
-        
-        const [
-            petCareResult,
-            mediaResult,
-            walkResult
-        ] =
-            await Promise.all([
-        
-        
-                supabaseClient
-                    .from(
-                        "visit_report_pet_care"
-                    )
-                    .select(
-                        "visit_report_id, pet_id, fed, fresh_water, pee, poop, created_at, updated_at"
-                    )
-                    .eq(
-                        "visit_report_id",
-                        report.id
-                    ),
-        
-        
-                supabaseClient
-                    .from(
-                        "visit_photos"
-                    )
-                    .select(
-                        "id, visit_id, storage_path, photo_type, caption, sort_order, created_at"
-                    )
-                    .eq(
-                        "visit_id",
-                        visitId
-                    )
-                    .order(
-                        "sort_order",
-                        {
-                            ascending:
-                                true
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending:
-                                true
-                        }
-                    ),
-        
-        
-                supabaseClient
-                    .from(
-                        "visit_walks"
-                    )
-                    .select(
-                        "id, visit_id, status, started_at, ended_at, duration_seconds, distance_meters"
-                    )
-                    .eq(
-                        "visit_id",
-                        visitId
-                    )
-                    .eq(
-                        "status",
-                        "completed"
-                    )
-                    .maybeSingle()
-        
-        
-            ]);
-        
-        
-        // ========================================
-        // CHECK PET CARE ERROR
-        // ========================================
-        
-        if (
-            petCareResult.error
-        ) {
-        
-            throw petCareResult.error;
-        
-        }
-        
-        
-        // ========================================
-        // CHECK MEDIA ERROR
-        // ========================================
-        
-        if (
-            mediaResult.error
-        ) {
-        
-            throw mediaResult.error;
-        
-        }
-        
-        
-        // ========================================
-        // CHECK WALK ERROR
-        // ========================================
-        
-        if (
-            walkResult.error
-        ) {
-        
-            throw walkResult.error;
-        
-        }
-        
-        
-        const petCareRows =
-            petCareResult.data ||
-            [];
-        
-        
-        const completedWalk =
-            walkResult.data ||
-            null;
-        
-        
-        // ========================================
-        // LOAD WALK POINTS
-        // ========================================
-
-        let walkPoints =
-            [];
-
-
-        if (
-            completedWalk
-        ) {
-
-
-            const {
-                data:
-                    walkPointData,
-                error:
-                    walkPointError
-            } =
-                await supabaseClient
-                    .from(
-                        "visit_walk_points"
-                    )
-                    .select(
-                        "sequence_number, latitude, longitude, recorded_at"
-                    )
-                    .eq(
-                        "walk_id",
-                        completedWalk.id
-                    )
-                    .order(
-                        "sequence_number",
-                        {
-                            ascending:
-                                true
-                        }
-                    );
-
-
-            if (
-                walkPointError
-            ) {
-
-                throw walkPointError;
-
-            }
-
-
-            walkPoints =
-                walkPointData ||
-                [];
-
         }
 
+        // Nothing new since what is on screen.
+        if ((options.refresh || kept) && mount.dataset.liveSignature === bundle.signature) return;
 
-        // ========================================
-        // CREATE SIGNED PHOTO URLS
-        // ========================================
-
-        const media =
-            mediaResult.data ||
-            [];
-
-
-        if (!mount.isConnected || activeClientVisitReportId !== visitId || currentUser?.id !== requestUserId) return;
-        const signature = JSON.stringify([report, petCareRows, media, completedWalk, walkPoints]);
-        if (options.refresh && mount.dataset.liveSignature === signature) return;
-
-        const mediaWithUrls =
-            await Promise.all(
-
-                media.map(
-                    async item => {
-
-
-                        const {
-                            data,
-                            error
-                        } =
-                            await supabaseClient
-                                .storage
-                                .from(
-                                    VISIT_MEDIA_BUCKET
-                                )
-                                .createSignedUrl(
-                                    item.storage_path,
-                                    3600
-                                );
-
-
-                        return {
-
-                            ...item,
-
-                            signed_url:
-                                error
-
-                                    ? null
-
-                                    : data
-                                        ?.signedUrl ||
-                                      null
-
-                        };
-
-                    }
-                )
-
-            );
-
-
-        // ========================================
-        // ADD THUMBNAIL URLS
-        // ========================================
-
-        const mediaWithThumbs =
-            await attachVisitPhotoThumbUrls(
-                mediaWithUrls
-            );
-
-
-        // ========================================
-        // RENDER VISIT REPORT
-        // ========================================
-        
-        renderClientVisitReport(
-            mount,
-            report,
-            petCareRows,
-            mediaWithThumbs,
-            completedWalk,
-            walkPoints
-        );
-        
-        
-        mount.dataset.liveSignature = signature;
-
-        // ========================================
-        // RENDER WALK ROUTE
-        // ========================================
-
-        if (
-            completedWalk &&
-            walkPoints.length >=
-            2
-        ) {
-
-            renderClientGoogleWalkRoute(
-                visitId,
-                walkPoints
-            );
-
-        }
-
-
-        // ========================================
-        // DESKTOP REPORT POSITION
-        // ========================================
-
-        if (
-            !options.refresh &&
-            !window.matchMedia(
-                "(max-width: 700px)"
-            ).matches
-        ) {
-
-
-            mount.scrollIntoView({
-                behavior:
-                    "smooth",
-
-                block:
-                    "start"
-            });
-
-        }
-
+        showBundle(bundle);
+        if (!kept) settleOnComputer();
 
     }
     catch (
@@ -18766,6 +18611,9 @@ async function toggleClientVisitReport(
 
 
         if (options.refresh) throw error;
+
+        // The report already on screen stays.
+        if (kept) return;
 
         mount.innerHTML =
             `
@@ -19267,6 +19115,7 @@ function renderClientVisitReport(
                                         photo.thumb_url ||
                                         photo.signed_url
                                     )}"
+                                    data-full-src="${escapeHtml(photo.signed_url)}"
                                     alt="Visit photo"
                                     class="client-visit-report-photo"
                                     loading="lazy"

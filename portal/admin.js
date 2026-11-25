@@ -119,6 +119,11 @@ let activeVisitReportVisitId =
 let pendingVisitReportPhotos =
     [];
 
+// A framing chosen with Adjust Cover on a photo that isn't uploaded yet.
+// Kept per photo (so it follows the photo when the order changes) and saved once the photo is uploaded.
+const pendingVisitPhotoCovers =
+    new WeakMap();
+
 
 let pendingVisitRouteFiles =
     [];
@@ -15060,7 +15065,10 @@ async function deleteAdminVisitReportMedia(
             preview
         ) {
 
+            const grid = preview.parentElement;
             preview.remove();
+            refreshAdminVisitCoverPill(grid);
+            renderPendingVisitPhotos();
 
         }
 
@@ -15256,6 +15264,12 @@ function renderPendingVisitPhotos() {
         return;
     }
 
+    // With no saved photos yet, the first new photo will be the cover on the client's
+    // Home screen, so it gets the Cover button and can be framed before the report is saved.
+    const coverIsNewPhoto =
+        Boolean(window.PisCover) &&
+        !activeVisitReportMedia.some(media => media.photo_type === "visit");
+
     // Thumbnails of the photos waiting to upload, like sit updates.
     container.innerHTML = `
         <div class="admin-visit-existing-media admin-visit-pending-thumbs">
@@ -15275,6 +15289,7 @@ function renderPendingVisitPhotos() {
                             >
                                 ×
                             </button>
+                            ${index === 0 && coverIsNewPhoto ? window.PisCover.pillHtml("data-adjust-pending-visit-cover") : ""}
                         </div>
                     `;
                 })
@@ -15317,6 +15332,23 @@ function renderPendingVisitPhotos() {
             }
         );
 
+
+    container
+        .querySelector("[data-adjust-pending-visit-cover]")
+        ?.addEventListener("click", async event => {
+            const button = event.currentTarget;
+            const file = pendingVisitReportPhotos[0];
+            const img = button.closest(".admin-visit-pending-photo")?.querySelector("img");
+            if (!file || !img || !window.PisCover || button.closest("form")?.dataset.savingReport === "true") return;
+            const result = await window.PisCover.edit({ src: img.src, box: pendingVisitPhotoCovers.get(file) });
+            if (!result) return;
+            if (result.reset) pendingVisitPhotoCovers.delete(file);
+            else pendingVisitPhotoCovers.set(file, result.box);
+            (window.pisNotice || window.alert)(
+                result.reset ? "Cover reset. It's saved with the report." : "Cover set ✓ It's saved with the report.",
+                "success"
+            );
+        });
 }
 
 
@@ -21073,16 +21105,24 @@ function renderAdminFinancialSnapshot() {
     weekElement.textContent = formatAdminFinancialCurrency(
         getAdminFinancialRevenue(getAdminFinancialVisits(week.start, week.end)));
 
-    // Hourly rate uses completed revenue, not money from visits still ahead.
-    // Overnight boarding is excluded from this mobile-service hourly metric.
-    // Your own hourly rate: visits assigned to an employee are their time.
-    const worked = visits.filter(visit => !isAdminBoardingService(visit) &&
+    // Today's hourly rate so far: money from finished work divided by the time it took
+    // (time at the visits plus the drive to each one).
+    //   - Overnight boarding is left out: it isn't hourly work.
+    //   - Visits assigned to an employee are their time, not yours.
+    //   - Outside income for today (admin-outside-income.js) counts: it has a price and a length
+    //     but no check-in, so it counts for the whole day. Its boarding type arrives as boarding
+    //     and is left out like any other boarding.
+    const isDone = visit => Boolean(visit.completed_at) ||
+        String(visit.status || '').toLowerCase() === 'completed';
+    const hourly = visits.filter(visit => !isAdminBoardingService(visit));
+    const outside = hourly.filter(visit => visit.is_outside_income);
+    const worked = hourly.filter(visit => !visit.is_outside_income &&
         (!visit.assigned_to || visit.assigned_to === currentUser?.id) &&
-        (visit.checked_in_at || visit.completed_at ||
-            String(visit.status || '').toLowerCase() === 'completed'));
-    const completed = worked.filter(visit => visit.completed_at ||
-        String(visit.status || '').toLowerCase() === 'completed');
-    const earned = getAdminFinancialRevenue(completed);
+        (visit.checked_in_at || isDone(visit)));
+    const completed = worked.filter(isDone);
+    const visitRevenue = getAdminFinancialRevenue(completed);
+    const outsideRevenue = getAdminFinancialRevenue(outside);
+    const outsideMinutes = outside.reduce((total, visit) => total + getAdminFinancialVisitMinutes(visit), 0);
     let actualMinutes = 0;
     let estimatedMinutes = 0;
     for (const visit of worked) {
@@ -21095,45 +21135,52 @@ function renderAdminFinancialSnapshot() {
             estimatedMinutes += getAdminFinancialVisitMinutes(visit);
         }
     }
-
+    // Driving: the estimate kept for each stop when its route was worked out (every morning by
+    // itself, or with Recalculate). A stop no route covered is left out and mentioned; it no
+    // longer hides the whole rate.
     const cache = adminDriveEstimateCache;
-    const rows = new Map(cache.rows.map(row => [String(row.visit_id), row]));
+    const rows = new Map(cache.rows.map(row => [String(row.visit_id), row.drive_seconds]));
+    const plannedLegs = new Map((readAdminSavedRoute()?.stops || [])
+        .map(stop => [String(stop.id), stop.drive_seconds_from_previous]));
+    const seconds = value => (value === null || value === undefined || value === '' ||
+        !Number.isFinite(Number(value)) || Number(value) < 0 ? null : Number(value));
     const reached = worked.filter(isAdminDrivingService);
     let driveSeconds = 0;
-    let missing = 0;
+    let unknownLegs = 0;
     for (const visit of reached) {
-        const row = rows.get(String(visit.id));
-        if (!row?.locked_at || !Number.isFinite(Number(row.drive_seconds))) {
-            missing++;
-        } else {
-            driveSeconds += Number(row.drive_seconds);
-        }
+        const leg = seconds(rows.get(String(visit.id))) ?? seconds(plannedLegs.get(String(visit.id)));
+        if (leg === null) unknownLegs++; else driveSeconds += leg;
     }
     const visitMinutes = actualMinutes + estimatedMinutes;
-    const totalMinutes = visitMinutes + driveSeconds / 60;
-    const timeText = `${formatAdminFinancialTime(visitMinutes)} visits` +
-        (estimatedMinutes ? ` (${formatAdminFinancialTime(estimatedMinutes)} estimated)` : '') +
-        ` • ${formatAdminFinancialTime(driveSeconds / 60)} estimated driving`;
-
-    if (!worked.length) {
+    const totalMinutes = visitMinutes + outsideMinutes + driveSeconds / 60;
+    const earned = visitRevenue + outsideRevenue;
+    const moneyText = [
+        completed.length ? `${formatAdminFinancialCurrency(visitRevenue)} completed revenue` : '',
+        outside.length ? `${formatAdminFinancialCurrency(outsideRevenue)} outside income` : ''
+    ].filter(Boolean).join(' + ');
+    const timeText = [
+        [
+            worked.length ? `${formatAdminFinancialTime(visitMinutes)} visits` +
+                (estimatedMinutes ? ` (${formatAdminFinancialTime(estimatedMinutes)} estimated)` : '') : '',
+            outside.length ? `${formatAdminFinancialTime(outsideMinutes)} outside` : ''
+        ].filter(Boolean).join(' + '),
+        reached.length && unknownLegs < reached.length ? `${formatAdminFinancialTime(driveSeconds / 60)} estimated driving` : '',
+        unknownLegs ? `drive time left out for ${unknownLegs} ${unknownLegs === 1 ? 'stop' : 'stops'}` : ''
+    ].filter(Boolean).join(' • ');
+    if (!worked.length && !outside.length) {
         rateElement.textContent = '—';
         detailElement.textContent = 'Your hourly rate will appear after completing a visit.';
-    } else if (reached.length && !cache.ready) {
+    } else if (unknownLegs && !cache.ready && !cache.error) {
         rateElement.textContent = '—';
-        detailElement.textContent = cache.error ?
-            'Unable to load saved driving time. Refresh to retry.' : 'Loading saved driving time…';
-    } else if (missing) {
-        rateElement.textContent = '—';
-        detailElement.textContent = `${timeText} • Missing driving estimates for ${missing} reached ${missing === 1 ? 'visit' : 'visits'}.`;
-    } else if (!completed.length || totalMinutes <= 0) {
+        detailElement.textContent = 'Loading saved driving time…';
+    } else if ((!completed.length && !outside.length) || totalMinutes <= 0) {
         rateElement.textContent = '—';
         detailElement.textContent = `${timeText} • First visit in progress`;
     } else {
         rateElement.textContent = `${formatAdminFinancialCurrency(earned / (totalMinutes / 60))}/hr`;
-        detailElement.textContent = `${formatAdminFinancialCurrency(earned)} completed revenue • ${timeText}`;
+        detailElement.textContent = `${moneyText} • ${timeText}`;
     }
 }
-
 // Refresh the rate while Home is visible, including after returning from Maps.
 window.addEventListener('focus', () => {
     if (currentUser?.id) void refreshAdminDriveEstimates(true);
@@ -21822,24 +21869,36 @@ function getAdminRemainingRouteSignature() {
     ]));
 }
 
-async function calculateAdminBestVisitRoute() {
-    if (adminBestRouteLoading) return;
+// options.auto: the automatic morning route (see below). It starts from options.origin without
+// asking for your location, and stays quiet if it can't finish (Recalculate is still there).
+async function calculateAdminBestVisitRoute(options) {
+    const quiet = options?.auto === true;
+    let planned = false;
+    if (adminBestRouteLoading) return planned;
     const remaining = getAdminRemainingRouteVisits();
     syncAdminSavedRoute();
     if (!remaining.length) {
         renderAdminBestVisitRoute();
         void refreshAdminDriveEstimates(true);
-        return;
+        return planned;
     }
     if (remaining.some(visit => visit.checked_in_at ||
         String(visit.status || '').toLowerCase() === 'checked_in')) {
-        (window.pisNotice || window.alert)('Finish your current visit before recalculating the remaining route.');
+        if (!quiet) (window.pisNotice || window.alert)('Finish your current visit before recalculating the remaining route.');
         renderAdminBestVisitRoute();
-        return;
+        return planned;
     }
     const routeOwner = currentUser?.id;
     const routeDate = getLocalDateString();
     const signature = getAdminRemainingRouteSignature();
+    // The automatic route only minds whether the stops themselves changed: checking in while it is
+    // still being worked out (opening the app at the first door) must not throw its estimates away.
+    const stopsKey = () => JSON.stringify(getAdminRemainingRouteVisits().map(visit => [
+        String(visit.id), visit.visit_date, visit.time_window,
+        getAdminRouteVisitAddress(visit), getAdminRouteDurationMinutes(visit)
+    ]));
+    const stopsAtStart = stopsKey();
+    const visitsChanged = () => (quiet ? stopsAtStart !== stopsKey() : signature !== getAdminRemainingRouteSignature());
     adminBestRouteLoading = true;
     renderAdminBestVisitRoute();
     try {
@@ -21853,7 +21912,7 @@ async function calculateAdminBestVisitRoute() {
                 duration_minutes: getAdminRouteDurationMinutes(visit)
             };
         });
-        const origin = await getAdminCurrentRouteOrigin();
+        const origin = (quiet && options.origin) || await getAdminCurrentRouteOrigin();
         const { data, error } = await supabaseClient.functions.invoke('route-optimizer', {
             body: { ...origin, visits: routeVisits }
         });
@@ -21874,8 +21933,7 @@ async function calculateAdminBestVisitRoute() {
             (data.skipped_shipments || []).length) {
             throw new Error('Google did not return every visit exactly once. No incomplete route was accepted.');
         }
-        if (currentUser?.id !== routeOwner || getLocalDateString() !== routeDate ||
-            signature !== getAdminRemainingRouteSignature()) {
+        if (currentUser?.id !== routeOwner || getLocalDateString() !== routeDate || visitsChanged()) {
             throw new Error('Your visits changed during calculation. Please recalculate.');
         }
 
@@ -21893,23 +21951,93 @@ async function calculateAdminBestVisitRoute() {
         });
         const saved = await supabaseClient.rpc('save_admin_route_drive_estimates', { p_legs: legs });
         if (saved.error) throw new Error(`Could not save driving estimates: ${saved.error.message}`);
-        if (currentUser?.id !== routeOwner || getLocalDateString() !== routeDate ||
-            signature !== getAdminRemainingRouteSignature()) {
+        if (currentUser?.id !== routeOwner || getLocalDateString() !== routeDate || visitsChanged()) {
             throw new Error('Your visits changed while saving the route. Please recalculate.');
         }
-        saveAdminDailyRoute({ ...data, calculated_at: Date.now(), visit_signature: signature });
+        saveAdminDailyRoute({ ...data, calculated_at: Date.now(), visit_signature: getAdminRemainingRouteSignature() });
         syncAdminSavedRoute();
         await refreshAdminDriveEstimates(true);
+        planned = true;
     } catch (error) {
         syncAdminSavedRoute();
-        console.error('Admin route optimization error:', error);
-        (window.pisNotice || window.alert)(error?.message || 'Unable to calculate the route.');
+        console.error(quiet ? 'Automatic route:' : 'Admin route optimization error:', error);
+        if (!quiet) (window.pisNotice || window.alert)(error?.message || 'Unable to calculate the route.');
     } finally {
         adminBestRouteLoading = false;
         renderAdminBestVisitRoute();
         renderAdminFinancialSnapshot();
     }
+    return planned;
 }
+// ========================================
+// MORNING ROUTE (AUTOMATIC)
+// ========================================
+// The hourly rate needs a driving estimate for every stop. Rather than wait for Recalculate
+// to be tapped, today's route is worked out by itself:
+//   - the first time the app is open on a day with stops ahead and no route yet
+//   - again if a stop is added that the route doesn't cover (and nobody is checked in)
+// It starts from your last finished visit today, or from your home address (More > My Profile).
+// It never asks for your location and never shows a pop-up. Owner only; a few tries a day.
+const ADMIN_AUTO_ROUTE_MAX_PER_DAY = 6;
+const ADMIN_AUTO_ROUTE_RETRY_MS = 5 * 60 * 1000;
+let adminAutoRouteTimer = null;
+function getAdminAutoRouteOrigin() {
+    const today = getLocalDateString();
+    const lastVisit = allVisits.filter(visit =>
+        visit.visit_date === today && isAdminDrivingService(visit) && visit.completed_at &&
+        (!visit.assigned_to || visit.assigned_to === currentUser?.id) &&
+        String(visit.status || '').toLowerCase() !== 'cancelled')
+        .sort((a, b) => Date.parse(b.completed_at) - Date.parse(a.completed_at))[0];
+    const address = (lastVisit && getAdminRouteVisitAddress(lastVisit)) || getAdminRouteStartAddress();
+    return address ? { start_address: address } : null;
+}
+// Why the automatic route would (not) run right now: '' means it should.
+function getAdminAutoRouteBlocker() {
+    if (!currentUser?.id) return 'signed-out';
+    if (window.PIS_STAFF_ROLE === 'employee' || document.body.classList.contains('pis-employee')) return 'team';
+    const remaining = getAdminRemainingRouteVisits();
+    if (!remaining.length) return 'no-stops';
+    if (remaining.some(visit => visit.checked_in_at ||
+        String(visit.status || '').toLowerCase() === 'checked_in')) return 'checked-in';
+    const saved = readAdminSavedRoute();
+    const covered = new Set((saved?.stops || []).map(stop => String(stop.id)));
+    if (saved && remaining.every(visit => covered.has(String(visit.id)))) return 'planned';
+    if (remaining.some(visit => !getAdminRouteVisitAddress(visit))) return 'no-address';
+    if (!getAdminAutoRouteOrigin()) return 'no-start';
+    return '';
+}
+async function planAdminRouteAutomatically() {
+    if (adminBestRouteLoading || document.hidden || navigator.onLine === false) return false;
+    if (getAdminAutoRouteBlocker()) return false;
+    // once per set of stops (one more try after a few minutes if it failed), a few a day at most
+    const signature = getAdminRemainingRouteSignature();
+    let mark = 0;
+    for (let i = 0; i < signature.length; i++) mark = (mark * 31 + signature.charCodeAt(i)) | 0;
+    const key = `pis-auto-route-v1:${currentUser.id}:${getLocalDateString()}`;
+    let memo = { tries: 0, mark: null, markTries: 0, at: 0 };
+    try {
+        memo = { ...memo, ...(JSON.parse(localStorage.getItem(key) || 'null') || {}) };
+        // earlier days' notes are no use any more
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const name = localStorage.key(i);
+            if (name && name.startsWith('pis-auto-route-v1:') && name !== key) localStorage.removeItem(name);
+        }
+    } catch { /* start fresh */ }
+    if (memo.tries >= ADMIN_AUTO_ROUTE_MAX_PER_DAY) return false;
+    if (memo.mark === mark && (memo.markTries >= 2 || Date.now() - memo.at < ADMIN_AUTO_ROUTE_RETRY_MS)) return false;
+    memo = { tries: memo.tries + 1, mark, markTries: memo.mark === mark ? memo.markTries + 1 : 1, at: Date.now() };
+    try { localStorage.setItem(key, JSON.stringify(memo)); } catch { /* still try once this session */ }
+    return calculateAdminBestVisitRoute({ auto: true, origin: getAdminAutoRouteOrigin() });
+}
+function scheduleAdminAutoRoute() {
+    clearTimeout(adminAutoRouteTimer);
+    adminAutoRouteTimer = setTimeout(() => {
+        planAdminRouteAutomatically().catch(error => console.error('Automatic route:', error));
+    }, 500);
+}
+// Coming back to the app (a new day, or signal again) is a good moment to check.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleAdminAutoRoute(); });
+window.addEventListener('online', scheduleAdminAutoRoute);
 
 // ========================================
 // DECODE GOOGLE ROUTE POLYLINE
@@ -23363,6 +23491,23 @@ if (adminRouteStopList) {
 // RECALCULATE BEST VISIT ROUTE
 // ========================================
 
+{
+    const drawAdminRouteCard = renderAdminBestVisitRoute;
+    renderAdminBestVisitRoute = function () {
+        const result = drawAdminRouteCard.apply(this, arguments);
+        try {
+            const subtitle = document.getElementById('admin-route-subtitle');
+            if (subtitle && /Recalculate to optimize\s*$/.test(subtitle.textContent) && getAdminAutoRouteBlocker() === 'no-start') {
+                subtitle.textContent = subtitle.textContent.replace(/Recalculate to optimize\s*$/,
+                    'Add your home address in More so each morning’s route plans itself');
+            }
+            scheduleAdminAutoRoute();
+        } catch (error) {
+            console.error('Automatic route:', error);
+        }
+        return result;
+    };
+}
 const adminRouteRecalculateButton =
     document.getElementById(
         "admin-route-recalculate-button"
@@ -29179,6 +29324,14 @@ async function uploadVisitReportMedia(
 
     }
 
+
+    // A framing chosen before this photo was uploaded (Adjust Cover on a new photo). It is in
+    // fractions of the photo, and the resize above keeps the photo's shape, so it fits the uploaded copy.
+    const cover = pendingVisitPhotoCovers.get(file);
+    if (cover && window.PisCover) {
+        try { await window.PisCover.save(storagePath, cover); }
+        catch (error) { console.warn("Cover not saved:", error?.message || error); }
+    }
 }
 
 // ========================================

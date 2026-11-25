@@ -292,9 +292,23 @@
         if (state.route) state.route.add(path);
     }
 
+    // How far the walk has gone according to the walk itself (client app). The walker's phone saves
+    // route points first and the distance second, so distance without points means the points are
+    // there but this app isn't being given them.
+    function knownDistance(id) {
+        try {
+            if (typeof currentClientLiveWalks === 'undefined' || !currentClientLiveWalks?.values) return 0;
+            for (const walk of currentClientLiveWalks.values()) if (Number(walk.id) === Number(id)) return Number(walk.distance_meters) || 0;
+        } catch { /* not the client app */ }
+        return 0;
+    }
     function draw(state) {
         if (!state.path.length) {
-            message(state, state.live ? 'The route shows up here once the walk gets going.' : 'No route was recorded for this walk.');
+            const withheld = state.live && state.loaded && knownDistance(state.id) > 15;
+            if (withheld && !state.warned) { state.warned = true; console.warn('Walk map: the walk has distance but no route points could be read (database rule for visit_walk_points).'); }
+            message(state, !state.live ? 'No route was recorded for this walk.'
+                : withheld ? 'The route will show here when the walk is finished.'
+                : 'The route shows up here once the walk gets going.');
             return;
         }
         if (!window.google?.maps) {

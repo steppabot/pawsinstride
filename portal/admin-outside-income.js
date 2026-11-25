@@ -12,6 +12,12 @@
    The entries only feed the money and time numbers. They never show up on the
    schedule, routes, client lists or anywhere else.
 
+   Each arrangement has a type (service_kind): walk, dropin, sitting, boarding or other.
+   Boarding is all day, so it has no length; its entries go out as boarding
+   (service_type 'dog_boarding') and every screen leaves them out of hours and hourly
+   rates exactly as it does for boarding booked in the app. The rest count their
+   money and their time, including in today's hourly rate on Home.
+
    window.PisOutsideIncome.visitsBetween(start, end) -> entries ('YYYY-MM-DD', null = open)
    window.PisOutsideIncome.cardHtml()                 -> the card for Full Financials
    window.PisOutsideIncome.load(force)                -> (re)load from Supabase
@@ -24,7 +30,21 @@
     // visits_by_day (visits on each weekday, Sun..Sat) needs a one-time
     // database update. Until it's run, everything else keeps working.
     let hasByDay = true;
-    const columns = () => hasByDay ? `${BASE_COLUMNS}, visits_by_day` : BASE_COLUMNS;
+    // service_kind (the type) is the same: optional until 7-paws-outside-income-type.sql is run.
+    let hasKind = true;
+    const columns = () => BASE_COLUMNS + (hasByDay ? ', visits_by_day' : '') + (hasKind ? ', service_kind' : '');
+    const KINDS = ['walk', 'dropin', 'sitting', 'boarding', 'other'];
+    const KIND_NAMES = { walk: 'Dog Walking', dropin: 'Drop-In Visits', sitting: 'Pet Sitting', boarding: 'Boarding', other: 'Other' };
+    const isBoardingKind = r => r?.kind === 'boarding';
+    // the words that change with the type: "3 visits × $85 · $255/day" or "2 pets × $60 · $120/night"
+    const words = r => isBoardingKind(r)
+        ? { one: 'pet', many: 'pets', per: 'night', pay: 'Pay per pet, per night', count: 'Pets boarding', days: 'Days they stay', off: '(days they weren’t here)' }
+        : { one: 'visit', many: 'visits', per: 'day', pay: 'Pay per visit', count: 'Visits a day', days: 'Days you go', off: '(days you didn’t go)' };
+    // 90 -> "1h 30m", 240 -> "4h", 45 -> "45m"
+    const lengthText = minutes => {
+        const m = Math.max(0, Math.round(Number(minutes) || 0)), h = Math.floor(m / 60);
+        return h ? (m % 60 ? `${h}h ${m % 60}m` : `${h}h`) : `${m}m`;
+    };
     const DAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -91,6 +111,7 @@
         const byDay = ALL_DAYS.map(d => days.includes(d) ? ((saved && saved[d]) || perDay) : 0);
         return {
             id: r.id,
+            kind: KINDS.includes(r.service_kind ?? r.kind) ? (r.service_kind ?? r.kind) : 'other',
             label: String(r.label || '').trim() || 'Outside client',
             visits_by_day: byDay,
             visits_per_day: Math.max(...byDay),
@@ -165,10 +186,12 @@
                         visit_date: date,
                         price: r.price_per_visit,
                         status: date < t ? 'completed' : 'scheduled',
-                        service_type: 'outside_income',
+                        // boarding is boarding wherever it was booked: no hours, no hourly rate
+                        service_type: isBoardingKind(r) ? 'dog_boarding' : 'outside_income',
                         service_name: r.label,
                         is_outside_income: true,
                         outside_income_id: r.id,
+                        outside_kind: r.kind,
                         outside_minutes: r.minutes_per_visit
                     });
                 }
@@ -200,8 +223,17 @@
     function isMissingByDay(error) {
         return /visits_by_day/i.test(`${error?.message || ''} ${error?.details || ''} ${error?.hint || ''}`);
     }
+    function isMissingKind(error) {
+        return /service_kind/i.test(`${error?.message || ''} ${error?.details || ''} ${error?.hint || ''}`);
+    }
+    // An optional column the database doesn't have yet: stop asking for it. True if the request is worth sending again.
+    function dropMissingColumn(error) {
+        if (hasKind && isMissingKind(error)) { hasKind = false; return true; }
+        if (hasByDay && isMissingByDay(error)) { hasByDay = false; return true; }
+        return false;
+    }
     function isMissingTable(error) {
-        if (isMissingByDay(error)) return false;
+        if (isMissingByDay(error) || isMissingKind(error)) return false;
         const code = String(error?.code || '');
         const text = String(error?.message || '');
         return code === 'PGRST205' || code === '42P01' ||
@@ -233,8 +265,7 @@
                     .eq('admin_id', id)
                     .order('start_date', { ascending: true });
                 let { data, error } = await fetchRows();
-                if (error && hasByDay && isMissingByDay(error)) {
-                    hasByDay = false;
+                for (let attempt = 0; attempt < 2 && error && dropMissingColumn(error); attempt++) {
                     ({ data, error } = await fetchRows());
                 }
                 if (error) throw error;
@@ -263,7 +294,9 @@
         const owner = me();
         if (!owner) throw new Error('Sign in again, then try saving.');
         const differs = varies(clean(values));
+        const typed = values.kind && values.kind !== 'other';
         if (!hasByDay && differs) throw new Error('needs-update');
+        if (!hasKind && typed) throw new Error('needs-type-update');
         const payload = {
             label: values.label,
             visits_per_day: values.visits_per_day,
@@ -276,16 +309,16 @@
             updated_at: new Date().toISOString()
         };
         const send = () => {
-            const body = hasByDay ? { ...payload, visits_by_day: values.visits_by_day } : payload;
+            const body = { ...payload, ...(hasByDay ? { visits_by_day: values.visits_by_day } : {}), ...(hasKind ? { service_kind: values.kind || 'other' } : {}) };
             const query = id
                 ? supabaseClient.from(TABLE).update(body).eq('id', id).eq('admin_id', owner)
                 : supabaseClient.from(TABLE).insert({ ...body, admin_id: owner });
             return query.select(columns()).single();
         };
         let { data, error } = await send();
-        if (error && hasByDay && isMissingByDay(error)) {
-            hasByDay = false;
-            if (differs) throw new Error('needs-update');
+        for (let attempt = 0; attempt < 2 && error && dropMissingColumn(error); attempt++) {
+            if (!hasByDay && differs) throw new Error('needs-update');
+            if (!hasKind && typed) throw new Error('needs-type-update');
             ({ data, error } = await send());
         }
         if (error) throw error;
@@ -310,6 +343,7 @@
 
     function friendlyError(error) {
         if (error?.message === 'needs-update') return 'A different number of visits on different days needs a quick database update. Run the outside income part of the setup SQL in Supabase → SQL Editor, then try again.';
+        if (error?.message === 'needs-type-update') return 'Choosing a type needs a quick database update. Run 7-paws-outside-income-type.sql in Supabase → SQL Editor, then try again.';
         if (isMissingTable(error)) return 'Outside income isn’t set up in the database yet. Run sql/admin_outside_income.sql in Supabase → SQL Editor, then try again.';
         if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'You’re offline. Connect and try again.';
         return `Couldn’t save: ${error?.message || 'please try again.'}`;
@@ -351,20 +385,29 @@
     // "$255/day", "$175/week", or the whole total when it has an end date.
     function rate(r) {
         const each = money(r.price_per_visit, true);
+        const w = words(r);
+        // boarding with an end date: pets × nights, said as nights ("6 nights × $65")
+        const total = isBoardingKind(r) ? { one: 'night', many: 'nights' } : w;
         if (r.end_date) {
             const visits = visitsOn(r, datesFor(r, null, r.end_date));
-            return { line: `${visits} ${visits === 1 ? 'visit' : 'visits'} × ${each} · ${money(visits * r.price_per_visit, true)} total`,
-                big: `${money(visits * r.price_per_visit, true)} total`, sub: `${visits} ${visits === 1 ? 'visit' : 'visits'}` };
+            return { line: `${visits} ${visits === 1 ? total.one : total.many} × ${each} · ${money(visits * r.price_per_visit, true)} total`,
+                big: `${money(visits * r.price_per_visit, true)} total`, sub: `${visits} ${visits === 1 ? total.one : total.many}` };
         }
         if (varies(r)) {
             const counts = r.days_of_week.map(d => r.visits_by_day[d]);
             const week = counts.reduce((a, b) => a + b, 0) * r.price_per_visit;
-            return { line: `${Math.min(...counts)}–${Math.max(...counts)} visits a day × ${each} · ${money(week, true)}/week`,
+            return { line: `${Math.min(...counts)}–${Math.max(...counts)} ${w.many} a ${w.per} × ${each} · ${money(week, true)}/week`,
                 big: `${money(week, true)} a week` };
         }
         const n = r.visits_per_day;
-        return { line: `${n} ${n === 1 ? 'visit' : 'visits'} × ${each} · ${money(n * r.price_per_visit, true)}/day`,
-            big: `${money(n * r.price_per_visit, true)} a day` };
+        return { line: `${n} ${n === 1 ? w.one : w.many} × ${each} · ${money(n * r.price_per_visit, true)}/${w.per}`,
+            big: `${money(n * r.price_per_visit, true)} a ${w.per}` };
+    }
+    // "Pet Sitting · 4h each", "Boarding · all day", or just "1h each" when no type was picked
+    function kindLine(r) {
+        if (isBoardingKind(r)) return 'Boarding · all day';
+        const length = `${lengthText(r.minutes_per_visit)} each`;
+        return r.kind && r.kind !== 'other' ? `${KIND_NAMES[r.kind]} · ${length}` : length;
     }
 
     /* ---------- card in Full Financials ---------- */
@@ -389,6 +432,7 @@
             return `<div class="poi-item">
                 <div class="poi-item-copy">
                     <strong>${esc(r.label)}</strong>
+                    <span data-poi-kind="${esc(r.kind)}">${esc(kindLine(r))}</span>
                     <span>${esc(rate(r).line)}</span>
                     ${scheduleLines(r).map((line, i, all) => `<span>${esc(line)}${i === all.length - 1 && off ? ` · ${off} ${off === 1 ? 'day' : 'days'} off` : ''}</span>`).join('')}
                     <em>${r.start_date > today() ? 'Not started yet' : `${money(earnedSoFar(r))} earned so far`}</em>
@@ -417,12 +461,14 @@
         if (document.getElementById('poi-editor')) return;
         const existing = id ? rows.find(r => String(r.id) === String(id)) : null;
         const r = existing || {
+            kind: 'other',
             label: '', visits_per_day: 1, visits_by_day: ALL_DAYS.map(() => 1), price_per_visit: '', minutes_per_visit: 60,
             days_of_week: ALL_DAYS.slice(), start_date: today(), end_date: null, skipped_dates: []
         };
         editor = {
             id: existing ? existing.id : null, skipped: r.skipped_dates.slice(), deleteArmed: false, busy: false,
             perDay: existing ? varies(r) : false,
+            minutes: r.minutes_per_visit,          // kept while Boarding hides the time boxes
             uniform: r.visits_per_day,
             counts: r.visits_by_day.map(n => n || r.visits_per_day)
         };
@@ -445,11 +491,17 @@
                     <p class="poi-intro">For a client you’re paid outside the app. It’s added to your totals but never shows on your schedule.</p>
                     <label class="poi-field"><span>Client</span>
                         <input type="text" name="label" maxlength="80" autocomplete="off" placeholder="Client name" value="${esc(existing ? r.label : '')}"></label>
+                    <label class="poi-field"><span>Type</span>
+                        <select name="kind">${KINDS.map(k => `<option value="${k}"${k === r.kind ? ' selected' : ''}>${esc(KIND_NAMES[k])}</option>`).join('')}</select></label>
                     <div class="poi-row2 poi-row-tight">
-                        <label class="poi-field"><span>Pay per visit</span>
+                        <label class="poi-field"><span data-poi-pay-label>${esc(words(r).pay)}</span>
                             <span class="poi-money"><i>$</i><input type="number" name="price" inputmode="decimal" min="0" step="0.01" placeholder="85" value="${esc(r.price_per_visit)}"></span></label>
-                        <label class="poi-field"><span>Minutes each</span>
-                            <input type="number" name="minutes" inputmode="numeric" min="1" max="1440" step="1" value="${esc(r.minutes_per_visit)}"></label>
+                        <div class="poi-field" data-poi-time${isBoardingKind(r) ? ' hidden' : ''}><span id="poi-time-label">Time each visit</span>
+                            <div class="poi-time" role="group" aria-labelledby="poi-time-label">
+                                <label><input type="number" name="hours" inputmode="numeric" min="0" max="24" step="1" aria-label="Hours" value="${Math.floor(r.minutes_per_visit / 60)}"><i>hr</i></label>
+                                <label><input type="number" name="mins" inputmode="numeric" min="0" max="59" step="1" aria-label="Minutes" value="${r.minutes_per_visit % 60}"><i>min</i></label>
+                            </div></div>
+                        <div class="poi-field poi-allday" data-poi-allday${isBoardingKind(r) ? '' : ' hidden'}><span>Time</span><p>All day. Boarding stays out of your hourly rate.</p></div>
                     </div>
                     <div class="poi-row2">
                         <label class="poi-field"><span>Started</span>
@@ -457,13 +509,13 @@
                         <label class="poi-field"><span>Ended <small>(blank if still going)</small></span>
                             <input type="date" name="end" value="${esc(r.end_date || '')}"></label>
                     </div>
-                    <div class="poi-field"><span id="poi-days-label">Days you go</span>
+                    <div class="poi-field"><span id="poi-days-label">${esc(words(r).days)}</span>
                         <div class="poi-days" role="group" aria-labelledby="poi-days-label">
                             ${ALL_DAYS.map(d => `<button type="button" class="poi-day" data-poi-day="${d}" aria-pressed="${r.days_of_week.includes(d)}" aria-label="${DAY_NAMES[d]}">${DAY_LETTERS[d]}</button>`).join('')}
                         </div></div>
-                    <div class="poi-field"><span>Visits a day</span>
+                    <div class="poi-field"><span data-poi-count-label>${esc(words(r).count)}</span>
                         <div class="poi-visits"></div></div>
-                    <div class="poi-field"><span>Days off <small>(days you didn’t go)</small></span>
+                    <div class="poi-field"><span>Days off <small data-poi-off-label>${esc(words(r).off)}</small></span>
                         <div class="poi-off-add">
                             <input type="date" name="off" aria-label="Day off">
                             <button type="button" class="poi-off-btn" data-poi-off-add>Add</button>
@@ -490,6 +542,7 @@
         });
         formEl.addEventListener('change', e => {
             if (e.target.name === 'start' || e.target.name === 'end') { renderVisits(); preview(); }
+            if (e.target.name === 'kind') { hideError(); applyKind(); renderVisits(); preview(); }
         });
         formEl.addEventListener('submit', e => { e.preventDefault(); void submit(); });
         renderOff();
@@ -512,6 +565,25 @@
     }
 
     function form() { return document.querySelector('#poi-editor form'); }
+    // The type decides the wording, and whether a length is asked for at all (boarding is all day).
+    function applyKind() {
+        const f = form();
+        if (!f) return;
+        const r = { kind: String(field('kind').value) };
+        const boarding = isBoardingKind(r);
+        f.querySelector('[data-poi-time]').hidden = boarding;
+        f.querySelector('[data-poi-allday]').hidden = !boarding;
+        f.querySelector('[data-poi-pay-label]').textContent = words(r).pay;
+        f.querySelector('[data-poi-count-label]').textContent = words(r).count;
+        f.querySelector('#poi-days-label').textContent = words(r).days;
+        f.querySelector('[data-poi-off-label]').textContent = words(r).off;
+    }
+    // Hours and minutes as one number of minutes (blank boxes count as 0).
+    function typedMinutes() {
+        const part = name => { const text = String(field(name).value).trim(); return text === '' ? 0 : Number(text); };
+        const hours = part('hours'), mins = part('mins');
+        return Number.isInteger(hours) && Number.isInteger(mins) && hours >= 0 && mins >= 0 && mins <= 59 ? hours * 60 + mins : NaN;
+    }
     function field(name) { return form().elements.namedItem(name); }
 
     function selectedDays() {
@@ -523,12 +595,15 @@
         const days = selectedDays();
         const priceText = String(field('price').value).trim();
         const byDay = ALL_DAYS.map(d => days.includes(d) ? (editor.perDay ? editor.counts[d] : editor.uniform) : 0);
+        const kind = KINDS.includes(String(field('kind').value)) ? String(field('kind').value) : 'other';
         return {
+            kind,
             label: String(field('label').value).trim(),
             visits_by_day: byDay,
             visits_per_day: days.length ? Math.max(...days.map(d => byDay[d])) : editor.uniform,
             price_per_visit: priceText === '' ? NaN : Math.round(Number(priceText) * 100) / 100,
-            minutes_per_visit: Number(field('minutes').value),
+            // boarding has no length to type: it keeps whatever was there (the database wants a number)
+            minutes_per_visit: kind === 'boarding' ? (Number.isInteger(editor.minutes) && editor.minutes >= 1 ? editor.minutes : 60) : typedMinutes(),
             days_of_week: days,
             start_date: String(field('start').value),
             end_date: String(field('end').value) || null,
@@ -540,8 +615,8 @@
         if (!v.label) return 'Add the client’s name.';
         if (v.label.length > 80) return 'Keep the name under 80 characters.';
         if (v.visits_by_day.some(n => !Number.isInteger(n) || n < 0 || n > 20)) return 'Visits a day should be from 1 to 20.';
-        if (!Number.isFinite(v.price_per_visit) || v.price_per_visit < 0 || v.price_per_visit > 100000) return 'Add how much you’re paid per visit.';
-        if (!Number.isInteger(v.minutes_per_visit) || v.minutes_per_visit < 1 || v.minutes_per_visit > 1440) return 'Minutes each should be a whole number from 1 to 1440.';
+        if (!Number.isFinite(v.price_per_visit) || v.price_per_visit < 0 || v.price_per_visit > 100000) return v.kind === 'boarding' ? 'Add how much you’re paid per night.' : 'Add how much you’re paid per visit.';
+        if (v.kind !== 'boarding' && (!Number.isInteger(v.minutes_per_visit) || v.minutes_per_visit < 1 || v.minutes_per_visit > 1440)) return 'Add how long each visit takes: hours, minutes or both (up to 24 hours, minutes 0 to 59).';
         if (!v.days_of_week.length) return 'Pick at least one day you go.';
         if (!isDate(v.start_date)) return 'Add the date you started.';
         if (v.end_date && !isDate(v.end_date)) return 'That end date doesn’t look right.';
@@ -562,7 +637,8 @@
         const so = earnedSoFar(r);
         const sum = rate(r);
         const after = so > 0 ? `${money(so)} earned so far` : 'Starts counting after the first day';
-        box.innerHTML = `<strong>${esc(sum.big)}</strong><span>${esc(sum.sub ? `${sum.sub} · ${after}` : after)}</span>`;
+        const length = isBoardingKind(r) ? 'All day' : (Number.isInteger(v.minutes_per_visit) && v.minutes_per_visit >= 1 ? `${lengthText(v.minutes_per_visit)} each` : '');
+        box.innerHTML = `<strong>${esc(sum.big)}</strong><span>${esc([length, sum.sub, after].filter(Boolean).join(' · '))}</span>`;
     }
 
     // "Visits a day": one number for every day, or a number for each day.
@@ -574,13 +650,14 @@
             box.innerHTML = '<span class="poi-none">Pick the days you go first.</span>';
             return;
         }
+        const unit = words({ kind: String(field('kind')?.value || 'other') });
         const step = (key, label, n, name) => `
             <div class="poi-step-row">
                 <span class="poi-step-label">${esc(label)}</span>
                 <div class="poi-stepper">
-                    <button type="button" class="poi-step-btn" data-poi-step="-1" data-poi-step-day="${key}" aria-label="One fewer visit ${esc(name)}"${n <= 1 ? ' disabled' : ''}>−</button>
-                    <span class="poi-step-num" aria-live="polite">${n}<small>${n === 1 ? 'visit' : 'visits'}</small></span>
-                    <button type="button" class="poi-step-btn" data-poi-step="1" data-poi-step-day="${key}" aria-label="One more visit ${esc(name)}"${n >= 20 ? ' disabled' : ''}>+</button>
+                    <button type="button" class="poi-step-btn" data-poi-step="-1" data-poi-step-day="${key}" aria-label="One fewer ${unit.one} ${esc(name)}"${n <= 1 ? ' disabled' : ''}>−</button>
+                    <span class="poi-step-num" aria-live="polite">${n}<small>${n === 1 ? unit.one : unit.many}</small></span>
+                    <button type="button" class="poi-step-btn" data-poi-step="1" data-poi-step-day="${key}" aria-label="One more ${unit.one} ${esc(name)}"${n >= 20 ? ' disabled' : ''}>+</button>
                 </div>
             </div>`;
         if (!editor.perDay) {
@@ -620,7 +697,7 @@
         if (!editor) return;
         editor.busy = on;
         const f = form();
-        f.querySelectorAll('button, input').forEach(el => { el.disabled = on; });
+        f.querySelectorAll('button, input, select').forEach(el => { el.disabled = on; });
         const saveBtn = f.querySelector('.poi-save');
         if (label && saveBtn) saveBtn.textContent = label;
         if (!on && saveBtn) saveBtn.textContent = 'Save';
@@ -634,7 +711,7 @@
         const issue = problem(v);
         if (issue) {
             // point at the box the problem is about (same red-box flow as every other form)
-            const which = /name/i.test(issue) ? 'label' : /paid per visit/i.test(issue) ? 'price' : /minutes/i.test(issue) ? 'minutes'
+            const which = /name/i.test(issue) ? 'label' : /paid per (visit|night)/i.test(issue) ? 'price' : /how long/i.test(issue) ? 'hours'
                 : /start/i.test(issue) && !/end date/i.test(issue) ? 'start' : /end date/i.test(issue) ? 'end' : '';
             const box = which ? field(which) : (/day you go/i.test(issue) ? document.querySelector('#poi-editor .poi-days, #poi-editor [data-poi-days]') : null);
             if (box && window.PisFormErrors) { hideError(); window.PisFormErrors.show(box, issue); return; }
@@ -812,6 +889,17 @@
     .poi-row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
     .poi-row3 .poi-field > span,.poi-row2 .poi-field > span{min-height:30px;display:flex;align-items:flex-end;line-height:1.2}
     .poi-row2 .poi-field > span{flex-wrap:wrap;gap:0 4px}
+    .poi select{display:block !important;width:100% !important;min-width:0 !important;height:48px !important;margin:0 !important;padding:0 36px 0 12px !important;box-sizing:border-box !important;border:1px solid #c9d9ea !important;border-radius:12px !important;
+        background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2346617d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center !important;
+        color:#183447 !important;font-family:inherit !important;font-size:16px !important;font-weight:600 !important;-webkit-appearance:none !important;appearance:none !important}
+    .poi select:focus{outline:none !important;border-color:#1f7bc2 !important;box-shadow:0 0 0 3px rgba(31,123,194,.15) !important}
+    .poi select:disabled{opacity:.6}
+    .poi-field[hidden]{display:none !important}
+    .poi-time{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+    .poi-time label{position:relative;display:block;margin:0}
+    .poi-time i{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-style:normal;font-size:12.5px;font-weight:700;color:#6b7785;pointer-events:none}
+    .poi .poi-time input{padding:0 34px 0 10px !important}
+    .poi-allday p{display:flex;align-items:center;min-height:48px;margin:0;font-size:12.5px;font-weight:600;line-height:1.35;color:#5b6f82}
     .poi-money{position:relative;display:block}
     .poi-money i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-style:normal;font-size:16px;font-weight:700;color:#6b7785;pointer-events:none}
     .poi .poi-money input{padding-left:24px !important}

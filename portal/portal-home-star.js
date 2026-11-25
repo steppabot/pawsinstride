@@ -193,6 +193,8 @@
         return `${Math.floor(mins / 60)} hr ${mins % 60} min`;
     }
         const miles = meters => { const m = Number(meters) / 1609.344; return Number.isFinite(m) ? m : 0; };
+    // short walks have to show movement too: 0.04 mi, not 0.0 mi
+    const milesText = mi => `${mi < 10 ? mi.toFixed(2) : mi.toFixed(1)} mi`;
 
         async function signed(path) {
         if (!path) return null;
@@ -294,11 +296,26 @@
             const kind = kindOf(v);
             const walk = typeof currentClientLiveWalks !== 'undefined' ? currentClientLiveWalks.get?.(Number(v.id)) : null;
             key += `:${v.id}`;
+            // the walk is over but the visit is still open
+            let walked = null;
+            if (kind === 'walk' && !walk) {
+                try {
+                    const { data } = await supabaseClient.from('visit_walks').select('id, started_at, ended_at, duration_seconds, distance_meters')
+                        .eq('visit_id', v.id).eq('status', 'completed').order('ended_at', { ascending: false }).limit(1);
+                    walked = data?.[0] || null;
+                } catch { walked = null; }
+            }
+            key += walk ? ':walking' : walked ? ':walked' : '';
                         if (kind === 'walk' && walk) {
                 chip = 'Live · Walking Now';
                 mapWalk = walk;
                 title = `${listNames(names)} ${verb(names, 'is', 'are')} out on a walk`;
                 button = { text: 'Follow the Walk', run: () => openVisit(v) };
+            } else if (kind === 'walk' && walked) {
+                chip = 'Live · Walk Finished';
+                title = `${listNames(names)} ${verb(names, 'is', 'are')} back from the walk`;
+                sub = `${person || 'Your walker'} is wrapping up the visit.`;
+                button = { text: 'View Visit', run: () => openVisit(v) };
             } else if (kind === 'walk') {
                 // checked in, walk not started yet
                 chip = 'Live · Checked In';
@@ -322,7 +339,9 @@
             const since = walk?.started_at || v.checked_in_at;
             stats.push(`<span class="pis-star-stat" data-star-since="${esc(since)}">⏱ <b>${esc(minutesText(since))}</b></span>`);
                         if (kind === 'walk' && walk) {
-                stats.push(`<span class="pis-star-stat" data-star-miles="${esc(v.id)}" ${miles(walk?.distance_meters) >= 0.01 ? '' : 'hidden'}>${PAW.replace('<svg', '<svg width="14" height="14"')} <b>${miles(walk?.distance_meters).toFixed(1)} mi</b></span>`);
+                stats.push(`<span class="pis-star-stat" data-star-miles="${esc(v.id)}" ${miles(walk?.distance_meters) >= 0.01 ? '' : 'hidden'}>${PAW.replace('<svg', '<svg width="14" height="14"')} <b>${milesText(miles(walk?.distance_meters))}</b></span>`);
+            } else if (walked && miles(walked.distance_meters) >= 0.01) {
+                stats.push(`<span class="pis-star-stat">${PAW.replace('<svg', '<svg width="14" height="14"')} <b>${milesText(miles(walked.distance_meters))}</b></span>`);
             }
             if (!photoPath) photoPath = await newestVisitPhoto();
             if (!photoPath) photoUrl = await petPhoto(pets);
@@ -354,6 +373,8 @@
 
         if (state.kind === 'done') {
             const { visit: v, report } = state;
+            // Home is about to offer this visit's report: look it up now, so it opens without a wait (portal.js)
+            try { window.prefetchClientVisitReport?.(v.id); } catch { /* it still loads when opened */ }
             const pets = petsOf(v);
             const names = pets.map(p => p.name || 'Your pet');
             const kind = kindOf(v);
@@ -369,7 +390,7 @@
             ]);
             const times = v.checked_in_at && v.completed_at ? `${clock(v.checked_in_at).replace(/ [AP]M$/, m => (clock(v.completed_at).endsWith(m.trim()) ? '' : m))} – ${clock(v.completed_at)}` : '';
             const dist = miles(walkResult?.data?.distance_meters);
-            sub = [dayLabel(v.completed_at || `${v.visit_date}T12:00:00`) + (times ? `, ${times}` : ''), dist >= 0.01 ? `${dist.toFixed(1)} mi` : ''].filter(Boolean).join(' · ');
+            sub = [dayLabel(v.completed_at || `${v.visit_date}T12:00:00`) + (times ? `, ${times}` : ''), dist >= 0.01 ? milesText(dist) : ''].filter(Boolean).join(' · ');
             const checks = [['fed', 'Fed'], ['fresh_water', 'Fresh Water'], ['pee', 'Pee'], ['poop', 'Poop']].filter(([f]) => report?.[f]).map(([, label]) => label);
             stats = checks.map(label => `<span class="pis-star-stat">✓ ${esc(label)}</span>`);
             if (!checks.length && report?.notes) note = esc(report.notes.trim());
@@ -451,10 +472,11 @@
         });
         host.querySelectorAll('[data-star-miles]').forEach(el => {
             const walk = typeof currentClientLiveWalks !== 'undefined' ? currentClientLiveWalks.get?.(Number(el.dataset.starMiles)) : null;
+            if (!walk) return;     // the walk just ended: the card is about to be redrawn with its final numbers
             const mi = miles(walk?.distance_meters);
             el.hidden = !(mi >= 0.01);
             const b = el.querySelector('b');
-            if (b) b.textContent = `${mi.toFixed(1)} mi`;
+            if (b) b.textContent = milesText(mi);
         });
     }
 
@@ -648,7 +670,7 @@
             dash.classList.add('pis-star-on');
             dash.classList.toggle('pis-star-covers-update', card.coversUpdate);
             clearInterval(liveTimer);
-            liveTimer = card.live ? setInterval(tickLive, 20000) : null;
+            liveTimer = card.live ? setInterval(tickLive, 5000) : null;
             if (card.live) tickLive();
                         saveCard(card);
             markReady();
@@ -696,9 +718,15 @@
     }
     const originalLive = window.refreshClientLiveWalks;
     if (typeof originalLive === 'function') {
+        let walking = null;
         window.refreshClientLiveWalks = async function (...args) {
             const result = await originalLive.apply(this, args);
-            tickLive();
+            // a walk started or ended: the card says something different now, not just new numbers
+            let now = '';
+            try { now = [...currentClientLiveWalks.keys()].sort().join(','); } catch { now = ''; }
+            if (walking !== null && now !== walking) void render();
+            else tickLive();
+            walking = now;
             return result;
         };
     }

@@ -112,6 +112,9 @@
         .pis-cover-circle { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
             box-shadow: 0 0 0 999px rgba(13,27,40,.62); border: 2px solid rgba(255,255,255,.9); }
         .boarding-photo-preview, .admin-visit-media-preview { position: relative; }
+        /* A photo tile is exactly as tall as its photo. (As inline content the photo left a few hidden pixels under it, so anything
+           that scrolled to the Cover button could nudge the photo up inside its tile.) */
+        .admin-visit-media-preview > img { display: block; }
         .pis-cover-pill, .boarding-photo-preview .pis-cover-pill, .admin-visit-media-preview .pis-cover-pill {
             position: absolute !important; left: 6px !important; bottom: 6px !important; top: auto !important; right: auto !important; z-index: 2;
             display: inline-flex !important; align-items: center; gap: 4px; width: auto !important; height: 28px !important; min-height: 28px; min-width: 0 !important;

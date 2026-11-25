@@ -14,10 +14,12 @@
 // 4. SWIPE BACK. On a phone, drag an open conversation to the right to return to
 //    the inbox (the New Message list closes the same way). Android's Back does the
 //    same before it closes Messages.
-// 5. A TAB, NOT A FULL SCREEN (phones). The bottom menu stays while the inbox or the
-//    New Message list is showing, so Messages behaves like the other tabs and the X is
-//    not needed. Inside a conversation the menu slides away to leave room for the
-//    reply box and the keyboard, and returns when you go back.
+// 5. A TAB, NOT A FULL SCREEN (phones). The app's own top header (logo, "Messages",
+//    Log Out) and the bottom menu stay while the inbox or the New Message list is
+//    showing, so Messages looks and behaves like the other tabs; its old "Messages /
+//    Client conversations" bar and the X are not needed. Inside a conversation both
+//    slide away to leave room for the reply box and the keyboard, and return when
+//    you go back.
 // Also: going back to the inbox on a phone stops marking that client's new messages
 // as read, and the Messages tab shows the unread count.
 // Client side: nothing changes (clients only ever see their one conversation).
@@ -183,6 +185,27 @@
             body.pis-msg-tabbed .admin-message-inbox { box-sizing: border-box; padding-bottom: var(--pis-msg-nav, 78px); }
             body.pis-msg-tabbed .pis-msg-compose { bottom: var(--pis-msg-nav, 78px); }
             body.pis-msg-tabbed .admin-message-close { display: none; }
+
+            /* ...under the app's own header, like every other tab (it slides away with the menu inside a conversation) */
+            body.pis-msg-tabbed.admin-messaging-open .admin-dashboard-header { z-index: 1150; transition: transform .2s ease; }
+            body.pis-msg-tabbed.admin-messaging-open.pis-msg-thread .admin-dashboard-header { transform: translateY(-110%); pointer-events: none; }
+            body.pis-msg-tabbed .admin-message-header { display: none; }
+            body.pis-msg-tabbed .admin-message-drawer { border: 0; box-shadow: none; background: linear-gradient(180deg, #f8fcfe 0%, #f1f7fa 100%); }
+            body.pis-msg-tabbed .admin-message-inbox { padding-top: var(--pis-msg-top, 123px); background: none; border: 0; }
+            body.pis-msg-tabbed .pis-msg-compose { top: var(--pis-msg-top, 123px); background: linear-gradient(180deg, #f8fcfe 0%, #f1f7fa 100%); }
+            body.pis-msg-tabbed .admin-message-conversation-header { padding-top: max(11px, env(safe-area-inset-top, 0px)); }
+            body.pis-msg-tabbed #admin-message-client-name { font-size: 16px; line-height: 20px; font-weight: 800; color: #13233a; }
+            body.pis-msg-tabbed #admin-message-client-meta { font-size: 12.5px; line-height: 16px; font-weight: 600; color: #5b6b80; }
+            /* the list is a card on the page, the way Clients is */
+            body.pis-msg-tabbed .pis-msg-on .admin-message-inbox-heading { padding: 16px 16px 10px !important; background: none; border: 0; }
+            body.pis-msg-tabbed .pis-msg-tabs { padding: 0 16px 10px; background: none; border: 0; }
+            body.pis-msg-tabbed .pis-msg-on .admin-conversation-list { padding: 2px 12px 18px; background: none; }
+            body.pis-msg-tabbed .pis-msg-card { background: #fff; border: 1px solid #dce5ef; border-radius: 18px; overflow: hidden; box-shadow: 0 6px 18px rgba(19, 35, 58, .05); }
+            body.pis-msg-tabbed .pis-msg-card > .pis-msg-row:last-child { border-bottom: 0; }
+            body.pis-msg-tabbed .pis-msg-compose-head { min-height: 56px; padding: 10px 16px 0; background: none; border: 0; }
+            body.pis-msg-tabbed .pis-msg-search { margin: 10px 12px 10px; }
+            body.pis-msg-tabbed .pis-msg-people { margin: 0 12px 14px; border: 1px solid #dce5ef; border-radius: 18px; box-shadow: 0 6px 18px rgba(19, 35, 58, .05); }
+            body.pis-msg-tabbed .pis-msg-person:last-child { border-bottom: 0; }
         }
         @media (min-width: 701px) {
             .admin-message-body.pis-msg-body { grid-template-columns: 300px minmax(0, 1fr); }
@@ -196,7 +219,7 @@
             .pis-msg-compose-close { width: 36px; height: 36px; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .pis-msg-compose, .pis-msg-row.is-leaving, .pis-msg-action svg, body.pis-msg-tabbed .admin-app-nav { transition: none !important; }
+            .pis-msg-compose, .pis-msg-row.is-leaving, .pis-msg-action svg, body.pis-msg-tabbed .admin-app-nav, body.pis-msg-tabbed .admin-dashboard-header { transition: none !important; }
         }
     `;
     document.head.appendChild(style);
@@ -440,7 +463,7 @@
                 list.innerHTML = `<div class="admin-message-empty pis-msg-empty"><strong>No messages yet</strong><span>Tap New Message to start a conversation with a client.</span></div>`;
                 return;
             }
-            list.innerHTML = shown.map(rowHtml).join('');
+            list.innerHTML = `<div class="pis-msg-card">${shown.map(rowHtml).join('')}</div>`;
             loadPhotos(list);
             if (!store.syncedAt) void sync(true);
         } catch (error) {
@@ -785,6 +808,7 @@
     const isOpen = () => document.body.classList.contains('admin-messaging-open');
     const tabbed = () => isPhone() && Boolean(menu());
     const messagesTab = () => menu()?.querySelector('[data-admin-screen="messages"]');
+    const topHeader = () => document.querySelector('.admin-dashboard-header');
     function syncTab() {
         const on = tabbed();
         const body = document.body;
@@ -793,7 +817,10 @@
         if (!on) return;
         const height = menu().offsetHeight;      // includes the phone's bottom safe area
         if (height) body.style.setProperty('--pis-msg-nav', `${height}px`);
+        const top = topHeader()?.offsetHeight;   // includes the status bar area
+        if (top) body.style.setProperty('--pis-msg-top', `${top}px`);
     }
+    if (window.ResizeObserver && topHeader()) new ResizeObserver(() => syncTab()).observe(topHeader());
     if (drawer()) new MutationObserver(syncTab).observe(drawer(), { attributes: true, attributeFilter: ['class'] });
     window.matchMedia('(max-width: 700px)').addEventListener?.('change', syncTab);
     window.addEventListener('resize', syncTab, { passive: true });

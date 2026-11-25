@@ -91,6 +91,8 @@
         .pis-live-tiles strong { display: block; max-width: 100%; font-size: 30px !important; line-height: 1.1 !important; font-weight: 800 !important;
             color: #183447 !important; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pis-live-tiles strong.is-word { font-size: 22px !important; }
+        .pis-live-tiles > span.is-wide { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; gap: 12px; padding: 10px 16px !important; font-size: 13.5px !important; }
+        .pis-live-tiles > span.is-wide strong { font-size: 22px !important; }
         .pis-live-meta { margin: 2px 0 0 !important; font-size: 14px !important; line-height: 1.4 !important; color: #41556b !important; font-weight: 500 !important; }
         .pis-live-meta.is-note { color: var(--live-label) !important; font-weight: 700 !important; }
         .pis-live > .admin-completed-visit-actions, .pis-live > button { margin-top: 12px !important; }
@@ -113,6 +115,7 @@
 
     function tileHtml(t) {
         const cls = [t.word ? 'is-word' : '', t.pending ? 'is-pending' : ''].filter(Boolean).join(' ');
+        if (t.wide) return `<span class="is-wide">${esc(t.label)}<strong${t.since ? ` data-pis-since="${esc(t.since)}"` : ''}>${esc(t.value)}</strong></span>`;
         return `<span>${esc(t.label)}<strong${t.id ? ` id="${esc(t.id)}"` : ''}${t.since ? ` data-pis-since="${esc(t.since)}"` : ''}${t.miles ? ` data-pis-miles="${esc(t.miles)}"` : ''}${t.count ? ` data-pis-count="${esc(t.count)}"` : ''}${cls ? ` class="${cls}"` : ''}>${esc(t.value)}</strong></span>`;
     }
 
@@ -379,11 +382,12 @@
             const ended = finishedWalks.get(Number(visit.id));
             if (ended) {
                 return card({
-                    kind, attrs, title: 'Walk Finished', paused: true,
+                    kind, attrs, title: 'Walk Finished · Visit In Progress',
                     tiles: [{ label: 'Walk Time', value: ended.duration_seconds ? clock(ended.duration_seconds) : since(ended.started_at) },
-                        { label: 'Distance', value: miles(ended.distance_meters) }],
+                        { label: 'Distance', value: miles(ended.distance_meters) },
+                        { label: 'Visit Time', value: since(checkedInAt), since: checkedInAt, wide: true }],
                     map: mapBox(ended.id, false),
-                    meta: [{ text: 'Your walker is wrapping up the visit.', note: true }]
+                    meta: [{ text: 'The visit is still going. Your walker is wrapping up.', note: true }]
                 });
             }
             lookForFinishedWalk(visit);

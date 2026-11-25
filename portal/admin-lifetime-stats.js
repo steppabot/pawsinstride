@@ -104,7 +104,8 @@
             visitMin += minutesOf(v);
             if (!drives(v)) continue;
             const r = rows.get(String(v.id));
-            if (r?.locked_at && Number.isFinite(Number(r.drive_seconds))) driveMin += Number(r.drive_seconds) / 60;
+            // the drive estimate kept for this stop (locked or not: see admin-financial-more.js)
+            if (r && r.drive_seconds !== null && r.drive_seconds !== undefined && Number.isFinite(Number(r.drive_seconds))) driveMin += Number(r.drive_seconds) / 60;
         }
         const boardingWalkMin = walks.filter(w => !w.visit_id && w.boarding_stay_id)
             .reduce((t, w) => t + (Number(w.duration_seconds) || 0) / 60, 0);
