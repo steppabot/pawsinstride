@@ -190,11 +190,10 @@
         body.pis-polish .admin-financial-card-label { display: block; font-size: 11px !important; font-weight: 800 !important; letter-spacing: .08em !important; text-transform: uppercase; color: #5b6b80 !important; }
         body.pis-polish .admin-financial-card-value { display: block; margin: 2px 0 0 !important; font-size: 21px !important; line-height: 27px !important; font-weight: 800 !important; color: #13233a !important; }
         body.pis-polish .admin-financial-card-detail { display: block; margin: 0 !important; font-size: 11.5px !important; line-height: 15px !important; font-weight: 600 !important; color: #627184 !important; }
-        body.pis-polish .admin-financial-card-featured { grid-column: 1 / -1; border-left: 0 !important; border-top: 1px solid #e4ebf3 !important; padding: 10px 14px !important; text-align: left;
-            display: grid !important; grid-template-columns: 1fr auto; column-gap: 12px; row-gap: 4px; align-items: center; }
-        body.pis-polish .admin-financial-card-featured .admin-financial-card-label { grid-column: 1; grid-row: 1; }
-        body.pis-polish .admin-financial-card-featured .admin-financial-card-value { grid-column: 2; grid-row: 1; margin: 0 !important; }
-        body.pis-polish .admin-financial-card-featured .admin-financial-card-detail { grid-column: 1 / -1; grid-row: 2; }
+        /* the third tile runs the full width and reads like the two above it: label, number, what went into it */
+        body.pis-polish .admin-financial-card.admin-financial-card-featured { grid-column: 1 / -1; border-left: 0 !important; border-top: 1px solid #e4ebf3 !important; padding: 13px 14px 14px !important;
+            text-align: center; display: block !important; }
+        body.pis-polish .admin-financial-card-featured .admin-financial-card-value { margin: 2px 0 3px !important; }
         body.pis-polish #admin-financial-snapshot > .pfin-open-btn { display: flex !important; align-items: center; justify-content: space-between; width: 100% !important; min-height: 48px !important; margin: 0 !important; padding: 0 14px !important;
             box-sizing: border-box; border: 0 !important; border-top: 1px solid #e4ebf3 !important; border-radius: 0 !important; background: #f8fbfe !important; color: #1b6fb3 !important; font-size: 14.5px !important; font-weight: 800 !important; box-shadow: none !important; }
 
