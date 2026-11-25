@@ -1,5 +1,5 @@
-/* Paws in Stride — photo viewer (admin side).
-   Load AFTER admin.js. Tapping a photo in pet sitting updates, boarding updates or a
+/* Paws in Stride — photo gallery viewer (admin portal and client dashboard).
+   Load AFTER admin.js / portal.js. Tapping a photo in pet sitting updates, boarding updates or a
    visit report preview opens it full screen in the app, the same way clients see
    photos, instead of opening a new window. Swipe or use the arrows to see the other
    photos from the same update. Close with ×, a tap outside the photo, or Escape. */
@@ -7,12 +7,12 @@
     'use strict';
 
     // Photo links that should open here instead of a new window.
-    const LINKS = '.boarding-photo-grid a[href], .admin-preview-photo a[href]';
+    const LINKS = '.boarding-photo-grid a[href], .admin-preview-photo a[href], .client-boarding-photo-grid a[href]';
     let viewer = null;
 
     // The other photos shown alongside this one (same update or same report).
     function groupFor(link) {
-        const grid = link.closest('.boarding-photo-grid');
+        const grid = link.closest('.boarding-photo-grid, .client-boarding-photo-grid');
         if (grid) return [...grid.querySelectorAll('a[href]')];
         const figure = link.closest('.admin-preview-photo');
         const box = figure?.parentElement;
@@ -129,6 +129,7 @@
     }, true);
 
     window.openAdminPhotoViewer = open;
+    window.PisPhotoGallery = { open };
 
     const style = document.createElement('style');
     style.textContent = `

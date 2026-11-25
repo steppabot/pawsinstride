@@ -25065,3 +25065,44 @@ html.iphone-login body.portal-login-page .pis-faceid-login { margin-bottom: 12px
         padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 34px);
     }
 }
+
+/* ========================================
+   BOARDING: TODAY'S WALKS LIST + VIEW BOARDING UPDATES
+   ======================================== */
+.admin-boarding-walk-list .boarding-walk-history { margin-top: 4px; }
+.boarding-walk-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 0;
+    border-top: 1px solid #dce9f2;
+}
+.boarding-walk-row:first-child { border-top: 0; padding-top: 4px; }
+.boarding-walk-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.boarding-walk-row-main strong { font-size: 16px; color: #183447; }
+.boarding-walk-row-main span { font-size: 14px; color: #46617d; }
+.boarding-walk-row .boarding-walk-route-button {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 38px;
+    margin: 0 !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    border-radius: 10px;
+}
+.boarding-walk-row .boarding-walk-map { flex-basis: 100%; }
+.boarding-walk-empty { color: #5c7286; margin: 0; }
+.boarding-viewer-dialog .boarding-viewer-day { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+.boarding-viewer-dialog .boarding-viewer-day + .boarding-viewer-day { margin-top: 22px; }
+.boarding-viewer-dialog .boarding-viewer-day h3 {
+    margin: 0 0 2px;
+    font-size: 13px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #c0610c;
+}
+.boarding-viewer-dialog .boarding-saved-update { padding: 12px 0; font-size: 14px; }
+.boarding-viewer-dialog .boarding-saved-update p { margin: 6px 0 0; }
+.boarding-viewer-dialog .boarding-photo-grid:empty { display: none; }
+.boarding-viewer-empty { color: #5c7286; }

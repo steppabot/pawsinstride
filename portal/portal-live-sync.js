@@ -174,9 +174,15 @@
             if (c.stillCurrent() && activeAdminConversationId) await loadActiveAdminMessages();
         });
         on('admin boarding history', ['boarding_updates', 'boarding_update_photos', 'boarding_update_pet_care'], async c => {
+            if (sync.deferVisible('dialog.pis-photo-viewer[open]', 'boarding_updates')) return;   // wait until the photo gallery closes
             if (typeof adminBoardingEditor !== 'undefined' && adminBoardingEditor && !adminBoardingEditor.busy) {
                 await c.preserveScroll(adminBoardingEditor.dialog.querySelector('.boarding-editor-body'),
                     () => loadAdminBoardingUpdateHistory(adminBoardingEditor));
+            }
+            if (c.stillCurrent() && typeof adminBoardingViewer !== 'undefined' && adminBoardingViewer) {
+                const viewer = adminBoardingViewer;
+                await c.preserveScroll(viewer.dialog.querySelector('.boarding-editor-body'),
+                    () => loadAdminBoardingViewer(viewer));
             }
         });
         on('admin sitting history', ['visit_updates', 'visit_update_photos', 'visit_update_pet_care'], async () => {
@@ -235,7 +241,7 @@
         });
         on('client boarding updates', ['boarding_stays', 'boarding_updates', 'boarding_update_photos', 'boarding_update_pet_care', 'visit_walks'], async c => {
             await loadClientBoardingData(true);
-            if (!c.stillCurrent() || sync.deferVisible('.client-report-lightbox-visible', 'boarding_updates')) return;
+            if (!c.stillCurrent() || sync.deferVisible('.client-report-lightbox-visible, dialog.pis-photo-viewer[open]', 'boarding_updates')) return;
             const state = clientBoardingViewer;
             if (!state || state.busy || state.walkBusy) return;
             const current = clientBoardingData.stays.find(s => s.id === state.stay.id);
