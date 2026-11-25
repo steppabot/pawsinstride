@@ -33,6 +33,11 @@ const MAX_VISIT_MEDIA_SIZE =
 const MAX_PHOTO_SIZE =
     5 * 1024 * 1024;
 
+// A picked photo is cropped to a small square before it is saved (photo-cover.js), so its own size
+// does not matter. Only something far bigger than any phone photo is turned away, because the
+// phone could not open it.
+const MAX_PHOTO_ORIGINAL_SIZE = 40 * 1024 * 1024;
+
 
 const ALLOWED_PHOTO_TYPES = [
 
@@ -2518,6 +2523,11 @@ async function openAdminProfileForm() {
 // ========================================
 
 function closeAdminProfileForm() {
+    // Leave nothing behind: no red boxes for next time, and no old message for another screen to show.
+    const profileFormToTidy = document.getElementById("admin-profile-form");
+    if (profileFormToTidy) window.PisFormErrors?.clearAll?.(profileFormToTidy);
+    const profileMessageToTidy = document.getElementById("admin-profile-message");
+    if (profileMessageToTidy) profileMessageToTidy.textContent = "";
 
 
     pendingAdminPhotoFile =
@@ -2691,13 +2701,13 @@ document.getElementById(
 
         if (
             file.size >
-            MAX_PHOTO_SIZE
+            MAX_PHOTO_ORIGINAL_SIZE
         ) {
 
 
             event.target.value = "";
             pendingAdminPhotoFile = null;
-            message.textContent = "That photo is larger than 5 MB. Choose a smaller one.";
+            message.textContent = "That photo is too large to open here. Choose a different one.";
             window.PisFormErrors?.fromPageMessage(event.target);
             return;
 
@@ -2715,6 +2725,13 @@ document.getElementById(
         }
         if (!cropped) {
             event.target.value = "";
+            return;
+        }
+        // Normally this is a small square by now. If the photo could not be shrunk at all, a big one stops here.
+        if (cropped.size > MAX_PHOTO_SIZE) {
+            event.target.value = "";
+            message.textContent = "We couldn't shrink that photo. Choose a different one.";
+            window.PisFormErrors?.fromPageMessage(event.target);
             return;
         }
 
@@ -2818,6 +2835,17 @@ document.getElementById(
                 window.PisFormErrors?.fromPageMessage(phoneBox);
                 return;
             }
+        }
+        // ZIP code: blank is fine too, but "75" or letters would break the route's starting point
+        const zipBox = document.getElementById("admin-zip");
+        const zipText = String(zipBox?.value || "").trim();
+        if (zipBox && zipText && !/^\d{5}(-\d{4})?$/.test(zipText)) {
+            message.textContent = "Enter a 5-digit ZIP code, or leave it blank.";
+            const note = window.PisFormErrors?.fromPageMessage(zipBox);
+            // ZIP shares its row with State: the message goes under the pair, not squeezed under one
+            const cell = zipBox.closest(".household-form-field");
+            if (note && cell?.parentElement?.classList.contains("household-form-grid")) cell.insertAdjacentElement("afterend", note);
+            return;
         }
 
 
@@ -21158,7 +21186,7 @@ function renderAdminFinancialSnapshot() {
         completed.length ? `${formatAdminFinancialCurrency(visitRevenue)} completed revenue` : '',
         outside.length ? `${formatAdminFinancialCurrency(outsideRevenue)} outside income` : ''
     ].filter(Boolean).join(' + ');
-    const timeText = [
+    const timeParts = [
         [
             worked.length ? `${formatAdminFinancialTime(visitMinutes)} visits` +
                 (estimatedMinutes ? ` (${formatAdminFinancialTime(estimatedMinutes)} estimated)` : '') : '',
@@ -21166,20 +21194,49 @@ function renderAdminFinancialSnapshot() {
         ].filter(Boolean).join(' + '),
         reached.length && unknownLegs < reached.length ? `${formatAdminFinancialTime(driveSeconds / 60)} estimated driving` : '',
         unknownLegs ? `drive time left out for ${unknownLegs} ${unknownLegs === 1 ? 'stop' : 'stops'}` : ''
-    ].filter(Boolean).join(' • ');
+    ].filter(Boolean);
     if (!worked.length && !outside.length) {
         rateElement.textContent = '—';
-        detailElement.textContent = 'Your hourly rate will appear after completing a visit.';
+        setAdminFinancialDetail(detailElement, ['Your hourly rate will appear after completing a visit.']);
     } else if (unknownLegs && !cache.ready && !cache.error) {
         rateElement.textContent = '—';
-        detailElement.textContent = 'Loading saved driving time…';
+        setAdminFinancialDetail(detailElement, ['Loading saved driving time…']);
     } else if ((!completed.length && !outside.length) || totalMinutes <= 0) {
         rateElement.textContent = '—';
-        detailElement.textContent = `${timeText} • First visit in progress`;
+        setAdminFinancialDetail(detailElement, [...timeParts, 'First visit in progress']);
     } else {
         rateElement.textContent = `${formatAdminFinancialCurrency(earned / (totalMinutes / 60))}/hr`;
-        detailElement.textContent = `${moneyText} • ${timeText}`;
+        setAdminFinancialDetail(detailElement, [moneyText, ...timeParts]);
     }
+}
+// The line under the hourly rate, one piece at a time: the money, the time, the driving. Each piece
+// is its own element so a phone can give each its own line (admin-polish.js) and a wide screen
+// can keep them on one line with dots between. A piece that adds two things ("$76 completed
+// revenue + $293 outside income") only ever breaks at the plus sign.
+function setAdminFinancialDetail(element, parts) {
+    const list = parts.filter(Boolean);
+    const text = list.join(' • ');
+    if (element.textContent === text && (list.length < 2 || element.querySelector('.pis-rate-part'))) return;
+    const nodes = [];
+    list.forEach((part, index) => {
+        if (index) {
+            const dot = document.createElement('span');
+            dot.className = 'pis-rate-dot';
+            dot.textContent = ' • ';
+            nodes.push(dot);
+        }
+        const piece = document.createElement('span');
+        piece.className = 'pis-rate-part';
+        part.split(' + ').forEach((term, termIndex) => {
+            const item = document.createElement('span');
+            item.className = 'pis-rate-term';
+            item.textContent = termIndex ? `+ ${term}` : term;
+            if (termIndex) piece.append(' ');
+            piece.append(item);
+        });
+        nodes.push(piece);
+    });
+    element.replaceChildren(...nodes);
 }
 // Refresh the rate while Home is visible, including after returning from Maps.
 window.addEventListener('focus', () => {
@@ -27922,7 +27979,7 @@ function renderAdminPricingCards() {
                             data-pricing-action="save"
                             hidden
                         >
-                            Save changes
+                            Save Changes
                         </button>
                     </div>
                 </article>
@@ -28058,6 +28115,7 @@ function setAdminPricingEditing(card, editing) {
 
         if (!editing) {
             input.value = input.dataset.original;
+            window.PisFormErrors?.clear?.(input);      // Cancel takes any "check this" message with it
         }
     });
 
@@ -28116,8 +28174,13 @@ async function saveAdminPricingCard(
             value < 0
         ) {
             message.textContent = "Enter a valid dollar amount with at most two decimal places.";
-                if (window.PisFormErrors) window.PisFormErrors.fromPageMessage(input);
-                else input.focus();
+                if (window.PisFormErrors) {
+                    // A price box is too narrow to hold a sentence: the box gets the red outline and
+                    // the message goes under the whole row of boxes.
+                    const note = window.PisFormErrors.fromPageMessage(input);
+                    const row = input.closest(".admin-service-pricing-rates, .admin-pricing-v2-fee-grid");
+                    if (note && row) row.insertAdjacentElement("afterend", note);
+                } else input.focus();
                 return;
         }
 

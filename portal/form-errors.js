@@ -210,8 +210,10 @@
 
     // Take the text out of the page's own message box and show it at the box instead
     function moveMessage(field) {
-        const scope = field.closest('form, section, dialog, main') || document;
-        const box = [...scope.querySelectorAll(MESSAGE_BOXES)].find(el => el.textContent.trim())
+        // Look in the box's own form or window first. Outside of one, only a message that is on screen
+        // counts: an old message left in a closed form must never show up under some other screen's box.
+        const scope = field.closest('form, section, dialog, main');
+        const box = (scope ? [...scope.querySelectorAll(MESSAGE_BOXES)].find(el => el.textContent.trim()) : null)
             || [...document.querySelectorAll(MESSAGE_BOXES)].find(el => el.textContent.trim() && visible(el));
         const text = box ? box.textContent.trim() : '';
         if (box) {
@@ -498,6 +500,10 @@
             outline-offset: 4px;
             border-radius: 14px;
         }
+        /* photo pickers: the button itself gets the red line and a soft glow, not a box around the whole area */
+        .client-photo-controls.pis-field-invalid, .pet-photo-controls.pis-field-invalid { outline: 0 !important; }
+        .client-photo-controls.pis-field-invalid .client-photo-upload-button,
+        .pet-photo-controls.pis-field-invalid .pet-photo-upload-button { box-shadow: 0 0 0 1.5px #d94f4f, 0 0 0 5px rgba(217, 79, 79, .16) !important; }
         .pis-field-note {
             display: flex;
             align-items: flex-start;

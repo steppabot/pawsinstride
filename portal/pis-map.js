@@ -212,14 +212,46 @@
         return api;
     }
 
-    function fit(map, path, padding = 30) {
+    const FIT_MAX_ZOOM = 18;      // as close as a route view goes by itself (pinching in still goes closer)
+    const boxSize = map => { const div = map.getDiv?.(); return div ? [div.clientWidth, div.clientHeight] : [0, 0]; };
+    // has the box changed size since the map was last fitted to it? (a pixel or two doesn't count)
+    const resized = map => { const [w, h] = boxSize(map), was = map.__pisFitSize; return !was || Math.abs(w - was[0]) > 24 || Math.abs(h - was[1]) > 24; };
+
+    function fit(map, path, padding = 30, maxZoom = FIT_MAX_ZOOM) {
         const points = Array.isArray(path) ? path : path?.getArray?.() || [];
         if (!points.length) return;
-        if (points.length === 1) { map.setCenter(points[0]); map.setZoom(17); return; }
+        map.__pisFitSize = boxSize(map);
+        if (points.length === 1) { map.setCenter(points[0]); if (map.getZoom?.() !== 17) map.setZoom(17); return; }
         const bounds = new google.maps.LatLngBounds();
         points.forEach(p => bounds.extend(p));
+        // A short route used to zoom all the way in and then back out to a sensible distance, and on a live
+        // walk that happened on every update: the map looked like it was jumping in and out. The zoom is
+        // capped while fitting, so the map goes straight to where it will rest; the cap comes off once it
+        // has settled, so pinching in closer still works.
+        if (!('__pisZoomCap' in map)) map.__pisZoomCap = map.get?.('maxZoom') ?? null;
+        map.setOptions({ maxZoom });
         map.fitBounds(bounds, padding);
-        google.maps.event.addListenerOnce(map, 'idle', () => { if (map.getZoom() > 18) map.setZoom(18); });
+        const lift = () => {
+            if (!('__pisZoomCap' in map)) return;
+            const cap = map.__pisZoomCap;
+            delete map.__pisZoomCap;
+            map.setOptions({ maxZoom: cap });
+        };
+        google.maps.event.addListenerOnce(map, 'idle', lift);
+        clearTimeout(map.__pisCapTimer);
+        map.__pisCapTimer = setTimeout(lift, 3000);       // in case the map never says it has settled
+    }
+
+    // Are any of these points outside the middle of what the map is showing (or about to walk off it)?
+    function leaving(map, points) {
+        if (!points.length) return false;
+        const view = map.getBounds?.();
+        if (!view) return true;
+        const ne = view.getNorthEast(), sw = view.getSouthWest();
+        const [w, h] = boxSize(map);
+        const EDGE = 30;                                  // px; less than the room a fit leaves around the route
+        const padLat = (ne.lat() - sw.lat()) * Math.min(0.3, EDGE / (h || 1)), padLng = (ne.lng() - sw.lng()) * Math.min(0.3, EDGE / (w || 1));
+        return points.some(p => p.lat() > ne.lat() - padLat || p.lat() < sw.lat() + padLat || p.lng() > ne.lng() - padLng || p.lng() < sw.lng() + padLng);
     }
 
     // A whole walk on one map: home marker, route, end dot (or live dot).
@@ -229,6 +261,18 @@
         const map = create(element, extra);
         const line = route(map, path, { live });
         fit(map, path);
+        if (window.ResizeObserver) {
+            // drawn before its box was on screen, or the box changed size: fit again (unless they moved the map)
+            let moved = false;
+            map.addListener?.('dragstart', () => { moved = true; });
+            element.__pisWatcher?.disconnect();          // the same spot drawn again: one watcher, for the newest map
+            const watcher = element.__pisWatcher = new ResizeObserver(() => {
+                if (!element.isConnected) { watcher.disconnect(); return; }
+                if (moved || !element.clientWidth || !resized(map)) return;
+                fit(map, line.path());
+            });
+            watcher.observe(element);
+        }
         return { map, route: line };
     }
 
@@ -322,17 +366,41 @@
             state.map = create(canvas, { disableDefaultUI: true, fullscreenControl: true });
             state.route = route(state.map, [], { live: state.live });
             state.route.add(state.path);
-            state.map.addListener('dragstart', () => { state.moved = true; });
+            // once they move or zoom the map themselves, it stays where they put it
+            const theirs = () => { state.moved = true; };
+            // (one finger and a plain mouse wheel scroll the page, so those don't count)
+            state.map.addListener('dragstart', theirs);
+            state.map.addListener('dblclick', theirs);
+            const early = { passive: true, capture: true };
+            canvas.addEventListener('wheel', event => { if (event.ctrlKey || event.metaKey || document.fullscreenElement) theirs(); }, early);
+            canvas.addEventListener('touchstart', event => { if (event.touches.length > 1) theirs(); }, early);
         } else {
             restyle(state.map);
         }
         state.box.classList.toggle('is-night', Boolean(state.map.__pisNight));
         message(state, '');
-        if (!state.moved) fit(state.map, state.route.path());
+        if (!state.moved) follow(state);
     }
 
-    async function load(state) {
-        if (state.busy) return;
+    // Keep the walk in the picture without the map jumping about: fit it once, then leave the map alone
+    // until the walker nears the edge (or the box changes size). During a live walk the map then only
+    // slides or zooms out, never back in; the finished walk gets one last fit of the whole route.
+    function follow(state, noNewPoints = false) {
+        if (!state.map || !state.route) return;           // the map didn't finish drawing: nothing to move
+        const path = state.route.path();
+        const fresh = noNewPoints ? [] : path.slice(state.seen || 0);
+        if (!noNewPoints) state.seen = path.length;
+        const [w, h] = boxSize(state.map);
+        if (!w || !h) return;                             // not on screen yet
+        const again = !state.fitted || resized(state.map);     // first time here, or a different size of box: a fresh fit
+        if (!again && !leaving(state.map, fresh)) return;
+        const closest = !again && state.live ? Math.min(FIT_MAX_ZOOM, state.map.getZoom() || FIT_MAX_ZOOM) : FIT_MAX_ZOOM;
+        fit(state.map, path, state.live ? 44 : 30, closest);
+        state.fitted = true;
+    }
+
+    async function load(state, afterThis = false) {
+        if (state.busy) { if (afterThis) state.again = true; return; }   // afterThis: don't skip it, run it next
         state.busy = true;
         try {
             const seeded = seeds.get(state.id);
@@ -343,7 +411,10 @@
         } catch (error) {
             console.warn('Walk map:', error);
             if (!state.map) message(state, "The map couldn't load right now.");
-        } finally { state.busy = false; }
+        } finally {
+            state.busy = false;
+            if (state.again) { state.again = false; void load(state); }
+        }
     }
 
     function stopPolling(state) { clearInterval(state.timer); state.timer = null; }
@@ -394,13 +465,17 @@
             if (state.live && !live) {
                 // walk just finished: last points, then the finished look
                 state.live = false;
+                state.fitted = false;                    // one last fit, of the whole route
                 stopPolling(state);
                 state.route?.setLive(false);
-                void load(state);
+                void load(state, true);
             }
             state.box.dataset.pisMapLive = state.live ? '1' : '0';
             if (state.live && state.box.isConnected) startPolling(state);
             if (state.map && shown(state.box) && restyle(state.map)) state.box.classList.toggle('is-night', state.map.__pisNight);
+            // the same map shows on Home and on the visit screen, in boxes of different sizes
+            // (and a map first drawn while its screen was closed gets its fit here)
+            if (state.map && state.route && !state.moved && shown(state.box)) follow(state, true);
         });
         // keep a few maps for coming back; drop the oldest ones not on the page
         const off = [...boxes.values()].filter(s => !s.box.isConnected);

@@ -425,7 +425,9 @@
         else if (!rows.length && state === 'idle') note = 'Loading…';
         else if (!rows.length && state === 'error') note = 'Couldn’t load outside income. Close and reopen Financials to try again.';
         else if (!rows.length) note = 'Paid for visits outside the app? Add them here so they count in your totals.';
-        else note = `This month · each day counts as earned once it’s over${state === 'error' ? ' · showing the copy saved on this phone' : ''}`;
+        else note = '';     // the usual line, built below so it can only break at the dot
+        const usual = `<span class="pfin-piece">This Month</span> · <span class="pfin-piece">Each day counted when complete</span>`
+            + (state === 'error' ? '<span class="pfin-line">Showing the copy saved on this phone</span>' : '');
 
         const items = rows.map(r => {
             const off = r.skipped_dates.length;
@@ -446,7 +448,7 @@
                 <span class="pfin-label">Outside Income</span>
                 ${rows.length ? `<strong class="pfin-value">${money(month)}</strong>` : ''}
             </div>
-            <span class="pfin-note">${esc(note)}</span>
+            <span class="pfin-note">${note ? esc(note) : usual}</span>
             ${items ? `<div class="poi-list">${items}</div>` : ''}
             ${state === 'missing' ? '' : '<button type="button" class="poi-add" data-poi-add>+ Add Outside Income</button>'}
         </section>`;

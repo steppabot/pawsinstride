@@ -181,7 +181,8 @@
             </div>
             ${items}
             ${draft.messages.length < MAX_MESSAGES ? '<button type="button" class="psb-add" data-psb-add>+ Add Another Message</button>' : ''}
-            <p class="psb-note" role="status">${esc(note || '')}</p>`;
+            <p class="psb-note" role="status"${note ? ' data-pis-tone="error"' : ''}>${esc(note || '')}</p>`;
+        if (note) body.querySelector('.psb-note')?.scrollIntoView({ block: 'center' });
     }
 
     function onInput(e) {
@@ -219,18 +220,29 @@
         if (t.closest('[data-psb-save]')) await save();
     }
 
+    // What is wrong, and which box it is about, so the message can sit under that box
+    // like everywhere else in the app (form-errors.js).
     function problem() {
         for (const [i, m] of draft.messages.entries()) {
-            if (!m.text.trim() && (m.link_url.trim() || m.link_text.trim())) return `Message ${i + 1} has a link but no text.`;
-            if (m.link_url.trim() && !safeLink(m.link_url)) return `Message ${i + 1}: links must start with / (a page on your site) or https://`;
+            if (!m.text.trim() && (m.link_url.trim() || m.link_text.trim())) return { index: i, field: 'text', text: 'Add the words for this message, or remove its button and link.' };
+            if (m.link_url.trim() && !safeLink(m.link_url)) return { index: i, field: 'link_url', text: 'Start the link with / (a page on your site) or https://' };
         }
-        if (draft.active && !draft.messages.some(m => m.text.trim())) return 'Add a message, or turn the banner off.';
-        return '';
+        if (draft.active && !draft.messages.some(m => m.text.trim())) return { index: 0, field: 'text', text: 'Add a message, or turn the banner off.' };
+        return null;
+    }
+    function showProblem(issue) {
+        render();
+        const box = document.querySelector(`#psb-editor .psb-msg[data-index="${issue.index}"] [data-field="${issue.field}"]`);
+        if (!box || !window.PisFormErrors?.show) { render(issue.text); return; }
+        const note = window.PisFormErrors.show(box, issue.text);
+        // Button Text and Link share a row: the message goes under the pair, not squeezed under one
+        const row = box.closest('.psb-row');
+        if (note && row) row.insertAdjacentElement('afterend', note);
     }
 
     async function save() {
         const issue = problem();
-        if (issue) { render(issue); return; }
+        if (issue) { showProblem(issue); return; }
         busy = true;
         const button = document.querySelector('#psb-editor [data-psb-save]');
         if (button) { button.disabled = true; button.textContent = 'Saving…'; }

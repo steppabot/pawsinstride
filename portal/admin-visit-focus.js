@@ -12,6 +12,13 @@
    - View Client Report-> preview opens in the popup, X closes it
    - Reopen Visit      -> popup opens again and the timer resumes
 
+   On phones an open report (the form or the client's view)
+   fills the popup: one header with the pets' names, and its
+   button is a Back arrow. Back returns to where the report
+   was opened from: the visit, or the schedule when Add Report
+   was tapped in the list. Wider screens keep the report as a
+   panel with its own X.
+
    The schedule list shows each visit as a compact row
    (time, service, client and pet, status, one button), and
    the popup adds Call / Text / Navigate buttons and pins the
@@ -256,6 +263,36 @@
    }
    .vfm .vfm-close svg { display: block; width: 20px; height: 20px; }
    .vfm-hidden { display: none !important; }
+   .vfm .vfm-close .vfm-icon-back { display: none; }
+   /* ----- phones: a report fills the screen. One header, and its button is Back to the visit ----- */
+   @media (max-width: 700px) {
+    .vfm[data-report] .vfm-header { justify-content: flex-start; }
+    .vfm[data-report] .vfm-header .vfm-kind-icon { display: none !important; }
+    .vfm[data-report] .vfm-header .vfm-close { order: -1; }
+    .vfm[data-report] .vfm-close .vfm-icon-x { display: none; }
+    .vfm[data-report] .vfm-close .vfm-icon-back { display: block; width: 22px; height: 22px; margin-left: -2px; }
+    .vfm[data-report] .vfm-title { font-size: 19px; line-height: 24px; font-weight: 800; }
+    .vfm[data-report] .vfm-body { padding: 14px 14px calc(env(safe-area-inset-bottom, 0px) + 24px); }
+    .vfm[data-report] .vfm-body > .admin-service-card { overflow: visible !important; border-radius: 0 !important; }
+    .vfm[data-report] .vfm-body .admin-visit-report-mount { margin: 0 !important; }
+    /* the client's view */
+    .vfm[data-report] .vfm-body .admin-client-report-preview { margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; overflow: visible !important; }
+    .vfm[data-report] .vfm-body .admin-preview-header { display: none !important; }
+    .vfm[data-report] .vfm-body .admin-preview-body { display: flex !important; flex-direction: column; gap: 12px !important; margin: 0 !important; padding: 0 !important; background: none !important; }
+    .vfm[data-report] .vfm-body .admin-preview-times,
+    .vfm[data-report] .vfm-body .admin-preview-section { margin: 0 !important; padding: 14px !important; box-sizing: border-box; background: #fff !important; border: 1px solid #dce5ef !important; border-radius: 18px !important;
+     box-shadow: 0 6px 18px rgba(19, 35, 58, .05) !important; }
+    .vfm[data-report] .vfm-body .admin-preview-times { padding: 12px 6px !important; }
+    .vfm[data-report] .vfm-body .admin-preview-title { margin: 0 0 10px !important; font-size: 11.5px !important; line-height: 16px !important; font-weight: 800 !important; letter-spacing: .1em !important; text-transform: uppercase; color: #5b6b80 !important; }
+    .vfm[data-report] .vfm-body .admin-preview-section-heading { display: flex !important; align-items: baseline !important; justify-content: space-between !important; gap: 10px; margin: 0 0 10px !important; padding: 0 !important; }
+    .vfm[data-report] .vfm-body .admin-preview-section-heading .admin-preview-title { margin: 0 !important; }
+    .vfm[data-report] .vfm-body .admin-preview-notes { margin: 0 !important; }
+    .vfm[data-report] .vfm-body .admin-preview-section > :last-child { margin-bottom: 0 !important; }
+    /* the report form */
+    .vfm[data-report] .vfm-body .admin-visit-report-form { margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+    .vfm[data-report] .vfm-body .admin-visit-report-header { display: none !important; }
+    .vfm[data-report] .vfm-body .admin-visit-report-main > .admin-visit-report-section:first-child { padding-top: 2px !important; }
+   }
    .vfm-body.vfm-report-mode > .admin-service-card {
     padding: 0; border: 0; background: transparent; box-shadow: none;
    }
@@ -477,7 +514,8 @@
       <span class="vfm-timer"></span>
      </div>
      <button type="button" class="vfm-close" aria-label="Close">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      <svg class="vfm-icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      <svg class="vfm-icon-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
      </button>
     </header>
     <div class="vfm-body"></div>
@@ -533,6 +571,7 @@
 
   reportModeActive = null;
   body.classList.remove('vfm-report-mode');
+  delete modal.dataset.report;
   const card = body.querySelector('.admin-service-card');
   card?.querySelectorAll('.vfm-open-visit-button').forEach(button => button.remove());
   if (card) decoratePopup(visit, card);
@@ -638,6 +677,12 @@
  // ---------- 3b. Report view: show only the report inside the popup ----------
  let reportModeActive = null;
 
+ // Phones: an open report fills the screen and the header button is Back. Back returns to where
+ // the report was opened from: the visit, or the schedule when Add Report was tapped in the list.
+ // Wider screens keep the report as a panel with its own X, as before.
+ const phoneReport = () => Boolean(reportModeActive) && window.matchMedia('(max-width: 700px)').matches;
+ let reportFromVisit = false;
+
  function applyReportMode() {
   if (!body || !focusedVisitId) return;
   decoratePreview();
@@ -657,6 +702,7 @@
 
   body.querySelectorAll('.vfm-hidden').forEach(el => el.classList.remove('vfm-hidden'));
   body.classList.toggle('vfm-report-mode', Boolean(mode));
+  if (mode) modal.dataset.report = mode; else { delete modal.dataset.report; body.scrollTop = 0; }
 
   if (mode) {
    // Hide everything in the card except the path down to the report.
@@ -683,7 +729,9 @@
    reportModeActive === 'edit' ? 'VISIT REPORT' :
    reportModeActive === 'preview' ? 'CLIENT REPORT' :
    isBoarding(visit) ? 'BOARDING STAY' : 'CURRENT VISIT';
-  titleEl.textContent = serviceName;
+  const inReport = phoneReport();
+  titleEl.textContent = inReport ? (petNamesOf(visit).join(' & ') || serviceName) : serviceName;
+  modal.querySelector('.vfm-close')?.setAttribute('aria-label', inReport ? (reportFromVisit ? 'Back to visit' : 'Back') : 'Close');
   const kind = isBoarding(visit) ? 'boarding' : serviceKind(visit);
   if (modal.dataset.kind !== kind) {
    modal.dataset.kind = kind;
@@ -734,6 +782,9 @@
   if (p.state === 'checked_in' && visit.checked_in_at) {
    timerEl.textContent = `Visit time ${formatClock((Date.now() - Date.parse(visit.checked_in_at)) / 1000)}`;
    timerEl.classList.add('is-live');
+  } else if (p.state === 'completed' && phoneReport()) {
+   // the pets are the title while a report is open, so this line says which service it was
+   timerEl.textContent = shortService(visit);
   } else if (p.state === 'completed') {
    const minutes = p.minutes ?? (typeof getVisitDurationMinutes === 'function' ? getVisitDurationMinutes(visit) : null);
    timerEl.textContent = minutes != null ? `Completed · ${minutes} min` : 'Completed';
@@ -782,6 +833,8 @@
   focusedVisitId = null;
   reportModeActive = null;
   body.classList.remove('vfm-report-mode');
+  delete modal.dataset.report;
+  reportFromVisit = false;
   clearInterval(timerHandle);
   try { window.PisMotion?.visitClosing?.(modal); } catch { /* ignore */ }   // slide out (native-motion.js)
   modal.hidden = true;
@@ -807,13 +860,14 @@
 
  let askingClose = false;
 
- function askCloseReport() {
+ function askCloseReport(goingBack = false) {
   if (typeof confirmAdminChoice === 'function') {
    return confirmAdminChoice({
-    title: 'Close without saving?',
+    title: goingBack ? 'Go back without saving?' : 'Close without saving?',
     context: ['Visit report', "What you've typed will be lost."],
-    message: 'Keep editing to finish the report, or close and lose your changes.',
-    confirmText: 'Close Without Saving',
+    message: goingBack ? 'Keep editing to finish the report, or go back and lose your changes.'
+     : 'Keep editing to finish the report, or close and lose your changes.',
+    confirmText: goingBack ? 'Discard Changes' : 'Close Without Saving',
     cancelText: 'Keep Editing',
     caution: true
    });
@@ -823,6 +877,10 @@
 
  async function requestClose({ fromHistory = false } = {}) {
   if (!focusedVisitId) return;
+  // Phones: with a report open this is Back. Opened from the visit, it leaves the report and
+  // stays on the visit; opened straight from the schedule, it goes back there (closes, as before).
+  const goingBack = phoneReport();
+  const backToVisit = goingBack && reportFromVisit;
   const editingReport =
    typeof activeVisitReportVisitId !== 'undefined' &&
    Number(activeVisitReportVisitId) === Number(focusedVisitId) &&
@@ -839,9 +897,22 @@
    askingClose = true;
    const askedFor = focusedVisitId;
    let leave = false;
-   try { leave = await askCloseReport(); } finally { askingClose = false; }
+   try { leave = await askCloseReport(goingBack); } finally { askingClose = false; }
    if (!leave || focusedVisitId !== askedFor) return;
    fromHistory = false;
+  }
+
+  if (backToVisit) {
+   // the back button already left this screen's history entry: put it back, the visit stays open
+   if (fromHistory) { try { history.pushState({ vfm: focusedVisitId }, ''); historyPushed = true; } catch { /* ignore */ } }
+   try {
+    if (typeof activeVisitReportVisitId !== 'undefined' && Number(activeVisitReportVisitId) === Number(focusedVisitId)) {
+     closeAdminVisitReport();
+    }
+   } catch { /* ignore */ }
+   applyReportMode();
+   tick();
+   return;
   }
 
   try {
@@ -1095,8 +1166,12 @@
   wrapAsync('reopenVisit', null, (_r, visitId) => { openFocus(visitId); });
 
   // Reports open inside the popup.
-  wrapAsync('openAdminVisitReport', visitId => { openFocus(visitId); }, () => { applyReportMode(); });
-  wrapAsync('openAdminClientVisitReportPreview', visitId => { openFocus(visitId); }, () => { applyReportMode(); });
+  const openReportInPopup = visitId => {
+   if (!reportModeActive) reportFromVisit = Boolean(modal) && !modal.hidden && Number(focusedVisitId) === Number(visitId);
+   openFocus(visitId);
+  };
+  wrapAsync('openAdminVisitReport', openReportInPopup, () => { applyReportMode(); });
+  wrapAsync('openAdminClientVisitReportPreview', openReportInPopup, () => { applyReportMode(); });
 
   // Saving the report closes the popup.
   wrapAsync('saveAdminVisitReport', null, () => {

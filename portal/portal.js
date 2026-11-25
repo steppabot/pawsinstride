@@ -66,6 +66,11 @@ const VISIT_MEDIA_BUCKET =
 const MAX_PHOTO_SIZE =
     5 * 1024 * 1024;
 
+// A picked photo is cropped to a small square before it is saved (photo-cover.js), so its own size
+// does not matter. Only something far bigger than any phone photo is turned away, because the
+// phone could not open it.
+const MAX_PHOTO_ORIGINAL_SIZE = 40 * 1024 * 1024;
+
 const ALLOWED_PHOTO_TYPES = [
     "image/jpeg",
     "image/png",
@@ -4030,12 +4035,12 @@ if (clientPhotoInput) {
 
             if (
                 file.size >
-                MAX_PHOTO_SIZE
+                MAX_PHOTO_ORIGINAL_SIZE
             ) {
 
                 clientPhotoInput.value = "";
             pendingClientPhotoFile = null;
-            message.textContent = "That photo is larger than 5 MB. Choose a smaller one.";
+            message.textContent = "That photo is too large to open here. Choose a different one.";
             window.PisFormErrors?.fromPageMessage(clientPhotoInput);
             return;
 
@@ -4052,6 +4057,13 @@ if (clientPhotoInput) {
             }
             if (!cropped) {
                 clientPhotoInput.value = "";
+                return;
+            }
+            // Normally this is a small square by now. If the photo could not be shrunk at all, a big one stops here.
+            if (cropped.size > MAX_PHOTO_SIZE) {
+                clientPhotoInput.value = "";
+                message.textContent = "We couldn't shrink that photo. Choose a different one.";
+                window.PisFormErrors?.fromPageMessage(clientPhotoInput);
                 return;
             }
 
@@ -6760,11 +6772,11 @@ if (petPhotoInput) {
 
             if (
                 file.size >
-                MAX_PHOTO_SIZE
+                MAX_PHOTO_ORIGINAL_SIZE
             ) {
 
                 petPhotoInput.value = "";
-            message.textContent = "That photo is larger than 5 MB. Choose a smaller one.";
+            message.textContent = "That photo is too large to open here. Choose a different one.";
             window.PisFormErrors?.fromPageMessage(petPhotoInput);
             return;
 
@@ -6781,6 +6793,13 @@ if (petPhotoInput) {
             }
             if (!cropped) {
                 petPhotoInput.value = "";
+                return;
+            }
+            // Normally this is a small square by now. If the photo could not be shrunk at all, a big one stops here.
+            if (cropped.size > MAX_PHOTO_SIZE) {
+                petPhotoInput.value = "";
+                message.textContent = "We couldn't shrink that photo. Choose a different one.";
+                window.PisFormErrors?.fromPageMessage(petPhotoInput);
                 return;
             }
 

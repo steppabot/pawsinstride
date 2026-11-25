@@ -1,7 +1,7 @@
 // ========================================
 // OWNER + TEAM APP POLISH (phones)
 // ========================================
-// A tidier look for four things, on phone-sized screens only (computers are unchanged).
+// A tidier look for seven things, on phone-sized screens (computers only get the pricing colors).
 // Nothing here changes what the app does or saves: the old parts keep working exactly
 // as before and are restyled, re-ordered or mirrored into a more compact card.
 //
@@ -18,6 +18,17 @@
 //    and the day's visits as one grouped list.
 // 4. MORE. Your profile first; Business Tools as one list with the status on the right;
 //    lifetime stats in one card; Log Out at the bottom.
+// 5. THE SCREENS BEHIND MORE. Edit Profile opens as its own page (it used to stretch the More
+//    screen), like Push Notifications, Services & Pricing and the Website Banner; all four share
+//    one header, the same cards and rounded-rectangle buttons (no pill buttons), and switches.
+//    Lines that used to wrap mid-phrase (the Effective Rate detail, the Longest Walk record)
+//    put each piece on its own line.
+// 6. SERVICE COLORS. Each visit row on the Schedule has its colored edge again (walks blue,
+//    drop-ins teal, sitting pink, meet and greets purple, boarding orange), and the Services &
+//    Pricing cards carry the same colors, on computers too.
+// 7. ONE BLUE. Everything filled (the corner photo, the Today card, a default profile photo,
+//    Save buttons, switches that are on) uses the same blue; quiet buttons are white with a
+//    thin border and blue words.
 // ========================================
 (() => {
     'use strict';
@@ -44,6 +55,15 @@
     css.id = 'pis-polish-css';
     css.textContent = `
     .pis-head-sub, .pis-head-avatar, .pis-head-menu, .pis-head-menu-close, .pis-sec-label, .pis-today, .pis-boarding-now, .pis-month-pill, .pis-tool-status, .pis-more-logout, .pis-more-version, .pis-route-note { display: none; }
+    /* >>> always on >>> */
+    /* Services & Pricing: a colored edge per service, the same colors as the Schedule
+       (walks blue, drop-ins teal, sitting pink, boarding orange). Phones and computers. */
+    body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card { position: relative; overflow: hidden; padding-left: 25px; }
+    body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: #46617d; }
+    body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card[data-pricing-key$="-minute"]::before { background: linear-gradient(180deg, #1f63b8 0 50%, #14c0dc 50% 100%); }
+    body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card[data-pricing-key^="pet-sitting"]::before { background: #b8336a; }
+    body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card[data-pricing-key="boarding"]::before { background: #c0610c; }
+    /* <<< always on <<< */
     @media (max-width: 700px) {
         /* ---------- top header ---------- */
         body.pis-polish .admin-dashboard-header { display: flex !important; align-items: center !important; gap: 10px !important; min-height: 0 !important;
@@ -312,6 +332,208 @@
         .pis-more-logout:disabled { opacity: .6; }
         body.pis-polish #admin-screen-more > .pis-more-version { order: 10; display: block; margin: -2px 0 0 !important; text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 600; color: #627184; }
         body.pis-polish #admin-screen-more > .pis-more-version:empty { display: none; }
+        /* >>> more screens >>> */
+        /* ========== lines that used to wrap ========== */
+        /* Effective Rate: the money, the time and the driving each get a line */
+        body.pis-polish #admin-financial-hourly-detail { margin-top: 5px !important; font-size: 12px !important; line-height: 17px !important; }
+        body.pis-polish #admin-financial-hourly-detail .pis-rate-part { display: block; }
+        body.pis-polish #admin-financial-hourly-detail .pis-rate-dot { display: none; }
+        body.pis-polish #admin-financial-hourly-detail .pis-rate-term { white-space: nowrap; }
+        /* Lifetime Stats records: the day, who and how long each get a line */
+        body.pis-polish #pis-lifetime-stats .pls-record-copy em .pls-piece { display: block; }
+        body.pis-polish #pis-lifetime-stats .pls-record-copy em .pls-dot { display: none; }
+        body.pis-polish #pis-lifetime-stats .pls-record-copy { row-gap: 1px; }
+
+        /* ========== one blue ==========
+           Filled things (the corner photo, the Today card, New Message, a default profile photo, Save
+           buttons, switches that are on) all use the same blue. Quiet buttons (Cancel, Choose Profile
+           Photo, Edit) are white with a thin border and blue words. */
+        body.pis-polish #admin-profile-avatar,
+        body.pis-polish #admin-profile-avatar .client-profile-initials,
+        body.pis-polish #admin-profile-form .client-photo-preview-wrapper,
+        body.pis-polish #admin-profile-form .client-photo-preview-initials { background: linear-gradient(135deg, #1f74be, #17609f) !important; color: #fff !important; }
+
+        /* ========== Edit Profile: its own page (the script below moves it there while it is open) ========== */
+        body.pis-profile-open { overflow: hidden !important; }
+        body.pis-polish #admin-profile-form-panel.pis-profile-page { position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; z-index: 3000 !important; display: flex !important; flex-direction: column;
+            width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: #f3f6fa !important; box-shadow: none !important; }
+        body.pis-polish .pis-profile-page .household-form-header { flex: 0 0 auto; display: flex !important; align-items: center !important; justify-content: space-between; gap: 12px !important; min-height: 0 !important; margin: 0 !important;
+            padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 12px !important; background: #fff !important; border: 0 !important; border-bottom: 1px solid #e4ebf3 !important; }
+        body.pis-polish .pis-profile-page .household-form-header > div { flex: 1 1 auto; min-width: 0; }
+        body.pis-polish .pis-profile-page .household-form-header > div::before { content: "MY ACCOUNT"; display: block; font-size: 11px; line-height: 14px; font-weight: 800; letter-spacing: .12em; color: #1b6fb3; }
+        body.pis-polish .pis-profile-page .household-form-header h4 { margin: 1px 0 0 !important; font-size: 22px !important; line-height: 27px !important; font-weight: 800 !important; color: #13233a !important; }
+        body.pis-polish .pis-profile-page .household-form-header p { display: none !important; }
+        body.pis-polish .pis-profile-page #admin-close-profile-form-button { flex: 0 0 44px; width: 44px !important; height: 44px !important; min-width: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; display: flex !important;
+            align-items: center; justify-content: center; border: 1px solid #c9d9ea !important; border-radius: 14px !important; background: #fff !important; box-shadow: none !important; color: #1b6fb3 !important; font-size: 26px !important; line-height: 1 !important;
+            font-weight: 400 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; display: flex !important; flex-direction: column; gap: 12px;
+            margin: 0 !important; padding: 14px 16px 0 !important; box-sizing: border-box; }
+        body.pis-polish .pis-profile-page #admin-profile-form > * { flex: 0 0 auto; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-editor,
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-section { margin: 0 !important; padding: 14px !important; background: #fff !important; border: 1px solid #dce5ef !important; border-radius: 18px !important;
+            box-shadow: 0 6px 18px rgba(19, 35, 58, .05) !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-editor { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 14px !important; text-align: left !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-preview-wrapper { width: 68px !important; height: 68px !important; flex: 0 0 68px; margin: 0 !important; box-shadow: none !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-preview-initials { font-size: 23px !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-controls { flex: 1 1 auto; min-width: 0; display: block !important; text-align: left !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-upload-button { display: inline-flex !important; align-items: center; justify-content: center; width: auto !important; min-height: 42px !important; margin: 0 !important;
+            padding: 0 14px !important; box-sizing: border-box; border: 1px solid #c9d9ea !important; border-radius: 14px !important; background: #fff !important; box-shadow: none !important; color: #1b6fb3 !important; font-size: 14.5px !important;
+            font-weight: 800 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-help { margin: 6px 0 0 !important; font-size: 12px !important; line-height: 16px !important; font-weight: 600; color: #627184 !important; text-align: left !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-section h5 { margin: 0 0 10px !important; font-size: 11.5px !important; line-height: 16px !important; font-weight: 800 !important; letter-spacing: .1em; text-transform: uppercase;
+            color: #5b6b80 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-grid { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 0 10px !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field { grid-column: 1 / -1; min-width: 0; margin: 0 0 12px !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-grid > .household-form-field:last-child { margin-bottom: 0 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field:has(> #admin-state) { grid-column: 1; margin-bottom: 0 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field:has(> #admin-zip) { grid-column: 2; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field label { display: block; margin: 0 0 5px !important; font-size: 13px !important; line-height: 17px !important; font-weight: 700 !important; color: #46566b !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field input,
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field select { width: 100% !important; height: 46px !important; min-height: 0 !important; margin: 0 !important; padding: 0 12px !important; box-sizing: border-box;
+            border: 1px solid #c9d9ea !important; border-radius: 12px !important; background-color: #fff !important; box-shadow: none !important; color: #13233a !important; font-size: 16px !important; font-weight: 600 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field input:focus,
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field select:focus { outline: none !important; border-color: #1f74be !important; box-shadow: 0 0 0 3px rgba(31, 116, 190, .16) !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field input:disabled { background-color: #f3f6fa !important; color: #627184 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .field-help { display: block; margin: 5px 0 0 !important; font-size: 12px !important; line-height: 16px !important; font-weight: 600; color: #627184 !important; }
+        /* Cancel and Save Profile stay at the bottom of the screen while the form scrolls */
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-actions { order: 9; position: sticky; bottom: 0; z-index: 2; display: flex !important; flex-direction: row !important; gap: 8px !important; margin: auto -16px 0 !important;
+            padding: 12px 16px calc(env(safe-area-inset-bottom, 0px) + 12px) !important; background: #fff !important; border: 0 !important; border-top: 1px solid #e4ebf3 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-actions button { order: 0 !important; width: auto !important; min-height: 50px !important; height: 50px !important; margin: 0 !important; padding: 0 12px !important;
+            box-sizing: border-box; border-radius: 14px !important; box-shadow: none !important; font-size: 16px !important; font-weight: 800 !important; transform: none !important; }
+        body.pis-polish .pis-profile-page #admin-cancel-profile-button { flex: 1 1 0; border: 1px solid #c9d9ea !important; background: #fff !important; color: #1b6fb3 !important; }
+        body.pis-polish .pis-profile-page #admin-save-profile-button { flex: 1.9 1 0; border: 0 !important; background: linear-gradient(135deg, #1f74be, #17609f) !important; color: #fff !important; }
+        body.pis-polish .pis-profile-page #admin-save-profile-button:disabled { opacity: .55 !important; }
+        /* a save that fails: the usual red strip, floating just above the buttons so it is seen wherever the form is scrolled */
+        body.pis-polish .pis-profile-page #admin-profile-message { order: 8; position: sticky; bottom: calc(env(safe-area-inset-bottom, 0px) + 83px); z-index: 2; margin: 0 !important; box-shadow: 0 6px 18px rgba(19, 35, 58, .12); }
+        body.pis-polish .pis-profile-page #admin-profile-message:empty { display: none !important; }
+
+        /* ========== Push Notifications and Services & Pricing (full-screen pages) ========== */
+        body.pis-polish .admin-services-pricing-dialog { width: 100% !important; max-width: none !important; height: 100vh !important; height: 100dvh !important; max-height: none !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; }
+        body.pis-polish .admin-services-pricing-header { display: flex !important; align-items: center !important; gap: 12px !important; min-height: 0 !important; margin: 0 !important;
+            padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 12px !important; background: #fff !important; border-bottom: 1px solid #e4ebf3 !important; box-shadow: none !important; }
+        body.pis-polish .admin-services-pricing-header > div { flex: 1 1 auto; min-width: 0; }
+        body.pis-polish .admin-services-pricing-header .admin-screen-eyebrow { display: block; margin: 0 !important; font-size: 11px !important; line-height: 14px !important; font-weight: 800 !important; letter-spacing: .12em !important; color: #1b6fb3 !important; }
+        body.pis-polish .admin-services-pricing-header h2 { margin: 1px 0 0 !important; font-size: 22px !important; line-height: 27px !important; font-weight: 800 !important; color: #13233a !important; }
+        body.pis-polish .admin-services-pricing-header p { display: none !important; }
+        body.pis-polish .admin-services-pricing-close { flex: 0 0 44px; width: 44px !important; height: 44px !important; min-width: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; display: flex !important; align-items: center;
+            justify-content: center; border: 1px solid #c9d9ea !important; border-radius: 14px !important; background: #fff !important; box-shadow: none !important; color: #1b6fb3 !important; font-size: 26px !important; line-height: 1 !important; font-weight: 400 !important; }
+        body.pis-polish .admin-services-pricing-body { padding: 14px 16px calc(env(safe-area-inset-bottom, 0px) + 24px) !important; background: #f3f6fa !important; }
+        /* push: this device */
+        body.pis-polish .admin-push-device-card { display: block !important; margin: 0 0 16px !important; padding: 14px !important; background: #fff !important; border: 1px solid #dce5ef !important; border-radius: 18px !important;
+            box-shadow: 0 6px 18px rgba(19, 35, 58, .05) !important; }
+        body.pis-polish .admin-push-device-copy { display: block !important; margin: 0 !important; }
+        body.pis-polish .admin-push-device-copy .admin-screen-eyebrow { display: block; margin: 0 !important; font-size: 11px !important; line-height: 14px !important; font-weight: 800 !important; letter-spacing: .1em !important; color: #5b6b80 !important; }
+        body.pis-polish .admin-push-device-copy strong { display: block; margin: 2px 0 0 !important; font-size: 16px !important; line-height: 21px !important; font-weight: 800 !important; color: #13233a !important; }
+        body.pis-polish .admin-push-modal-status { margin: 3px 0 0 !important; font-size: 13.5px !important; line-height: 18px !important; font-weight: 600 !important; }
+        body.pis-polish .admin-push-enable-button { display: flex !important; align-items: center; justify-content: center; width: 100% !important; min-height: 46px !important; height: auto !important; margin: 12px 0 0 !important; padding: 8px 12px !important;
+            box-sizing: border-box; border: 0 !important; border-radius: 14px !important; background: linear-gradient(135deg, #1f74be, #17609f) !important; box-shadow: none !important; color: #fff !important; font-size: 15px !important; font-weight: 800 !important;
+            transform: none !important; }
+        /* In the app this button can never be tapped (it only repeated the line above it), so it is left out
+           there; on the website it is the real Enable Notifications button. */
+        body.pis-polish .admin-push-enable-button:disabled { display: none !important; }
+        body.pis-polish .admin-push-enable-button[hidden] { display: none !important; }
+        /* push: what should notify you */
+        body.pis-polish .admin-push-preferences { margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+        body.pis-polish .admin-push-preferences .admin-more-section-heading { display: block !important; margin: 0 4px 8px !important; padding: 0 !important; border: 0 !important; }
+        body.pis-polish .admin-push-preferences .admin-more-section-heading .admin-screen-eyebrow,
+        body.pis-polish .admin-push-preferences .admin-more-section-heading p { display: none !important; }
+        body.pis-polish .admin-push-preferences h3 { margin: 0 !important; font-size: 11.5px !important; line-height: 16px !important; font-weight: 800 !important; letter-spacing: .1em; text-transform: uppercase; color: #5b6b80 !important; }
+        body.pis-polish .admin-push-preference-list { display: block !important; margin: 0 !important; padding: 0 !important; overflow: hidden; background: #fff !important; border: 1px solid #dce5ef !important; border-radius: 18px !important;
+            box-shadow: 0 6px 18px rgba(19, 35, 58, .05) !important; }
+        body.pis-polish .admin-push-preference-row { display: flex !important; align-items: center !important; gap: 12px !important; min-height: 62px; margin: 0 !important; padding: 10px 12px 10px 14px !important; box-sizing: border-box; border: 0 !important;
+            border-top: 1px solid #e4ebf3 !important; border-radius: 0 !important; background: none !important; }
+        body.pis-polish .admin-push-preference-row:first-child { border-top: 0 !important; }
+        body.pis-polish .admin-push-preference-copy { flex: 1 1 auto; min-width: 0; display: block !important; }
+        body.pis-polish .admin-push-preference-copy strong { display: block; margin: 0 !important; font-size: 15px !important; line-height: 20px !important; font-weight: 800 !important; color: #13233a !important; }
+        body.pis-polish .admin-push-preference-copy > span { display: block; margin: 1px 0 0 !important; font-size: 12.5px !important; line-height: 17px !important; font-weight: 600 !important; color: #627184 !important; }
+        body.pis-polish .admin-push-switch { flex: 0 0 auto; }
+        body.pis-polish .admin-push-switch input:checked + .admin-push-switch-track { background: linear-gradient(135deg, #1f74be, #17609f) !important; }
+        /* services & pricing */
+        body.pis-polish .admin-services-pricing-toolbar { display: none !important; }
+        body.pis-polish #admin-services-pricing-list { display: block !important; margin: 0 !important; padding: 0 !important; font-size: 14px; font-weight: 600; color: #5b6b80; }
+        body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card { display: block !important; margin: 0 0 12px !important; padding: 14px !important; background: #fff !important; border: 1px solid #dce5ef !important; border-radius: 18px !important;
+            box-shadow: 0 6px 18px rgba(19, 35, 58, .05) !important; }
+        body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card { padding-left: 19px !important; }
+        body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card.admin-service-is-editing { border-color: #1f74be !important; box-shadow: 0 0 0 3px rgba(31, 116, 190, .14) !important; }
+        body.pis-polish .admin-pricing-v2-heading { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; flex-wrap: nowrap !important; gap: 10px !important; margin: 0 0 12px !important; }
+        body.pis-polish .admin-pricing-v2-heading h3 { flex: 1 1 auto; min-width: 0; margin: 0 !important; font-size: 16px !important; line-height: 21px !important; font-weight: 800 !important; color: #13233a !important; }
+        body.pis-polish .admin-pricing-v2-heading .admin-service-status { flex: 0 0 auto; margin: 1px 0 0 !important; padding: 3px 9px !important; border-radius: 999px !important; font-size: 10.5px !important; line-height: 14px !important; font-weight: 800 !important;
+            letter-spacing: .05em !important; white-space: nowrap; }
+        body.pis-polish .admin-pricing-v2-card:has([data-pricing-action="toggle"][data-next-active="true"]) .admin-service-status { background: #eef2f6 !important; border-color: #cfd8e3 !important; color: #55657a !important; }
+        body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card .admin-service-pricing-rates { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        body.pis-polish #admin-services-pricing-list .admin-service-rate-field { display: block !important; grid-column: auto !important; min-width: 0; width: auto !important; margin: 0 !important; }
+        body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card .admin-service-rate-field > span { display: block; margin: 0 0 4px !important; font-size: 10.5px !important; line-height: 14px !important; font-weight: 800 !important; letter-spacing: .06em !important;
+            text-transform: uppercase; color: #5b6b80 !important; }
+        body.pis-polish #admin-services-pricing-list .admin-service-rate-input { display: flex !important; align-items: center !important; gap: 3px !important; width: 100% !important; height: 44px !important; min-height: 0 !important; margin: 0 !important; padding: 0 10px !important;
+            box-sizing: border-box; border: 1px solid #dce5ef !important; border-radius: 12px !important; background: #f6f9fc !important; box-shadow: none !important; }
+        body.pis-polish #admin-services-pricing-list .admin-service-is-editing .admin-service-rate-input { border-color: #c9d9ea !important; background: #fff !important; }
+        body.pis-polish #admin-services-pricing-list .admin-service-rate-input > span { flex: 0 0 auto; margin: 0 !important; padding: 0 !important; font-size: 14px !important; font-weight: 700 !important; color: #7d8ca0 !important; }
+        body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card .admin-service-rate-input input { flex: 1 1 auto; min-width: 0; width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important;
+            box-shadow: none !important; outline: none !important; font-size: 16px !important; font-weight: 800 !important; color: #13233a !important; }
+        body.pis-polish #admin-services-pricing-list .admin-service-rate-input input::-webkit-outer-spin-button,
+        body.pis-polish #admin-services-pricing-list .admin-service-rate-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        body.pis-polish #admin-services-pricing-list .admin-service-rate-input input { -moz-appearance: textfield; appearance: textfield; }
+        body.pis-polish .admin-pricing-v2-fees { margin: 14px 0 0 !important; padding: 12px 0 0 !important; border-top: 1px solid #e4ebf3 !important; }
+        body.pis-polish .admin-pricing-v2-fees > strong { display: block; margin: 0 0 9px !important; font-size: 11.5px !important; line-height: 16px !important; font-weight: 800 !important; letter-spacing: .1em; text-transform: uppercase; color: #5b6b80 !important; }
+        body.pis-polish .admin-pricing-v2-fee-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px 8px !important; align-items: end; }
+        body.pis-polish .admin-pricing-v2-note { margin: 10px 0 0 !important; font-size: 12px !important; line-height: 17px !important; font-weight: 600; color: #627184 !important; white-space: normal !important; }
+        body.pis-polish .admin-pricing-v2-note + .admin-pricing-v2-note { display: none; }
+        body.pis-polish .admin-service-is-editing .admin-pricing-v2-note + .admin-pricing-v2-note { display: block; }
+        body.pis-polish .admin-pricing-v2-message { margin: 10px 0 0 !important; font-size: 13px !important; line-height: 18px !important; font-weight: 700; }
+        body.pis-polish .admin-pricing-v2-actions { display: flex !important; flex-wrap: nowrap !important; justify-content: stretch !important; gap: 8px !important; margin: 12px 0 0 !important; padding: 0 !important; }
+        body.pis-polish .admin-pricing-v2-actions button { flex: 1 1 0; min-width: 0; min-height: 46px !important; height: 46px !important; margin: 0 !important; padding: 0 10px !important; box-sizing: border-box; border: 1px solid #c9d9ea !important;
+            border-radius: 14px !important; background: #fff !important; box-shadow: none !important; color: #1b6fb3 !important; font-size: 15px !important; font-weight: 800 !important; }
+        body.pis-polish .admin-pricing-v2-actions button[data-pricing-action="save"] { flex: 1.9 1 0; border-color: transparent !important; background: linear-gradient(135deg, #1f74be, #17609f) !important; color: #fff !important; }
+        body.pis-polish .admin-pricing-v2-actions button:disabled { opacity: .5 !important; }
+
+        /* ========== Website Banner: a switch for on/off, and the same blue as everything else ========== */
+        body.pis-polish .psb-toggle { flex-direction: row-reverse; justify-content: space-between; }
+        body.pis-polish .psb-toggle > span { flex: 1 1 auto; min-width: 0; }
+        body.pis-polish .psb-toggle input { -webkit-appearance: none; appearance: none; position: relative; flex: 0 0 48px; width: 48px; height: 29px; margin: 0; border: 0; border-radius: 999px; background: #cdd7e2; cursor: pointer;
+            transition: background-color .15s ease; }
+        body.pis-polish .psb-toggle input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 23px; height: 23px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(19, 35, 58, .3); transition: transform .15s ease; }
+        body.pis-polish .psb-toggle input:checked { background: linear-gradient(135deg, #1f74be, #17609f); }
+        body.pis-polish .psb-toggle input:checked::after { transform: translateX(19px); }
+        body.pis-polish .psb-toggle input:focus-visible { outline: 3px solid rgba(31, 116, 190, .35); outline-offset: 2px; }
+        body.pis-polish .psb-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+        body.pis-polish .psb-row .psb-field > span { min-height: 0; }
+        body.pis-polish .psb .psb-eyebrow { color: #1b6fb3; }
+        body.pis-polish .psb .psb-close,
+        body.pis-polish .psb .psb-foot .psb-cancel,
+        body.pis-polish .psb .psb-chip,
+        body.pis-polish .psb .psb-add { color: #1b6fb3 !important; }
+        body.pis-polish .psb .psb-foot .psb-save { background: linear-gradient(135deg, #1f74be, #17609f) !important; }
+        /* a mistake with the photo: the message goes under the photo row, like every other box in the app */
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-editor { flex-wrap: wrap !important; row-gap: 12px !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-editor > .client-photo-controls { flex: 1 1 0 !important; min-width: 0; }
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-editor > .pis-field-note { flex: 0 0 100%; margin: 0 2px !important; }
+        /* mistakes: same flow as the rest of the app, even where a box is too narrow to hold a sentence */
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-grid > .pis-field-note { grid-column: 1 / -1; margin: 8px 2px 0 !important; }
+        body.pis-polish #admin-services-pricing-list .admin-service-rate-input:has(input.pis-field-invalid) { border-color: #d94f4f !important; background: #fffafa !important; box-shadow: 0 0 0 3px rgba(217, 79, 79, .14) !important; }
+        body.pis-polish #admin-services-pricing-list .admin-pricing-v2-card > .pis-field-note,
+        body.pis-polish #admin-services-pricing-list .admin-pricing-v2-fees > .pis-field-note { margin: 10px 2px 0 !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field input.pis-field-invalid,
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field select.pis-field-invalid { border-color: #d94f4f !important; background-color: #fffafa !important; box-shadow: 0 0 0 3px rgba(217, 79, 79, .14) !important; }
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field input.pis-field-invalid:focus,
+        body.pis-polish .pis-profile-page #admin-profile-form .household-form-field select.pis-field-invalid:focus { border-color: #d94f4f !important; box-shadow: 0 0 0 3px rgba(217, 79, 79, .22) !important; }
+        /* a mistake with the photo: a red line and a soft glow on the button itself (the same look as a wrong box) */
+        body.pis-polish .pis-profile-page #admin-profile-form .client-photo-controls.pis-field-invalid .client-photo-upload-button { border-color: #d94f4f !important; background: #fffafa !important;
+            box-shadow: 0 0 0 3px rgba(217, 79, 79, .14) !important; }
+
+        /* ========== Schedule: the colored edge per service is back (it tells walks, drop-ins, sitting,
+           meet and greets and boarding apart at a glance; the compact look had dropped it) ========== */
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-walk,
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-dropin,
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-sit,
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-meet,
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-boarding { padding-left: 19px !important; }
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-walk { box-shadow: inset 5px 0 0 #1f63b8 !important; }
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-dropin { box-shadow: inset 5px 0 0 #14c0dc !important; }
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-sit { box-shadow: inset 5px 0 0 #b8336a !important; }
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-meet { box-shadow: inset 5px 0 0 #6a45c2 !important; }
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.kind-boarding { box-shadow: inset 5px 0 0 #c0610c !important; }
+        body.pis-polish #admin-day-services .pis-row.pis-row.pis-row.is-cancelled { box-shadow: inset 5px 0 0 #e3a19b !important; }
+        /* <<< more screens <<< */
     }
     `;
     document.head.appendChild(css);
@@ -685,7 +907,7 @@
     function paint() {
         queued = false;
         try { ensureHome(); ensureSchedule(); ensureMore(); } catch (error) { console.warn('Polish (set up):', error); }
-        for (const step of [paintHeader, paintToday, paintRoute, paintBoarding, paintSchedule, paintMore]) {
+        for (const step of [paintHeader, paintToday, paintRoute, paintBoarding, paintSchedule, paintMore, paintTeamWords]) {
             try { step(); } catch (error) { console.warn('Polish:', error); }
         }
         if (!isPhone()) closeMenu();
@@ -711,6 +933,48 @@
     window.addEventListener('resize', queue, { passive: true });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) queue(); });
     setInterval(() => { if (!document.hidden) queue(); }, 30000);       // boarding guests, the date at midnight
+
+    // A team member is not an admin: their Push Notifications page says "My Account", like Edit Profile.
+    function paintTeamWords() {
+        if (!document.body.classList.contains('pis-employee')) return;
+        const eyebrow = $('#admin-push-notifications-modal .admin-services-pricing-header .admin-screen-eyebrow');
+        if (eyebrow && eyebrow.textContent.trim() !== 'MY ACCOUNT') eyebrow.textContent = 'MY ACCOUNT';
+    }
+
+    // ========================================
+    // EDIT PROFILE: ITS OWN PAGE (phones)
+    // ========================================
+    // The form used to open inside the More screen and push everything under it down the page.
+    // On phones it now covers the screen the way Push Notifications and the Website Banner do,
+    // with Cancel and Save Profile always in reach. While it is open it sits beside those pages
+    // in the document, so nothing about the More screen can move or clip it; closing puts it back
+    // exactly where it was. Computers keep the form inside the More screen.
+    const profilePanel = document.getElementById('admin-profile-form-panel');
+    const profileSpot = profilePanel ? document.createComment('edit profile form') : null;
+    function syncProfilePage() {
+        if (!profilePanel) return;
+        const shown = Boolean(profilePanel.style.display) && profilePanel.style.display !== 'none';
+        const wantPage = shown && isPhone();
+        const isPage = profilePanel.classList.contains('pis-profile-page');
+        if (wantPage === isPage) return;
+        if (wantPage) {
+            profilePanel.parentNode.insertBefore(profileSpot, profilePanel);
+            (document.getElementById('admin-content') || document.body).appendChild(profilePanel);
+            profilePanel.classList.add('pis-profile-page');
+            document.body.classList.add('pis-profile-open');
+            const form = document.getElementById('admin-profile-form');
+            if (form) form.scrollTop = 0;
+        } else {
+            profilePanel.classList.remove('pis-profile-page');
+            document.body.classList.remove('pis-profile-open');
+            if (profileSpot.parentNode) profileSpot.parentNode.replaceChild(profilePanel, profileSpot);
+        }
+    }
+    if (profilePanel) {
+        new MutationObserver(syncProfilePage).observe(profilePanel, { attributes: true, attributeFilter: ['style'] });
+        window.addEventListener('resize', syncProfilePage, { passive: true });
+        syncProfilePage();
+    }
 
     window.PisPolish = { paint, closeMenu, openMenu };
     paint();

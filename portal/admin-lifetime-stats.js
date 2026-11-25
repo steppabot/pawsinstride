@@ -34,6 +34,14 @@
     function drives(v) {
         return typeof isAdminDrivingService === 'function' ? isAdminDrivingService(v) : !isBoarding(v);
     }
+    // The small line under a record, one piece at a time (the day, who, how long), so a phone
+    // can give each its own line instead of wrapping mid-phrase (admin-polish.js).
+    function pieces(list) {
+        return list.filter(Boolean)
+            .map(part => `<span class="pls-piece">${esc(part)}</span>`)
+            .join('<span class="pls-dot"> · </span>');
+    }
+
     function niceDate(dateLike, withDay) {
         const d = /^\d{4}-\d{2}-\d{2}$/.test(String(dateLike)) ? parseLocalDate(dateLike) : new Date(dateLike);
         if (Number.isNaN(d.getTime())) return '';
@@ -127,7 +135,9 @@
             longestInfo = {
                 miles: miles(longest.distance_meters).toFixed(2),
                 date: niceDate(longest.started_at || visit?.visit_date),
-                detail: [who || (longest.boarding_stay_id ? 'Boarding walk' : ''), mins ? `${mins} min` : ''].filter(Boolean).join(' · ')
+                detail: [who || (longest.boarding_stay_id ? 'Boarding walk' : ''), mins ? `${mins} min` : ''].filter(Boolean).join(' · '),
+                who: who || (longest.boarding_stay_id ? 'Boarding walk' : ''),
+                length: mins ? `${mins} min` : ''
             };
         }
 
@@ -170,7 +180,7 @@
                     <span class="pls-record-copy">
                         <span class="pls-name">Longest walk</span>
                         <strong>${s.longestInfo ? `${s.longestInfo.miles} mi` : '—'}</strong>
-                        <em>${s.longestInfo ? esc([s.longestInfo.date, s.longestInfo.detail].filter(Boolean).join(' · ')) : 'Finish a GPS walk to set your record'}</em>
+                        <em>${s.longestInfo ? pieces([s.longestInfo.date, s.longestInfo.who, s.longestInfo.length]) : 'No GPS walks yet'}</em>
                     </span>
                 </div>
                 <div class="pls-record">
@@ -178,7 +188,7 @@
                     <span class="pls-record-copy">
                         <span class="pls-name">Busiest day</span>
                         <strong>${s.busiest ? `${s.busiest.count} ${s.busiest.count === 1 ? 'visit' : 'visits'}` : '—'}</strong>
-                        <em>${s.busiest ? esc(niceDate(s.busiest.date, true)) : 'Finish a visit to set your record'}</em>
+                        <em>${s.busiest ? pieces([niceDate(s.busiest.date, true)]) : 'No finished visits yet'}</em>
                     </span>
                 </div>
             </div>`;

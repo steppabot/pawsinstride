@@ -182,17 +182,20 @@
             changeHtml = `<span class="pfin-change-note">${s.thisSoFar > 0 ? `Nothing from ${MONTHS[s.lm].slice(0, 3)} 1${s.d > 1 ? '–' + s.d : ''} to compare to` : `Compares to ${MONTHS[s.lm]} after your first finished visit`}</span>`;
         }
 
+        // The small print under a number: short lines, one fact each (never one long wrapping sentence).
+        const lines = list => list.filter(Boolean).map(line => `<span class="pfin-line">${esc(line)}</span>`).join('');
         let rateValue = '—', rateNote;
-        if (driveState === 'loading' || driveState === 'idle') rateNote = 'Loading saved driving time…';
-        else if (s.rate === null) rateNote = s.per === 'month' ? 'Appears after your first finished visit this month.' : 'Appears after your first finished visit.';
+        if (driveState === 'loading' || driveState === 'idle') rateNote = ['Loading saved driving time…'];
+        else if (s.rate === null) rateNote = [s.per === 'month' ? 'Appears after your first finished visit this month.' : 'Appears after your first finished visit.'];
         else if (s.visitOnly) {
             rateValue = `${money(s.rate)}/hr`;
-            rateNote = driveState === 'error' ? 'Visit time only · couldn’t load driving time (reopen to retry)'
-                : 'Visit time only · no saved driving time for these days';
+            rateNote = driveState === 'error' ? ['Visit Time Only', 'Couldn’t Load Drive Time', 'Reopen to Retry']
+                : ['Visit Time Only', 'No Saved Drive Time for These Days'];
         } else {
             rateValue = `${money(s.rate)}/hr`;
-            rateNote = s.rateDays === s.workDays ? `Visit time + driving · ${s.workDays} work ${s.workDays === 1 ? 'day' : 'days'}`
-                : `Visit time + driving · ${s.rateDays} of ${s.workDays} work days (the rest are missing driving time)`;
+            const missing = s.workDays - s.rateDays;
+            rateNote = missing > 0 ? ['Visit + Drive Time', `${s.rateDays} of ${s.workDays} Days`, `${missing} Missing Drive Time`]
+                : ['Visit + Drive Time', `${s.workDays} ${s.workDays === 1 ? 'Day' : 'Days'}`];
         }
 
         const max = Math.max(1, ...s.yearBars.map(b => b.earned + b.scheduled));
@@ -224,19 +227,19 @@
         <section class="pfin-card pfin-rate">
             <span class="pfin-label">Effective Hourly Rate</span>
             <strong class="pfin-value">${rateValue}</strong>
-            <span class="pfin-note">${esc(rateNote)}</span>
+            <span class="pfin-note">${lines(rateNote)}</span>
         </section>
 
         <div class="pfin-pair">
             <section class="pfin-card">
                 <span class="pfin-label">Hours Worked</span>
                 <strong class="pfin-value">${hrs(s.visitMin + s.driveMin)}</strong>
-                <span class="pfin-note">${hrs(s.visitMin)} visits · ${hrs(s.driveMin)} driving</span>
+                <span class="pfin-note">${lines([`${hrs(s.visitMin)} Visit Time`, `${hrs(s.driveMin)} Drive Time`])}</span>
             </section>
             <section class="pfin-card">
                 <span class="pfin-label">Avg per Visit</span>
                 <strong class="pfin-value">${s.avg === null ? '—' : money(s.avg)}</strong>
-                <span class="pfin-note">${s.work.length} ${s.work.length === 1 ? 'visit' : 'visits'} finished${s.nights ? ` · ${s.nights} boarding ${s.nights === 1 ? 'night' : 'nights'}` : ''}</span>
+                <span class="pfin-note">${lines([`${s.work.length} ${s.work.length === 1 ? 'Visit' : 'Visits'} Finished`, s.nights ? `${s.nights} Boarding ${s.nights === 1 ? 'Night' : 'Nights'}` : ''])}</span>
             </section>
         </div>
 
@@ -331,6 +334,8 @@
     .pfin-body > *{flex-shrink:0;margin:0 !important}
     .pfin-label{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#667784}
     .pfin-note{display:block;margin-top:6px;font-size:12px;font-weight:600;line-height:1.4;color:#6b7785}
+    .pfin-line{display:block}
+    .pfin-piece{white-space:nowrap}
     .pfin-card{background:#fff;border:1px solid #d6e4eb;border-radius:16px;padding:16px;box-shadow:0 4px 12px rgba(24,52,71,.05)}
     .pfin-value{display:block;margin-top:6px;font-size:26px;font-weight:800;line-height:1.05;color:#183447}
     .pfin-row-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
