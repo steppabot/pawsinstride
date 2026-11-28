@@ -707,6 +707,51 @@ body.pis-cp #booking-form .pis-cp-bkchips button { flex: 1 1 auto !important; wh
 .pis-cp-bkchips small { color: var(--cp-soft); font: 700 13px/1.2 var(--cp-text); }
 body.pis-cp #booking-form .pis-cp-bkchips button.is-on { border-color: #F47B20 !important; background: #FFF3E0 !important; box-shadow: 0 0 0 1.500px #F47B20 !important; }
 .pis-cp-bkchips button.is-on small { color: #8A4B0B; }
+/* ----- a time list in the app's own sheet (instead of the phone's menu): the box, then the sheet ----- */
+body.pis-cp #booking-form button.pis-cp-pick, body.pis-cp #booking-form .booking-time-row > button.pis-cp-pick { box-sizing: border-box !important; flex: 1 1 auto !important; display: block !important; width: 100% !important; min-width: 0 !important; height: 50px !important; min-height: 50px !important; margin: 0 !important; padding: 0 40px 0 14px !important;
+    border: 1.500px solid var(--cp-line) !important; border-radius: 14px !important; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2351677F' stroke-width='2.400' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9.500 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center / 20px 20px !important; box-shadow: none !important; color: var(--cp-navy) !important;
+    font: 600 16px/1.2 var(--cp-text) !important; text-align: left !important; white-space: nowrap !important; overflow: hidden !important; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+body.pis-cp #booking-form button.pis-cp-pick.is-empty, body.pis-cp #booking-form .booking-time-row > button.pis-cp-pick.is-empty { color: var(--cp-soft) !important; }
+body.pis-cp #booking-form button.pis-cp-pick.is-wrong, body.pis-cp #booking-form .booking-time-row > button.pis-cp-pick.is-wrong { border-color: #D93025 !important; }
+body.pis-cp #booking-form button.pis-cp-pick:focus-visible, body.pis-cp #booking-form .booking-time-row > button.pis-cp-pick:focus-visible { outline: none !important; border-color: #F8A534 !important; box-shadow: 0 0 0 3px rgba(248,165,52,.22) !important; }
+body.pis-cp #booking-form button.pis-cp-pick:disabled { opacity: .55 !important; cursor: default; }
+body.pis-cp-pick-open { overflow: hidden !important; }
+/* ----- Breed in the pet form: suggestions as you type, under the box or above it, whichever has the room ----- */
+body.pis-cp #pet-form-panel .pis-cp-breedfield { position: relative !important; }
+body.pis-cp #pet-form-panel .pis-cp-breeds { position: absolute !important; left: 0 !important; right: 0 !important; top: calc(100% + 6px) !important; bottom: auto !important; z-index: 6 !important; display: grid !important; gap: 0 !important; margin: 0 !important; padding: 5px !important;
+    border: 1px solid var(--cp-line) !important; border-radius: 14px !important; background: #fff !important; box-shadow: 0 10px 26px rgba(13,30,48,.18) !important; overflow-x: hidden !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; align-content: start !important; }
+body.pis-cp #pet-form-panel .pis-cp-breeds[hidden] { display: none !important; }
+body.pis-cp #pet-form-panel .pis-cp-breeds.is-up { top: auto !important; bottom: calc(100% + 6px) !important; }
+body.pis-cp #pet-form-panel .pis-cp-breeds > button { box-sizing: border-box !important; display: block !important; width: 100% !important; min-width: 0 !important; height: auto !important; min-height: 44px !important; margin: 0 !important; padding: 8px 12px !important; border: 0 !important; border-radius: 10px !important;
+    background: none !important; box-shadow: none !important; color: var(--cp-navy) !important; font: 600 16px/1.25 var(--cp-text) !important; letter-spacing: 0 !important; text-align: left !important; text-transform: none !important; white-space: normal !important; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+body.pis-cp #pet-form-panel .pis-cp-breeds > button.is-on { background: var(--cp-cream) !important; }
+@media (hover: hover) { body.pis-cp #pet-form-panel .pis-cp-breeds > button:hover { background: var(--cp-cream) !important; } }
+.pis-cp-pickshade { position: fixed; inset: 0; z-index: 4000; display: flex; align-items: flex-end; justify-content: center; background: rgba(13,30,48,.48); overscroll-behavior: contain; }
+.pis-cp-picksheet { box-sizing: border-box; position: relative; display: flex; flex-direction: column; width: 100%; max-width: 560px; max-height: calc(100vh - 34px - env(safe-area-inset-top, 0px)); max-height: calc(100dvh - 34px - env(safe-area-inset-top, 0px));
+    padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; background: #fff; box-shadow: 0 -10px 30px rgba(13,30,48,.24); color: #14304F; font-family: var(--cp-text); animation: pis-pop-up .22s ease-out; }
+.pis-cp-picksheet:focus { outline: none; }
+.pis-cp-picksheet::before { content: ""; position: absolute; top: 8px; left: 50%; width: 40px; height: 5px; margin-left: -20px; border-radius: 3px; background: #D5DFE9; }
+.pis-cp-pickhead { flex: none; display: flex; align-items: center; gap: 12px; padding: 24px 0 12px; }
+.pis-cp-pickhead i { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 13px; background: #FFF3E0; color: #F47B20; font-style: normal; }
+.pis-cp-pickhead h3 { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; color: #14304F; font: 600 20px/1.150 var(--cp-display); letter-spacing: .1px; text-align: left; }
+.pis-cp-pickx { flex: none; display: grid; place-items: center; width: 40px; height: 40px; margin: 0; padding: 0; border: 0; border-radius: 13px; background: #EEF3F8; color: #14304F; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pis-cp-picklist { flex: 1 1 auto; min-height: 0; display: grid; gap: 8px; margin: 0; padding: 2px 2px 4px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.pis-cp-picklist button { box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 54px; margin: 0; padding: 0 14px; border: 1.500px solid #DCE6EF; border-radius: 14px; background: #fff; color: #14304F;
+    font: 600 17px/1.2 var(--cp-text); text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pis-cp-picklist button span { flex: 1 1 auto; min-width: 0; }
+.pis-cp-picklist button small { flex: none; padding: 4px 9px; border-radius: 9px; background: #FFF3E0; color: #8A4B0B; font: 700 13px/1.1 var(--cp-text); }
+.pis-cp-picklist button b { flex: none; display: none; place-items: center; width: 22px; height: 22px; color: #F47B20; }
+.pis-cp-picklist button.is-on { border-color: #F47B20; background: #FFF8EE; box-shadow: 0 0 0 1.500px #F47B20; }
+.pis-cp-picklist button.is-on b { display: grid; }
+.pis-cp-picklist button:disabled { opacity: .45; cursor: default; }
+.pis-cp-picklist button:focus-visible, .pis-cp-pickx:focus-visible { outline: 3px solid rgba(248,165,52,.55); outline-offset: 1px; }
+@media (min-width: 701px) { .pis-cp-pickshade { align-items: center; padding: 24px; } .pis-cp-picksheet { max-width: 420px; padding-bottom: 16px; border-radius: 24px; } .pis-cp-picksheet::before { display: none; } }
+@media (prefers-reduced-motion: reduce) { .pis-cp-picksheet { animation: none; } }
+/* a date box: the date in the middle of the box on an iPhone too (its own layout was being switched off) */
+/* ([id] lifts these above the rules further down that set every box in the sheet to display: block) */
+body.pis-cp #pet-form-panel[data-cp-sheet] input[type="date"][id], body.pis-cp #booking-form input[type="date"][id] { display: flex !important; align-items: center !important; }
+body.pis-cp #pet-form-panel[data-cp-sheet] input[type="date"]::-webkit-date-and-time-value, body.pis-cp #booking-form input[type="date"]::-webkit-date-and-time-value { margin: 0 !important; text-align: left !important; }
+
 /* the line under Repeat Last Week's Booking sits centered under its button */
 body.pis-cp #booking-form .repeat-last-week-booking-message { text-align: center !important; }
 /* the day that is open stands apart from the closed ones */
@@ -1617,7 +1662,7 @@ body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar
 body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar-completed { background: #DDF2E5 !important; color: #1F7A45 !important; }
 body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar-completed .upcoming-service-count { background: #2E9E5B !important; }
 body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar-today { box-shadow: inset 0 0 0 2.500px var(--cp-tang) !important; }
-body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar-today:not(.upcoming-calendar-booked) { color: var(--cp-navy) !important; }
+body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar-today:not(.upcoming-calendar-booked):not(.upcoming-calendar-selected) { color: var(--cp-navy) !important; }
 body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar-today .upcoming-day-number { font-weight: 700 !important; }
 body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar-selected { background: var(--cp-navy) !important; box-shadow: 0 4px 10px rgba(20,48,79,.22) !important; color: #fff !important; }
 body.pis-cp-cal #upcoming-calendar-grid .upcoming-calendar-day.upcoming-calendar-selected .upcoming-day-number { font-weight: 700 !important; }
@@ -2623,7 +2668,15 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
             }
         };
         const fresh = (box, select) => { const key = realOptions(select).map(item => `${item.value}=${item.textContent.trim()}`).join('|'); if (box.dataset.cpKey === key) return null; box.dataset.cpKey = key; return realOptions(select); };
-        const hold = (box, select, on) => { select.classList.toggle('pis-cp-held', on); if (on) select.tabIndex = -1; else { select.removeAttribute('tabindex'); box.innerHTML = ''; } };
+        // a list a chooser stands in for takes no cursor: the app moves the cursor to the next field after each choice, and on an iPhone that
+        // opens the phone's own menu over the chooser. Its label does nothing when tapped, for the same reason.
+        const noFocus = () => {};
+        const quiet = (select, on) => {
+            if (on) { select.tabIndex = -1; select.focus = noFocus; if (document.activeElement === select) select.blur(); } else { select.removeAttribute('tabindex'); delete select.focus; }
+            const label = select.id ? form.querySelector(`label[for="${select.id}"]`) : null;
+            if (label && !label.dataset.cpQuiet) { label.dataset.cpQuiet = '1'; label.addEventListener('click', event => { if (select.classList.contains('pis-cp-held')) event.preventDefault(); }); }
+        };
+        const hold = (box, select, on) => { select.classList.toggle('pis-cp-held', on); quiet(select, on); if (!on) box.innerHTML = ''; };
         async function drawFaces() {
             const options = fresh(faces, pet);
             if (!options) return;
@@ -2666,7 +2719,72 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
         wire(faces, pet); wire(tiles, type); wire(chips, option);
         faces.addEventListener('error', event => { if (event.target instanceof HTMLImageElement) event.target.closest('.pis-cp-face').innerHTML = ICON.pawBig; }, true);
         let drawing = false;
-        const draw = () => { drawing = false; void drawFaces().catch(() => {}); drawTiles(); drawChips(); mark(); paint(); };
+        // ----- the time lists (Preferred Time Window, each added visit time, a stay's pick-up time) open in the app's own sheet, not the phone's menu.
+        //       The same fields hold the answers: a row in the sheet sets its field exactly as picking from the list would.
+        const PICK_ICON = { clock: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/></svg>',
+            x: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" aria-hidden="true"><path d="M6.500 6.500l11 11M17.500 6.500l-11 11"/></svg>',
+            check: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg>' };
+        const words = el => String(el?.textContent || '').replace(/\s+/g, ' ').trim();
+        let pickOpen = null;
+        function closePick(back) {
+            const was = pickOpen;
+            if (!was) return;
+            pickOpen = null;
+            document.removeEventListener('keydown', was.onKey, true);
+            was.shade.remove();
+            document.body.classList.remove('pis-cp-pick-open');
+            if (back !== false && was.from.isConnected) { try { was.from.focus({ preventScroll: true }); } catch (error) { /* not focusable right now */ } }
+        }
+        function openPick(select, from) {
+            closePick(false);
+            const title = words(select.id ? form.querySelector(`label[for="${select.id}"]`) : null) || words(select.closest('#time-window-wrapper')?.querySelector('label')) || 'Choose a Time';
+            const rows = realOptions(select).map(item => { const text = words(item); const extra = /^(.*\S)\s*\(([^()]+)\)$/.exec(text); return { value: item.value, main: extra ? extra[1] : text, extra: extra ? extra[2] : '', off: item.disabled, on: item.value === select.value }; });
+            if (!rows.length) return;
+            const shade = make('div', 'pis-cp-pickshade', `<div class="pis-cp-picksheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="pis-cp-pickhead"><i>${PICK_ICON.clock}</i><h3>${esc(title)}</h3><button type="button" class="pis-cp-pickx" aria-label="Close">${PICK_ICON.x}</button></div>`
+                + `<div class="pis-cp-picklist" role="listbox">${rows.map(row => `<button type="button" role="option" aria-selected="${row.on}" data-cp-value="${esc(row.value)}"${row.on ? ' class="is-on"' : ''}${row.off ? ' disabled' : ''}><span>${esc(row.main)}</span>${row.extra ? `<small>${esc(row.extra)}</small>` : ''}<b>${PICK_ICON.check}</b></button>`).join('')}</div></div>`);
+            const onKey = event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closePick(); } };
+            shade.addEventListener('click', event => {
+                if (event.target === shade || event.target.closest('.pis-cp-pickx')) { closePick(); return; }
+                const row = event.target.closest('[data-cp-value]');
+                if (!row || row.disabled) return;
+                const value = row.dataset.cpValue;
+                closePick();
+                choose(select, value);
+                note.textContent = '';
+                drawPicks();
+            });
+            document.addEventListener('keydown', onKey, true);
+            document.body.append(shade);
+            document.body.classList.add('pis-cp-pick-open');
+            pickOpen = { shade, from, onKey };
+            const sheet = shade.firstElementChild;
+            sheet.tabIndex = -1;
+            try { sheet.focus({ preventScroll: true }); } catch (error) { /* not focusable right now */ }      // the sheet itself: no ring round a button nobody chose
+        }
+        function drawPicks() {
+            for (const select of form.querySelectorAll('#booking-time-windows select, #boarding-pickup-window')) {
+                let button = select.previousElementSibling;
+                if (!button?.classList?.contains('pis-cp-pick')) {
+                    button = make('button', 'pis-cp-pick');
+                    button.type = 'button';
+                    button.setAttribute('aria-haspopup', 'listbox');
+                    button.addEventListener('click', () => openPick(select, button));
+                    select.before(button);
+                    select.classList.add('pis-cp-held');
+                    quiet(select, true);
+                }
+                const chosen = select.value ? select.selectedOptions[0] : null;
+                const text = words(chosen || select.options[0]) || 'Select';
+                const key = [text, chosen ? 1 : 0, select.disabled ? 1 : 0, select.classList.contains('booking-field-error') ? 1 : 0].join('|');
+                if (button.dataset.cpKey === key) continue;
+                button.dataset.cpKey = key;
+                button.textContent = text;
+                button.classList.toggle('is-empty', !chosen);
+                button.classList.toggle('is-wrong', select.classList.contains('booking-field-error'));
+                button.disabled = select.disabled;
+            }
+        }
+        const draw = () => { drawing = false; void drawFaces().catch(() => {}); drawTiles(); drawChips(); drawPicks(); mark(); paint(); };
         const soon = () => { if (!drawing) { drawing = true; requestAnimationFrame(draw); } };
         new MutationObserver(soon).observe(form, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style', 'hidden'] });
         form.addEventListener('change', soon);
@@ -3113,7 +3231,7 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
                 paint();
                 form.scrollTop = 0;
                 const box = kind === 'feeding' ? feeding : kind === 'care' ? care : null;
-                if (box) { try { box.focus({ preventScroll: true }); box.setSelectionRange(box.value.length, box.value.length); } catch (error) { /* not focusable right now */ } }
+                if (box && !touch) { try { box.focus({ preventScroll: true }); box.setSelectionRange(box.value.length, box.value.length); } catch (error) { /* not focusable right now */ } }      // on a touch screen the keyboard waits for a tap in the box
             } else {
                 delete petPanel.dataset.cpSheet;
                 delete petPanel.dataset.cpReady;
@@ -3220,6 +3338,84 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
         return true;
     }
     try { setUpPetSheet(); } catch (error) { console.warn('Pet sheets:', error?.message || error); nextSheet = ''; }
+
+    // ---------- Breed in the pet form: suggestions as you type (the sign-up page has them; this form never did) ----------
+    // The list is kept here, so it works with no connection. It only helps: any breed can still be typed.
+    const BREEDS = 'Affenpinscher|Afghan Hound|Airedale Terrier|Akita|Alaskan Husky|Alaskan Klee Kai|Alaskan Malamute|American Bulldog|American Bully|American Eskimo Dog|American Foxhound|American Pit Bull Terrier|American Staffordshire Terrier|Anatolian Shepherd|Aussiedoodle|Australian Cattle Dog|Australian Kelpie|Australian Shepherd|Australian Terrier|Basenji|Basset Hound|Beagle|Bearded Collie|Beauceron|Bedlington Terrier|Belgian Malinois|Belgian Sheepdog|Belgian Tervuren|Bernedoodle|Bernese Mountain Dog|Bichon Frise|Biewer Terrier|Black and Tan Coonhound|Black Mouth Cur|Bloodhound|Blue Heeler|Blue Lacy|Bluetick Coonhound|Boerboel|Bolognese|Border Collie|Border Terrier|Borzoi|Boston Terrier|Bouvier des Flandres|Boxer|Boykin Spaniel|Briard|Brittany|Brussels Griffon|Bull Terrier|Bulldog|Bullmastiff|Cairn Terrier|Cane Corso|Cardigan Welsh Corgi|Catahoula Leopard Dog|Cavachon|Cavalier King Charles Spaniel|Cavapoo|Chesapeake Bay Retriever|Chihuahua|Chinese Crested|Chinese Shar-Pei|Chiweenie|Chow Chow|Clumber Spaniel|Cockapoo|Cocker Spaniel|Collie|Corgi|Coton de Tulear|Dachshund|Dalmatian|Doberman Pinscher|Dogo Argentino|Dogue de Bordeaux|English Bulldog|English Cocker Spaniel|English Foxhound|English Mastiff|English Setter|English Springer Spaniel|Field Spaniel|Finnish Spitz|Flat-Coated Retriever|Fox Terrier|French Bulldog|Frenchton|German Pinscher|German Shepherd|German Shorthaired Pointer|German Wirehaired Pointer|Giant Schnauzer|Goldador|Golden Retriever|Goldendoodle|Gordon Setter|Great Dane|Great Pyrenees|Greater Swiss Mountain Dog|Greyhound|Havanese|Havapoo|Husky|Irish Setter|Irish Terrier|Irish Wolfhound|Italian Greyhound|Jack Russell Terrier|Japanese Chin|Keeshond|Kerry Blue Terrier|Lab Mix|Labradoodle|Labrador Retriever|Lagotto Romagnolo|Lakeland Terrier|Leonberger|Lhasa Apso|Maltese|Maltipoo|Manchester Terrier|Mastiff|Mini Bernedoodle|Mini Goldendoodle|Miniature American Shepherd|Miniature Australian Shepherd|Miniature Bull Terrier|Miniature Dachshund|Miniature Pinscher|Miniature Poodle|Miniature Schnauzer|Mixed Breed|Morkie|Mountain Cur|Newfoundland|Norfolk Terrier|Norwegian Elkhound|Norwich Terrier|Nova Scotia Duck Tolling Retriever|Old English Sheepdog|Papillon|Parson Russell Terrier|Peekapoo|Pekingese|Pembroke Welsh Corgi|Pit Bull|Plott Hound|Pointer|Pomeranian|Pomsky|Poochon|Poodle|Portuguese Water Dog|Pug|Puggle|Rat Terrier|Redbone Coonhound|Rhodesian Ridgeback|Rottweiler|Saint Bernard|Saluki|Samoyed|Schipperke|Schnauzer|Schnoodle|Scottish Terrier|Sheepadoodle|Shepherd Mix|Shetland Sheepdog|Shiba Inu|Shih Tzu|Shihpoo|Shorkie|Siberian Husky|Silky Terrier|Soft Coated Wheaten Terrier|Staffordshire Bull Terrier|Standard Poodle|Standard Schnauzer|Terrier Mix|Tibetan Mastiff|Tibetan Spaniel|Tibetan Terrier|Toy Fox Terrier|Toy Poodle|Treeing Walker Coonhound|Vizsla|Weimaraner|Welsh Springer Spaniel|Welsh Terrier|West Highland White Terrier|Westiepoo|Whippet|Whoodle|Wire Fox Terrier|Wirehaired Pointing Griffon|Xoloitzcuintli|Yorkipoo|Yorkshire Terrier'.split('|');
+    function setUpBreedHelp() {
+        const box = document.getElementById('pet-breed');
+        const field = box?.closest('.pet-form-field');
+        if (!box || !field || field.querySelector('.pis-cp-breeds')) return false;
+        const plain = text => String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const keys = BREEDS.map(name => [name, plain(name)]);
+        const list = document.createElement('div');
+        list.className = 'pis-cp-breeds';
+        list.id = 'pis-cp-breeds';
+        list.setAttribute('role', 'listbox');
+        list.setAttribute('aria-label', 'Breeds');
+        list.hidden = true;
+        field.classList.add('pis-cp-breedfield');
+        field.append(list);
+        box.setAttribute('autocomplete', 'off');
+        box.setAttribute('aria-autocomplete', 'list');
+        box.setAttribute('aria-controls', list.id);
+        let at = -1;
+        const shut = () => { at = -1; if (!list.hidden) { list.hidden = true; list.innerHTML = ''; } box.setAttribute('aria-expanded', 'false'); box.removeAttribute('aria-activedescendant'); };
+        // breeds that start with what is typed first, then breeds with a later word that does; nothing once a breed is typed in full
+        function find(typed) {
+            const q = plain(typed);
+            if (!q) return [];
+            const starts = [], words = [];
+            for (const [name, key] of keys) {
+                if (key === q) return [];
+                if (key.startsWith(q)) starts.push(name); else if (key.includes(` ${q}`)) words.push(name);
+            }
+            return [...starts, ...words].slice(0, 5);
+        }
+        function draw() {
+            const found = document.activeElement === box ? find(box.value) : [];
+            if (!found.length) { shut(); return; }
+            // under the box when the rows fit there, above it when they fit there instead (with the keyboard up there is often more room above).
+            // Where neither side takes them all, the side with more room shows as many whole rows as it holds: typing more narrows the list.
+            const form = box.closest('form');
+            const edge = form ? form.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
+            const view = window.visualViewport;
+            const mine = field.getBoundingClientRect();
+            const save = form ? form.querySelector('button[type="submit"]') : null;
+            const saveTop = save && save.getClientRects().length ? save.getBoundingClientRect().top : Infinity;
+            const floor = Math.min(edge.bottom, view ? view.offsetTop + view.height : window.innerHeight, saveTop > mine.bottom ? saveTop - 8 : Infinity);
+            const below = floor - mine.bottom - 8;
+            const above = mine.top - edge.top - 8;
+            const holds = room => Math.floor((room - 12) / 44);
+            let up = false;
+            let rows = found.length;
+            if (holds(below) < rows) { if (holds(above) >= rows) up = true; else { up = above > below; rows = Math.max(2, Math.min(rows, holds(up ? above : below))); } }
+            list.innerHTML = found.slice(0, rows).map((name, i) => `<button type="button" role="option" tabindex="-1" id="pis-cp-breed-${i}" data-cp-breed="${esc(name)}">${esc(name)}</button>`).join('');
+            at = -1;
+            list.classList.toggle('is-up', up);
+            list.style.maxHeight = `${Math.round(Math.max(60, up ? above : below))}px`;
+            list.hidden = false;
+            box.setAttribute('aria-expanded', 'true');
+        }
+        const take = name => { box.value = name; shut(); box.dispatchEvent(new Event('input', { bubbles: true })); box.dispatchEvent(new Event('change', { bubbles: true })); };
+        box.addEventListener('input', draw);
+        box.addEventListener('blur', () => window.setTimeout(shut, 150));
+        list.addEventListener('mousedown', event => event.preventDefault());      // the box keeps the cursor while a suggestion is clicked
+        list.addEventListener('click', event => { const row = event.target.closest('[data-cp-breed]'); if (row) take(row.dataset.cpBreed); });
+        box.addEventListener('keydown', event => {
+            if (list.hidden) return;
+            const rows = [...list.children];
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                at = event.key === 'ArrowDown' ? (at + 1) % rows.length : (at <= 0 ? rows.length - 1 : at - 1);
+                rows.forEach((row, i) => row.classList.toggle('is-on', i === at));
+                box.setAttribute('aria-activedescendant', rows[at].id);
+            } else if (event.key === 'Enter' && at >= 0) { event.preventDefault(); take(rows[at].dataset.cpBreed); }
+            else if (event.key === 'Escape') { event.stopPropagation(); shut(); }
+        });
+        return true;
+    }
+    try { setUpBreedHelp(); } catch (error) { console.warn('Breed suggestions:', error?.message || error); }
 
     // =====================================================================
     // PART 6: MESSAGES
@@ -3555,6 +3751,7 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
         contact.insertAdjacentElement('afterend', opts);
         contact.classList.add('pis-cp-held');
         contact.tabIndex = -1;
+        contact.focus = () => {};      // the buttons stand in for this list: it takes no cursor, so the phone's own menu never opens for it
         const paintOpts = () => { for (const button of opts.children) button.setAttribute('aria-checked', String(button.dataset.cpValue === contact.value)); };
         opts.addEventListener('click', event => {
             const button = event.target.closest('.pis-cp-pf-opt');
@@ -3620,7 +3817,7 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
                 setKind(nextKind || 'profile');
                 nextKind = '';
                 relabelSave();
-                const box = kind === 'notes' ? document.getElementById('household-home-notes') : touch ? null : form.querySelector(`[data-cp-part="${kind}"] :is(input:not([disabled]), textarea)`);
+                const box = touch ? null : kind === 'notes' ? document.getElementById('household-home-notes') : form.querySelector(`[data-cp-part="${kind}"] :is(input:not([disabled]), textarea)`);
                 if (box) { try { box.focus({ preventScroll: true }); box.setSelectionRange(box.value.length, box.value.length); } catch (error) { /* not a box that takes a cursor position */ } }
             } else {
                 panel.classList.remove('pis-cp-sheet');
@@ -4090,6 +4287,20 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
             if (v.from?.isConnected) { try { v.from.focus({ preventScroll: true }); } catch { /* ignore */ } }
         }
 
+        // the photo's box: as large as fits the screen for the photo's shape, whichever copy of it is showing
+        function fitPhoto(v, w, h) {
+            const stage = v.img.parentElement;
+            const cs = getComputedStyle(stage);
+            const roomW = Math.min(1100, stage.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0));
+            const roomH = stage.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+            if (!(w > 0 && h > 0 && roomW > 0 && roomH > 0)) { v.shape = null; v.img.style.width = v.img.style.height = ''; return; }
+            const k = Math.min(roomW / w, roomH / h);
+            v.shape = [w, h];
+            v.img.style.width = `${Math.round(w * k)}px`;
+            v.img.style.height = `${Math.round(h * k)}px`;
+        }
+        window.addEventListener('resize', () => { if (view?.shape) fitPhoto(view, view.shape[0], view.shape[1]); });
+
         async function show(v, index) {
             const item = v.items[index];
             const turn = ++v.turn;
@@ -4104,8 +4315,18 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
             v.img.alt = item.alt || 'Photo';
             v.img.classList.remove('is-held');
             v.img.style.transform = '';
-            if (item.small) { v.img.src = item.small; v.img.classList.add('is-ready'); }          // the small picture at once, the full one as soon as it is in
-            else { v.img.classList.remove('is-ready'); v.img.removeAttribute('src'); }
+            // the small picture at once, in a box the size the full photo will take, so it doesn't open small and then jump bigger
+            v.shape = null;
+            v.img.style.width = v.img.style.height = '';
+            let fullIn = false;
+            const clear = () => { v.img.classList.remove('is-ready'); v.img.removeAttribute('src'); };
+            if (item.small) {
+                const small = new Image();
+                const putSmall = () => { if (!here() || fullIn || !small.naturalWidth) return; fitPhoto(v, small.naturalWidth, small.naturalHeight); v.img.src = item.small; v.img.classList.add('is-ready'); };
+                small.onload = putSmall;
+                small.src = item.small;
+                if (small.complete && small.naturalWidth) putSmall(); else clear();
+            } else clear();
             let url = item.url;
             if (!url && item.path) {
                 try { url = await window.getVisitPhotoFullUrl(item.path); } catch { url = ''; }
@@ -4114,7 +4335,7 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
             }
             if (!url) { if (!item.small) v.note.hidden = false; return; }
             const full = new Image();
-            full.onload = () => { if (here()) { v.img.src = url; v.img.classList.add('is-ready'); } };
+            full.onload = () => { if (here()) { fullIn = true; fitPhoto(v, full.naturalWidth, full.naturalHeight); v.img.src = url; v.img.classList.add('is-ready'); } };
             full.onerror = () => { if (here() && !item.small) v.note.hidden = false; };
             full.src = url;
             // the ones on either side, so the next is there at once

@@ -59,6 +59,11 @@ body.pis-ck .payment-header-copy p, body.pis-ck .payment-security-badge { displa
 
 /* ----- a white box whose heading is the soft cream band ----- */
 body.pis-ck .payment-layout { gap: 14px !important; margin: 0 !important; padding: 0 !important; }
+/* the header runs edge to edge and the cards fill the column. (The app copy gives the header, the cards' column and the confirmation card
+   a width of their own, which left all three short on the right: the page looked pushed to the left.) */
+body.pis-ck .payment-page-header, body.pis-ck .booking-success-header { width: auto !important; }
+body.pis-ck .payment-layout { width: auto !important; max-width: none !important; }
+body.pis-ck .booking-success-card { width: auto !important; }
 body.pis-ck .payment-card, body.pis-ck .booking-success-card { position: relative; margin: 0 !important; padding: 0 !important; background: #fff !important; border: 1px solid var(--cp-line) !important; border-radius: 20px !important; box-shadow: 0 5px 14px rgba(20,48,79,.045) !important; overflow: visible !important; }
 body.pis-ck .payment-card::before, body.pis-ck .payment-card::after, body.pis-ck .booking-success-card::before, body.pis-ck .booking-success-card::after { display: none !important; }
 body.pis-ck .payment-card-heading { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; min-height: 46px !important; margin: 0 !important; padding: 0 14px !important;
