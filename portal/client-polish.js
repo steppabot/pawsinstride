@@ -716,6 +716,12 @@ body.pis-cp #booking-form button.pis-cp-pick.is-wrong, body.pis-cp #booking-form
 body.pis-cp #booking-form button.pis-cp-pick:focus-visible, body.pis-cp #booking-form .booking-time-row > button.pis-cp-pick:focus-visible { outline: none !important; border-color: #F8A534 !important; box-shadow: 0 0 0 3px rgba(248,165,52,.22) !important; }
 body.pis-cp #booking-form button.pis-cp-pick:disabled { opacity: .55 !important; cursor: default; }
 body.pis-cp-pick-open { overflow: hidden !important; }
+/* ----- back from checkout to change a booking: a short wait in place of Home, until the booking is on screen ----- */
+body.pis-cp-editback #dashboard-content > :not(#booking-section):not(.pis-cp-wait) { visibility: hidden !important; }
+.pis-cp-wait { display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 0; padding: 96px 24px 40px; color: var(--cp-soft); font: 600 16px/1.3 var(--cp-text); text-align: center; }
+.pis-cp-wait i { display: block; width: 30px; height: 30px; border: 3px solid #F6DFBE; border-top-color: var(--cp-tang); border-radius: 50%; animation: pis-cp-turn .8s linear infinite; }
+@keyframes pis-cp-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pis-cp-wait i { animation: none; } }
 /* ----- Breed in the pet form: suggestions as you type, under the box or above it, whichever has the room ----- */
 body.pis-cp #pet-form-panel .pis-cp-breedfield { position: relative !important; }
 body.pis-cp #pet-form-panel .pis-cp-breeds { position: absolute !important; left: 0 !important; right: 0 !important; top: calc(100% + 6px) !important; bottom: auto !important; z-index: 6 !important; display: grid !important; gap: 0 !important; margin: 0 !important; padding: 5px !important;
@@ -3416,6 +3422,36 @@ body.pis-cp-pv-on .client-report-lightbox-close { width: 44px !important; height
         return true;
     }
     try { setUpBreedHelp(); } catch (error) { console.warn('Breed suggestions:', error?.message || error); }
+
+    // ---------- back from checkout to change a booking ("Edit Booking") ----------
+    // The app reloads everything and only then reopens the booking, and Home was on screen for those two seconds.
+    // A short wait shows in its place, with Services picked in the tabs, until the booking is on screen.
+    function setUpEditReturn() {
+        const KEY = 'paws-in-stride-booking-draft';
+        let asked = false;
+        try { asked = new URLSearchParams(window.location.search).get('editBooking') === '1' && Boolean(window.sessionStorage.getItem(KEY) || window.localStorage.getItem(KEY)); } catch (error) { asked = false; }
+        const content = document.getElementById('dashboard-content');
+        if (!asked || !bookingBox || !content) return false;
+        const shown = () => bookingBox.style.display !== 'none' && bookingBox.getClientRects().length > 0;
+        if (shown()) return false;
+        const wait = document.createElement('div');
+        wait.className = 'pis-cp-wait';
+        wait.setAttribute('role', 'status');
+        wait.innerHTML = '<i aria-hidden="true"></i><span>Getting Your Booking Ready</span>';
+        content.prepend(wait);
+        document.body.classList.add('pis-cp-editback');
+        let watch = null;
+        let timer = 0;
+        const done = () => { if (!wait.isConnected) return; wait.remove(); document.body.classList.remove('pis-cp-editback'); if (watch) watch.disconnect(); window.clearTimeout(timer); };
+        watch = new MutationObserver(() => { if (shown()) done(); });
+        watch.observe(bookingBox, { attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
+        watch.observe(content, { attributes: true, attributeFilter: ['style'] });
+        timer = window.setTimeout(done, 8000);
+        // the tabs show where this is heading
+        try { document.querySelector('[data-client-app-tab="services"]')?.click(); } catch (error) { /* the tabs are not ready yet: the booking opens Services itself */ }
+        return true;
+    }
+    try { setUpEditReturn(); } catch (error) { console.warn('Edit Booking return:', error?.message || error); document.body.classList.remove('pis-cp-editback'); }
 
     // =====================================================================
     // PART 6: MESSAGES
