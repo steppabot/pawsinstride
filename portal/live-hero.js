@@ -267,7 +267,8 @@
             tiles = [{ label: 'Visit Time', value: length(progress.minutes) }, { label: 'Finished', value: timeOf(progress.completedAt) || '—', word: true }];
         }
         const meta = [range(progress.checkedInAt || visit.checked_in_at, progress.completedAt || visit.completed_at, progress.minutes)];
-        if (kind !== 'meet') {
+        // A pet sit is told through its sit updates: with no report written, nothing is missing.
+        if (kind !== 'meet' && (report || kind !== 'sit')) {
             meta.push(report?.published_at ? `Report sent at ${timeOf(report.published_at)}`
                 : report ? 'Report saved' : { text: 'No visit report yet', note: true });
         }

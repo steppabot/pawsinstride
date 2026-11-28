@@ -1,0 +1,406 @@
+/* ========================================
+   SIGN IN, SIGN UP AND PASSWORD PAGES: NEW LOOK
+   ========================================
+   The pages a client sees before the app: login.html, signup.html, forgot-password.html,
+   reset-password.html, and join-team.html (which shares the sign-in layout).
+   Sign in keeps its orange and sign up keeps its blue.
+   - The app's lettering for headings, bigger fields, one button style.
+   - On a phone: a curved band of color across the top, the logo sitting on its edge,
+     the heading and the form on white under it.
+   - On a computer: the color side and the form side, with the logo and the words in the
+     same spot on Sign In and on Sign Up.
+   Styles only: nothing here changes what the pages do. A page turns this on with
+   class="pis-au" on its <body>. Load it after portal.css.
+   ======================================== */
+@font-face { font-family: "Fredoka"; font-weight: 600; font-style: normal; font-display: swap; src: url("assets/fonts/fredoka-600.woff2") format("woff2"); }
+
+body.pis-au {
+    --au-display: "Fredoka", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+    --au-text: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --au-navy: #14304F; --au-soft: #51677F; --au-tang: #F47B20; --au-line: #DCE6EF; --au-blue: #1E73BE; --au-page: #EEF4F9;
+    --au-accent: #F47B20; --au-ring: rgba(244,123,32,.16);
+    --au-fill: linear-gradient(180deg, #F8A534 0, #F8A534 calc(var(--au-safe) + 36px), #F26B21 calc(var(--au-safe) + 230px));          /* the band of color on a phone: flat at the top, so it meets the status bar strip cleanly */
+    /* a phone: how tall the band is, how tall the logo is, and the room the status bar takes */
+    --au-band: 206px; --au-logo: 176px; --au-safe: env(safe-area-inset-top, 0px);
+    --au-edge: calc(var(--au-logo) * .0472);                                /* the white edge and its shadow room, drawn into the logo picture */
+    font-family: var(--au-text) !important; color: var(--au-navy) !important;
+}
+body.pis-au.portal-signup-page { --au-accent: #2890DF; --au-ring: rgba(40,144,223,.16); --au-fill: linear-gradient(145deg, #47CEE6 0%, #2890DF 55%, #1F7BC2 100%); }
+/* an iPhone keeps Sign In between the status bar and the home bar (its own keyboard handling), so the band starts under the status bar */
+html.iphone-login body.pis-au { --au-safe: 0px; }
+/* shorter phones: a shorter band and a smaller logo, so Sign In still fits on one screen.
+   (By the height of the phone itself, which does not change when the keyboard comes up.) */
+@media (max-device-height: 879px) { body.pis-au { --au-band: 192px; --au-logo: 162px; } }
+@media (max-device-height: 829px) { body.pis-au { --au-band: 160px; --au-logo: 136px; } }
+@media (max-device-height: 699px) { body.pis-au { --au-band: 134px; --au-logo: 116px; } }
+
+/* ===================== fields, buttons and links (every page, every size) ===================== */
+body.pis-au :is(.login-field, .signup-field) > label, body.pis-au .signup-field-heading > label { display: block !important; margin: 0 0 7px !important; color: var(--au-navy) !important; font: 700 14.5px/1.3 var(--au-text) !important; letter-spacing: 0 !important; text-transform: none !important; }
+body.pis-au :is(.login-field, .signup-field) :is(input, select, textarea) { box-sizing: border-box !important; width: 100% !important; height: 54px !important; min-height: 54px !important; margin: 0 !important; padding: 0 16px !important; border: 1.5px solid var(--au-line) !important; border-radius: 15px !important;
+    background-color: #fff !important; box-shadow: none !important; color: var(--au-navy) !important; font: 500 17px/1.2 var(--au-text) !important; outline: 0 !important; }
+body.pis-au :is(.login-field, .signup-field) select { -webkit-appearance: none !important; appearance: none !important; padding-right: 42px !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2351677F' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important; background-position: right 14px center !important; background-size: 18px 18px !important; }
+body.pis-au :is(.login-field, .signup-field) input[type="date"] { min-width: 0 !important; -webkit-appearance: none; appearance: none; text-align: left !important; }
+body.pis-au :is(.login-field, .signup-field) input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+body.pis-au :is(.login-field, .signup-field) textarea { height: auto !important; min-height: 96px !important; padding: 13px 16px !important; line-height: 1.4 !important; }
+body.pis-au :is(.login-field, .signup-field) :is(input, textarea)::placeholder { color: #8496A8 !important; opacity: 1 !important; }
+body.pis-au :is(.login-field, .signup-field) :is(input, select, textarea):focus { border-color: var(--au-accent) !important; box-shadow: 0 0 0 4px var(--au-ring) !important; }
+/* a field the page itself marked as wrong (older page code sets the red line on the field directly) */
+body.pis-au :is(.login-field, .signup-field) :is(input, select, textarea):is([style*="border-color"], .signup-field-error) { border-color: #D94F4F !important; box-shadow: 0 0 0 3px rgba(217,79,79,.14) !important; }
+body.pis-au :is(.login-password-wrap, .signup-password-wrap) { position: relative !important; display: block !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+body.pis-au :is(.login-password-wrap, .signup-password-wrap) > input { padding-right: 74px !important; }
+body.pis-au :is(.login-password-wrap, .signup-password-wrap) > button { position: absolute !important; top: 7px !important; right: 7px !important; bottom: auto !important; width: auto !important; height: 40px !important; min-height: 40px !important; margin: 0 !important; padding: 0 12px !important; border: 0 !important; border-radius: 11px !important;
+    background: var(--au-page) !important; box-shadow: none !important; color: var(--au-navy) !important; font: 600 14.5px/1 var(--au-display) !important; letter-spacing: .2px !important; transform: none !important; }
+body.pis-au :is(.login-submit-button, .signup-primary-button) { display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; width: 100% !important; height: 56px !important; min-height: 56px !important; margin: 0 !important; padding: 0 16px !important;
+    border: 0 !important; border-radius: 16px !important; background: linear-gradient(135deg, #F8A534, #F26B21) !important; box-shadow: 0 8px 18px rgba(242,107,33,.26) !important; color: #fff !important; font: 600 19px/1 var(--au-display) !important; letter-spacing: .3px !important; text-decoration: none !important; text-transform: none !important; transform: none !important; }
+body.pis-au :is(.login-submit-button, .signup-primary-button):disabled { background: #E3EAF1 !important; box-shadow: none !important; color: #8496A8 !important; opacity: 1 !important; }
+body.pis-au :is(.login-submit-button, .signup-primary-button, .signup-secondary-button, .signup-add-pet-button):focus-visible, body.pis-au :is(.login-password-wrap, .signup-password-wrap) > button:focus-visible, body.pis-au a:focus-visible { outline: 3px solid var(--au-blue) !important; outline-offset: 2px !important; }
+/* a button answers a press (and a mouse resting on it) */
+body.pis-au :is(.login-submit-button, .signup-primary-button, .signup-secondary-button, .signup-add-pet-button, .signup-remove-pet-button, .pis-faceid-button, .pis-auth-back, .signup-calendar-nav, .signup-meet-greet-time, .signup-calendar-day, .login-password-toggle, .signup-password-toggle):not(:disabled):active { filter: brightness(.93) !important; }
+@media (hover: hover) {
+    body.pis-au :is(.login-submit-button, .signup-primary-button, .pis-faceid-button):not(:disabled):hover { filter: brightness(1.05) !important; }
+    body.pis-au :is(.signup-secondary-button, .signup-add-pet-button, .pis-auth-back, .signup-calendar-nav, .signup-meet-greet-time:not(.selected), .signup-calendar-day:not(.selected)):not(:disabled):hover { filter: brightness(.97) !important; }
+    body.pis-au a:not(.pis-auth-back):not(.signup-logo-link):not(.login-submit-button):not(.signup-primary-button):hover { text-decoration: underline !important; }
+}
+body.pis-au a:not(.pis-auth-back):not(.signup-logo-link):not(.login-submit-button):not(.signup-primary-button) { color: var(--au-blue) !important; font-weight: 700 !important; text-decoration: none !important; }
+
+/* ===================== SIGN IN, FORGOT PASSWORD, RESET PASSWORD, TEAM LOGIN ===================== */
+body.pis-au .login-form-heading { margin: 0 0 20px !important; padding: 0 !important; }
+body.pis-au .login-form-heading > span { display: none !important; }
+body.pis-au .login-form-heading > h2 { margin: 0 0 6px !important; color: var(--au-navy) !important; font: 600 28px/1.15 var(--au-display) !important; letter-spacing: .2px !important; }
+body.pis-au .login-form-heading > p { margin: 0 !important; color: var(--au-soft) !important; font: 500 15.5px/1.4 var(--au-text) !important; text-wrap: balance; }
+body.pis-au .login-field { margin: 0 0 15px !important; }
+body.pis-au .login-forgot-password-row { margin: 10px 2px 0 !important; text-align: right !important; font: 700 14.5px/1.3 var(--au-text) !important; }
+body.pis-au .login-submit-button { margin-top: 20px !important; }
+body.pis-au .login-signup-prompt { margin: 16px 0 0 !important; text-align: center !important; color: var(--au-soft) !important; font: 500 15px/1.4 var(--au-text) !important; }
+body.pis-au .login-signup-prompt + .login-signup-prompt { margin-top: 9px !important; }
+body.pis-au .login-signup-prompt > span { color: var(--au-soft) !important; font: inherit !important; }
+body.pis-au .login-footer-note { margin: 20px 0 0 !important; padding: 16px 0 0 !important; border-top: 1px solid var(--au-line) !important; text-align: center !important; color: var(--au-soft) !important; font: 500 13px/1.4 var(--au-text) !important; }
+body.pis-au .pis-legal-links { margin: 8px 0 0 !important; text-align: center !important; font: 700 14px/1.3 var(--au-text) !important; }
+/* the message under a form (wrong password, link sent...) and the pages that have only a link under the button */
+body.pis-au :is(#login-message, #forgot-password-message, #reset-password-message, #join-team-message) { margin: 14px 0 0 !important; font: 600 14.5px/1.45 var(--au-text) !important; text-align: center; }
+body.pis-au :is(#login-message, #forgot-password-message, #reset-password-message, #join-team-message):empty { display: none !important; }
+body.pis-au :is(#forgot-password-message, #reset-password-message) ~ .login-forgot-password-row { display: block !important; margin: 18px 0 0 !important; text-align: center !important; font-size: 15.5px !important; }
+/* Reset Password, once it is done */
+body.pis-au .reset-password-success { margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; text-align: center !important; }
+body.pis-au .reset-password-success-icon { display: grid !important; place-items: center !important; width: 64px !important; height: 64px !important; margin: 0 auto 14px !important; border: 0 !important; border-radius: 22px !important; background: #DDF2E5 !important; box-shadow: none !important; color: #1F8A4C !important; font: 800 30px/1 var(--au-text) !important; }
+body.pis-au .reset-password-success > h2 { margin: 0 0 8px !important; color: var(--au-navy) !important; font: 600 28px/1.15 var(--au-display) !important; letter-spacing: .2px !important; }
+body.pis-au .reset-password-success > p { margin: 0 0 22px !important; color: var(--au-soft) !important; font: 500 15.5px/1.5 var(--au-text) !important; }
+/* the Face ID button the iPhone app adds above the form */
+body.pis-au .pis-faceid-login { gap: 9px !important; margin: 0 0 14px !important; }
+body.pis-au .pis-faceid-button { box-sizing: border-box !important; height: 56px !important; min-height: 56px !important; padding: 0 16px !important; border: 0 !important; border-radius: 16px !important; background: var(--au-navy) !important; box-shadow: 0 8px 18px rgba(20,48,79,.22) !important; color: #fff !important; font: 600 18px/1 var(--au-display) !important; letter-spacing: .3px !important; }
+body.pis-au .pis-faceid-for { color: var(--au-soft) !important; font: 500 13.5px/1.35 var(--au-text) !important; }
+body.pis-au .pis-faceid-off { color: var(--au-blue) !important; font-weight: 700 !important; }
+body.pis-au .pis-faceid-or { margin-top: 2px !important; color: var(--au-soft) !important; font: 600 13.5px/1.2 var(--au-text) !important; letter-spacing: 0 !important; text-transform: none !important; }
+body.pis-au .pis-faceid-or::before, body.pis-au .pis-faceid-or::after { background: var(--au-line) !important; }
+
+/* a computer: the color side, in the app's lettering */
+body.pis-au .login-brand-panel h1 { font: 600 clamp(40px, 4.6vw, 58px)/1.05 var(--au-display) !important; letter-spacing: .3px !important; text-shadow: 0 3px 0 rgba(13,30,48,.22) !important; }
+body.pis-au .login-brand-eyebrow { font: 600 17px/1.2 var(--au-display) !important; letter-spacing: .4px !important; text-transform: none !important; opacity: .95 !important; }
+body.pis-au .login-brand-panel p { font: 500 18px/1.55 var(--au-text) !important; }
+body.pis-au .login-brand-trust > span { font: 600 15.5px/1.3 var(--au-display) !important; letter-spacing: .2px !important; }
+@media (min-width: 981px) {
+    body.pis-au.portal-login-page .login-container { box-sizing: border-box !important; width: 100% !important; max-width: 452px !important; padding: 34px 36px 28px !important; border: 0 !important; border-radius: 24px !important; background: #fff !important; box-shadow: 0 10px 28px rgba(20,48,79,.10) !important; }
+    body.pis-au.portal-login-page .login-container::before, body.pis-au.portal-login-page .login-container::after { display: none !important; }
+    body.pis-au.portal-login-page .login-form-panel { background: var(--au-page) !important; }
+    /* the two sides fill the window top to bottom, square, the way Sign Up's do */
+    body.pis-au.portal-login-page :is(.login-brand-panel, .login-form-panel) { margin: 0 !important; border-radius: 0 !important; }
+    html body.pis-au.portal-login-page { background: var(--au-page) !important; }
+}
+
+/* a phone (and a tablet held upright): the band of orange, the logo on its edge, the heading and the form on white */
+@media (max-width: 980px) {
+    html body.pis-au.portal-login-page { background: #fff !important; }
+    html body.pis-au.portal-login-page::before, html body.pis-au.portal-login-page::after { content: none !important; display: none !important; }
+    html body.pis-au .login-page-shell { border-radius: 0 !important; background: none !important; }
+    html:not(.iphone-login) body.pis-au .login-page-shell { display: block !important; min-height: 100vh !important; min-height: 100dvh !important; }
+    html body.pis-au .login-brand-panel { display: none !important; }
+    html body.pis-au .login-form-panel { position: relative !important; display: flex !important; flex-direction: column !important; align-items: stretch !important; justify-content: flex-start !important; box-sizing: border-box !important; width: 100% !important; height: auto !important;
+        min-height: 100vh !important; min-height: 100dvh !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; border-radius: 0 !important; background: #fff !important; }
+    html body.pis-au .login-form-panel::before { content: "" !important; display: block !important; position: absolute !important; z-index: 3 !important; top: 0 !important; left: 0 !important; width: 100% !important; height: calc(var(--au-safe) + var(--au-band)) !important;
+        -webkit-clip-path: ellipse(116.3% 100% at 50% 0); clip-path: ellipse(116.3% 100% at 50% 0); background: radial-gradient(circle at 8.4% 51%, rgba(255,255,255,.13) 0 calc(var(--au-band) * .447), transparent calc(var(--au-band) * .447 + 1px)), var(--au-fill) !important; }
+    /* a page that scrolls under the status bar: once the band has scrolled away, a white strip keeps the clock and battery clear of the form.
+       (It sits behind the band and the logo, in front of everything else. No height where there is no status bar to clear.) */
+    html body.pis-au .login-form-panel::after { content: "" !important; display: block !important; position: fixed !important; z-index: 2 !important; top: 0 !important; left: 0 !important; right: 0 !important; height: var(--au-safe) !important; background: #fff !important; pointer-events: none !important; }
+    html body.pis-au.portal-login-page .login-container { position: relative !important; z-index: auto !important; display: block !important; flex: 1 0 auto !important; box-sizing: border-box !important; width: 100% !important; max-width: 520px !important; margin: 0 auto !important; padding: 0 24px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+        border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; overflow: visible !important; }
+    html body.pis-au.portal-login-page .login-container::before, html body.pis-au.portal-login-page .login-container::after { content: none !important; display: none !important; }
+    html body.pis-au .login-mobile-logo-wrapper { position: relative !important; z-index: 4 !important; display: flex !important; justify-content: center !important; width: auto !important; height: auto !important; margin: calc(var(--au-safe) + var(--au-band) - var(--au-logo) * .557 - var(--au-edge)) 0 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+    html body.pis-au .login-mobile-logo { display: block !important; width: auto !important; height: calc(var(--au-logo) + var(--au-edge) * 2) !important; max-width: none !important; margin: 0 !important; filter: drop-shadow(0 10px 14px rgba(20,48,79,.22)) !important; animation: none !important; }
+    html body.pis-au .login-form-heading { margin: calc(14px - var(--au-edge)) 0 20px !important; padding: 0 !important; text-align: center !important; }
+    html body.pis-au .login-form-heading > h2 { margin: 0 !important; font-size: 30px !important; line-height: 1.12 !important; letter-spacing: .3px !important; }
+    html body.pis-au .login-form-heading > p { margin: 7px 0 0 !important; }
+    html body.pis-au .login-footer-note { display: none !important; }                 /* the logo already says it */
+    html body.pis-au .pis-legal-links { margin-top: 10px !important; }
+    html body.pis-au .reset-password-success { padding-top: 14px !important; }
+    /* an iPhone: the strip behind the status bar matches the top of the band */
+    html.iphone-login body.pis-au.portal-login-page { background: linear-gradient(#F8A534, #F8A534) top / 100% 50% no-repeat, #fff !important; }
+    html.iphone-login body.pis-au .login-form-panel { min-height: 100% !important; }
+    html.iphone-login body.pis-au.portal-login-page .login-container { padding-bottom: 14px !important; }
+    /* with the Face ID button there is more to fit: a smaller logo, and the line under the heading steps aside */
+    html body.pis-au:has(.pis-faceid-login) { --au-band: 140px; --au-logo: 112px; }
+    html body.pis-au .login-container:has(.pis-faceid-login) .login-form-heading { margin-bottom: 14px !important; }
+    html body.pis-au .login-container:has(.pis-faceid-login) .login-form-heading > p { display: none !important; }
+    html body.pis-au .login-container:has(.pis-faceid-login) .login-field { margin-bottom: 12px !important; }
+    html body.pis-au .login-container:has(.pis-faceid-login) .login-submit-button { margin-top: 16px !important; }
+    html body.pis-au .login-container:has(.pis-faceid-login) .login-signup-prompt { margin-top: 13px !important; }
+    html body.pis-au .login-container:has(.pis-faceid-login) .login-signup-prompt + .login-signup-prompt { margin-top: 7px !important; }
+}
+@media (max-width: 980px) and (max-device-height: 829px) {
+    html body.pis-au:has(.pis-faceid-login) { --au-band: 106px; --au-logo: 88px; }
+}
+@media (max-width: 980px) and (max-device-height: 699px) {
+    html body.pis-au .login-form-heading { margin-bottom: 14px !important; }
+    html body.pis-au .login-form-heading > h2 { font-size: 27px !important; }
+    html body.pis-au .login-form-heading > p { margin-top: 4px !important; font-size: 14.5px !important; }
+    html body.pis-au .login-field { margin-bottom: 11px !important; }
+    html body.pis-au :is(.login-field) :is(input) { height: 50px !important; min-height: 50px !important; }
+    html body.pis-au .login-password-wrap > button { top: 5px !important; }
+    html body.pis-au .login-submit-button { height: 52px !important; min-height: 52px !important; margin-top: 14px !important; }
+    html body.pis-au .login-signup-prompt { margin-top: 13px !important; }
+    html body.pis-au .login-signup-prompt + .login-signup-prompt { margin-top: 6px !important; }
+    html body.pis-au .pis-legal-links { margin-top: 9px !important; }
+    html body.pis-au:has(.pis-faceid-login) { --au-band: 80px; --au-logo: 66px; }
+    html body.pis-au .pis-faceid-login { gap: 7px !important; margin-bottom: 10px !important; }
+    html body.pis-au .pis-faceid-button { height: 50px !important; min-height: 50px !important; }
+    html body.pis-au .login-container:has(.pis-faceid-login) .login-form-heading { margin-bottom: 10px !important; }
+}
+@media (max-width: 359px) {
+    html body.pis-au.portal-login-page .login-container { padding-left: 18px !important; padding-right: 18px !important; }
+    html body.pis-au .login-form-heading > h2 { font-size: 26px !important; }
+    body.pis-au .login-signup-prompt { font-size: 14px !important; }
+}
+
+/* ===================== SIGN UP ===================== */
+body.pis-au .signup-card::before, body.pis-au .signup-card::after { display: none !important; }
+body.pis-au .signup-progress { margin: 0 0 20px !important; padding: 0 !important; }
+body.pis-au.portal-signup-page .signup-card .signup-progress-copy { display: flex !important; flex-direction: row !important; align-items: baseline !important; justify-content: space-between !important; gap: 10px !important; margin: 0 0 9px !important; }
+body.pis-au #signup-step-count { color: var(--au-navy) !important; font: 600 16px/1.2 var(--au-display) !important; letter-spacing: .2px !important; }
+body.pis-au #signup-step-label { color: var(--au-soft) !important; font: 600 14px/1.2 var(--au-text) !important; }
+body.pis-au .signup-progress-track { height: 9px !important; border-radius: 5px !important; background: #E6EEF5 !important; overflow: hidden !important; }
+body.pis-au .signup-progress-bar { height: 100% !important; border-radius: 5px !important; background: linear-gradient(90deg, #47CEE6, #2890DF) !important; box-shadow: none !important; }
+body.pis-au .signup-eyebrow { display: none !important; }
+body.pis-au .signup-step { margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; }
+body.pis-au .signup-step-heading { margin: 0 0 20px !important; }
+body.pis-au .signup-step-heading > h1 { margin: 0 0 6px !important; color: var(--au-navy) !important; font: 600 28px/1.15 var(--au-display) !important; letter-spacing: .2px !important; text-wrap: balance; }
+body.pis-au .signup-step-heading > p { margin: 0 !important; color: var(--au-soft) !important; font: 500 15.5px/1.45 var(--au-text) !important; text-wrap: pretty; }
+body.pis-au .signup-field-heading { margin: 0 0 10px !important; }
+body.pis-au .signup-field-heading > label { margin-bottom: 2px !important; font-size: 15.5px !important; }
+body.pis-au .signup-field-heading > p, body.pis-au .signup-field-help { margin: 0 !important; color: var(--au-soft) !important; font: 500 13.5px/1.4 var(--au-text) !important; }
+body.pis-au .signup-field-help { display: block !important; margin-top: 7px !important; }
+body.pis-au .signup-client-type-options { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; margin: 0 0 18px !important; }
+body.pis-au .signup-choice-card { position: relative !important; display: block !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; }
+body.pis-au .signup-choice-card-content { display: flex !important; align-items: center !important; gap: 12px !important; box-sizing: border-box !important; min-height: 72px !important; margin: 0 !important; padding: 12px 14px !important; border: 1.5px solid var(--au-line) !important; border-radius: 17px !important; background: #fff !important; box-shadow: none !important; transform: none !important; }
+body.pis-au .signup-choice-card-icon { flex: none !important; display: grid !important; place-items: center !important; width: 44px !important; height: 44px !important; border: 0 !important; border-radius: 14px !important; background: #E3F3FC !important; color: #1F7BC2 !important; font: 700 20px/1 var(--au-text) !important; }
+body.pis-au .signup-choice-card-copy > strong { display: block !important; color: var(--au-navy) !important; font: 600 17.5px/1.2 var(--au-display) !important; letter-spacing: .1px !important; }
+body.pis-au .signup-choice-card-copy > small { display: block !important; margin-top: 2px !important; color: var(--au-soft) !important; font: 500 13px/1.3 var(--au-text) !important; text-wrap: balance; }
+body.pis-au .signup-choice-card > input:checked + .signup-choice-card-content { border-color: #2890DF !important; background: #EEF8FD !important; box-shadow: 0 0 0 3px rgba(40,144,223,.14) !important; }
+body.pis-au .signup-choice-card > input:checked + .signup-choice-card-content .signup-choice-card-icon { background: linear-gradient(135deg, #47CEE6, #2890DF) !important; color: #fff !important; }
+body.pis-au .signup-choice-card > input:focus-visible + .signup-choice-card-content { outline: 3px solid var(--au-blue) !important; outline-offset: 2px !important; }
+body.pis-au .signup-form-grid { gap: 15px 14px !important; }
+body.pis-au .signup-section-divider { height: 1px !important; margin: 24px 0 20px !important; border: 0 !important; background: var(--au-line) !important; }
+body.pis-au .signup-subsection-heading { margin: 0 0 16px !important; }
+body.pis-au .signup-subsection-heading > h2 { margin: 0 0 4px !important; color: var(--au-navy) !important; font: 600 21px/1.2 var(--au-display) !important; letter-spacing: .1px !important; }
+body.pis-au .signup-subsection-heading > p { margin: 0 !important; color: var(--au-soft) !important; font: 500 14px/1.45 var(--au-text) !important; }
+body.pis-au .signup-optional { margin-left: 4px !important; color: var(--au-soft) !important; font: 500 12.5px/1.3 var(--au-text) !important; letter-spacing: 0 !important; text-transform: none !important; }
+body.pis-au .signup-message { margin: 0 0 18px !important; }
+/* the buttons under a step: the way forward on top, Back under it, both the full width (side by side on a computer) */
+body.pis-au .signup-actions { display: flex !important; flex-direction: column-reverse !important; align-items: stretch !important; gap: 10px !important; margin: 24px 0 0 !important; padding: 0 !important; border: 0 !important; }
+body.pis-au .signup-secondary-button { display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; width: 100% !important; height: 56px !important; min-height: 56px !important; margin: 0 !important; padding: 0 16px !important; border: 1.5px solid var(--au-line) !important; border-radius: 16px !important;
+    background: #fff !important; box-shadow: none !important; color: var(--au-navy) !important; font: 600 18px/1 var(--au-display) !important; letter-spacing: .3px !important; text-transform: none !important; transform: none !important; }
+/* step 2: pets */
+body.pis-au .signup-pet-card { margin: 0 0 14px !important; padding: 16px 16px 18px !important; border: 1.5px solid var(--au-line) !important; border-radius: 20px !important; background: #fff !important; box-shadow: none !important; }
+body.pis-au .signup-pet-card-header { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; min-height: 38px !important; margin: 0 0 12px !important; padding: 0 !important; border: 0 !important; }
+body.pis-au .signup-pet-number { margin: 0 !important; color: var(--au-navy) !important; font: 600 21px/1.2 var(--au-display) !important; letter-spacing: .1px !important; text-transform: none !important; }
+body.pis-au .signup-pet-card-header h2 { display: none !important; }                 /* "Pet 1" says it */
+body.pis-au .signup-remove-pet-button { flex: none !important; box-sizing: border-box !important; width: auto !important; height: 38px !important; min-height: 38px !important; margin: 0 !important; padding: 0 13px !important; border: 0 !important; border-radius: 12px !important; background: #FDECEA !important; box-shadow: none !important; color: #B23A2B !important; font: 600 14.5px/1 var(--au-display) !important; letter-spacing: .2px !important; }
+body.pis-au .signup-breed-autocomplete { position: relative !important; }
+body.pis-au .signup-breed-suggestions { top: calc(100% + 6px) !important; left: 0 !important; right: 0 !important; z-index: 1 !important; max-height: 240px !important; margin: 0 !important; padding: 6px !important; overflow-y: auto !important; border: 1.5px solid var(--au-line) !important; border-radius: 16px !important; background: #fff !important; box-shadow: 0 12px 28px rgba(20,48,79,.16) !important; }
+body.pis-au .signup-breed-suggestion { display: block !important; box-sizing: border-box !important; width: 100% !important; min-height: 44px !important; margin: 0 !important; padding: 10px 12px !important; border: 0 !important; border-radius: 11px !important; background: none !important; color: var(--au-navy) !important; font: 500 16.5px/1.3 var(--au-text) !important; text-align: left !important; }
+body.pis-au .signup-breed-suggestion:is(:hover, :focus, .is-active, [aria-selected="true"]) { background: #EEF8FD !important; outline: 0 !important; }
+body.pis-au .signup-add-pet-button { display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; box-sizing: border-box !important; width: 100% !important; height: 54px !important; min-height: 54px !important; margin: 0 0 16px !important; padding: 0 16px !important; border: 1.5px dashed #8FC3EC !important; border-radius: 16px !important;
+    background: #F4FAFE !important; box-shadow: none !important; color: var(--au-blue) !important; font: 600 17.5px/1 var(--au-display) !important; letter-spacing: .2px !important; transform: none !important; }
+body.pis-au .signup-add-pet-button > span { display: inline !important; width: auto !important; height: auto !important; border: 0 !important; background: none !important; color: inherit !important; font: 600 21px/1 var(--au-display) !important; }
+body.pis-au .signup-pet-note { margin: 0 !important; padding: 14px 16px !important; border: 0 !important; border-radius: 16px !important; background: var(--au-page) !important; box-shadow: none !important; }
+body.pis-au .signup-pet-note > strong { display: block !important; margin: 0 0 3px !important; color: var(--au-navy) !important; font: 700 14.5px/1.35 var(--au-text) !important; }
+body.pis-au .signup-pet-note > p { margin: 0 !important; color: var(--au-soft) !important; font: 500 14px/1.45 var(--au-text) !important; }
+/* step 3: the meet and greet */
+body.pis-au .signup-meet-greet-summary { display: flex !important; align-items: center !important; gap: 12px !important; margin: 0 0 14px !important; padding: 12px 14px !important; border: 0 !important; border-radius: 17px !important; background: #EEF8FD !important; box-shadow: none !important; }
+body.pis-au .signup-meet-greet-icon { flex: none !important; display: grid !important; place-items: center !important; width: 44px !important; height: 44px !important; border: 0 !important; border-radius: 14px !important; background: #fff !important; box-shadow: none !important; font-size: 22px !important; line-height: 1 !important; }
+body.pis-au .signup-meet-greet-summary strong { display: block !important; color: var(--au-navy) !important; font: 600 17.5px/1.2 var(--au-display) !important; letter-spacing: .1px !important; }
+body.pis-au .signup-meet-greet-summary p { margin: 2px 0 0 !important; color: var(--au-soft) !important; font: 500 13.5px/1.3 var(--au-text) !important; }
+body.pis-au #signup-meet-greet-calendar { margin: 0 !important; padding: 14px 12px 12px !important; border: 1.5px solid var(--au-line) !important; border-radius: 20px !important; background: #fff !important; box-shadow: none !important; text-align: left !important; }
+body.pis-au .signup-meet-greet-calendar-header { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 8px !important; margin: 0 0 10px !important; padding: 0 2px !important; border: 0 !important; }
+body.pis-au .signup-meet-greet-calendar-header strong { color: var(--au-navy) !important; font: 600 21px/1.2 var(--au-display) !important; letter-spacing: .1px !important; }
+body.pis-au .signup-calendar-nav { flex: none !important; display: grid !important; place-items: center !important; box-sizing: border-box !important; width: 42px !important; height: 42px !important; min-height: 42px !important; margin: 0 !important; padding: 0 0 3px !important; border: 0 !important; border-radius: 14px !important; background: var(--au-page) !important; box-shadow: none !important; color: var(--au-navy) !important; font: 500 28px/1 var(--au-text) !important; transform: none !important; }
+body.pis-au .signup-calendar-weekdays, body.pis-au .signup-calendar-grid { display: grid !important; grid-template-columns: repeat(7, minmax(0, 1fr)) !important; gap: 4px !important; margin: 0 !important; padding: 0 !important; }
+body.pis-au .signup-calendar-weekdays { margin-bottom: 4px !important; }
+body.pis-au .signup-calendar-weekdays span { color: var(--au-soft) !important; font: 600 12.5px/1.2 var(--au-text) !important; letter-spacing: 0 !important; text-align: center !important; text-transform: none !important; }
+body.pis-au .signup-calendar-day { display: grid !important; place-items: center !important; box-sizing: border-box !important; width: 100% !important; height: 44px !important; min-height: 44px !important; aspect-ratio: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 13px !important; background: #E3F1FB !important; box-shadow: none !important; color: #1A5FAE !important; font: 700 17px/1 var(--au-text) !important; transform: none !important; }
+body.pis-au .signup-calendar-day:disabled { background: none !important; color: #A9B6C3 !important; font-weight: 500 !important; opacity: 1 !important; }
+body.pis-au .signup-calendar-day-empty { background: none !important; }
+body.pis-au .signup-calendar-day.selected { background: linear-gradient(135deg, #47CEE6, #2890DF) !important; box-shadow: 0 5px 12px rgba(40,144,223,.30) !important; color: #fff !important; }
+body.pis-au :is(.signup-calendar-day, .signup-calendar-nav, .signup-meet-greet-time):focus-visible { outline: 3px solid var(--au-blue) !important; outline-offset: 2px !important; }
+body.pis-au .signup-time-slots { display: block !important; margin: 20px 0 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
+body.pis-au .signup-time-slots[hidden] { display: none !important; }
+body.pis-au .signup-meet-greet-time-heading { margin: 0 0 10px !important; padding: 0 !important; color: var(--au-navy) !important; font: 600 21px/1.2 var(--au-display) !important; letter-spacing: .1px !important; text-transform: none !important; }
+body.pis-au .signup-meet-greet-time-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; margin: 0 !important; padding: 0 !important; }
+body.pis-au .signup-meet-greet-time { box-sizing: border-box !important; width: 100% !important; height: 48px !important; min-height: 48px !important; margin: 0 !important; padding: 0 4px !important; border: 1.5px solid var(--au-line) !important; border-radius: 14px !important; background: #fff !important; box-shadow: none !important; color: var(--au-navy) !important; font: 600 15.5px/1 var(--au-text) !important; white-space: nowrap !important; transform: none !important; }
+body.pis-au .signup-meet-greet-time:disabled { border-color: transparent !important; background: var(--au-page) !important; color: #A9B6C3 !important; text-decoration: line-through !important; opacity: 1 !important; }
+body.pis-au .signup-meet-greet-time.selected { border-color: transparent !important; background: linear-gradient(135deg, #47CEE6, #2890DF) !important; box-shadow: 0 5px 12px rgba(40,144,223,.30) !important; color: #fff !important; }
+body.pis-au .signup-selected-appointment { margin: 18px 0 0 !important; padding: 13px 16px !important; border: 0 !important; border-radius: 16px !important; background: #EEF8FD !important; box-shadow: none !important; }
+body.pis-au .signup-selected-appointment[hidden] { display: none !important; }
+body.pis-au .signup-selected-appointment span { display: block !important; margin: 0 0 3px !important; color: var(--au-soft) !important; font: 600 13.5px/1.3 var(--au-text) !important; letter-spacing: 0 !important; text-transform: none !important; }
+body.pis-au .signup-selected-appointment strong { display: block !important; color: var(--au-navy) !important; font: 700 15px/1.35 var(--au-text) !important; letter-spacing: -.1px !important; text-wrap: balance; }
+/* the finish: the account is made, so the page stops asking */
+body.pis-au .signup-form-column:has(#signup-step-success:not([hidden])) :is(.signup-branding-subtitle, .signup-footer) { display: none !important; }
+body.pis-au .signup-success { text-align: center !important; }
+body.pis-au .signup-success-icon { display: grid !important; place-items: center !important; width: 64px !important; height: 64px !important; margin: 4px auto 14px !important; border: 0 !important; border-radius: 22px !important; background: #DDF2E5 !important; box-shadow: none !important; color: #1F8A4C !important; font: 800 30px/1 var(--au-text) !important; }
+body.pis-au .signup-success h1 { margin: 0 0 8px !important; color: var(--au-navy) !important; font: 600 30px/1.15 var(--au-display) !important; letter-spacing: .2px !important; }
+body.pis-au .signup-success-message { margin: 0 0 18px !important; color: var(--au-soft) !important; font: 500 15.5px/1.5 var(--au-text) !important; text-wrap: pretty; }
+body.pis-au .signup-success-appointment { margin: 0 0 14px !important; padding: 14px 16px !important; border: 0 !important; border-radius: 17px !important; background: #EEF8FD !important; box-shadow: none !important; text-align: center !important; }
+body.pis-au .signup-success-appointment[hidden] { display: none !important; }
+body.pis-au .signup-success-appointment span { display: block !important; margin: 0 0 4px !important; color: var(--au-soft) !important; font: 600 13.5px/1.3 var(--au-text) !important; letter-spacing: 0 !important; text-transform: none !important; }
+body.pis-au .signup-success-appointment strong { display: block !important; color: var(--au-navy) !important; font: 700 15px/1.35 var(--au-text) !important; letter-spacing: -.1px !important; text-wrap: balance; }
+body.pis-au .signup-success-appointment p { margin: 3px 0 0 !important; color: var(--au-soft) !important; font: 500 14.5px/1.3 var(--au-text) !important; }
+body.pis-au .signup-success-checklist { display: grid !important; gap: 0 !important; margin: 0 0 22px !important; padding: 4px 16px !important; border: 1.5px solid var(--au-line) !important; border-radius: 17px !important; background: #fff !important; box-shadow: none !important; text-align: left !important; }
+body.pis-au .signup-success-checklist > div { display: flex !important; align-items: center !important; gap: 11px !important; min-height: 46px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-top: 1px solid var(--au-line) !important; border-radius: 0 !important; background: none !important; color: var(--au-navy) !important; font: 600 15.5px/1.3 var(--au-text) !important; }
+body.pis-au .signup-success-checklist > div:first-child { border-top: 0 !important; }
+body.pis-au .signup-success-checklist > div[hidden] { display: none !important; }
+body.pis-au .signup-success-checklist span { flex: none !important; display: grid !important; place-items: center !important; width: 26px !important; height: 26px !important; border: 0 !important; border-radius: 9px !important; background: #DDF2E5 !important; color: #1F8A4C !important; font: 800 14px/1 var(--au-text) !important; }
+body.pis-au .signup-footer { color: var(--au-soft) !important; font: 500 14.5px/1.4 var(--au-text) !important; text-align: center !important; }
+body.pis-au .signup-footer > p { margin: 0 !important; color: inherit !important; font: inherit !important; }
+body.pis-au .pis-auth-back { display: inline-flex !important; align-items: center !important; gap: 4px !important; box-sizing: border-box !important; height: 42px !important; margin: 0 !important; padding: 0 15px 0 9px !important; border: 0 !important; border-radius: 14px !important; background: rgba(255,255,255,.95) !important;
+    box-shadow: 0 3px 8px rgba(13,30,48,.16) !important; color: var(--au-navy) !important; font: 600 16px/1 var(--au-display) !important; letter-spacing: .2px !important; text-decoration: none !important; }
+body.pis-au .pis-auth-back > svg { width: 20px !important; height: 20px !important; }
+
+/* a computer: the blue side stays, its words in the app's lettering */
+body.pis-au .signup-desktop-brand-panel h1 { font: 600 clamp(40px, 4.6vw, 58px)/1.05 var(--au-display) !important; letter-spacing: .3px !important; text-shadow: 0 3px 0 rgba(13,30,48,.20) !important; }
+body.pis-au .signup-desktop-brand-eyebrow { font: 600 17px/1.2 var(--au-display) !important; letter-spacing: .4px !important; text-transform: none !important; color: #fff !important; }
+body.pis-au .signup-desktop-brand-copy { font: 500 18px/1.55 var(--au-text) !important; }
+body.pis-au .signup-desktop-brand-benefits strong { font: 600 15.5px/1.3 var(--au-display) !important; letter-spacing: .2px !important; }
+@media (min-width: 981px) {
+    body.pis-au.portal-signup-page { background: var(--au-page) !important; }
+    body.pis-au .signup-card { box-sizing: border-box !important; padding: 30px 34px 30px !important; border: 0 !important; border-radius: 24px !important; background: #fff !important; box-shadow: 0 10px 28px rgba(20,48,79,.10) !important; }
+    body.pis-au .signup-branding { display: none !important; }
+    body.pis-au .signup-client-type-options { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)) !important; }
+    body.pis-au .signup-choice-card-content { gap: 10px !important; padding: 12px !important; }
+    body.pis-au .signup-choice-card-copy > small { font-size: 12.5px !important; }
+    body.pis-au .signup-actions { flex-direction: row !important; }
+    body.pis-au .signup-actions > .signup-secondary-button { flex: 0 0 32% !important; width: auto !important; }
+    body.pis-au .signup-actions > .signup-primary-button { flex: 1 1 0% !important; width: auto !important; min-width: 0 !important; }
+    /* the logo and the words sit in the same spot on Sign In and on Sign Up, so nothing jumps going from one to the other */
+    body.pis-au :is(.login-brand-panel, .signup-desktop-brand-panel) { align-items: flex-start !important; justify-content: flex-start !important; padding: 0 56px 0 5.7vw !important; }
+    body.pis-au :is(.login-brand-content, .signup-desktop-brand-content) { position: relative !important; z-index: 1 !important; box-sizing: border-box !important; width: 100% !important; max-width: 520px !important; margin: 0 !important; padding: clamp(32px, 19vh, 210px) 0 40px !important; }
+    body.pis-au :is(.login-brand-logo, .signup-desktop-brand-logo) { display: block !important; width: min(220px, 24.5vh) !important; height: auto !important; max-width: none !important; margin: 0 0 30px !important; }
+    body.pis-au :is(.login-brand-eyebrow, .signup-desktop-brand-eyebrow) { display: flex !important; align-items: center !important; gap: 10px !important; margin: 0 0 12px !important; padding: 0 !important; }
+    body.pis-au :is(.login-brand-panel, .signup-desktop-brand-panel) h1 { max-width: none !important; margin: 0 0 16px !important; }
+    body.pis-au :is(.login-brand-panel p, .signup-desktop-brand-copy) { max-width: 460px !important; margin: 0 0 28px !important; }
+    body.pis-au .signup-desktop-brand-panel h1 { max-width: 7.6em !important; text-wrap: balance; }      /* "Let's Get You / Set Up", not one word left on its own line */
+}
+
+/* a phone (and a tablet held upright): the band of blue, the logo on its edge, the heading and the steps on white */
+@media (max-width: 980px) {
+    body.pis-au.portal-signup-page { background: #fff !important; }
+    body.pis-au .signup-shell { display: block !important; box-sizing: border-box !important; width: 100% !important; max-width: none !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; background: none !important; }
+    body.pis-au .signup-form-column { position: relative !important; display: flex !important; flex-direction: column !important; box-sizing: border-box !important; width: 100% !important; max-width: none !important; min-height: 100vh !important; min-height: 100dvh !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+    body.pis-au .signup-form-column::before { content: "" !important; display: block !important; position: absolute !important; z-index: 3 !important; top: 0 !important; left: 0 !important; width: 100% !important; height: calc(var(--au-safe) + var(--au-band)) !important;
+        -webkit-clip-path: ellipse(116.3% 100% at 50% 0); clip-path: ellipse(116.3% 100% at 50% 0); background: radial-gradient(circle at 11.6% 0, rgba(255,255,255,.15) 0 calc(var(--au-band) * .68), transparent calc(var(--au-band) * .68 + 1px)), var(--au-fill) !important; }
+    /* the white strip behind the status bar once the band has scrolled away (see Sign In above) */
+    body.pis-au .signup-form-column::after { content: "" !important; display: block !important; position: fixed !important; z-index: 2 !important; top: 0 !important; left: 0 !important; right: 0 !important; height: var(--au-safe) !important; background: #fff !important; pointer-events: none !important; }
+    body.pis-au .pis-auth-back { position: absolute !important; z-index: 4 !important; top: calc(var(--au-safe) + 12px) !important; left: 14px !important; }
+    body.pis-au .signup-branding { position: relative !important; z-index: auto !important; display: block !important; margin: 0 !important; padding: calc(var(--au-safe) + var(--au-band) - var(--au-logo) * .557 - var(--au-edge)) 22px 2px !important; border: 0 !important; background: none !important; text-align: center !important; }
+    body.pis-au .signup-logo-link { position: relative !important; z-index: 4 !important; display: inline-block !important; width: auto !important; height: auto !important; margin: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+    body.pis-au .signup-logo { display: block !important; width: auto !important; height: calc(var(--au-logo) + var(--au-edge) * 2) !important; max-width: none !important; margin: 0 auto !important; filter: drop-shadow(0 10px 14px rgba(20,48,79,.22)) !important; }
+    body.pis-au .signup-branding-subtitle { margin: calc(14px - var(--au-edge)) 0 0 !important; color: var(--au-navy) !important; font: 600 30px/1.12 var(--au-display) !important; letter-spacing: .3px !important; text-transform: none !important; }
+    body.pis-au .signup-card { position: relative !important; z-index: auto !important; flex: 1 0 auto !important; box-sizing: border-box !important; width: 100% !important; max-width: 600px !important; margin: 0 auto !important; padding: 20px 22px 26px !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+    body.pis-au .signup-footer { position: relative !important; z-index: auto !important; margin: 0 !important; padding: 2px 22px calc(26px + env(safe-area-inset-bottom, 0px)) !important; background: none !important; }
+}
+@media (max-width: 480px) {
+    body.pis-au .signup-step-heading > h1 { font-size: 26px !important; }
+}
+@media (max-width: 359px) {
+    body.pis-au .signup-branding-subtitle { font-size: 25px !important; }
+    body.pis-au .signup-choice-card-content { gap: 10px !important; padding: 12px !important; }
+    body.pis-au .signup-choice-card-copy > small { font-size: 12.5px !important; }
+    body.pis-au .signup-meet-greet-time { font-size: 14px !important; }
+    body.pis-au .signup-meet-greet-time-grid { gap: 6px !important; }
+    body.pis-au .signup-calendar-day { height: 40px !important; min-height: 40px !important; font-size: 16px !important; }
+    body.pis-au .signup-card { padding-left: 16px !important; padding-right: 16px !important; }
+}
+
+/* ===================== THE POP-UP BOX (the Face ID question, "Leave Sign Up?"): the same box as in the app ===================== */
+/* POP-UP BOX: START (made from client/pop/src/box.css; the app carries the same rules in client-polish.js) */
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) { --pop-display: var(--au-display); --pop-text: var(--au-text); }
+/* The pop-up box: Cancel This Service, Log Out, the Face ID question and the yes / no questions. One box, so one look.
+   A sheet that slides up on a phone, a box in the middle of the window on a computer. (The App Icon chooser has its own rules.) */
+@keyframes pis-pop-up { from { transform: translateY(26px); opacity: .4; } to { transform: none; opacity: 1; } }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) { --pop-navy: #14304F; --pop-soft: #51677F; --pop-ink: #3F5368; --pop-line: #DCE6EF; --pop-tint: #EEF3F8; --pop-cream: #FFF3E0; --pop-cream-line: #F6DFBE; --pop-red: #D93025;
+    align-items: flex-end !important; justify-content: center !important; padding: 0 !important; background: rgba(13,30,48,.48) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) > .client-cancellation-dialog { position: relative !important; display: flex !important; flex-direction: column !important; box-sizing: border-box !important; width: 100% !important; max-width: none !important; max-height: calc(100vh - 34px - env(safe-area-inset-top, 0px)) !important; max-height: calc(100dvh - 34px - env(safe-area-inset-top, 0px)) !important;
+    margin: 0 !important; padding: 0 16px !important; border: 0 !important; border-radius: 26px 26px 0 0 !important; background: #fff !important; box-shadow: 0 -10px 30px rgba(13,30,48,.24) !important; color: var(--pop-navy) !important; font-family: var(--pop-text) !important; text-align: left !important; overflow-x: hidden !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; animation: pis-pop-up .22s ease-out; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) > .client-cancellation-dialog::before { content: "" !important; display: block !important; position: absolute !important; top: 8px !important; left: 50% !important; width: 40px !important; height: 5px !important; margin: 0 0 0 -20px !important; border-radius: 3px !important; background: #D5DFE9 !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) > .client-cancellation-dialog::after { content: none !important; display: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) > .client-cancellation-dialog > * { flex: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-header { order: 0; display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; margin: 0 !important; padding: 24px 0 12px !important; border: 0 !important; background: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-header > div { flex: 1 1 auto !important; min-width: 0 !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-eyebrow { display: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-header h3 { margin: 0 !important; color: var(--pop-navy) !important; font: 600 24px/1.15 var(--pop-display) !important; letter-spacing: .1px !important; text-transform: capitalize !important; text-wrap: balance; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-close { flex: none !important; position: static !important; display: block !important; width: 44px !important; min-width: 44px !important; height: 44px !important; min-height: 44px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 14px !important;
+    background: var(--pop-tint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2314304F' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6.5 6.5l11 11M17.5 6.5l-11 11'/%3E%3C/svg%3E") center / 20px no-repeat !important; box-shadow: none !important; color: transparent !important; font-size: 0 !important; line-height: 0 !important; transform: none !important; cursor: pointer; }
+/* what it is about: the service being cancelled (in that service's color), or who is signed in */
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-service { order: 1; display: block !important; margin: 0 0 12px !important; padding: 14px 16px !important; border: 0 !important; border-radius: 18px !important; background: var(--pkb, var(--pop-tint)) !important; box-shadow: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-service strong { display: block !important; margin: 0 !important; color: var(--pop-navy) !important; font: 600 19px/1.25 var(--pop-display) !important; letter-spacing: .1px !important; overflow-wrap: anywhere; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-service span { display: block !important; margin: 2px 0 0 !important; color: var(--pop-ink) !important; font: 600 15px/1.4 var(--pop-text) !important; overflow-wrap: anywhere; }
+/* the sums: one box, the credit on a band at the bottom of it */
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price { order: 2; display: flex !important; align-items: baseline !important; justify-content: space-between !important; gap: 12px !important; margin: 0 !important; padding: 11px 16px !important; border: 1.5px solid var(--pop-line) !important; border-top-width: 0 !important; border-radius: 0 !important; background: #fff !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) :not(.client-cancellation-price) + .client-cancellation-price { border-top-width: 1.5px !important; border-radius: 18px 18px 0 0 !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price > span { min-width: 0 !important; color: var(--pop-soft) !important; font: 600 15px/1.3 var(--pop-text) !important; letter-spacing: 0 !important; text-transform: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price > strong { flex: none !important; color: var(--pop-navy) !important; font: 700 15.5px/1.3 var(--pop-text) !important; white-space: nowrap !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price.pis-pop-total { align-items: center !important; padding: 13px 16px !important; border-color: var(--pop-cream-line) !important; border-top-width: 1.5px !important; border-radius: 0 0 18px 18px !important; background: var(--pop-cream) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price.pis-pop-total > span { color: var(--pop-navy) !important; font: 600 18px/1.25 var(--pop-display) !important; letter-spacing: .1px !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price.pis-pop-total > strong { font: 600 22px/1.1 var(--pop-display) !important; letter-spacing: .2px !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-note { order: 3; margin: 2px 2px 0 !important; padding: 0 !important; border: 0 !important; background: none !important; color: var(--pop-ink) !important; font: 500 15px/1.45 var(--pop-text) !important; text-align: left !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price + .client-cancellation-note { margin-top: 12px !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-note[data-pis-tone="error"], body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-note[data-pis-tone="success"] { margin: 2px 0 0 !important; padding: 12px 14px !important; border-radius: 14px !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-note:empty { display: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-policy { order: 4; margin: 14px 0 0 !important; padding: 13px 16px !important; border: 0 !important; border-radius: 16px !important; background: var(--pop-tint) !important; box-shadow: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-policy strong { display: block !important; margin: 0 0 4px !important; color: var(--pop-navy) !important; font: 700 14.5px/1.3 var(--pop-text) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-policy p { margin: 0 0 6px !important; color: var(--pop-soft) !important; font: 500 13.5px/1.45 var(--pop-text) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-policy p:last-child { margin-bottom: 0 !important; }
+/* the Face ID question asks for the password */
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .pis-faceid-password { order: 5; display: block !important; margin: 14px 0 0 !important; color: var(--pop-soft) !important; font: 700 14px/1.25 var(--pop-text) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .pis-faceid-password > span:first-child { display: block !important; margin: 0 2px 6px !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .pis-faceid-password .pis-password-wrap { position: relative !important; display: block !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .pis-faceid-password input { display: block !important; box-sizing: border-box !important; width: 100% !important; height: 54px !important; min-height: 54px !important; margin: 0 !important; padding: 0 74px 0 16px !important; border: 1.5px solid var(--pop-line) !important; border-radius: 15px !important; background: #fff !important; box-shadow: none !important; color: var(--pop-navy) !important; font: 500 17px/1.2 var(--pop-text) !important; outline: 0 !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .pis-faceid-password input:focus { border-color: #F47B20 !important; box-shadow: 0 0 0 4px rgba(244,123,32,.16) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .pis-faceid-password .pis-password-toggle { position: absolute !important; top: 7px !important; right: 7px !important; width: auto !important; height: 40px !important; min-height: 40px !important; margin: 0 !important; padding: 0 12px !important; border: 0 !important; border-radius: 11px !important; background: var(--pop-tint) !important; box-shadow: none !important; color: var(--pop-navy) !important; font: 600 14.5px/1 var(--pop-display) !important; letter-spacing: .2px !important; transform: none !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .pis-faceid-password small { display: block !important; min-height: 0 !important; margin: 6px 2px 0 !important; color: #C0392B !important; font: 600 14px/1.35 var(--pop-text) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .pis-faceid-password small:empty { display: none !important; }
+/* the answer: the action on top, the way out under it, both the full width, always in reach */
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions { order: 9; position: sticky !important; bottom: 0 !important; z-index: 1 !important; display: flex !important; flex-direction: column-reverse !important; align-items: stretch !important; gap: 10px !important; margin: 16px -16px 0 !important; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) !important; border: 0 !important; border-top: 1px solid var(--pop-line) !important; border-radius: 0 !important; background: #fff !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions > button { display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; width: 100% !important; max-width: none !important; min-width: 0 !important; height: 50px !important; min-height: 50px !important; margin: 0 !important; padding: 0 12px !important; border: 1.5px solid var(--pop-line) !important; border-radius: 15px !important;
+    background: #fff !important; box-shadow: none !important; color: var(--pop-navy) !important; font: 600 17px/1 var(--pop-display) !important; letter-spacing: .2px !important; text-transform: none !important; white-space: nowrap !important; transform: none !important; opacity: 1 !important; cursor: pointer; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions > .client-cancellation-confirm { height: 54px !important; min-height: 54px !important; border: 0 !important; background: var(--pop-red) !important; box-shadow: 0 6px 14px rgba(217,48,37,.26) !important; color: #fff !important; font-size: 18px !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions > .client-cancellation-confirm.pis-faceid-yes { background: linear-gradient(135deg, #F8A534 0%, #F26B21 100%) !important; box-shadow: 0 6px 14px rgba(242,107,33,.3) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions > .client-cancellation-confirm:disabled { opacity: .45 !important; box-shadow: none !important; cursor: default; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions > button:active:not(:disabled) { filter: brightness(.94) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) :is(.client-cancellation-actions > button, .client-cancellation-close):focus:not(:focus-visible) { outline: 0 !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions > button:not(.client-cancellation-confirm):focus:not(:focus-visible) { box-shadow: none !important; border-color: var(--pop-line) !important; }
+body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) :is(.client-cancellation-actions > button, .client-cancellation-close):focus-visible { outline: 3px solid #1E73BE !important; outline-offset: 2px !important; }
+@media (min-width: 1024px) {
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) { align-items: center !important; padding: 24px !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) > .client-cancellation-dialog { width: min(480px, calc(100vw - 48px)) !important; max-height: calc(100vh - 80px) !important; padding: 0 20px !important; border-radius: 24px !important; box-shadow: 0 24px 60px rgba(13,30,48,.32) !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) > .client-cancellation-dialog::before { display: none !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-header { padding-top: 20px !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions { flex-direction: row !important; margin: 16px -20px 0 !important; padding: 14px 20px 16px !important; border-radius: 0 0 24px 24px !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions > button { flex: 1 1 0% !important; height: 52px !important; min-height: 52px !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-actions > .client-cancellation-confirm { flex: 1.3 1 0% !important; height: 52px !important; min-height: 52px !important; }
+}
+@media (max-width: 359px) {
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-header h3 { font-size: 22px !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price > span { font-size: 14px !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price.pis-pop-total > span { font-size: 16.5px !important; }
+    body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) .client-cancellation-price.pis-pop-total > strong { font-size: 20px !important; }
+}
+@media (prefers-reduced-motion: reduce) { body.pis-au .client-cancellation-modal:not(.pis-appicon-modal) > .client-cancellation-dialog { animation: none !important; } }
+/* POP-UP BOX: END */

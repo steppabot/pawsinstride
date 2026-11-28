@@ -35,6 +35,7 @@
     // The last card is kept on this phone so Home opens with it straight away (no blank, no pop-in).
     const SAVED_CARD = 'pis-star-card';
     const SAVED_PHOTO = 'pis-star-photo';
+    const MAX_THUMBS = 5;        // small photos in one row; with more, the last tile says how many are left
         const SAVED_URLS = 'pis-star-urls';
     const SAVED_CSS = 'pis-star-css';
     const store = {
@@ -92,9 +93,12 @@
             color: #fff; font: 700 12px Roboto, Arial, sans-serif; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); white-space: nowrap; min-width: 0; }
         .pis-star-person b { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none;
             background: linear-gradient(135deg, #2b8bd6, #1f6fb2); font-size: 11px; font-weight: 800; }
-        .pis-star-bottom { position: absolute; z-index: 2; left: 18px; right: 18px; bottom: 18px; color: #fff; display: grid; gap: 10px; }
+        .pis-star-bottom { position: absolute; z-index: 2; left: 18px; right: 18px; bottom: 18px; color: #fff; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
         .pis-star-bottom h2 { margin: 0; color: #fff; font: 800 25px/1.18 Roboto, Arial, sans-serif; letter-spacing: -.01em;
-            text-shadow: 0 1px 12px rgba(0,0,0,.25); overflow-wrap: anywhere; }
+            text-shadow: 0 1px 12px rgba(0,0,0,.25); overflow-wrap: anywhere; min-width: 0; }
+        /* the headline keeps to one line: fitTitle() makes it smaller until it fits, and only lets it wrap when it would get too small to read */
+        .pis-star-bottom h2.pis-star-fit { white-space: nowrap; overflow-wrap: normal; }
+        .pis-star-bottom h2.pis-star-wrap { text-wrap: balance; }
         .pis-star-sub { margin: -4px 0 0; font: 600 14px/1.35 Roboto, Arial, sans-serif; color: rgba(255,255,255,.92); }
         .pis-star-stats { display: flex; gap: 8px; flex-wrap: wrap; }
                 .pis-star-stat[hidden] { display: none !important; }
@@ -103,9 +107,9 @@
         .pis-star-note { margin: 0; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             font: 500 14px/1.4 Roboto, Arial, sans-serif; color: #fff; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .pis-star-note b { font-weight: 800; }
-        .pis-star-thumbs { display: flex; gap: 6px; }
-        .pis-star-thumbs span { position: relative; width: 46px; height: 46px; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,.85);
-            background: rgba(255,255,255,.2); flex: none; }
+        .pis-star-thumbs { display: flex; flex-wrap: nowrap; gap: 6px; min-width: 0; }
+        .pis-star-thumbs span { position: relative; flex: 0 1 46px; min-width: 0; aspect-ratio: 1 / 1; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,.85);
+            background: rgba(255,255,255,.2); }
         .pis-star-thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .pis-star-thumbs span.more { display: grid; place-items: center; border-color: rgba(255,255,255,.5); font: 800 13px Roboto, Arial, sans-serif; }
         .pis-star-btn { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; min-height: 48px; border-radius: 14px; border: 0;
@@ -268,8 +272,20 @@
                 .select('id, visit_id, notes, fed, fresh_water, pee, poop, created_at, published_at')
                 .in('visit_id', recent.map(v => v.id));
             if (error) throw error;
-            const visit = recent.find(v => (data || []).some(r => Number(r.visit_id) === Number(v.id)));
-            if (visit) return { kind: 'done', visit, report: data.find(r => Number(r.visit_id) === Number(visit.id)) };
+            // A pet sit is told through its sit updates (there is no final report to write):
+            // a finished sit that got updates shows here by them.
+            const sits = recent.filter(v => kindOf(v) === 'sit' && !(data || []).some(r => Number(r.visit_id) === Number(v.id)));
+            let updates = [];
+            if (sits.length) {
+                const told = await supabaseClient.from('visit_updates')
+                    .select('id, visit_id, notes, published_at, visit_update_photos(storage_path, sort_order), visit_update_pet_care(fed, fresh_water, pee, poop)')
+                    .in('visit_id', sits.map(v => v.id)).not('published_at', 'is', null)
+                    .order('published_at', { ascending: false }).order('id', { ascending: false });
+                if (!told.error) updates = told.data || [];        // if they can't be read, Home shows what it would have before
+            }
+            const visit = recent.find(v => (data || []).some(r => Number(r.visit_id) === Number(v.id)) || updates.some(u => Number(u.visit_id) === Number(v.id)));
+            if (visit) return { kind: 'done', visit, report: (data || []).find(r => Number(r.visit_id) === Number(visit.id)) || null,
+                updates: updates.filter(u => Number(u.visit_id) === Number(visit.id)) };
         }
 
         // NEXT
@@ -373,8 +389,10 @@
 
         if (state.kind === 'done') {
             const { visit: v, report } = state;
+            // a finished pet sit with no report: its updates (newest first) are what there is to see
+            const told = !report && state.updates?.length ? state.updates : null;
             // Home is about to offer this visit's report: look it up now, so it opens without a wait (portal.js)
-            try { window.prefetchClientVisitReport?.(v.id); } catch { /* it still loads when opened */ }
+            if (!told) { try { window.prefetchClientVisitReport?.(v.id); } catch { /* it still loads when opened */ } }
             const pets = petsOf(v);
             const names = pets.map(p => p.name || 'Your pet');
             const kind = kindOf(v);
@@ -391,14 +409,18 @@
             const times = v.checked_in_at && v.completed_at ? `${clock(v.checked_in_at).replace(/ [AP]M$/, m => (clock(v.completed_at).endsWith(m.trim()) ? '' : m))} – ${clock(v.completed_at)}` : '';
             const dist = miles(walkResult?.data?.distance_meters);
             sub = [dayLabel(v.completed_at || `${v.visit_date}T12:00:00`) + (times ? `, ${times}` : ''), dist >= 0.01 ? milesText(dist) : ''].filter(Boolean).join(' · ');
-            const checks = [['fed', 'Fed'], ['fresh_water', 'Fresh Water'], ['pee', 'Pee'], ['poop', 'Poop']].filter(([f]) => report?.[f]).map(([, label]) => label);
-            stats = checks.map(label => `<span class="pis-star-stat">✓ ${esc(label)}</span>`);
-            if (!checks.length && report?.notes) note = esc(report.notes.trim());
-            const photos = (photoResult?.data || []).map(p => p.storage_path);
+            const marked = f => (told ? told.some(u => (u.visit_update_pet_care || []).some(care => care[f])) : report?.[f]);
+            const checks = [['fed', 'Fed'], ['fresh_water', 'Fresh Water'], ['pee', 'Pee'], ['poop', 'Poop']].filter(([f]) => marked(f)).map(([, label]) => label);
+            // the care checks are in the visit report; the card keeps to the headline, the time and the photos
+            const words = told ? (told.find(u => String(u.notes || '').trim())?.notes || '') : (report?.notes || '');
+            if (!checks.length && words) note = esc(words.trim());
+            const photos = told
+                ? told.flatMap(u => [...(u.visit_update_photos || [])].sort((a, b) => a.sort_order - b.sort_order).map(p => p.storage_path))
+                : (photoResult?.data || []).map(p => p.storage_path);
             photoPath = photos[0] || null;
             thumbPaths = photos.slice(1);
-            button = { text: 'See Visit Report', run: () => openClientHomeVisitReport(v) };
-            key += `:${v.id}:${report?.id}`;
+            button = told ? { text: 'See Sit Updates', run: () => openVisit(v) } : { text: 'See Visit Report', run: () => openClientHomeVisitReport(v) };
+            key += told ? `:${v.id}:sit:${told[0].id}:${told.length}` : `:${v.id}:${report?.id}`;
             if (!photoPath) photoUrl = await petPhoto(pets);
         }
 
@@ -428,10 +450,10 @@
         const [mainUrl, covers, thumbUrls] = await Promise.all([
             photoPath ? signed(photoPath) : Promise.resolve(photoUrl),
             photoPath && window.PisCover ? window.PisCover.load([photoPath]) : Promise.resolve(new Map()),
-            Promise.all(thumbPaths.slice(0, 3).map(signed))
+            Promise.all(thumbPaths.slice(0, MAX_THUMBS).map(signed))
         ]);
-        const extra = thumbPaths.length - 3;
-        const thumbs = thumbUrls.map((url, i) => (i === 2 && extra > 0
+        const extra = thumbPaths.length - MAX_THUMBS;
+        const thumbs = thumbUrls.map((url, i) => (i === MAX_THUMBS - 1 && extra > 0
             ? `<span class="more">+${extra + 1}</span>`
             : url ? `<span><img src="${esc(url)}" alt="" loading="lazy"></span>` : '')).join('');
                 const box = photoPath ? covers.get(photoPath) : null;
@@ -453,14 +475,54 @@
                 <div class="pis-star-bottom">
                     <h2>${esc(title)}</h2>
                     ${sub ? `<p class="pis-star-sub">${esc(sub)}</p>` : ''}
+                    ${thumbs ? `<div class="pis-star-thumbs" aria-hidden="true">${thumbs}</div>` : ''}
                     ${stats.length ? `<div class="pis-star-stats">${stats.join('')}</div>` : ''}
                     ${note ? `<p class="pis-star-note">${note}</p>` : ''}
-                    ${thumbs ? `<div class="pis-star-thumbs" aria-hidden="true">${thumbs}</div>` : ''}
                     ${button ? `<button type="button" class="pis-star-btn${button.orange ? ' orange' : ''}" data-star-button>${esc(button.text)} <span aria-hidden="true">→</span></button>` : ''}
                 </div>
             </div>`;
                 return { html, key, button, photoId, mainUrl, coversUpdate: state.kind === 'done' || state.kind === 'stay', live: state.kind === 'live' ? state.visit : null };
     }
+
+    // ---------- the headline on one line ----------
+    // Smaller first, wrap last: the headline shrinks until it fits on one line. Only when it would
+    // have to go below the smallest readable size does it wrap, onto two even lines.
+    function fitTitle(host, again = false) {
+        const h2 = host?.querySelector('.pis-star-bottom h2');
+        if (!h2) return;
+        const room = h2.clientWidth;
+        if (!room) return;                                   // Home isn't on screen: fitted when it shows
+        const mark = `${room}|${h2.textContent}`;
+        if (!again && h2.dataset.fit === mark) return;       // already fitted for this width and wording
+        h2.classList.remove('pis-star-wrap');
+        h2.classList.add('pis-star-fit');
+        h2.style.fontSize = '';
+        const base = parseFloat(getComputedStyle(h2).fontSize) || 25;
+        const floor = Math.max(16, Math.round(base * 0.6));
+        let size = base;
+        while (h2.scrollWidth > room + 0.5 && size > floor) {
+            size = Math.max(floor, size - 0.5);
+            h2.style.fontSize = `${size}px`;
+        }
+        if (h2.scrollWidth > room + 0.5) {
+            h2.classList.remove('pis-star-fit');
+            h2.classList.add('pis-star-wrap');
+            h2.style.fontSize = `${Math.max(floor, Math.round(base * 0.82))}px`;
+        }
+        h2.dataset.fit = mark;
+    }
+    // the card as saved for the next start carries its fitted headline, so it opens on one line too
+    function withFit(html) {
+        const h2 = document.querySelector('#pis-star .pis-star-bottom h2');
+        if (!h2 || !h2.dataset.fit) return html;
+        const size = h2.style.fontSize ? ` style="font-size:${esc(h2.style.fontSize)}"` : '';
+        return html.replace('<h2>', `<h2 class="${esc(h2.className)}" data-fit="${esc(h2.dataset.fit)}"${size}>`);
+    }
+    // a turned phone, a resized window, Home coming back on screen: fit again
+    const fitWatch = typeof ResizeObserver === 'function'
+        ? new ResizeObserver(() => fitTitle(document.getElementById('pis-star')))
+        : null;
+    try { document.fonts?.ready?.then(() => fitTitle(document.getElementById('pis-star'), true)); } catch { /* fitted without waiting for fonts */ }
 
     // ---------- keep the live numbers moving ----------
     function tickLive() {
@@ -529,6 +591,7 @@
             const anchor = document.getElementById('mobile-home-next-visit-card');
             if (anchor) anchor.before(host); else dash.prepend(host);
         }
+        fitWatch?.observe(host);
         return host;
     }
 
@@ -569,6 +632,7 @@
             watchLoading(img);
             img.addEventListener('error', () => img.classList.add('is-loading'), { once: true });
         }
+        fitTitle(host);
         const btn = host.querySelector('[data-star-button]');
         if (btn) btn.onclick = () => { pendingClick = true; };
                 shownKey = saved.key || '';
@@ -583,7 +647,7 @@
     let savingPhotoFor = '';
     function saveCard(card) {
         if (!me()) return;
-        store.set(SAVED_CARD, { uid: me(), key: card.key, html: card.html, photoId: card.photoId, coversUpdate: card.coversUpdate, at: Date.now() });
+        store.set(SAVED_CARD, { uid: me(), key: card.key, html: withFit(card.html), photoId: card.photoId, coversUpdate: card.coversUpdate, at: Date.now() });
         const pic = store.get(SAVED_PHOTO);
         if (!card.mainUrl || (pic?.uid === me() && pic.photoId === card.photoId) || savingPhotoFor === card.photoId) return;
         savingPhotoFor = card.photoId;
@@ -661,6 +725,7 @@
             if (card.key !== shownKey || !host.querySelector('.pis-star-card')) {
                 if (!(await showCard(host, card, version))) return;
             }
+            fitTitle(host);
             const btn = host.querySelector('[data-star-button]');
             if (btn) btn.onclick = () => card.button?.run();
             if (pendingClick) { pendingClick = false; card.button?.run(); }

@@ -853,6 +853,9 @@ async function loadAdminDashboard(options = {}) {
             offlineData.saved_at ||
             "unknown save time"
         );
+
+        // Boarding stays as this phone last saw them.
+        restoreAdminBoardingStays(currentUser?.id);
     
     }
     
@@ -1353,6 +1356,9 @@ async function fastStartAdminFromCache() {
         allVisitReports = list(saved.visitReports);
         allVisitWalks = list(saved.visitWalks);
         allVisitPets = list(saved.visitPets);
+        // Boarding stays as this phone last saw them, so nights that are
+        // already done are drawn as done from the first moment.
+        restoreAdminBoardingStays(snapshot.user_id);
 
         // Re-apply anything done on this phone that hasn't synced yet.
         for (const visit of allVisits) {
@@ -3403,6 +3409,55 @@ const adminBoardingState = {
     loadedAt: 0
 };
 
+// The phone keeps the boarding stays it last loaded, next to its saved copy of
+// the visits. On the next start the calendar is drawn from them right away, so
+// nights that are already done show as done from the first moment instead of
+// turning from blue to green when the server answers. It is only a starting
+// picture: the stays are loaded fresh straight after, and every boarding
+// action re-reads the stay before it changes anything.
+const ADMIN_BOARDING_SAVED_KEY = "paws-in-stride-admin-boarding-stays";
+let adminBoardingSavedJson = "";
+let adminBoardingSavedAt = 0;
+
+function saveAdminBoardingStays() {
+    try {
+        if (!currentUser?.id) return;
+        const stays = JSON.stringify(adminBoardingState.stays);
+        // Live updates reload the stays every few seconds during a walk:
+        // only write when something changed, or the copy is getting old.
+        if (stays === adminBoardingSavedJson &&
+            Date.now() - adminBoardingSavedAt < 60 * 60 * 1000) return;
+        localStorage.setItem(ADMIN_BOARDING_SAVED_KEY, JSON.stringify({
+            owner_id: currentUser.id,
+            saved_at: new Date().toISOString(),
+            stays: adminBoardingState.stays
+        }));
+        adminBoardingSavedJson = stays;
+        adminBoardingSavedAt = Date.now();
+    } catch (error) {
+        console.warn("Boarding stays not saved for the next start:", error);
+    }
+}
+
+function restoreAdminBoardingStays(ownerId) {
+    // Never replaces stays that already came from the server.
+    if (adminBoardingState.loaded || adminBoardingState.request) return false;
+    try {
+        const saved = JSON.parse(localStorage.getItem(ADMIN_BOARDING_SAVED_KEY) || "null");
+        if (!ownerId || saved?.owner_id !== ownerId || !Array.isArray(saved.stays) ||
+            !(Date.now() - Date.parse(saved.saved_at || 0) <= ADMIN_FAST_START_MAX_AGE_MS)) {
+            return false;
+        }
+        adminBoardingState.stays = saved.stays;
+        adminBoardingState.loaded = true;
+        adminBoardingState.error = null;
+        return true;
+    } catch (error) {
+        console.warn("Saved boarding stays could not be read:", error);
+        return false;
+    }
+}
+
 function isAdminBoardingService(visit) {
     return ["dog boarding", "dog_boarding"].includes(
         String(visit?.service_type || "").trim().toLowerCase()
@@ -3515,9 +3570,13 @@ async function loadAdminBoardingStays(force = false) {
             if (error) throw error;
             adminBoardingState.stays = data || [];
             adminBoardingState.loaded = true;
+            saveAdminBoardingStays();
         } catch (error) {
+            // What was last known stays on screen (an earlier load, or this
+            // phone's saved copy): a refresh that fails must not turn finished
+            // nights back to "not done". The error still locks the boarding
+            // buttons and offers "Try Again". Nothing known yet stays "not loaded".
             adminBoardingState.error = error;
-            adminBoardingState.loaded = false;
             console.error("Boarding stays could not be loaded:", error);
         } finally {
             adminBoardingState.visitsReference = visitsReference;
@@ -4717,6 +4776,7 @@ document.getElementById("admin-day-services")?.addEventListener("click", async e
         adminBoardingState.stays.push(saved);
         adminBoardingState.loaded = true;
         adminBoardingState.error = null;
+        saveAdminBoardingStays();
     } catch (error) {
         console.error("Boarding action error:", error);
         void loadAdminBoardingStays(true);   // show the latest status
@@ -10736,6 +10796,15 @@ function replaceAdminVisit(updatedVisit) {
 // BUILD SERVICE CARD
 // ========================================
 
+// A pet sit is told through its sit updates (notes, photos and care, sent during
+// the sit), so it has no final visit report to add. A report written before
+// this change can still be opened and edited.
+function isAdminPetSittingService(visit) {
+    return /pet[\s_-]*sit/i.test(
+        `${visit?.service_name || ""} ${visit?.service_type || ""}`
+    );
+}
+
 function buildAdminServiceCard(
     visit
 ) {
@@ -11743,7 +11812,8 @@ function buildAdminVisitProgressSection(
     
     
                     ${
-                        !meetAndGreet
+                        !meetAndGreet &&
+                        (existingReport || !isAdminPetSittingService(visit))
     
                             ? `
     
@@ -20710,10 +20780,12 @@ function renderAdminNeedsAttention() {
                             .trim()
                             .toLowerCase();
 
-                    // Meet & Greets and boarding do not require ordinary visit reports.
+                    // Meet & Greets, boarding and pet sits do not require ordinary visit reports
+                    // (a stay and a sit are told through their updates).
 
                     if (
                         isAdminBoardingService(visit) ||
+                        isAdminPetSittingService(visit) ||
                         isMeetAndGreetService(visit) ||
                         serviceType === "meet_greet"
                     ) {

@@ -3036,12 +3036,18 @@ async function renderAccountCredit() {
     // HIDE UNTIL POSITIVE CREDIT IS CONFIRMED
     // ========================================
 
-    card.style.display =
-        "none";
-
-
-    container.textContent =
-        "$0.00";
+    // A credit that is already showing stays where it is while its balance is
+    // checked again (it used to blink off and on at every refresh). It goes
+    // away once the answer says there is none, or the check fails.
+    const creditShowing =
+        card.dataset.creditShown === "1" &&
+        card.style.display !== "none";
+    if (!creditShowing) {
+        card.style.display =
+            "none";
+        container.textContent =
+            "$0.00";
+    }
 
 
     try {
@@ -3086,7 +3092,15 @@ async function renderAccountCredit() {
 
             card.style.display =
                 "";
+            card.dataset.creditShown =
+                "1";
 
+        } else {
+            card.style.display =
+                "none";
+            container.textContent =
+                "$0.00";
+            delete card.dataset.creditShown;
         }
 
     }
@@ -3100,6 +3114,7 @@ async function renderAccountCredit() {
 
         card.style.display =
             "none";
+        delete card.dataset.creditShown;
 
     }
 
@@ -31847,7 +31862,7 @@ window.setTimeout(
 // ========================================
  
 const GOOGLE_REVIEW_URL =
-    "https://g.page/r/REPLACE_WITH_YOUR_LINK/review";
+    "https://g.page/r/CUIId14weH0HEAE/review";
  
  
 const REVIEW_CREDIT_AMOUNT =
@@ -32253,7 +32268,7 @@ function renderReviewCreditCard() {
                     <div class="review-strip-copy">
 
                         <strong>
-                            Thanks for your review!
+                            Thanks for Your Review!
                         </strong>
 
                         <span>
@@ -32465,7 +32480,7 @@ function renderReviewCreditCard() {
                         class="review-strip-link"
                         data-review-open
                     >
-                        Open Google again
+                        Open Google Again
                     </button>
  
                 </div>
@@ -32504,11 +32519,11 @@ function renderReviewCreditCard() {
                 <div class="review-strip-copy">
  
                     <strong>
-                        Leave a review, get $${REVIEW_CREDIT_AMOUNT}
+                        Leave a Review, Get $${REVIEW_CREDIT_AMOUNT}
                     </strong>
  
                     <span>
-                        Added to your account credit.
+                        Added to Your Account Credit
                     </span>
  
                 </div>

@@ -583,6 +583,8 @@
             requestAnimationFrame(() => {
                 const report = b.parentElement?.querySelector('[data-visit-report-open]');
                 if (report && report.parentElement === b.parentElement) report.after(b);
+                // A sit has no final report to add: with no report button beside it, this is the main button.
+                b.classList.toggle('pis-sit-view-main', !report);
             });
 
             return b;
@@ -631,6 +633,7 @@
     style.textContent = `
         .pis-sit-update-button{display:flex !important;align-items:center !important;justify-content:center !important;gap:8px !important;background:linear-gradient(135deg,#d6467f,#b8336a) !important;border:0 !important;color:#fff !important}
         .pis-sit-view-button{display:flex !important;align-items:center !important;justify-content:center !important;gap:8px !important;background:#fff !important;color:#b8336a !important;border:1px solid #f1c3d6 !important;box-shadow:none !important}
+        .pis-sit-view-button.pis-sit-view-main{background:linear-gradient(135deg,#d6467f,#b8336a) !important;color:#fff !important;border:0 !important}
         .pis-sit-add-final{display:block;width:100%;margin:0 0 16px;padding:12px;border:1px dashed #b8336a;border-radius:10px;background:#fdf3f7;color:#b8336a;font:inherit;font-weight:800;cursor:pointer}
         .pis-sit-discard{display:block;width:100%;margin:10px 0 0;padding:10px;border:0;background:none;color:#5b6f80;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
         .pis-sit-discard:disabled{opacity:.5;cursor:default}

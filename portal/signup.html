@@ -33,6 +33,23 @@
     >
 
     <!-- ========================================
+         SIGN-IN PAGES: NEW LOOK
+         ======================================== -->
+
+    <link
+        rel="preload"
+        href="assets/fonts/fredoka-600.woff2"
+        as="font"
+        type="font/woff2"
+        crossorigin
+    >
+
+    <link
+        rel="stylesheet"
+        href="auth-polish.css"
+    >
+
+    <!-- ========================================
          PWA / HOME SCREEN APP
     ======================================== -->
     
@@ -99,7 +116,7 @@
     
 </head>
 
-<body class="portal-signup-page">
+<body class="portal-signup-page pis-au">
 
     <main class="signup-shell">
     
@@ -197,15 +214,16 @@
                 >
     
                     <img
-                        src="/portal/assets/paws-in-stride-logo.png"
+                        src="/portal/assets/pis-logo-edge.png"
                         alt="Paws in Stride"
                         class="signup-logo"
+                        onerror="this.onerror=null;this.src='/portal/assets/paws-in-stride-logo.png'"
                     >
     
                 </a>
     
                 <p class="signup-branding-subtitle">
-                    Client Portal
+                    Let’s Get You Set Up
                 </p>
     
             </header>
@@ -1102,10 +1120,10 @@
         <footer class="signup-footer">
         
             <p>
-                Already have a portal account?
+                Already Have a Portal Account?
         
                 <a href="/portal/login.html">
-                    Sign in
+                    Sign In
                 </a>
         
             </p>

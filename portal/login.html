@@ -54,6 +54,23 @@
         href="portal.css"
     >
 
+    <!-- ========================================
+         SIGN-IN PAGES: NEW LOOK
+         ======================================== -->
+
+    <link
+        rel="preload"
+        href="assets/fonts/fredoka-600.woff2"
+        as="font"
+        type="font/woff2"
+        crossorigin
+    >
+
+    <link
+        rel="stylesheet"
+        href="auth-polish.css"
+    >
+
 
     <!-- ========================================
          PWA / HOME SCREEN APP
@@ -66,7 +83,7 @@
 
     <meta
         name="theme-color"
-        content="#2890df"
+        content="#F8A534"
     >
 
     <meta
@@ -122,7 +139,7 @@
 </head>
 
 
-<body class="portal-login-page">
+<body class="portal-login-page pis-au">
 
 
     <!-- ========================================
@@ -201,9 +218,10 @@
                 <div class="login-mobile-logo-wrapper">
 
                     <img
-                        src="/portal/assets/paws-in-stride-logo.png"
+                        src="/portal/assets/pis-logo-edge.png"
                         alt="Paws in Stride"
                         class="login-mobile-logo"
+                        onerror="this.onerror=null;this.src='/portal/assets/paws-in-stride-logo.png'"
                     >
 
                 </div>
@@ -220,7 +238,7 @@
                     </span>
 
                     <h2>
-                        Sign in to your portal
+                        Sign In to Your Portal
                     </h2>
 
                     <p>

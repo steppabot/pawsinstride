@@ -150,7 +150,7 @@
                 </div>`;
         }
         const ages = pets.filter(p => Number(p.age) > 0)
-            .map(p => `${esc(p.name)} turns ${Number(p.age)} today!`).join(' ');
+            .map(p => `${esc(p.name)} Turns ${Number(p.age)} Today`).join('<br>');
         const photos = await Promise.all(pets.slice(0, 3).map(photoFor));
 
         const card = document.createElement('section');
@@ -162,7 +162,7 @@
             <div class="pis-bday-photos">${photos.map((src, i) => `<img src="${esc(src)}" alt="${esc(pets[i].name)}">`).join('')}<span class="pis-bday-cake" aria-hidden="true">🎂</span></div>
             <div class="pis-bday-copy">
                 <span class="pis-bday-eyebrow">🎉 IT'S A BIRTHDAY!</span>
-                <h3>Happy birthday, ${esc(listNames(names))}!</h3>
+                <h3>Happy Birthday, ${esc(listNames(names))}!</h3>
                 ${ages ? `<p>${ages}</p>` : ''}
                 ${gift}
                 <button type="button" class="pis-bday-book">Book a Birthday Walk</button>

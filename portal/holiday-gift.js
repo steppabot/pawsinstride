@@ -145,8 +145,8 @@
             <div class="pis-snow" aria-hidden="true">${Array.from({ length: 16 }, (_, i) =>
                 `<i style="left:${(i * 61) % 100}%;--s:${4 + (i * 7) % 5}px;--d:${6 + (i * 13) % 6}s;--w:${(i * 37) % 100 / 100 * -9}s"></i>`).join('')}</div>
             <button type="button" class="pis-xmas-close" aria-label="Close Christmas message"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
-            <span class="pis-xmas-eyebrow">🎄 MERRY CHRISTMAS</span>
-            <h3>Merry Christmas from Paws in Stride!</h3>
+            <h3>Merry Christmas</h3>
+            <span class="pis-xmas-eyebrow">From Paws in Stride</span>
             <p>${available
                 ? 'Thank you for letting us care for your pets this year. We left a little something under the tree for you.'
                 : opened
